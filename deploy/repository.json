@@ -61,7 +61,7 @@
 		]
 	}, {
 		"name": "impress",
-		"description": "A presentation framework based on the power of CSS3 transforms.",
+		"description": "A presentation framework based on the power of CSS3.",
 		"versions": [ {
 				"dependencies": [],
 				"version": "0.5",
