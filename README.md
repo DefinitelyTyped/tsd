@@ -5,7 +5,7 @@ TSD is a TypeScript definition file package manager.  let you easily download an
 
 ### How to install
 
-TSD is installed using node and npm. To install TSD use:
+TSD is installed using [node](http://nodejs.org/) and [npm](https://npmjs.org/). To install TSD use:
 
     npm install tsd -g
 
