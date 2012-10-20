@@ -79,5 +79,125 @@
 				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jasmine-1.2.d.ts"
 			}
 		]
+	}, {
+		"name": "globalize",
+		"description": "New age globalization and localization.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.1",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/globalize.d.ts"
+			}
+		]
+	}, {
+		"name": "globalize",
+		"description": "JavaScript library to handle HTML elements.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.8",
+				"author": "TypeScript samples",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jquery-1.8.d.ts"
+			}
+		]
+	}, {
+		"name": "jqueryui",
+		"description": "Set of javascript interface components.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.9",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jqueryui-1.9.d.ts"
+			}
+		]
+	}, {
+		"name": "knockout",
+		"description": "Dynamic JavaScript UIs by applying the Model-View-View Model (MVVM).",
+		"versions": [ {
+				"dependencies": [],
+				"version": "2.1",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/knockout-2.1.d.ts"
+			}
+		]
+	}, {
+		"name": "modernizr",
+		"description": "A JavaScript library that detects HTML5 and CSS3 feature.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "2.6",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/modernizr-2.6.d.ts"
+			}
+		]
+	}, {
+		"name": "moment",
+		"description": "Parse, validate, manipulate, and display dates in javascript.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.67",
+				"author": "Michael Lakerveld",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/moment-1.7.d.ts"
+			}
+		]
+	}, {
+		"name": "moment",
+		"description": "Minimal templating in JavaScript.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.7",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/mustache-0.7.d.ts"
+			}
+		]
+	}, {
+		"name": "node",
+		"description": "JavaScript runtime for build applications.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.8",
+				"author": "TypeScript samples",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/node-0.8.d.ts"
+			}
+		]
+	}, {
+		"name": "qunit",
+		"description": "JavaScript runtime for build applications.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.10",
+				"author": "Diullei Gomes",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/qunit-1.10.d.ts"
+			}
+		]
+	}, {
+		"name": "raphael",
+		"description": "A small JavaScript library that should simplify your work with vector graphics on the web.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "2.1",
+				"author": "CheCoxshall",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/raphael-2.1.d.ts"
+			}
+		]
+	}, {
+		"name": "spin",
+		"description": "A spinning activity indicator.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.2",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/spin-1.2.d.ts"
+			}
+		]
+	}, {
+		"name": "underscore",
+		"description": "Utility-belt library for JavaScript.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.4",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/underscore-1.4.d.ts"
+			}
+		]
 	}
 ]
