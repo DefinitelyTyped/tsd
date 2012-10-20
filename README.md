@@ -7,23 +7,23 @@ TSD is a TypeScript definition file package manager. Its lets you easily downloa
 
 TSD is installed using node and npm. To install tsd use:
 
-```npm install tsd -g```
+    npm install tsd -g
 
 ### Usage
 
 To view all repository files use:
 
-```tsd all```
+    tsd all
 
 This will print all file definitions available on repository. To install some file on local project you must use ```install``` followed by a lib name:
 
-```tsd install node```
+    tsd install node
 
 This will create a folder named ```d.ts``` if not exists and will download the file definition to this folder.
 
 To make a search for any file you must use ```search``` command.
 
-```tsd search backbone```
+    tsd search backbone
 
 ## License
 
