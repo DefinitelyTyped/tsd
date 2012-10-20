@@ -24,7 +24,7 @@ class LibContent {
 }
 
 interface IDataSource {
-	all: (callback: (data: string) => void) => Lib[];
+	all: (callback: (data: string) => void) => void;
 	find: (keys: string[]) => Lib;
 	get: (query: IQueryLibContent) => LibContent;
 }

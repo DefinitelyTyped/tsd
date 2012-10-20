@@ -8,8 +8,8 @@ declare var process: any;
 var args = <Array>Array.prototype.slice.call(process.argv);
 
 var cfg = new Config();
-cfg.repositoryType = RepositoryTypeEnum.FileSystem;
-cfg.uri = "./repository.json";
+cfg.repositoryType = RepositoryTypeEnum.Web;
+cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
 cfg.localPath = "./d.ts";
 
 var ds = DataSourceFactory.factory(cfg);

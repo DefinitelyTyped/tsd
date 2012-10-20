@@ -197,7 +197,11 @@ var WebDataSource = (function () {
         this._request = require('request');
     }
     WebDataSource.prototype.all = function (callback) {
-        return null;
+        this._request(this.repositoryUrl, function (error, response, body) {
+            if(!error && response.statusCode == 200) {
+                callback(JSON.parse(body));
+            }
+        });
     };
     WebDataSource.prototype.find = function (keys) {
         return null;
@@ -219,7 +223,6 @@ var FileSystemDataSource = (function () {
             }
             callback(JSON.parse(data));
         });
-        return null;
     };
     FileSystemDataSource.prototype.find = function (keys) {
         return null;
@@ -467,8 +470,8 @@ var DataSourceFactory = (function () {
 })();
 var args = Array.prototype.slice.call(process.argv);
 var cfg = new Config();
-cfg.repositoryType = RepositoryTypeEnum.FileSystem;
-cfg.uri = "./repository.json";
+cfg.repositoryType = RepositoryTypeEnum.Web;
+cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
 cfg.localPath = "./d.ts";
 var ds = DataSourceFactory.factory(cfg);
 var cp = new CommandLineProcessor(new ConsoleTTY(), ds, new IO(), cfg);

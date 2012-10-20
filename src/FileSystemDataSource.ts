@@ -8,12 +8,11 @@ class FileSystemDataSource implements IDataSource {
 
 	constructor(public repositoryPath: string) {}
 
-	public all(callback: (data: string) => void): Lib[] {
+	public all(callback: (data: string) => void): void {
 		this._fs.readFile(this.repositoryPath, function (err, data) {
 		  if (err) throw err;
 		  callback(JSON.parse(data));
 		});
-		return null;
 	}
 	public find(keys: string[]): Lib {
 		return null;

@@ -1,7 +1,7 @@
 [
 	{
 		"name": "backbone",
-		"description": "Backbonme js",
+		"description": "Javascript MV* framework",
 		"versions": [ {
 				"dependencies": [],
 				"version": "0.9",
@@ -10,8 +10,8 @@
 			}
 		]
 	}, {
-		"name": "backbone",
-		"description": "Bootstrap js.",
+		"name": "Bootstrap",
+		"description": "Twitter Bootstrap javascript code.",
 		"versions": [ {
 				"dependencies": [],
 				"version": "2.1",
@@ -21,12 +21,42 @@
 		]
 	}, {
 		"name": "express",
-		"description": "Bootstrap js.",
+		"description": "Node.js web application framework",
 		"versions": [ {
 				"dependencies": [],
 				"version": "2.0",
 				"author": "TypeScript samples",
 				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/express-2.d.ts"
+			}
+		]
+	}, {
+		"name": "fancybox",
+		"description": "FancyBox is a tool for displaying images, html content and multi-media",
+		"versions": [ {
+				"dependencies": [],
+				"version": "2.1",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/fancybox-2.1.d.ts"
+			}
+		]
+	}, {
+		"name": "history",
+		"description": "Gracefully supports the HTML5 History/State APIs",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.7",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/history-1.7.d.ts"
+			}
+		]
+	}, {
+		"name": "humane",
+		"description": "A simple, modern, framework-independent, well-tested, unobtrusive, notification system.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "3.0",
+				"author": "John Vrbanac",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/humane-3.0.d.ts"
 			}
 		]
 	}
