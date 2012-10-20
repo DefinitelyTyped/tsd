@@ -1,0 +1,1 @@
+tsc --out ./deploy/tsd.js ./src/tsd.ts

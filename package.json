@@ -1,0 +1,15 @@
+{
+  "name": "tsd",
+  "description": "The TypeScript definition package manager.",
+  "version": "0.1.0",
+  "author": "Diullei Gomes",
+  "licenses": [ { "type": "MIT", "url": "" } ],
+  "main": "src",
+  "homepage": "",
+  "engines": { "node": ">= 0.8.0" },
+  "dependencies": {
+    "request"           : "latest"
+  },
+  "bin": { "tsd": "deploy/tsd" },
+  "preferGlobal": true
+}
