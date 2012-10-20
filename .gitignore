@@ -1,2 +1,5 @@
 obj
 bin
+tsd.csproj
+tsd.csproj.user
+tsd.sln
