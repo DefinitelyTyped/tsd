@@ -1,5 +1,5 @@
-TSD - A TypeScript definition file package manager
-==================================================
+TSD - A TypeScript definition package manager
+=============================================
 
 TSD is a TypeScript definition file package manager. Its lets you easily download and install definition files to use in TypeScript projects.
 
