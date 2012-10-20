@@ -514,7 +514,7 @@ var CommandLineProcessor = (function () {
         }
     };
     CommandLineProcessor.prototype.execute = function (args) {
-        this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + args[2]);
+        this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + args[2] || "...");
         var accepted = false;
         for(var i = 0; i < this.commands.length; i++) {
             var command = this.commands[i];

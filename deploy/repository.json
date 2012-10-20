@@ -199,5 +199,15 @@
 				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/underscore-1.4.d.ts"
 			}
 		]
+	}, {
+		"name": "async",
+		"description": "Async utilities for node and the browser",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.1.22",
+				"author": "Carlos Ballesteros Velasco",
+				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/async.d.ts"
+			}
+		]
 	}
 ]

@@ -1,11 +1,11 @@
 TSD - A TypeScript definition package manager
 =============================================
 
-TSD is a TypeScript definition file package manager. Its lets you easily download and install definition files to use in TypeScript projects.
+TSD is a TypeScript definition file package manager.  let you easily download and install definition files to use in TypeScript projects.
 
 ### How to install
 
-TSD is installed using node and npm. To install tsd use:
+TSD is installed using node and npm. To install TSD use:
 
     npm install tsd -g
 
@@ -17,9 +17,9 @@ To view all repository files use:
 
 This will print all file definitions available on repository. To install some file on local project you must use ```install``` followed by a lib name:
 
-    tsd install node
+    tsd install nodereferenc
 
-This will create a folder named ```d.ts``` if not exists and will download the file definition to this folder.
+This will create a folder named ```d.ts``` (if it doesn't exists) and will download the file definition to this folder.
 
 To make a search for any file you must use ```search``` command.
 
@@ -27,7 +27,7 @@ To make a search for any file you must use ```search``` command.
 
 ### Repository
 
-TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) project. You can view the repository referencies on [repository.json](https://github.com/Diullei/tsd/blob/master/deploy/repository.json) file. I'm working to add some another repositories. If you want to contribute please make a fork from tsd repo, change the repository.json and make a pull request.
+TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) project. You can view the repository references inside [repository.json](https://github.com/Diullei/tsd/blob/master/deploy/repository.json) file (I'm working to add some anothers). If you want to contribute please make a fork from tsd repo, change the repository.json and make a pull request.
 
 ## License
 
