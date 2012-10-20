@@ -13,21 +13,26 @@ class AllCommand implements ICommand {
 		return args[2] == this.shortcut;
 	}
 
+	private print(lib: Lib) { 
+        this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
+
+        for (var j = 0; j < lib.versions.length; j++) { 
+            if (j > 0 && j < lib.versions.length) { 
+                this.tty.write("{{=yellow}},{{=cyan}} ");
+            }
+            var ver = lib.versions[j];
+            this.tty.write(ver.version);
+        }
+
+        this.tty.write("{{=yellow}}]{{=reset}}");
+        this.tty.writeLine(" - " + lib.description);
+    }
+
 	public exec(args: Array): void {
 	    this.dataSource.all((libs) => { 
             for (var i = 0; i < libs.length; i++) { 
                 var lib = <Lib>libs[i];
-                this.tty.write(" " + lib.name + " - " + lib.description + " [");
-
-                for (var j = 0; j < lib.versions.length; j++) { 
-                    if (j > 0 && j < lib.versions.length) { 
-                        this.tty.write(", ");
-                    }
-                    var ver = lib.versions[j];
-                    this.tty.write(ver.version);
-                }
-
-                this.tty.writeLine("]");
+                this.print(lib);
             }
         });
 	}

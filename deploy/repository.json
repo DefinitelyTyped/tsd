@@ -59,5 +59,25 @@
 				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/humane-3.0.d.ts"
 			}
 		]
+	}, {
+		"name": "impress",
+		"description": "A presentation framework based on the power of CSS3 transforms.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.5",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/impress-0.5.d.ts"
+			}
+		]
+	}, {
+		"name": "jasmine",
+		"description": "A behavior-driven development framework.",
+		"versions": [ {
+				"dependencies": [],
+				"version": "1.2",
+				"author": "Boris Yankov",
+				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jasmine-1.2.d.ts"
+			}
+		]
 	}
 ]

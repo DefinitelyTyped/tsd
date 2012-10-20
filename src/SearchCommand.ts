@@ -13,7 +13,7 @@ class SearchCommand implements ICommand {
 	}
 
 	private print(lib: Lib) { 
-        this.tty.write(" {{=cyan}}" + lib.name + "{{=reset}} - " + lib.description + " {{=yellow}}[{{=cyan}}");
+        this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
 
         for (var j = 0; j < lib.versions.length; j++) { 
             if (j > 0 && j < lib.versions.length) { 
@@ -23,7 +23,8 @@ class SearchCommand implements ICommand {
             this.tty.write(ver.version);
         }
 
-        this.tty.writeLine("{{=yellow}}]{{=reset}}");
+        this.tty.write("{{=yellow}}]{{=reset}}");
+        this.tty.writeLine(" - " + lib.description);
     }
 
 	private match(key: string, name: string) { 

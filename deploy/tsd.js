@@ -273,20 +273,24 @@ var AllCommand = (function () {
     AllCommand.prototype.accept = function (args) {
         return args[2] == this.shortcut;
     };
+    AllCommand.prototype.print = function (lib) {
+        this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
+        for(var j = 0; j < lib.versions.length; j++) {
+            if(j > 0 && j < lib.versions.length) {
+                this.tty.write("{{=yellow}},{{=cyan}} ");
+            }
+            var ver = lib.versions[j];
+            this.tty.write(ver.version);
+        }
+        this.tty.write("{{=yellow}}]{{=reset}}");
+        this.tty.writeLine(" - " + lib.description);
+    };
     AllCommand.prototype.exec = function (args) {
         var _this = this;
         this.dataSource.all(function (libs) {
             for(var i = 0; i < libs.length; i++) {
                 var lib = libs[i];
-                _this.tty.write(" " + lib.name + " - " + lib.description + " [");
-                for(var j = 0; j < lib.versions.length; j++) {
-                    if(j > 0 && j < lib.versions.length) {
-                        _this.tty.write(", ");
-                    }
-                    var ver = lib.versions[j];
-                    _this.tty.write(ver.version);
-                }
-                _this.tty.writeLine("]");
+                _this.print(lib);
             }
         });
     };
@@ -306,7 +310,7 @@ var SearchCommand = (function () {
         return args[2] == this.shortcut;
     };
     SearchCommand.prototype.print = function (lib) {
-        this.tty.write(" {{=cyan}}" + lib.name + "{{=reset}} - " + lib.description + " {{=yellow}}[{{=cyan}}");
+        this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
         for(var j = 0; j < lib.versions.length; j++) {
             if(j > 0 && j < lib.versions.length) {
                 this.tty.write("{{=yellow}},{{=cyan}} ");
@@ -314,7 +318,8 @@ var SearchCommand = (function () {
             var ver = lib.versions[j];
             this.tty.write(ver.version);
         }
-        this.tty.writeLine("{{=yellow}}]{{=reset}}");
+        this.tty.write("{{=yellow}}]{{=reset}}");
+        this.tty.writeLine(" - " + lib.description);
     };
     SearchCommand.prototype.match = function (key, name) {
         return name.indexOf(key) != -1;
