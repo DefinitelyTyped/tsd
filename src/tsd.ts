@@ -1,18 +1,30 @@
-///<reference path='ConsoleTTY.ts'/>
+///<reference path='TTY.ts'/>
 ///<reference path='CommandLineProcessor.ts'/>
 ///<reference path='Config.ts'/>
-///<reference path='DataSourceFactory.ts'/>
+///<reference path='DataSource\DataSourceFactory.ts'/>
+///<reference path='Util\WebRequest.ts'/>
+///<reference path='Util\Trace.ts'/>
 
 declare var process: any;
 
+Util.Trace.debug = false;
+
 var args = <Array>Array.prototype.slice.call(process.argv);
+var tty = new TTY();
+Util.Trace.tty = tty;
 
-var cfg = new Config();
-cfg.repositoryType = RepositoryTypeEnum.Web;
-cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
-cfg.localPath = "./d.ts";
+try { 
+    Util.WebRequest.instance().init(tty);
 
-var ds = DataSourceFactory.factory(cfg);
+    var cfg = new Config();
+    cfg.repositoryType = RepositoryTypeEnum.Web;
+    cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
+    cfg.localPath = "./d.ts";
 
-var cp = new CommandLineProcessor(new ConsoleTTY(), ds, new IO(), cfg);
-cp.execute(args);
+    var ds = DataSource.DataSourceFactory.factory(cfg);
+    var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
+    cp.execute(args);
+} catch(e){
+    tty.error(e.message);
+}
+

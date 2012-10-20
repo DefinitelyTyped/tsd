@@ -46,27 +46,28 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="deploy\tsd.js" />
-    <Content Include="src\AllCommand.ts" />
-    <Content Include="src\ANSIFormat.ts" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="src\Command\AllCommand.ts" />
+    <Content Include="src\Util\ANSIFormat.ts" />
     <Content Include="src\CommandLineProcessor.ts" />
     <Content Include="src\Config.ts" />
-    <Content Include="src\ConsoleTTY.ts" />
-    <Content Include="src\DataSourceFactory.ts" />
-    <Content Include="src\FileSystemDataSource.ts" />
-    <Content Include="src\HelpCommand.ts" />
-    <Content Include="src\ICommand.ts" />
-    <Content Include="src\IDataSource.ts" />
+    <Content Include="src\TTY.ts" />
+    <Content Include="src\DataSource\DataSourceFactory.ts" />
+    <Content Include="src\DataSource\FileSystemDataSource.ts" />
+    <Content Include="src\Command\HelpCommand.ts" />
+    <Content Include="src\Command\ICommand.ts" />
+    <Content Include="src\DataSource\IDataSource.ts" />
     <Content Include="src\IIO.ts" />
-    <Content Include="src\InstallCommand.ts" />
+    <Content Include="src\Command\InstallCommand.ts" />
     <Content Include="src\IO.ts" />
     <Content Include="src\ITTY.ts" />
-    <Content Include="src\SearchCommand.ts" />
+    <Content Include="src\Command\SearchCommand.ts" />
     <Content Include="src\tsd.ts" />
-    <Content Include="src\WebDataSource.ts" />
+    <Content Include="src\DataSource\WebDataSource.ts" />
+    <Content Include="src\Util\Trace.ts" />
+    <Content Include="src\Util\WebRequest.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="src\d.ts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
     <Exec Command="&quot;$(PROGRAMFILES)\Microsoft SDKs\TypeScript\0.8.0.0\tsc&quot; --out $(ProjectDir)deploy\tsd.js $(ProjectDir)src\tsd.ts" />

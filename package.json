@@ -3,9 +3,9 @@
   "description": "The TypeScript definition package manager.",
   "version": "0.1.0",
   "author": "Diullei Gomes",
-  "licenses": [ { "type": "MIT", "url": "" } ],
-  "main": "src",
-  "homepage": "",
+  "licenses": [ { "type": "MIT", "url": "https://raw.github.com/Diullei/tsd/master/LICENSE.txt" } ],
+  "main": "deploy",
+  "homepage": "https://github.com/Diullei/tsd",
   "engines": { "node": ">= 0.8.0" },
   "dependencies": {
     "request"           : "latest"

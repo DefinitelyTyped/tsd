@@ -1,15 +1,15 @@
 ///<reference path='ITTY.ts'/>
-///<reference path='ANSIFormat.ts'/>
+///<reference path='Util\ANSIFormat.ts'/>
 
 declare var process: any;
 
-class ConsoleTTY implements ITTY {
+class TTY implements ITTY {
 	public beep(): void {
 		//...
 	}
 
 	public write(value: string): void {
-	    process.stdout.write(Terminal.ANSIFormat(value));
+	    process.stdout.write(Util.Terminal.ANSIFormat(value));
 	}
 
 	public writeLine(value: string): void {

@@ -1,22 +1,23 @@
-///<reference path='ConsoleTTY.ts'/>
+///<reference path='TTY.ts'/>
 ///<reference path='IO.ts'/>
 ///<reference path='Config.ts'/>
-///<reference path='IDataSource.ts'/>
-///<reference path='HelpCommand.ts'/>
-///<reference path='AllCommand.ts'/>
-///<reference path='SearchCommand.ts'/>
-///<reference path='InstallCommand.ts'/>
+///<reference path='DataSource\IDataSource.ts'/>
+///<reference path='Command\ICommand.ts'/>
+///<reference path='Command\HelpCommand.ts'/>
+///<reference path='Command\AllCommand.ts'/>
+///<reference path='Command\SearchCommand.ts'/>
+///<reference path='Command\InstallCommand.ts'/>
 
 class CommandLineProcessor {
 
-	commands: ICommand[];
+	commands: Command.ICommand[];
 
-	constructor(public tty: ITTY, public dataSource: IDataSource, public io: IIO, public cfg: Config){
-		this.commands = new ICommand[];
-		this.commands.push(new HelpCommand());
-        this.commands.push(new AllCommand(this.tty, this.dataSource));
-        this.commands.push(new SearchCommand(this.tty, this.dataSource));
-        this.commands.push(new InstallCommand(this.tty, this.dataSource, this.io, this.cfg));
+	constructor(public tty: ITTY, public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config){
+		this.commands = [];
+		this.commands.push(new Command.HelpCommand());
+        this.commands.push(new Command.AllCommand(this.tty, this.dataSource));
+        this.commands.push(new Command.SearchCommand(this.tty, this.dataSource));
+        this.commands.push(new Command.InstallCommand(this.tty, this.dataSource, this.io, this.cfg));
 	}
 
 	public printUsage() {
@@ -32,13 +33,15 @@ class CommandLineProcessor {
 	}
 
     public execute(args: Array) {
+    	this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + args[2]);
+
         var accepted: bool = false;
 
         for(var i = 0; i < this.commands.length; i++) {
             var command = this.commands[i];
             if(command.accept(args)) {
                 accepted = true;
-                if(command instanceof HelpCommand)
+                if(command instanceof Command.HelpCommand)
                     this.printUsage();
                 else
                     command.exec(args);
