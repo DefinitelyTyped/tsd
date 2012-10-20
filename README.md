@@ -17,7 +17,7 @@ To view all repository files use:
 
 This will print all file definitions available on repository. To install some file on local project you must use ```install``` followed by a lib name:
 
-    tsd install nodereferenc
+    tsd install node
 
 This will create a folder named ```d.ts``` (if it doesn't exists) and will download the file definition to this folder.
 
