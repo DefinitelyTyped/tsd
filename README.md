@@ -25,6 +25,10 @@ To make a search for any file you must use ```search``` command.
 
     tsd search backbone
 
+### Repository
+
+TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) project. You can view the repository referencies on [repository.json](https://github.com/Diullei/tsd/blob/master/deploy/repository.json) file. I'm working to add some another repositories. If you want to contribute please make a fork from tsd repo, change the repository.json and make a pull request.
+
 ## License
 
 TSD is distributed under the MIT license. [See license file here](https://raw.github.com/Diullei/tsd/master/LICENSE.txt) or below:
