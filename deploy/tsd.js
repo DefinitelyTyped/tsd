@@ -457,12 +457,14 @@ var Command;
         InstallCommand.prototype.match = function (key, name) {
             return name.toUpperCase() == key.toUpperCase();
         };
-        InstallCommand.prototype.save = function (name, version, content) {
+        InstallCommand.prototype.save = function (name, version, key, content) {
             if(!this.io.directoryExists(this.cfg.localPath)) {
                 this.io.createDirectory(this.cfg.localPath);
             }
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
-            this.tty.write("└── " + name + "@" + version + " instaled.");
+            this.tty.writeLine("└── " + name + "@" + version + " instaled.");
+            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
+            this.tty.writeLine("     └── " + key + ".key");
         };
         InstallCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
@@ -484,7 +486,7 @@ var Command;
                     var version = targetLib.versions[0];
                     var request = Util.WebRequest.instance();
                     request.getUrl(version.url, function (body) {
-                        _this.save(targetLib.name, version.version, body);
+                        _this.save(targetLib.name, version.version, version.key, body);
                     });
                 }
             });

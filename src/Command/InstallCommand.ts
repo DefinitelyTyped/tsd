@@ -33,13 +33,17 @@ module Command {
             return name.toUpperCase() == key.toUpperCase();
         }
 
-        private save(name: string, version: string, content: string): void { 
+
+
+        private save(name: string, version: string, key: string, content: string): void { 
             if (!this.io.directoryExists(this.cfg.localPath)) {
                 this.io.createDirectory(this.cfg.localPath);
             }
+            // ├
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
-
-            this.tty.write("└── " + name + "@" + version + " instaled.");
+            this.tty.writeLine("└── " + name + "@" + version + " instaled.");
+            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
+            this.tty.writeLine("     └── " + key + ".key");
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
@@ -66,7 +70,7 @@ module Command {
                     var request = Util.WebRequest.instance();
 
                     request.getUrl(version.url, (body) => {
-                        this.save(targetLib.name, version.version, body);
+                        this.save(targetLib.name, version.version, version.key, body);
                     });
                 }
             });

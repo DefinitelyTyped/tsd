@@ -4,6 +4,7 @@
 module DataSource {
 
     export class LibVersion {
+        public key: string;
         public version: string;
         public author: string;
         public url: string;
