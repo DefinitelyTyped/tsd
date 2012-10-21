@@ -33,8 +33,6 @@ module Command {
             return name.toUpperCase() == key.toUpperCase();
         }
 
-
-
         private save(name: string, version: string, key: string, content: string): void { 
             if (!this.io.directoryExists(this.cfg.localPath)) {
                 this.io.createDirectory(this.cfg.localPath);
@@ -71,6 +69,8 @@ module Command {
 
                     request.getUrl(version.url, (body) => {
                         this.save(targetLib.name, version.version, version.key, body);
+
+
                     });
                 }
             });

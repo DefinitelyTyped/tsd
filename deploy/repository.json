@@ -241,5 +241,65 @@
 				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/colors.d.ts"
 			}
 		]
+	}, {
+		"name": "angular",
+		"description": "Google - Angular.Js",
+		"versions": [ {
+				"key": "D9089893-23AE-4182-BCBF-3DEEA8900FC1",
+				"dependencies": [
+					{ "name": "angular-ng", "version": "1.0.2" },
+					{ "name": "angular-ng-http", "version": "1.0.2" },
+					{ "name": "angular-ngResource", "version": "1.0.2" }
+				],
+				"version": "1.0.2",
+				"author": "Nodir Turakulov",
+				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.d.ts"
+			}
+		]
+	}, {
+		"name": "angular-ng",
+		"description": "Google - Angular.Js",
+		"versions": [ {
+				"key": "0646B271-1CF1-4803-9B8B-E0E0518B54F0",
+				"dependencies": [
+					{ "name": "angular", "version": "1.0.2" },
+					{ "name": "angular-ng-http", "version": "1.0.2" },
+					{ "name": "angular-ngResource", "version": "1.0.2" }
+				],
+				"version": "1.0.2",
+				"author": "Nodir Turakulov",
+				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ng.d.ts"
+			}
+		]
+	}, {
+		"name": "angular-ng-http",
+		"description": "Google - Angular.Js",
+		"versions": [ {
+				"key": "0ECCA6AA-B3BA-45E8-AFAB-743F5092F8D1",
+				"dependencies": [
+					{ "name": "angular", "version": "1.0.2" },
+					{ "name": "angular-ng", "version": "1.0.2" },
+					{ "name": "angular-ngResource", "version": "1.0.2" }
+				],
+				"version": "1.0.2",
+				"author": "Nodir Turakulov",
+				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ng.http.d.ts"
+			}
+		]
+	}, {
+		"name": "angular-ngResource",
+		"description": "Google - Angular.Js",
+		"versions": [ {
+				"key": "CBD9AAC5-AC89-490D-87E4-6F0C5F81E604",
+				"dependencies": [
+					{ "name": "angular", "version": "1.0.2" },
+					{ "name": "angular-ng", "version": "1.0.2" },
+					{ "name": "angular-ng-http", "version": "1.0.2" }
+				],
+				"version": "1.0.2",
+				"author": "Nodir Turakulov",
+				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ngResource.d.ts"
+			}
+		]
 	}
 ]
