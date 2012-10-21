@@ -140,7 +140,7 @@
 			}
 		]
 	}, {
-		"name": "moment",
+		"name": "mustache",
 		"description": "Minimal templating in JavaScript.",
 		"versions": [ {
 				"dependencies": [],
@@ -207,6 +207,16 @@
 				"version": "0.1.22",
 				"author": "Carlos Ballesteros Velasco",
 				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/async.d.ts"
+			}
+		]
+	}, {
+		"name": "colors",
+		"description": "Get colors in your node.js console like what",
+		"versions": [ {
+				"dependencies": [],
+				"version": "0.6",
+				"author": "Carlos Ballesteros Velasco",
+				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/colors.d.ts"
 			}
 		]
 	}

@@ -514,7 +514,7 @@ var CommandLineProcessor = (function () {
         }
     };
     CommandLineProcessor.prototype.execute = function (args) {
-        this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + args[2] || "...");
+        this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + (args[2] || "..."));
         var accepted = false;
         for(var i = 0; i < this.commands.length; i++) {
             var command = this.commands[i];
@@ -571,19 +571,25 @@ var Util;
     Util.Trace = Trace;    
 })(Util || (Util = {}));
 
-Util.Trace.debug = false;
-var args = Array.prototype.slice.call(process.argv);
-var tty = new TTY();
-Util.Trace.tty = tty;
-try  {
-    Util.WebRequest.instance().init(tty);
-    var cfg = new Config();
-    cfg.repositoryType = RepositoryTypeEnum.Web;
-    cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
-    cfg.localPath = "./d.ts";
-    var ds = DataSource.DataSourceFactory.factory(cfg);
-    var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
-    cp.execute(args);
-} catch (e) {
-    tty.error(e.message);
-}
+var Main = (function () {
+    function Main() { }
+    Main.prototype.run = function (args) {
+        Util.Trace.debug = false;
+        var tty = new TTY();
+        Util.Trace.tty = tty;
+        try  {
+            Util.WebRequest.instance().init(tty);
+            var cfg = new Config();
+            cfg.repositoryType = RepositoryTypeEnum.Web;
+            cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
+            cfg.localPath = "./d.ts";
+            var ds = DataSource.DataSourceFactory.factory(cfg);
+            var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
+            cp.execute(args);
+        } catch (e) {
+            tty.error(e.message);
+        }
+    };
+    return Main;
+})();
+new Main().run(Array.prototype.slice.call(process.argv));

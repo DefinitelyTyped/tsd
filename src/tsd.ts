@@ -7,24 +7,28 @@
 
 declare var process: any;
 
-Util.Trace.debug = false;
+class Main { 
+    public run(args: Array) { 
+        Util.Trace.debug = false;
 
-var args = <Array>Array.prototype.slice.call(process.argv);
-var tty = new TTY();
-Util.Trace.tty = tty;
+        var tty = new TTY();
+        Util.Trace.tty = tty;
 
-try { 
-    Util.WebRequest.instance().init(tty);
+        try { 
+            Util.WebRequest.instance().init(tty);
 
-    var cfg = new Config();
-    cfg.repositoryType = RepositoryTypeEnum.Web;
-    cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
-    cfg.localPath = "./d.ts";
+            var cfg = new Config();
+            cfg.repositoryType = RepositoryTypeEnum.Web;
+            cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
+            cfg.localPath = "./d.ts";
 
-    var ds = DataSource.DataSourceFactory.factory(cfg);
-    var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
-    cp.execute(args);
-} catch(e){
-    tty.error(e.message);
+            var ds = DataSource.DataSourceFactory.factory(cfg);
+            var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
+            cp.execute(args);
+        } catch(e){
+            tty.error(e.message);
+        }
+    }
 }
 
+new Main().run(<Array>Array.prototype.slice.call(process.argv));

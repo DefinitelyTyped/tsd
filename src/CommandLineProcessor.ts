@@ -33,7 +33,7 @@ class CommandLineProcessor {
 	}
 
     public execute(args: Array) {
-    	this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + args[2] || "...");
+    	this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + (args[2] || "..."));
 
         var accepted: bool = false;
 
