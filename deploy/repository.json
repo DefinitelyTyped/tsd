@@ -90,7 +90,7 @@
 			}
 		]
 	}, {
-		"name": "globalize",
+		"name": "jquery",
 		"description": "JavaScript library to handle HTML elements.",
 		"versions": [ {
 				"dependencies": [],
