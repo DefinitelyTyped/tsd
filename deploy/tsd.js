@@ -407,6 +407,7 @@ var Util;
         };
         WebRequest.prototype.getUrl = function (url, callback) {
             var _this = this;
+            this.verifyInit();
             this._tty.writeLine("tsd {{=green}}http {{=magenta}}GET{{=reset}} " + url);
             this._request(url, function (error, response, body) {
                 _this._tty.writeLine("tsd {{=green}}http {{=magenta}}" + response.statusCode + "{{=reset}} " + url);

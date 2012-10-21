@@ -18,8 +18,10 @@ class Main {
             Util.WebRequest.instance().init(tty);
 
             var cfg = new Config();
+
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
+
             cfg.localPath = "./d.ts";
 
             var ds = DataSource.DataSourceFactory.factory(cfg);

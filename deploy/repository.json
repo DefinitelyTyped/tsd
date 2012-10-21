@@ -3,6 +3,7 @@
 		"name": "backbone",
 		"description": "Javascript MV* framework",
 		"versions": [ {
+				"key": "37387AAB-922D-460C-82C8-C00DB2920791",
 				"dependencies": [],
 				"version": "0.9",
 				"author": "Boris Yankov",
@@ -13,6 +14,7 @@
 		"name": "Bootstrap",
 		"description": "Twitter Bootstrap javascript code.",
 		"versions": [ {
+				"key": "D02BBE29-B1F2-4E9A-AD69-B1BF3D9BFDDD",
 				"dependencies": [],
 				"version": "2.1",
 				"author": "Boris Yankov",
@@ -23,6 +25,7 @@
 		"name": "express",
 		"description": "Node.js web application framework",
 		"versions": [ {
+				"key": "BCC7E8CB-2FE1-404D-82DB-687A0B592169",
 				"dependencies": [],
 				"version": "2.0",
 				"author": "TypeScript samples",
@@ -33,6 +36,7 @@
 		"name": "fancybox",
 		"description": "FancyBox is a tool for displaying images, html content and multi-media",
 		"versions": [ {
+				"key": "EDE384C1-57A8-4F1C-A8A8-A3BAC91C2EAF",
 				"dependencies": [],
 				"version": "2.1",
 				"author": "Boris Yankov",
@@ -43,6 +47,7 @@
 		"name": "history",
 		"description": "Gracefully supports the HTML5 History/State APIs",
 		"versions": [ {
+				"key": "4EFBB523-7D05-440E-ACB1-3E3191A5E466",
 				"dependencies": [],
 				"version": "1.7",
 				"author": "Boris Yankov",
@@ -53,6 +58,7 @@
 		"name": "humane",
 		"description": "A simple, modern, framework-independent, well-tested, unobtrusive, notification system.",
 		"versions": [ {
+				"key": "84602CB7-E9F4-40AD-BB48-B17B2A819402",
 				"dependencies": [],
 				"version": "3.0",
 				"author": "John Vrbanac",
@@ -63,6 +69,7 @@
 		"name": "impress",
 		"description": "A presentation framework based on the power of CSS3.",
 		"versions": [ {
+				"key": "2B8E0B68-91AE-4BB4-8999-D8B7D0778A83",
 				"dependencies": [],
 				"version": "0.5",
 				"author": "Boris Yankov",
@@ -73,6 +80,7 @@
 		"name": "jasmine",
 		"description": "A behavior-driven development framework.",
 		"versions": [ {
+				"key": "C86218A4-95A3-498D-8232-41270FBCC0CD",
 				"dependencies": [],
 				"version": "1.2",
 				"author": "Boris Yankov",
@@ -83,6 +91,7 @@
 		"name": "globalize",
 		"description": "New age globalization and localization.",
 		"versions": [ {
+				"key": "6CDD21FE-F783-46B4-AE55-80C93FF87D5C",
 				"dependencies": [],
 				"version": "0.1",
 				"author": "Boris Yankov",
@@ -93,6 +102,7 @@
 		"name": "jquery",
 		"description": "JavaScript library to handle HTML elements.",
 		"versions": [ {
+				"key": "6536E49D-F9FC-4211-B8ED-4EBCC8464887",
 				"dependencies": [],
 				"version": "1.8",
 				"author": "TypeScript samples",
@@ -103,6 +113,7 @@
 		"name": "jqueryui",
 		"description": "Set of javascript interface components.",
 		"versions": [ {
+				"key": "F0F1AE9E-08B8-4E0E-92D5-93060CEFAAC4",
 				"dependencies": [],
 				"version": "1.9",
 				"author": "Boris Yankov",
@@ -113,6 +124,7 @@
 		"name": "knockout",
 		"description": "Dynamic JavaScript UIs by applying the Model-View-View Model (MVVM).",
 		"versions": [ {
+				"key": "70EE2286-BD27-4DFE-AFD0-2798AAA74A3B",
 				"dependencies": [],
 				"version": "2.1",
 				"author": "Boris Yankov",
@@ -123,6 +135,7 @@
 		"name": "modernizr",
 		"description": "A JavaScript library that detects HTML5 and CSS3 feature.",
 		"versions": [ {
+				"key": "D3D17555-E9EF-468E-B605-A4577B502D75",
 				"dependencies": [],
 				"version": "2.6",
 				"author": "Boris Yankov",
@@ -133,6 +146,7 @@
 		"name": "moment",
 		"description": "Parse, validate, manipulate, and display dates in javascript.",
 		"versions": [ {
+				"key": "AD60F318-9860-4ADD-B7B8-729B4CB71458",
 				"dependencies": [],
 				"version": "1.67",
 				"author": "Michael Lakerveld",
@@ -143,6 +157,7 @@
 		"name": "mustache",
 		"description": "Minimal templating in JavaScript.",
 		"versions": [ {
+				"key": "96C40747-B6A3-46F3-9B13-691D61A3DD08",
 				"dependencies": [],
 				"version": "0.7",
 				"author": "Boris Yankov",
@@ -153,6 +168,7 @@
 		"name": "node",
 		"description": "JavaScript runtime for build applications.",
 		"versions": [ {
+				"key": "F6711A17-81AF-4E9C-A82D-855DDB1E7F3A",
 				"dependencies": [],
 				"version": "0.8",
 				"author": "TypeScript samples",
@@ -163,6 +179,7 @@
 		"name": "qunit",
 		"description": "JavaScript runtime for build applications.",
 		"versions": [ {
+				"key": "BD09CCAE-87F7-49FF-9CFE-5FB9F95369AB",
 				"dependencies": [],
 				"version": "1.10",
 				"author": "Diullei Gomes",
@@ -173,6 +190,7 @@
 		"name": "raphael",
 		"description": "A small JavaScript library that should simplify your work with vector graphics on the web.",
 		"versions": [ {
+				"key": "E6A34E99-68E8-42F8-9479-ABA9C575319C",
 				"dependencies": [],
 				"version": "2.1",
 				"author": "CheCoxshall",
@@ -183,6 +201,7 @@
 		"name": "spin",
 		"description": "A spinning activity indicator.",
 		"versions": [ {
+				"key": "3844D795-5DAC-4AE2-9B3D-37DD342E2409",
 				"dependencies": [],
 				"version": "1.2",
 				"author": "Boris Yankov",
@@ -193,6 +212,7 @@
 		"name": "underscore",
 		"description": "Utility-belt library for JavaScript.",
 		"versions": [ {
+				"key": "87874D1C-602E-496B-AEFE-0D6659813FFC",
 				"dependencies": [],
 				"version": "1.4",
 				"author": "Boris Yankov",
@@ -203,6 +223,7 @@
 		"name": "async",
 		"description": "Async utilities for node and the browser",
 		"versions": [ {
+				"key": "97298BA7-59AE-40ED-A937-748685DD294E",
 				"dependencies": [],
 				"version": "0.1.22",
 				"author": "Carlos Ballesteros Velasco",
@@ -213,6 +234,7 @@
 		"name": "colors",
 		"description": "Get colors in your node.js console like what",
 		"versions": [ {
+				"key": "5FCAB0EB-0E61-42FF-8DCD-4C3521E48383",
 				"dependencies": [],
 				"version": "0.6",
 				"author": "Carlos Ballesteros Velasco",

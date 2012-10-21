@@ -21,6 +21,8 @@ module Util {
         }
 
         public getUrl(url: string, callback: (data: string) => void ): void {
+            this.verifyInit();
+
             this._tty.writeLine("tsd {{=green}}http {{=magenta}}GET{{=reset}} " + url);
 
             this._request(url, (error, response, body) => {
