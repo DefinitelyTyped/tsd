@@ -10,7 +10,7 @@ module DataSource {
 
         constructor (public repositoryPath: string) { }
 
-        public all(callback: (data: string) => void ): void {
+        public all(callback: (data: DataSource.Lib[]) => void ): void {
             this._fs.readFile(this.repositoryPath, function (err, data) {
                 if (err) throw err;
                 callback(JSON.parse(data));

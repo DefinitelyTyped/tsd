@@ -464,18 +464,20 @@ var Command;
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
             this.tty.write("└── " + name + "@" + version + " instaled.");
         };
+        InstallCommand.prototype.find = function (key, libs) {
+            for(var i = 0; i < libs.length; i++) {
+                var lib = libs[i];
+                if(this.match(lib.name, key)) {
+                    return lib;
+                }
+            }
+            return null;
+        };
         InstallCommand.prototype.exec = function (args) {
             var _this = this;
             this.dataSource.all(function (libs) {
-                var targetLib = null;
                 _this.tty.writeLine("");
-                for(var i = 0; i < libs.length; i++) {
-                    var lib = libs[i];
-                    if(_this.match(lib.name, args[3])) {
-                        targetLib = lib;
-                        break;
-                    }
-                }
+                var targetLib = _this.find(args[3], libs);
                 if(targetLib == null) {
                     _this.tty.warn("Lib not found.");
                 } else {

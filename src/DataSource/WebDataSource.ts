@@ -8,7 +8,7 @@ module DataSource {
 
         constructor (public repositoryUrl: string) { }
 
-        public all(callback: (data: string) => void ): void {
+        public all(callback: (data: DataSource.Lib[]) => void ): void {
             var request = Util.WebRequest.instance();
 
             request.getUrl(this.repositoryUrl, (body) => {

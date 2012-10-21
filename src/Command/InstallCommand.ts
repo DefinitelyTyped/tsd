@@ -42,18 +42,22 @@ module Command {
             this.tty.write("└── " + name + "@" + version + " instaled.");
         }
 
+        private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
+            for (var i = 0; i < libs.length; i++) {
+                var lib = libs[i];
+                if (this.match(lib.name, key)) {
+                    return lib;
+                }
+            }
+
+            return null;
+        }
+
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
-                var targetLib: DataSource.Lib = null;
                 this.tty.writeLine("");
 
-                for (var i = 0; i < libs.length; i++) {
-                    var lib = <DataSource.Lib>libs[i];
-                    if (this.match(lib.name, args[3])) {
-                        targetLib = lib;
-                        break;
-                    }
-                }
+                var targetLib: DataSource.Lib = this.find(args[3], libs);
 
                 if (targetLib == null) {
                     this.tty.warn("Lib not found.");

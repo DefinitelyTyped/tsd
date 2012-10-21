@@ -22,7 +22,7 @@ module DataSource {
     }
 
     export interface IDataSource {
-        all: (callback: (data: string) => void ) => void;
+        all: (callback: (data: DataSource.Lib[]) => void ) => void;
         find: (keys: string[]) => Lib;
     }
 }
