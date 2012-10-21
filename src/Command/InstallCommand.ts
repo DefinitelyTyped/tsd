@@ -33,6 +33,15 @@ module Command {
             return name.toUpperCase() == key.toUpperCase();
         }
 
+        private save(name: string, version: string, content: string): void { 
+            if (!this.io.directoryExists(this.cfg.localPath)) {
+                this.io.createDirectory(this.cfg.localPath);
+            }
+            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
+
+            this.tty.write("└── " + name + "@" + version + " instaled.");
+        }
+
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
                 var targetLib: DataSource.Lib = null;
@@ -53,13 +62,7 @@ module Command {
                     var request = Util.WebRequest.instance();
 
                     request.getUrl(version.url, (body) => {
-
-                        if (!this.io.directoryExists(this.cfg.localPath)) {
-                            this.io.createDirectory(this.cfg.localPath);
-                        }
-                        this.io.createFile(this.cfg.localPath + "\\" + targetLib.name + "-" + version.version + ".d.ts", body);
-
-                        this.tty.write("└── " + targetLib.name + "@" + version.version + " instaled.");
+                        this.save(targetLib.name, version.version, body);
                     });
                 }
             });
