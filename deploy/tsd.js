@@ -439,6 +439,9 @@ var Command;
             this.cfg = cfg;
             this.shortcut = "install";
             this.usage = "Intall file definition";
+            this._cache = [];
+            this._request = Util.WebRequest.instance();
+            this._index = 0;
         }
         InstallCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
@@ -475,19 +478,43 @@ var Command;
             }
             return null;
         };
+        InstallCommand.prototype.cacheContains = function (name) {
+            for(var i = 0; i < this._cache.length; i++) {
+                if(this._cache[i] == name) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        InstallCommand.prototype.install = function (targetLib, targetVersion, libs) {
+            var _this = this;
+            if(this.cacheContains(targetLib.name + '@' + targetVersion)) {
+                return;
+            }
+            if(targetLib == null) {
+                this.tty.warn("Lib not found.");
+            } else {
+                var version = targetLib.versions[0];
+                this._request.getUrl(version.url, function (body) {
+                    _this.save(targetLib.name, version.version, version.key, body);
+                    _this._cache.push(targetLib.name + '@' + version.version);
+                    var deps = (targetLib.versions[0].dependencies) || [];
+                    for(var i = 0; i < deps.length; i++) {
+                        var dep = _this.find(deps[i].name, libs);
+                        _this.install(dep, dep.versions[0].version, libs);
+                    }
+                });
+            }
+        };
         InstallCommand.prototype.exec = function (args) {
             var _this = this;
             this.dataSource.all(function (libs) {
                 _this.tty.writeLine("");
                 var targetLib = _this.find(args[3], libs);
-                if(targetLib == null) {
-                    _this.tty.warn("Lib not found.");
+                if(targetLib) {
+                    _this.install(targetLib, targetLib.versions[0].version, libs);
                 } else {
-                    var version = targetLib.versions[0];
-                    var request = Util.WebRequest.instance();
-                    request.getUrl(version.url, function (body) {
-                        _this.save(targetLib.name, version.version, version.key, body);
-                    });
+                    _this.tty.warn("Lib not found.");
                 }
             });
         };

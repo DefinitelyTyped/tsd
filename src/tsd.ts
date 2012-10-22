@@ -22,6 +22,9 @@ class Main {
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
 
+            //cfg.repositoryType = RepositoryTypeEnum.FileSystem;
+            //cfg.uri = "repository.json";
+
             cfg.localPath = "./d.ts";
 
             var ds = DataSource.DataSourceFactory.factory(cfg);

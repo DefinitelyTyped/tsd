@@ -7,7 +7,10 @@ module Command {
     export class InstallCommand implements ICommand {
         public shortcut: string = "install";
         public usage: string = "Intall file definition";
-        private args: Array;
+        private _args: Array;
+        private _cache: string[] = [];
+        private _request: Util.WebRequest = Util.WebRequest.instance();
+        private _index: number = 0;
 
         constructor (public tty: ITTY, public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config) { }
 
@@ -55,24 +58,44 @@ module Command {
             return null;
         }
 
+        private cacheContains(name: string): bool { 
+            for (var i = 0; i < this._cache.length; i++) { 
+                if(this._cache[i] == name)
+                    return true;
+            }
+            return false;
+        }
+
+        private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
+            if(this.cacheContains(targetLib.name + '@' + targetVersion))
+                return;
+
+            if (targetLib == null) {
+                this.tty.warn("Lib not found.");
+            } else {
+                var version = targetLib.versions[0];
+
+                this._request.getUrl(version.url, (body) => {
+                    this.save(targetLib.name, version.version, version.key, body);
+                    this._cache.push(targetLib.name + '@' + version.version);
+                    var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];
+                    for (var i = 0; i < deps.length; i++) { 
+                        var dep: DataSource.Lib = this.find(deps[i].name, libs);
+                        this.install(dep, dep.versions[0].version, libs);
+                    }
+                });
+            }
+        }
+
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
                 this.tty.writeLine("");
-
                 var targetLib: DataSource.Lib = this.find(args[3], libs);
 
-                if (targetLib == null) {
+                if(targetLib)
+                    this.install(targetLib, targetLib.versions[0].version, libs);
+                else
                     this.tty.warn("Lib not found.");
-                } else {
-                    var version = targetLib.versions[0];
-                    var request = Util.WebRequest.instance();
-
-                    request.getUrl(version.url, (body) => {
-                        this.save(targetLib.name, version.version, version.key, body);
-
-
-                    });
-                }
             });
         }
 

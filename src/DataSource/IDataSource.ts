@@ -11,6 +11,11 @@ module DataSource {
         public dependencies: any[] = [];
     }
 
+    export interface LibDep { 
+        name: string;
+        version: string;
+    }
+
     export class Lib {
         public name: string;
         public description: string;
