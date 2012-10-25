@@ -1,6 +1,6 @@
 ﻿///<reference path='ICommand.ts'/>
 ///<reference path='../IIO.ts'/>
-///<reference path='../Util/WebRequest.ts'/>
+///<reference path='../System/Web/WebRequest.ts'/>
 
 module Command {
 
@@ -9,7 +9,7 @@ module Command {
         public usage: string = "Intall file definition";
         private _args: Array;
         private _cache: string[] = [];
-        private _request: Util.WebRequest = Util.WebRequest.instance();
+        private _request: System.Web.WebRequest = System.Web.WebRequest.instance();
         private _index: number = 0;
 
         constructor (public tty: ITTY, public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config) { }

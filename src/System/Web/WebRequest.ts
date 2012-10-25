@@ -1,8 +1,8 @@
-﻿///<reference path='..\ITTY.ts'/>
+﻿///<reference path='..\..\ITTY.ts'/>
 
 declare var require: any;
 
-module Util { 
+module System.Web { 
     export class WebRequest { 
         private _request: any = require('request');
         private _initialized: bool = false;

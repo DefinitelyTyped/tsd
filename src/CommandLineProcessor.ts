@@ -1,3 +1,5 @@
+///<reference path='System/Console.js'/>
+
 ///<reference path='TTY.ts'/>
 ///<reference path='IO.ts'/>
 ///<reference path='Config.ts'/>
@@ -21,20 +23,25 @@ class CommandLineProcessor {
 	}
 
 	public printUsage() {
-        this.tty.writeLine("{{=cyan}}Syntax:{{=reset}}   tsd {{=yellow}}[{{=cyan}}command{{=yellow}}] [{{=cyan}}args...{{=yellow}}]{{=reset}}");
-        this.tty.writeLine("");
-        this.tty.writeLine("   {{=cyan}}Ex.:{{=reset}} tsd search nodejs");
-        this.tty.writeLine("");
-        this.tty.writeLine("{{=cyan}}Options:{{=reset}}");
+	    System.Console.out.autoFlush = false;
+	    
+        System.Console.writeLine('Syntax: tsd [command] [args...]');
+        System.Console.writeLine('');
+        System.Console.writeLine('   Ex.: tsd search nodejs');
+        System.Console.writeLine('');
+        System.Console.writeLine('Options:');
 
         for(var i = 0; i < this.commands.length; i++) {
-    		this.tty.writeLine("  " + this.commands[i].toString());
+            System.Console.writeLine("  " + this.commands[i].toString());
         }
+
+	    System.Console.out.flush();
 	}
 
     public execute(args: Array) {
-    	this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + (args[2] || "..."));
-
+        System.Console.writeLine("Command: " + (args[2] || "..."));
+        System.Console.writeLine('');
+ 
         var accepted: bool = false;
 
         for(var i = 0; i < this.commands.length; i++) {

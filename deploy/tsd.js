@@ -1,3 +1,181 @@
+var System;
+(function (System) {
+    var Environment = (function () {
+        function Environment() { }
+        Environment.isNode = function isNode() {
+            return !(typeof ActiveXObject === "function");
+        }
+        Environment.isWsh = function isWsh() {
+            return !Environment.isNode();
+        }
+        return Environment;
+    })();
+    System.Environment = Environment;    
+})(System || (System = {}));
+
+var System;
+(function (System) {
+    
+})(System || (System = {}));
+
+var System;
+(function (System) {
+    (function (IO) {
+        var StreamWriter = (function () {
+            function StreamWriter() {
+                this.autoFlush = true;
+            }
+            StreamWriter.prototype.flush = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.flushAsync = function (callback) {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.write = function (value) {
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flush();
+                    this._buffer = null;
+                }
+            };
+            StreamWriter.prototype.writeLine = function (value) {
+                this.write(value + '\n');
+            };
+            StreamWriter.prototype.writeAsync = function (value, callback) {
+                var _this = this;
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flushAsync(function () {
+                        _this._buffer = null;
+                        callback();
+                    });
+                }
+            };
+            StreamWriter.prototype.writeLineAsync = function (value, callback) {
+                this.writeAsync(value + '\n', callback);
+            };
+            StreamWriter.prototype.dispose = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            return StreamWriter;
+        })();
+        IO.StreamWriter = StreamWriter;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+
+})(System || (System = {}));
+
+var __extends = this.__extends || function (d, b) {
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+var NodeJs;
+(function (NodeJs) {
+    var ConsoleWriter = (function (_super) {
+        __extends(ConsoleWriter, _super);
+        function ConsoleWriter() {
+            _super.apply(this, arguments);
+
+        }
+        ConsoleWriter.prototype.flush = function () {
+            process.stdout.write(this._buffer);
+        };
+        ConsoleWriter.prototype.flushAsync = function (callback) {
+            this.flush();
+            callback();
+        };
+        ConsoleWriter.prototype.dispose = function () {
+            throw new Error("Not Implemented Exception");
+        };
+        return ConsoleWriter;
+    })(System.IO.StreamWriter);
+    NodeJs.ConsoleWriter = ConsoleWriter;    
+})(NodeJs || (NodeJs = {}));
+
+var System;
+(function (System) {
+    var Console = (function () {
+        function Console() { }
+        Console.out = null;
+        Console.initialize = function initialize() {
+            if(System.Environment.isNode()) {
+                Console.out = new NodeJs.ConsoleWriter();
+            } else {
+                if(System.Environment.isWsh()) {
+                } else {
+                    throw new Error('Invalid host');
+                }
+            }
+        }
+        Console.write = function write(value) {
+            Console.out.write(value);
+        }
+        Console.writeLine = function writeLine(value) {
+            Console.out.writeLine(value);
+        }
+        Console.writeAsync = function writeAsync(value, callback) {
+            Console.out.writeAsync(value, callback);
+        }
+        Console.writeLineAsync = function writeLineAsync(value, callback) {
+            Console.out.writeLineAsync(value, callback);
+        }
+        return Console;
+    })();
+    System.Console = Console;    
+})(System || (System = {}));
+
+var System;
+(function (System) {
+    (function (Web) {
+        var WebRequest = (function () {
+            function WebRequest() {
+                this._request = require('request');
+                this._initialized = false;
+            }
+            WebRequest._instance = null;
+            WebRequest.prototype.verifyInit = function () {
+                if(!this._initialized) {
+                    throw new Error('WebRequest was not initialized.');
+                }
+            };
+            WebRequest.prototype.init = function (tty) {
+                this._tty = tty;
+                this._initialized = true;
+            };
+            WebRequest.prototype.getUrl = function (url, callback) {
+                var _this = this;
+                this.verifyInit();
+                this._tty.writeLine("tsd {{=green}}http {{=magenta}}GET{{=reset}} " + url);
+                this._request(url, function (error, response, body) {
+                    _this._tty.writeLine("tsd {{=green}}http {{=magenta}}" + response.statusCode + "{{=reset}} " + url);
+                    if(!error && response.statusCode == 200) {
+                        callback(body);
+                    } else {
+                        _this._tty.writeLine("tsd {{=red}}ERR! {{=magenta}}" + response.statusCode + " {{=reset}}" + error);
+                    }
+                });
+            };
+            WebRequest.instance = function instance() {
+                if(WebRequest._instance == null) {
+                    WebRequest._instance = new WebRequest();
+                }
+                return WebRequest._instance;
+            }
+            return WebRequest;
+        })();
+        Web.WebRequest = WebRequest;        
+    })(System.Web || (System.Web = {}));
+    var Web = System.Web;
+
+})(System || (System = {}));
+
 var Util;
 (function (Util) {
     var tmpl;
@@ -203,7 +381,7 @@ var DataSource;
             this.repositoryUrl = repositoryUrl;
         }
         WebDataSource.prototype.all = function (callback) {
-            var request = Util.WebRequest.instance();
+            var request = System.Web.WebRequest.instance();
             request.getUrl(this.repositoryUrl, function (body) {
                 callback(JSON.parse(body));
             });
@@ -388,47 +566,6 @@ var Command;
     Command.SearchCommand = SearchCommand;    
 })(Command || (Command = {}));
 
-var Util;
-(function (Util) {
-    var WebRequest = (function () {
-        function WebRequest() {
-            this._request = require('request');
-            this._initialized = false;
-        }
-        WebRequest._instance = null;
-        WebRequest.prototype.verifyInit = function () {
-            if(!this._initialized) {
-                throw new Error('WebRequest was not initialized.');
-            }
-        };
-        WebRequest.prototype.init = function (tty) {
-            this._tty = tty;
-            this._initialized = true;
-        };
-        WebRequest.prototype.getUrl = function (url, callback) {
-            var _this = this;
-            this.verifyInit();
-            this._tty.writeLine("tsd {{=green}}http {{=magenta}}GET{{=reset}} " + url);
-            this._request(url, function (error, response, body) {
-                _this._tty.writeLine("tsd {{=green}}http {{=magenta}}" + response.statusCode + "{{=reset}} " + url);
-                if(!error && response.statusCode == 200) {
-                    callback(body);
-                } else {
-                    _this._tty.writeLine("tsd {{=red}}ERR! {{=magenta}}" + response.statusCode + " {{=reset}}" + error);
-                }
-            });
-        };
-        WebRequest.instance = function instance() {
-            if(WebRequest._instance == null) {
-                WebRequest._instance = new WebRequest();
-            }
-            return WebRequest._instance;
-        }
-        return WebRequest;
-    })();
-    Util.WebRequest = WebRequest;    
-})(Util || (Util = {}));
-
 var Command;
 (function (Command) {
     var InstallCommand = (function () {
@@ -440,7 +577,7 @@ var Command;
             this.shortcut = "install";
             this.usage = "Intall file definition";
             this._cache = [];
-            this._request = Util.WebRequest.instance();
+            this._request = System.Web.WebRequest.instance();
             this._index = 0;
         }
         InstallCommand.prototype.accept = function (args) {
@@ -539,17 +676,20 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.InstallCommand(this.tty, this.dataSource, this.io, this.cfg));
     }
     CommandLineProcessor.prototype.printUsage = function () {
-        this.tty.writeLine("{{=cyan}}Syntax:{{=reset}}   tsd {{=yellow}}[{{=cyan}}command{{=yellow}}] [{{=cyan}}args...{{=yellow}}]{{=reset}}");
-        this.tty.writeLine("");
-        this.tty.writeLine("   {{=cyan}}Ex.:{{=reset}} tsd search nodejs");
-        this.tty.writeLine("");
-        this.tty.writeLine("{{=cyan}}Options:{{=reset}}");
+        System.Console.out.autoFlush = false;
+        System.Console.writeLine('Syntax: tsd [command] [args...]');
+        System.Console.writeLine('');
+        System.Console.writeLine('   Ex.: tsd search nodejs');
+        System.Console.writeLine('');
+        System.Console.writeLine('Options:');
         for(var i = 0; i < this.commands.length; i++) {
-            this.tty.writeLine("  " + this.commands[i].toString());
+            System.Console.writeLine("  " + this.commands[i].toString());
         }
+        System.Console.out.flush();
     };
     CommandLineProcessor.prototype.execute = function (args) {
-        this.tty.writeLine("{{=cyan}}Command:{{=reset}} " + (args[2] || "..."));
+        System.Console.writeLine("Command: " + (args[2] || "..."));
+        System.Console.writeLine('');
         var accepted = false;
         for(var i = 0; i < this.commands.length; i++) {
             var command = this.commands[i];
@@ -608,12 +748,15 @@ var Util;
 
 var Main = (function () {
     function Main() { }
+    Main.prototype.init = function () {
+        System.Console.initialize();
+    };
     Main.prototype.run = function (args) {
         Util.Trace.debug = false;
         var tty = new TTY();
         Util.Trace.tty = tty;
         try  {
-            Util.WebRequest.instance().init(tty);
+            System.Web.WebRequest.instance().init(tty);
             var cfg = new Config();
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
@@ -627,4 +770,6 @@ var Main = (function () {
     };
     return Main;
 })();
-new Main().run(Array.prototype.slice.call(process.argv));
+var main = new Main();
+main.init();
+main.run(Array.prototype.slice.call(process.argv));

@@ -1,21 +1,27 @@
+///<reference path='d.ts/node-0.8.d.ts'/>
+///<reference path='System/Console.ts'/>
+///<reference path='System/Web/WebRequest.ts'/>
+
 ///<reference path='TTY.ts'/>
 ///<reference path='CommandLineProcessor.ts'/>
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\DataSourceFactory.ts'/>
-///<reference path='Util\WebRequest.ts'/>
 ///<reference path='Util\Trace.ts'/>
 
-declare var process: any;
-
 class Main { 
+    public init() { 
+        System.Console.initialize();
+    }
+
     public run(args: Array) { 
+
         Util.Trace.debug = false;
 
         var tty = new TTY();
         Util.Trace.tty = tty;
 
         try { 
-            Util.WebRequest.instance().init(tty);
+            System.Web.WebRequest.instance().init(tty);
 
             var cfg = new Config();
 
@@ -36,4 +42,6 @@ class Main {
     }
 }
 
-new Main().run(<Array>Array.prototype.slice.call(process.argv));
+var main = new Main();
+main.init();
+main.run(Array.prototype.slice.call(process.argv));

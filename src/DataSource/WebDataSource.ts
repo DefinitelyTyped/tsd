@@ -9,7 +9,7 @@ module DataSource {
         constructor (public repositoryUrl: string) { }
 
         public all(callback: (data: DataSource.Lib[]) => void ): void {
-            var request = Util.WebRequest.instance();
+            var request = System.Web.WebRequest.instance();
 
             request.getUrl(this.repositoryUrl, (body) => {
                 callback(JSON.parse(body));
