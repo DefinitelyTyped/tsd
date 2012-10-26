@@ -1,5 +1,5 @@
 module System { 
-    export class Environment { 
+    export class Environment {
         public static isNode() { 
             return !(typeof ActiveXObject === "function");
         }

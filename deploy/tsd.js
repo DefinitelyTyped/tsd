@@ -99,6 +99,29 @@ var NodeJs;
     NodeJs.ConsoleWriter = ConsoleWriter;    
 })(NodeJs || (NodeJs = {}));
 
+var Wsh;
+(function (Wsh) {
+    var ConsoleWriter = (function (_super) {
+        __extends(ConsoleWriter, _super);
+        function ConsoleWriter() {
+            _super.apply(this, arguments);
+
+        }
+        ConsoleWriter.prototype.flush = function () {
+            WScript.StdOut.Write(this._buffer);
+        };
+        ConsoleWriter.prototype.flushAsync = function (callback) {
+            this.flush();
+            callback();
+        };
+        ConsoleWriter.prototype.dispose = function () {
+            throw new Error("Not Implemented Exception");
+        };
+        return ConsoleWriter;
+    })(System.IO.StreamWriter);
+    Wsh.ConsoleWriter = ConsoleWriter;    
+})(Wsh || (Wsh = {}));
+
 var System;
 (function (System) {
     var Console = (function () {
@@ -109,6 +132,7 @@ var System;
                 Console.out = new NodeJs.ConsoleWriter();
             } else {
                 if(System.Environment.isWsh()) {
+                    Console.out = new Wsh.ConsoleWriter();
                 } else {
                     throw new Error('Invalid host');
                 }
@@ -129,6 +153,98 @@ var System;
         return Console;
     })();
     System.Console = Console;    
+})(System || (System = {}));
+
+var System;
+(function (System) {
+    
+})(System || (System = {}));
+
+var NodeJs;
+(function (NodeJs) {
+    var FileStreamWriter = (function (_super) {
+        __extends(FileStreamWriter, _super);
+        function FileStreamWriter(path) {
+                _super.call(this);
+            this.path = path;
+            this._fs = require('fs');
+            this.autoFlush = false;
+        }
+        FileStreamWriter.prototype.flush = function () {
+            this._fs.appendFileSync(this.path, this._buffer);
+        };
+        FileStreamWriter.prototype.flushAsync = function (callback) {
+            this._fs.writeFile(this.path, this._buffer, function (err) {
+                if(err) {
+                    throw err;
+                }
+                callback();
+            });
+        };
+        return FileStreamWriter;
+    })(System.IO.StreamWriter);    
+    var FileHandle = (function () {
+        function FileHandle() {
+            this._fs = require('fs');
+        }
+        FileHandle.prototype.createFile = function (path) {
+            this._fs.writeFileSync(path, '');
+            return new FileStreamWriter(path);
+        };
+        FileHandle.prototype.deleteFile = function (path) {
+            try  {
+                this._fs.unlinkSync(path);
+            } catch (e) {
+            }
+        };
+        FileHandle.prototype.fileExists = function (path) {
+            return this._fs.existsSync(path);
+        };
+        return FileHandle;
+    })();
+    NodeJs.FileHandle = FileHandle;    
+})(NodeJs || (NodeJs = {}));
+
+var Wsh;
+(function (Wsh) {
+    var FileHandle = (function () {
+        function FileHandle() { }
+        FileHandle.prototype.createFile = function (path) {
+            return null;
+        };
+        FileHandle.prototype.deleteFile = function (path) {
+        };
+        FileHandle.prototype.fileExists = function (path) {
+            return false;
+        };
+        return FileHandle;
+    })();
+    Wsh.FileHandle = FileHandle;    
+})(Wsh || (Wsh = {}));
+
+var System;
+(function (System) {
+    (function (IO) {
+        var FileManager = (function () {
+            function FileManager() { }
+            FileManager.handle = null;
+            FileManager.initialize = function initialize() {
+                if(System.Environment.isNode()) {
+                    FileManager.handle = new NodeJs.FileHandle();
+                } else {
+                    if(System.Environment.isWsh()) {
+                        FileManager.handle = new Wsh.FileHandle();
+                    } else {
+                        throw new Error('Invalid host');
+                    }
+                }
+            }
+            return FileManager;
+        })();
+        IO.FileManager = FileManager;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+
 })(System || (System = {}));
 
 var System;
@@ -165,13 +281,14 @@ var System;
 
 })(System || (System = {}));
 
-var _fs = require('fs');
-var _path = require('path');
-var _module = require('module');
 var IO = (function () {
-    function IO() { }
+    function IO() {
+        this._fs = require('fs');
+        this._path = require('path');
+        this._module = require('module');
+    }
     IO.prototype.readFile = function (file) {
-        var buffer = _fs.readFileSync(file);
+        var buffer = this._fs.readFileSync(file);
         switch(buffer[0]) {
             case 254: {
                 if(buffer[1] == 255) {
@@ -203,28 +320,16 @@ var IO = (function () {
         }
         return buffer.toString();
     };
-    IO.prototype.createFile = function (path, contents) {
-        _fs.writeFileSync(path, contents);
-    };
-    IO.prototype.deleteFile = function (path) {
-        try  {
-            _fs.unlinkSync(path);
-        } catch (e) {
-        }
-    };
-    IO.prototype.fileExists = function (path) {
-        return _fs.existsSync(path);
-    };
     IO.prototype.directoryExists = function (path) {
-        return _fs.existsSync(path) && _fs.lstatSync(path).isDirectory();
+        return this._fs.existsSync(path) && this._fs.lstatSync(path).isDirectory();
     };
     IO.prototype.createDirectory = function (path) {
         if(!this.directoryExists(path)) {
-            _fs.mkdirSync(path);
+            this._fs.mkdirSync(path);
         }
     };
     IO.prototype.dirName = function (path) {
-        return _path.dirname(path);
+        return this._path.dirname(path);
     };
     return IO;
 })();
@@ -461,13 +566,19 @@ var Command;
         InstallCommand.prototype.match = function (key, name) {
             return name.toUpperCase() == key.toUpperCase();
         };
+        InstallCommand.prototype.saveFile = function (name, content) {
+            var sw = System.IO.FileManager.handle.createFile(name);
+            sw.write(content);
+            sw.flush();
+        };
         InstallCommand.prototype.save = function (name, version, key, content) {
             if(!this.io.directoryExists(this.cfg.localPath)) {
                 this.io.createDirectory(this.cfg.localPath);
             }
-            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
+            var fileNameWithoutExtension = this.cfg.localPath + "\\" + name + "-" + version;
+            this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " instaled.");
-            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
+            this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     └── " + key + ".key");
         };
         InstallCommand.prototype.find = function (key, libs) {
@@ -591,10 +702,12 @@ var DataSource;
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
 
+var VERSION = "0.1.2";
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
         System.Console.initialize();
+        System.IO.FileManager.initialize();
     };
     Main.prototype.run = function (args) {
         try  {
@@ -613,4 +726,15 @@ var Main = (function () {
 })();
 var main = new Main();
 main.init();
-main.run(Array.prototype.slice.call(process.argv));
+var arguments;
+if(System.Environment.isNode()) {
+    arguments = Array.prototype.slice.call(process.argv);
+}
+if(System.Environment.isWsh()) {
+    var args = [];
+    for(var i = 0; i < WScript.Arguments.length; i++) {
+        args[i] = WScript.Arguments.Item(i);
+    }
+    arguments = args;
+}
+main.run(arguments);

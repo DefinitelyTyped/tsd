@@ -1,16 +1,18 @@
 ///<reference path='d.ts/node-0.8.d.ts'/>
 ///<reference path='System/Console.ts'/>
+///<reference path='System/IO/FileManager.ts'/>
 ///<reference path='System/Web/WebRequest.ts'/>
 
-///<reference path='TTY.ts'/>
 ///<reference path='CommandLineProcessor.ts'/>
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\DataSourceFactory.ts'/>
-///<reference path='Util\Trace.ts'/>
+
+var VERSION = "0.1.2";
 
 class Main { 
     public init() { 
         System.Console.initialize();
+        System.IO.FileManager.initialize();
     }
 
     public run(args: Array) { 
@@ -37,4 +39,17 @@ class Main {
 
 var main = new Main();
 main.init();
-main.run(Array.prototype.slice.call(process.argv));
+
+var arguments: Array;
+if (System.Environment.isNode()) {
+    arguments = Array.prototype.slice.call(process.argv);
+} if (System.Environment.isWsh()) {
+    var args = [];
+    for (var i = 0; i < WScript.Arguments.length; i++) {
+        args[i] = WScript.Arguments.Item(i);
+    }
+
+    arguments = <Array><any>args;
+}
+
+main.run(arguments);

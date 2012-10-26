@@ -5,6 +5,16 @@ src/*/*.js
 src/*/*/*.js
 src/*/*/*/*.js
 src/*/*/*/*/*.js
+NodeJs/*.js
+NodeJs/*/*.js
+NodeJs/*/*/*.js
+NodeJs/*/*/*/*.js
+NodeJs/*/*/*/*/*.js
+Wsh/*.js
+Wsh/*/*.js
+Wsh/*/*/*.js
+Wsh/*/*/*/*.js
+Wsh/*/*/*/*/*.js
 tsd.csproj
 tsd.csproj.user
 tsd.sln

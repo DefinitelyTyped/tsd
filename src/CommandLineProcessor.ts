@@ -1,6 +1,5 @@
 ///<reference path='System/Console.js'/>
 
-///<reference path='TTY.ts'/>
 ///<reference path='IO.ts'/>
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\IDataSource.ts'/>

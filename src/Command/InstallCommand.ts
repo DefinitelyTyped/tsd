@@ -1,6 +1,7 @@
 ﻿///<reference path='ICommand.ts'/>
 ///<reference path='../IIO.ts'/>
 ///<reference path='../System/Web/WebRequest.ts'/>
+///<reference path='../../System/IO/FileManager.ts'/>
 
 module Command {
 
@@ -36,14 +37,23 @@ module Command {
             return name.toUpperCase() == key.toUpperCase();
         }
 
+        private saveFile(name: string, content: string): void { 
+            var sw = System.IO.FileManager.handle.createFile(name);
+            sw.write(content);
+            sw.flush();
+        }
+
         private save(name: string, version: string, key: string, content: string): void { 
             if (!this.io.directoryExists(this.cfg.localPath)) {
                 this.io.createDirectory(this.cfg.localPath);
             }
-            // ├
-            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
+
+            var fileNameWithoutExtension = this.cfg.localPath + "\\" + name + "-" + version;
+
+            this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " instaled.");
-            this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
+
+            this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     └── " + key + ".key");
         }
 

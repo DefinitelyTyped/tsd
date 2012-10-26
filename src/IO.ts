@@ -2,13 +2,13 @@
 
 declare var require: any;
 
-var _fs = require('fs');
-var _path = require('path');
-var _module = require('module');
-
 class IO implements IIO {
+    private _fs = require('fs');
+    private  _path = require('path');
+    private  _module = require('module');
+
     public readFile(file): string {
-        var buffer = _fs.readFileSync(file);
+        var buffer = this._fs.readFileSync(file);
         switch (buffer[0]) {
             case 0xFE:
                 if (buffer[1] == 0xFF) {
@@ -40,33 +40,33 @@ class IO implements IIO {
         return buffer.toString();
     }
 
-    public createFile(path: string, contents: string): void {
-    	_fs.writeFileSync(path, contents);
-    }
+    //public createFile(path: string, contents: string): void {
+    //	this._fs.writeFileSync(path, contents);
+    //}
 
-    public deleteFile(path): void {
-        try {
-            _fs.unlinkSync(path);
-        } catch (e) {
+    //public deleteFile(path): void {
+    //    try {
+    //        this._fs.unlinkSync(path);
+    //    } catch (e) {
 
-        }
-    }
+    //    }
+    //}
 
-    public fileExists(path): bool {
-        return _fs.existsSync(path);
-    }
+    //public fileExists(path): bool {
+    //    return this._fs.existsSync(path);
+    //}
 
     public directoryExists(path: string): bool {
-        return _fs.existsSync(path) && _fs.lstatSync(path).isDirectory();
+        return this._fs.existsSync(path) && this._fs.lstatSync(path).isDirectory();
     }
 
     public createDirectory(path): void {
         if (!this.directoryExists(path)) {
-            _fs.mkdirSync(path);
+            this._fs.mkdirSync(path);
         }
     }
     
     public dirName(path: string): string {
-        return _path.dirname(path);
+        return this._path.dirname(path);
     }    
 }

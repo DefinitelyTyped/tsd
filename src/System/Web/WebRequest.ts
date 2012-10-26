@@ -1,5 +1,4 @@
-﻿///<reference path='..\..\ITTY.ts'/>
-
+﻿
 declare var require: any;
 
 module System.Web { 
