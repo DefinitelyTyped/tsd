@@ -12,24 +12,24 @@ module Command {
         private _request: System.Web.WebRequest = System.Web.WebRequest.instance();
         private _index: number = 0;
 
-        constructor (public tty: ITTY, public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config) { }
+        constructor (public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config) { }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut;
         }
 
         private print(lib: DataSource.Lib) {
-            this.tty.write(" {{=cyan}}" + lib.name + "{{=reset}} - " + lib.description + " {{=yellow}}[{{=cyan}}");
+            System.Console.write(lib.name + ' - ' + lib.description + '[');
 
             for (var j = 0; j < lib.versions.length; j++) {
                 if (j > 0 && j < lib.versions.length) {
-                    this.tty.write("{{=yellow}},{{=cyan}} ");
+                    System.Console.write(',');
                 }
                 var ver = lib.versions[j];
-                this.tty.write(ver.version);
+                System.Console.write(ver.version);
             }
 
-            this.tty.writeLine("{{=yellow}}]{{=reset}}");
+            System.Console.writeLine(']');
         }
 
         private match(key: string, name: string) {
@@ -42,9 +42,9 @@ module Command {
             }
             // ├
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
-            this.tty.writeLine("└── " + name + "@" + version + " instaled.");
+            System.Console.writeLine("└── " + name + "@" + version + " instaled.");
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
-            this.tty.writeLine("     └── " + key + ".key");
+            System.Console.writeLine("     └── " + key + ".key");
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
@@ -71,7 +71,7 @@ module Command {
                 return;
 
             if (targetLib == null) {
-                this.tty.warn("Lib not found.");
+                System.Console.writeLine("Lib not found.");
             } else {
                 var version = targetLib.versions[0];
 
@@ -89,13 +89,13 @@ module Command {
 
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
-                this.tty.writeLine("");
+                System.Console.writeLine("");
                 var targetLib: DataSource.Lib = this.find(args[3], libs);
 
                 if(targetLib)
                     this.install(targetLib, targetLib.versions[0].version, libs);
                 else
-                    this.tty.warn("Lib not found.");
+                    System.Console.writeLine("Lib not found.");
             });
         }
 

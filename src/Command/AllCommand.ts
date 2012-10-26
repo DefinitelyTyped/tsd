@@ -1,5 +1,4 @@
 ﻿///<reference path='ICommand.ts'/>
-///<reference path='../ITTY.ts'/>
 
 module Command {
 
@@ -9,25 +8,25 @@ module Command {
         public usage: string = "Show all file definitions from repository";
         private args: Array;
 
-        constructor (public tty: ITTY, public dataSource: DataSource.IDataSource) { }
+        constructor (public dataSource: DataSource.IDataSource) { }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut;
         }
 
         private print(lib: DataSource.Lib) {
-            this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
+            System.Console.write(lib.name + '[');
 
             for (var j = 0; j < lib.versions.length; j++) {
                 if (j > 0 && j < lib.versions.length) {
-                    this.tty.write("{{=yellow}},{{=cyan}} ");
+                    System.Console.write(',');
                 }
                 var ver = lib.versions[j];
-                this.tty.write(ver.version);
+                System.Console.write(ver.version);
             }
 
-            this.tty.write("{{=yellow}}]{{=reset}}");
-            this.tty.writeLine(" - " + lib.description);
+            System.Console.write(']');
+            System.Console.writeLine(' - '+ lib.description);
         }
 
         public exec(args: Array): void {

@@ -14,12 +14,12 @@ class CommandLineProcessor {
 
 	commands: Command.ICommand[];
 
-	constructor(public tty: ITTY, public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config){
+	constructor(public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config){
 		this.commands = [];
 		this.commands.push(new Command.HelpCommand());
-        this.commands.push(new Command.AllCommand(this.tty, this.dataSource));
-        this.commands.push(new Command.SearchCommand(this.tty, this.dataSource));
-        this.commands.push(new Command.InstallCommand(this.tty, this.dataSource, this.io, this.cfg));
+        this.commands.push(new Command.AllCommand(this.dataSource));
+        this.commands.push(new Command.SearchCommand(this.dataSource));
+        this.commands.push(new Command.InstallCommand(this.dataSource, this.io, this.cfg));
 	}
 
 	public printUsage() {

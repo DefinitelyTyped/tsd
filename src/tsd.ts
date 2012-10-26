@@ -15,14 +15,7 @@ class Main {
 
     public run(args: Array) { 
 
-        Util.Trace.debug = false;
-
-        var tty = new TTY();
-        Util.Trace.tty = tty;
-
         try { 
-            System.Web.WebRequest.instance().init(tty);
-
             var cfg = new Config();
 
             cfg.repositoryType = RepositoryTypeEnum.Web;
@@ -34,10 +27,10 @@ class Main {
             cfg.localPath = "./d.ts";
 
             var ds = DataSource.DataSourceFactory.factory(cfg);
-            var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
+            var cp = new CommandLineProcessor(ds, new IO(), cfg);
             cp.execute(args);
         } catch(e){
-            tty.error(e.message);
+            System.Console.writeLine(e.message);
         }
     }
 }

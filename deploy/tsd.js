@@ -140,25 +140,14 @@ var System;
                 this._initialized = false;
             }
             WebRequest._instance = null;
-            WebRequest.prototype.verifyInit = function () {
-                if(!this._initialized) {
-                    throw new Error('WebRequest was not initialized.');
-                }
-            };
-            WebRequest.prototype.init = function (tty) {
-                this._tty = tty;
-                this._initialized = true;
-            };
             WebRequest.prototype.getUrl = function (url, callback) {
-                var _this = this;
-                this.verifyInit();
-                this._tty.writeLine("tsd {{=green}}http {{=magenta}}GET{{=reset}} " + url);
+                System.Console.writeLine("tsd http GET " + url);
                 this._request(url, function (error, response, body) {
-                    _this._tty.writeLine("tsd {{=green}}http {{=magenta}}" + response.statusCode + "{{=reset}} " + url);
+                    System.Console.writeLine("tsd http " + response.statusCode + " " + url);
                     if(!error && response.statusCode == 200) {
                         callback(body);
                     } else {
-                        _this._tty.writeLine("tsd {{=red}}ERR! {{=magenta}}" + response.statusCode + " {{=reset}}" + error);
+                        System.Console.writeLine("tsd ERR! " + response.statusCode + " " + error);
                     }
                 });
             };
@@ -176,126 +165,6 @@ var System;
 
 })(System || (System = {}));
 
-var Util;
-(function (Util) {
-    var tmpl;
-    (function () {
-        var cache = {
-        };
-        tmpl = function (str, data) {
-            var fn = !/\W/.test(str) ? cache[str] = cache[str] || tmpl(document.getElementById(str).innerHTML) : new Function("obj", "var p=[],print=function(){p.push.apply(p,arguments);};" + "with(obj){p.push('" + str.replace(/[\r\t\n]/g, " ").split("{{").join("\t").replace(/((^|\}\})[^\t]*)'/g, "$1\r").replace(/\t=(.*?)\}\}/g, "',$1,'").split("\t").join("');").split("}}").join("p.push('").split("\r").join("\\'") + "');}return p.join('');");
-            return data ? fn(data) : fn;
-        };
-    })();
-    var Colors = (function () {
-        function Colors() { }
-        Colors.Black = 0;
-        Colors.Red = 1;
-        Colors.Green = 2;
-        Colors.Yellow = 3;
-        Colors.Blue = 4;
-        Colors.Magenta = 5;
-        Colors.Cyan = 6;
-        Colors.White = 7;
-        Colors.Default = 9;
-        Colors.Bright = {
-            On: 1,
-            Off: 22
-        };
-        Colors.Bold = {
-            On: 1,
-            Off: 22
-        };
-        Colors.Italics = {
-            On: 3,
-            Off: 23
-        };
-        Colors.Underline = {
-            On: 4,
-            Off: 24
-        };
-        Colors.Inverse = {
-            On: 7,
-            Off: 27
-        };
-        Colors.Strikethrough = {
-            On: 9,
-            Off: 29
-        };
-        return Colors;
-    })();    
-    var Terminal = (function () {
-        function Terminal() { }
-        Terminal._reset = 0;
-        Terminal._foreground = function _foreground(color) {
-            return "3" + color;
-        }
-        Terminal._background = function _background(color) {
-            return "4" + color;
-        }
-        Terminal._makeANSI = function _makeANSI(code) {
-            return '\033[' + code + 'm';
-        }
-        Terminal._environment = {
-            'reset': Terminal._makeANSI(Terminal._reset),
-            'bold': Terminal._makeANSI(Colors.Bold.On),
-            'nobold': Terminal._makeANSI(Colors.Bold.Off),
-            'bright': Terminal._makeANSI(Colors.Bright.On),
-            'nobright': Terminal._makeANSI(Colors.Bright.Off),
-            'italics': Terminal._makeANSI(Colors.Italics.On),
-            'noitalics': Terminal._makeANSI(Colors.Italics.Off),
-            'underline': Terminal._makeANSI(Colors.Underline.On),
-            'nounderline': Terminal._makeANSI(Colors.Underline.Off),
-            'inverse': Terminal._makeANSI(Colors.Inverse.On),
-            'noinverse': Terminal._makeANSI(Colors.Inverse.Off),
-            'strikethrough': Terminal._makeANSI(Colors.Strikethrough.On),
-            'nostrikethrough': Terminal._makeANSI(Colors.Strikethrough.Off),
-            'black': Terminal._makeANSI(Terminal._foreground(Colors.Black)),
-            'red': Terminal._makeANSI(Terminal._foreground(Colors.Red)),
-            'green': Terminal._makeANSI(Terminal._foreground(Colors.Green)),
-            'yellow': Terminal._makeANSI(Terminal._foreground(Colors.Yellow)),
-            'blue': Terminal._makeANSI(Terminal._foreground(Colors.Blue)),
-            'magenta': Terminal._makeANSI(Terminal._foreground(Colors.Magenta)),
-            'cyan': Terminal._makeANSI(Terminal._foreground(Colors.Cyan)),
-            'white': Terminal._makeANSI(Terminal._foreground(Colors.White)),
-            'default': Terminal._makeANSI(Terminal._foreground(Colors.Default)),
-            'bgblack': Terminal._makeANSI(Terminal._background(Colors.Black)),
-            'bgred': Terminal._makeANSI(Terminal._background(Colors.Red)),
-            'bggreen': Terminal._makeANSI(Terminal._background(Colors.Green)),
-            'bgyellow': Terminal._makeANSI(Terminal._background(Colors.Yellow)),
-            'bgblue': Terminal._makeANSI(Terminal._background(Colors.Blue)),
-            'bgmagenta': Terminal._makeANSI(Terminal._background(Colors.Magenta)),
-            'bgcyan': Terminal._makeANSI(Terminal._background(Colors.Cyan)),
-            'bgwhite': Terminal._makeANSI(Terminal._background(Colors.White)),
-            'bgdefault': Terminal._makeANSI(Terminal._background(Colors.Default))
-        };
-        Terminal.ANSIFormat = function ANSIFormat(text) {
-            return tmpl(text, Terminal._environment);
-        }
-        return Terminal;
-    })();
-    Util.Terminal = Terminal;    
-})(Util || (Util = {}));
-
-var TTY = (function () {
-    function TTY() { }
-    TTY.prototype.beep = function () {
-    };
-    TTY.prototype.write = function (value) {
-        process.stdout.write(Util.Terminal.ANSIFormat(value));
-    };
-    TTY.prototype.writeLine = function (value) {
-        this.write(value + '\n');
-        process.stdout.write('\n');
-    };
-    TTY.prototype.error = function (message) {
-        this.writeLine("{{=red}}" + message + "{{=reset}}");
-    };
-    TTY.prototype.warn = function (message) {
-        this.writeLine("{{=yellow}}" + message + "{{=reset}}");
-    };
-    return TTY;
-})();
 var _fs = require('fs');
 var _path = require('path');
 var _module = require('module');
@@ -463,8 +332,7 @@ var Command;
 var Command;
 (function (Command) {
     var AllCommand = (function () {
-        function AllCommand(tty, dataSource) {
-            this.tty = tty;
+        function AllCommand(dataSource) {
             this.dataSource = dataSource;
             this.shortcut = "all";
             this.usage = "Show all file definitions from repository";
@@ -473,16 +341,16 @@ var Command;
             return args[2] == this.shortcut;
         };
         AllCommand.prototype.print = function (lib) {
-            this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
+            System.Console.write(lib.name + '[');
             for(var j = 0; j < lib.versions.length; j++) {
                 if(j > 0 && j < lib.versions.length) {
-                    this.tty.write("{{=yellow}},{{=cyan}} ");
+                    System.Console.write(',');
                 }
                 var ver = lib.versions[j];
-                this.tty.write(ver.version);
+                System.Console.write(ver.version);
             }
-            this.tty.write("{{=yellow}}]{{=reset}}");
-            this.tty.writeLine(" - " + lib.description);
+            System.Console.write(']');
+            System.Console.writeLine(' - ' + lib.description);
         };
         AllCommand.prototype.exec = function (args) {
             var _this = this;
@@ -504,8 +372,7 @@ var Command;
 var Command;
 (function (Command) {
     var SearchCommand = (function () {
-        function SearchCommand(tty, dataSource) {
-            this.tty = tty;
+        function SearchCommand(dataSource) {
             this.dataSource = dataSource;
             this.shortcut = "search";
             this.usage = "Search a file definition on repository";
@@ -514,16 +381,16 @@ var Command;
             return args[2] == this.shortcut;
         };
         SearchCommand.prototype.print = function (lib) {
-            this.tty.write(" {{=cyan}}" + lib.name + " {{=yellow}}[{{=cyan}}");
+            System.Console.write(" " + lib.name + " [");
             for(var j = 0; j < lib.versions.length; j++) {
                 if(j > 0 && j < lib.versions.length) {
-                    this.tty.write("{{=yellow}},{{=cyan}} ");
+                    System.Console.write(", ");
                 }
                 var ver = lib.versions[j];
-                this.tty.write(ver.version);
+                System.Console.write(ver.version);
             }
-            this.tty.write("{{=yellow}}]{{=reset}}");
-            this.tty.writeLine(" - " + lib.description);
+            System.Console.write("]");
+            System.Console.writeLine(" - " + lib.description);
         };
         SearchCommand.prototype.match = function (key, name) {
             return name.indexOf(key) != -1;
@@ -532,7 +399,6 @@ var Command;
             var found = false;
             for(var i = 3; i < args.length; i++) {
                 var key = args[i];
-                Util.Trace.log("arg[" + i + "]: " + key);
                 if(this.match(key, lib.name)) {
                     this.print(lib);
                     found = true;
@@ -544,17 +410,16 @@ var Command;
             var _this = this;
             this.dataSource.all(function (libs) {
                 var found = false;
-                _this.tty.writeLine("{{=cyan}}Search results:{{=reset}}");
-                _this.tty.writeLine("");
+                System.Console.writeLine("Search results:");
+                System.Console.writeLine("");
                 for(var i = 0; i < libs.length; i++) {
                     var lib = libs[i];
-                    Util.Trace.log("test match for lib: " + lib.name);
                     if(_this.printIfMatch(lib, args)) {
                         found = true;
                     }
                 }
                 if(!found) {
-                    _this.tty.warn("No results found.");
+                    System.Console.writeLine("No results found.");
                 }
             });
         };
@@ -569,8 +434,7 @@ var Command;
 var Command;
 (function (Command) {
     var InstallCommand = (function () {
-        function InstallCommand(tty, dataSource, io, cfg) {
-            this.tty = tty;
+        function InstallCommand(dataSource, io, cfg) {
             this.dataSource = dataSource;
             this.io = io;
             this.cfg = cfg;
@@ -584,15 +448,15 @@ var Command;
             return args[2] == this.shortcut;
         };
         InstallCommand.prototype.print = function (lib) {
-            this.tty.write(" {{=cyan}}" + lib.name + "{{=reset}} - " + lib.description + " {{=yellow}}[{{=cyan}}");
+            System.Console.write(lib.name + ' - ' + lib.description + '[');
             for(var j = 0; j < lib.versions.length; j++) {
                 if(j > 0 && j < lib.versions.length) {
-                    this.tty.write("{{=yellow}},{{=cyan}} ");
+                    System.Console.write(',');
                 }
                 var ver = lib.versions[j];
-                this.tty.write(ver.version);
+                System.Console.write(ver.version);
             }
-            this.tty.writeLine("{{=yellow}}]{{=reset}}");
+            System.Console.writeLine(']');
         };
         InstallCommand.prototype.match = function (key, name) {
             return name.toUpperCase() == key.toUpperCase();
@@ -602,9 +466,9 @@ var Command;
                 this.io.createDirectory(this.cfg.localPath);
             }
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.ts", content);
-            this.tty.writeLine("└── " + name + "@" + version + " instaled.");
+            System.Console.writeLine("└── " + name + "@" + version + " instaled.");
             this.io.createFile(this.cfg.localPath + "\\" + name + "-" + version + ".d.key", key);
-            this.tty.writeLine("     └── " + key + ".key");
+            System.Console.writeLine("     └── " + key + ".key");
         };
         InstallCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
@@ -629,7 +493,7 @@ var Command;
                 return;
             }
             if(targetLib == null) {
-                this.tty.warn("Lib not found.");
+                System.Console.writeLine("Lib not found.");
             } else {
                 var version = targetLib.versions[0];
                 this._request.getUrl(version.url, function (body) {
@@ -646,12 +510,12 @@ var Command;
         InstallCommand.prototype.exec = function (args) {
             var _this = this;
             this.dataSource.all(function (libs) {
-                _this.tty.writeLine("");
+                System.Console.writeLine("");
                 var targetLib = _this.find(args[3], libs);
                 if(targetLib) {
                     _this.install(targetLib, targetLib.versions[0].version, libs);
                 } else {
-                    _this.tty.warn("Lib not found.");
+                    System.Console.writeLine("Lib not found.");
                 }
             });
         };
@@ -664,16 +528,15 @@ var Command;
 })(Command || (Command = {}));
 
 var CommandLineProcessor = (function () {
-    function CommandLineProcessor(tty, dataSource, io, cfg) {
-        this.tty = tty;
+    function CommandLineProcessor(dataSource, io, cfg) {
         this.dataSource = dataSource;
         this.io = io;
         this.cfg = cfg;
         this.commands = [];
         this.commands.push(new Command.HelpCommand());
-        this.commands.push(new Command.AllCommand(this.tty, this.dataSource));
-        this.commands.push(new Command.SearchCommand(this.tty, this.dataSource));
-        this.commands.push(new Command.InstallCommand(this.tty, this.dataSource, this.io, this.cfg));
+        this.commands.push(new Command.AllCommand(this.dataSource));
+        this.commands.push(new Command.SearchCommand(this.dataSource));
+        this.commands.push(new Command.InstallCommand(this.dataSource, this.io, this.cfg));
     }
     CommandLineProcessor.prototype.printUsage = function () {
         System.Console.out.autoFlush = false;
@@ -728,44 +591,22 @@ var DataSource;
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
 
-var Util;
-(function (Util) {
-    var Trace = (function () {
-        function Trace() { }
-        Trace.debug = false;
-        Trace.tty = null;
-        Trace.log = function log(msg) {
-            if(this.debug) {
-                if(this.tty != null) {
-                    this.tty.writeLine("{{=yellow}}TRACE{{=reset}}: " + msg);
-                }
-            }
-        }
-        return Trace;
-    })();
-    Util.Trace = Trace;    
-})(Util || (Util = {}));
-
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
         System.Console.initialize();
     };
     Main.prototype.run = function (args) {
-        Util.Trace.debug = false;
-        var tty = new TTY();
-        Util.Trace.tty = tty;
         try  {
-            System.Web.WebRequest.instance().init(tty);
             var cfg = new Config();
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
             cfg.localPath = "./d.ts";
             var ds = DataSource.DataSourceFactory.factory(cfg);
-            var cp = new CommandLineProcessor(tty, ds, new IO(), cfg);
+            var cp = new CommandLineProcessor(ds, new IO(), cfg);
             cp.execute(args);
         } catch (e) {
-            tty.error(e.message);
+            System.Console.writeLine(e.message);
         }
     };
     return Main;
