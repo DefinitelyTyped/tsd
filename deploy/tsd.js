@@ -998,8 +998,8 @@ var Main = (function () {
     Main.prototype.run = function (args) {
         try  {
             var cfg = new Config();
-            cfg.repositoryType = RepositoryTypeEnum.FileSystem;
-            cfg.uri = "C:\\Users\\dgomes\\Documents\\GitHub\\tsd\\deploy\\repository.json";
+            cfg.repositoryType = RepositoryTypeEnum.Web;
+            cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
             cfg.localPath = "d.ts";
             var ds = DataSource.DataSourceFactory.factory(cfg);
             var cp = new CommandLineProcessor(ds, cfg);

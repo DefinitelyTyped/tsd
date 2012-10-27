@@ -22,11 +22,11 @@ class Main {
         try { 
             var cfg = new Config();
 
-            //cfg.repositoryType = RepositoryTypeEnum.Web;
-            //cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
+            cfg.repositoryType = RepositoryTypeEnum.Web;
+            cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
 
-            cfg.repositoryType = RepositoryTypeEnum.FileSystem;
-            cfg.uri = "C:\\Users\\dgomes\\Documents\\GitHub\\tsd\\deploy\\repository.json";
+            //cfg.repositoryType = RepositoryTypeEnum.FileSystem;
+            //cfg.uri = "C:\\Users\\dgomes\\Documents\\GitHub\\tsd\\deploy\\repository.json";
 
             cfg.localPath = "d.ts";
 
