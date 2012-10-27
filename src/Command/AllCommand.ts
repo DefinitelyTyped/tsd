@@ -15,7 +15,7 @@ module Command {
         }
 
         private print(lib: DataSource.Lib) {
-            System.Console.write(' ' + lib.name + '[');
+            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
 
             for (var j = 0; j < lib.versions.length; j++) {
                 if (j > 0 && j < lib.versions.length) {

@@ -371,13 +371,13 @@ var NodeJs;
             this._request = require('request');
         }
         WebRequest.prototype.getUrl = function (url, callback) {
-            System.Console.writeLine("tsd http GET " + url);
+            System.Console.writeLine("tsd \033[32mhttp \033[35mGET\033[0m " + url);
             this._request(url, function (error, response, body) {
-                System.Console.writeLine("tsd http " + response.statusCode + " " + url);
+                System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
                 if(!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    System.Console.writeLine("tsd ERR! " + response.statusCode + " " + error);
+                    System.Console.writeLine("tsd \033[31ERR!\033[0m " + response.statusCode + " " + error);
                 }
             });
         };
@@ -556,7 +556,7 @@ var Command;
             return args[2] == this.shortcut;
         };
         AllCommand.prototype.print = function (lib) {
-            System.Console.write(' ' + lib.name + '[');
+            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
             for(var j = 0; j < lib.versions.length; j++) {
                 if(j > 0 && j < lib.versions.length) {
                     System.Console.write(',');
@@ -596,7 +596,7 @@ var Command;
             return args[2] == this.shortcut;
         };
         SearchCommand.prototype.print = function (lib) {
-            System.Console.write(" " + lib.name + " [");
+            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
             for(var j = 0; j < lib.versions.length; j++) {
                 if(j > 0 && j < lib.versions.length) {
                     System.Console.write(", ");
