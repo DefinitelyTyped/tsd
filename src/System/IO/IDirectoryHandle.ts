@@ -3,5 +3,6 @@ module System.IO {
         directoryExists(path: string): bool;
         createDirectory(path: string): void;
         dirName(path: string): string;
+        getAllFiles(path, spec?, options?): string[];
     }
 }

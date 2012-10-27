@@ -18,5 +18,27 @@ module NodeJs {
         public dirName(path: string): string { 
             return this._path.dirname(path);
         }
+
+        public getAllFiles(path, spec?, options?): string[] { 
+            options = options || <{ recursive?: bool; }>{};
+
+            var filesInFolder = (folder: string): string[] => {
+                var paths = [];
+
+                var files = this._fs.readdirSync(folder);
+                for (var i = 0; i < files.length; i++) {
+                    var stat = this._fs.statSync(folder + "\\" + files[i]);
+                    if (options.recursive && stat.isDirectory()) {
+                        paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                    } else if (stat.isFile() && (!spec || files[i].match(spec))) {
+                        paths.push(folder + "\\" + files[i]);
+                    }
+                }
+
+                return paths;
+            }
+
+            return filesInFolder(path);
+        }
     }
 }

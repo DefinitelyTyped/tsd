@@ -669,6 +669,27 @@ var NodeJs;
         DirectoryHandle.prototype.dirName = function (path) {
             return this._path.dirname(path);
         };
+        DirectoryHandle.prototype.getAllFiles = function (path, spec, options) {
+            var _this = this;
+            options = options || {
+            };
+            var filesInFolder = function (folder) {
+                var paths = [];
+                var files = _this._fs.readdirSync(folder);
+                for(var i = 0; i < files.length; i++) {
+                    var stat = _this._fs.statSync(folder + "\\" + files[i]);
+                    if(options.recursive && stat.isDirectory()) {
+                        paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                    } else {
+                        if(stat.isFile() && (!spec || files[i].match(spec))) {
+                            paths.push(folder + "\\" + files[i]);
+                        }
+                    }
+                }
+                return paths;
+            };
+            return filesInFolder(path);
+        };
         return DirectoryHandle;
     })();
     NodeJs.DirectoryHandle = DirectoryHandle;    
@@ -676,6 +697,7 @@ var NodeJs;
 
 var Wsh;
 (function (Wsh) {
+    
     var DirectoryHandle = (function () {
         function DirectoryHandle() {
             this._fso = new ActiveXObject("Scripting.FileSystemObject");
@@ -690,6 +712,30 @@ var Wsh;
         };
         DirectoryHandle.prototype.dirName = function (path) {
             return this._fso.GetParentFolderName(path);
+        };
+        DirectoryHandle.prototype.getAllFiles = function (path, spec, options) {
+            options = options || {
+            };
+            function filesInFolder(folder, root) {
+                var paths = [];
+                var fc;
+                if(options.recursive) {
+                    fc = new Enumerator(folder.subfolders);
+                    for(; !fc.atEnd(); fc.moveNext()) {
+                        paths = paths.concat(filesInFolder(fc.item(), root + "\\" + fc.item().Name));
+                    }
+                }
+                fc = new Enumerator(folder.files);
+                for(; !fc.atEnd(); fc.moveNext()) {
+                    if(!spec || fc.item().Name.match(spec)) {
+                        paths.push(root + "\\" + fc.item().Name);
+                    }
+                }
+                return paths;
+            }
+            var folder = this._fso.GetFolder(path);
+            var paths = [];
+            return filesInFolder(folder, path);
         };
         return DirectoryHandle;
     })();
@@ -822,6 +868,60 @@ var Command;
     Command.InstallCommand = InstallCommand;    
 })(Command || (Command = {}));
 
+var Command;
+(function (Command) {
+    var Lib = (function () {
+        function Lib() { }
+        return Lib;
+    })();    
+    var UpdateCommand = (function () {
+        function UpdateCommand(dataSource, cfg) {
+            this.dataSource = dataSource;
+            this.cfg = cfg;
+            this.shortcut = "update";
+            this.usage = "Checks if any definition file needs to be updated";
+        }
+        UpdateCommand.prototype.accept = function (args) {
+            return args[2] == this.shortcut;
+        };
+        UpdateCommand.prototype.exec = function (args) {
+            var _this = this;
+            this.dataSource.all(function (libs) {
+                var libList = [];
+                var files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.localPath);
+                for(var i = 0; i < files.length; i++) {
+                    var file = files[i].substr(_this.cfg.localPath.length + 1);
+                    if(file.substr(file.length - 5) == 'd.key') {
+                        var name = file.substr(0, file.lastIndexOf('-'));
+                        var version = file.substr(name.length + 1, file.length - name.length - 7);
+                        var key = System.IO.FileManager.handle.readFile(files[i]);
+                        var flg = false;
+                        for(var j = 0; j < libs.length; j++) {
+                            var lib = libs[j];
+                            if(name == lib.name) {
+                                if(version == lib.versions[0].version) {
+                                    if(key != lib.versions[0].key) {
+                                        System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + (System.Environment.isNode() ? '\033[33m' : '') + 'A new version is available!' + (System.Environment.isNode() ? '\033[0m' : ''));
+                                        flg = true;
+                                    }
+                                }
+                            }
+                        }
+                        if(!flg) {
+                            System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Lib is out of date.');
+                        }
+                    }
+                }
+            });
+        };
+        UpdateCommand.prototype.toString = function () {
+            return this.shortcut + "    " + this.usage;
+        };
+        return UpdateCommand;
+    })();
+    Command.UpdateCommand = UpdateCommand;    
+})(Command || (Command = {}));
+
 var CommandLineProcessor = (function () {
     function CommandLineProcessor(dataSource, cfg) {
         this.dataSource = dataSource;
@@ -831,6 +931,7 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.AllCommand(this.dataSource));
         this.commands.push(new Command.SearchCommand(this.dataSource));
         this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
+        this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
     }
     CommandLineProcessor.prototype.printUsage = function () {
         System.Console.out.autoFlush = false;
