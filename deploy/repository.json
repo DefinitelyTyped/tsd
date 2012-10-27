@@ -1,305 +1,39 @@
 [
-	{
-		"name": "backbone",
-		"description": "Javascript MV* framework",
-		"versions": [ {
-				"key": "37387AAB-922D-460C-82C8-C00DB2920791",
-				"dependencies": [],
-				"version": "0.9",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/backbone-0.9.d.ts"
-			}
-		]
-	}, {
-		"name": "Bootstrap",
-		"description": "Twitter Bootstrap javascript code.",
-		"versions": [ {
-				"key": "D02BBE29-B1F2-4E9A-AD69-B1BF3D9BFDDD",
-				"dependencies": [],
-				"version": "2.1",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/bootstrap-2.1.d.ts"
-			}
-		]
-	}, {
-		"name": "express",
-		"description": "Node.js web application framework",
-		"versions": [ {
-				"key": "BCC7E8CB-2FE1-404D-82DB-687A0B592169",
-				"dependencies": [],
-				"version": "2.0",
-				"author": "TypeScript samples",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/express-2.d.ts"
-			}
-		]
-	}, {
-		"name": "fancybox",
-		"description": "FancyBox is a tool for displaying images, html content and multi-media",
-		"versions": [ {
-				"key": "EDE384C1-57A8-4F1C-A8A8-A3BAC91C2EAF",
-				"dependencies": [],
-				"version": "2.1",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/fancybox-2.1.d.ts"
-			}
-		]
-	}, {
-		"name": "history",
-		"description": "Gracefully supports the HTML5 History/State APIs",
-		"versions": [ {
-				"key": "4EFBB523-7D05-440E-ACB1-3E3191A5E466",
-				"dependencies": [],
-				"version": "1.7",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/history-1.7.d.ts"
-			}
-		]
-	}, {
-		"name": "humane",
-		"description": "A simple, modern, framework-independent, well-tested, unobtrusive, notification system.",
-		"versions": [ {
-				"key": "84602CB7-E9F4-40AD-BB48-B17B2A819402",
-				"dependencies": [],
-				"version": "3.0",
-				"author": "John Vrbanac",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/humane-3.0.d.ts"
-			}
-		]
-	}, {
-		"name": "impress",
-		"description": "A presentation framework based on the power of CSS3.",
-		"versions": [ {
-				"key": "2B8E0B68-91AE-4BB4-8999-D8B7D0778A83",
-				"dependencies": [],
-				"version": "0.5",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/impress-0.5.d.ts"
-			}
-		]
-	}, {
-		"name": "jasmine",
-		"description": "A behavior-driven development framework.",
-		"versions": [ {
-				"key": "C86218A4-95A3-498D-8232-41270FBCC0CD",
-				"dependencies": [],
-				"version": "1.2",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jasmine-1.2.d.ts"
-			}
-		]
-	}, {
-		"name": "globalize",
-		"description": "New age globalization and localization.",
-		"versions": [ {
-				"key": "6CDD21FE-F783-46B4-AE55-80C93FF87D5C",
-				"dependencies": [],
-				"version": "0.1",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/globalize.d.ts"
-			}
-		]
-	}, {
-		"name": "jquery",
-		"description": "JavaScript library to handle HTML elements.",
-		"versions": [ {
-				"key": "6536E49D-F9FC-4211-B8ED-4EBCC8464887",
-				"dependencies": [],
-				"version": "1.8",
-				"author": "TypeScript samples",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jquery-1.8.d.ts"
-			}
-		]
-	}, {
-		"name": "jqueryui",
-		"description": "Set of javascript interface components.",
-		"versions": [ {
-				"key": "F0F1AE9E-08B8-4E0E-92D5-93060CEFAAC4",
-				"dependencies": [],
-				"version": "1.9",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jqueryui-1.9.d.ts"
-			}
-		]
-	}, {
-		"name": "knockout",
-		"description": "Dynamic JavaScript UIs by applying the Model-View-View Model (MVVM).",
-		"versions": [ {
-				"key": "70EE2286-BD27-4DFE-AFD0-2798AAA74A3B",
-				"dependencies": [],
-				"version": "2.1",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/knockout-2.1.d.ts"
-			}
-		]
-	}, {
-		"name": "modernizr",
-		"description": "A JavaScript library that detects HTML5 and CSS3 feature.",
-		"versions": [ {
-				"key": "D3D17555-E9EF-468E-B605-A4577B502D75",
-				"dependencies": [],
-				"version": "2.6",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/modernizr-2.6.d.ts"
-			}
-		]
-	}, {
-		"name": "moment",
-		"description": "Parse, validate, manipulate, and display dates in javascript.",
-		"versions": [ {
-				"key": "AD60F318-9860-4ADD-B7B8-729B4CB71458",
-				"dependencies": [],
-				"version": "1.67",
-				"author": "Michael Lakerveld",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/moment-1.7.d.ts"
-			}
-		]
-	}, {
-		"name": "mustache",
-		"description": "Minimal templating in JavaScript.",
-		"versions": [ {
-				"key": "96C40747-B6A3-46F3-9B13-691D61A3DD08",
-				"dependencies": [],
-				"version": "0.7",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/mustache-0.7.d.ts"
-			}
-		]
-	}, {
-		"name": "node",
-		"description": "JavaScript runtime for build applications.",
-		"versions": [ {
-				"key": "F6711A17-81AF-4E9C-A82D-855DDB1E7F3A",
-				"dependencies": [],
-				"version": "0.8",
-				"author": "TypeScript samples",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/node-0.8.d.ts"
-			}
-		]
-	}, {
-		"name": "qunit",
-		"description": "JavaScript runtime for build applications.",
-		"versions": [ {
-				"key": "BD09CCAE-87F7-49FF-9CFE-5FB9F95369AB",
-				"dependencies": [],
-				"version": "1.10",
-				"author": "Diullei Gomes",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/qunit-1.10.d.ts"
-			}
-		]
-	}, {
-		"name": "raphael",
-		"description": "A small JavaScript library that should simplify your work with vector graphics on the web.",
-		"versions": [ {
-				"key": "E6A34E99-68E8-42F8-9479-ABA9C575319C",
-				"dependencies": [],
-				"version": "2.1",
-				"author": "CheCoxshall",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/raphael-2.1.d.ts"
-			}
-		]
-	}, {
-		"name": "spin",
-		"description": "A spinning activity indicator.",
-		"versions": [ {
-				"key": "3844D795-5DAC-4AE2-9B3D-37DD342E2409",
-				"dependencies": [],
-				"version": "1.2",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/spin-1.2.d.ts"
-			}
-		]
-	}, {
-		"name": "underscore",
-		"description": "Utility-belt library for JavaScript.",
-		"versions": [ {
-				"key": "87874D1C-602E-496B-AEFE-0D6659813FFC",
-				"dependencies": [],
-				"version": "1.4",
-				"author": "Boris Yankov",
-				"url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/underscore-1.4.d.ts"
-			}
-		]
-	}, {
-		"name": "async",
-		"description": "Async utilities for node and the browser",
-		"versions": [ {
-				"key": "97298BA7-59AE-40ED-A937-748685DD294E",
-				"dependencies": [],
-				"version": "0.1.22",
-				"author": "Carlos Ballesteros Velasco",
-				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/async.d.ts"
-			}
-		]
-	}, {
-		"name": "colors",
-		"description": "Get colors in your node.js console like what",
-		"versions": [ {
-				"key": "5FCAB0EB-0E61-42FF-8DCD-4C3521E48383",
-				"dependencies": [],
-				"version": "0.6",
-				"author": "Carlos Ballesteros Velasco",
-				"url": "https://github.com/soywiz/typescript-node-definitions/raw/master/colors.d.ts"
-			}
-		]
-	}, {
-		"name": "angular",
-		"description": "Google - Angular.Js",
-		"versions": [ {
-				"key": "D9089893-23AE-4182-BCBF-3DEEA8900FC1",
-				"dependencies": [
-					{ "name": "angular-ng", "version": "1.0.2" },
-					{ "name": "angular-ng-http", "version": "1.0.2" },
-					{ "name": "angular-ngResource", "version": "1.0.2" }
-				],
-				"version": "1.0.2",
-				"author": "Nodir Turakulov",
-				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.d.ts"
-			}
-		]
-	}, {
-		"name": "angular-ng",
-		"description": "Google - Angular.Js",
-		"versions": [ {
-				"key": "0646B271-1CF1-4803-9B8B-E0E0518B54F0",
-				"dependencies": [
-					{ "name": "angular", "version": "1.0.2" },
-					{ "name": "angular-ng-http", "version": "1.0.2" },
-					{ "name": "angular-ngResource", "version": "1.0.2" }
-				],
-				"version": "1.0.2",
-				"author": "Nodir Turakulov",
-				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ng.d.ts"
-			}
-		]
-	}, {
-		"name": "angular-ng-http",
-		"description": "Google - Angular.Js",
-		"versions": [ {
-				"key": "0ECCA6AA-B3BA-45E8-AFAB-743F5092F8D1",
-				"dependencies": [
-					{ "name": "angular", "version": "1.0.2" },
-					{ "name": "angular-ng", "version": "1.0.2" },
-					{ "name": "angular-ngResource", "version": "1.0.2" }
-				],
-				"version": "1.0.2",
-				"author": "Nodir Turakulov",
-				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ng.http.d.ts"
-			}
-		]
-	}, {
-		"name": "angular-ngResource",
-		"description": "Google - Angular.Js",
-		"versions": [ {
-				"key": "CBD9AAC5-AC89-490D-87E4-6F0C5F81E604",
-				"dependencies": [
-					{ "name": "angular", "version": "1.0.2" },
-					{ "name": "angular-ng", "version": "1.0.2" },
-					{ "name": "angular-ng-http", "version": "1.0.2" }
-				],
-				"version": "1.0.2",
-				"author": "Nodir Turakulov",
-				"url": "https://github.com/nodirt/AngularTS/raw/master/angular.ngResource.d.ts"
-			}
-		]
-	}
+	{ "name": "backbone", "description": "Javascript MV* framework", "versions": [ { "key": "37387AAB-922D-460C-82C8-C00DB2920791", "dependencies": [], "version": "0.9", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/backbone-0.9.d.ts"}]},
+	{ "name": "Bootstrap", "description": "Twitter Bootstrap javascript code.", "versions": [ { "key": "D02BBE29-B1F2-4E9A-AD69-B1BF3D9BFDDD", "dependencies": [], "version": "2.1", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/bootstrap-2.1.d.ts"}]},
+	{ "name": "express", "description": "Node.js web application framework", "versions": [ { "key": "9167385F-C4E4-4634-AF92-0FC7795C3393", "dependencies": [], "version": "3.0", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/express-3.0.d.ts"}]},
+	{ "name": "fancybox", "description": "FancyBox is a tool for displaying images, html content and multi-media", "versions": [ { "key": "EDE384C1-57A8-4F1C-A8A8-A3BAC91C2EAF", "dependencies": [], "version": "2.1", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/fancybox-2.1.d.ts"}]},
+	{ "name": "history", "description": "Gracefully supports the HTML5 History/State APIs", "versions": [ { "key": "4EFBB523-7D05-440E-ACB1-3E3191A5E466", "dependencies": [], "version": "1.7", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/history-1.7.d.ts"}]},
+	{ "name": "humane", "description": "A simple, modern, framework-independent, well-tested, unobtrusive, notification system.", "versions": [ { "key": "84602CB7-E9F4-40AD-BB48-B17B2A819402", "dependencies": [], "version": "3.0", "author": "John Vrbanac", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/humane-3.0.d.ts"}]},
+	{ "name": "impress", "description": "A presentation framework based on the power of CSS3.", "versions": [ { "key": "2B8E0B68-91AE-4BB4-8999-D8B7D0778A83", "dependencies": [], "version": "0.5", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/impress-0.5.d.ts"}]},
+	{ "name": "jasmine", "description": "A behavior-driven development framework.", "versions": [ { "key": "C86218A4-95A3-498D-8232-41270FBCC0CD", "dependencies": [], "version": "1.2", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jasmine-1.2.d.ts"}]},
+	{ "name": "globalize", "description": "New age globalization and localization.", "versions": [ { "key": "6CDD21FE-F783-46B4-AE55-80C93FF87D5C", "dependencies": [], "version": "0.1", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/globalize.d.ts"}]},
+	{ "name": "jquery", "description": "JavaScript library to handle HTML elements.", "versions": [ { "key": "6536E49D-F9FC-4211-B8ED-4EBCC8464887", "dependencies": [], "version": "1.8", "author": "TypeScript samples", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jquery-1.8.d.ts"}]},
+	{ "name": "jqueryui", "description": "Set of javascript interface components.", "versions": [ { "key": "F0F1AE9E-08B8-4E0E-92D5-93060CEFAAC4", "dependencies": [], "version": "1.9", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jqueryui-1.9.d.ts"}]},
+	{ "name": "knockout", "description": "Dynamic JavaScript UIs by applying the Model-View-View Model (MVVM).", "versions": [ { "key": "B95B4583-6C6E-4C21-B8FC-DD3D5538596E", "dependencies": [], "version": "2.2", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/knockout-2.2.d.ts"}]},
+	{ "name": "modernizr", "description": "A JavaScript library that detects HTML5 and CSS3 feature.", "versions": [ { "key": "D3D17555-E9EF-468E-B605-A4577B502D75", "dependencies": [], "version": "2.6", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/modernizr-2.6.d.ts"}]},
+	{ "name": "moment", "description": "Parse, validate, manipulate, and display dates in javascript.", "versions": [ { "key": "F0FBEE19-CED3-47F1-BD5C-0F726C37E8B3", "dependencies": [], "version": "1.7", "author": "Michael Lakerveld", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/moment-1.7.d.ts"}]},
+	{ "name": "mustache", "description": "Minimal templating in JavaScript.", "versions": [ { "key": "96C40747-B6A3-46F3-9B13-691D61A3DD08", "dependencies": [], "version": "0.7", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/mustache-0.7.d.ts"}]},
+	{ "name": "node", "description": "JavaScript runtime for build applications.", "versions": [ { "key": "F6711A17-81AF-4E9C-A82D-855DDB1E7F3A", "dependencies": [], "version": "0.8", "author": "TypeScript samples", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/node-0.8.d.ts"}]},
+	{ "name": "qunit", "description": "JavaScript runtime for build applications.", "versions": [ { "key": "BD09CCAE-87F7-49FF-9CFE-5FB9F95369AB", "dependencies": [], "version": "1.10", "author": "Diullei Gomes", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/qunit-1.10.d.ts"}]},
+	{ "name": "raphael", "description": "A small JavaScript library that should simplify your work with vector graphics on the web.", "versions": [ { "key": "E6A34E99-68E8-42F8-9479-ABA9C575319C", "dependencies": [], "version": "2.1", "author": "CheCoxshall", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/raphael-2.1.d.ts"}]},
+	{ "name": "spin", "description": "A spinning activity indicator.", "versions": [ { "key": "3844D795-5DAC-4AE2-9B3D-37DD342E2409", "dependencies": [], "version": "1.2", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/spin-1.2.d.ts"}]},
+	{ "name": "underscore", "description": "Utility-belt library for JavaScript.", "versions": [ { "key": "61302984-20B9-412B-9FB3-FDFC7554E144", "dependencies": [], "version": "1.4.1", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/underscore-1.4.d.ts"}]},
+	{ "name": "async", "description": "Async utilities for node and the browser", "versions": [ { "key": "F4FE4BBE-6C28-4BC0-9F0E-9DFE51F9DAE9", "dependencies": [], "version": "0.2", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/async-0.1.d.ts"}]},
+	{ "name": "colors", "description": "Get colors in your node.js console like what", "versions": [ { "key": "5FCAB0EB-0E61-42FF-8DCD-4C3521E48383", "dependencies": [], "version": "0.6", "author": "Carlos Ballesteros Velasco", "url": "https://github.com/soywiz/typescript-node-definitions/raw/master/colors.d.ts"}]},
+	{ "name": "angular", "description": "Google - Angular.Js", "versions": [ { "key": "50B0446D-C849-40C4-968C-73FF356C4ADC", "dependencies": [], "version": "1.0.2", "author": "Diego Vilar", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/angular-1.0.2.d.ts"}]},
+	{ "name": "angular-cookies", "description": "Google - Angular.Js", "versions": [ { "key": "3B3D645C-33FC-4504-A83E-D0F6BFCD60C3", "dependencies": [], "version": "1.0.2", "author": "Diego Vilar", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/angular-cookies-1.0.2.d.ts"}]},
+	{ "name": "angular-mocks", "description": "Google - Angular.Js", "versions": [ { "key": "3E235107-A6E0-47AB-AED8-D1F01CBAA8DB", "dependencies": [], "version": "1.0.2", "author": "Diego Vilar", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/angular-mocks-1.0.2.d.ts"}]},
+	{ "name": "angular-resource", "description": "Google - Angular.Js", "versions": [ { "key": "2BE43001-1FBE-48BF-A971-54F51158FBE0", "dependencies": [], "version": "1.0.2", "author": "Diego Vilar", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/angular-resource-1.0.2.d.ts"}]},
+	{ "name": "angular-sanitize", "description": "Google - Angular.Js", "versions": [ { "key": "0F021186-7D07-4AC0-A4B1-2E4B248D3AA3", "dependencies": [], "version": "1.0.2", "author": "Diego Vilar", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/angular-sanitize-1.0.2.d.ts"}]},
+	{ "name": "codemirror", "description": "In-browser code editing", "versions": [ { "key": "4EF706B3-CADB-4F59-9238-15760D3A999E", "dependencies": [], "version": "3.0", "author": "François de Campredon", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/codemirror-3.0.d.ts"}]},
+	{ "name": "ember", "description": "A Framework for creating ambitious web application.", "versions": [ { "key": "BADFDF09-0F77-4B90-B1D8-A1BA0E2A6BFD", "dependencies": [], "version": "1.0", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/ember-1.0.d.ts"}]},
+	{ "name": "google.maps", "description": "Google Maps API", "versions": [ { "key": "2AE44DF7-BEE5-4354-B68E-62A6067694FD", "dependencies": [], "version": "3.0", "author": "Esben Nepper", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/google.maps.d.ts"}]},
+	{ "name": "handlebars", "description": "Handlebars provides the power necessary to let you build semantic templates effectively with no frustration.", "versions": [ { "key": "BE9045CC-7333-471D-A441-2817D7410F06", "dependencies": [], "version": "1.0", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/handlebars-1.0.d.ts"}]},
+	{ "name": " jquery.dynatree", "description": "", "versions": [ { "key": "8CA66E9A-F574-40F3-9DDF-44A20F570831", "dependencies": [], "version": "1.2", "author": "François de Campredon", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jquery.dynatree-1.2.d.ts"}]},
+	{ "name": "jquerymobile", "description": "Touch-Optimized Web Framework for Smartphones & Tablets", "versions": [ { "key": "D7E641C0-8E41-428E-AFF1-8D7993E054A1", "dependencies": [], "version": "1.2", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/jquerymobile-1.2.d.ts"}]},
+	{ "name": " knockoutmapping", "description": "Object mapping plugin for KnockoutJS", "versions": [ { "key": "31341C16-2D30-4B8E-87E2-4522F0B868BF", "dependencies": [], "version": "2.0", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/knockoutmapping-2.0.d.ts"}]},
+	{ "name": "node_redis", "description": "Redis client for node", "versions": [ { "key": "DA143CF3-8AFE-4DF9-B98E-85951A3A7B9C", "dependencies": [], "version": "0.8", "author": "Boris Yankov", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/node_redis-0.8.d.ts"}]},
+	{ "name": "raphael", "description": "Raphael is a small JavaScript library that should simplify your work with vector graphics on the web.", "versions": [ { "key": "C2FEC7EF-EFD9-44F7-AD81-97D1A1D65F62", "dependencies": [], "version": "2.1", "author": "CheCoxshall", "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Definitions/raphael-2.1.d.ts"}]},
+	{ "name": "linqjs", "description": "LINQ for JavaScript", "versions": [ { "key": "40BBB477-93E2-45CB-8FA5-47BD3BCCF167", "dependencies": [], "version": "2.2.0.2", "author": "MarcinNajder", "url": "https://github.com/marcinnajder/TypeScript-declaration-files/raw/master/linq.d.ts"}]}
 ]
