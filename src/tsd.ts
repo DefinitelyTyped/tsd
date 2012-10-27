@@ -1,7 +1,7 @@
 ///<reference path='d.ts/node-0.8.d.ts'/>
 ///<reference path='System/Console.ts'/>
 ///<reference path='System/IO/FileManager.ts'/>
-///<reference path='System/Web/WebRequest.ts'/>
+///<reference path='System/Web/WebHandler.ts'/>
 
 ///<reference path='CommandLineProcessor.ts'/>
 ///<reference path='Config.ts'/>
@@ -13,6 +13,8 @@ class Main {
     public init() { 
         System.Console.initialize();
         System.IO.FileManager.initialize();
+        System.IO.DirectoryManager.initialize();
+        System.Web.WebHandler.initialize();
     }
 
     public run(args: Array) { 
@@ -26,10 +28,10 @@ class Main {
             //cfg.repositoryType = RepositoryTypeEnum.FileSystem;
             //cfg.uri = "repository.json";
 
-            cfg.localPath = "./d.ts";
+            cfg.localPath = "d.ts";
 
             var ds = DataSource.DataSourceFactory.factory(cfg);
-            var cp = new CommandLineProcessor(ds, new IO(), cfg);
+            var cp = new CommandLineProcessor(ds, cfg);
             cp.execute(args);
         } catch(e){
             System.Console.writeLine(e.message);
@@ -41,14 +43,14 @@ var main = new Main();
 main.init();
 
 var arguments: Array;
+
 if (System.Environment.isNode()) {
     arguments = Array.prototype.slice.call(process.argv);
 } if (System.Environment.isWsh()) {
-    var args = [];
+    var args = [null, null];
     for (var i = 0; i < WScript.Arguments.length; i++) {
-        args[i] = WScript.Arguments.Item(i);
+        args[2 + i] = WScript.Arguments.Item(i);
     }
-
     arguments = <Array><any>args;
 }
 

@@ -1,7 +1,7 @@
 ﻿///<reference path='ICommand.ts'/>
-///<reference path='../IIO.ts'/>
 ///<reference path='../System/Web/WebRequest.ts'/>
-///<reference path='../../System/IO/FileManager.ts'/>
+///<reference path='../System/IO/FileManager.ts'/>
+///<reference path='../System/IO/DirectoryManager.ts'/>
 
 module Command {
 
@@ -10,10 +10,9 @@ module Command {
         public usage: string = "Intall file definition";
         private _args: Array;
         private _cache: string[] = [];
-        private _request: System.Web.WebRequest = System.Web.WebRequest.instance();
         private _index: number = 0;
 
-        constructor (public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config) { }
+        constructor (public dataSource: DataSource.IDataSource, public cfg: Config) { }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut;
@@ -41,11 +40,12 @@ module Command {
             var sw = System.IO.FileManager.handle.createFile(name);
             sw.write(content);
             sw.flush();
+            sw.close();
         }
 
         private save(name: string, version: string, key: string, content: string): void { 
-            if (!this.io.directoryExists(this.cfg.localPath)) {
-                this.io.createDirectory(this.cfg.localPath);
+            if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath)) {
+                System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath);
             }
 
             var fileNameWithoutExtension = this.cfg.localPath + "\\" + name + "-" + version;
@@ -85,7 +85,7 @@ module Command {
             } else {
                 var version = targetLib.versions[0];
 
-                this._request.getUrl(version.url, (body) => {
+                System.Web.WebHandler.request.getUrl(version.url, (body) => {
                     this.save(targetLib.name, version.version, version.key, body);
                     this._cache.push(targetLib.name + '@' + version.version);
                     var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];

@@ -1,6 +1,4 @@
 ///<reference path='System/Console.js'/>
-
-///<reference path='IO.ts'/>
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\IDataSource.ts'/>
 ///<reference path='Command\ICommand.ts'/>
@@ -13,13 +11,13 @@ class CommandLineProcessor {
 
 	commands: Command.ICommand[];
 
-	constructor(public dataSource: DataSource.IDataSource, public io: IIO, public cfg: Config){
-		this.commands = [];
+	constructor(public dataSource: DataSource.IDataSource, public cfg: Config){
+ 		this.commands = [];
 		this.commands.push(new Command.HelpCommand());
         this.commands.push(new Command.AllCommand(this.dataSource));
         this.commands.push(new Command.SearchCommand(this.dataSource));
-        this.commands.push(new Command.InstallCommand(this.dataSource, this.io, this.cfg));
-	}
+        this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
+ 	}
 
 	public printUsage() {
 	    System.Console.out.autoFlush = false;

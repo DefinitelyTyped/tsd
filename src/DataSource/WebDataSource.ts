@@ -1,4 +1,5 @@
 ///<reference path='IDataSource.ts'/>
+///<reference path='../System/Web/WebHandler.ts'/>
 
 declare var require: any;
 
@@ -9,10 +10,12 @@ module DataSource {
         constructor (public repositoryUrl: string) { }
 
         public all(callback: (data: DataSource.Lib[]) => void ): void {
-            var request = System.Web.WebRequest.instance();
-
-            request.getUrl(this.repositoryUrl, (body) => {
-                callback(JSON.parse(body));
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, (body) => {
+                if (System.Environment.isWsh()) { 
+                    callback(eval("(function(){return " + body + ";})()"));
+                }
+                else
+                    callback(JSON.parse(body));
             });
         }
         public find(keys: string[]): Lib {

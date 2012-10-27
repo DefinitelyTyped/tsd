@@ -48,5 +48,9 @@ module System.IO {
         public dispose(): void { 
             throw new Error("Not Implemented Exception");
         }
+
+        public close(): void {
+            throw new Error("Not Implemented Exception");
+        }
     }
 }
