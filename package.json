@@ -1,7 +1,7 @@
 {
   "name": "tsd",
   "description": "The TypeScript definition package manager.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Diullei Gomes",
   "licenses": [ { "type": "MIT", "url": "https://raw.github.com/Diullei/tsd/master/LICENSE.txt" } ],
   "main": "deploy",
