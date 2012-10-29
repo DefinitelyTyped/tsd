@@ -7,7 +7,7 @@
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\DataSourceFactory.ts'/>
 
-var VERSION = "0.2.0";
+var VERSION = "0.2.1";
 
 class Main { 
     public init() { 
