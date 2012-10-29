@@ -986,7 +986,7 @@ var DataSource;
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
 
-var VERSION = "0.1.2";
+var VERSION = "0.2.0";
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
