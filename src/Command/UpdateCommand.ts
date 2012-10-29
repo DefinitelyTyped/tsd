@@ -55,7 +55,7 @@ module Command {
 						if (!flg) { 
 							System.Console.writeLine(
                                 ' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - '
-                                + 'Lib is out of date.');
+                                + 'Is the latest version.');
 						}
 					}
 				}

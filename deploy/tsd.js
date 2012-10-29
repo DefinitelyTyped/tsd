@@ -908,7 +908,7 @@ var Command;
                             }
                         }
                         if(!flg) {
-                            System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Lib is out of date.');
+                            System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Is the latest version.');
                         }
                     }
                 }
