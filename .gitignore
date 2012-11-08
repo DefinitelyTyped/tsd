@@ -15,7 +15,7 @@ Wsh/*/*.js
 Wsh/*/*/*.js
 Wsh/*/*/*/*.js
 Wsh/*/*/*/*/*.js
-tsd.csproj
+# tsd.csproj
 tsd.csproj.user
-tsd.sln
+# tsd.sln
 tsd.v11.suo

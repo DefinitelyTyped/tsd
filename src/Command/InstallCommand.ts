@@ -48,7 +48,7 @@ module Command {
                 System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath);
             }
 
-            var fileNameWithoutExtension = this.cfg.localPath + "\\" + name + "-" + version;
+            var fileNameWithoutExtension = this.cfg.localPath + "/" + name + "-" + version;
 
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " instaled.");

@@ -677,12 +677,12 @@ var NodeJs;
                 var paths = [];
                 var files = _this._fs.readdirSync(folder);
                 for(var i = 0; i < files.length; i++) {
-                    var stat = _this._fs.statSync(folder + "\\" + files[i]);
+                    var stat = _this._fs.statSync(folder + "/" + files[i]);
                     if(options.recursive && stat.isDirectory()) {
-                        paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                        paths = paths.concat(filesInFolder(folder + "/" + files[i]));
                     } else {
                         if(stat.isFile() && (!spec || files[i].match(spec))) {
-                            paths.push(folder + "\\" + files[i]);
+                            paths.push(folder + "/" + files[i]);
                         }
                     }
                 }
@@ -805,7 +805,7 @@ var Command;
             if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath)) {
                 System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath);
             }
-            var fileNameWithoutExtension = this.cfg.localPath + "\\" + name + "-" + version;
+            var fileNameWithoutExtension = this.cfg.localPath + "/" + name + "-" + version;
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " instaled.");
             this.saveFile(fileNameWithoutExtension + ".d.key", key);

@@ -29,6 +29,12 @@ To make a search for any file you must use ```search``` command.
 
 TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) project. You can view the repository references inside [repository.json](https://github.com/Diullei/tsd/blob/master/deploy/repository.json) file (I'm working to add some anothers). If you want to contribute please make a fork from tsd repo, change the repository.json and make a pull request.
 
+## Change log
+
+### v0.2.2 (2012-11-07)
+
+* Fix: now tsd works on linux/mac. Issue #1. Thanks to @seanhess
+
 ## License
 
 TSD is distributed under the MIT license. [See license file here](https://raw.github.com/Diullei/tsd/master/LICENSE.txt) or below:
