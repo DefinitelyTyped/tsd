@@ -7,7 +7,7 @@
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\DataSourceFactory.ts'/>
 
-var VERSION = "0.2.1";
+var VERSION = "0.2.3";
 
 class Main { 
     public init() { 
@@ -21,14 +21,15 @@ class Main {
 
         try { 
             var cfg = new Config();
-
+			cfg.load();
+			
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
 
             //cfg.repositoryType = RepositoryTypeEnum.FileSystem;
             //cfg.uri = "repository.json";
 
-            cfg.localPath = "d.ts";
+            //cfg.localPath = "d.ts";
 
             var ds = DataSource.DataSourceFactory.factory(cfg);
             var cp = new CommandLineProcessor(ds, cfg);

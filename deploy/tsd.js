@@ -451,7 +451,14 @@ var RepositoryTypeEnum;
 
 var Config = (function () {
     function Config() { }
-    Config.prototype.load = function (cfgFile) {
+    Config.prototype.load = function () {
+        try  {
+            var cfgStr = System.IO.FileManager.handle.readFile('tsd-config.json');
+            var cfg = JSON.parse(cfgStr);
+            this.localPath = cfg.localPath;
+        } catch (e) {
+            this.localPath = "d.ts";
+        }
     };
     return Config;
 })();
@@ -986,7 +993,7 @@ var DataSource;
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
 
-var VERSION = "0.2.1";
+var VERSION = "0.2.3";
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
@@ -998,9 +1005,9 @@ var Main = (function () {
     Main.prototype.run = function (args) {
         try  {
             var cfg = new Config();
+            cfg.load();
             cfg.repositoryType = RepositoryTypeEnum.Web;
             cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
-            cfg.localPath = "d.ts";
             var ds = DataSource.DataSourceFactory.factory(cfg);
             var cp = new CommandLineProcessor(ds, cfg);
             cp.execute(args);

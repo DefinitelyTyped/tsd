@@ -8,7 +8,13 @@ class Config {
 	public uri: string;
 	public localPath: string;
 
-	public load(cfgFile: string) {
-		//...
+	public load() {
+		try{
+			var cfgStr = System.IO.FileManager.handle.readFile('tsd-config.json');
+			var cfg = JSON.parse(cfgStr);
+			this.localPath = cfg.localPath;
+		}catch(e){
+			this.localPath = "d.ts";
+		}
 	}
 }
