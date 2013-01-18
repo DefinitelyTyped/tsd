@@ -1,5 +1,3 @@
-///<reference path='System/Console.js'/>
-///<reference path='Config.ts'/>
 ///<reference path='DataSource\IDataSource.ts'/>
 ///<reference path='Command\ICommand.ts'/>
 ///<reference path='Command\HelpCommand.ts'/>

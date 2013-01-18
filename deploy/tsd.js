@@ -1,4 +1,4 @@
-var System;
+﻿var System;
 (function (System) {
     var Environment = (function () {
         function Environment() { }
@@ -12,12 +12,9 @@ var System;
     })();
     System.Environment = Environment;    
 })(System || (System = {}));
-
 var System;
 (function (System) {
-    
-})(System || (System = {}));
-
+    })(System || (System = {}));
 var System;
 (function (System) {
     (function (IO) {
@@ -71,14 +68,12 @@ var System;
         IO.StreamWriter = StreamWriter;        
     })(System.IO || (System.IO = {}));
     var IO = System.IO;
-
 })(System || (System = {}));
-
 var __extends = this.__extends || function (d, b) {
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
-}
+};
 var NodeJs;
 (function (NodeJs) {
     var ConsoleWriter = (function (_super) {
@@ -101,7 +96,6 @@ var NodeJs;
     })(System.IO.StreamWriter);
     NodeJs.ConsoleWriter = ConsoleWriter;    
 })(NodeJs || (NodeJs = {}));
-
 var Wsh;
 (function (Wsh) {
     var ConsoleWriter = (function (_super) {
@@ -124,7 +118,6 @@ var Wsh;
     })(System.IO.StreamWriter);
     Wsh.ConsoleWriter = ConsoleWriter;    
 })(Wsh || (Wsh = {}));
-
 var System;
 (function (System) {
     var Console = (function () {
@@ -157,12 +150,9 @@ var System;
     })();
     System.Console = Console;    
 })(System || (System = {}));
-
 var System;
 (function (System) {
-    
-})(System || (System = {}));
-
+    })(System || (System = {}));
 var NodeJs;
 (function (NodeJs) {
     var FileStreamWriter = (function (_super) {
@@ -242,7 +232,6 @@ var NodeJs;
     })();
     NodeJs.FileHandle = FileHandle;    
 })(NodeJs || (NodeJs = {}));
-
 var Wsh;
 (function (Wsh) {
     var FileStreamWriter = (function (_super) {
@@ -333,7 +322,6 @@ var Wsh;
     })();
     Wsh.FileHandle = FileHandle;    
 })(Wsh || (Wsh = {}));
-
 var System;
 (function (System) {
     (function (IO) {
@@ -356,14 +344,10 @@ var System;
         IO.FileManager = FileManager;        
     })(System.IO || (System.IO = {}));
     var IO = System.IO;
-
 })(System || (System = {}));
-
 var System;
 (function (System) {
-    
-})(System || (System = {}));
-
+    })(System || (System = {}));
 var NodeJs;
 (function (NodeJs) {
     var WebRequest = (function () {
@@ -385,7 +369,6 @@ var NodeJs;
     })();
     NodeJs.WebRequest = WebRequest;    
 })(NodeJs || (NodeJs = {}));
-
 var Wsh;
 (function (Wsh) {
     var WebRequest = (function () {
@@ -414,7 +397,6 @@ var Wsh;
     })();
     Wsh.WebRequest = WebRequest;    
 })(Wsh || (Wsh = {}));
-
 var System;
 (function (System) {
     (function (Web) {
@@ -437,31 +419,7 @@ var System;
         Web.WebHandler = WebHandler;        
     })(System.Web || (System.Web = {}));
     var Web = System.Web;
-
 })(System || (System = {}));
-
-var RepositoryTypeEnum;
-(function (RepositoryTypeEnum) {
-    RepositoryTypeEnum._map = [];
-    RepositoryTypeEnum._map[0] = "FileSystem";
-    RepositoryTypeEnum.FileSystem = 0;
-    RepositoryTypeEnum._map[1] = "Web";
-    RepositoryTypeEnum.Web = 1;
-})(RepositoryTypeEnum || (RepositoryTypeEnum = {}));
-
-var Config = (function () {
-    function Config() { }
-    Config.prototype.load = function () {
-        try  {
-            var cfgStr = System.IO.FileManager.handle.readFile('tsd-config.json');
-            var cfg = JSON.parse(cfgStr);
-            this.localPath = cfg.localPath;
-        } catch (e) {
-            this.localPath = "d.ts";
-        }
-    };
-    return Config;
-})();
 var DataSource;
 (function (DataSource) {
     var WebDataSource = (function () {
@@ -484,7 +442,6 @@ var DataSource;
     })();
     DataSource.WebDataSource = WebDataSource;    
 })(DataSource || (DataSource = {}));
-
 var DataSource;
 (function (DataSource) {
     var FileSystemDataSource = (function () {
@@ -507,7 +464,6 @@ var DataSource;
     })();
     DataSource.FileSystemDataSource = FileSystemDataSource;    
 })(DataSource || (DataSource = {}));
-
 var DataSource;
 (function (DataSource) {
     var LibVersion = (function () {
@@ -530,7 +486,6 @@ var DataSource;
     })();
     DataSource.LibContent = LibContent;    
 })(DataSource || (DataSource = {}));
-
 var Command;
 (function (Command) {
     var HelpCommand = (function () {
@@ -550,7 +505,6 @@ var Command;
     })();
     Command.HelpCommand = HelpCommand;    
 })(Command || (Command = {}));
-
 var Command;
 (function (Command) {
     var AllCommand = (function () {
@@ -590,7 +544,6 @@ var Command;
     })();
     Command.AllCommand = AllCommand;    
 })(Command || (Command = {}));
-
 var Command;
 (function (Command) {
     var SearchCommand = (function () {
@@ -652,12 +605,9 @@ var Command;
     })();
     Command.SearchCommand = SearchCommand;    
 })(Command || (Command = {}));
-
 var System;
 (function (System) {
-    
-})(System || (System = {}));
-
+    })(System || (System = {}));
 var NodeJs;
 (function (NodeJs) {
     var DirectoryHandle = (function () {
@@ -670,7 +620,15 @@ var NodeJs;
         };
         DirectoryHandle.prototype.createDirectory = function (path) {
             if(!this.directoryExists(path)) {
-                this._fs.mkdirSync(path);
+                path = path.replace('\\', '/');
+                var parts = path.split('/');
+                var dpath = '';
+                for(var i = 0; i < parts.length; i++) {
+                    dpath += parts[i] + '/';
+                    if(!this.directoryExists(path)) {
+                        this._fs.mkdirSync(dpath);
+                    }
+                }
             }
         };
         DirectoryHandle.prototype.dirName = function (path) {
@@ -701,7 +659,6 @@ var NodeJs;
     })();
     NodeJs.DirectoryHandle = DirectoryHandle;    
 })(NodeJs || (NodeJs = {}));
-
 var Wsh;
 (function (Wsh) {
     
@@ -714,7 +671,15 @@ var Wsh;
         };
         DirectoryHandle.prototype.createDirectory = function (path) {
             if(!this.directoryExists(path)) {
-                this._fso.CreateFolder(path);
+                path = path.replace('\\', '/');
+                var parts = path.split('/');
+                var dpath = '';
+                for(var i = 0; i < parts.length; i++) {
+                    dpath += parts[i] + '/';
+                    if(!this.directoryExists(path)) {
+                        this._fso.CreateFolder(dpath);
+                    }
+                }
             }
         };
         DirectoryHandle.prototype.dirName = function (path) {
@@ -748,7 +713,6 @@ var Wsh;
     })();
     Wsh.DirectoryHandle = DirectoryHandle;    
 })(Wsh || (Wsh = {}));
-
 var System;
 (function (System) {
     (function (IO) {
@@ -771,9 +735,7 @@ var System;
         IO.DirectoryManager = DirectoryManager;        
     })(System.IO || (System.IO = {}));
     var IO = System.IO;
-
 })(System || (System = {}));
-
 var Command;
 (function (Command) {
     var InstallCommand = (function () {
@@ -874,7 +836,6 @@ var Command;
     })();
     Command.InstallCommand = InstallCommand;    
 })(Command || (Command = {}));
-
 var Command;
 (function (Command) {
     var Lib = (function () {
@@ -928,7 +889,6 @@ var Command;
     })();
     Command.UpdateCommand = UpdateCommand;    
 })(Command || (Command = {}));
-
 var CommandLineProcessor = (function () {
     function CommandLineProcessor(dataSource, cfg) {
         this.dataSource = dataSource;
@@ -973,6 +933,28 @@ var CommandLineProcessor = (function () {
     };
     return CommandLineProcessor;
 })();
+var RepositoryTypeEnum;
+(function (RepositoryTypeEnum) {
+    RepositoryTypeEnum._map = [];
+    RepositoryTypeEnum._map[0] = "FileSystem";
+    RepositoryTypeEnum.FileSystem = 0;
+    RepositoryTypeEnum._map[1] = "Web";
+    RepositoryTypeEnum.Web = 1;
+})(RepositoryTypeEnum || (RepositoryTypeEnum = {}));
+var Config = (function () {
+    function Config() { }
+    Config.prototype.load = function () {
+        try  {
+            var cfgStr = System.IO.FileManager.handle.readFile('tsd-config.json');
+            var cfg = JSON.parse(cfgStr);
+            this.localPath = cfg.localPath;
+        } catch (e) {
+            console.log(e);
+            this.localPath = "d.ts";
+        }
+    };
+    return Config;
+})();
 var DataSource;
 (function (DataSource) {
     var DataSourceFactory = (function () {
@@ -992,7 +974,6 @@ var DataSource;
     })();
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
-
 var VERSION = "0.2.3";
 var Main = (function () {
     function Main() { }

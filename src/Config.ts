@@ -1,3 +1,5 @@
+///<reference path='System/IO/FileManager.ts'/>
+
 enum RepositoryTypeEnum {
 	FileSystem,
 	Web
@@ -14,6 +16,7 @@ class Config {
 			var cfg = JSON.parse(cfgStr);
 			this.localPath = cfg.localPath;
 		}catch(e){
+		    console.log(e);
 			this.localPath = "d.ts";
 		}
 	}

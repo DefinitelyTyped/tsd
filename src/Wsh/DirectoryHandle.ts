@@ -18,7 +18,17 @@ module Wsh {
 
         public createDirectory(path: string): void { 
             if (!this.directoryExists(path)) {
-                this._fso.CreateFolder(path);
+
+                path = path.replace('\\', '/');
+                var parts = path.split('/');
+
+                var dpath = '';
+                for (var i = 0; i < parts.length; i++) { 
+                    dpath += parts[i] + '/';
+                    if (!this.directoryExists(path)) {
+                        this._fso.CreateFolder(dpath);
+                    }
+                }
             }
         }
 
