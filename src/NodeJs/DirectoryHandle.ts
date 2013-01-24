@@ -18,7 +18,7 @@ module NodeJs {
                 var dpath = '';
                 for (var i = 0; i < parts.length; i++) { 
                     dpath += parts[i] + '/';
-                    if (!this.directoryExists(path)) {
+                    if (!this.directoryExists(dpath)) {
                         this._fs.mkdirSync(dpath);
                     }
                 }
@@ -29,7 +29,7 @@ module NodeJs {
             return this._path.dirname(path);
         }
 
-        public getAllFiles(path, spec?, options?): string[] { 
+        public getAllFiles(path, spec?, options?): string[] {
             options = options || <{ recursive?: bool; }>{};
 
             var filesInFolder = (folder: string): string[] => {

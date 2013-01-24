@@ -4,10 +4,10 @@
         function Environment() { }
         Environment.isNode = function isNode() {
             return !(typeof ActiveXObject === "function");
-        }
+        };
         Environment.isWsh = function isWsh() {
             return !Environment.isNode();
-        }
+        };
         return Environment;
     })();
     System.Environment = Environment;    
@@ -122,30 +122,27 @@ var System;
 (function (System) {
     var Console = (function () {
         function Console() { }
-        Console.out = null;
         Console.initialize = function initialize() {
             if(System.Environment.isNode()) {
                 Console.out = new NodeJs.ConsoleWriter();
+            } else if(System.Environment.isWsh()) {
+                Console.out = new Wsh.ConsoleWriter();
             } else {
-                if(System.Environment.isWsh()) {
-                    Console.out = new Wsh.ConsoleWriter();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                throw new Error('Invalid host');
             }
-        }
+        };
         Console.write = function write(value) {
             Console.out.write(value);
-        }
+        };
         Console.writeLine = function writeLine(value) {
             Console.out.writeLine(value);
-        }
+        };
         Console.writeAsync = function writeAsync(value, callback) {
             Console.out.writeAsync(value, callback);
-        }
+        };
         Console.writeLineAsync = function writeLineAsync(value, callback) {
             Console.out.writeLineAsync(value, callback);
-        }
+        };
         return Console;
     })();
     System.Console = Console;    
@@ -185,7 +182,7 @@ var NodeJs;
         FileHandle.prototype.readFile = function (file) {
             var buffer = this._fs.readFileSync(file);
             switch(buffer[0]) {
-                case 254: {
+                case 254:
                     if(buffer[1] == 255) {
                         var i = 0;
                         while((i + 1) < buffer.length) {
@@ -197,21 +194,15 @@ var NodeJs;
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-
-                }
-                case 255: {
+                case 255:
                     if(buffer[1] == 254) {
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-
-                }
-                case 239: {
+                case 239:
                     if(buffer[1] == 187) {
                         return buffer.toString("utf8", 3);
                     }
-
-                }
             }
             return buffer.toString();
         };
@@ -286,10 +277,8 @@ var Wsh;
                 streamObj.Position = 0;
                 if((bomChar.charCodeAt(0) == 254 && bomChar.charCodeAt(1) == 255) || (bomChar.charCodeAt(0) == 255 && bomChar.charCodeAt(1) == 254)) {
                     streamObj.Charset = 'unicode';
-                } else {
-                    if(bomChar.charCodeAt(0) == 239 && bomChar.charCodeAt(1) == 187) {
-                        streamObj.Charset = 'utf-8';
-                    }
+                } else if(bomChar.charCodeAt(0) == 239 && bomChar.charCodeAt(1) == 187) {
+                    streamObj.Charset = 'utf-8';
                 }
                 var str = streamObj.ReadText(-1);
                 streamObj.Close();
@@ -327,18 +316,15 @@ var System;
     (function (IO) {
         var FileManager = (function () {
             function FileManager() { }
-            FileManager.handle = null;
             FileManager.initialize = function initialize() {
                 if(System.Environment.isNode()) {
                     FileManager.handle = new NodeJs.FileHandle();
+                } else if(System.Environment.isWsh()) {
+                    FileManager.handle = new Wsh.FileHandle();
                 } else {
-                    if(System.Environment.isWsh()) {
-                        FileManager.handle = new Wsh.FileHandle();
-                    } else {
-                        throw new Error('Invalid host');
-                    }
+                    throw new Error('Invalid host');
                 }
-            }
+            };
             return FileManager;
         })();
         IO.FileManager = FileManager;        
@@ -357,6 +343,9 @@ var NodeJs;
         WebRequest.prototype.getUrl = function (url, callback) {
             System.Console.writeLine("tsd \033[32mhttp \033[35mGET\033[0m " + url);
             this._request(url, function (error, response, body) {
+                if(error) {
+                    System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m " + url);
+                }
                 System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
                 if(!error && response.statusCode == 200) {
                     callback(body);
@@ -402,18 +391,15 @@ var System;
     (function (Web) {
         var WebHandler = (function () {
             function WebHandler() { }
-            WebHandler.request = null;
             WebHandler.initialize = function initialize() {
                 if(System.Environment.isNode()) {
                     WebHandler.request = new NodeJs.WebRequest();
+                } else if(System.Environment.isWsh()) {
+                    WebHandler.request = new Wsh.WebRequest();
                 } else {
-                    if(System.Environment.isWsh()) {
-                        WebHandler.request = new Wsh.WebRequest();
-                    } else {
-                        throw new Error('Invalid host');
-                    }
+                    throw new Error('Invalid host');
                 }
-            }
+            };
             return WebHandler;
         })();
         Web.WebHandler = WebHandler;        
@@ -452,7 +438,7 @@ var DataSource;
         FileSystemDataSource.prototype.all = function (callback) {
             this._fs.readFile(this.repositoryPath, function (err, data) {
                 if(err) {
-                    throw err;
+                    throw new Error("Error reading file repository file: " + err.message);
                 }
                 callback(JSON.parse(data));
             });
@@ -625,7 +611,7 @@ var NodeJs;
                 var dpath = '';
                 for(var i = 0; i < parts.length; i++) {
                     dpath += parts[i] + '/';
-                    if(!this.directoryExists(path)) {
+                    if(!this.directoryExists(dpath)) {
                         this._fs.mkdirSync(dpath);
                     }
                 }
@@ -645,10 +631,8 @@ var NodeJs;
                     var stat = _this._fs.statSync(folder + "/" + files[i]);
                     if(options.recursive && stat.isDirectory()) {
                         paths = paths.concat(filesInFolder(folder + "/" + files[i]));
-                    } else {
-                        if(stat.isFile() && (!spec || files[i].match(spec))) {
-                            paths.push(folder + "/" + files[i]);
-                        }
+                    } else if(stat.isFile() && (!spec || files[i].match(spec))) {
+                        paths.push(folder + "/" + files[i]);
                     }
                 }
                 return paths;
@@ -676,7 +660,7 @@ var Wsh;
                 var dpath = '';
                 for(var i = 0; i < parts.length; i++) {
                     dpath += parts[i] + '/';
-                    if(!this.directoryExists(path)) {
+                    if(!this.directoryExists(dpath)) {
                         this._fso.CreateFolder(dpath);
                     }
                 }
@@ -718,24 +702,69 @@ var System;
     (function (IO) {
         var DirectoryManager = (function () {
             function DirectoryManager() { }
-            DirectoryManager.handle = null;
             DirectoryManager.initialize = function initialize() {
                 if(System.Environment.isNode()) {
                     DirectoryManager.handle = new NodeJs.DirectoryHandle();
+                } else if(System.Environment.isWsh()) {
+                    DirectoryManager.handle = new Wsh.DirectoryHandle();
                 } else {
-                    if(System.Environment.isWsh()) {
-                        DirectoryManager.handle = new Wsh.DirectoryHandle();
-                    } else {
-                        throw new Error('Invalid host');
-                    }
+                    throw new Error('Invalid host');
                 }
-            }
+            };
             return DirectoryManager;
         })();
         IO.DirectoryManager = DirectoryManager;        
     })(System.IO || (System.IO = {}));
     var IO = System.IO;
 })(System || (System = {}));
+var Uri = (function () {
+    var options = {
+        strictMode: false,
+        key: [
+            "source", 
+            "protocol", 
+            "authority", 
+            "userInfo", 
+            "user", 
+            "password", 
+            "host", 
+            "port", 
+            "relative", 
+            "path", 
+            "directory", 
+            "file", 
+            "query", 
+            "anchor"
+        ],
+        q: {
+            name: "queryKey",
+            parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+        },
+        parser: {
+            strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+            loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+        }
+    };
+    function parseUri(str) {
+        var o = options, m = o.parser[o.strictMode ? "strict" : "loose"].exec(str), uri = {
+        }, i = 14;
+        while(i--) {
+            uri[o.key[i]] = m[i] || "";
+        }
+        uri[o.q.name] = {
+        };
+        uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+            if($1) {
+                uri[o.q.name][$1] = $2;
+            }
+        });
+        return uri;
+    }
+    ;
+    return {
+        parseUri: parseUri
+    };
+})();
 var Command;
 (function (Command) {
     var InstallCommand = (function () {
@@ -770,13 +799,24 @@ var Command;
             sw.flush();
             sw.close();
         };
-        InstallCommand.prototype.save = function (name, version, key, content) {
-            if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath)) {
-                System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath);
+        InstallCommand.prototype.normalizeGithubUrl = function (uri) {
+            if(uri.host == 'github.com') {
+                var parts = uri.directory.split('/');
+                var repo = parts[2];
+                var ignore = '/' + parts[1] + '/' + parts[2] + '/' + parts[3] + '/' + parts[4];
+                uri.directory = '/' + repo + uri.directory.substr(ignore.length);
             }
-            var fileNameWithoutExtension = this.cfg.localPath + "/" + name + "-" + version;
+        };
+        InstallCommand.prototype.save = function (url, name, version, key, content) {
+            var uri = Uri.parseUri(url);
+            this.normalizeGithubUrl(uri);
+            if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath + uri.directory)) {
+                System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
+            }
+            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name + "-" + version;
+            System.Console.writeLine("");
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("└── " + name + "@" + version + " instaled.");
+            System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     └── " + key + ".key");
         };
@@ -807,7 +847,7 @@ var Command;
             } else {
                 var version = targetLib.versions[0];
                 System.Web.WebHandler.request.getUrl(version.url, function (body) {
-                    _this.save(targetLib.name, version.version, version.key, body);
+                    _this.save(version.url, targetLib.name, version.version, version.key, body);
                     _this._cache.push(targetLib.name + '@' + version.version);
                     var deps = (targetLib.versions[0].dependencies) || [];
                     for(var i = 0; i < deps.length; i++) {
@@ -819,13 +859,22 @@ var Command;
         };
         InstallCommand.prototype.exec = function (args) {
             var _this = this;
-            this.dataSource.all(function (libs) {
-                System.Console.writeLine("");
-                var targetLib = _this.find(args[3], libs);
+            var targetLib;
+            var tryInstall = function (libs, lib) {
+                targetLib = _this.find(lib, libs);
                 if(targetLib) {
                     _this.install(targetLib, targetLib.versions[0].version, libs);
                 } else {
                     System.Console.writeLine("Lib not found.");
+                }
+            };
+            this.dataSource.all(function (libs) {
+                var index = 3;
+                var lib = args[index];
+                while(lib) {
+                    tryInstall(libs, lib);
+                    index++;
+                    lib = args[index];
                 }
             });
         };
@@ -856,28 +905,33 @@ var Command;
             var _this = this;
             this.dataSource.all(function (libs) {
                 var libList = [];
-                var files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.localPath);
+                var files = [];
+                try  {
+                    files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.localPath, /.d\.key$/g, {
+                        recursive: true
+                    });
+                } catch (e) {
+                    System.Console.writeLine('Empty directory.');
+                }
                 for(var i = 0; i < files.length; i++) {
                     var file = files[i].substr(_this.cfg.localPath.length + 1);
-                    if(file.substr(file.length - 5) == 'd.key') {
-                        var name = file.substr(0, file.lastIndexOf('-'));
-                        var version = file.substr(name.length + 1, file.length - name.length - 7);
-                        var key = System.IO.FileManager.handle.readFile(files[i]);
-                        var flg = false;
-                        for(var j = 0; j < libs.length; j++) {
-                            var lib = libs[j];
-                            if(name == lib.name) {
-                                if(version == lib.versions[0].version) {
-                                    if(key != lib.versions[0].key) {
-                                        System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + (System.Environment.isNode() ? '\033[33m' : '') + 'A new version is available!' + (System.Environment.isNode() ? '\033[0m' : ''));
-                                        flg = true;
-                                    }
+                    var name = file.substr(0, file.lastIndexOf('-'));
+                    var version = file.substr(name.length + 1, file.length - name.length - 7);
+                    var key = System.IO.FileManager.handle.readFile(files[i]);
+                    var flg = false;
+                    for(var j = 0; j < libs.length; j++) {
+                        var lib = libs[j];
+                        if(name == lib.name) {
+                            if(version == lib.versions[0].version) {
+                                if(key != lib.versions[0].key) {
+                                    System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + (System.Environment.isNode() ? '\033[33m' : '') + 'A new version is available!' + (System.Environment.isNode() ? '\033[0m' : ''));
+                                    flg = true;
                                 }
                             }
                         }
-                        if(!flg) {
-                            System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Is the latest version.');
-                        }
+                    }
+                    if(!flg) {
+                        System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Is the latest version.');
                     }
                 }
             });
@@ -889,6 +943,68 @@ var Command;
     })();
     Command.UpdateCommand = UpdateCommand;    
 })(Command || (Command = {}));
+var RepositoryTypeEnum;
+(function (RepositoryTypeEnum) {
+    RepositoryTypeEnum._map = [];
+    RepositoryTypeEnum._map[0] = "FileSystem";
+    RepositoryTypeEnum.FileSystem = 0;
+    RepositoryTypeEnum._map[1] = "Web";
+    RepositoryTypeEnum.Web = 1;
+})(RepositoryTypeEnum || (RepositoryTypeEnum = {}));
+var Config = (function () {
+    function Config() { }
+    Config.FILE_NAME = 'tsd-config.json';
+    Config.isNull = function isNull(cfg, key, alternativeValue) {
+        return cfg[key] ? cfg[key] : alternativeValue;
+    };
+    Config.tryGetConfigFile = function tryGetConfigFile() {
+        var cfg = {
+        };
+        try  {
+            cfg = JSON.parse(System.IO.FileManager.handle.readFile(Config.FILE_NAME));
+        } catch (e) {
+        }
+        return cfg;
+    };
+    Config.prototype.load = function () {
+        var cfg = Config.tryGetConfigFile();
+        this.localPath = Config.isNull(cfg, 'localPath', 'd.ts');
+        this.repositoryType = Config.isNull(cfg, 'repositoryType', RepositoryTypeEnum.Web);
+        this.uri = Config.isNull(cfg, 'uri', "https://github.com/Diullei/tsd/raw/master/deploy/repository.json");
+    };
+    return Config;
+})();
+var Command;
+(function (Command) {
+    var CreateLocalConfigCommand = (function () {
+        function CreateLocalConfigCommand() {
+            this.shortcut = "ncfg";
+            this.usage = "Create a local config file.";
+        }
+        CreateLocalConfigCommand.prototype.accept = function (args) {
+            return args[2] == this.shortcut;
+        };
+        CreateLocalConfigCommand.prototype.saveConfigFile = function () {
+            var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
+            sw.write('{\n' + '    "localPath": "d.ts",\n' + '    "repositoryType": "1",\n' + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '}');
+            sw.flush();
+            sw.close();
+        };
+        CreateLocalConfigCommand.prototype.exec = function (args) {
+            if(System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {
+                throw new Error("There is already a configuration file in this folder.");
+            } else {
+                this.saveConfigFile();
+            }
+            System.Console.writeLine("configuration file created successfully.");
+        };
+        CreateLocalConfigCommand.prototype.toString = function () {
+            return this.shortcut + "      " + this.usage;
+        };
+        return CreateLocalConfigCommand;
+    })();
+    Command.CreateLocalConfigCommand = CreateLocalConfigCommand;    
+})(Command || (Command = {}));
 var CommandLineProcessor = (function () {
     function CommandLineProcessor(dataSource, cfg) {
         this.dataSource = dataSource;
@@ -899,6 +1015,7 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.SearchCommand(this.dataSource));
         this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
+        this.commands.push(new Command.CreateLocalConfigCommand());
     }
     CommandLineProcessor.prototype.printUsage = function () {
         System.Console.out.autoFlush = false;
@@ -933,28 +1050,6 @@ var CommandLineProcessor = (function () {
     };
     return CommandLineProcessor;
 })();
-var RepositoryTypeEnum;
-(function (RepositoryTypeEnum) {
-    RepositoryTypeEnum._map = [];
-    RepositoryTypeEnum._map[0] = "FileSystem";
-    RepositoryTypeEnum.FileSystem = 0;
-    RepositoryTypeEnum._map[1] = "Web";
-    RepositoryTypeEnum.Web = 1;
-})(RepositoryTypeEnum || (RepositoryTypeEnum = {}));
-var Config = (function () {
-    function Config() { }
-    Config.prototype.load = function () {
-        try  {
-            var cfgStr = System.IO.FileManager.handle.readFile('tsd-config.json');
-            var cfg = JSON.parse(cfgStr);
-            this.localPath = cfg.localPath;
-        } catch (e) {
-            console.log(e);
-            this.localPath = "d.ts";
-        }
-    };
-    return Config;
-})();
 var DataSource;
 (function (DataSource) {
     var DataSourceFactory = (function () {
@@ -962,19 +1057,16 @@ var DataSource;
         DataSourceFactory.factory = function factory(cfg) {
             if(cfg.repositoryType == RepositoryTypeEnum.FileSystem) {
                 return new DataSource.FileSystemDataSource(cfg.uri);
+            } else if(cfg.repositoryType == RepositoryTypeEnum.Web) {
+                return new DataSource.WebDataSource(cfg.uri);
             } else {
-                if(cfg.repositoryType == RepositoryTypeEnum.Web) {
-                    return new DataSource.WebDataSource(cfg.uri);
-                } else {
-                    throw Error('Invalid dataSource.');
-                }
+                throw Error('Invalid dataSource.');
             }
-        }
+        };
         return DataSourceFactory;
     })();
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
-var VERSION = "0.2.3";
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
@@ -987,8 +1079,6 @@ var Main = (function () {
         try  {
             var cfg = new Config();
             cfg.load();
-            cfg.repositoryType = RepositoryTypeEnum.Web;
-            cfg.uri = "https://github.com/Diullei/tsd/raw/master/deploy/repository.json";
             var ds = DataSource.DataSourceFactory.factory(cfg);
             var cp = new CommandLineProcessor(ds, cfg);
             cp.execute(args);

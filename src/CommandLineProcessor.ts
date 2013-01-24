@@ -5,6 +5,7 @@
 ///<reference path='Command\SearchCommand.ts'/>
 ///<reference path='Command\InstallCommand.ts'/>
 ///<reference path='Command\UpdateCommand.ts'/>
+///<reference path='Command\CreateLocalConfigCommand.ts'/>
 
 class CommandLineProcessor {
 
@@ -17,6 +18,7 @@ class CommandLineProcessor {
         this.commands.push(new Command.SearchCommand(this.dataSource));
         this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
+        this.commands.push(new Command.CreateLocalConfigCommand());
  	}
 
 	public printUsage() {

@@ -11,8 +11,11 @@ module DataSource {
         constructor (public repositoryPath: string) { }
 
         public all(callback: (data: DataSource.Lib[]) => void ): void {
-            this._fs.readFile(this.repositoryPath, function (err, data) {
-                if (err) throw err;
+            this._fs.readFile(this.repositoryPath, (err, data) => {
+                if (err) {
+                    throw new Error("Error reading file repository file: " + err.message);
+                    //throw err;
+                }
                 callback(JSON.parse(data));
             });
         }

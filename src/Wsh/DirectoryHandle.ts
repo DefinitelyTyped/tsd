@@ -25,7 +25,7 @@ module Wsh {
                 var dpath = '';
                 for (var i = 0; i < parts.length; i++) { 
                     dpath += parts[i] + '/';
-                    if (!this.directoryExists(path)) {
+                    if (!this.directoryExists(dpath)) {
                         this._fso.CreateFolder(dpath);
                     }
                 }

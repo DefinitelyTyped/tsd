@@ -1,5 +1,6 @@
 ///<reference path='ICommand.ts'/>
 ///<reference path='../System/IO/DirectoryManager.ts'/>
+///<reference path='../System/Console.ts'/>
 
 module Command {
 
@@ -24,13 +25,19 @@ module Command {
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
 					
-				var libList: Lib[] = [];
-				var files = System.IO.DirectoryManager.handle.getAllFiles(this.cfg.localPath);
+                var libList: Lib[] = [];
+                var files = [];
+
+                try {
+                    files = System.IO.DirectoryManager.handle.getAllFiles(this.cfg.localPath, /.d\.key$/g, { recursive: true });
+                } catch (e) {
+                    System.Console.writeLine('Empty directory.');
+                }
 
 				for (var i = 0; i < files.length; i++) {
 
 					var file = files[i].substr(this.cfg.localPath.length + 1);
-					if (file.substr(file.length - 5) == 'd.key') {
+					//if (file.substr(file.length - 5) == 'd.key') {
 						var name = file.substr(0, file.lastIndexOf('-'));
 						var version = file.substr(name.length + 1, file.length - name.length - 7);
 						var key = System.IO.FileManager.handle.readFile(files[i]);
@@ -44,7 +51,7 @@ module Command {
 								if (version == lib.versions[0].version) { 
 									if (key != lib.versions[0].key) { 
 										System.Console.writeLine(
-                                            ' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - '
+                                            ' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - '
                                             + (System.Environment.isNode() ? '\033[33m' : '') + 'A new version is available!' + (System.Environment.isNode() ? '\033[0m' : '') );
 										flg = true;
 									}
@@ -54,10 +61,10 @@ module Command {
 
 						if (!flg) { 
 							System.Console.writeLine(
-                                ' ' + (System.Environment.isNode() ? '\033[36m' : '') + name + (System.Environment.isNode() ? '\033[0m' : '') + ' - '
+                                ' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - '
                                 + 'Is the latest version.');
 						}
-					}
+					//}
 				}
 						
             });
