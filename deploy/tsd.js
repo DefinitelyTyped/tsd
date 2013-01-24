@@ -915,7 +915,7 @@ var Command;
                 }
                 for(var i = 0; i < files.length; i++) {
                     var file = files[i].substr(_this.cfg.localPath.length + 1);
-                    var name = file.substr(0, file.lastIndexOf('-'));
+                    var name = file.substr(0, file.lastIndexOf('.'));
                     var version = file.substr(name.length + 1, file.length - name.length - 7);
                     var key = System.IO.FileManager.handle.readFile(files[i]);
                     var flg = false;

@@ -38,7 +38,7 @@ module Command {
 
 					var file = files[i].substr(this.cfg.localPath.length + 1);
 					//if (file.substr(file.length - 5) == 'd.key') {
-						var name = file.substr(0, file.lastIndexOf('-'));
+						var name = file.substr(0, file.lastIndexOf('.'));
 						var version = file.substr(name.length + 1, file.length - name.length - 7);
 						var key = System.IO.FileManager.handle.readFile(files[i]);
 
