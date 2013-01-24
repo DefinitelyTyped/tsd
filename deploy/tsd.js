@@ -777,7 +777,7 @@ var Command;
             this._index = 0;
         }
         InstallCommand.prototype.accept = function (args) {
-            return args[2] == this.shortcut;
+            return args[2] == this.shortcut && args[3];
         };
         InstallCommand.prototype.print = function (lib) {
             System.Console.write(lib.name + ' - ' + lib.description + '[');
@@ -813,7 +813,7 @@ var Command;
             if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath + uri.directory)) {
                 System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
             }
-            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name + "-" + version;
+            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
             System.Console.writeLine("");
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
@@ -1005,6 +1005,71 @@ var Command;
     })();
     Command.CreateLocalConfigCommand = CreateLocalConfigCommand;    
 })(Command || (Command = {}));
+var Command;
+(function (Command) {
+    var InfoCommand = (function () {
+        function InfoCommand(dataSource) {
+            this.dataSource = dataSource;
+            this.shortcut = "info";
+            this.usage = "Get lib information";
+            this._index = 0;
+        }
+        InfoCommand.prototype.accept = function (args) {
+            return args[2] == this.shortcut && args[3];
+        };
+        InfoCommand.prototype.match = function (key, name) {
+            return name.toUpperCase() == key.toUpperCase();
+        };
+        InfoCommand.prototype.find = function (key, libs) {
+            for(var i = 0; i < libs.length; i++) {
+                var lib = libs[i];
+                if(this.match(lib.name, key)) {
+                    return lib;
+                }
+            }
+            return null;
+        };
+        InfoCommand.prototype.display = function (targetLib, targetVersion, libs) {
+            if(targetLib == null) {
+                System.Console.writeLine("Lib not found.");
+            } else {
+                var version = targetLib.versions[0];
+                System.Web.WebHandler.request.getUrl(version.url, function (body) {
+                    System.Console.writeLine("");
+                    System.Console.writeLine("[INFO]        name: " + targetLib.name);
+                    System.Console.writeLine("   +-- description: " + targetLib.description);
+                    System.Console.writeLine("   +---------- key: " + version.key);
+                    System.Console.writeLine("   +------ version: " + version.version);
+                    System.Console.writeLine("   +------- author: " + version.author);
+                    System.Console.writeLine("   +---------- url: " + version.url);
+                    System.Console.writeLine("");
+                });
+            }
+        };
+        InfoCommand.prototype.exec = function (args) {
+            var _this = this;
+            var targetLib;
+            var tryGetInfo = function (libs, lib) {
+                targetLib = _this.find(lib, libs);
+                if(targetLib) {
+                    _this.display(targetLib, targetLib.versions[0].version, libs);
+                } else {
+                    System.Console.writeLine("Lib not found.");
+                }
+            };
+            this.dataSource.all(function (libs) {
+                var index = 3;
+                var lib = args[index];
+                tryGetInfo(libs, lib);
+            });
+        };
+        InfoCommand.prototype.toString = function () {
+            return this.shortcut + "      " + this.usage;
+        };
+        return InfoCommand;
+    })();
+    Command.InfoCommand = InfoCommand;    
+})(Command || (Command = {}));
 var CommandLineProcessor = (function () {
     function CommandLineProcessor(dataSource, cfg) {
         this.dataSource = dataSource;
@@ -1016,6 +1081,7 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
+        this.commands.push(new Command.InfoCommand(this.dataSource));
     }
     CommandLineProcessor.prototype.printUsage = function () {
         System.Console.out.autoFlush = false;

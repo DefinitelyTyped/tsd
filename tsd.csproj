@@ -50,6 +50,7 @@
     <Content Include="LICENSE.txt" />
     <Content Include="src\Command\AllCommand.ts" />
     <TypeScriptCompile Include="src\Command\UpdateCommand.ts" />
+    <Content Include="src\Command\InfoCommand.ts" />
     <Content Include="src\Command\CreateLocalConfigCommand.ts" />
     <Content Include="src\Command\UpdateCommand.js">
       <DependentUpon>UpdateCommand.ts</DependentUpon>

@@ -17,7 +17,7 @@ module Command {
         constructor (public dataSource: DataSource.IDataSource, public cfg: Config) { }
 
         public accept(args: Array): bool {
-            return args[2] == this.shortcut;
+            return args[2] == this.shortcut && args[3];
         }
 
         private print(lib: DataSource.Lib) {
@@ -62,7 +62,7 @@ module Command {
                 System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
             }
 
-            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name + "-" + version;
+            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;// + "-" + version;
 
             System.Console.writeLine("");
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
