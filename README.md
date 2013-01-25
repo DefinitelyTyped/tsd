@@ -47,7 +47,7 @@ Some definition files have dependencies of another files like `socket.io` that d
 
 Example:
 
-	tsd install sicket.io node express
+	tsd install socket.io node express
 	
 This will install _express_, _socket.io_ and _node_ definitions.
 
