@@ -773,7 +773,7 @@ var Command;
             this.dataSource = dataSource;
             this.cfg = cfg;
             this.shortcut = "install";
-            this.usage = "Intall file definition. To automatically dependencies map use install* command.";
+            this.usage = "Intall file definition. Use install* to automatically dependencies map.";
             this._cache = [];
             this._index = 0;
             this._withDep = false;

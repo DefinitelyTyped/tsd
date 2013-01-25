@@ -9,7 +9,7 @@ module Command {
 
     export class InstallCommand implements ICommand {
         public shortcut: string = "install";
-        public usage: string = "Intall file definition. To automatically dependencies map use install* command.";
+        public usage: string = "Intall file definition. Use install* to automatically dependencies map.";
         private _args: Array;
         private _cache: string[] = [];
         private _index: number = 0;
