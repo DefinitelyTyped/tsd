@@ -35,6 +35,7 @@ module Command {
                     var lib = <DataSource.Lib>libs[i];
                     this.print(lib);
                 }
+                System.Console.writeLine('>> Total ' + libs.length + ' libs.');
             });
         }
 

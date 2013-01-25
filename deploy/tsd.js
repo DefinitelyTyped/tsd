@@ -521,6 +521,7 @@ var Command;
                     var lib = libs[i];
                     _this.print(lib);
                 }
+                System.Console.writeLine('>> Total ' + libs.length + ' libs.');
             });
         };
         AllCommand.prototype.toString = function () {
@@ -772,12 +773,13 @@ var Command;
             this.dataSource = dataSource;
             this.cfg = cfg;
             this.shortcut = "install";
-            this.usage = "Intall file definition";
+            this.usage = "Intall file definition. To automatically dependencies map use install* command.";
             this._cache = [];
             this._index = 0;
+            this._withDep = false;
         }
         InstallCommand.prototype.accept = function (args) {
-            return args[2] == this.shortcut && args[3];
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
         };
         InstallCommand.prototype.print = function (lib) {
             System.Console.write(lib.name + ' - ' + lib.description + '[');
@@ -814,11 +816,11 @@ var Command;
                 System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
             }
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
-            System.Console.writeLine("");
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     └── " + key + ".key");
+            System.Console.writeLine("");
         };
         InstallCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
@@ -839,7 +841,7 @@ var Command;
         };
         InstallCommand.prototype.install = function (targetLib, targetVersion, libs) {
             var _this = this;
-            if(this.cacheContains(targetLib.name + '@' + targetVersion)) {
+            if(this.cacheContains(targetLib.name)) {
                 return;
             }
             if(targetLib == null) {
@@ -848,7 +850,10 @@ var Command;
                 var version = targetLib.versions[0];
                 System.Web.WebHandler.request.getUrl(version.url, function (body) {
                     _this.save(version.url, targetLib.name, version.version, version.key, body);
-                    _this._cache.push(targetLib.name + '@' + version.version);
+                    _this._cache.push(targetLib.name);
+                    if(!_this._withDep) {
+                        return;
+                    }
                     var deps = (targetLib.versions[0].dependencies) || [];
                     for(var i = 0; i < deps.length; i++) {
                         var dep = _this.find(deps[i].name, libs);
@@ -860,6 +865,9 @@ var Command;
         InstallCommand.prototype.exec = function (args) {
             var _this = this;
             var targetLib;
+            if(args[2].indexOf('*') != -1) {
+                this._withDep = true;
+            }
             var tryInstall = function (libs, lib) {
                 targetLib = _this.find(lib, libs);
                 if(targetLib) {

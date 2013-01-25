@@ -9,15 +9,17 @@ module Command {
 
     export class InstallCommand implements ICommand {
         public shortcut: string = "install";
-        public usage: string = "Intall file definition";
+        public usage: string = "Intall file definition. To automatically dependencies map use install* command.";
         private _args: Array;
         private _cache: string[] = [];
         private _index: number = 0;
 
+        private _withDep = false;
+
         constructor (public dataSource: DataSource.IDataSource, public cfg: Config) { }
 
         public accept(args: Array): bool {
-            return args[2] == this.shortcut && args[3];
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
         }
 
         private print(lib: DataSource.Lib) {
@@ -64,12 +66,13 @@ module Command {
 
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;// + "-" + version;
 
-            System.Console.writeLine("");
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
 
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     └── " + key + ".key");
+
+            System.Console.writeLine("");
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
@@ -92,7 +95,7 @@ module Command {
         }
 
         private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
-            if(this.cacheContains(targetLib.name + '@' + targetVersion))
+            if(this.cacheContains(targetLib.name/* + '@' + targetVersion*/))
                 return;
 
             if (targetLib == null) {
@@ -102,9 +105,13 @@ module Command {
 
                 System.Web.WebHandler.request.getUrl(version.url, (body) => {
                     this.save(version.url, targetLib.name, version.version, version.key, body);
-                    this._cache.push(targetLib.name + '@' + version.version);
+                    this._cache.push(targetLib.name/* + '@' + version.version*/);
+
+                    if (!this._withDep)
+                        return;
+
                     var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];
-                    for (var i = 0; i < deps.length; i++) { 
+                    for (var i = 0; i < deps.length; i++) {
                         var dep: DataSource.Lib = this.find(deps[i].name, libs);
                         this.install(dep, dep.versions[0].version, libs);
                     }
@@ -114,6 +121,10 @@ module Command {
 
         public exec(args: Array): void {
             var targetLib: DataSource.Lib;
+
+            if (args[2].indexOf('*') != -1) {
+                this._withDep = true;
+            }
 
             var tryInstall = (libs, lib: string) => {
                 targetLib = this.find(lib, libs);

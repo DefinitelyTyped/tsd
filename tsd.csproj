@@ -49,6 +49,10 @@
     <Content Include="deploy\tsd.js" />
     <Content Include="LICENSE.txt" />
     <Content Include="src\Command\AllCommand.ts" />
+    <Content Include="tools\estractRepository.js">
+      <DependentUpon>estractRepository.ts</DependentUpon>
+    </Content>
+    <TypeScriptCompile Include="tools\estractRepository.ts" />
     <TypeScriptCompile Include="src\Command\UpdateCommand.ts" />
     <Content Include="src\Command\InfoCommand.ts" />
     <Content Include="src\Command\CreateLocalConfigCommand.ts" />
