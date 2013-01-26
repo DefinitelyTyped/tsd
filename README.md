@@ -4,6 +4,7 @@ TSD - A TypeScript definition package manager
 TSD is a TypeScript definition file package manager.  let you easily download and install definition files to use in TypeScript projects.
 
 > To view online package search go to http://www.tsdpm.com/
+
 > To view how to use TSD with NuGet Console go to [Using TSD with Visual Studio Nuget Console](https://github.com/Diullei/tsd#using-tsd-with-visual-studio-nuget-console)
 
 ### How to install
