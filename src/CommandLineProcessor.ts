@@ -28,19 +28,20 @@ class CommandLineProcessor {
 	    
         System.Console.writeLine('Syntax: tsd [command] [args...]');
         System.Console.writeLine('');
-        System.Console.writeLine('   Ex.: tsd search nodejs');
+        System.Console.writeLine('The following TSD commands are included:');
         System.Console.writeLine('');
-        System.Console.writeLine('Options:');
-
+        System.Console.writeLine("  Command           Description");
+        System.Console.writeLine("  ----------------  ---------------------------------------------------------");
         for(var i = 0; i < this.commands.length; i++) {
-            System.Console.writeLine("  " + this.commands[i].toString());
+            System.Console.writeLine(this.commands[i].toString());
         }
+        System.Console.writeLine('');
 
 	    System.Console.out.flush();
 	}
 
     public execute(args: Array) {
-        System.Console.writeLine("Command: " + (args[2] || "..."));
+        //System.Console.writeLine("Command: " + (args[2] || "..."));
         System.Console.writeLine('');
  
         var accepted: bool = false;

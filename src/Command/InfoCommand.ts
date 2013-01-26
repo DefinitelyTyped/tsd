@@ -7,13 +7,13 @@
 
 module Command {
 
-    export class InfoCommand implements ICommand {
+    export class InfoCommand extends BaseCommand {
         public shortcut: string = "info";
         public usage: string = "Get lib information";
         private _args: Array;
         private _index: number = 0;
 
-        constructor (public dataSource: DataSource.IDataSource) { }
+        constructor(public dataSource: DataSource.IDataSource) { super(); }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut && args[3];
@@ -37,19 +37,19 @@ module Command {
         private display(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
 
             if (targetLib == null) {
-                System.Console.writeLine("Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.");
             } else {
                 var version = targetLib.versions[0];
 
                 System.Web.WebHandler.request.getUrl(version.url, (body) => {
 
                     System.Console.writeLine("");
-                    System.Console.writeLine("[INFO]        name: " + targetLib.name);
-                    System.Console.writeLine("   +-- description: " + targetLib.description);
-                    System.Console.writeLine("   +---------- key: " + version.key);
-                    System.Console.writeLine("   +------ version: " + version.version);
-                    System.Console.writeLine("   +------- author: " + version.author);
-                    System.Console.writeLine("   +---------- url: " + version.url);
+                    System.Console.writeLine("         name: " + targetLib.name);
+                    System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                    System.Console.writeLine("          key: " + version.key);
+                    System.Console.writeLine("      version: " + version.version);
+                    System.Console.writeLine("       author: " + version.author);
+                    System.Console.writeLine("          url: " + format(0, 60, version.url));
                     System.Console.writeLine("");
                 });
             }
@@ -64,7 +64,7 @@ module Command {
                 if (targetLib)
                     this.display(targetLib, targetLib.versions[0].version, libs);
                 else
-                    System.Console.writeLine("Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.");
             };
 
             this.dataSource.all((libs) => {
@@ -72,10 +72,6 @@ module Command {
                 var lib = args[index];
                 tryGetInfo(libs, lib);
             });
-        }
-
-        public toString(): string {
-            return this.shortcut + "      " + this.usage;
         }
     }
 }

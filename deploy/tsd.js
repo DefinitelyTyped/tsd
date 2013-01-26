@@ -1,4 +1,4 @@
-﻿var System;
+var System;
 (function (System) {
     var Environment = (function () {
         function Environment() { }
@@ -474,8 +474,28 @@ var DataSource;
 })(DataSource || (DataSource = {}));
 var Command;
 (function (Command) {
-    var HelpCommand = (function () {
+    var BaseCommand = (function () {
+        function BaseCommand() { }
+        BaseCommand.prototype.accept = function (args) {
+            throw new Error("Not implemented exception");
+        };
+        BaseCommand.prototype.exec = function (args) {
+            throw new Error("Not implemented exception");
+        };
+        BaseCommand.prototype.toString = function () {
+            return format(2, 15, this.shortcut) + "   " + format(0, 57, this.usage);
+        };
+        return BaseCommand;
+    })();
+    Command.BaseCommand = BaseCommand;    
+})(Command || (Command = {}));
+var Command;
+(function (Command) {
+    var HelpCommand = (function (_super) {
+        __extends(HelpCommand, _super);
         function HelpCommand() {
+            _super.apply(this, arguments);
+
             this.shortcut = "-h";
             this.usage = "Print this help message";
         }
@@ -484,17 +504,16 @@ var Command;
         };
         HelpCommand.prototype.exec = function (args) {
         };
-        HelpCommand.prototype.toString = function () {
-            return this.shortcut + "        " + this.usage;
-        };
         return HelpCommand;
-    })();
+    })(Command.BaseCommand);
     Command.HelpCommand = HelpCommand;    
 })(Command || (Command = {}));
 var Command;
 (function (Command) {
-    var AllCommand = (function () {
+    var AllCommand = (function (_super) {
+        __extends(AllCommand, _super);
         function AllCommand(dataSource) {
+                _super.call(this);
             this.dataSource = dataSource;
             this.shortcut = "all";
             this.usage = "Show all file definitions from repository";
@@ -503,38 +522,36 @@ var Command;
             return args[2] == this.shortcut;
         };
         AllCommand.prototype.print = function (lib) {
-            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
-            for(var j = 0; j < lib.versions.length; j++) {
-                if(j > 0 && j < lib.versions.length) {
-                    System.Console.write(',');
-                }
-                var ver = lib.versions[j];
-                System.Console.write(ver.version);
-            }
-            System.Console.write(']');
-            System.Console.writeLine(' - ' + lib.description);
+            var name = lib.name;
+            var version = lib.versions[0].version;
+            var description = lib.description;
+            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
         };
         AllCommand.prototype.exec = function (args) {
             var _this = this;
             this.dataSource.all(function (libs) {
+                System.Console.writeLine('');
+                System.Console.writeLine(' Name                         Version Description');
+                System.Console.writeLine(' ---------------------------- ------- -----------------------------------------');
                 for(var i = 0; i < libs.length; i++) {
                     var lib = libs[i];
                     _this.print(lib);
                 }
-                System.Console.writeLine('>> Total ' + libs.length + ' libs.');
+                System.Console.writeLine(' ------------------------------------------------------------------------------');
+                System.Console.writeLine(' Total: ' + libs.length + ' libs.');
+                System.Console.writeLine('');
             });
         };
-        AllCommand.prototype.toString = function () {
-            return this.shortcut + "       " + this.usage;
-        };
         return AllCommand;
-    })();
+    })(Command.BaseCommand);
     Command.AllCommand = AllCommand;    
 })(Command || (Command = {}));
 var Command;
 (function (Command) {
-    var SearchCommand = (function () {
+    var SearchCommand = (function (_super) {
+        __extends(SearchCommand, _super);
         function SearchCommand(dataSource) {
+                _super.call(this);
             this.dataSource = dataSource;
             this.shortcut = "search";
             this.usage = "Search a file definition on repository";
@@ -543,16 +560,10 @@ var Command;
             return args[2] == this.shortcut;
         };
         SearchCommand.prototype.print = function (lib) {
-            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
-            for(var j = 0; j < lib.versions.length; j++) {
-                if(j > 0 && j < lib.versions.length) {
-                    System.Console.write(", ");
-                }
-                var ver = lib.versions[j];
-                System.Console.write(ver.version);
-            }
-            System.Console.write("]");
-            System.Console.writeLine(" - " + lib.description);
+            var name = lib.name;
+            var version = lib.versions[0].version;
+            var description = lib.description;
+            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
         };
         SearchCommand.prototype.match = function (key, name) {
             return name.indexOf(key) != -1;
@@ -571,25 +582,29 @@ var Command;
         SearchCommand.prototype.exec = function (args) {
             var _this = this;
             this.dataSource.all(function (libs) {
+                var count = 0;
                 var found = false;
-                System.Console.writeLine("Search results:");
-                System.Console.writeLine("");
+                System.Console.writeLine('');
+                System.Console.writeLine(' Name                         Version Description');
+                System.Console.writeLine(' ---------------------------- ------- -----------------------------------------');
                 for(var i = 0; i < libs.length; i++) {
                     var lib = libs[i];
                     if(_this.printIfMatch(lib, args)) {
                         found = true;
+                        count++;
                     }
                 }
                 if(!found) {
-                    System.Console.writeLine("No results found.");
+                    System.Console.writeLine("   [!] No results found.");
+                } else {
+                    System.Console.writeLine(' ------------------------------------------------------------------------------');
+                    System.Console.writeLine(' Total found: ' + count + ' lib(s).');
+                    System.Console.writeLine('');
                 }
             });
         };
-        SearchCommand.prototype.toString = function () {
-            return this.shortcut + "    " + this.usage;
-        };
         return SearchCommand;
-    })();
+    })(Command.BaseCommand);
     Command.SearchCommand = SearchCommand;    
 })(Command || (Command = {}));
 var System;
@@ -768,12 +783,14 @@ var Uri = (function () {
 })();
 var Command;
 (function (Command) {
-    var InstallCommand = (function () {
+    var InstallCommand = (function (_super) {
+        __extends(InstallCommand, _super);
         function InstallCommand(dataSource, cfg) {
+                _super.call(this);
             this.dataSource = dataSource;
             this.cfg = cfg;
             this.shortcut = "install";
-            this.usage = "Intall file definition. Use install* to automatically dependencies map.";
+            this.usage = "Intall file definition. Use install* to map dependencies.";
             this._cache = [];
             this._index = 0;
             this._withDep = false;
@@ -817,9 +834,9 @@ var Command;
             }
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
-            System.Console.writeLine("     └── " + key + ".key");
+            System.Console.writeLine("     \\-- " + key + ".key");
             System.Console.writeLine("");
         };
         InstallCommand.prototype.find = function (key, libs) {
@@ -845,7 +862,7 @@ var Command;
                 return;
             }
             if(targetLib == null) {
-                System.Console.writeLine("Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.");
             } else {
                 var version = targetLib.versions[0];
                 System.Web.WebHandler.request.getUrl(version.url, function (body) {
@@ -873,7 +890,7 @@ var Command;
                 if(targetLib) {
                     _this.install(targetLib, targetLib.versions[0].version, libs);
                 } else {
-                    System.Console.writeLine("Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.");
                 }
             };
             this.dataSource.all(function (libs) {
@@ -886,11 +903,8 @@ var Command;
                 }
             });
         };
-        InstallCommand.prototype.toString = function () {
-            return this.shortcut + "   " + this.usage;
-        };
         return InstallCommand;
-    })();
+    })(Command.BaseCommand);
     Command.InstallCommand = InstallCommand;    
 })(Command || (Command = {}));
 var Command;
@@ -899,8 +913,10 @@ var Command;
         function Lib() { }
         return Lib;
     })();    
-    var UpdateCommand = (function () {
+    var UpdateCommand = (function (_super) {
+        __extends(UpdateCommand, _super);
         function UpdateCommand(dataSource, cfg) {
+                _super.call(this);
             this.dataSource = dataSource;
             this.cfg = cfg;
             this.shortcut = "update";
@@ -920,7 +936,11 @@ var Command;
                     });
                 } catch (e) {
                     System.Console.writeLine('Empty directory.');
+                    System.Console.writeLine('');
+                    return;
                 }
+                System.Console.writeLine(' Lib                                  Status');
+                System.Console.writeLine(' ------------------------------------ ----------------------------------------');
                 for(var i = 0; i < files.length; i++) {
                     var file = files[i].substr(_this.cfg.localPath.length + 1);
                     var name = file.substr(0, file.lastIndexOf('.'));
@@ -932,23 +952,25 @@ var Command;
                         if(name == lib.name) {
                             if(version == lib.versions[0].version) {
                                 if(key != lib.versions[0].key) {
-                                    System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + (System.Environment.isNode() ? '\033[33m' : '') + 'A new version is available!' + (System.Environment.isNode() ? '\033[0m' : ''));
+                                    var lname = name.split('/')[name.split('/').length - 1];
+                                    var dir = name;
+                                    System.Console.writeLine(format(1, 35, lname.substr(0, lname.length - 2) + ' @ ./' + dir) + '  Update is available!');
                                     flg = true;
                                 }
                             }
                         }
                     }
                     if(!flg) {
-                        System.Console.writeLine(' ' + (System.Environment.isNode() ? '\033[36m' : '') + '> ' + name + ' d.ts' + (System.Environment.isNode() ? '\033[0m' : '') + ' - ' + 'Is the latest version.');
+                        var lname = name.split('/')[name.split('/').length - 1];
+                        var dir = name;
+                        System.Console.writeLine(format(1, 35, lname.substr(0, lname.length - 2) + ' @ ./' + dir) + '  Is the latest version.');
                     }
                 }
+                System.Console.writeLine('');
             });
         };
-        UpdateCommand.prototype.toString = function () {
-            return this.shortcut + "    " + this.usage;
-        };
         return UpdateCommand;
-    })();
+    })(Command.BaseCommand);
     Command.UpdateCommand = UpdateCommand;    
 })(Command || (Command = {}));
 var RepositoryTypeEnum;
@@ -984,39 +1006,42 @@ var Config = (function () {
 })();
 var Command;
 (function (Command) {
-    var CreateLocalConfigCommand = (function () {
+    var CreateLocalConfigCommand = (function (_super) {
+        __extends(CreateLocalConfigCommand, _super);
         function CreateLocalConfigCommand() {
+            _super.apply(this, arguments);
+
             this.shortcut = "ncfg";
-            this.usage = "Create a local config file.";
+            this.usage = "Create a local config file";
         }
         CreateLocalConfigCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "localPath": "d.ts",\n' + '    "repositoryType": "1",\n' + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '}');
+            sw.write('{\n' + '    "localPath": "ts-definitions",\n' + '    "repositoryType": "1",\n' + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '}');
             sw.flush();
             sw.close();
         };
         CreateLocalConfigCommand.prototype.exec = function (args) {
             if(System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {
-                throw new Error("There is already a configuration file in this folder.");
+                throw new Error("   [!] There is already a configuration file in this folder.");
             } else {
                 this.saveConfigFile();
             }
-            System.Console.writeLine("configuration file created successfully.");
-        };
-        CreateLocalConfigCommand.prototype.toString = function () {
-            return this.shortcut + "      " + this.usage;
+            System.Console.writeLine("   [!] Configuration file created successfully.");
+            System.Console.writeLine("");
         };
         return CreateLocalConfigCommand;
-    })();
+    })(Command.BaseCommand);
     Command.CreateLocalConfigCommand = CreateLocalConfigCommand;    
 })(Command || (Command = {}));
 var Command;
 (function (Command) {
-    var InfoCommand = (function () {
+    var InfoCommand = (function (_super) {
+        __extends(InfoCommand, _super);
         function InfoCommand(dataSource) {
+                _super.call(this);
             this.dataSource = dataSource;
             this.shortcut = "info";
             this.usage = "Get lib information";
@@ -1039,17 +1064,17 @@ var Command;
         };
         InfoCommand.prototype.display = function (targetLib, targetVersion, libs) {
             if(targetLib == null) {
-                System.Console.writeLine("Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.");
             } else {
                 var version = targetLib.versions[0];
                 System.Web.WebHandler.request.getUrl(version.url, function (body) {
                     System.Console.writeLine("");
-                    System.Console.writeLine("[INFO]        name: " + targetLib.name);
-                    System.Console.writeLine("   +-- description: " + targetLib.description);
-                    System.Console.writeLine("   +---------- key: " + version.key);
-                    System.Console.writeLine("   +------ version: " + version.version);
-                    System.Console.writeLine("   +------- author: " + version.author);
-                    System.Console.writeLine("   +---------- url: " + version.url);
+                    System.Console.writeLine("         name: " + targetLib.name);
+                    System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                    System.Console.writeLine("          key: " + version.key);
+                    System.Console.writeLine("      version: " + version.version);
+                    System.Console.writeLine("       author: " + version.author);
+                    System.Console.writeLine("          url: " + format(0, 60, version.url));
                     System.Console.writeLine("");
                 });
             }
@@ -1062,7 +1087,7 @@ var Command;
                 if(targetLib) {
                     _this.display(targetLib, targetLib.versions[0].version, libs);
                 } else {
-                    System.Console.writeLine("Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.");
                 }
             };
             this.dataSource.all(function (libs) {
@@ -1071,11 +1096,8 @@ var Command;
                 tryGetInfo(libs, lib);
             });
         };
-        InfoCommand.prototype.toString = function () {
-            return this.shortcut + "      " + this.usage;
-        };
         return InfoCommand;
-    })();
+    })(Command.BaseCommand);
     Command.InfoCommand = InfoCommand;    
 })(Command || (Command = {}));
 var CommandLineProcessor = (function () {
@@ -1095,16 +1117,17 @@ var CommandLineProcessor = (function () {
         System.Console.out.autoFlush = false;
         System.Console.writeLine('Syntax: tsd [command] [args...]');
         System.Console.writeLine('');
-        System.Console.writeLine('   Ex.: tsd search nodejs');
+        System.Console.writeLine('The following TSD commands are included:');
         System.Console.writeLine('');
-        System.Console.writeLine('Options:');
+        System.Console.writeLine("  Command           Description");
+        System.Console.writeLine("  ----------------  ---------------------------------------------------------");
         for(var i = 0; i < this.commands.length; i++) {
-            System.Console.writeLine("  " + this.commands[i].toString());
+            System.Console.writeLine(this.commands[i].toString());
         }
+        System.Console.writeLine('');
         System.Console.out.flush();
     };
     CommandLineProcessor.prototype.execute = function (args) {
-        System.Console.writeLine("Command: " + (args[2] || "..."));
         System.Console.writeLine('');
         var accepted = false;
         for(var i = 0; i < this.commands.length; i++) {
@@ -1141,6 +1164,16 @@ var DataSource;
     })();
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
+function complete(val) {
+    var result = '';
+    for(var i = 0; i < val; i++) {
+        result += ' ';
+    }
+    return result;
+}
+function format(start, maxLen, text) {
+    return complete(start) + (text.length > maxLen ? text.substr(0, maxLen - 3) + '...' : text + complete(maxLen - text.length));
+}
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {
@@ -1158,6 +1191,7 @@ var Main = (function () {
             cp.execute(args);
         } catch (e) {
             System.Console.writeLine(e.message);
+            System.Console.writeLine("");
         }
     };
     return Main;

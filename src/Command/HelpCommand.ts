@@ -2,7 +2,7 @@
 
 module Command {
 
-    export class HelpCommand implements ICommand {
+    export class HelpCommand extends BaseCommand {
 
         public shortcut: string = "-h";
         public usage: string = "Print this help message";
@@ -14,10 +14,6 @@ module Command {
 
         public exec(args: Array): void {
             //...
-        }
-
-        public toString(): string {
-            return this.shortcut + "        " + this.usage;
         }
     }
 }

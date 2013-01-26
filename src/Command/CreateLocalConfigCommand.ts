@@ -4,10 +4,10 @@
 
 module Command {
 
-    export class CreateLocalConfigCommand implements ICommand {
+    export class CreateLocalConfigCommand extends BaseCommand {
 
         public shortcut: string = "ncfg";
-        public usage: string = "Create a local config file.";
+        public usage: string = "Create a local config file";
         private args: Array;
 
         public accept(args: Array): bool {
@@ -17,7 +17,7 @@ module Command {
         private saveConfigFile(): void {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
             sw.write('{\n'
-                     + '    "localPath": "d.ts",\n'
+                     + '    "localPath": "ts-definitions",\n'
                      + '    "repositoryType": "1",\n'
                      + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n'
                      + '}');
@@ -27,15 +27,12 @@ module Command {
 
         public exec(args: Array): void {
             if (System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {
-                throw new Error("There is already a configuration file in this folder.");
+                throw new Error("   [!] There is already a configuration file in this folder.");
             } else {
                 this.saveConfigFile();
             }
-            System.Console.writeLine("configuration file created successfully.");
-        }
-
-        public toString(): string {
-            return this.shortcut + "      " + this.usage;
+            System.Console.writeLine("   [!] Configuration file created successfully.");
+            System.Console.writeLine("");
         }
     }
 }

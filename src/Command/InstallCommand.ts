@@ -7,16 +7,16 @@
 
 module Command {
 
-    export class InstallCommand implements ICommand {
+    export class InstallCommand extends BaseCommand {
         public shortcut: string = "install";
-        public usage: string = "Intall file definition. Use install* to automatically dependencies map.";
+        public usage: string = "Intall file definition. Use install* to map dependencies.";
         private _args: Array;
         private _cache: string[] = [];
         private _index: number = 0;
 
         private _withDep = false;
 
-        constructor (public dataSource: DataSource.IDataSource, public cfg: Config) { }
+        constructor(public dataSource: DataSource.IDataSource, public cfg: Config) { super(); }
 
         public accept(args: Array): bool {
             return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
@@ -67,10 +67,10 @@ module Command {
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;// + "-" + version;
 
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("└── " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
 
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
-            System.Console.writeLine("     └── " + key + ".key");
+            System.Console.writeLine("     \\-- " + key + ".key");
 
             System.Console.writeLine("");
         }
@@ -99,7 +99,7 @@ module Command {
                 return;
 
             if (targetLib == null) {
-                System.Console.writeLine("Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.");
             } else {
                 var version = targetLib.versions[0];
 
@@ -132,7 +132,7 @@ module Command {
                 if (targetLib)
                     this.install(targetLib, targetLib.versions[0].version, libs);
                 else
-                    System.Console.writeLine("Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.");
             };
 
             this.dataSource.all((libs) => {
@@ -144,10 +144,6 @@ module Command {
                     lib = args[index];
                 }
             });
-        }
-
-        public toString(): string {
-            return this.shortcut + "   " + this.usage;
         }
     }
 }

@@ -2,31 +2,24 @@
 
 module Command {
 
-    export class SearchCommand implements ICommand {
+    export class SearchCommand extends BaseCommand {
 
         public shortcut: string = "search";
         public usage: string = "Search a file definition on repository";
         private args: Array;
 
-        constructor (public dataSource: DataSource.IDataSource) { }
+        constructor(public dataSource: DataSource.IDataSource) { super(); }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut;
         }
 
         private print(lib: DataSource.Lib) {
-            System.Console.write(' ' + (System.Environment.isNode() ? '\033[36m' : '') + lib.name + (System.Environment.isNode() ? '\033[0m' : '') + '[');
+            var name = lib.name;
+            var version = lib.versions[0].version;
+            var description = lib.description;
 
-            for (var j = 0; j < lib.versions.length; j++) {
-                if (j > 0 && j < lib.versions.length) {
-                    System.Console.write(", ");
-                }
-                var ver = lib.versions[j];
-                System.Console.write(ver.version);
-            }
-
-            System.Console.write("]");
-            System.Console.writeLine(" - " + lib.description);
+            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
         }
 
         private match(key: string, name: string) {
@@ -49,26 +42,28 @@ module Command {
 
         public exec(args: Array): void {
             this.dataSource.all((libs) => {
+                var count = 0;
                 var found = false;
-                System.Console.writeLine("Search results:");
-                System.Console.writeLine("");
-
+                System.Console.writeLine('');
+                System.Console.writeLine(' Name                         Version Description');
+                System.Console.writeLine(' ---------------------------- ------- -----------------------------------------');
                 for (var i = 0; i < libs.length; i++) {
                     var lib = <DataSource.Lib>libs[i];
 
                     if (this.printIfMatch(lib, args)) {
                         found = true;
+                        count++;
                     }
                 }
 
                 if (!found) {
-                    System.Console.writeLine("No results found.");
+                    System.Console.writeLine("   [!] No results found.");
+                } else {
+                    System.Console.writeLine(' ------------------------------------------------------------------------------');
+                    System.Console.writeLine(' Total found: ' + count + ' lib(s).');
+                    System.Console.writeLine('');
                 }
             });
-        }
-
-        public toString(): string {
-            return this.shortcut + "    " + this.usage;
         }
     }
 }

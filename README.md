@@ -31,11 +31,13 @@ You can define your own custom folder to store definition files with the command
 
 This will create a file named `tsd-config.json` on current folder with the following content:
 
-	{
-		"localPath": "d.ts",
-		"repositoryType": "1",
-		"uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
-	}	
+```json	
+{
+	"localPath": "ts-definitions",
+	"repositoryType": "1",
+	"uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
+}
+```
 
 * **localPath** - Must be the path to your local folder to store definition files. This folder will be created in the first time if not exists.
 * **repositoryType** - this property is used to define if uri is a local folder or a url. Use `0` to local folder or `1` to url.
@@ -75,7 +77,51 @@ TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyank
 
 > This file is updated constantly.
 
+## Using TSD with Visual Studio Nuget Console
+
+You can use TSD with Visual Studio Nuget Console. Nuget Console is a PowerShell Console and can normally call any application on Windows PATH. For view how to use TSD I suggest the following steps:
+
+### Prerequisites
+
+* [TypeScript Visual Studio Plugin](http://www.microsoft.com/en-us/download/details.aspx?id=34790)
+* TSD 0.3.1 or last - [View How to install section](https://github.com/Diullei/tsd#how-to-install)
+
+### Steps
+
+1. Open Visual Studio and Create a TypeScript application 
+
+![](https://github.com/Diullei/tsd/raw/master/doc_img/create_ts_app.png)
+
+> I will create an application named `TestApp`
+
+2. Open Nuget Console
+
+![](https://github.com/Diullei/tsd/raw/master/doc_img/open_nuget_console.png)
+
+3. Goto TestApp root folder. Enter the `cd .\TestApp` command on Nuget Console.
+
+4. Create a TSD config file. On Nuget Console use the command: `tsd ncfg`.
+
+![](https://github.com/Diullei/tsd/raw/master/doc_img/tsd_cnfg_nuget.png)
+
+5. Now you can see that TSD has created a file named `tsd-config.json` on your app root folder. To include this file on your application go to Vidual Studio Solution Explorer and select `Show All Files`.
+
+![](https://github.com/Diullei/tsd/raw/master/doc_img/show_all_files.png)
+
+This will show `tsd-config.json` file on Solution Explorer.
+
+6. Take right click on `tsd-config.json` file and select `Include In Project`. Now you can edit this file on visual Studio. [See configuration section](https://github.com/Diullei/tsd#tsd-configuration).
+
+7. Try install `jquery` definition file using `tsd install jquery` on Nuget Console and go to Vidual Studio Solution Explorer and select `Show All Files`(if it is not enabled) to view `ts-definition` folder with `jquery` definition file. Include this folder in project.
+
+> You can test other TSD commands like `tsd all` [See usage section](https://github.com/Diullei/tsd#usage).
+
 ## Change log
+
+### v0.3.1 (2013-01-26)
+
+* Web site (http://www.tsdpm.com/)[http://www.tsdpm.com/]
+* Friendly console output.
 
 ### v0.3.0 (2013-01-25)
 

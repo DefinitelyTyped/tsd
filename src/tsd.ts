@@ -7,6 +7,24 @@
 ///<reference path='Config.ts'/>
 ///<reference path='DataSource\DataSourceFactory.ts'/>
 
+// *********************************************
+//         GLOBAL HELP FUNCTIONS
+// *********************************************
+
+function complete(val: number) {
+    var result = '';
+    for (var i = 0; i < val; i++) {
+        result += ' ';
+    }
+    return result;
+}
+
+function format(start: number, maxLen: number, text: string): string {
+    return complete(start) + (text.length > maxLen ? text.substr(0, maxLen - 3) + '...' : text + complete(maxLen - text.length));
+}
+
+// *********************************************
+
 class Main { 
     public init() { 
         System.Console.initialize();
@@ -25,6 +43,7 @@ class Main {
             cp.execute(args);
         } catch(e){
             System.Console.writeLine(e.message);
+            System.Console.writeLine("");
         }
     }
 }
