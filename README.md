@@ -135,6 +135,8 @@ Example:
 
 Done that, send a pull request.
 
+> NOTE: The definition files can be placed anywhere on the web, however I think [this project](https://github.com/borisyankov/DefinitelyTyped) ([DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)) is the best place.
+
 ## Using TSD with Visual Studio NuGet Console
 
 You can use TSD with Visual Studio NuGet Console. NuGet Console is a PowerShell Console and can normally call any application on Windows PATH. For view how to use TSD I suggest the following steps:
