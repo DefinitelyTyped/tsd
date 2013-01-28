@@ -85,7 +85,7 @@ TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyank
 
 ## How to contribute
 
-To contribute adding new definition files references "fork" this project and add a new file on `repo_data` folder according to the following specifications:
+To contribute adding new definition files references, "fork" this project and add a new file on `repo_data` folder according to the following specifications:
 
 ```javascript	
 {
