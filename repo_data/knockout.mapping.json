@@ -1,0 +1,19 @@
+{
+  "name": "knockout.mapping",
+  "description": "Object mapping plugin for KnockoutJS",
+  "versions": [
+    {
+      "version": "2.0",
+      "key": "31341C16-2D30-4B8E-87E2-4522F0B868BF",
+      "dependencies": [
+        {
+          "name": "knockout",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.mapping/knockout.mapping.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "zeroclipboard",
+  "description": "provides an easy way to copy text to the clipboard using an invisible Adobe Flash movie, and a JavaScript",
+  "versions": [
+    {
+      "version": "",
+      "key": "1ccf7428-d157-c185-9341-e7fec87bbe27",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/zeroclipboard/zeroclipboard.d.ts",
+      "author": "Eric J. Smith",
+      "author_url": "https://github.com/ejsmith"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "domo",
+  "description": "Markup, style, and code in one language",
+  "versions": [
+    {
+      "version": "0.5",
+      "key": "f5828915-4107-6908-a0a1-fd9ce0ec6fd8",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/domo/domo.d.ts",
+      "author": "Steve Fenton",
+      "author_url": "https://github.com/Steve-Fenton"
+    }
+  ]
+}

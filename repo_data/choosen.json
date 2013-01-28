@@ -1,0 +1,19 @@
+{
+  "name": "choosen",
+  "description": "Chosen is a JavaScript plugin that makes long, unwieldy select boxes much more user-friendly.",
+  "versions": [
+    {
+      "version": "0.9",
+      "key": "AA07EAB9-73B4-43A4-B07C-26A899045D72",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chosen/chosen.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "jquery.bootstrap.wizard",
+  "description": "Type definition to jquery.bootstrap.wizard",
+  "versions": [
+    {
+      "version": "",
+      "key": "a7863fc0-a850-e77f-7711-9f75f0c95bf4",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bootstrap.wizard/jquery.bootstrap.wizard.d.ts",
+      "author": "Blake Niemyjski",
+      "author_url": "https://github.com/niemyjski"
+    }
+  ]
+}

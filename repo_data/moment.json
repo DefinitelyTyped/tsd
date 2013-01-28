@@ -1,0 +1,14 @@
+{
+  "name": "moment",
+  "description": "Parse, validate, manipulate, and display dates in javascript.",
+  "versions": [
+    {
+      "version": "1.7",
+      "key": "F0FBEE19-CED3-47F1-BD5C-0F726C37E8B3",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/moment/moment.d.ts",
+      "author": "Michael Lakerveld",
+      "author_url": "https://github.com/Lakerfield"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "backbone",
+  "description": "Javascript MV* framework",
+  "versions": [
+    {
+      "version": "0.9",
+      "key": "94727903-4C29-46C7-9A0C-943BE6A3B22C",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/backbone/backbone.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

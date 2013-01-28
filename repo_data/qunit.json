@@ -1,0 +1,14 @@
+{
+  "name": "qunit",
+  "description": "JavaScript runtime for build applications.",
+  "versions": [
+    {
+      "version": "1.10",
+      "key": "BD09CCAE-87F7-49FF-9CFE-5FB9F95369AB",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/qunit/qunit.d.ts",
+      "author": "Diullei Gomes",
+      "author_url": "https://github.com/Diullei"
+    }
+  ]
+}

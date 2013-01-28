@@ -1,0 +1,19 @@
+{
+  "name": "flot",
+  "description": "Flot definitions",
+  "versions": [
+    {
+      "version": "",
+      "key": "9C497A79-426C-4EB0-924A-5F0EC6144591",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/flot/jquery.flot.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

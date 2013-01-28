@@ -1,0 +1,14 @@
+{
+  "name": "jasmine",
+  "description": "A behavior-driven development framework.",
+  "versions": [
+    {
+      "version": "1.2",
+      "key": "C86218A4-95A3-498D-8232-41270FBCC0CD",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jasmine/jasmine.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

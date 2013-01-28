@@ -1,0 +1,19 @@
+{
+  "name": "jquerymobile",
+  "description": "Touch-Optimized Web Framework for Smartphones & Tablets",
+  "versions": [
+    {
+      "version": "1.2",
+      "key": "D7E641C0-8E41-428E-AFF1-8D7993E054A1",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquerymobile/jquerymobile.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

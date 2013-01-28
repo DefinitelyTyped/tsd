@@ -1,0 +1,14 @@
+{
+  "name": "breeze",
+  "description": "Build rich web apps in JavaScript with techniques you know.",
+  "versions": [
+    {
+      "version": "1.0",
+      "key": "62E7AD1D-D4E7-4210-9CD9-7D5AA3542445",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/breeze/breeze.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

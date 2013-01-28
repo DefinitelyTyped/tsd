@@ -1,0 +1,14 @@
+{
+  "name": "jquery",
+  "description": "JavaScript library to handle HTML elements.",
+  "versions": [
+    {
+      "version": "1.8",
+      "key": "6536E49D-F9FC-4211-B8ED-4EBCC8464887",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery/jquery.d.ts",
+      "author": "TypeScript samples",
+      "author_url": "https://typescript.codeplex.com/"
+    }
+  ]
+}

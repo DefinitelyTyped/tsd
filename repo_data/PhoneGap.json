@@ -1,0 +1,14 @@
+{
+  "name": "PhoneGap",
+  "description": "Framework that supports 7 mobile platforms",
+  "versions": [
+    {
+      "version": "2.2",
+      "key": "53535BA3-1A74-4DA2-9B98-46DFEFA74BB2",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phonegap/phonegap.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

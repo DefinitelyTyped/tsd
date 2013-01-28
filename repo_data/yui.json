@@ -1,0 +1,14 @@
+{
+  "name": "yui",
+  "description": "Type definitions for YUI",
+  "versions": [
+    {
+      "version": "",
+      "key": "1726322F-7D9C-4199-B37D-C5DFC6E54D2B",
+      "dependencies": [],
+      "url": "https://gist.github.com/raw/3845543/828c41fe0e83d179155a49592efa5a5c09f3792f/result.js",
+      "author": "Juan Ignacio Dopazo",
+      "author_url": "https://github.com/juandopazo"
+    }
+  ]
+}

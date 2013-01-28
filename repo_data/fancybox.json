@@ -1,0 +1,19 @@
+{
+  "name": "fancybox",
+  "description": "FancyBox is a tool for displaying images, html content and multi-media",
+  "versions": [
+    {
+      "version": "2.1",
+      "key": "EDE384C1-57A8-4F1C-A8A8-A3BAC91C2EAF",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/fancybox/fancybox.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

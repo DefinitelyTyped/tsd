@@ -1,0 +1,14 @@
+{
+  "name": "underscore-typed",
+  "description": "Utility-belt library for JavaScript.",
+  "versions": [
+    {
+      "version": "1.4",
+      "key": "2B259BB1-D680-468B-835B-2F369D08184A",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore-typed.d.ts",
+      "author": "Josh Baldwin",
+      "author_url": "https://github.com/jbaldwin/"
+    }
+  ]
+}

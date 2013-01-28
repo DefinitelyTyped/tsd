@@ -1,0 +1,14 @@
+{
+  "name": "Youtube",
+  "description": "Type definitions for YouTube",
+  "versions": [
+    {
+      "version": "",
+      "key": "302735EF-0179-4F79-932B-7A0DB70EAED0",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/youtube/youtube.d.ts",
+      "author": "Daz Wilkin",
+      "author_url": "https://github.com/DazWilkin/"
+    }
+  ]
+}

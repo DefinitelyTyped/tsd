@@ -1,0 +1,14 @@
+{
+  "name": "Web-Audio-API",
+  "description": "Type definitions for the Web Audio API, currently only implemented in WebKit browsers",
+  "versions": [
+    {
+      "version": "",
+      "key": "625D38FB-E434-4306-8773-A1BC4A4170CD",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa.d.ts",
+      "author": "bbss",
+      "author_url": "https://github.com/bbss"
+    }
+  ]
+}

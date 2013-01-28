@@ -1,0 +1,19 @@
+{
+  "name": "msnodesql",
+  "description": "Microsoft Driver for Node.js for SQL Server",
+  "versions": [
+    {
+      "version": "0.2",
+      "key": "1A9391CF-2C4F-4A15-AD57-A97A372EE0F8",
+      "dependencies": [
+        {
+          "name": "node",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/msnodesql/msnodesql.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

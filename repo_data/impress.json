@@ -1,0 +1,14 @@
+{
+  "name": "impress",
+  "description": "A presentation framework based on the power of CSS3.",
+  "versions": [
+    {
+      "version": "0.5",
+      "key": "2B8E0B68-91AE-4BB4-8999-D8B7D0778A83",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/impress/impress.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

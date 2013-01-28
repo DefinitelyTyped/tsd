@@ -1,0 +1,14 @@
+{
+  "name": "underscore",
+  "description": "Utility-belt library for JavaScript.",
+  "versions": [
+    {
+      "version": "1.4",
+      "key": "8A9EC69F-7728-4F88-9190-E528402EE27C",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

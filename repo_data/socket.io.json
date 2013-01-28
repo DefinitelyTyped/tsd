@@ -1,0 +1,19 @@
+{
+  "name": "socket.io",
+  "description": "Type definitions for socket.io",
+  "versions": [
+    {
+      "version": "0.9",
+      "key": "3DCF55EB-2079-42F7-9432-D8E1E7A8A09A",
+      "dependencies": [
+        {
+          "name": "node",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/socket.io/socket.io.d.ts",
+      "author": "William Orr",
+      "author_url": "https://github.com/worr"
+    }
+  ]
+}

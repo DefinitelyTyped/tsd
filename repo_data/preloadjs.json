@@ -1,0 +1,14 @@
+{
+  "name": "preloadjs",
+  "description": "A Javascript library that lets you manage and co-ordinate the loading of assets.",
+  "versions": [
+    {
+      "version": "0.2",
+      "key": "27EFA90F-3854-43DE-949A-867A5683FB72",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/preloadjs/preloadjs.d.ts",
+      "author": "Pedro Ferreira",
+      "author_url": "https://bitbucket.org/drk4"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "sinon",
+  "description": "Standalone test spies, stubs and mocks for JavaScript",
+  "versions": [
+    {
+      "version": "",
+      "key": "BB8E24CF-8A90-4064-88A7-4AEC746FD75E",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sinon/sinon-1.5.d.ts",
+      "author": "William Sears",
+      "author_url": "https://github.com/mrbigdog2u"
+    }
+  ]
+}

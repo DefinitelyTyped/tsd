@@ -1,0 +1,19 @@
+{
+  "name": "foundation",
+  "description": "Type definitions for Foundation 3.2",
+  "versions": [
+    {
+      "version": "3.2",
+      "key": "32B595F8-6448-4454-AFAA-8FCBC13FE2AE",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/foundation/foundation.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

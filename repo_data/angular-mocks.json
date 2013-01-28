@@ -1,0 +1,19 @@
+{
+  "name": "angular-mocks",
+  "description": "Google - Angular.Js",
+  "versions": [
+    {
+      "version": "1.0",
+      "key": "4656A224-8C17-442A-8E65-FCA6C3C74788",
+      "dependencies": [
+        {
+          "name": "angular",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-mocks.d.ts",
+      "author": "Diego Vilar",
+      "author_url": "https://github.com/diegovilar"
+    }
+  ]
+}

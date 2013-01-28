@@ -1,0 +1,14 @@
+{
+  "name": "linqjs",
+  "description": "LINQ for JavaScript",
+  "versions": [
+    {
+      "version": "2.2",
+      "key": "F0C29FAB-9E82-4CC4-8BCE-418D28AF4A65",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.d.ts",
+      "author": "MarcinNajder",
+      "author_url": "https://github.com/marcinnajder"
+    }
+  ]
+}

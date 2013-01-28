@@ -1,0 +1,14 @@
+{
+  "name": "toastr",
+  "description": "toastr is a Javascript library for Gnome / Growl type non-blocking notifications.",
+  "versions": [
+    {
+      "version": "1.0",
+      "key": "384F77E4-257E-4050-9457-591FD85381A4",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/toastr/toastr.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

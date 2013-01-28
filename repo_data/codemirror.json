@@ -1,0 +1,14 @@
+{
+  "name": "codemirror",
+  "description": "In-browser code editing",
+  "versions": [
+    {
+      "version": "3.0",
+      "key": "4EF706B3-CADB-4F59-9238-15760D3A999E",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/codemirror/codemirror.d.ts",
+      "author": "François de Campredon",
+      "author_url": "https://github.com/fdecampredon"
+    }
+  ]
+}

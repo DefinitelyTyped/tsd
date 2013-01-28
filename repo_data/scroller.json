@@ -1,0 +1,14 @@
+{
+  "name": "scroller",
+  "description": "Type definition to Scroller",
+  "versions": [
+    {
+      "version": "",
+      "key": "663d9def-e6ed-714f-f057-6ddfdcea46dd",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/scroller/easyscroller.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

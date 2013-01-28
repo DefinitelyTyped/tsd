@@ -1,0 +1,14 @@
+{
+  "name": "node",
+  "description": "JavaScript runtime for build applications.",
+  "versions": [
+    {
+      "version": "0.8",
+      "key": "F6711A17-81AF-4E9C-A82D-855DDB1E7F3A",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/node/node.d.ts",
+      "author": "TypeScript samples",
+      "author_url": "https://typescript.codeplex.com/"
+    }
+  ]
+}

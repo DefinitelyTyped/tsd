@@ -1,0 +1,19 @@
+{
+  "name": "express",
+  "description": "Node.js web application framework",
+  "versions": [
+    {
+      "version": "3.0",
+      "key": "9167385F-C4E4-4634-AF92-0FC7795C3393",
+      "dependencies": [
+        {
+          "name": "node",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/express/express.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}

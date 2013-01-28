@@ -1,0 +1,19 @@
+{
+  "name": "bootstrap.datepicker",
+  "description": "A  datepicker for @twitter bootstrap",
+  "versions": [
+    {
+      "version": "",
+      "key": "BF35ABC1-0C08-421C-8296-72589C74FF9C",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap.datepicker/bootstrap.datepicker.d.ts",
+      "author": "Boris Yankov",
+      "author_url": "https://github.com/borisyankov"
+    }
+  ]
+}
