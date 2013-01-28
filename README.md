@@ -87,7 +87,7 @@ TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyank
 
 To contribute adding new definition files references "fork" this project and add a new file on `repo_data` folder according to the following specifications:
 
-```json	
+```javascript	
 {
   "name": "LIB NAME", // must match the file name without json extension
   "description": "LIB DESCRIPTION",
