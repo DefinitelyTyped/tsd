@@ -3,9 +3,11 @@ TSD - A TypeScript definition package manager
 
 TSD is a TypeScript definition file package manager.  let you easily download and install definition files to use in TypeScript projects.
 
-> To view online package search go to http://www.tsdpm.com/
+> To view online package search - http://www.tsdpm.com/
 
-> To view how to use TSD with NuGet Console go to [Using TSD with Visual Studio Nuget Console](https://github.com/Diullei/tsd#using-tsd-with-visual-studio-nuget-console)
+> To view how to use TSD with NuGet Console - [Using TSD with Visual Studio Nuget Console](https://github.com/Diullei/tsd#using-tsd-with-visual-studio-nuget-console)
+
+> To contribute by adding new references - [How to contribute](https://github.com/Diullei/tsd#how-to-contribute)
 
 ### How to install
 
@@ -80,6 +82,58 @@ Example:
 TSD get the file definitions from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) project. You can view the repository references inside [repository.json](https://github.com/Diullei/tsd/blob/master/deploy/repository.json) file (I'm working to add some anothers). If you want to contribute please make a fork from tsd repo, change the repository.json and make a pull request.
 
 > This file is updated constantly.
+
+## How to contribute
+
+To contribute adding new definition files references "fork" this project and add a new file on `repo_data` folder according to the following specifications:
+
+```json	
+{
+  "name": "LIB NAME", // must match the file name without json extension
+  "description": "LIB DESCRIPTION",
+  "versions": [
+    {
+      "version": "x.x", // LIB VERSION
+      "key": "FILE VERSION KEY", // must be a unique key like a guid. You can use [this tool](http://www.guidgenerator.com/) to generate this key
+      "dependencies": [
+        {
+          "name": "LIB NAME",
+          "version": "VERSION"
+        }
+      ],
+      "url": "DEFINITION FILE URL",
+      "author": "DEFINITION FILE AUTHOR",
+      "author_url": "AUTHOR URL"
+    }
+  ]
+}
+```
+
+Example:
+
+```json	
+{
+  "name": "angular-resource",
+  "description": "Google - Angular.Js",
+  "versions": [
+    {
+      "version": "1.0",
+      "key": "8918D3CF-AAF2-4572-B3D2-509716336A99",
+      "dependencies": [
+        {
+          "name": "angular",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-resource.d.ts",
+      "author": "Diego Vilar",
+      "author_url": "https://github.com/diegovilar"
+    }
+  ]
+}
+```
+
+Done that, send a pull request.
 
 ## Using TSD with Visual Studio NuGet Console
 
