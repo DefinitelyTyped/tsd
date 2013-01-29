@@ -94,7 +94,8 @@ To contribute adding new definition files references, "fork" this project and ad
   "versions": [
     {
       "version": "x.x", // LIB VERSION
-      "key": "FILE VERSION KEY", // must be a unique key like a guid. You can use this tool http://www.guidgenerator.com/ to generate this key
+      "key": "FILE VERSION KEY", // must be a unique key like a guid. You can use this tool 
+      				 // http://www.guidgenerator.com/ to generate this key
       "dependencies": [
         {
           "name": "LIB NAME",
