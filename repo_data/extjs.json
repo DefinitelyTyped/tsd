@@ -1,0 +1,14 @@
+{
+  "name": "extjs",
+  "description": "JavaScript Framework for Rich Apps in Every Browser",
+  "versions": [
+    {
+      "version": "4.1.1",
+      "key": "a64fe5a5-6b79-428b-8258-274d0ca139ad",
+      "dependencies": [],
+      "url": "https://github.com/zz9pa/extjsTypescript/raw/master/jsondocs/ext-4.1.1a.d.ts",
+      "author": "zz9pa",
+      "author_url": "https://github.com/zz9pa"
+    }
+  ]
+}
