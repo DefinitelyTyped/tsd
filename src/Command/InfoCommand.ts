@@ -20,7 +20,7 @@ module Command {
         }
 
         private match(key: string, name: string) {
-            return name.toUpperCase() == key.toUpperCase();
+            return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 

@@ -23,7 +23,7 @@ module Command {
         }
 
         private match(key: string, name: string) {
-            return name.indexOf(key) != -1;
+            return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
         }
 
         private printIfMatch(lib: DataSource.Lib, args: Array): bool {
