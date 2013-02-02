@@ -1,0 +1,19 @@
+{
+  "name": "jquery.timeago",
+  "description": "Timeago is a jQuery plugin that makes it easy to support automatically updating fuzzy timestamps.",
+  "versions": [
+    {
+      "version": "",
+      "key": "d71ef484-6e71-4cc6-ab06-64305ded4ae2",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.timeago/jquery.timeago.d.ts",
+      "author": "François Guillot",
+      "author_url": "http://fguillot.developpez.com/"
+    }
+  ]
+}

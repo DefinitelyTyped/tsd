@@ -1,0 +1,19 @@
+{
+  "name": "jquery.cycle",
+  "description": "The jQuery Cycle Plugin is a slideshow plugin that supports many different types of transition effects.",
+  "versions": [
+    {
+      "version": "",
+      "key": "2503ff50-a27a-4ce7-a50f-e061605dabff",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cycle/jquery.cycle.d.ts",
+      "author": "François Guillot",
+      "author_url": "http://fguillot.developpez.com/"
+    }
+  ]
+}

@@ -4,10 +4,14 @@
   "versions": [
     {
       "version": "0.9",
-      "key": "94727903-4C29-46C7-9A0C-943BE6A3B22C",
+      "key": "352ddabe-1120-418f-bf30-117ce02fccba",
       "dependencies": [
         {
           "name": "jquery",
+          "version": "latest"
+        },
+        {
+          "name": "underscore",
           "version": "latest"
         }
       ],

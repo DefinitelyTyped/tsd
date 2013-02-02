@@ -4,7 +4,7 @@
   "versions": [
     {
       "version": "1.4",
-      "key": "8A9EC69F-7728-4F88-9190-E528402EE27C",
+      "key": "443fd8d4-5352-43cb-a316-6a164c5d05a7",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore.d.ts",
       "author": "Boris Yankov",

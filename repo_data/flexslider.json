@@ -1,0 +1,19 @@
+{
+  "name": "flexslider",
+  "description": "An awesome, fully responsive jQuery slider plugin",
+  "versions": [
+    {
+      "version": "",
+      "key": "5a156dbe-d50a-4d4b-a2fc-b537489fe0df",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/flexSlider/flexSlider.d.ts",
+      "author": "Diullei Gomes",
+      "author_url": "https://github.com/Diullei"
+    }
+  ]
+}
