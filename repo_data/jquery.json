@@ -4,7 +4,7 @@
   "versions": [
     {
       "version": "1.8",
-      "key": "6536E49D-F9FC-4211-B8ED-4EBCC8464887",
+      "key": "ea030dea-980c-435f-a69b-16ec1a1cdf86",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery/jquery.d.ts",
       "author": "TypeScript samples",
