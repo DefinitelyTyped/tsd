@@ -1,0 +1,14 @@
+{
+  "name": "nodemailer",
+  "description": "Nodemailer is an easy to use module to send e-mails with Node.JS (using SMTP or sendmail or Amazon SES) and is unicode friendly.",
+  "versions": [
+    {
+      "version": "",
+      "key": "f22fa921-9879-4f22-a583-d38e158f2496",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/nodemailer/nodemailer.d.ts",
+      "author": "Vincent Bortone",
+      "author_url": "https://github.com/vbortone/"
+    }
+  ]
+}

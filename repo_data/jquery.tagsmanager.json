@@ -1,0 +1,19 @@
+{
+  "name": "jquery.tagsmanager",
+  "description": "Tags Manager (a jQuery plugin)",
+  "versions": [
+    {
+      "version": "",
+      "key": "3526be12-7731-46b3-a09c-8e2e18886f82",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.tagsmanager/jquery.tagsmanager.d.ts",
+      "author": "Vincent Bortone",
+      "author_url": "https://github.com/vbortone/"
+    }
+  ]
+}
