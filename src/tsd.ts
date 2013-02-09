@@ -38,8 +38,8 @@ class Main {
         try { 
             var cfg = new Config();
 			cfg.load();
-            var ds = DataSource.DataSourceFactory.factory(cfg);
-            var cp = new CommandLineProcessor(ds, cfg);
+            //var ds = DataSource.DataSourceFactory.factory(cfg);
+            var cp = new CommandLineProcessor(cfg);
             cp.execute(args);
         } catch(e){
             System.Console.writeLine(e.message);

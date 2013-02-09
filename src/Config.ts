@@ -7,12 +7,20 @@ enum RepositoryTypeEnum {
 	Web
 }
 
+class RepoUri {
+    public repositoryType: RepositoryTypeEnum;
+    public uri: string;
+}
+
+class Repo {
+    public uriList: RepoUri[] = [];
+}
+
 class Config {
     public static FILE_NAME = 'tsd-config.json';
 
-	public repositoryType: RepositoryTypeEnum;
-	public uri: string;
 	public localPath: string;
+	public repo: Repo;
 
 	private static isNull(cfg: Object, key: string, alternativeValue: any): any {
 	    return cfg[key] ? cfg[key] : alternativeValue;
@@ -30,7 +38,11 @@ class Config {
 	public load() {
 	    var cfg = Config.tryGetConfigFile();
 	    this.localPath = Config.isNull(cfg, 'localPath', 'typings');
-	    this.repositoryType = Config.isNull(cfg, 'repositoryType', RepositoryTypeEnum.Web);
-	    this.uri = Config.isNull(cfg, 'uri', "https://github.com/Diullei/tsd/raw/master/deploy/repository.json");
+	    this.repo = Config.isNull(cfg, 'repo', {
+	        uriList: [{
+	            repositoryType: RepositoryTypeEnum.Web,
+	            uri: "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
+	        }]
+	    });
 	}
 }

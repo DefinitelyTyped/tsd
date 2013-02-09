@@ -12,7 +12,7 @@ module NodeJs {
             
             this._request(url, (error, response, body) => {
                 if (error) {
-                    System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please check your internet connection - " + error + '\n');
+                    System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please, check your internet connection - " + error + '\n');
                 } else {
                     System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
                     if (!error && response.statusCode == 200) {

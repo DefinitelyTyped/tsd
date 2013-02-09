@@ -13,10 +13,10 @@ module Command {
         private _args: Array;
         private _cache: string[] = [];
         private _index: number = 0;
-
         private _withDep = false;
+        private _withRepoIndex = false;
 
-        constructor(public dataSource: DataSource.IDataSource, public cfg: Config) { super(); }
+        constructor(public cfg: Config) { super(); }
 
         public accept(args: Array): bool {
             return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
@@ -99,7 +99,7 @@ module Command {
                 return;
 
             if (targetLib == null) {
-                System.Console.writeLine("   [!] Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = targetLib.versions[0];
 
@@ -119,12 +119,8 @@ module Command {
             }
         }
 
-        public exec(args: Array): void {
+        private execInternal(index: number, uriList: RepoUri[], args: Array) {
             var targetLib: DataSource.Lib;
-
-            if (args[2].indexOf('*') != -1) {
-                this._withDep = true;
-            }
 
             var tryInstall = (libs, lib: string) => {
                 targetLib = this.find(lib, libs);
@@ -132,11 +128,12 @@ module Command {
                 if (targetLib)
                     this.install(targetLib, targetLib.versions[0].version, libs);
                 else
-                    System.Console.writeLine("   [!] Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.\n");
             };
 
-            this.dataSource.all((libs) => {
-                var index = 3;
+            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            dataSource.all((libs) => {
+                var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
                 while (lib) {
                     tryInstall(libs, lib);
@@ -144,6 +141,25 @@ module Command {
                     lib = args[index];
                 }
             });
+        }
+
+        public exec(args: Array): void {
+            if (args[2].indexOf('*') != -1) {
+                this._withDep = true;
+            }
+
+            var uriList = this.cfg.repo.uriList;
+            if (args[3].indexOf('!') != -1) {
+                this._withRepoIndex = true;
+                var index = parseInt(args[3][1]);
+                if (index.toString() != "NaN") {
+                    this.execInternal(index, uriList, args);
+                } else {
+                    System.Console.writeLine("   [!] Invalid repository index.\n");
+                }
+            } else {
+                this.execInternal(0, uriList, args);
+            }
         }
     }
 }

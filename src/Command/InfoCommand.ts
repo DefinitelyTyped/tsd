@@ -12,8 +12,9 @@ module Command {
         public usage: string = "Get lib information";
         private _args: Array;
         private _index: number = 0;
+        private _withRepoIndex = false;
 
-        constructor(public dataSource: DataSource.IDataSource) { super(); }
+        constructor(public cfg: Config) { super(); }
 
         public accept(args: Array): bool {
             return args[2] == this.shortcut && args[3];
@@ -37,7 +38,7 @@ module Command {
         private display(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
 
             if (targetLib == null) {
-                System.Console.writeLine("   [!] Lib not found.");
+                System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = targetLib.versions[0];
 
@@ -55,7 +56,7 @@ module Command {
             }
         }
 
-        public exec(args: Array): void {
+        private execInternal(index: number, uriList: RepoUri[], args: Array) {
             var targetLib: DataSource.Lib;
 
             var tryGetInfo = (libs, lib: string) => {
@@ -64,14 +65,30 @@ module Command {
                 if (targetLib)
                     this.display(targetLib, targetLib.versions[0].version, libs);
                 else
-                    System.Console.writeLine("   [!] Lib not found.");
+                    System.Console.writeLine("   [!] Lib not found.\n");
             };
 
-            this.dataSource.all((libs) => {
-                var index = 3;
+            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            dataSource.all((libs) => {
+                var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
                 tryGetInfo(libs, lib);
             });
+        }
+
+        public exec(args: Array): void {
+            var uriList = this.cfg.repo.uriList;
+            if (args[3].indexOf('!') != -1) {
+                this._withRepoIndex = true;
+                var index = parseInt(args[3][1]);
+                if (index.toString() != "NaN") {
+                    this.execInternal(index, uriList, args);
+                } else {
+                    System.Console.writeLine("   [!] Invalid repository index.\n");
+                }
+            } else {
+                this.execInternal(0, uriList, args);
+            }
         }
     }
 }

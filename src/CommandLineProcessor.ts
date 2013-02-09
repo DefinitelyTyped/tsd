@@ -1,4 +1,5 @@
 ///<reference path='DataSource\IDataSource.ts'/>
+///<reference path='Command\Helper.ts'/>
 ///<reference path='Command\ICommand.ts'/>
 ///<reference path='Command\HelpCommand.ts'/>
 ///<reference path='Command\AllCommand.ts'/>
@@ -12,15 +13,15 @@ class CommandLineProcessor {
 
 	commands: Command.ICommand[];
 
-	constructor(public dataSource: DataSource.IDataSource, public cfg: Config){
+	constructor(public cfg: Config){
  		this.commands = [];
 		this.commands.push(new Command.HelpCommand());
-        this.commands.push(new Command.AllCommand(this.dataSource));
-        this.commands.push(new Command.SearchCommand(this.dataSource));
-        this.commands.push(new Command.InstallCommand(this.dataSource, this.cfg));
-        this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
+		this.commands.push(new Command.AllCommand(cfg));
+		this.commands.push(new Command.SearchCommand(cfg));
+		this.commands.push(new Command.InstallCommand(cfg));
+        //this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
-        this.commands.push(new Command.InfoCommand(this.dataSource));
+        this.commands.push(new Command.InfoCommand(cfg));
  	}
 
 	public printUsage() {
@@ -41,7 +42,6 @@ class CommandLineProcessor {
 	}
 
     public execute(args: Array) {
-        //System.Console.writeLine("Command: " + (args[2] || "..."));
         System.Console.writeLine('');
  
         var accepted: bool = false;
@@ -50,10 +50,11 @@ class CommandLineProcessor {
             var command = this.commands[i];
             if(command.accept(args)) {
                 accepted = true;
-                if(command instanceof Command.HelpCommand)
+                if (command instanceof Command.HelpCommand)
                     this.printUsage();
-                else
+                else {
                     command.exec(args);
+                }
             }
         }
 

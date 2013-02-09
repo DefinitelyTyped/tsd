@@ -161,6 +161,7 @@
     <Content Include="deploy\tsd.js" />
     <Content Include="LICENSE.txt" />
     <Content Include="src\Command\AllCommand.ts" />
+    <Content Include="src\Command\Helper.ts" />
     <Content Include="tools\estractRepository.js">
       <DependentUpon>buildRepository.ts</DependentUpon>
     </Content>
