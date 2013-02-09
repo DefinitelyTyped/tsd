@@ -29,7 +29,7 @@ class Config {
 
 	public load() {
 	    var cfg = Config.tryGetConfigFile();
-	    this.localPath = Config.isNull(cfg, 'localPath', 'd.ts');
+	    this.localPath = Config.isNull(cfg, 'localPath', 'typings');
 	    this.repositoryType = Config.isNull(cfg, 'repositoryType', RepositoryTypeEnum.Web);
 	    this.uri = Config.isNull(cfg, 'uri', "https://github.com/Diullei/tsd/raw/master/deploy/repository.json");
 	}
