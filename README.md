@@ -27,7 +27,7 @@ This will print all file definitions available on repository. To install some fi
 
     tsd install node
 
-This will create by default a folder named `d.ts` (if it doesn't exists) and will download the file definition to this folder.
+This will create by default a folder named `typings` (if it doesn't exists) and will download the file definition to this folder.
 
 ### TSD configuration
 
@@ -39,7 +39,7 @@ This will create a file named `tsd-config.json` on current folder with the follo
 
 ```json	
 {
-	"localPath": "ts-definitions",
+	"localPath": "typings",
 	"repositoryType": "1",
 	"uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
 }
@@ -173,7 +173,7 @@ This will show `tsd-config.json` file on Solution Explorer.
 
 6. Take right click on `tsd-config.json` file and select `Include In Project`. Now you can edit this file on visual Studio. [See configuration section](https://github.com/Diullei/tsd#tsd-configuration).
 
-7. Try install `jquery` definition file using `tsd install jquery` on NuGet Console and go to Vidual Studio Solution Explorer and select `Show All Files`(if it is not enabled) to view `ts-definition` folder with `jquery` definition file. Include this folder in project.
+7. Try install `jquery` definition file using `tsd install jquery` on NuGet Console and go to Vidual Studio Solution Explorer and select `Show All Files`(if it is not enabled) to view `typings` folder with `jquery` definition file. Include this folder in project.
 
 > You can test other TSD commands like `tsd all` [See usage section](https://github.com/Diullei/tsd#usage).
 

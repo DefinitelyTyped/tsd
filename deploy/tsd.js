@@ -999,7 +999,7 @@ var Config = (function () {
     };
     Config.prototype.load = function () {
         var cfg = Config.tryGetConfigFile();
-        this.localPath = Config.isNull(cfg, 'localPath', 'd.ts');
+        this.localPath = Config.isNull(cfg, 'localPath', 'typings');
         this.repositoryType = Config.isNull(cfg, 'repositoryType', RepositoryTypeEnum.Web);
         this.uri = Config.isNull(cfg, 'uri', "https://github.com/Diullei/tsd/raw/master/deploy/repository.json");
     };
@@ -1020,7 +1020,7 @@ var Command;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "localPath": "ts-definitions",\n' + '    "repositoryType": "1",\n' + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '}');
+            sw.write('{\n' + '    "localPath": "typings",\n' + '    "repositoryType": "1",\n' + '    "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '}');
             sw.flush();
             sw.close();
         };
