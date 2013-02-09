@@ -344,13 +344,14 @@ var NodeJs;
             System.Console.writeLine("tsd \033[32mhttp \033[35mGET\033[0m " + url);
             this._request(url, function (error, response, body) {
                 if(error) {
-                    System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m " + url);
-                }
-                System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
-                if(!error && response.statusCode == 200) {
-                    callback(body);
+                    System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please check your internet connection - " + error + '\n');
                 } else {
-                    System.Console.writeLine("tsd \033[31ERR!\033[0m " + response.statusCode + " " + error);
+                    System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
+                    if(!error && response.statusCode == 200) {
+                        callback(body);
+                    } else {
+                        System.Console.writeLine("tsd \033[31ERR!\033[0m " + response.statusCode + " " + error);
+                    }
                 }
             });
         };
@@ -566,7 +567,7 @@ var Command;
             System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
         };
         SearchCommand.prototype.match = function (key, name) {
-            return name.indexOf(key) != -1;
+            return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
         };
         SearchCommand.prototype.printIfMatch = function (lib, args) {
             var found = false;
@@ -1051,7 +1052,7 @@ var Command;
             return args[2] == this.shortcut && args[3];
         };
         InfoCommand.prototype.match = function (key, name) {
-            return name.toUpperCase() == key.toUpperCase();
+            return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
         };
         InfoCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
