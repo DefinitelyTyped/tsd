@@ -4,7 +4,7 @@
   "versions": [
     {
       "version": "",
-      "key": "67b5b294-02d6-4569-9f5c-d9d5289e3361",
+      "key": "2b44a7f1-c4ad-4f05-9208-f50000c22c64",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sinon/sinon-1.5.d.ts",
       "author": "William Sears",

@@ -4,7 +4,7 @@
   "versions": [
     {
       "version": "1.10",
-      "key": "036550a7-f2c2-481d-b268-5fb3a171e13b",
+      "key": "31f242da-ab6d-4b58-bacd-a6f493971a7a",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/qunit/qunit.d.ts",
       "author": "Diullei Gomes",

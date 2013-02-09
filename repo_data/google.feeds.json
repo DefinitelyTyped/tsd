@@ -1,0 +1,14 @@
+{
+  "name": "google.feeds",
+  "description": "With the Feed API, you can download any public Atom, RSS, or Media RSS feed using only JavaScript.",
+  "versions": [
+    {
+      "version": "v1",
+      "key": "2938159e-d613-4b6a-8dd9-dd7947c79827",
+      "dependencies": [],
+      "url": "https://github.com/RodneyJT/DefinitelyTyped/raw/master/google.feeds/google.feed.api.d.ts",
+      "author": "RodneyJT",
+      "author_url": "https://github.com/RodneyJT"
+    }
+  ]
+}

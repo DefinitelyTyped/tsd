@@ -1,0 +1,19 @@
+{
+  "name": "urijs",
+  "description": "Javascript URL mutation library",
+  "versions": [
+    {
+      "version": "1.8.3",
+      "key": "4b36aa51-2bc9-40b7-bd15-3f733fec159d",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/urijs/URI.d.ts",
+      "author": "RodneyJT",
+      "author_url": "https://github.com/RodneyJT"
+    }
+  ]
+}
