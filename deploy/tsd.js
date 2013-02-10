@@ -866,6 +866,7 @@ var Command;
             System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     \\-- " + key + ".key");
+            this.cfg.addDependency(name, version, key);
             System.Console.writeLine("");
         };
         InstallCommand.prototype.find = function (key, libs) {
@@ -1017,6 +1018,7 @@ var Command;
     })(Command.BaseCommand);
     Command.UpdateCommand = UpdateCommand;    
 })(Command || (Command = {}));
+var util = require('util');
 var RepositoryTypeEnum;
 (function (RepositoryTypeEnum) {
     RepositoryTypeEnum._map = [];
@@ -1036,7 +1038,9 @@ var Repo = (function () {
     return Repo;
 })();
 var Config = (function () {
-    function Config() { }
+    function Config() {
+        this.dependencies = [];
+    }
     Config.FILE_NAME = 'tsd-config.json';
     Config.isNull = function isNull(cfg, key, alternativeValue) {
         return cfg[key] ? cfg[key] : alternativeValue;
@@ -1062,6 +1066,24 @@ var Config = (function () {
             ]
         });
     };
+    Config.prototype.save = function () {
+        var cfg = {
+            localPath: this.localPath,
+            repo: this.repo,
+            dependencies: this.dependencies
+        };
+        var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
+        sw.write(util.inspect(cfg, false, 10, false));
+        sw.flush();
+        sw.close();
+    };
+    Config.prototype.addDependency = function (name, version, key) {
+        this.dependencies.push({
+            name: name,
+            version: version,
+            key: key
+        });
+    };
     return Config;
 })();
 var Command;
@@ -1079,7 +1101,7 @@ var Command;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "localPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "repositoryType": "1",\n' + '                "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '            }\n' + '        ]\n' + '    }\n' + '}');
+            sw.write('{\n' + '    "localPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "repositoryType": "1",\n' + '                "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '            }\n' + '        ]\n' + '    }\n' + '    "dependencies": []\n' + '}');
             sw.flush();
             sw.close();
         };

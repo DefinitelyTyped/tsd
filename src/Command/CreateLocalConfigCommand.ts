@@ -25,6 +25,7 @@ module Command {
                     + '            }\n'
                     + '        ]\n'
                     + '    }\n'
+                    + '    "dependencies": []\n'
                     + '}');
             sw.flush();
             sw.close();

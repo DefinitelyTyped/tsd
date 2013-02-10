@@ -72,6 +72,8 @@ module Command {
             this.saveFile(fileNameWithoutExtension + ".d.key", key);
             System.Console.writeLine("     \\-- " + key + ".key");
 
+            this.cfg.addDependency(name, version, key);
+
             System.Console.writeLine("");
         }
 

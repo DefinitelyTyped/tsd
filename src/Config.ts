@@ -1,5 +1,6 @@
 ///<reference path='System/IO/FileManager.ts'/>
 
+var util = require('util');
 declare var unescape;
 
 enum RepositoryTypeEnum {
@@ -21,6 +22,7 @@ class Config {
 
 	public localPath: string;
 	public repo: Repo;
+	private dependencies: any[] = [];
 
 	private static isNull(cfg: Object, key: string, alternativeValue: any): any {
 	    return cfg[key] ? cfg[key] : alternativeValue;
@@ -44,5 +46,21 @@ class Config {
 	            uri: "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
 	        }]
 	    });
+	}
+
+	public save() {
+	    var cfg = {
+	        localPath: this.localPath,
+	        repo: this.repo,
+            dependencies: this.dependencies
+	    };
+	    var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
+	    sw.write(util.inspect(cfg, false, 10, false));
+	    sw.flush();
+	    sw.close();
+	}
+
+	public addDependency(name: string, version: string, key: string) {
+	    this.dependencies.push({name: name, version: version, key: key});
 	}
 }
