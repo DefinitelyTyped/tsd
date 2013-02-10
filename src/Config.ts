@@ -40,6 +40,7 @@ class Config {
 	public load() {
 	    var cfg = Config.tryGetConfigFile();
 	    this.localPath = Config.isNull(cfg, 'localPath', 'typings');
+	    this.dependencies = Config.isNull(cfg, 'dependencies', []);
 	    this.repo = Config.isNull(cfg, 'repo', {
 	        uriList: [{
 	            repositoryType: RepositoryTypeEnum.Web,

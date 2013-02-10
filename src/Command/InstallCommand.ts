@@ -69,12 +69,14 @@ module Command {
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
 
-            this.saveFile(fileNameWithoutExtension + ".d.key", key);
-            System.Console.writeLine("     \\-- " + key + ".key");
+            //this.saveFile(fileNameWithoutExtension + ".d.key", key);
+            //System.Console.writeLine("     \\-- " + key + ".key");
 
             this.cfg.addDependency(name, version, key);
 
             System.Console.writeLine("");
+
+            this.cfg.save();
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 

@@ -864,10 +864,9 @@ var Command;
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
             System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
-            this.saveFile(fileNameWithoutExtension + ".d.key", key);
-            System.Console.writeLine("     \\-- " + key + ".key");
             this.cfg.addDependency(name, version, key);
             System.Console.writeLine("");
+            this.cfg.save();
         };
         InstallCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
@@ -1057,6 +1056,7 @@ var Config = (function () {
     Config.prototype.load = function () {
         var cfg = Config.tryGetConfigFile();
         this.localPath = Config.isNull(cfg, 'localPath', 'typings');
+        this.dependencies = Config.isNull(cfg, 'dependencies', []);
         this.repo = Config.isNull(cfg, 'repo', {
             uriList: [
                 {
