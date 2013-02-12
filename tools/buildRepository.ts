@@ -74,6 +74,7 @@ for (var i = 0; i < data.length; i++) {
 //console.log(JSON.stringify(obj, null, 2));
 var files = new NodeJs.DirectoryHandle().getAllFiles('../repo_data');
 var repo = [];
+var repo_v2 = [];
 var repo_site = [];
 for (var i = 0; i < files.length; i++) {
     console.log(files[i]);
@@ -93,6 +94,35 @@ for (var i = 0; i < files.length; i++) {
         author_url: obj.versions[0].author_url,
         url: obj.versions[0].url
     });
+
+    repo_v2.push({
+        name: obj.name,
+        description: obj.description,
+        versions: [{
+            version: obj.versions[0].version,
+            key: obj.versions[0].key,
+            dependencies: obj.versions[0].dependencies,
+            uri: {
+                source: obj.versions[0].url,
+                sourceType: 1
+            },
+            author: {
+                name: obj.versions[0].author,
+                url: obj.versions[0].author_url,
+            },
+            lib: {
+                sources: [
+/*
+"folder": "",
+"uri": {
+	"source": "",
+	"sourceType": "1"
+}
+*/
+                ]
+            }
+        }]
+    });
 }
 
 var sw = new NodeJs.FileHandle().createFile('../deploy/repository.json');
@@ -104,3 +134,8 @@ var sw2 = new NodeJs.FileHandle().createFile('../../tsdpm-site/tmpl/repository.j
 sw2.write('var __repo = ' + JSON.stringify(repo_site) + ';');
 sw2.flush();
 sw2.close();
+
+var sw3 = new NodeJs.FileHandle().createFile('../deploy/repository_v2.json');
+sw3.write(JSON.stringify({ repo: repo_v2 }));
+sw3.flush();
+sw3.close();

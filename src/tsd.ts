@@ -38,7 +38,6 @@ class Main {
         try { 
             var cfg = new Config();
 			cfg.load();
-            //var ds = DataSource.DataSourceFactory.factory(cfg);
             var cp = new CommandLineProcessor(cfg);
             cp.execute(args);
         } catch(e){

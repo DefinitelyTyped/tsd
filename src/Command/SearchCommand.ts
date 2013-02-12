@@ -39,7 +39,7 @@ module Command {
             return found;
         }
 
-        private showResults(dataSource: DataSource.IDataSource, uriList: RepoUri[], args: Array){
+        private showResults(dataSource: DataSource.IDataSource, uriList: TsdUri[], args: Array){
             dataSource.all((libs) => {
                 var repoNumber = this._indexSync - 1;
                 var foundLibs: DataSource.Lib[] = [];
@@ -59,7 +59,7 @@ module Command {
                 }
 
                 if (this._indexSync < uriList.length) {
-                    this.showResults(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList, args);
+                    this.showResults(Helper.getDataSource(uriList[this._indexSync++]), uriList, args);
                 }
             });
         }
@@ -68,7 +68,7 @@ module Command {
         public exec(args: Array): void {
             var uriList = this.cfg.repo.uriList;
             if (this._indexSync < uriList.length) {
-                this.showResults(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList, args);
+                this.showResults(Helper.getDataSource(uriList[this._indexSync++]), uriList, args);
             }
         }
     }

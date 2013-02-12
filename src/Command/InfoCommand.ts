@@ -36,27 +36,22 @@ module Command {
         }
 
         private display(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
-
             if (targetLib == null) {
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = targetLib.versions[0];
 
-                System.Web.WebHandler.request.getUrl(version.url, (body) => {
-
-                    System.Console.writeLine("");
-                    System.Console.writeLine("         name: " + targetLib.name);
-                    System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
-                    System.Console.writeLine("          key: " + version.key);
-                    System.Console.writeLine("      version: " + version.version);
-                    System.Console.writeLine("       author: " + version.author);
-                    System.Console.writeLine("          url: " + format(0, 60, version.url));
-                    System.Console.writeLine("");
-                });
+                System.Console.writeLine("         name: " + targetLib.name);
+                System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                System.Console.writeLine("          key: " + version.key);
+                System.Console.writeLine("      version: " + version.version);
+                System.Console.writeLine("       author: " + format(0, 60, version.author.name + ' (' + version.author.url + ')'));
+                System.Console.writeLine("          url: " + format(0, 60, version.uri.source));
+                System.Console.writeLine("");
             }
         }
 
-        private execInternal(index: number, uriList: RepoUri[], args: Array) {
+        private execInternal(index: number, uriList: TsdUri[], args: Array) {
             var targetLib: DataSource.Lib;
 
             var tryGetInfo = (libs, lib: string) => {
@@ -68,7 +63,7 @@ module Command {
                     System.Console.writeLine("   [!] Lib not found.\n");
             };
 
-            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            var dataSource = Helper.getDataSource(uriList[index]);
             dataSource.all((libs) => {
                 var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];

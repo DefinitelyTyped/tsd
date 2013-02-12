@@ -14,13 +14,13 @@ module Command {
             return args[2] == this.shortcut;
         }
 
-        private repoExplorer(dataSource: DataSource.IDataSource, uriList: RepoUri[]) {
+        private repoExplorer(dataSource: DataSource.IDataSource, uriList: TsdUri[]) {
             dataSource.all((libs) => {
                 var repoNumber = this._indexSync - 1;
                 Helper.printLibs(libs, uriList[repoNumber], repoNumber);
 
                 if (this._indexSync < uriList.length) {
-                    this.repoExplorer(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList);
+                    this.repoExplorer(Helper.getDataSource(uriList[this._indexSync++]), uriList);
                 }
             });
         }
@@ -29,7 +29,7 @@ module Command {
         public exec(args: Array): void {
             var uriList = this.cfg.repo.uriList;
             if (this._indexSync < uriList.length) {
-                this.repoExplorer(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList);
+                this.repoExplorer(Helper.getDataSource(uriList[this._indexSync++]), uriList);
             }
         }
     }

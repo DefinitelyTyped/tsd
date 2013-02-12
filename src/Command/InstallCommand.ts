@@ -56,7 +56,7 @@ module Command {
             }
         }
 
-        private save(url: string, name: string, version: string, key: string, content: string): void {
+        private save(url: string, name: string, version: string, key: string, content: string, tsdUri: TsdUri): void {
             var uri = Uri.parseUri(url);
             this.normalizeGithubUrl(uri);
 
@@ -67,12 +67,9 @@ module Command {
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;// + "-" + version;
 
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            System.Console.writeLine("+-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
 
-            //this.saveFile(fileNameWithoutExtension + ".d.key", key);
-            //System.Console.writeLine("     \\-- " + key + ".key");
-
-            this.cfg.addDependency(name, version, key);
+            this.cfg.addDependency(name, version, key, tsdUri);
 
             System.Console.writeLine("");
 
@@ -99,7 +96,7 @@ module Command {
         }
 
         private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
-            if(this.cacheContains(targetLib.name/* + '@' + targetVersion*/))
+            if(this.cacheContains(targetLib.name))
                 return;
 
             if (targetLib == null) {
@@ -107,9 +104,9 @@ module Command {
             } else {
                 var version = targetLib.versions[0];
 
-                System.Web.WebHandler.request.getUrl(version.url, (body) => {
-                    this.save(version.url, targetLib.name, version.version, version.key, body);
-                    this._cache.push(targetLib.name/* + '@' + version.version*/);
+                Helper.getSourceContent(version.uri, (body: string) => {
+                    this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
+                    this._cache.push(targetLib.name);
 
                     if (!this._withDep)
                         return;
@@ -120,10 +117,25 @@ module Command {
                         this.install(dep, dep.versions[0].version, libs);
                     }
                 });
+
+                /*
+                System.Web.WebHandler.request.getUrl(version.uri.source, (body) => {
+                    this.save(version.uri.source, targetLib.name, version.version, version.key, body);
+                    this._cache.push(targetLib.name);
+
+                    if (!this._withDep)
+                        return;
+
+                    var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];
+                    for (var i = 0; i < deps.length; i++) {
+                        var dep: DataSource.Lib = this.find(deps[i].name, libs);
+                        this.install(dep, dep.versions[0].version, libs);
+                    }
+                });*/
             }
         }
 
-        private execInternal(index: number, uriList: RepoUri[], args: Array) {
+        private execInternal(index: number, uriList: TsdUri[], args: Array) {
             var targetLib: DataSource.Lib;
 
             var tryInstall = (libs, lib: string) => {
@@ -135,7 +147,7 @@ module Command {
                     System.Console.writeLine("   [!] Lib not found.\n");
             };
 
-            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            var dataSource = Helper.getDataSource(uriList[index]);
             dataSource.all((libs) => {
                 var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];

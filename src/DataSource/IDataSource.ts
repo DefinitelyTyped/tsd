@@ -4,11 +4,12 @@
 module DataSource {
 
     export class LibVersion {
-        public key: string;
         public version: string;
-        public author: string;
-        public url: string;
-        public dependencies: any[] = [];
+        public key: string;
+        public dependencies: LibDep[];
+        public uri: TsdUri;
+        public author: { name: string; url: string; };
+        public lib: any;
     }
 
     export interface LibDep { 
@@ -30,5 +31,6 @@ module DataSource {
     export interface IDataSource {
         all: (callback: (data: DataSource.Lib[]) => void ) => void;
         find: (keys: string[]) => Lib;
+        content: (callback: (data: string) => void ) => any;
     }
 }

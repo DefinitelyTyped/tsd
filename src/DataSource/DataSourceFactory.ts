@@ -6,11 +6,11 @@
 module DataSource {
 
     export class DataSourceFactory {
-        public static factory(repoUri: RepoUri): IDataSource {
-            if (repoUri.repositoryType == RepositoryTypeEnum.FileSystem) {
-                return new FileSystemDataSource(repoUri.uri);
-            } else if (repoUri.repositoryType == RepositoryTypeEnum.Web) {
-                return new WebDataSource(repoUri.uri);
+        public static factory(uri: TsdUri): IDataSource {
+            if (uri.sourceType == SourceTypeEnum.FileSystem) {
+                return new FileSystemDataSource(uri.source);
+            } else if (uri.sourceType == SourceTypeEnum.Web) {
+                return new WebDataSource(uri.source);
             } else {
                 throw Error('Invalid dataSource.');
             }

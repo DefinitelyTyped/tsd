@@ -8,6 +8,7 @@
 ///<reference path='Command\UpdateCommand.ts'/>
 ///<reference path='Command\CreateLocalConfigCommand.ts'/>
 ///<reference path='Command\InfoCommand.ts'/>
+///<reference path='Command\RepoCommand.ts'/>
 
 class CommandLineProcessor {
 
@@ -22,6 +23,7 @@ class CommandLineProcessor {
         //this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
         this.commands.push(new Command.InfoCommand(cfg));
+        this.commands.push(new Command.RepoCommand(cfg));
  	}
 
 	public printUsage() {

@@ -17,15 +17,16 @@ module Command {
         private saveConfigFile(): void {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
             sw.write('{\n'
+                    + '    "version": "v2",\n'
                     + '    "localPath": "typings",\n'
                     + '    "repo": {\n'
                     + '        "uriList": [{\n'
-                    + '                "repositoryType": "1",\n'
-                    + '                "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n'
+                    + '                "sourceType": "1",\n'
+                    + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n'
                     + '            }\n'
                     + '        ]\n'
-                    + '    }\n'
-                    + '    "dependencies": []\n'
+                    + '    },\n'
+                    + '    "dependencies": {}\n'
                     + '}');
             sw.flush();
             sw.close();

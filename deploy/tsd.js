@@ -347,7 +347,9 @@ var NodeJs;
                     System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please, check your internet connection - " + error + '\n');
                 } else {
                     System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
-                    if(!error && response.statusCode == 200) {
+                    if(response.statusCode == 404) {
+                        System.Console.writeLine("tsd \033[31mERR!\033[0m " + response.statusCode + " Not Found");
+                    } else if(!error && response.statusCode == 200) {
                         callback(body);
                     } else {
                         System.Console.writeLine("tsd \033[31ERR!\033[0m " + response.statusCode + " " + error);
@@ -416,14 +418,19 @@ var DataSource;
         WebDataSource.prototype.all = function (callback) {
             System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (body) {
                 if(System.Environment.isWsh()) {
-                    callback(eval("(function(){return " + body + ";})()"));
+                    callback(eval("(function(){return " + body + ";})()").repo);
                 } else {
-                    callback(JSON.parse(body));
+                    callback(JSON.parse(body).repo);
                 }
             });
         };
         WebDataSource.prototype.find = function (keys) {
             return null;
+        };
+        WebDataSource.prototype.content = function (callback) {
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (body) {
+                callback(body);
+            });
         };
         return WebDataSource;
     })();
@@ -441,11 +448,14 @@ var DataSource;
                 if(err) {
                     throw new Error("Error reading file repository file: " + err.message);
                 }
-                callback(JSON.parse(data));
+                callback(JSON.parse(data).repo);
             });
         };
         FileSystemDataSource.prototype.find = function (keys) {
             return null;
+        };
+        FileSystemDataSource.prototype.content = function (callback) {
+            callback(this._fs.readFileSync(this.repositoryPath, 'utf8'));
         };
         return FileSystemDataSource;
     })();
@@ -454,9 +464,7 @@ var DataSource;
 var DataSource;
 (function (DataSource) {
     var LibVersion = (function () {
-        function LibVersion() {
-            this.dependencies = [];
-        }
+        function LibVersion() { }
         return LibVersion;
     })();
     DataSource.LibVersion = LibVersion;    
@@ -503,7 +511,7 @@ var Command;
         Helper.printLibs = function printLibs(libs, repo, repoNumber) {
             System.Console.writeLine('');
             System.Console.writeLine(' ------------------------------------------------------------------------------');
-            System.Console.writeLine(' Repo [' + repoNumber + ']: ' + repo.uri);
+            System.Console.writeLine(' Repo [' + repoNumber + ']: ' + repo.source);
             System.Console.writeLine('');
             System.Console.writeLine(' Name                         Version Description                             R');
             System.Console.writeLine(' ---------------------------- ------- --------------------------------------- -');
@@ -514,6 +522,12 @@ var Command;
             System.Console.writeLine(' ------------------------------------------------------------------------------');
             System.Console.writeLine(' Repo [' + repoNumber + '] - Total: ' + libs.length + ' lib(s).');
             System.Console.writeLine('');
+        };
+        Helper.getDataSource = function getDataSource(uri) {
+            return DataSource.DataSourceFactory.factory(uri);
+        };
+        Helper.getSourceContent = function getSourceContent(uri, callback) {
+            Helper.getDataSource(uri).content(callback);
         };
         return Helper;
     })();
@@ -558,14 +572,14 @@ var Command;
                 var repoNumber = _this._indexSync - 1;
                 Command.Helper.printLibs(libs, uriList[repoNumber], repoNumber);
                 if(_this._indexSync < uriList.length) {
-                    _this.repoExplorer(DataSource.DataSourceFactory.factory(uriList[_this._indexSync++]), uriList);
+                    _this.repoExplorer(Command.Helper.getDataSource(uriList[_this._indexSync++]), uriList);
                 }
             });
         };
         AllCommand.prototype.exec = function (args) {
             var uriList = this.cfg.repo.uriList;
             if(this._indexSync < uriList.length) {
-                this.repoExplorer(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList);
+                this.repoExplorer(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList);
             }
         };
         return AllCommand;
@@ -622,14 +636,14 @@ var Command;
                     Command.Helper.printLibs(foundLibs, uriList[repoNumber], repoNumber);
                 }
                 if(_this._indexSync < uriList.length) {
-                    _this.showResults(DataSource.DataSourceFactory.factory(uriList[_this._indexSync++]), uriList, args);
+                    _this.showResults(Command.Helper.getDataSource(uriList[_this._indexSync++]), uriList, args);
                 }
             });
         };
         SearchCommand.prototype.exec = function (args) {
             var uriList = this.cfg.repo.uriList;
             if(this._indexSync < uriList.length) {
-                this.showResults(DataSource.DataSourceFactory.factory(uriList[this._indexSync++]), uriList, args);
+                this.showResults(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList, args);
             }
         };
         return SearchCommand;
@@ -855,7 +869,7 @@ var Command;
                 uri.directory = '/' + repo + uri.directory.substr(ignore.length);
             }
         };
-        InstallCommand.prototype.save = function (url, name, version, key, content) {
+        InstallCommand.prototype.save = function (url, name, version, key, content, tsdUri) {
             var uri = Uri.parseUri(url);
             this.normalizeGithubUrl(uri);
             if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath + uri.directory)) {
@@ -863,8 +877,8 @@ var Command;
             }
             var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
             this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("\\-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
-            this.cfg.addDependency(name, version, key);
+            System.Console.writeLine("+-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            this.cfg.addDependency(name, version, key, tsdUri);
             System.Console.writeLine("");
             this.cfg.save();
         };
@@ -894,8 +908,8 @@ var Command;
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = targetLib.versions[0];
-                System.Web.WebHandler.request.getUrl(version.url, function (body) {
-                    _this.save(version.url, targetLib.name, version.version, version.key, body);
+                Command.Helper.getSourceContent(version.uri, function (body) {
+                    _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
                     _this._cache.push(targetLib.name);
                     if(!_this._withDep) {
                         return;
@@ -919,7 +933,7 @@ var Command;
                     System.Console.writeLine("   [!] Lib not found.\n");
                 }
             };
-            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            var dataSource = Command.Helper.getDataSource(uriList[index]);
             dataSource.all(function (libs) {
                 var index = (_this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
@@ -1017,18 +1031,17 @@ var Command;
     })(Command.BaseCommand);
     Command.UpdateCommand = UpdateCommand;    
 })(Command || (Command = {}));
-var util = require('util');
-var RepositoryTypeEnum;
-(function (RepositoryTypeEnum) {
-    RepositoryTypeEnum._map = [];
-    RepositoryTypeEnum._map[0] = "FileSystem";
-    RepositoryTypeEnum.FileSystem = 0;
-    RepositoryTypeEnum._map[1] = "Web";
-    RepositoryTypeEnum.Web = 1;
-})(RepositoryTypeEnum || (RepositoryTypeEnum = {}));
-var RepoUri = (function () {
-    function RepoUri() { }
-    return RepoUri;
+var SourceTypeEnum;
+(function (SourceTypeEnum) {
+    SourceTypeEnum._map = [];
+    SourceTypeEnum._map[0] = "FileSystem";
+    SourceTypeEnum.FileSystem = 0;
+    SourceTypeEnum._map[1] = "Web";
+    SourceTypeEnum.Web = 1;
+})(SourceTypeEnum || (SourceTypeEnum = {}));
+var TsdUri = (function () {
+    function TsdUri() { }
+    return TsdUri;
 })();
 var Repo = (function () {
     function Repo() {
@@ -1038,7 +1051,9 @@ var Repo = (function () {
 })();
 var Config = (function () {
     function Config() {
-        this.dependencies = [];
+        this.version = "2.0";
+        this.dependencies = {
+        };
     }
     Config.FILE_NAME = 'tsd-config.json';
     Config.isNull = function isNull(cfg, key, alternativeValue) {
@@ -1060,29 +1075,33 @@ var Config = (function () {
         this.repo = Config.isNull(cfg, 'repo', {
             uriList: [
                 {
-                    repositoryType: RepositoryTypeEnum.Web,
-                    uri: "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"
+                    sourceType: SourceTypeEnum.Web,
+                    source: "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"
                 }
             ]
         });
     };
     Config.prototype.save = function () {
+        var dep = {
+        };
+        for(var attr in this.dependencies) {
+            dep[attr] = this.dependencies[attr];
+        }
         var cfg = {
             localPath: this.localPath,
             repo: this.repo,
-            dependencies: this.dependencies
+            dependencies: dep
         };
         var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-        sw.write(util.inspect(cfg, false, 10, false));
+        sw.write(JSON.stringify(cfg, null, 4));
         sw.flush();
         sw.close();
     };
-    Config.prototype.addDependency = function (name, version, key) {
-        this.dependencies.push({
-            name: name,
-            version: version,
-            key: key
-        });
+    Config.prototype.addDependency = function (name, version, key, uri) {
+        this.dependencies[name + '#' + version] = {
+            key: key,
+            uri: uri
+        };
     };
     return Config;
 })();
@@ -1101,7 +1120,7 @@ var Command;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "localPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "repositoryType": "1",\n' + '                "uri": "https://github.com/Diullei/tsd/raw/master/deploy/repository.json"\n' + '            }\n' + '        ]\n' + '    }\n' + '    "dependencies": []\n' + '}');
+            sw.write('{\n' + '    "version": "v2",\n' + '    "localPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "sourceType": "1",\n' + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n' + '            }\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
             sw.flush();
             sw.close();
         };
@@ -1150,16 +1169,13 @@ var Command;
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = targetLib.versions[0];
-                System.Web.WebHandler.request.getUrl(version.url, function (body) {
-                    System.Console.writeLine("");
-                    System.Console.writeLine("         name: " + targetLib.name);
-                    System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
-                    System.Console.writeLine("          key: " + version.key);
-                    System.Console.writeLine("      version: " + version.version);
-                    System.Console.writeLine("       author: " + version.author);
-                    System.Console.writeLine("          url: " + format(0, 60, version.url));
-                    System.Console.writeLine("");
-                });
+                System.Console.writeLine("         name: " + targetLib.name);
+                System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                System.Console.writeLine("          key: " + version.key);
+                System.Console.writeLine("      version: " + version.version);
+                System.Console.writeLine("       author: " + format(0, 60, version.author.name + ' (' + version.author.url + ')'));
+                System.Console.writeLine("          url: " + format(0, 60, version.uri.source));
+                System.Console.writeLine("");
             }
         };
         InfoCommand.prototype.execInternal = function (index, uriList, args) {
@@ -1173,7 +1189,7 @@ var Command;
                     System.Console.writeLine("   [!] Lib not found.\n");
                 }
             };
-            var dataSource = DataSource.DataSourceFactory.factory(uriList[index]);
+            var dataSource = Command.Helper.getDataSource(uriList[index]);
             dataSource.all(function (libs) {
                 var index = (_this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
@@ -1198,6 +1214,83 @@ var Command;
     })(Command.BaseCommand);
     Command.InfoCommand = InfoCommand;    
 })(Command || (Command = {}));
+var Command;
+(function (Command) {
+    var RepoCommand = (function (_super) {
+        __extends(RepoCommand, _super);
+        function RepoCommand(cfg) {
+                _super.call(this);
+            this.cfg = cfg;
+            this.shortcut = "repo";
+            this.usage = "Show repo list";
+            this._index = 0;
+            this._withRepoIndex = false;
+        }
+        RepoCommand.prototype.accept = function (args) {
+            return args[2] == this.shortcut && args[3];
+        };
+        RepoCommand.prototype.match = function (key, name) {
+            return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
+        };
+        RepoCommand.prototype.find = function (key, libs) {
+            for(var i = 0; i < libs.length; i++) {
+                var lib = libs[i];
+                if(this.match(lib.name, key)) {
+                    return lib;
+                }
+            }
+            return null;
+        };
+        RepoCommand.prototype.display = function (targetLib, targetVersion, libs) {
+            if(targetLib == null) {
+                System.Console.writeLine("   [!] Lib not found.\n");
+            } else {
+                var version = targetLib.versions[0];
+                System.Console.writeLine("         name: " + targetLib.name);
+                System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                System.Console.writeLine("          key: " + version.key);
+                System.Console.writeLine("      version: " + version.version);
+                System.Console.writeLine("       author: " + format(0, 60, version.author.name + ' (' + version.author.url + ')'));
+                System.Console.writeLine("          url: " + format(0, 60, version.uri.source));
+                System.Console.writeLine("");
+            }
+        };
+        RepoCommand.prototype.execInternal = function (index, uriList, args) {
+            var _this = this;
+            var targetLib;
+            var tryGetInfo = function (libs, lib) {
+                targetLib = _this.find(lib, libs);
+                if(targetLib) {
+                    _this.display(targetLib, targetLib.versions[0].version, libs);
+                } else {
+                    System.Console.writeLine("   [!] Lib not found.\n");
+                }
+            };
+            var dataSource = Command.Helper.getDataSource(uriList[index]);
+            dataSource.all(function (libs) {
+                var index = (_this._withRepoIndex ? 4 : 3);
+                var lib = args[index];
+                tryGetInfo(libs, lib);
+            });
+        };
+        RepoCommand.prototype.exec = function (args) {
+            var uriList = this.cfg.repo.uriList;
+            if(args[3].indexOf('!') != -1) {
+                this._withRepoIndex = true;
+                var index = parseInt(args[3][1]);
+                if(index.toString() != "NaN") {
+                    this.execInternal(index, uriList, args);
+                } else {
+                    System.Console.writeLine("   [!] Invalid repository index.\n");
+                }
+            } else {
+                this.execInternal(0, uriList, args);
+            }
+        };
+        return RepoCommand;
+    })(Command.BaseCommand);
+    Command.RepoCommand = RepoCommand;    
+})(Command || (Command = {}));
 var CommandLineProcessor = (function () {
     function CommandLineProcessor(cfg) {
         this.cfg = cfg;
@@ -1208,6 +1301,7 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.InstallCommand(cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
         this.commands.push(new Command.InfoCommand(cfg));
+        this.commands.push(new Command.RepoCommand(cfg));
     }
     CommandLineProcessor.prototype.printUsage = function () {
         System.Console.out.autoFlush = false;
@@ -1247,11 +1341,11 @@ var DataSource;
 (function (DataSource) {
     var DataSourceFactory = (function () {
         function DataSourceFactory() { }
-        DataSourceFactory.factory = function factory(repoUri) {
-            if(repoUri.repositoryType == RepositoryTypeEnum.FileSystem) {
-                return new DataSource.FileSystemDataSource(repoUri.uri);
-            } else if(repoUri.repositoryType == RepositoryTypeEnum.Web) {
-                return new DataSource.WebDataSource(repoUri.uri);
+        DataSourceFactory.factory = function factory(uri) {
+            if(uri.sourceType == SourceTypeEnum.FileSystem) {
+                return new DataSource.FileSystemDataSource(uri.source);
+            } else if(uri.sourceType == SourceTypeEnum.Web) {
+                return new DataSource.WebDataSource(uri.source);
             } else {
                 throw Error('Invalid dataSource.');
             }

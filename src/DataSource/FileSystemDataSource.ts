@@ -16,11 +16,16 @@ module DataSource {
                     throw new Error("Error reading file repository file: " + err.message);
                     //throw err;
                 }
-                callback(JSON.parse(data));
+                callback(JSON.parse(data).repo);
             });
         }
+
         public find(keys: string[]): Lib {
             return null;
+        }
+
+        public content(callback: (data: string) => void ): void {
+            callback(this._fs.readFileSync(this.repositoryPath, 'utf8'));
         }
     }
 }
