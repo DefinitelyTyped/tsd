@@ -21,7 +21,8 @@ class Config {
     public static FILE_NAME = 'tsd-config.json';
 
     public version: string = "2.0";
-	public localPath: string;
+    public typingsPath: string;
+    public libPath: string;
 	public repo: Repo;
 	public dependencies: any = {};
 
@@ -40,7 +41,8 @@ class Config {
 
 	public load() {
 	    var cfg = Config.tryGetConfigFile();
-	    this.localPath = Config.isNull(cfg, 'localPath', 'typings');
+	    this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
+	    this.libPath = Config.isNull(cfg, 'libPath', 'lib');
 	    this.dependencies = Config.isNull(cfg, 'dependencies', []);
 	    this.repo = Config.isNull(cfg, 'repo', {
 	        uriList: [{
@@ -57,7 +59,8 @@ class Config {
 	    }
 
 	    var cfg = {
-	        localPath: this.localPath,
+	        localPath: this.typingsPath,
+	        libPath: this.libPath,
 	        repo: this.repo,
 	        dependencies: dep
 	    };

@@ -29,7 +29,7 @@ module Command {
                 var files = [];
 
                 try {
-                    files = System.IO.DirectoryManager.handle.getAllFiles(this.cfg.localPath, /.d\.key$/g, { recursive: true });
+                    files = System.IO.DirectoryManager.handle.getAllFiles(this.cfg.typingsPath, /.d\.key$/g, { recursive: true });
                 } catch (e) {
                     System.Console.writeLine('Empty directory.');
                     System.Console.writeLine('');
@@ -42,7 +42,7 @@ module Command {
 
 				for (var i = 0; i < files.length; i++) {
 
-					var file = files[i].substr(this.cfg.localPath.length + 1);
+				    var file = files[i].substr(this.cfg.typingsPath.length + 1);
 					var name = file.substr(0, file.lastIndexOf('.'));
 					var version = file.substr(name.length + 1, file.length - name.length - 7);
 					var key = System.IO.FileManager.handle.readFile(files[i]);

@@ -18,7 +18,8 @@ module Command {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
             sw.write('{\n'
                     + '    "version": "v2",\n'
-                    + '    "localPath": "typings",\n'
+                    + '    "typingsPath": "typings",\n'
+                    + '    "libPath": "lib",\n'
                     + '    "repo": {\n'
                     + '        "uriList": [{\n'
                     + '                "sourceType": "1",\n'

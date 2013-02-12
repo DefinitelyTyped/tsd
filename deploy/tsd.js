@@ -874,9 +874,9 @@ var Command;
             this.normalizeGithubUrl(uri);
             var path = '';
             if(tsdUri.relative) {
-                path = this.cfg.localPath + '/' + tsdUri.relative + '/';
+                path = this.cfg.typingsPath + '/' + tsdUri.relative + '/';
             } else {
-                path = this.cfg.localPath + uri.directory;
+                path = this.cfg.typingsPath + uri.directory;
             }
             if(!System.IO.DirectoryManager.handle.directoryExists(path)) {
                 System.IO.DirectoryManager.handle.createDirectory(path);
@@ -886,6 +886,25 @@ var Command;
             this.cfg.addDependency(name, version, key, tsdUri);
             System.Console.writeLine("");
             this.cfg.save();
+        };
+        InstallCommand.prototype.saveLib = function (tsdUri) {
+            var _this = this;
+            var uri = Uri.parseUri(tsdUri.source);
+            this.normalizeGithubUrl(uri);
+            var path = '';
+            if(tsdUri.relative) {
+                path = this.cfg.libPath + '/' + tsdUri.relative + '/';
+            } else {
+                path = this.cfg.libPath + uri.directory;
+            }
+            if(!System.IO.DirectoryManager.handle.directoryExists(path)) {
+                System.IO.DirectoryManager.handle.createDirectory(path);
+            }
+            var name = uri.file;
+            Command.Helper.getSourceContent(tsdUri, function (body) {
+                _this.saveFile(path + '/' + name, body);
+                System.Console.writeLine("+-- " + name + " -> " + path + name + '\n');
+            });
         };
         InstallCommand.prototype.find = function (key, libs) {
             for(var i = 0; i < libs.length; i++) {
@@ -925,13 +944,22 @@ var Command;
                 Command.Helper.getSourceContent(version.uri, function (body) {
                     _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
                     _this._cache.push(targetLib.name);
-                    if(!_this._withDep) {
-                        return;
+                    if(_this._isFull) {
+                        var lib = (targetLib.versions[0].lib || {
+                        });
+                        if(lib.sources) {
+                            for(var i = 0; i < lib.sources.length; i++) {
+                                var source = lib.sources[i];
+                                _this.saveLib(source.uri);
+                            }
+                        }
                     }
-                    var deps = (targetLib.versions[0].dependencies) || [];
-                    for(var i = 0; i < deps.length; i++) {
-                        var dep = _this.find(deps[i].name, libs);
-                        _this.install(dep, dep.versions[0].version, libs);
+                    if(_this._withDep) {
+                        var deps = (version.dependencies) || [];
+                        for(var i = 0; i < deps.length; i++) {
+                            var dep = _this.find(deps[i].name, libs);
+                            _this.install(dep, dep.versions[0].version, libs);
+                        }
                     }
                 });
             }
@@ -989,6 +1017,10 @@ var Command;
             if(!args[3]) {
                 this.installFromConfig();
             } else {
+                if(args[args.length - 1] == 'full') {
+                    this._isFull = true;
+                    args.pop();
+                }
                 var uriList = this.cfg.repo.uriList;
                 if(args[3].indexOf('!') != -1) {
                     this._withRepoIndex = true;
@@ -1031,7 +1063,7 @@ var Command;
                 var libList = [];
                 var files = [];
                 try  {
-                    files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.localPath, /.d\.key$/g, {
+                    files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.typingsPath, /.d\.key$/g, {
                         recursive: true
                     });
                 } catch (e) {
@@ -1042,7 +1074,7 @@ var Command;
                 System.Console.writeLine(' Lib                                  Status');
                 System.Console.writeLine(' ------------------------------------ ----------------------------------------');
                 for(var i = 0; i < files.length; i++) {
-                    var file = files[i].substr(_this.cfg.localPath.length + 1);
+                    var file = files[i].substr(_this.cfg.typingsPath.length + 1);
                     var name = file.substr(0, file.lastIndexOf('.'));
                     var version = file.substr(name.length + 1, file.length - name.length - 7);
                     var key = System.IO.FileManager.handle.readFile(files[i]);
@@ -1112,7 +1144,8 @@ var Config = (function () {
     };
     Config.prototype.load = function () {
         var cfg = Config.tryGetConfigFile();
-        this.localPath = Config.isNull(cfg, 'localPath', 'typings');
+        this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
+        this.libPath = Config.isNull(cfg, 'libPath', 'lib');
         this.dependencies = Config.isNull(cfg, 'dependencies', []);
         this.repo = Config.isNull(cfg, 'repo', {
             uriList: [
@@ -1130,7 +1163,8 @@ var Config = (function () {
             dep[attr] = this.dependencies[attr];
         }
         var cfg = {
-            localPath: this.localPath,
+            localPath: this.typingsPath,
+            libPath: this.libPath,
             repo: this.repo,
             dependencies: dep
         };
@@ -1162,7 +1196,7 @@ var Command;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "version": "v2",\n' + '    "localPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "sourceType": "1",\n' + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n' + '            }\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
+            sw.write('{\n' + '    "version": "v2",\n' + '    "typingsPath": "typings",\n' + '    "libPath": "lib",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "sourceType": "1",\n' + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n' + '            }\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
             sw.flush();
             sw.close();
         };

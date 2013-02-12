@@ -15,6 +15,7 @@ module Command {
         private _index: number = 0;
         private _withDep = false;
         private _withRepoIndex = false;
+        private _isFull: bool;
 
         constructor(public cfg: Config) { super(); }
 
@@ -64,9 +65,9 @@ module Command {
             var path = '';
 
             if (tsdUri.relative) {
-                path = this.cfg.localPath + '/' + tsdUri.relative + '/';
+                path = this.cfg.typingsPath + '/' + tsdUri.relative + '/';
             } else {
-                path = this.cfg.localPath + uri.directory;
+                path = this.cfg.typingsPath + uri.directory;
             }
 
             if (!System.IO.DirectoryManager.handle.directoryExists(path)) {
@@ -81,6 +82,31 @@ module Command {
             System.Console.writeLine("");
 
             this.cfg.save();
+        }
+
+        private saveLib(tsdUri: TsdUri): void {
+            var uri = Uri.parseUri(tsdUri.source);
+
+            this.normalizeGithubUrl(uri);
+
+            var path = '';
+
+            if (tsdUri.relative) {
+                path = this.cfg.libPath + '/' + tsdUri.relative + '/';
+            } else {
+                path = this.cfg.libPath + uri.directory;
+            }
+
+            if (!System.IO.DirectoryManager.handle.directoryExists(path)) {
+                System.IO.DirectoryManager.handle.createDirectory(path);
+            }
+
+            var name = uri.file;
+
+            Helper.getSourceContent(tsdUri, (body: string) => {
+                this.saveFile(path + '/' + name, body);
+                System.Console.writeLine("+-- " + name + " -> " + path + name + '\n');
+            });
         }
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
@@ -125,13 +151,22 @@ module Command {
                     this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
                     this._cache.push(targetLib.name);
 
-                    if (!this._withDep)
-                        return;
+                    if (this._isFull) {
+                        var lib = (targetLib.versions[0].lib || {});
+                        if (lib.sources) {
+                            for (var i = 0; i < lib.sources.length; i++) {
+                                var source = <{ uri: TsdUri; }>lib.sources[i];
+                                this.saveLib(source.uri);
+                            }
+                        }
+                    }
 
-                    var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];
-                    for (var i = 0; i < deps.length; i++) {
-                        var dep: DataSource.Lib = this.find(deps[i].name, libs);
-                        this.install(dep, dep.versions[0].version, libs);
+                    if (this._withDep) {
+                        var deps = (<DataSource.LibDep[]>version.dependencies) || [];
+                        for (var i = 0; i < deps.length; i++) {
+                            var dep: DataSource.Lib = this.find(deps[i].name, libs);
+                            this.install(dep, dep.versions[0].version, libs);
+                        }
                     }
                 });
             }
@@ -197,6 +232,11 @@ module Command {
             if (!args[3]) {
                 this.installFromConfig();
             } else {
+                if (args[args.length - 1] == 'full') {
+                    this._isFull = true;
+                    args.pop();
+                }
+
                 var uriList = this.cfg.repo.uriList;
                 if (args[3].indexOf('!') != -1) {
                     this._withRepoIndex = true;
