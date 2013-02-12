@@ -872,12 +872,17 @@ var Command;
         InstallCommand.prototype.save = function (url, name, version, key, content, tsdUri) {
             var uri = Uri.parseUri(url);
             this.normalizeGithubUrl(uri);
-            if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath + uri.directory)) {
-                System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
+            var path = '';
+            if(tsdUri.relative) {
+                path = this.cfg.localPath + '/' + tsdUri.relative + '/';
+            } else {
+                path = this.cfg.localPath + uri.directory;
             }
-            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;
-            this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("+-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            if(!System.IO.DirectoryManager.handle.directoryExists(path)) {
+                System.IO.DirectoryManager.handle.createDirectory(path);
+            }
+            this.saveFile(path + name + ".d.ts", content);
+            System.Console.writeLine("+-- " + name + "@" + version + " -> " + path);
             this.cfg.addDependency(name, version, key, tsdUri);
             System.Console.writeLine("");
             this.cfg.save();
@@ -899,6 +904,15 @@ var Command;
             }
             return false;
         };
+        InstallCommand.prototype.getVersion = function (versions, strVersion) {
+            for(var i = 0; i < versions.length; i++) {
+                var version = versions[i];
+                if(version.version == strVersion) {
+                    return version;
+                }
+            }
+            return versions[0];
+        };
         InstallCommand.prototype.install = function (targetLib, targetVersion, libs) {
             var _this = this;
             if(this.cacheContains(targetLib.name)) {
@@ -907,7 +921,7 @@ var Command;
             if(targetLib == null) {
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
-                var version = targetLib.versions[0];
+                var version = this.getVersion(targetLib.versions, targetVersion);
                 Command.Helper.getSourceContent(version.uri, function (body) {
                     _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
                     _this._cache.push(targetLib.name);
@@ -926,9 +940,11 @@ var Command;
             var _this = this;
             var targetLib;
             var tryInstall = function (libs, lib) {
-                targetLib = _this.find(lib, libs);
+                targetLib = _this.find(lib.split('@')[0], libs);
                 if(targetLib) {
-                    _this.install(targetLib, targetLib.versions[0].version, libs);
+                    var name = lib.split('@')[0];
+                    var version = lib.split('@')[1];
+                    _this.install(targetLib, version || targetLib.versions[0].version, libs);
                 } else {
                     System.Console.writeLine("   [!] Lib not found.\n");
                 }
@@ -947,8 +963,8 @@ var Command;
         InstallCommand.prototype.installFromConfig = function () {
             var libs = [];
             for(var dep in this.cfg.dependencies) {
-                var name = dep.split('#')[0];
-                var version = dep.split('#')[1];
+                var name = dep.split('@')[0];
+                var version = dep.split('@')[1];
                 var key = this.cfg.dependencies[dep].key;
                 var uri = this.cfg.dependencies[dep].uri;
                 var lib = new DataSource.Lib();
@@ -1124,7 +1140,7 @@ var Config = (function () {
         sw.close();
     };
     Config.prototype.addDependency = function (name, version, key, uri) {
-        this.dependencies[name + '#' + version] = {
+        this.dependencies[name + '@' + version] = {
             key: key,
             uri: uri
         };

@@ -58,16 +58,23 @@ module Command {
 
         private save(url: string, name: string, version: string, key: string, content: string, tsdUri: TsdUri): void {
             var uri = Uri.parseUri(url);
+
             this.normalizeGithubUrl(uri);
 
-            if(!System.IO.DirectoryManager.handle.directoryExists(this.cfg.localPath + uri.directory)) {
-                System.IO.DirectoryManager.handle.createDirectory(this.cfg.localPath + uri.directory);
+            var path = '';
+
+            if (tsdUri.relative) {
+                path = this.cfg.localPath + '/' + tsdUri.relative + '/';
+            } else {
+                path = this.cfg.localPath + uri.directory;
             }
 
-            var fileNameWithoutExtension = this.cfg.localPath + uri.directory + name;// + "-" + version;
+            if (!System.IO.DirectoryManager.handle.directoryExists(path)) {
+                System.IO.DirectoryManager.handle.createDirectory(path);
+            }
 
-            this.saveFile(fileNameWithoutExtension + ".d.ts", content);
-            System.Console.writeLine("+-- " + name + "@" + version + " -> " + this.cfg.localPath + uri.directory);
+            this.saveFile(path + name + ".d.ts", content);
+            System.Console.writeLine("+-- " + name + "@" + version + " -> " + path);
 
             this.cfg.addDependency(name, version, key, tsdUri);
 
@@ -95,6 +102,16 @@ module Command {
             return false;
         }
 
+        private getVersion(versions: DataSource.LibVersion[], strVersion: string): DataSource.LibVersion {
+            for (var i = 0; i < versions.length; i++) {
+                var version = versions[i];
+                if (version.version == strVersion) {
+                    return version;
+                }
+            }
+            return versions[0];
+        }
+
         private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[]): void { 
             if(this.cacheContains(targetLib.name))
                 return;
@@ -102,7 +119,7 @@ module Command {
             if (targetLib == null) {
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
-                var version = targetLib.versions[0];
+                var version = this.getVersion(targetLib.versions, targetVersion);
 
                 Helper.getSourceContent(version.uri, (body: string) => {
                     this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
@@ -124,11 +141,13 @@ module Command {
             var targetLib: DataSource.Lib;
 
             var tryInstall = (libs, lib: string) => {
-                targetLib = this.find(lib, libs);
+                targetLib = this.find(lib.split('@')[0], libs);
 
-                if (targetLib)
-                    this.install(targetLib, targetLib.versions[0].version, libs);
-                else
+                if (targetLib) {
+                    var name = lib.split('@')[0];
+                    var version = lib.split('@')[1];
+                    this.install(targetLib, version || targetLib.versions[0].version, libs);
+                } else
                     System.Console.writeLine("   [!] Lib not found.\n");
             };
 
@@ -147,8 +166,8 @@ module Command {
         private installFromConfig() {
             var libs: DataSource.Lib[] = [];
             for (var dep in this.cfg.dependencies) {
-                var name = dep.split('#')[0];
-                var version = dep.split('#')[1];
+                var name = dep.split('@')[0];
+                var version = dep.split('@')[1];
                 var key = this.cfg.dependencies[dep].key;
                 var uri = this.cfg.dependencies[dep].uri;
 

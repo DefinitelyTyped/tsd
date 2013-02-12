@@ -10,6 +10,7 @@ enum SourceTypeEnum {
 class TsdUri {
     public sourceType: SourceTypeEnum;
     public source: string;
+    public relative: string;
 }
 
 class Repo {
@@ -68,6 +69,6 @@ class Config {
 	}
 
 	public addDependency(name: string, version: string, key: string, uri: TsdUri) {
-	    this.dependencies[name + '#' + version] = { key: key, uri: uri };
+	    this.dependencies[name + '@' + version] = { key: key, uri: uri };
 	}
 }
