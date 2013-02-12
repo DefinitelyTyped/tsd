@@ -23,7 +23,7 @@ module Command {
                     + '    "repo": {\n'
                     + '        "uriList": [{\n'
                     + '                "sourceType": "1",\n'
-                    + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n'
+                    + '                "source": "http://www.tsdpm.com/repository_v2.json"\n'
                     + '            }\n'
                     + '        ]\n'
                     + '    },\n'

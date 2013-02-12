@@ -47,7 +47,7 @@ class Config {
 	    this.repo = Config.isNull(cfg, 'repo', {
 	        uriList: [{
 	            sourceType: SourceTypeEnum.Web,
-	            source: "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"
+	            source: "http://www.tsdpm.com/repository_v2.json"
 	        }]
 	    });
 	}

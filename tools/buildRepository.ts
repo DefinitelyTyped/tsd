@@ -135,7 +135,7 @@ sw2.write('var __repo = ' + JSON.stringify(repo_site) + ';');
 sw2.flush();
 sw2.close();
 
-var sw3 = new NodeJs.FileHandle().createFile('../deploy/repository_v2.json');
+var sw3 = new NodeJs.FileHandle().createFile('../../tsdpm-site/repository_v2.json');
 sw3.write(JSON.stringify({ repo: repo_v2 }));
 sw3.flush();
 sw3.close();

@@ -1151,7 +1151,7 @@ var Config = (function () {
             uriList: [
                 {
                     sourceType: SourceTypeEnum.Web,
-                    source: "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"
+                    source: "http://www.tsdpm.com/repository_v2.json"
                 }
             ]
         });
@@ -1196,7 +1196,7 @@ var Command;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "version": "v2",\n' + '    "typingsPath": "typings",\n' + '    "libPath": "lib",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "sourceType": "1",\n' + '                "source": "https://github.com/Diullei/tsd/raw/master/deploy/repository_v2.json"\n' + '            }\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
+            sw.write('{\n' + '    "version": "v2",\n' + '    "typingsPath": "typings",\n' + '    "libPath": "lib",\n' + '    "repo": {\n' + '        "uriList": [{\n' + '                "sourceType": "1",\n' + '                "source": "http://www.tsdpm.com/repository_v2.json"\n' + '            }\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
             sw.flush();
             sw.close();
         };
