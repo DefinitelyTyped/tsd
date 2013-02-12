@@ -839,7 +839,7 @@ var Command;
             this._withRepoIndex = false;
         }
         InstallCommand.prototype.accept = function (args) {
-            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*');
         };
         InstallCommand.prototype.print = function (lib) {
             System.Console.write(lib.name + ' - ' + lib.description + '[');
@@ -944,21 +944,47 @@ var Command;
                 }
             });
         };
+        InstallCommand.prototype.installFromConfig = function () {
+            var libs = [];
+            for(var dep in this.cfg.dependencies) {
+                var name = dep.split('#')[0];
+                var version = dep.split('#')[1];
+                var key = this.cfg.dependencies[dep].key;
+                var uri = this.cfg.dependencies[dep].uri;
+                var lib = new DataSource.Lib();
+                lib.name = name;
+                lib.versions.push({
+                    version: version,
+                    key: key,
+                    dependencies: [],
+                    uri: uri,
+                    lib: []
+                });
+                libs.push(lib);
+            }
+            for(var i = 0; i < libs.length; i++) {
+                this.install(libs[i], libs[i].versions[0].version, []);
+            }
+        };
         InstallCommand.prototype.exec = function (args) {
             if(args[2].indexOf('*') != -1) {
                 this._withDep = true;
             }
-            var uriList = this.cfg.repo.uriList;
-            if(args[3].indexOf('!') != -1) {
-                this._withRepoIndex = true;
-                var index = parseInt(args[3][1]);
-                if(index.toString() != "NaN") {
-                    this.execInternal(index, uriList, args);
-                } else {
-                    System.Console.writeLine("   [!] Invalid repository index.\n");
-                }
+            if(!args[3]) {
+                this.installFromConfig();
             } else {
-                this.execInternal(0, uriList, args);
+                var uriList = this.cfg.repo.uriList;
+                if(args[3].indexOf('!') != -1) {
+                    this._withRepoIndex = true;
+                    var index = parseInt(args[3][1]);
+                    if(index.toString() != "NaN") {
+                        this.execInternal(index, uriList, args);
+                    } else {
+                        System.Console.writeLine("   [!] Invalid repository index.\n");
+                    }
+                } else {
+                    this.execInternal(0, uriList, args);
+                }
             }
         };
         return InstallCommand;

@@ -22,7 +22,7 @@ class Config {
     public version: string = "2.0";
 	public localPath: string;
 	public repo: Repo;
-	private dependencies: any = {};
+	public dependencies: any = {};
 
 	private static isNull(cfg: Object, key: string, alternativeValue: any): any {
 	    return cfg[key] ? cfg[key] : alternativeValue;

@@ -19,7 +19,7 @@ module Command {
         constructor(public cfg: Config) { super(); }
 
         public accept(args: Array): bool {
-            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') && args[3];
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') /*&& args[3]*/;
         }
 
         private print(lib: DataSource.Lib) {
@@ -117,21 +117,6 @@ module Command {
                         this.install(dep, dep.versions[0].version, libs);
                     }
                 });
-
-                /*
-                System.Web.WebHandler.request.getUrl(version.uri.source, (body) => {
-                    this.save(version.uri.source, targetLib.name, version.version, version.key, body);
-                    this._cache.push(targetLib.name);
-
-                    if (!this._withDep)
-                        return;
-
-                    var deps = (<DataSource.LibDep[]>targetLib.versions[0].dependencies) || [];
-                    for (var i = 0; i < deps.length; i++) {
-                        var dep: DataSource.Lib = this.find(deps[i].name, libs);
-                        this.install(dep, dep.versions[0].version, libs);
-                    }
-                });*/
             }
         }
 
@@ -159,22 +144,52 @@ module Command {
             });
         }
 
+        private installFromConfig() {
+            var libs: DataSource.Lib[] = [];
+            for (var dep in this.cfg.dependencies) {
+                var name = dep.split('#')[0];
+                var version = dep.split('#')[1];
+                var key = this.cfg.dependencies[dep].key;
+                var uri = this.cfg.dependencies[dep].uri;
+
+                var lib: DataSource.Lib = new DataSource.Lib();
+                lib.name = name;
+                lib.versions.push(<DataSource.LibVersion>{
+                    version: version,
+                    key: key,
+                    dependencies: [],
+                    uri: uri,
+                    lib: []
+                });
+                libs.push(lib);
+            }
+
+            for (var i = 0; i < libs.length; i++) {
+                this.install(libs[i], libs[i].versions[0].version, []);
+            }
+        }
+
         public exec(args: Array): void {
             if (args[2].indexOf('*') != -1) {
                 this._withDep = true;
             }
 
-            var uriList = this.cfg.repo.uriList;
-            if (args[3].indexOf('!') != -1) {
-                this._withRepoIndex = true;
-                var index = parseInt(args[3][1]);
-                if (index.toString() != "NaN") {
-                    this.execInternal(index, uriList, args);
-                } else {
-                    System.Console.writeLine("   [!] Invalid repository index.\n");
-                }
+            // if only 'install'
+            if (!args[3]) {
+                this.installFromConfig();
             } else {
-                this.execInternal(0, uriList, args);
+                var uriList = this.cfg.repo.uriList;
+                if (args[3].indexOf('!') != -1) {
+                    this._withRepoIndex = true;
+                    var index = parseInt(args[3][1]);
+                    if (index.toString() != "NaN") {
+                        this.execInternal(index, uriList, args);
+                    } else {
+                        System.Console.writeLine("   [!] Invalid repository index.\n");
+                    }
+                } else {
+                    this.execInternal(0, uriList, args);
+                }
             }
         }
     }
