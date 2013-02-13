@@ -225,7 +225,7 @@ for(var i = 0; i < files.length; i++) {
                 version: obj.versions[0].version,
                 key: obj.versions[0].key,
                 dependencies: obj.versions[0].dependencies,
-                url: {
+                uri: {
                     source: obj.versions[0].url,
                     sourceType: 1
                 },
@@ -248,7 +248,7 @@ var sw2 = new NodeJs.FileHandle().createFile('../../tsdpm-site/tmpl/repository.j
 sw2.write('var __repo = ' + JSON.stringify(repo_site) + ';');
 sw2.flush();
 sw2.close();
-var sw3 = new NodeJs.FileHandle().createFile('../deploy/repository_v2.json');
+var sw3 = new NodeJs.FileHandle().createFile('../../tsdpm-site/repository_v2.json');
 sw3.write(JSON.stringify({
     repo: repo_v2
 }));
