@@ -869,7 +869,7 @@ var Command;
                 uri.directory = '/' + repo + uri.directory.substr(ignore.length);
             }
         };
-        InstallCommand.prototype.save = function (url, name, version, key, content, tsdUri) {
+        InstallCommand.prototype.save = function (url, name, version, key, content, tsdUri, repo) {
             var uri = Uri.parseUri(url);
             this.normalizeGithubUrl(uri);
             var path = '';
@@ -883,9 +883,11 @@ var Command;
             }
             this.saveFile(path + name + ".d.ts", content);
             System.Console.writeLine("+-- " + name + "@" + version + " -> " + path);
-            this.cfg.addDependency(name, version, key, tsdUri);
             System.Console.writeLine("");
-            this.cfg.save();
+            if(repo) {
+                this.cfg.addDependency(name, version, key, tsdUri, repo);
+                this.cfg.save();
+            }
         };
         InstallCommand.prototype.saveLib = function (tsdUri) {
             var _this = this;
@@ -932,7 +934,7 @@ var Command;
             }
             return versions[0];
         };
-        InstallCommand.prototype.install = function (targetLib, targetVersion, libs) {
+        InstallCommand.prototype.install = function (targetLib, targetVersion, libs, repo) {
             var _this = this;
             if(this.cacheContains(targetLib.name)) {
                 return;
@@ -942,7 +944,7 @@ var Command;
             } else {
                 var version = this.getVersion(targetLib.versions, targetVersion);
                 Command.Helper.getSourceContent(version.uri, function (body) {
-                    _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri);
+                    _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri, repo);
                     _this._cache.push(targetLib.name);
                     if(_this._isFull) {
                         var lib = (targetLib.versions[0].lib || {
@@ -958,7 +960,7 @@ var Command;
                         var deps = (version.dependencies) || [];
                         for(var i = 0; i < deps.length; i++) {
                             var dep = _this.find(deps[i].name, libs);
-                            _this.install(dep, dep.versions[0].version, libs);
+                            _this.install(dep, dep.versions[0].version, libs, _this.cfg.repo.uriList[0]);
                         }
                     }
                 });
@@ -972,7 +974,7 @@ var Command;
                 if(targetLib) {
                     var name = lib.split('@')[0];
                     var version = lib.split('@')[1];
-                    _this.install(targetLib, version || targetLib.versions[0].version, libs);
+                    _this.install(targetLib, version || targetLib.versions[0].version, libs, uriList[index]);
                 } else {
                     System.Console.writeLine("   [!] Lib not found.\n");
                 }
@@ -1007,7 +1009,7 @@ var Command;
                 libs.push(lib);
             }
             for(var i = 0; i < libs.length; i++) {
-                this.install(libs[i], libs[i].versions[0].version, []);
+                this.install(libs[i], libs[i].versions[0].version, [], null);
             }
         };
         InstallCommand.prototype.exec = function (args) {
@@ -1047,59 +1049,60 @@ var Command;
     })();    
     var UpdateCommand = (function (_super) {
         __extends(UpdateCommand, _super);
-        function UpdateCommand(dataSource, cfg) {
+        function UpdateCommand(cfg) {
                 _super.call(this);
-            this.dataSource = dataSource;
             this.cfg = cfg;
             this.shortcut = "update";
             this.usage = "Checks if any definition file needs to be updated";
+            this._index = 0;
+            this._libList = [];
         }
         UpdateCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
         };
-        UpdateCommand.prototype.exec = function (args) {
-            var _this = this;
-            this.dataSource.all(function (libs) {
-                var libList = [];
-                var files = [];
-                try  {
-                    files = System.IO.DirectoryManager.handle.getAllFiles(_this.cfg.typingsPath, /.d\.key$/g, {
-                        recursive: true
-                    });
-                } catch (e) {
-                    System.Console.writeLine('Empty directory.');
-                    System.Console.writeLine('');
-                    return;
-                }
-                System.Console.writeLine(' Lib                                  Status');
-                System.Console.writeLine(' ------------------------------------ ----------------------------------------');
-                for(var i = 0; i < files.length; i++) {
-                    var file = files[i].substr(_this.cfg.typingsPath.length + 1);
-                    var name = file.substr(0, file.lastIndexOf('.'));
-                    var version = file.substr(name.length + 1, file.length - name.length - 7);
-                    var key = System.IO.FileManager.handle.readFile(files[i]);
-                    var flg = false;
-                    for(var j = 0; j < libs.length; j++) {
-                        var lib = libs[j];
-                        if(name == lib.name) {
-                            if(version == lib.versions[0].version) {
-                                if(key != lib.versions[0].key) {
-                                    var lname = name.split('/')[name.split('/').length - 1];
-                                    var dir = name;
-                                    System.Console.writeLine(format(1, 35, lname.substr(0, lname.length - 2) + ' @ ./' + dir) + '  Update is available!');
-                                    flg = true;
-                                }
-                            }
+        UpdateCommand.prototype.getVersion = function (libs, name, strVersion) {
+            for(var i = 0; i < libs.length; i++) {
+                var lib = libs[i];
+                if(lib.name == name) {
+                    for(var j = 0; j < lib.versions.length; j++) {
+                        var version = lib.versions[j];
+                        if(version.version == strVersion) {
+                            return version;
                         }
                     }
-                    if(!flg) {
-                        var lname = name.split('/')[name.split('/').length - 1];
-                        var dir = name;
-                        System.Console.writeLine(format(1, 35, lname.substr(0, lname.length - 2) + ' @ ./' + dir) + '  Is the latest version.');
+                    return lib.versions[0];
+                }
+            }
+            return null;
+        };
+        UpdateCommand.prototype.update = function (lib) {
+            var _this = this;
+            var ds = Command.Helper.getDataSource(this.cfg.dependencies[lib].repo);
+            ds.all(function (data) {
+                var name = lib.split('@')[0];
+                var version = lib.split('@')[1];
+                var ver = _this.getVersion(data, name, version);
+                if(ver) {
+                    if(ver.key != _this.cfg.dependencies[lib].key) {
+                        System.Console.writeLine(format(1, 35, lib + '  Update is available!'));
+                    } else {
+                        System.Console.writeLine(format(1, 35, lib + '  Is the latest version.'));
                     }
                 }
-                System.Console.writeLine('');
+                if(_this._index < _this._libList.length) {
+                    _this.update(_this._libList[(_this._index++)]);
+                } else {
+                    System.Console.writeLine('\n');
+                }
             });
+        };
+        UpdateCommand.prototype.exec = function (args) {
+            System.Console.writeLine(' Lib                                  Status');
+            System.Console.writeLine(' ------------------------------------ ----------------------------------------');
+            for(var lib in this.cfg.dependencies) {
+                this._libList.push(lib);
+            }
+            this.update(this._libList[(this._index++)]);
         };
         return UpdateCommand;
     })(Command.BaseCommand);
@@ -1173,8 +1176,9 @@ var Config = (function () {
         sw.flush();
         sw.close();
     };
-    Config.prototype.addDependency = function (name, version, key, uri) {
+    Config.prototype.addDependency = function (name, version, key, uri, repo) {
         this.dependencies[name + '@' + version] = {
+            repo: repo,
             key: key,
             uri: uri
         };
@@ -1331,6 +1335,7 @@ var CommandLineProcessor = (function () {
         this.commands.push(new Command.AllCommand(cfg));
         this.commands.push(new Command.SearchCommand(cfg));
         this.commands.push(new Command.InstallCommand(cfg));
+        this.commands.push(new Command.UpdateCommand(this.cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
         this.commands.push(new Command.InfoCommand(cfg));
         this.commands.push(new Command.RepoCommand(cfg));

@@ -20,7 +20,7 @@ class CommandLineProcessor {
 		this.commands.push(new Command.AllCommand(cfg));
 		this.commands.push(new Command.SearchCommand(cfg));
 		this.commands.push(new Command.InstallCommand(cfg));
-        //this.commands.push(new Command.UpdateCommand(this.dataSource, this.cfg));
+        this.commands.push(new Command.UpdateCommand(this.cfg));
         this.commands.push(new Command.CreateLocalConfigCommand());
         this.commands.push(new Command.InfoCommand(cfg));
         this.commands.push(new Command.RepoCommand(cfg));

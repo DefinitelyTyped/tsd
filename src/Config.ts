@@ -71,7 +71,7 @@ class Config {
 	    sw.close();
 	}
 
-	public addDependency(name: string, version: string, key: string, uri: TsdUri) {
-	    this.dependencies[name + '@' + version] = { key: key, uri: uri };
+	public addDependency(name: string, version: string, key: string, uri: TsdUri, repo: TsdUri) {
+	    this.dependencies[name + '@' + version] = { repo: repo, key: key, uri: uri };
 	}
 }
