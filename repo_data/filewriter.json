@@ -1,0 +1,14 @@
+{
+  "name": "filewriter",
+  "description": "File API: Writer",
+  "versions": [
+    {
+      "version": "",
+      "key": "007409ae-997d-45e9-b8ad-ce234c5f5bf9",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/filewriter/filewriter.d.ts",
+      "author": "Kon",
+      "author_url": "http://phyzkit.net/"
+    }
+  ]
+}

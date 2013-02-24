@@ -1,0 +1,14 @@
+{
+  "name": "restify",
+  "description": "node.js REST framework specifically meant for web service APIs",
+  "versions": [
+    {
+      "version": "2.0",
+      "key": "145285ff-dd99-47dc-958d-e55021769ab8",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/restify/restify.d.ts",
+      "author": "Bret Little",
+      "author_url": "https://github.com/blittle"
+    }
+  ]
+}

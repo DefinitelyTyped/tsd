@@ -1,0 +1,14 @@
+{
+  "name": "libxmljs",
+  "description": "libxml bindings for v8 javascript engine",
+  "versions": [
+    {
+      "version": "0.9",
+      "key": "11010f5a-233d-4095-a8d2-061f3ac64c01",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/libxmljs/libxmljs.d.ts",
+      "author": "François de Campredon",
+      "author_url": "https://github.com/fdecampredon"
+    }
+  ]
+}

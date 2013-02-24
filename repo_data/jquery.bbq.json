@@ -5,7 +5,12 @@
     {
       "version": "1.2",
       "key": "DE275D25-3427-43E0-AF8C-282C587D5FFC",
-      "dependencies": [],
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bbq/jquery.bbq.d.ts",
       "author": "Adam R. Smith",
       "author_url": "https://github.com/sunetos"
