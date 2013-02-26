@@ -9,6 +9,14 @@
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.d.ts",
       "author": "MarcinNajder",
       "author_url": "https://github.com/marcinnajder"
+    },
+    {
+      "version": "3.0.3-Beta4",
+      "key": "5d10dbc5-3ce1-4c36-b344-8a98e1bc1e35",
+      "dependencies": [],
+      "url": "https://github.com/bdb-opensource/DefinitelyTyped/raw/linqjs-v3/linq/linq.d.ts",
+      "author": "neuecc",
+      "author_url": "http://www.codeplex.com/site/users/view/neuecc"
     }
   ]
 }
