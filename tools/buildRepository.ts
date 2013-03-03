@@ -76,11 +76,16 @@ var files = new NodeJs.DirectoryHandle().getAllFiles('../repo_data');
 var repo = [];
 var repo_v2 = [];
 var repo_site = [];
+
+var docs = [];
+
 for (var i = 0; i < files.length; i++) {
     console.log(files[i]);
 
     var content = new NodeJs.FileHandle().readFile(files[i]);
     var obj = JSON.parse(content);
+
+    //docs.push({html: dtsdoc.loadSourceFile('class Test{name:string;}')});
 
     repo.push(obj);
 
