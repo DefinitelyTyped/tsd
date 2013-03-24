@@ -50,9 +50,9 @@ module Command {
                 var ver = this.getVersion(data, name, version);
                 if (ver) {
                     if (ver.key != this.cfg.dependencies[lib].key) {
-                        System.Console.writeLine(format(1, 35, lib + '  Update is available!'));
+                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Update is available!'));
                     } else {
-                        System.Console.writeLine(format(1, 35, lib + '  Is the latest version.'));
+                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Is the latest version.'));
                     }
                 }
 

@@ -8,7 +8,11 @@
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/amcharts/AmCharts.d.ts",
       "author": "covobonomo",
-      "author_url": "https://github.com/covobonomo/"
+      "author_url": "https://github.com/covobonomo/",
+	  "lib": {
+		"target": "tsd-libs",
+		"dir": "amcharts"
+	  }
     }
   ]
 }

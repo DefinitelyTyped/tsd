@@ -11,6 +11,7 @@ class TsdUri {
     public sourceType: SourceTypeEnum;
     public source: string;
     public relative: string;
+    public pre: string;
 }
 
 class Repo {

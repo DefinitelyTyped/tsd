@@ -182,8 +182,8 @@ var NodeJs;
         FileHandle.prototype.readFile = function (file) {
             var buffer = this._fs.readFileSync(file);
             switch(buffer[0]) {
-                case 254:
-                    if(buffer[1] == 255) {
+                case 0xFE:
+                    if(buffer[1] == 0xFF) {
                         var i = 0;
                         while((i + 1) < buffer.length) {
                             var temp = buffer[i];
@@ -194,13 +194,13 @@ var NodeJs;
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 255:
-                    if(buffer[1] == 254) {
+                case 0xFF:
+                    if(buffer[1] == 0xFE) {
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 239:
-                    if(buffer[1] == 187) {
+                case 0xEF:
+                    if(buffer[1] == 0xBB) {
                         return buffer.toString("utf8", 3);
                     }
             }
@@ -275,9 +275,9 @@ var Wsh;
                 streamObj.LoadFromFile(file);
                 var bomChar = streamObj.ReadText(2);
                 streamObj.Position = 0;
-                if((bomChar.charCodeAt(0) == 254 && bomChar.charCodeAt(1) == 255) || (bomChar.charCodeAt(0) == 255 && bomChar.charCodeAt(1) == 254)) {
+                if((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF) || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
                     streamObj.Charset = 'unicode';
-                } else if(bomChar.charCodeAt(0) == 239 && bomChar.charCodeAt(1) == 187) {
+                } else if(bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {
                     streamObj.Charset = 'utf-8';
                 }
                 var str = streamObj.ReadText(-1);
@@ -377,7 +377,7 @@ var Wsh;
             } catch (objError) {
                 System.Console.writeLine("tsd ERR! " + WinHttpReq.statusCode + " " + objError.message);
                 strResult = objError + "\n";
-                strResult += "WinHTTP returned error: " + (objError.number & 65535).toString() + "\n\n";
+                strResult += "WinHTTP returned error: " + (objError.number & 0xFFFF).toString() + "\n\n";
                 strResult += objError.description;
             }
             return callback(strResult);
@@ -899,6 +899,9 @@ var Command;
             } else {
                 path = this.cfg.libPath + uri.directory;
             }
+            if(tsdUri.pre) {
+                path = path + uri.directory.substr(tsdUri.pre.length);
+            }
             if(!System.IO.DirectoryManager.handle.directoryExists(path)) {
                 System.IO.DirectoryManager.handle.createDirectory(path);
             }
@@ -947,7 +950,7 @@ var Command;
                     _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri, repo);
                     _this._cache.push(targetLib.name);
                     if(_this._isFull) {
-                        var lib = (targetLib.versions[0].lib || {
+                        var lib = (version.lib || {
                         });
                         if(lib.sources) {
                             for(var i = 0; i < lib.sources.length; i++) {
@@ -1084,9 +1087,9 @@ var Command;
                 var ver = _this.getVersion(data, name, version);
                 if(ver) {
                     if(ver.key != _this.cfg.dependencies[lib].key) {
-                        System.Console.writeLine(format(1, 35, lib + '  Update is available!'));
+                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Update is available!'));
                     } else {
-                        System.Console.writeLine(format(1, 35, lib + '  Is the latest version.'));
+                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Is the latest version.'));
                     }
                 }
                 if(_this._index < _this._libList.length) {

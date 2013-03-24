@@ -190,7 +190,19 @@
     <Content Include="src\Command\AllCommand.ts" />
     <Content Include="src\Command\RepoCommand.ts" />
     <Content Include="src\Command\Helper.ts" />
-    <Content Include="tools\estractRepository.js">
+    <Content Include="src\Config.js">
+      <DependentUpon>Config.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Config.min.js">
+      <DependentUpon>Config.ts</DependentUpon>
+    </Content>
+    <Content Include="src\NodeJs\WebRequest.min.js">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </Content>
+    <Content Include="tools\buildRepository.js">
+      <DependentUpon>buildRepository.ts</DependentUpon>
+    </Content>
+    <Content Include="tools\buildRepository.min.js">
       <DependentUpon>buildRepository.ts</DependentUpon>
     </Content>
     <TypeScriptCompile Include="tools\buildRepository.ts" />

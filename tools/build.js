@@ -147,8 +147,8 @@ var NodeJs;
         FileHandle.prototype.readFile = function (file) {
             var buffer = this._fs.readFileSync(file);
             switch(buffer[0]) {
-                case 254:
-                    if(buffer[1] == 255) {
+                case 0xFE:
+                    if(buffer[1] == 0xFF) {
                         var i = 0;
                         while((i + 1) < buffer.length) {
                             var temp = buffer[i];
@@ -159,13 +159,13 @@ var NodeJs;
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 255:
-                    if(buffer[1] == 254) {
+                case 0xFF:
+                    if(buffer[1] == 0xFE) {
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 239:
-                    if(buffer[1] == 187) {
+                case 0xEF:
+                    if(buffer[1] == 0xBB) {
                         return buffer.toString("utf8", 3);
                     }
             }
@@ -188,9 +188,10 @@ var NodeJs;
     })();
     NodeJs.FileHandle = FileHandle;    
 })(NodeJs || (NodeJs = {}));
+var fs = require('fs');
 function GUID() {
     var S4 = function () {
-        return Math.floor(Math.random() * 65536).toString(16);
+        return Math.floor(Math.random() * 0x10000).toString(16);
     };
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
@@ -198,6 +199,52 @@ function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 ;
+function fromFile(lib, name, version) {
+    var sources = [];
+    var lb = {
+    };
+    lb.uri = {
+    };
+    lb.uri.sourceType = 1;
+    lb.uri.relative = name + "/" + version;
+    lb.uri.source = lib.file;
+    sources.push(lb);
+    return sources;
+}
+function fromTsdLibs(lib, name, version) {
+    var sources = [];
+    var targetDir = '../../tsd-libs/libs/' + lib.dir;
+    var files = new NodeJs.DirectoryHandle().getAllFiles(targetDir, null, {
+        recursive: true
+    });
+    for(var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var fileName = file.substr(targetDir.length + 1);
+        console.log(fileName);
+        var lb = {
+            uri: {
+            }
+        };
+        lb.uri.sourceType = 1;
+        lb.uri.relative = name + "/" + version;
+        lb.uri.source = 'https://raw.github.com/Diullei/tsd-libs/master/libs/' + lib.dir + '/' + fileName;
+        lb.uri.pre = '/Diullei/tsd-libs/master/libs/' + lib.dir + '/';
+        sources.push(lb);
+    }
+    return sources;
+}
+function buildSource(lib, name, version) {
+    var result = {
+    };
+    if(lib) {
+        if(lib.target == 'file') {
+            result.sources = fromFile(lib, name, version);
+        } else if(lib.target == 'tsd-libs') {
+            result.sources = fromTsdLibs(lib, name, version);
+        }
+    }
+    return result;
+}
 var files = new NodeJs.DirectoryHandle().getAllFiles('../repo_data');
 var repo = [];
 var repo_v2 = [];
@@ -207,6 +254,29 @@ for(var i = 0; i < files.length; i++) {
     console.log(files[i]);
     var content = new NodeJs.FileHandle().readFile(files[i]);
     var obj = JSON.parse(content);
+    var v2lib = {
+        name: obj.name,
+        description: obj.description,
+        versions: []
+    };
+    for(var x = 0; x < obj.versions.length; x++) {
+        v2lib.versions.push({
+            version: obj.versions[x].version,
+            key: obj.versions[x].key,
+            dependencies: obj.versions[x].dependencies,
+            uri: {
+                source: obj.versions[x].url,
+                sourceType: 1
+            },
+            author: {
+                name: obj.versions[x].author,
+                url: obj.versions[x].author_url
+            },
+            lib: buildSource(obj.versions[x].lib, obj.name, obj.versions[x].version)
+        });
+        delete obj.versions[x].lib;
+    }
+    repo_v2.push(v2lib);
     repo.push(obj);
     repo_site.push({
         name: obj.name,
@@ -217,28 +287,6 @@ for(var i = 0; i < files.length; i++) {
         author: obj.versions[0].author,
         author_url: obj.versions[0].author_url,
         url: obj.versions[0].url
-    });
-    repo_v2.push({
-        name: obj.name,
-        description: obj.description,
-        versions: [
-            {
-                version: obj.versions[0].version,
-                key: obj.versions[0].key,
-                dependencies: obj.versions[0].dependencies,
-                uri: {
-                    source: obj.versions[0].url,
-                    sourceType: 1
-                },
-                author: {
-                    name: obj.versions[0].author,
-                    url: obj.versions[0].author_url
-                },
-                lib: {
-                    sources: []
-                }
-            }
-        ]
     });
 }
 var sw = new NodeJs.FileHandle().createFile('../deploy/repository.json');

@@ -8,7 +8,11 @@
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/async/async.d.ts",
       "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "author_url": "https://github.com/borisyankov",
+	  "lib": {
+		"target": "tsd-libs",
+		"dir": "async"
+	  }
     }
   ]
 }

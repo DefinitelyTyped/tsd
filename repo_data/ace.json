@@ -8,7 +8,11 @@
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/ace/ace.d.ts",
       "author": "Diullei Gomes",
-      "author_url": "https://github.com/Diullei"
+      "author_url": "https://github.com/Diullei",
+	  "lib": {
+		"target": "tsd-libs",
+		"dir": "ace-builds"
+	  }
     }
   ]
 }

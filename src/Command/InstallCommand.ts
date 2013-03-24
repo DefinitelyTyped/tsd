@@ -98,6 +98,10 @@ module Command {
                 path = this.cfg.libPath + uri.directory;
             }
 
+            if (tsdUri.pre) {
+                path = path + uri.directory.substr(tsdUri.pre.length);
+            }
+
             if (!System.IO.DirectoryManager.handle.directoryExists(path)) {
                 System.IO.DirectoryManager.handle.createDirectory(path);
             }
@@ -153,7 +157,7 @@ module Command {
                     this._cache.push(targetLib.name);
 
                     if (this._isFull) {
-                        var lib = (targetLib.versions[0].lib || {});
+                        var lib = (version.lib || {});
                         if (lib.sources) {
                             for (var i = 0; i < lib.sources.length; i++) {
                                 var source = <{ uri: TsdUri; }>lib.sources[i];

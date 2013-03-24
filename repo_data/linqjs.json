@@ -1,14 +1,28 @@
 {
   "name": "linqjs",
   "description": "LINQ for JavaScript",
-  "versions": [
-    {
+  "versions": [{
       "version": "2.2",
       "key": "F0C29FAB-9E82-4CC4-8BCE-418D28AF4A65",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.d.ts",
       "author": "MarcinNajder",
-      "author_url": "https://github.com/marcinnajder"
+      "author_url": "https://github.com/marcinnajder",
+	  "lib": {
+		"target": "tsd-libs",
+		"dir": "linq.js_ver2.2.0.2"
+	  }
+    },{
+      "version": "3.0.3-Beta4",
+      "key": "5d10dbc5-3ce1-4c36-b344-8a98e1bc1e35",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.3.0.3-Beta4.d.ts",
+      "author": "MarcinNajder",
+      "author_url": "https://github.com/marcinnajder",
+	  "lib": {
+		"target": "tsd-libs",
+		"dir": "linq.js_ver.3.0.3-beta4"
+	  }
     }
   ]
 }
