@@ -21,3 +21,4 @@ tsd.csproj.user
 tsd.v11.suo
 _ReSharper.tsd
 tests
+node_modules
