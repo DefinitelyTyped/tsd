@@ -1,0 +1,14 @@
+{
+  "name": "google.geolocation",
+  "description": "Goal is to provide a usable geo location framework for mobile websites/widget applications.",
+  "versions": [
+    {
+      "version": "",
+      "key": "86338f4c-55cc-4600-aa39-1f79340e16f2",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/google.geolocation/google.geolocation.d.ts",
+      "author": "Vincent Bortone",
+      "author_url": "https://github.com/vbortone/"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "gamepad",
+  "description": "The Gamepad specification defines a low-level interface that represents gamepad devices.",
+  "versions": [
+    {
+      "version": "",
+      "key": "7975f234-9b73-439e-b95c-69efc5fc5acd",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/gamepad/gamepad.d.ts",
+      "author": "Kon",
+      "author_url": "http://phyzkit.net/"
+    }
+  ]
+}

@@ -4,11 +4,11 @@
   "versions": [
     {
       "version": "1.4",
-      "key": "443fd8d4-5352-43cb-a316-6a164c5d05a7",
+      "key": "84ec0626-dd47-48ba-abd2-ec3a39356972",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "author": "Josh Baldwin",
+      "author_url": "https://github.com/jbaldwin/"
     }
   ]
 }

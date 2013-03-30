@@ -1,0 +1,23 @@
+{
+  "name": "underscore-ko",
+  "description": "A tiny library that adds all of the Underscore.js collection/array methods to Knockout observable arrays",
+  "versions": [
+    {
+      "version": "1.4",
+      "key": "2e23ee3b-48bb-4a06-a850-c13c8da990a4",
+      "dependencies": [
+        {
+          "name": "knockout",
+          "version": "latest"
+        },
+        {
+          "name": "underscore",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore-ko/underscore-ko.d.ts",
+      "author": "Maurits Elbers",
+      "author_url": "https://github.com/MagicMau/"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "jquery.cookie",
+  "description": "A simple, lightweight jQuery plugin for reading, writing and deleting cookies",
+  "versions": [
+    {
+      "version": "1.3",
+      "key": "0b6737ee-58a6-4f97-b075-6b0b26e8632d",
+      "dependencies": [
+        {
+          "name": "jquery",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
+      "author": "Roy Goode",
+      "author_url": "https://github.com/RoyGoode/"
+    }
+  ]
+}
