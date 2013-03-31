@@ -1,5 +1,5 @@
 {
-  "name": "azure-mobile-services-client",
+  "name": "AzureMobileServicesClient",
   "description": "Type definitions for Microsoft.Windows.Azure.MobileService.Web-1.0.0",
   "versions": [
     {

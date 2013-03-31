@@ -20,7 +20,7 @@ module Command {
         constructor(public cfg: Config) { super(); }
 
         public accept(args: Array): bool {
-            return (args[2] == this.shortcut || args[2] == this.shortcut + '*') /*&& args[3]*/;
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*' || args[2] == this.shortcut + '-all') /*&& args[3]*/;
         }
 
         private print(lib: DataSource.Lib) {
@@ -232,7 +232,10 @@ module Command {
             if (args[2].indexOf('*') != -1) {
                 this._withDep = true;
             }
-
+            else if (args[2] == this.shortcut + '-all') { // issue #13
+                this._withDep = true;
+            }
+			
             // if only 'install'
             if (!args[3]) {
                 this.installFromConfig();
