@@ -11,6 +11,6 @@
     "request"           : "latest"
   },
   "main": { "tsd": "deploy/api.js" },
-  "bin": { "tsd": "deploy/commandLine.js" },
+  "bin": { "tsd": "deploy/tsd" },
   "preferGlobal": true
 }

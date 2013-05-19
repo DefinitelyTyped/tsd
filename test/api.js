@@ -1,4 +1,4 @@
-﻿var tsd = require("../deploy/api");
+﻿var tsd = require("../deploy/api.js");
 
 var config = {
     "version": "v2",
