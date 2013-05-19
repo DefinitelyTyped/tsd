@@ -7,13 +7,17 @@ module System {
     export class Console { 
         public static out: IO.StreamWriter;
 
-        public static initialize() { 
-            if (Environment.isNode()) {
-                Console.out = new NodeJs.ConsoleWriter();
-            } else if (Environment.isWsh()) { 
-                Console.out = new Wsh.ConsoleWriter();
-            } else { 
-                throw new Error('Invalid host');
+        public static initialize(proxy?) {
+            if (proxy) {
+                Console.out = proxy;
+            } else {
+                if (Environment.isNode()) {
+                    Console.out = new NodeJs.ConsoleWriter();
+                } else if (Environment.isWsh()) {
+                    Console.out = new Wsh.ConsoleWriter();
+                } else {
+                    throw new Error('Invalid host');
+                }
             }
         }
 

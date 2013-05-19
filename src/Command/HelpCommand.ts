@@ -12,7 +12,7 @@ module Command {
             return args[2] == this.shortcut;
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             //...
         }
     }

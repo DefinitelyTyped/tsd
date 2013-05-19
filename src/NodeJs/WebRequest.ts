@@ -9,7 +9,7 @@ module NodeJs {
         public getUrl(url: string, callback: (data: string) => void ): void {
 
             System.Console.writeLine("tsd \033[32mhttp \033[35mGET\033[0m " + url);
-            
+
             this._request(url, (error, response, body) => {
                 if (error) {
                     System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please, check your internet connection - " + error + '\n');

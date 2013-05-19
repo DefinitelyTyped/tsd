@@ -40,8 +40,8 @@ class Config {
 	    return cfg;
 	}
 
-	public load() {
-	    var cfg = Config.tryGetConfigFile();
+	public load(cfg?) {
+	    var cfg = cfg || Config.tryGetConfigFile();
 	    this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
 	    this.libPath = Config.isNull(cfg, 'libPath', 'lib');
 	    this.dependencies = Config.isNull(cfg, 'dependencies', []);

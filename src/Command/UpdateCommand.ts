@@ -1,3 +1,4 @@
+///<reference path='../Common.ts'/>
 ///<reference path='ICommand.ts'/>
 ///<reference path='../System/IO/DirectoryManager.ts'/>
 ///<reference path='../System/Console.ts'/>
@@ -50,9 +51,9 @@ module Command {
                 var ver = this.getVersion(data, name, version);
                 if (ver) {
                     if (ver.key != this.cfg.dependencies[lib].key) {
-                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Update is available!'));
+                        System.Console.writeLine(Common.format(1, 34, lib) + Common.format(1, 35, '  Update is available!'));
                     } else {
-                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Is the latest version.'));
+                        System.Console.writeLine(Common.format(1, 34, lib) + Common.format(1, 35, '  Is the latest version.'));
                     }
                 }
 
@@ -64,7 +65,7 @@ module Command {
             });
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
 
             System.Console.writeLine(' Lib                                  Status');
             System.Console.writeLine(' ------------------------------------ ----------------------------------------');

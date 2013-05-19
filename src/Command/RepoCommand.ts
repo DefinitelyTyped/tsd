@@ -20,7 +20,7 @@ module Command {
             return args[2] == this.shortcut;
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             var uriList = this.cfg.repo.uriList;
             if (uriList.length > 0) {
                 var index = 0;
