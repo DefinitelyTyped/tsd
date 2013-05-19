@@ -1,4 +1,5 @@
-﻿///<reference path='ICommand.ts'/>
+﻿///<reference path='../Common.ts'/>
+///<reference path='ICommand.ts'/>
 ///<reference path='../System/Web/WebRequest.ts'/>
 ///<reference path='../System/IO/FileManager.ts'/>
 ///<reference path='../System/IO/DirectoryManager.ts'/>
@@ -42,11 +43,11 @@ module Command {
                 var version = targetLib.versions[0];
 
                 System.Console.writeLine("         name: " + targetLib.name);
-                System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                System.Console.writeLine("  description: " + Common.format(0, 60, targetLib.description));
                 System.Console.writeLine("          key: " + version.key);
                 System.Console.writeLine("      version: " + version.version);
-                System.Console.writeLine("       author: " + format(0, 60, version.author.name + ' (' + version.author.url + ')'));
-                System.Console.writeLine("          url: " + format(0, 60, version.uri.source));
+                System.Console.writeLine("       author: " + Common.format(0, 60, version.author.name + ' (' + version.author.url + ')'));
+                System.Console.writeLine("          url: " + Common.format(0, 60, version.uri.source));
                 System.Console.writeLine("");
             }
         }
@@ -71,7 +72,7 @@ module Command {
             });
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             var uriList = this.cfg.repo.uriList;
             if (args[3].indexOf('!') != -1) {
                 this._withRepoIndex = true;

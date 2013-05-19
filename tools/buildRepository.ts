@@ -9,19 +9,8 @@ declare var require: any;
 declare var process: any;
 
 function GUID() {
-    var S4 = function () {
-        return Math.floor(
-                Math.random() * 0x10000 /* 65536 */
-            ).toString(16);
-    };
-
-    return (
-            S4() + S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + S4() + S4()
-        );
+    var S4 = function () { return Math.floor(Math.random() * 0x10000 /* 65536 */).toString(16); };
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
 
 function endsWith(str, suffix) {
@@ -65,22 +54,6 @@ function fromTsdLibs(lib, name, version) {
     return sources;
 }
 
-//function fromZip(lib, name, version) {
-//    var AdmZip = require('adm-zip');
-
-//    request(lib.file, (error, response, body) => {
-//        if (error) {
-//        } else {
-//            fs.writeFileSync('c:/temp/a.zip', body);
-//            var zip = new AdmZip("c:/temp/a.zip");
-//            var zipEntries = zip.getEntries();
-//            zipEntries.forEach(function (zipEntry) {
-//                console.log(zipEntry.toString());
-//            });
-//        }
-//    });
-//}
-
 function buildSource(lib, name, version) {
     var result: any = {};
 
@@ -95,7 +68,6 @@ function buildSource(lib, name, version) {
     return result;
 }
 
-//console.log(JSON.stringify(obj, null, 2));
 var files = new NodeJs.DirectoryHandle().getAllFiles('../repo_data');
 var repo = [];
 var repo_v2 = [];
@@ -108,8 +80,6 @@ for (var i = 0; i < files.length; i++) {
 
     var content = new NodeJs.FileHandle().readFile(files[i]);
     var obj = JSON.parse(content);
-
-    //docs.push({html: dtsdoc.loadSourceFile('class Test{name:string;}')});
 
     var v2lib = {
         name: obj.name,
@@ -136,26 +106,6 @@ for (var i = 0; i < files.length; i++) {
     }
 
     repo_v2.push(v2lib);
-
-    /*
-    repo_v2.push({
-        name: obj.name,
-        description: obj.description,
-        versions: [{
-            version: obj.versions[0].version,
-            key: obj.versions[0].key,
-            dependencies: obj.versions[0].dependencies,
-            uri: {
-                source: obj.versions[0].url,
-                sourceType: 1
-            },
-            author: {
-                name: obj.versions[0].author,
-                url: obj.versions[0].author_url,
-            },
-            lib: obj.versions[0].lib || {}
-        }]
-    });*/
 
     repo.push(obj);
 

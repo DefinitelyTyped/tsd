@@ -1,1 +1,2 @@
-tsc --out ./deploy/tsd.js ./src/tsd.ts
+tsc --out ./deploy/commandLine.js ./src/commandLine.ts
+tsc --out ./deploy/api.js ./src/api.ts

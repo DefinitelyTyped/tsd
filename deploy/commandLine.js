@@ -122,13 +122,17 @@ var System;
 (function (System) {
     var Console = (function () {
         function Console() { }
-        Console.initialize = function initialize() {
-            if(System.Environment.isNode()) {
-                Console.out = new NodeJs.ConsoleWriter();
-            } else if(System.Environment.isWsh()) {
-                Console.out = new Wsh.ConsoleWriter();
+        Console.initialize = function initialize(proxy) {
+            if(proxy) {
+                Console.out = proxy;
             } else {
-                throw new Error('Invalid host');
+                if(System.Environment.isNode()) {
+                    Console.out = new NodeJs.ConsoleWriter();
+                } else if(System.Environment.isWsh()) {
+                    Console.out = new Wsh.ConsoleWriter();
+                } else {
+                    throw new Error('Invalid host');
+                }
             }
         };
         Console.write = function write(value) {
@@ -182,8 +186,8 @@ var NodeJs;
         FileHandle.prototype.readFile = function (file) {
             var buffer = this._fs.readFileSync(file);
             switch(buffer[0]) {
-                case 0xFE:
-                    if(buffer[1] == 0xFF) {
+                case 254:
+                    if(buffer[1] == 255) {
                         var i = 0;
                         while((i + 1) < buffer.length) {
                             var temp = buffer[i];
@@ -194,13 +198,13 @@ var NodeJs;
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 0xFF:
-                    if(buffer[1] == 0xFE) {
+                case 255:
+                    if(buffer[1] == 254) {
                         return buffer.toString("ucs2", 2);
                     }
                     break;
-                case 0xEF:
-                    if(buffer[1] == 0xBB) {
+                case 239:
+                    if(buffer[1] == 187) {
                         return buffer.toString("utf8", 3);
                     }
             }
@@ -275,9 +279,9 @@ var Wsh;
                 streamObj.LoadFromFile(file);
                 var bomChar = streamObj.ReadText(2);
                 streamObj.Position = 0;
-                if((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF) || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
+                if((bomChar.charCodeAt(0) == 254 && bomChar.charCodeAt(1) == 255) || (bomChar.charCodeAt(0) == 255 && bomChar.charCodeAt(1) == 254)) {
                     streamObj.Charset = 'unicode';
-                } else if(bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {
+                } else if(bomChar.charCodeAt(0) == 239 && bomChar.charCodeAt(1) == 187) {
                     streamObj.Charset = 'utf-8';
                 }
                 var str = streamObj.ReadText(-1);
@@ -377,7 +381,7 @@ var Wsh;
             } catch (objError) {
                 System.Console.writeLine("tsd ERR! " + WinHttpReq.statusCode + " " + objError.message);
                 strResult = objError + "\n";
-                strResult += "WinHTTP returned error: " + (objError.number & 0xFFFF).toString() + "\n\n";
+                strResult += "WinHTTP returned error: " + (objError.number & 65535).toString() + "\n\n";
                 strResult += objError.description;
             }
             return callback(strResult);
@@ -481,6 +485,20 @@ var DataSource;
     })();
     DataSource.LibContent = LibContent;    
 })(DataSource || (DataSource = {}));
+var Common = (function () {
+    function Common() { }
+    Common.complete = function complete(val) {
+        var result = '';
+        for(var i = 0; i < val; i++) {
+            result += ' ';
+        }
+        return result;
+    };
+    Common.format = function format(start, maxLen, text) {
+        return Common.complete(start) + (text.length > maxLen ? text.substr(0, maxLen - 3) + '...' : text + Common.complete(maxLen - text.length));
+    };
+    return Common;
+})();
 var Command;
 (function (Command) {
     var BaseCommand = (function () {
@@ -488,11 +506,11 @@ var Command;
         BaseCommand.prototype.accept = function (args) {
             throw new Error("Not implemented exception");
         };
-        BaseCommand.prototype.exec = function (args) {
+        BaseCommand.prototype.exec = function (args, callback) {
             throw new Error("Not implemented exception");
         };
         BaseCommand.prototype.toString = function () {
-            return format(2, 15, this.shortcut) + "   " + format(0, 57, this.usage);
+            return Common.format(2, 15, this.shortcut) + "   " + Common.format(0, 57, this.usage);
         };
         return BaseCommand;
     })();
@@ -506,7 +524,7 @@ var Command;
             var name = lib.name;
             var version = lib.versions[0].version;
             var description = lib.description;
-            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 39, description) + ' ' + repoNumber.toString());
+            System.Console.writeLine(Common.format(1, 28, name) + ' ' + Common.format(0, 7, version) + ' ' + Common.format(0, 39, description) + ' ' + repoNumber.toString());
         };
         Helper.printLibs = function printLibs(libs, repo, repoNumber) {
             System.Console.writeLine('');
@@ -546,7 +564,7 @@ var Command;
         HelpCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
         };
-        HelpCommand.prototype.exec = function (args) {
+        HelpCommand.prototype.exec = function (args, callback) {
         };
         return HelpCommand;
     })(Command.BaseCommand);
@@ -576,7 +594,7 @@ var Command;
                 }
             });
         };
-        AllCommand.prototype.exec = function (args) {
+        AllCommand.prototype.exec = function (args, callback) {
             var uriList = this.cfg.repo.uriList;
             if(this._indexSync < uriList.length) {
                 this.repoExplorer(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList);
@@ -604,7 +622,7 @@ var Command;
             var name = lib.name;
             var version = lib.versions[0].version;
             var description = lib.description;
-            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
+            System.Console.writeLine(Common.format(1, 28, name) + ' ' + Common.format(0, 7, version) + ' ' + Common.format(0, 41, description));
         };
         SearchCommand.prototype.match = function (key, name) {
             return name.toUpperCase().indexOf(key.toUpperCase()) != -1;
@@ -640,7 +658,7 @@ var Command;
                 }
             });
         };
-        SearchCommand.prototype.exec = function (args) {
+        SearchCommand.prototype.exec = function (args, callback) {
             var uriList = this.cfg.repo.uriList;
             if(this._indexSync < uriList.length) {
                 this.showResults(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList, args);
@@ -837,6 +855,8 @@ var Command;
             this._index = 0;
             this._withDep = false;
             this._withRepoIndex = false;
+            this._map = {
+            };
         }
         InstallCommand.prototype.accept = function (args) {
             return (args[2] == this.shortcut || args[2] == this.shortcut + '*' || args[2] == this.shortcut + '-all');
@@ -937,7 +957,7 @@ var Command;
             }
             return versions[0];
         };
-        InstallCommand.prototype.install = function (targetLib, targetVersion, libs, repo) {
+        InstallCommand.prototype.install = function (targetLib, targetVersion, libs, repo, callback) {
             var _this = this;
             if(this.cacheContains(targetLib.name)) {
                 return;
@@ -962,14 +982,30 @@ var Command;
                     if(_this._withDep) {
                         var deps = (version.dependencies) || [];
                         for(var i = 0; i < deps.length; i++) {
+                            if(!_this._map[deps[i].name]) {
+                                _this._map[deps[i].name] = false;
+                            }
                             var dep = _this.find(deps[i].name, libs);
-                            _this.install(dep, dep.versions[0].version, libs, _this.cfg.repo.uriList[0]);
+                            _this.install(dep, dep.versions[0].version, libs, _this.cfg.repo.uriList[0], callback);
                         }
                     }
+                    _this.verifyFinish(targetLib.name, callback);
                 });
             }
         };
-        InstallCommand.prototype.execInternal = function (index, uriList, args) {
+        InstallCommand.prototype.verifyFinish = function (name, callback) {
+            var isFinish = true;
+            this._map[name] = true;
+            for(var attr in this._map) {
+                if(!this._map[attr]) {
+                    isFinish = false;
+                }
+            }
+            if(isFinish) {
+                callback();
+            }
+        };
+        InstallCommand.prototype.execInternal = function (index, uriList, args, callback) {
             var _this = this;
             var targetLib;
             var tryInstall = function (libs, lib) {
@@ -977,11 +1013,17 @@ var Command;
                 if(targetLib) {
                     var name = lib.split('@')[0];
                     var version = lib.split('@')[1];
-                    _this.install(targetLib, version || targetLib.versions[0].version, libs, uriList[index]);
+                    _this.install(targetLib, version || targetLib.versions[0].version, libs, uriList[index], callback);
                 } else {
                     System.Console.writeLine("   [!] Lib not found.\n");
+                    _this.verifyFinish(lib.split('@')[0], callback);
                 }
             };
+            for(var i = 3; i < args.length; i++) {
+                if(!this._map[args[i]]) {
+                    this._map[args[i]] = false;
+                }
+            }
             var dataSource = Command.Helper.getDataSource(uriList[index]);
             dataSource.all(function (libs) {
                 var index = (_this._withRepoIndex ? 4 : 3);
@@ -993,7 +1035,7 @@ var Command;
                 }
             });
         };
-        InstallCommand.prototype.installFromConfig = function () {
+        InstallCommand.prototype.installFromConfig = function (callback) {
             var libs = [];
             for(var dep in this.cfg.dependencies) {
                 var name = dep.split('@')[0];
@@ -1012,17 +1054,17 @@ var Command;
                 libs.push(lib);
             }
             for(var i = 0; i < libs.length; i++) {
-                this.install(libs[i], libs[i].versions[0].version, [], null);
+                this.install(libs[i], libs[i].versions[0].version, [], null, callback);
             }
         };
-        InstallCommand.prototype.exec = function (args) {
+        InstallCommand.prototype.exec = function (args, callback) {
             if(args[2].indexOf('*') != -1) {
                 this._withDep = true;
             } else if(args[2] == this.shortcut + '-all') {
                 this._withDep = true;
             }
             if(!args[3]) {
-                this.installFromConfig();
+                this.installFromConfig(callback);
             } else {
                 if(args[args.length - 1] == 'full') {
                     this._isFull = true;
@@ -1033,12 +1075,12 @@ var Command;
                     this._withRepoIndex = true;
                     var index = parseInt(args[3][1]);
                     if(index.toString() != "NaN") {
-                        this.execInternal(index, uriList, args);
+                        this.execInternal(index, uriList, args, callback);
                     } else {
                         System.Console.writeLine("   [!] Invalid repository index.\n");
                     }
                 } else {
-                    this.execInternal(0, uriList, args);
+                    this.execInternal(0, uriList, args, callback);
                 }
             }
         };
@@ -1089,9 +1131,9 @@ var Command;
                 var ver = _this.getVersion(data, name, version);
                 if(ver) {
                     if(ver.key != _this.cfg.dependencies[lib].key) {
-                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Update is available!'));
+                        System.Console.writeLine(Common.format(1, 34, lib) + Common.format(1, 35, '  Update is available!'));
                     } else {
-                        System.Console.writeLine(format(1, 34, lib) + format(1, 35, '  Is the latest version.'));
+                        System.Console.writeLine(Common.format(1, 34, lib) + Common.format(1, 35, '  Is the latest version.'));
                     }
                 }
                 if(_this._index < _this._libList.length) {
@@ -1101,7 +1143,7 @@ var Command;
                 }
             });
         };
-        UpdateCommand.prototype.exec = function (args) {
+        UpdateCommand.prototype.exec = function (args, callback) {
             System.Console.writeLine(' Lib                                  Status');
             System.Console.writeLine(' ------------------------------------ ----------------------------------------');
             for(var lib in this.cfg.dependencies) {
@@ -1150,8 +1192,8 @@ var Config = (function () {
         }
         return cfg;
     };
-    Config.prototype.load = function () {
-        var cfg = Config.tryGetConfigFile();
+    Config.prototype.load = function (cfg) {
+        var cfg = cfg || Config.tryGetConfigFile();
         this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
         this.libPath = Config.isNull(cfg, 'libPath', 'lib');
         this.dependencies = Config.isNull(cfg, 'dependencies', []);
@@ -1209,7 +1251,7 @@ var Command;
             sw.flush();
             sw.close();
         };
-        CreateLocalConfigCommand.prototype.exec = function (args) {
+        CreateLocalConfigCommand.prototype.exec = function (args, callback) {
             if(System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {
                 throw new Error("   [!] There is already a configuration file in this folder.");
             } else {
@@ -1255,11 +1297,11 @@ var Command;
             } else {
                 var version = targetLib.versions[0];
                 System.Console.writeLine("         name: " + targetLib.name);
-                System.Console.writeLine("  description: " + format(0, 60, targetLib.description));
+                System.Console.writeLine("  description: " + Common.format(0, 60, targetLib.description));
                 System.Console.writeLine("          key: " + version.key);
                 System.Console.writeLine("      version: " + version.version);
-                System.Console.writeLine("       author: " + format(0, 60, version.author.name + ' (' + version.author.url + ')'));
-                System.Console.writeLine("          url: " + format(0, 60, version.uri.source));
+                System.Console.writeLine("       author: " + Common.format(0, 60, version.author.name + ' (' + version.author.url + ')'));
+                System.Console.writeLine("          url: " + Common.format(0, 60, version.uri.source));
                 System.Console.writeLine("");
             }
         };
@@ -1281,7 +1323,7 @@ var Command;
                 tryGetInfo(libs, lib);
             });
         };
-        InfoCommand.prototype.exec = function (args) {
+        InfoCommand.prototype.exec = function (args, callback) {
             var uriList = this.cfg.repo.uriList;
             if(args[3].indexOf('!') != -1) {
                 this._withRepoIndex = true;
@@ -1314,7 +1356,7 @@ var Command;
         RepoCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
         };
-        RepoCommand.prototype.exec = function (args) {
+        RepoCommand.prototype.exec = function (args, callback) {
             var uriList = this.cfg.repo.uriList;
             if(uriList.length > 0) {
                 var index = 0;
@@ -1369,7 +1411,8 @@ var CommandLineProcessor = (function () {
                 if(command instanceof Command.HelpCommand) {
                     this.printUsage();
                 } else {
-                    command.exec(args);
+                    command.exec(args, function () {
+                    });
                 }
             }
         }
@@ -1396,16 +1439,6 @@ var DataSource;
     })();
     DataSource.DataSourceFactory = DataSourceFactory;    
 })(DataSource || (DataSource = {}));
-function complete(val) {
-    var result = '';
-    for(var i = 0; i < val; i++) {
-        result += ' ';
-    }
-    return result;
-}
-function format(start, maxLen, text) {
-    return complete(start) + (text.length > maxLen ? text.substr(0, maxLen - 3) + '...' : text + complete(maxLen - text.length));
-}
 var Main = (function () {
     function Main() { }
     Main.prototype.init = function () {

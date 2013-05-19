@@ -33,7 +33,7 @@ module Command {
             sw.close();
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             if (System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {
                 throw new Error("   [!] There is already a configuration file in this folder.");
             } else {

@@ -143,7 +143,7 @@ module Command {
             return versions[0];
         }
 
-        private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[], repo: TsdUri): void { 
+        private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[], repo: TsdUri, callback: (err?, data?) => any): void {
             if(this.cacheContains(targetLib.name))
                 return;
 
@@ -168,16 +168,37 @@ module Command {
 
                     if (this._withDep) {
                         var deps = (<DataSource.LibDep[]>version.dependencies) || [];
+
                         for (var i = 0; i < deps.length; i++) {
+                            if (!this._map[deps[i].name])
+                                this._map[deps[i].name] = false;
                             var dep: DataSource.Lib = this.find(deps[i].name, libs);
-                            this.install(dep, dep.versions[0].version, libs, this.cfg.repo.uriList[0]);
+                            this.install(dep, dep.versions[0].version, libs, this.cfg.repo.uriList[0], callback);
                         }
                     }
+
+                    this.verifyFinish(targetLib.name, callback);
                 });
             }
         }
 
-        private execInternal(index: number, uriList: TsdUri[], args: Array) {
+        private _map: Object = {};
+
+        private verifyFinish(name, callback: (err?, data?) => any) {
+            var isFinish = true;
+            this._map[name] = true;
+            for (var attr in this._map) {
+                if (!this._map[attr]) {
+                    isFinish = false;
+                }
+            }
+
+            if (isFinish) {
+                callback();
+            }
+        }
+
+        private execInternal(index: number, uriList: TsdUri[], args: Array, callback: (err?, data?) => any) {
             var targetLib: DataSource.Lib;
 
             var tryInstall = (libs, lib: string) => {
@@ -186,10 +207,17 @@ module Command {
                 if (targetLib) {
                     var name = lib.split('@')[0];
                     var version = lib.split('@')[1];
-                    this.install(targetLib, version || targetLib.versions[0].version, libs, uriList[index]);
-                } else
+                    this.install(targetLib, version || targetLib.versions[0].version, libs, uriList[index], callback);
+                } else {
                     System.Console.writeLine("   [!] Lib not found.\n");
+                    this.verifyFinish(lib.split('@')[0], callback);
+                }
             };
+
+            for (var i = 3; i < args.length; i++) {
+                if (!this._map[args[i]])
+                    this._map[args[i]] = false;
+            }
 
             var dataSource = Helper.getDataSource(uriList[index]);
             dataSource.all((libs) => {
@@ -203,7 +231,7 @@ module Command {
             });
         }
 
-        private installFromConfig() {
+        private installFromConfig(callback: (err?, data?) => any) {
             var libs: DataSource.Lib[] = [];
             for (var dep in this.cfg.dependencies) {
                 var name = dep.split('@')[0];
@@ -224,11 +252,12 @@ module Command {
             }
 
             for (var i = 0; i < libs.length; i++) {
-                this.install(libs[i], libs[i].versions[0].version, [], null);
+                this.install(libs[i], libs[i].versions[0].version, [], null, callback);
             }
         }
 
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
+
             if (args[2].indexOf('*') != -1) {
                 this._withDep = true;
             }
@@ -238,7 +267,7 @@ module Command {
 			
             // if only 'install'
             if (!args[3]) {
-                this.installFromConfig();
+                this.installFromConfig(callback);
             } else {
                 if (args[args.length - 1] == 'full') {
                     this._isFull = true;
@@ -250,12 +279,12 @@ module Command {
                     this._withRepoIndex = true;
                     var index = parseInt(args[3][1]);
                     if (index.toString() != "NaN") {
-                        this.execInternal(index, uriList, args);
+                        this.execInternal(index, uriList, args, callback);
                     } else {
                         System.Console.writeLine("   [!] Invalid repository index.\n");
                     }
                 } else {
-                    this.execInternal(0, uriList, args);
+                    this.execInternal(0, uriList, args, callback);
                 }
             }
         }

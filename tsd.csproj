@@ -182,23 +182,315 @@
     <None Include="repo_data\Youtube.json" />
     <None Include="repo_data\yui.json" />
     <None Include="repo_data\zeroclipboard.json" />
+    <None Include="src\api.js.map">
+      <DependentUpon>api.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\AllCommand.js.map">
+      <DependentUpon>AllCommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\HelpCommand.js.map">
+      <DependentUpon>HelpCommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\Helper.js.map">
+      <DependentUpon>Helper.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\ICommand.js.map">
+      <DependentUpon>ICommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\InfoCommand.js.map">
+      <DependentUpon>InfoCommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\RepoCommand.js.map">
+      <DependentUpon>RepoCommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Command\SearchCommand.js.map">
+      <DependentUpon>SearchCommand.ts</DependentUpon>
+    </None>
+    <None Include="src\Common.js.map">
+      <DependentUpon>Common.ts</DependentUpon>
+    </None>
+    <None Include="src\Config.js.map">
+      <DependentUpon>Config.ts</DependentUpon>
+    </None>
     <None Include="src\d.ts\node-0.8.d.key" />
+    <None Include="src\DataSource\DataSourceFactory.js.map">
+      <DependentUpon>DataSourceFactory.ts</DependentUpon>
+    </None>
+    <None Include="src\DataSource\FileSystemDataSource.js.map">
+      <DependentUpon>FileSystemDataSource.ts</DependentUpon>
+    </None>
+    <None Include="src\DataSource\IDataSource.js.map">
+      <DependentUpon>IDataSource.ts</DependentUpon>
+    </None>
+    <None Include="src\DataSource\WebDataSource.js.map">
+      <DependentUpon>WebDataSource.ts</DependentUpon>
+    </None>
+    <None Include="src\NodeJs\ConsoleWriter.js.map">
+      <DependentUpon>ConsoleWriter.ts</DependentUpon>
+    </None>
+    <None Include="src\NodeJs\DirectoryHandle.js.map">
+      <DependentUpon>DirectoryHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\NodeJs\FileHandle.js.map">
+      <DependentUpon>FileHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\NodeJs\WebRequest.js.map">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Console.js.map">
+      <DependentUpon>Console.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Environment.js.map">
+      <DependentUpon>Environment.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IDisposable.js.map">
+      <DependentUpon>IDisposable.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\DirectoryManager.js.map">
+      <DependentUpon>DirectoryManager.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\FileManager.js.map">
+      <DependentUpon>FileManager.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\IDirectoryHandle.js.map">
+      <DependentUpon>IDirectoryHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\IFileHandle.js.map">
+      <DependentUpon>IFileHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\ITextWriter.js.map">
+      <DependentUpon>ITextWriter.ts</DependentUpon>
+    </None>
+    <None Include="src\System\IO\StreamWriter.js.map">
+      <DependentUpon>StreamWriter.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Uri.js.map">
+      <DependentUpon>Uri.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Web\IWebRequest.js.map">
+      <DependentUpon>IWebRequest.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Web\WebHandler.js.map">
+      <DependentUpon>WebHandler.ts</DependentUpon>
+    </None>
+    <None Include="src\System\Web\WebRequest.js.map">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </None>
+    <None Include="src\Util\ANSIFormat.js.map">
+      <DependentUpon>ANSIFormat.ts</DependentUpon>
+    </None>
+    <None Include="src\Wsh\ConsoleWriter.js.map">
+      <DependentUpon>ConsoleWriter.ts</DependentUpon>
+    </None>
+    <None Include="src\Wsh\DirectoryHandle.js.map">
+      <DependentUpon>DirectoryHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\Wsh\FileHandle.js.map">
+      <DependentUpon>FileHandle.ts</DependentUpon>
+    </None>
+    <None Include="src\Wsh\WebRequest.js.map">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="deploy\tsd.js" />
+    <Content Include="deploy\api.js" />
+    <Content Include="deploy\commandLine.js" />
     <Content Include="LICENSE.txt" />
+    <Content Include="src\api.js">
+      <DependentUpon>api.ts</DependentUpon>
+    </Content>
+    <Content Include="src\api.min.js">
+      <DependentUpon>api.ts</DependentUpon>
+    </Content>
+    <Content Include="src\commandLine.js">
+      <DependentUpon>commandLine.ts</DependentUpon>
+    </Content>
+    <Content Include="src\commandLine.min.js">
+      <DependentUpon>commandLine.ts</DependentUpon>
+    </Content>
+    <Content Include="src\CommandLineProcessor.js">
+      <DependentUpon>CommandLineProcessor.ts</DependentUpon>
+    </Content>
+    <Content Include="src\CommandLineProcessor.min.js">
+      <DependentUpon>CommandLineProcessor.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\AllCommand.js">
+      <DependentUpon>AllCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\AllCommand.min.js">
+      <DependentUpon>AllCommand.ts</DependentUpon>
+    </Content>
     <Content Include="src\Command\AllCommand.ts" />
+    <Content Include="src\Command\CreateLocalConfigCommand.js">
+      <DependentUpon>CreateLocalConfigCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\CreateLocalConfigCommand.min.js">
+      <DependentUpon>CreateLocalConfigCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\HelpCommand.js">
+      <DependentUpon>HelpCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\HelpCommand.min.js">
+      <DependentUpon>HelpCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\Helper.js">
+      <DependentUpon>Helper.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\Helper.min.js">
+      <DependentUpon>Helper.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\ICommand.js">
+      <DependentUpon>ICommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\ICommand.min.js">
+      <DependentUpon>ICommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\InfoCommand.js">
+      <DependentUpon>InfoCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\InfoCommand.min.js">
+      <DependentUpon>InfoCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\RepoCommand.js">
+      <DependentUpon>RepoCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\RepoCommand.min.js">
+      <DependentUpon>RepoCommand.ts</DependentUpon>
+    </Content>
     <Content Include="src\Command\RepoCommand.ts" />
     <Content Include="src\Command\Helper.ts" />
+    <TypeScriptCompile Include="src\Common.ts" />
+    <Content Include="src\api.ts" />
+    <Content Include="src\Command\SearchCommand.js">
+      <DependentUpon>SearchCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\SearchCommand.min.js">
+      <DependentUpon>SearchCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Command\UpdateCommand.min.js">
+      <DependentUpon>UpdateCommand.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Common.js">
+      <DependentUpon>Common.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Common.min.js">
+      <DependentUpon>Common.ts</DependentUpon>
+    </Content>
     <Content Include="src\Config.js">
       <DependentUpon>Config.ts</DependentUpon>
     </Content>
     <Content Include="src\Config.min.js">
       <DependentUpon>Config.ts</DependentUpon>
     </Content>
+    <Content Include="src\DataSource\DataSourceFactory.js">
+      <DependentUpon>DataSourceFactory.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\DataSourceFactory.min.js">
+      <DependentUpon>DataSourceFactory.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\FileSystemDataSource.js">
+      <DependentUpon>FileSystemDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\FileSystemDataSource.min.js">
+      <DependentUpon>FileSystemDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\IDataSource.js">
+      <DependentUpon>IDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\IDataSource.min.js">
+      <DependentUpon>IDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\WebDataSource.js">
+      <DependentUpon>WebDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\DataSource\WebDataSource.min.js">
+      <DependentUpon>WebDataSource.ts</DependentUpon>
+    </Content>
+    <Content Include="src\NodeJs\ConsoleWriter.js">
+      <DependentUpon>ConsoleWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\NodeJs\ConsoleWriter.min.js">
+      <DependentUpon>ConsoleWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\NodeJs\DirectoryHandle.min.js">
+      <DependentUpon>DirectoryHandle.ts</DependentUpon>
+    </Content>
+    <Content Include="src\NodeJs\FileHandle.min.js">
+      <DependentUpon>FileHandle.ts</DependentUpon>
+    </Content>
     <Content Include="src\NodeJs\WebRequest.min.js">
       <DependentUpon>WebRequest.ts</DependentUpon>
     </Content>
+    <Content Include="src\System\Console.min.js">
+      <DependentUpon>Console.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Environment.min.js">
+      <DependentUpon>Environment.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IDisposable.min.js">
+      <DependentUpon>IDisposable.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\DirectoryManager.min.js">
+      <DependentUpon>DirectoryManager.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\FileManager.js">
+      <DependentUpon>FileManager.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\FileManager.min.js">
+      <DependentUpon>FileManager.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\IDirectoryHandle.min.js">
+      <DependentUpon>IDirectoryHandle.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\IFileHandle.min.js">
+      <DependentUpon>IFileHandle.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\ITextWriter.js">
+      <DependentUpon>ITextWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\ITextWriter.min.js">
+      <DependentUpon>ITextWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\StreamWriter.js">
+      <DependentUpon>StreamWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\IO\StreamWriter.min.js">
+      <DependentUpon>StreamWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Uri.min.js">
+      <DependentUpon>Uri.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Web\IWebRequest.min.js">
+      <DependentUpon>IWebRequest.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Web\WebHandler.min.js">
+      <DependentUpon>WebHandler.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Web\WebRequest.js">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </Content>
+    <Content Include="src\System\Web\WebRequest.min.js">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Util\ANSIFormat.js">
+      <DependentUpon>ANSIFormat.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Util\ANSIFormat.min.js">
+      <DependentUpon>ANSIFormat.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Wsh\ConsoleWriter.min.js">
+      <DependentUpon>ConsoleWriter.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Wsh\DirectoryHandle.min.js">
+      <DependentUpon>DirectoryHandle.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Wsh\FileHandle.min.js">
+      <DependentUpon>FileHandle.ts</DependentUpon>
+    </Content>
+    <Content Include="src\Wsh\WebRequest.min.js">
+      <DependentUpon>WebRequest.ts</DependentUpon>
+    </Content>
+    <Content Include="test\api.js" />
     <Content Include="tools\buildRepository.js">
       <DependentUpon>buildRepository.ts</DependentUpon>
     </Content>
@@ -303,7 +595,7 @@
     <Content Include="src\DataSource\IDataSource.ts" />
     <Content Include="src\Command\InstallCommand.ts" />
     <Content Include="src\Command\SearchCommand.ts" />
-    <Content Include="src\tsd.ts" />
+    <Content Include="src\commandLine.ts" />
     <Content Include="src\DataSource\WebDataSource.ts" />
     <Content Include="src\System\Web\WebRequest.ts" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿///<reference path='ICommand.ts'/>
+﻿///<reference path='../Common.ts'/>
+///<reference path='ICommand.ts'/>
 
 module Command {
 
@@ -19,7 +20,7 @@ module Command {
             var version = lib.versions[0].version;
             var description = lib.description;
 
-            System.Console.writeLine(format(1, 28, name) + ' ' + format(0, 7, version) + ' ' + format(0, 41, description));
+            System.Console.writeLine(Common.format(1, 28, name) + ' ' + Common.format(0, 7, version) + ' ' + Common.format(0, 41, description));
         }
 
         private match(key: string, name: string) {
@@ -65,7 +66,7 @@ module Command {
         }
 
         private _indexSync: number = 0;
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             var uriList = this.cfg.repo.uriList;
             if (this._indexSync < uriList.length) {
                 this.showResults(Helper.getDataSource(uriList[this._indexSync++]), uriList, args);

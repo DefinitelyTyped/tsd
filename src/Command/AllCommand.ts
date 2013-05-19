@@ -26,7 +26,7 @@ module Command {
         }
 
         private _indexSync: number = 0;
-        public exec(args: Array): void {
+        public exec(args: Array, callback: (err?, data?) => any): void {
             var uriList = this.cfg.repo.uriList;
             if (this._indexSync < uriList.length) {
                 this.repoExplorer(Helper.getDataSource(uriList[this._indexSync++]), uriList);

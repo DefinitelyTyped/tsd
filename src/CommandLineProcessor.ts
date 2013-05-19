@@ -55,7 +55,7 @@ class CommandLineProcessor {
                 if (command instanceof Command.HelpCommand)
                     this.printUsage();
                 else {
-                    command.exec(args);
+                    command.exec(args, <any>function () { });
                 }
             }
         }

@@ -8,7 +8,7 @@
 
 module System.IO { 
     export class FileManager { 
-        private static handle: IFileHandle;
+        public static handle: IFileHandle;
 
         public static initialize() { 
             if (Environment.isNode()) {

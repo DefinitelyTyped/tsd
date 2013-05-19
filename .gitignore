@@ -1,20 +1,35 @@
 obj
 bin
 src/*.js
+src/*.js.map
 src/*/*.js
+src/*/*.js.map
 src/*/*/*.js
+src/*/*/*.js.map
 src/*/*/*/*.js
+src/*/*/*/*.js.map
 src/*/*/*/*/*.js
+src/*/*/*/*/*.js.map
 NodeJs/*.js
+NodeJs/*.js.map
 NodeJs/*/*.js
+NodeJs/*/*.js.map
 NodeJs/*/*/*.js
+NodeJs/*/*/*.js.map
 NodeJs/*/*/*/*.js
+NodeJs/*/*/*/*.js.map
 NodeJs/*/*/*/*/*.js
+NodeJs/*/*/*/*/*.js.map
 Wsh/*.js
+Wsh/*.js.map
 Wsh/*/*.js
+Wsh/*/*.js.map
 Wsh/*/*/*.js
+Wsh/*/*/*.js.map
 Wsh/*/*/*/*.js
+Wsh/*/*/*/*.js.map
 Wsh/*/*/*/*/*.js
+Wsh/*/*/*/*/*.js.map
 # tsd.csproj
 tsd.csproj.user
 # tsd.sln
