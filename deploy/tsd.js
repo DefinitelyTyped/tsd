@@ -839,7 +839,7 @@ var Command;
             this._withRepoIndex = false;
         }
         InstallCommand.prototype.accept = function (args) {
-            return (args[2] == this.shortcut || args[2] == this.shortcut + '*');
+            return (args[2] == this.shortcut || args[2] == this.shortcut + '*' || args[2] == this.shortcut + '-all');
         };
         InstallCommand.prototype.print = function (lib) {
             System.Console.write(lib.name + ' - ' + lib.description + '[');
@@ -1017,6 +1017,8 @@ var Command;
         };
         InstallCommand.prototype.exec = function (args) {
             if(args[2].indexOf('*') != -1) {
+                this._withDep = true;
+            } else if(args[2] == this.shortcut + '-all') {
                 this._withDep = true;
             }
             if(!args[3]) {
