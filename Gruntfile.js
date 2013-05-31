@@ -18,6 +18,12 @@ module.exports = function (grunt) {
 		shell: {
 		    gitDefinitelyTypedClone: {
 		        command: 'git clone git@github.com:borisyankov/DefinitelyTyped.git'
+		    },
+		    tsdInstall: {
+		        command: 'npm install'
+		    },
+		    tsdDefToolsInstall: {
+		        command: 'npm install ./tsd-deftools'
 		    }
 		},
 		typescript: {
@@ -62,4 +68,6 @@ module.exports = function (grunt) {
 	grunt.registerTask('default', ['clean', 'compile-api', 'compile-cli']);
 
 	grunt.registerTask('repo', ['default', 'compile-repo', 'git-DefinitelyTyped-clone', 'exec-repo']);	
+
+	grunt.registerTask('install', ['shell:tsdInstall', 'shell:tsdDefToolsInstall']);
 };
