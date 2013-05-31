@@ -10,7 +10,18 @@
   "dependencies": {
     "request"           : "latest"
   },
-  "main": { "tsd": "deploy/api.js" },
+   "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-typescript": "~0.1.5",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-execute": "~0.1.2",
+    "grunt-shell": "*"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+ "main": { "tsd": "deploy/api.js" },
   "bin": { "tsd": "deploy/tsd" },
   "preferGlobal": true
 }

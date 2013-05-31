@@ -213,7 +213,7 @@ function fromFile(lib, name, version) {
 }
 function fromTsdLibs(lib, name, version) {
     var sources = [];
-    var targetDir = '../../tsd-libs/libs/' + lib.dir;
+    var targetDir = './../tsd-libs/libs/' + lib.dir;
     var files = new NodeJs.DirectoryHandle().getAllFiles(targetDir, null, {
         recursive: true
     });
@@ -226,7 +226,7 @@ function fromTsdLibs(lib, name, version) {
             }
         };
         lb.uri.sourceType = 1;
-        lb.uri.relative = name + "/" + version;
+        lb.uri.relative = name + (version ? "/" + version : "");
         lb.uri.source = 'https://raw.github.com/Diullei/tsd-libs/master/libs/' + lib.dir + '/' + fileName;
         lb.uri.pre = '/Diullei/tsd-libs/master/libs/' + lib.dir + '/';
         sources.push(lb);
@@ -245,7 +245,7 @@ function buildSource(lib, name, version) {
     }
     return result;
 }
-var files = new NodeJs.DirectoryHandle().getAllFiles('../repo_data');
+var files = new NodeJs.DirectoryHandle().getAllFiles('./repo_data');
 var repo = [];
 var repo_v2 = [];
 var repo_site = [];
@@ -289,15 +289,15 @@ for(var i = 0; i < files.length; i++) {
         url: obj.versions[0].url
     });
 }
-var sw = new NodeJs.FileHandle().createFile('../deploy/repository.json');
+var sw = new NodeJs.FileHandle().createFile('./deploy/repository.json');
 sw.write(JSON.stringify(repo));
 sw.flush();
 sw.close();
-var sw2 = new NodeJs.FileHandle().createFile('../../tsdpm-site/tmpl/repository.js');
+var sw2 = new NodeJs.FileHandle().createFile('./../tsdpm-site/tmpl/repository.js');
 sw2.write('var __repo = ' + JSON.stringify(repo_site) + ';');
 sw2.flush();
 sw2.close();
-var sw3 = new NodeJs.FileHandle().createFile('../../tsdpm-site/repository_v2.json');
+var sw3 = new NodeJs.FileHandle().createFile('./../tsdpm-site/repository_v2.json');
 sw3.write(JSON.stringify({
     repo: repo_v2
 }));
