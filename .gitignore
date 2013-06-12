@@ -35,9 +35,9 @@ tsd.csproj.user
 # tsd.sln
 tsd.v11.suo
 _ReSharper.tsd
-tests
-test
+/tests
+/test
 node_modules
-npm-debug.log
-DefinitelyTyped
+/npm-debug.log
+/DefinitelyTyped
 /.idea
