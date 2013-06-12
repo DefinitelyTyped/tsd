@@ -1,5 +1,6 @@
 .npmignore
 .gitignore
+.gitmodules
 
 repo_data
 repo
@@ -13,5 +14,4 @@ Gruntfile.js
 tsd-config.json
 typings
 
-/.idea
-/test/_tmp.test.js
+/test
