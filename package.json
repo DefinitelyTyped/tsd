@@ -3,6 +3,9 @@
     "description": "The TypeScript definition package manager.",
     "version": "0.4.2",
     "author": "Diullei Gomes",
+    "contributors" : [
+        "Bart van der Schoor"
+    ],
     "licenses": [
         {
             "type": "MIT",
