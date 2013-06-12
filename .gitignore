@@ -38,4 +38,6 @@ _ReSharper.tsd
 tests
 test
 node_modules
+npm-debug.log
 DefinitelyTyped
+/.idea
