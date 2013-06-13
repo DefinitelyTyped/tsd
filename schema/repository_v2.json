@@ -21,7 +21,7 @@
                     "properties": {
                         "author": {
                             "type": "object",
-                            "required": ["name", "url"],
+                            "required": ["name"],
                             "properties": {
                                 "name": {
                                     "type": "string"
