@@ -1,51 +1,45 @@
 {
-    "$schema": "http://json-schema.org/draft-03/schema",
+    "$schema": "http://json-schema.org/draft-04/schema",
     "id": "tsd_repos_v2",
     "type": "array",
+    "required": ["/"],
     "items": {
         "type": "object",
-        "required": true,
         "properties": {
-            "description": {
-                "type": "string",
-                "required": true
-            },
+            "required": ["name", "description", "versions"],
             "name": {
-                "type": "string",
-                "required": true
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
             },
             "versions": {
                 "type": "array",
-                "required": true,
                 "items": {
                     "type": "object",
-                    "required": true,
+                    "required": ["author", "version", "key", "uri", "dependencies"],
                     "properties": {
                         "author": {
                             "type": "object",
-                            "required": true,
+                            "required": ["name", "url"],
                             "properties": {
                                 "name": {
-                                    "type": "string",
-                                    "required": true
+                                    "type": "string"
                                 },
                                 "url": {
-                                    "type": "string",
-                                    "required": true
+                                    "type": "string"
                                 }
                             }
                         },
                         "version": {
-                            "type": "string",
-                            "required": true
+                            "type": "string"
                         },
                         "key": {
-                            "type": "string",
-                            "required": true
+                            "type": "string"
                         },
                         "uri": {
                             "type": "object",
-                            "required": true,
+                            "required": ["sourceType", "source"],
                             "properties": {
                                 "sourceType": {
                                     "type": "number"

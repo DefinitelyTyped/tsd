@@ -4,50 +4,40 @@
     "type": "array",
     "items": {
         "type": "object",
-        "required": true,
+        "required": ["name", "description", "url", "version", "author", "key", "dependencies"],
         "properties": {
             "name": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "description": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "url": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "version": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "author": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "author_url": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "key": {
-                "type": "string",
-                "required": true
+                "type": "string"
             },
             "dependencies": {
                 "type": "array",
-                "required": true,
                 "items": {
                     "type": "object",
-                    "required": true,
+                    "required": ["name", "version"],
                     "properties": {
                         "name": {
-                            "type": "string",
-                            "required": true
+                            "type": "string"
                         },
                         "version": {
-                            "type": "string",
-                            "required": true
+                            "type": "string"
                         }
                     }
                 }

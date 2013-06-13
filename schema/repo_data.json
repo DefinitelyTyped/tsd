@@ -1,57 +1,47 @@
 {
     "type": "object",
-    "$schema": "http://json-schema.org/draft-03/schema",
+    "$schema": "http://json-schema.org/draft-04/schema",
     "id": "tsd_repo_data",
     "properties": {
+        "required": ["name", "description", "versions"],
         "name": {
-            "type": "string",
-            "required": true
+            "type": "string"
         },
         "description": {
-            "type": "string",
-            "required": true
+            "type": "string"
         },
         "versions": {
             "type": "array",
-            "required": true,
             "items": {
                 "type": "object",
-                "required": true,
+                "required": ["author", "version", "url", "key", "dependencies"],
                 "properties": {
                     "author": {
-                        "type": "string",
-                        "required": true
+                        "type": "string"
                     },
                     "author_url": {
-                        "type": "string",
-                        "required": false
+                        "type": "string"
                     },
                     "version": {
-                        "type": "string",
-                        "required": true
+                        "type": "string"
                     },
                     "url": {
-                        "type": "string",
-                        "required": true
+                        "type": "string"
                     },
                     "key": {
-                        "type": "string",
-                        "required": true
+                        "type": "string"
                     },
                     "dependencies": {
                         "type": "array",
-                        "required": false,
+                        "required": ["name", "version"],
                         "items": {
                             "type": "object",
-                            "required": true,
                             "properties": {
                                 "name": {
-                                    "type": "string",
-                                    "required": true
+                                    "type": "string"
                                 },
                                 "version": {
-                                    "type": "string",
-                                    "required": true
+                                    "type": "string"
                                 }
                             }
                         }
