@@ -4,5 +4,6 @@ module System.IO {
         createFile(path: string): StreamWriter;
         deleteFile(path): void;
         fileExists(path): bool;
+        writeFile(path: string, content:string): void;
     }
 }

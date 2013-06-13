@@ -1,0 +1,63 @@
+{
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "id": "tsd_repo_data",
+    "properties": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "description": {
+            "type": "string",
+            "required": true
+        },
+        "versions": {
+            "type": "array",
+            "required": true,
+            "items": {
+                "type": "object",
+                "required": true,
+                "properties": {
+                    "author": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "author_url": {
+                        "type": "string",
+                        "required": false
+                    },
+                    "version": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "key": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "dependencies": {
+                        "type": "array",
+                        "required": false,
+                        "items": {
+                            "type": "object",
+                            "required": true,
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "required": true
+                                },
+                                "version": {
+                                    "type": "string",
+                                    "required": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

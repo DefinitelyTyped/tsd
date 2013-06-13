@@ -1,0 +1,66 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "id": "tsd_repos_v2",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": true,
+        "properties": {
+            "description": {
+                "type": "string",
+                "required": true
+            },
+            "name": {
+                "type": "string",
+                "required": true
+            },
+            "versions": {
+                "type": "array",
+                "required": true,
+                "items": {
+                    "type": "object",
+                    "required": true,
+                    "properties": {
+                        "author": {
+                            "type": "object",
+                            "required": true,
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "required": true
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "required": true
+                                }
+                            }
+                        },
+                        "version": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "key": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "uri": {
+                            "type": "object",
+                            "required": true,
+                            "properties": {
+                                "sourceType": {
+                                    "type": "number"
+                                },
+                                "source": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "dependencies": {
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

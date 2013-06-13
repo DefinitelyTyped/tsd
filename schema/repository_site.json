@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "id": "tsd_repository_site",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": true,
+        "properties": {
+            "name": {
+                "type": "string",
+                "required": true
+            },
+            "description": {
+                "type": "string",
+                "required": true
+            },
+            "url": {
+                "type": "string",
+                "required": true
+            },
+            "version": {
+                "type": "string",
+                "required": true
+            },
+            "author": {
+                "type": "string",
+                "required": true
+            },
+            "author_url": {
+                "type": "string",
+                "required": true
+            },
+            "key": {
+                "type": "string",
+                "required": true
+            },
+            "dependencies": {
+                "type": "array",
+                "required": true,
+                "items": {
+                    "type": "object",
+                    "required": true,
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "version": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
