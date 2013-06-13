@@ -67,6 +67,12 @@ module NodeJs {
             this._fs.writeFileSync(path, '');
             return new FileStreamWriter(path);
         }
+        public writeFile(path: string, content:string): void {
+            var sw = this.createFile(path);
+            sw.write(content);
+            sw.flush();
+            sw.close();
+        }
 
         public deleteFile(path): void {
             try {

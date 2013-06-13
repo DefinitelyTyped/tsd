@@ -214,6 +214,12 @@ var NodeJs;
             this._fs.writeFileSync(path, '');
             return new FileStreamWriter(path);
         };
+        FileHandle.prototype.writeFile = function (path, content) {
+            var sw = this.createFile(path);
+            sw.write(content);
+            sw.flush();
+            sw.close();
+        };
         FileHandle.prototype.deleteFile = function (path) {
             try  {
                 this._fs.unlinkSync(path);
@@ -302,6 +308,12 @@ var Wsh;
                 WScript.StdErr.WriteLine("Couldn't write to file '" + path + "'");
                 throw ex;
             }
+        };
+        FileHandle.prototype.writeFile = function (path, content) {
+            var sw = this.createFile(path);
+            sw.write(content);
+            sw.flush();
+            sw.close();
         };
         FileHandle.prototype.deleteFile = function (path) {
             if(this._fso.FileExists(path)) {
