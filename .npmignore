@@ -1,0 +1,17 @@
+.npmignore
+.gitignore
+.gitmodules
+
+repo_data
+repo
+
+test
+tmp
+src
+
+.jshintrc
+Gruntfile.js
+tsd-config.json
+typings
+
+/test

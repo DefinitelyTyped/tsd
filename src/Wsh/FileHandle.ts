@@ -1,18 +1,18 @@
 ///<reference path='../System/IO/IFileHandle.ts'/>
 ///<reference path='../System/IO/StreamWriter.ts'/>
 
-module Wsh { 
+module Wsh {
 
-    class FileStreamWriter extends System.IO.StreamWriter { 
+    class FileStreamWriter extends System.IO.StreamWriter {
         private _streamObjectPool: any;
         public autoFlush: bool = false;
 
-        constructor(public streamObj: any, public path: string, streamObjectPool) { 
+        constructor(public streamObj: any, public path: string, streamObjectPool) {
             super();
             this._streamObjectPool = streamObjectPool;
         }
 
-        private releaseStreamObject(obj: any) { 
+        private releaseStreamObject(obj: any) {
             this._streamObjectPool.push(obj);
         }
 
@@ -36,7 +36,7 @@ module Wsh {
         private _fso = new ActiveXObject("Scripting.FileSystemObject");
         private _streamObjectPool = [];
 
-        private getStreamObject(): any { 
+        private getStreamObject(): any {
             if (this._streamObjectPool.length > 0) {
                 return this._streamObjectPool.pop();
             }  else {
@@ -44,7 +44,7 @@ module Wsh {
             }
         }
 
-        private releaseStreamObject(obj: any) { 
+        private releaseStreamObject(obj: any) {
             this._streamObjectPool.push(obj);
         }
 
@@ -60,7 +60,10 @@ module Wsh {
                 if ((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF)
                     || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
                     streamObj.Charset = 'unicode';
-                } else if (bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {                    streamObj.Charset = 'utf-8';                 }
+                } else if (bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {
+                    streamObj.Charset = 'utf-8';
+                }
+
                 // Read the whole file
                 var str = streamObj.ReadText(-1 /* read from the current position to EOS */);
                 streamObj.Close();
@@ -84,13 +87,20 @@ module Wsh {
             }
         }
 
+        public writeFile(path: string, content:string): void {
+            var sw = this.createFile(path);
+            sw.write(content);
+            sw.flush();
+            sw.close();
+        }
+
         public deleteFile(path): void {
             if (this._fso.FileExists(path)) {
                 this._fso.DeleteFile(path, true); // true: delete read-only files
             }
         }
 
-        public fileExists(path): bool{ 
+        public fileExists(path): bool{
             return this._fso.FileExists(path);
         }
     }
