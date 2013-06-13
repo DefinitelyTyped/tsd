@@ -2,16 +2,15 @@
 .gitignore
 .gitmodules
 
-repo_data
-repo
+/repo_data
+/repo
 
-test
-tmp
-src
+/tmp
+/src
 
 .jshintrc
 Gruntfile.js
 tsd-config.json
-typings
+/typings
 
 /test
