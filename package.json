@@ -33,7 +33,7 @@
     "chai": "~1.6.1",
     "chai-fuzzy": "~1.3.0",
     "grunt-mocha-test": "~0.4.0",
-    "grunt-tv4": "*"
+    "grunt-tv4": "git://github.com/Bartvds/grunt-tv4"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"
