@@ -10,7 +10,7 @@ module.exports = function (grunt){
     grunt.loadNpmTasks('grunt-execute');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-mocha-test');
-    grunt.loadNpmTasks('grunt-json-schema');
+    grunt.loadNpmTasks('grunt-tv4');
 
     grunt.loadTasks('tasks');
 
@@ -75,7 +75,7 @@ module.exports = function (grunt){
                 src: ['repo_data/*.json']
             }
         },
-        json_schema: {
+        tv4: {
             repo_data: {
                 'files' : {
                     'schema/repo_data.json': ['repo_data/*.json']
@@ -105,8 +105,8 @@ module.exports = function (grunt){
     grunt.registerTask('compile-cli', ['typescript:cli']);
     grunt.registerTask('compile-api', ['typescript:api']);
 
-    grunt.registerTask('validate-data', ['json_schema:repo_data']);
-    grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'json_schema:repo_v2', 'json_schema:repo_site']);
+    grunt.registerTask('validate-data', ['tv4:repo_data']);
+    grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'tv4:repo_v2', 'tv4:repo_site']);
 
     grunt.registerTask('test-code', ['typescript:test_node', 'mochaTest']);
 
