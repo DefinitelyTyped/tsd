@@ -77,17 +77,17 @@ module.exports = function (grunt){
         },
         tv4: {
             repo_data: {
-                'files' : {
+                files : {
                     'schema/repo_data.json': ['repo_data/*.json']
                 }
             },
             repo_v2: {
-                'files' : {
+                files : {
                     'schema/repository_v2.json': ['repo/repository_v2.json']
                 }
             },
             repo_site: {
-                'files' : {
+                files : {
                     'schema/repository_site.json': ['repo/repository_site.json']
                 }
             }
