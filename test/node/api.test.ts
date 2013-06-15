@@ -1,7 +1,8 @@
 ///<reference path="../_ref.ts" />
 
 declare var assert:chai.Assert;
-declare var _:UnderscoreStatic;
+
+var _:UnderscoreStatic = <any>require('../../libs/underscore');
 
 describe('verify repo', () =>{
 

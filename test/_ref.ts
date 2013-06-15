@@ -9,7 +9,5 @@
 var chaii = require('chai');
 chaii.use(require('chai-fuzzy'));
 var assert = chaii.assert;
-var _ = require('underscore');
-
 
 process.env['mocha-unfunk-color'] = true;
