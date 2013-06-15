@@ -48,13 +48,9 @@ module.exports = function (grunt){
                 declaration: false,
                 sourcemap: false
             },
-            cli: {
-                src: ['src/commandLine.ts'],
-                dest: 'deploy/commandLine.js'
-            },
-            api: {
-                src: ['src/api.ts'],
-                dest: 'deploy/api.js'
+            source: {
+                src: ['src/source.ts'],
+                dest: 'deploy/source.js'
             },
             test_node: {
                 option: {base_path: 'test/node/'},
@@ -102,15 +98,14 @@ module.exports = function (grunt){
         }
     });
 
-    grunt.registerTask('compile-cli', ['typescript:cli']);
-    grunt.registerTask('compile-api', ['typescript:api']);
+    grunt.registerTask('compile-source', ['typescript:source']);
 
     grunt.registerTask('validate-data', ['tv4:repo_data']);
     grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'tv4:repo_v2', 'tv4:repo_site']);
 
     grunt.registerTask('test-code', ['typescript:test_node', 'mochaTest']);
 
-    grunt.registerTask('build', ['clean:tmp', 'clean:build', 'compile-api', 'compile-cli', 'test-code']);
+    grunt.registerTask('build', ['clean:tmp', 'clean:build', 'compile-source', 'test-code']);
     grunt.registerTask('repo', ['clean:tmp', 'clean:repo','test-code', 'validate-data', 'build', 'build_repo:all', 'validate-repo', 'copy:export_repo']);
 
     // cli commands

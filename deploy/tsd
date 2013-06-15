@@ -1,2 +1,67 @@
 #!/usr/bin/env node
-require('./commandLine.js');
+var tsd = require('./source');
+
+var isMain = (module) && require.main === (module);
+
+if (isMain) {
+    var main = new tsd.Main();
+    main.init();
+    var arguments;
+    if(tsd.System.Environment.isNode()) {
+        arguments = Array.prototype.slice.call(process.argv);
+    }
+    if(tsd.System.Environment.isWsh()) {
+        var args = [
+            null, 
+            null
+        ];
+        for(var i = 0; i < WScript.Arguments.length; i++) {
+            args[2 + i] = WScript.Arguments.Item(i);
+        }
+        arguments = args;
+    }
+    main.run(arguments);
+
+} else {
+    var eventManager = new tsd.EventManager();
+    var logProxy = {
+        logger: {
+            log: function (msg) {
+                eventManager.dispatchEvent('log', msg);
+            }
+        }
+    };
+    var logger = new tsd.ApiLogger(logProxy);
+    tsd.System.Console.initialize(logger);
+    tsd.System.IO.FileManager.initialize();
+    tsd.System.IO.DirectoryManager.initialize();
+    tsd.System.Web.WebHandler.initialize();
+    function load(config, callback) {
+        exports.commands.config = new tsd.Config();
+        exports.commands.config.load(config);
+        callback(exports);
+    }
+    function install(libs, callback) {
+        var command = new tsd.Command.InstallCommand(this.config);
+        var args = [];
+        args[0] = '*';
+        args[1] = 'api';
+        args[2] = 'install';
+        var cache = {
+        };
+        for(var i = 0; i < libs.length; i++) {
+            if(!cache[libs[i]]) {
+                cache[libs[i]] = true;
+                args.push(libs[i]);
+            }
+        }
+        command.exec(args, callback);
+    }
+    exports.load = load;
+    exports.commands = {
+        install: install
+    };
+    exports.on = function (ev, callback) {
+        eventManager.addListener(ev, callback);
+    };
+}

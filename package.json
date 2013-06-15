@@ -13,7 +13,7 @@
     }
   ],
   "main": {
-    "tsd": "deploy/api.js"
+    "tsd": "deploy/main.js"
   },
   "homepage": "https://github.com/Diullei/tsd",
   "engines": {
