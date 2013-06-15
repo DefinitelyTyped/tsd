@@ -96,28 +96,6 @@ var NodeJs;
     })(System.IO.StreamWriter);
     NodeJs.ConsoleWriter = ConsoleWriter;    
 })(NodeJs || (NodeJs = {}));
-var Wsh;
-(function (Wsh) {
-    var ConsoleWriter = (function (_super) {
-        __extends(ConsoleWriter, _super);
-        function ConsoleWriter() {
-            _super.apply(this, arguments);
-
-        }
-        ConsoleWriter.prototype.flush = function () {
-            WScript.StdOut.Write(this._buffer);
-        };
-        ConsoleWriter.prototype.flushAsync = function (callback) {
-            this.flush();
-            callback();
-        };
-        ConsoleWriter.prototype.dispose = function () {
-            throw new Error("Not Implemented Exception");
-        };
-        return ConsoleWriter;
-    })(System.IO.StreamWriter);
-    Wsh.ConsoleWriter = ConsoleWriter;    
-})(Wsh || (Wsh = {}));
 var System;
 (function (System) {
     var Console = (function () {
@@ -126,13 +104,7 @@ var System;
             if(proxy) {
                 Console.out = proxy;
             } else {
-                if(System.Environment.isNode()) {
-                    Console.out = new NodeJs.ConsoleWriter();
-                } else if(System.Environment.isWsh()) {
-                    Console.out = new Wsh.ConsoleWriter();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                Console.out = new NodeJs.ConsoleWriter();
             }
         };
         Console.write = function write(value) {
@@ -233,113 +205,13 @@ var NodeJs;
     })();
     NodeJs.FileHandle = FileHandle;    
 })(NodeJs || (NodeJs = {}));
-var Wsh;
-(function (Wsh) {
-    var FileStreamWriter = (function (_super) {
-        __extends(FileStreamWriter, _super);
-        function FileStreamWriter(streamObj, path, streamObjectPool) {
-                _super.call(this);
-            this.streamObj = streamObj;
-            this.path = path;
-            this.autoFlush = false;
-            this._streamObjectPool = streamObjectPool;
-        }
-        FileStreamWriter.prototype.releaseStreamObject = function (obj) {
-            this._streamObjectPool.push(obj);
-        };
-        FileStreamWriter.prototype.flush = function () {
-            this.streamObj.WriteText(this._buffer, 0);
-        };
-        FileStreamWriter.prototype.flushAsync = function (callback) {
-            this.streamObj.WriteText(this._buffer, 0);
-            callback();
-        };
-        FileStreamWriter.prototype.close = function () {
-            this.streamObj.SaveToFile(this.path, 2);
-            this.streamObj.Close();
-            this.releaseStreamObject(this.streamObj);
-        };
-        return FileStreamWriter;
-    })(System.IO.StreamWriter);    
-    var FileHandle = (function () {
-        function FileHandle() {
-            this._fso = new ActiveXObject("Scripting.FileSystemObject");
-            this._streamObjectPool = [];
-        }
-        FileHandle.prototype.getStreamObject = function () {
-            if(this._streamObjectPool.length > 0) {
-                return this._streamObjectPool.pop();
-            } else {
-                return new ActiveXObject("ADODB.Stream");
-            }
-        };
-        FileHandle.prototype.releaseStreamObject = function (obj) {
-            this._streamObjectPool.push(obj);
-        };
-        FileHandle.prototype.readFile = function (file) {
-            try  {
-                var streamObj = this.getStreamObject();
-                streamObj.Open();
-                streamObj.Type = 2;
-                streamObj.Charset = 'x-ansi';
-                streamObj.LoadFromFile(file);
-                var bomChar = streamObj.ReadText(2);
-                streamObj.Position = 0;
-                if((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF) || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
-                    streamObj.Charset = 'unicode';
-                } else if(bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {
-                    streamObj.Charset = 'utf-8';
-                }
-                var str = streamObj.ReadText(-1);
-                streamObj.Close();
-                this.releaseStreamObject(streamObj);
-                return str;
-            } catch (err) {
-                throw new Error("Error reading file \"" + file + "\": " + err.message);
-            }
-        };
-        FileHandle.prototype.createFile = function (path, useUTF8) {
-            try  {
-                var streamObj = this.getStreamObject();
-                streamObj.Charset = useUTF8 ? 'utf-8' : 'x-ansi';
-                streamObj.Open();
-                return new FileStreamWriter(streamObj, path, this._streamObjectPool);
-            } catch (ex) {
-                WScript.StdErr.WriteLine("Couldn't write to file '" + path + "'");
-                throw ex;
-            }
-        };
-        FileHandle.prototype.writeFile = function (path, content) {
-            var sw = this.createFile(path);
-            sw.write(content);
-            sw.flush();
-            sw.close();
-        };
-        FileHandle.prototype.deleteFile = function (path) {
-            if(this._fso.FileExists(path)) {
-                this._fso.DeleteFile(path, true);
-            }
-        };
-        FileHandle.prototype.fileExists = function (path) {
-            return this._fso.FileExists(path);
-        };
-        return FileHandle;
-    })();
-    Wsh.FileHandle = FileHandle;    
-})(Wsh || (Wsh = {}));
 var System;
 (function (System) {
     (function (IO) {
         var FileManager = (function () {
             function FileManager() { }
             FileManager.initialize = function initialize() {
-                if(System.Environment.isNode()) {
-                    FileManager.handle = new NodeJs.FileHandle();
-                } else if(System.Environment.isWsh()) {
-                    FileManager.handle = new Wsh.FileHandle();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                FileManager.handle = new NodeJs.FileHandle();
             };
             return FileManager;
         })();
@@ -377,47 +249,13 @@ var NodeJs;
     })();
     NodeJs.WebRequest = WebRequest;    
 })(NodeJs || (NodeJs = {}));
-var Wsh;
-(function (Wsh) {
-    var WebRequest = (function () {
-        function WebRequest() { }
-        WebRequest.prototype.request = function (url, callback) {
-            var strResult;
-            System.Console.writeLine("tsd http GET " + url);
-            var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
-            try  {
-                var temp = WinHttpReq.Open("GET", url, false);
-                WinHttpReq.Send();
-                System.Console.writeLine("tsd http " + WinHttpReq.statusCode + " " + url);
-                strResult = WinHttpReq.ResponseText;
-            } catch (objError) {
-                System.Console.writeLine("tsd ERR! " + WinHttpReq.statusCode + " " + objError.message);
-                strResult = objError + "\n";
-                strResult += "WinHTTP returned error: " + (objError.number & 0xFFFF).toString() + "\n\n";
-                strResult += objError.description;
-            }
-            return callback(strResult);
-        };
-        WebRequest.prototype.getUrl = function (url, callback) {
-            this.request(url, callback);
-        };
-        return WebRequest;
-    })();
-    Wsh.WebRequest = WebRequest;    
-})(Wsh || (Wsh = {}));
 var System;
 (function (System) {
     (function (Web) {
         var WebHandler = (function () {
             function WebHandler() { }
             WebHandler.initialize = function initialize() {
-                if(System.Environment.isNode()) {
-                    WebHandler.request = new NodeJs.WebRequest();
-                } else if(System.Environment.isWsh()) {
-                    WebHandler.request = new Wsh.WebRequest();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                WebHandler.request = new NodeJs.WebRequest();
             };
             return WebHandler;
         })();
@@ -543,73 +381,13 @@ var NodeJs;
     })();
     NodeJs.DirectoryHandle = DirectoryHandle;    
 })(NodeJs || (NodeJs = {}));
-var Wsh;
-(function (Wsh) {
-    
-    var DirectoryHandle = (function () {
-        function DirectoryHandle() {
-            this._fso = new ActiveXObject("Scripting.FileSystemObject");
-        }
-        DirectoryHandle.prototype.directoryExists = function (path) {
-            return this._fso.FolderExists(path);
-        };
-        DirectoryHandle.prototype.createDirectory = function (path) {
-            if(!this.directoryExists(path)) {
-                path = path.replace('\\', '/');
-                var parts = path.split('/');
-                var dpath = '';
-                for(var i = 0; i < parts.length; i++) {
-                    dpath += parts[i] + '/';
-                    if(!this.directoryExists(dpath)) {
-                        this._fso.CreateFolder(dpath);
-                    }
-                }
-            }
-        };
-        DirectoryHandle.prototype.dirName = function (path) {
-            return this._fso.GetParentFolderName(path);
-        };
-        DirectoryHandle.prototype.getAllFiles = function (path, spec, options) {
-            options = options || {
-            };
-            function filesInFolder(folder, root) {
-                var paths = [];
-                var fc;
-                if(options.recursive) {
-                    fc = new Enumerator(folder.subfolders);
-                    for(; !fc.atEnd(); fc.moveNext()) {
-                        paths = paths.concat(filesInFolder(fc.item(), root + "\\" + fc.item().Name));
-                    }
-                }
-                fc = new Enumerator(folder.files);
-                for(; !fc.atEnd(); fc.moveNext()) {
-                    if(!spec || fc.item().Name.match(spec)) {
-                        paths.push(root + "\\" + fc.item().Name);
-                    }
-                }
-                return paths;
-            }
-            var folder = this._fso.GetFolder(path);
-            var paths = [];
-            return filesInFolder(folder, path);
-        };
-        return DirectoryHandle;
-    })();
-    Wsh.DirectoryHandle = DirectoryHandle;    
-})(Wsh || (Wsh = {}));
 var System;
 (function (System) {
     (function (IO) {
         var DirectoryManager = (function () {
             function DirectoryManager() { }
             DirectoryManager.initialize = function initialize() {
-                if(System.Environment.isNode()) {
-                    DirectoryManager.handle = new NodeJs.DirectoryHandle();
-                } else if(System.Environment.isWsh()) {
-                    DirectoryManager.handle = new Wsh.DirectoryHandle();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                DirectoryManager.handle = new NodeJs.DirectoryHandle();
             };
             return DirectoryManager;
         })();

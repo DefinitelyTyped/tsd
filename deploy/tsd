@@ -6,21 +6,7 @@ var isMain = (module) && require.main === (module);
 if (isMain) {
     var main = new tsd.Main();
     main.init();
-    var arguments;
-    if(tsd.System.Environment.isNode()) {
-        arguments = Array.prototype.slice.call(process.argv);
-    }
-    if(tsd.System.Environment.isWsh()) {
-        var args = [
-            null, 
-            null
-        ];
-        for(var i = 0; i < WScript.Arguments.length; i++) {
-            args[2 + i] = WScript.Arguments.Item(i);
-        }
-        arguments = args;
-    }
-    main.run(arguments);
+    main.run(Array.prototype.slice.call(process.argv));
 
 } else {
     var eventManager = new tsd.EventManager();
@@ -31,16 +17,20 @@ if (isMain) {
             }
         }
     };
+
     var logger = new tsd.ApiLogger(logProxy);
+
     tsd.System.Console.initialize(logger);
     tsd.System.IO.FileManager.initialize();
     tsd.System.IO.DirectoryManager.initialize();
     tsd.System.Web.WebHandler.initialize();
+
     function load(config, callback) {
         exports.commands.config = new tsd.Config();
         exports.commands.config.load(config);
         callback(exports);
     }
+
     function install(libs, callback) {
         var command = new tsd.Command.InstallCommand(this.config);
         var args = [];
@@ -57,10 +47,13 @@ if (isMain) {
         }
         command.exec(args, callback);
     }
+
     exports.load = load;
+
     exports.commands = {
         install: install
     };
+    
     exports.on = function (ev, callback) {
         eventManager.addListener(ev, callback);
     };

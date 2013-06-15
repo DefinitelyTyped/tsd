@@ -1,7 +1,6 @@
 ///<reference path='Environment.ts'/>
 ///<reference path='IO/StreamWriter.ts'/>
 ///<reference path='../NodeJs/ConsoleWriter.ts'/>
-///<reference path='../Wsh/ConsoleWriter.ts'/>
 
 module System {
     export class Console { 
@@ -11,13 +10,7 @@ module System {
             if (proxy) {
                 Console.out = proxy;
             } else {
-                if (Environment.isNode()) {
-                    Console.out = new NodeJs.ConsoleWriter();
-                } else if (Environment.isWsh()) {
-                    Console.out = new Wsh.ConsoleWriter();
-                } else {
-                    throw new Error('Invalid host');
-                }
+                Console.out = new NodeJs.ConsoleWriter();
             }
         }
 
