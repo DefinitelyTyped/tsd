@@ -4,10 +4,6 @@
 
 module System.Web {
     export class WebHandler { 
-        public static request: IWebRequest;
-
-        public static initialize() { 
-            WebHandler.request = new NodeJs.WebRequest();
-        }
+        public static request: IWebRequest = new NodeJs.WebRequest();
     }
 }

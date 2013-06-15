@@ -4,13 +4,11 @@
 
 module System {
     export class Console { 
-        public static out: IO.StreamWriter;
-
+        public static out: IO.StreamWriter = new NodeJs.ConsoleWriter();
+        
         public static initialize(proxy?) {
             if (proxy) {
                 Console.out = proxy;
-            } else {
-                Console.out = new NodeJs.ConsoleWriter();
             }
         }
 

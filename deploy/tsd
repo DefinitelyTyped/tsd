@@ -4,10 +4,7 @@ var tsd = require('./source');
 var isMain = (module) && require.main === (module);
 
 if (isMain) {
-    var main = new tsd.Main();
-    main.init();
-    main.run(Array.prototype.slice.call(process.argv));
-
+    new tsd.Main().run(Array.prototype.slice.call(process.argv));
 } else {
     var eventManager = new tsd.EventManager();
     var logProxy = {
@@ -21,9 +18,6 @@ if (isMain) {
     var logger = new tsd.ApiLogger(logProxy);
 
     tsd.System.Console.initialize(logger);
-    tsd.System.IO.FileManager.initialize();
-    tsd.System.IO.DirectoryManager.initialize();
-    tsd.System.Web.WebHandler.initialize();
 
     function load(config, callback) {
         exports.commands.config = new tsd.Config();
@@ -53,7 +47,7 @@ if (isMain) {
     exports.commands = {
         install: install
     };
-    
+
     exports.on = function (ev, callback) {
         eventManager.addListener(ev, callback);
     };

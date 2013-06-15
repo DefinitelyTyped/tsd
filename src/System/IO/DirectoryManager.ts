@@ -5,10 +5,6 @@
 
 module System.IO { 
     export class DirectoryManager { 
-        private static handle: IDirectoryHandle;
-
-        public static initialize() { 
-            DirectoryManager.handle = new NodeJs.DirectoryHandle();
-        }
+        private static handle: IDirectoryHandle = new NodeJs.DirectoryHandle();
     }
 }

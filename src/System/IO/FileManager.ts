@@ -6,10 +6,6 @@
 
 module System.IO { 
     export class FileManager { 
-        public static handle: IFileHandle;
-
-        public static initialize() { 
-            FileManager.handle = new NodeJs.FileHandle();
-        }
+        public static handle: IFileHandle = new NodeJs.FileHandle();
     }
 }

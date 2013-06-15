@@ -11,13 +11,6 @@
 ///<reference path='DataSource\DataSourceFactory.ts'/>
 
 class Main { 
-    public init() { 
-        System.Console.initialize();
-        System.IO.FileManager.initialize();
-        System.IO.DirectoryManager.initialize();
-        System.Web.WebHandler.initialize();
-    }
-
     public run(args: Array) { 
 
         try { 

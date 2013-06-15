@@ -100,11 +100,10 @@ var System;
 (function (System) {
     var Console = (function () {
         function Console() { }
+        Console.out = new NodeJs.ConsoleWriter();
         Console.initialize = function initialize(proxy) {
             if(proxy) {
                 Console.out = proxy;
-            } else {
-                Console.out = new NodeJs.ConsoleWriter();
             }
         };
         Console.write = function write(value) {
@@ -210,9 +209,7 @@ var System;
     (function (IO) {
         var FileManager = (function () {
             function FileManager() { }
-            FileManager.initialize = function initialize() {
-                FileManager.handle = new NodeJs.FileHandle();
-            };
+            FileManager.handle = new NodeJs.FileHandle();
             return FileManager;
         })();
         IO.FileManager = FileManager;        
@@ -254,9 +251,7 @@ var System;
     (function (Web) {
         var WebHandler = (function () {
             function WebHandler() { }
-            WebHandler.initialize = function initialize() {
-                WebHandler.request = new NodeJs.WebRequest();
-            };
+            WebHandler.request = new NodeJs.WebRequest();
             return WebHandler;
         })();
         Web.WebHandler = WebHandler;        
@@ -386,9 +381,7 @@ var System;
     (function (IO) {
         var DirectoryManager = (function () {
             function DirectoryManager() { }
-            DirectoryManager.initialize = function initialize() {
-                DirectoryManager.handle = new NodeJs.DirectoryHandle();
-            };
+            DirectoryManager.handle = new NodeJs.DirectoryHandle();
             return DirectoryManager;
         })();
         IO.DirectoryManager = DirectoryManager;        
@@ -1231,12 +1224,6 @@ var DataSource;
 })(DataSource || (DataSource = {}));
 var Main = (function () {
     function Main() { }
-    Main.prototype.init = function () {
-        System.Console.initialize();
-        System.IO.FileManager.initialize();
-        System.IO.DirectoryManager.initialize();
-        System.Web.WebHandler.initialize();
-    };
     Main.prototype.run = function (args) {
         try  {
             var cfg = new Config();
