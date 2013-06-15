@@ -42,10 +42,20 @@ if (isMain) {
         command.exec(args, callback);
     }
 
+    function all(callback) {
+    	var command = new tsd.Command.AllCommand(this.config);
+        var args = [];
+        args[0] = '*';
+        args[1] = 'api';
+        args[2] = 'all';
+        command.exec(args, callback);
+    }
+
     exports.load = load;
 
     exports.commands = {
-        install: install
+        install: install,
+        all: all
     };
 
     exports.on = function (ev, callback) {

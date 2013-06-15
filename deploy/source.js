@@ -787,20 +787,22 @@ var Command;
         AllCommand.prototype.accept = function (args) {
             return args[2] == this.shortcut;
         };
-        AllCommand.prototype.repoExplorer = function (dataSource, uriList) {
+        AllCommand.prototype.repoExplorer = function (dataSource, uriList, callback) {
             var _this = this;
             dataSource.all(function (libs) {
                 var repoNumber = _this._indexSync - 1;
                 Command.Helper.printLibs(libs, uriList[repoNumber], repoNumber);
                 if(_this._indexSync < uriList.length) {
-                    _this.repoExplorer(Command.Helper.getDataSource(uriList[_this._indexSync++]), uriList);
+                    _this.repoExplorer(Command.Helper.getDataSource(uriList[_this._indexSync++]), uriList, callback);
+                } else {
+                    callback();
                 }
             });
         };
         AllCommand.prototype.exec = function (args, callback) {
             var uriList = this.cfg.repo.uriList;
             if(this._indexSync < uriList.length) {
-                this.repoExplorer(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList);
+                this.repoExplorer(Command.Helper.getDataSource(uriList[this._indexSync++]), uriList, callback);
             }
         };
         return AllCommand;
