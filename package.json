@@ -42,5 +42,8 @@
   "bin": {
     "tsd": "deploy/tsd"
   },
+  "scripts": {
+    "test": "grunt build"
+  },
   "preferGlobal": true
 }
