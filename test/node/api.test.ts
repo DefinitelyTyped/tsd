@@ -67,6 +67,35 @@ describe('api', () =>{
         });
     });
 
+    describe('all', () =>{
+
+        it('Should list all avaliable typings', (done) =>{
+
+            tsd.load(getConfig(), function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.all(function (er, data) {
+                    if (er) throw er;
+
+                    done();
+                });
+            });
+        });
+
+        it('Should emit "end" event', (done) =>{
+
+            tsd.load(getConfig(), function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.all()
+                    .on('error', function(err){})
+                    .on('end', function(data){
+                        done();
+                    });
+            });
+        });
+    });
+
     describe('install', () =>{
 
         it('Should install jquery and backbone typings', (done) =>{

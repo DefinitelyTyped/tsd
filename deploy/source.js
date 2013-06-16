@@ -817,13 +817,17 @@ var Command;
         };
         AllCommand.prototype.repoExplorer = function (dataSource, uriList, callback) {
             var _this = this;
-            dataSource.all(function (libs) {
+            dataSource.all(function (err, libs) {
+                if(err) {
+                    callback(err, null);
+                }
                 var repoNumber = _this._indexSync - 1;
                 Command.Helper.printLibs(libs, uriList[repoNumber], repoNumber);
                 if(_this._indexSync < uriList.length) {
                     _this.repoExplorer(Command.Helper.getDataSource(uriList[_this._indexSync++]), uriList, callback);
                 } else {
-                    callback();
+                    callback(null, {
+                    });
                 }
             });
         };

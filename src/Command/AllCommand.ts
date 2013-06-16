@@ -15,14 +15,18 @@ module Command {
         }
 
         private repoExplorer(dataSource: DataSource.IDataSource, uriList: TsdUri[], callback: (err?, data?) => any) {
-            dataSource.all((libs) => {
+            dataSource.all((err, libs) => {
+                if (err) {
+                    callback(err, null);
+                }
+
                 var repoNumber = this._indexSync - 1;
                 Helper.printLibs(libs, uriList[repoNumber], repoNumber);
 
                 if (this._indexSync < uriList.length) {
                     this.repoExplorer(Helper.getDataSource(uriList[this._indexSync++]), uriList, callback);
                 } else {
-                    callback();
+                    callback(null, {});
                 }
             });
         }

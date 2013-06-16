@@ -52,8 +52,7 @@ if (isMain) {
         		evManager.dispatchEvent('end', data);
         	}
 
-        	if(callback)
-        		callback.apply(this, [err, data]);
+        	if(callback) callback.apply(this, [err, data]);
         }
 
         command.exec(args, wrappCallback);
@@ -70,7 +69,6 @@ if (isMain) {
     	var evManager = new tsd.EventManager();
     	var command = new tsd.Command.AllCommand(this.config);
         var args = ['*', 'api', 'all'];
-        command.exec(args, callback);
 
         function wrappCallback(err, data){
         	if(err) {
@@ -79,8 +77,7 @@ if (isMain) {
         		evManager.dispatchEvent('end', data);
         	}
 
-        	if(callback)
-        		callback.apply(this, [err, data]);
+        	if(callback) callback.apply(this, [err, data]);
         }
 
         command.exec(args, wrappCallback);
