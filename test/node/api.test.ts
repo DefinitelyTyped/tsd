@@ -50,9 +50,19 @@ describe('api', () =>{
 
             tsd.load(config, function (tsd, er) {
                 if (er) throw er;
+                
                 done();
             });
+        });
 
+        it('Callback "tsd" parameter cannot be null' , (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                assert.isNotNull(tsd);
+                done();
+            });
         });
     });
 
