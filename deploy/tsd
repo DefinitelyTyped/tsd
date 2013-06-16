@@ -27,14 +27,17 @@ if (isMain) {
 
     function install(libs, callback) {
     	var evManager = new tsd.EventManager();
-
         var command = new tsd.Command.InstallCommand(this.config);
-        var args = [];
-        args[0] = '*';
-        args[1] = 'api';
-        args[2] = 'install';
-        var cache = {
-        };
+        var args = ['*', 'api', 'install'];
+        var cache = {};
+
+        if(typeof callback !== 'function') {
+        	if(callback == "*") {
+	        	args[2] = 'install*';
+	        	callback = null;
+	        }
+        }
+
         for(var i = 0; i < libs.length; i++) {
             if(!cache[libs[i]]) {
                 cache[libs[i]] = true;
@@ -64,12 +67,30 @@ if (isMain) {
     }
 
     function all(callback) {
+    	var evManager = new tsd.EventManager();
     	var command = new tsd.Command.AllCommand(this.config);
-        var args = [];
-        args[0] = '*';
-        args[1] = 'api';
-        args[2] = 'all';
+        var args = ['*', 'api', 'all'];
         command.exec(args, callback);
+
+        function wrappCallback(err, data){
+        	if(err) {
+        		evManager.dispatchEvent('error', err);
+        	} else {
+        		evManager.dispatchEvent('end', data);
+        	}
+
+        	if(callback)
+        		callback.apply(this, [err, data]);
+        }
+
+        command.exec(args, wrappCallback);
+
+        return {
+			on: function(ev, callback) {
+		        evManager.addListener(ev, callback);
+		        return this;
+	    	}
+        };
     }
 
     exports.load = load;

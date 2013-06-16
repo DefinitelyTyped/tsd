@@ -152,6 +152,20 @@ describe('api', () =>{
             });
         });
 
-        it.skip('Should install typings dependencies');
+        it('Should install typings dependencies', (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["express"], "*")
+                    .on('error', function(err){})
+                    .on('end', function(data){
+                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "express")));
+                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "node")));
+                        done();
+                    });
+            });
+        });
+
     });
 });
