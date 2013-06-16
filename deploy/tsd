@@ -26,6 +26,8 @@ if (isMain) {
     }
 
     function install(libs, callback) {
+    	var evManager = new tsd.EventManager();
+
         var command = new tsd.Command.InstallCommand(this.config);
         var args = [];
         args[0] = '*';
@@ -39,7 +41,26 @@ if (isMain) {
                 args.push(libs[i]);
             }
         }
-        command.exec(args, callback);
+
+        function wrappCallback(err, data){
+        	if(err) {
+        		evManager.dispatchEvent('error', err);
+        	} else {
+        		evManager.dispatchEvent('end', data);
+        	}
+
+        	if(callback)
+        		callback.apply(this, [err, data]);
+        }
+
+        command.exec(args, wrappCallback);
+
+        return {
+			on: function(ev, callback) {
+		        evManager.addListener(ev, callback);
+		        return this;
+	    	}
+        };
     }
 
     function all(callback) {

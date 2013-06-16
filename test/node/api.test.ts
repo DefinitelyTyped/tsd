@@ -83,6 +83,21 @@ describe('api', () =>{
             });
         });
 
+        it('Should emit end event', (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["jquery"])
+                    .on('error', function(err){})
+                    .on('end', function(data){
+                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
+                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
+                        done();
+                    });
+            });
+        });
+
         it('Callback "data" parameter should return installed informations', (done) =>{
 
             tsd.load(config, function (tsd, er) {
@@ -136,5 +151,7 @@ describe('api', () =>{
                 });
             });
         });
+
+        it.skip('Should install typings dependencies');
     });
 });
