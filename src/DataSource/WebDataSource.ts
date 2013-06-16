@@ -9,22 +9,18 @@ module DataSource {
 
         constructor (public repositoryUrl: string) { }
 
-        public all(callback: (data: DataSource.Lib[]) => void ): void {
-            System.Web.WebHandler.request.getUrl(this.repositoryUrl, (body) => {
-                if (System.Environment.isWsh()) { 
-                    callback(eval("(function(){return " + body + ";})()").repo);
-                }
-                else
-                    callback(JSON.parse(body).repo);
+        public all(callback: (err: any, data: DataSource.Lib[]) => void ): void {
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, (err, body) => {
+                callback(err, body ? JSON.parse(body).repo : null);
             });
         }
         public find(keys: string[]): Lib {
             return null;
         }
 
-        public content(callback: (data: string) => void ): void {
-            System.Web.WebHandler.request.getUrl(this.repositoryUrl, (body) => {
-                callback(body);
+        public content(callback: (err: any, data: string) => void ): void {
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, (err, body) => {
+                callback(err, body);
             });
         }
     }

@@ -24,8 +24,12 @@ module DataSource {
             return null;
         }
 
-        public content(callback: (data: string) => void ): void {
-            callback(this._fs.readFileSync(this.repositoryPath, 'utf8'));
+        public content(callback: (err: any, data: string) => void ): void {
+            try{
+                callback(null, this._fs.readFileSync(this.repositoryPath, 'utf8'));
+            }catch(e){
+                callback(e, null);
+            }
         }
     }
 }

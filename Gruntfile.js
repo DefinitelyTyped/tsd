@@ -93,7 +93,7 @@ module.exports = function (grunt){
                 src: ['test/**/*.test.js'],
                 options: {
                     reporter: 'mocha-unfunk-reporter',
-                    timeout: 60000
+                    timeout: 20000
                 }
             }
         }

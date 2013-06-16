@@ -102,5 +102,6 @@ if (isMain) {
 
     exports.on = function (ev, callback) {
         eventManager.addListener(ev, callback);
+        return this;
     };
 }

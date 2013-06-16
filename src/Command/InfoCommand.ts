@@ -1,6 +1,5 @@
 ﻿///<reference path='../Common.ts'/>
 ///<reference path='ICommand.ts'/>
-///<reference path='../System/Web/WebRequest.ts'/>
 ///<reference path='../System/IO/FileManager.ts'/>
 ///<reference path='../System/IO/DirectoryManager.ts'/>
 ///<reference path='../System/Console.ts'/>

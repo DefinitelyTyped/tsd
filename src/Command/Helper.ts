@@ -33,7 +33,7 @@ module Command {
             return DataSource.DataSourceFactory.factory(uri);
         }
 
-        public static getSourceContent(uri: TsdUri, callback: (data: string) => void): void {
+        public static getSourceContent(uri: TsdUri, callback: (err: any, data: string) => void): void {
             Helper.getDataSource(uri).content(callback);
         }
     }

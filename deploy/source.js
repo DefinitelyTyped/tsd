@@ -230,14 +230,23 @@ var NodeJs;
             this._request(url, function (error, response, body) {
                 if(error) {
                     System.Console.writeLine("tsd \033[31mERR!\033[0m \033[35mGET\033[0m Please, check your internet connection - " + error + '\n');
+                    callback(error, null);
                 } else {
                     System.Console.writeLine("tsd \033[32mhttp \033[35m" + response.statusCode + "\033[0m " + url);
                     if(response.statusCode == 404) {
                         System.Console.writeLine("tsd \033[31mERR!\033[0m " + response.statusCode + " Not Found");
+                        callback({
+                            statusCode: response.statusCode,
+                            messagem: "Connection failure."
+                        }, null);
                     } else if(!error && response.statusCode == 200) {
-                        callback(body);
+                        callback(null, body);
                     } else {
                         System.Console.writeLine("tsd \033[31ERR!\033[0m " + response.statusCode + " " + error);
+                        callback({
+                            statusCode: response.statusCode,
+                            messagem: "Connection failure."
+                        }, null);
                     }
                 }
             });
@@ -560,7 +569,11 @@ var Command;
                 System.Console.writeLine("   [!] Lib not found.\n");
             } else {
                 var version = this.getVersion(targetLib.versions, targetVersion);
-                Command.Helper.getSourceContent(version.uri, function (body) {
+                Command.Helper.getSourceContent(version.uri, function (err, body) {
+                    if(err) {
+                        callback(err, null);
+                        return;
+                    }
                     _this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri, repo);
                     _this._cache.push(targetLib.name);
                     if(_this._isFull) {
@@ -630,7 +643,11 @@ var Command;
                 }
             }
             var dataSource = Command.Helper.getDataSource(uriList[index]);
-            dataSource.all(function (libs) {
+            dataSource.all(function (err, libs) {
+                if(err) {
+                    callback(err, null);
+                    return;
+                }
                 var index = (_this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
                 while(lib) {
@@ -700,20 +717,16 @@ var DataSource;
             this.repositoryUrl = repositoryUrl;
         }
         WebDataSource.prototype.all = function (callback) {
-            System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (body) {
-                if(System.Environment.isWsh()) {
-                    callback(eval("(function(){return " + body + ";})()").repo);
-                } else {
-                    callback(JSON.parse(body).repo);
-                }
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (err, body) {
+                callback(err, body ? JSON.parse(body).repo : null);
             });
         };
         WebDataSource.prototype.find = function (keys) {
             return null;
         };
         WebDataSource.prototype.content = function (callback) {
-            System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (body) {
-                callback(body);
+            System.Web.WebHandler.request.getUrl(this.repositoryUrl, function (err, body) {
+                callback(err, body);
             });
         };
         return WebDataSource;
@@ -739,7 +752,11 @@ var DataSource;
             return null;
         };
         FileSystemDataSource.prototype.content = function (callback) {
-            callback(this._fs.readFileSync(this.repositoryPath, 'utf8'));
+            try  {
+                callback(null, this._fs.readFileSync(this.repositoryPath, 'utf8'));
+            } catch (e) {
+                callback(e, null);
+            }
         };
         return FileSystemDataSource;
     })();

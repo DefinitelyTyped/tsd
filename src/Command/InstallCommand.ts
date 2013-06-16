@@ -1,5 +1,4 @@
 ﻿///<reference path='ICommand.ts'/>
-///<reference path='../System/Web/WebRequest.ts'/>
 ///<reference path='../System/IO/FileManager.ts'/>
 ///<reference path='../System/IO/DirectoryManager.ts'/>
 ///<reference path='../System/Console.ts'/>
@@ -152,7 +151,12 @@ module Command {
             } else {
                 var version = this.getVersion(targetLib.versions, targetVersion);
 
-                Helper.getSourceContent(version.uri, (body: string) => {
+                Helper.getSourceContent(version.uri, (err: any, body: string) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
+
                     this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri, repo);
                     this._cache.push(targetLib.name);
 
@@ -229,7 +233,12 @@ module Command {
             }
 
             var dataSource = Helper.getDataSource(uriList[index]);
-            dataSource.all((libs) => {
+            dataSource.all((err, libs) => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+
                 var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
                 while (lib) {

@@ -10,22 +10,23 @@ var rimraf  = require('rimraf');
 
 var _:UnderscoreStatic = <any>require('../../libs/underscore');
 
-// tsd config
-var config = {
-    "version": "v2",
-    "typingsPath": "typings",
-    "libPath": "lib",
-    "repo": {
-        "uriList": [{
-                "sourceType": "1",
-                "source": "http://www.tsdpm.com/repository_v2.json"
-            }
-        ]
-    }
-};
-
 describe('api', () =>{
     var cwd = <any>process.cwd();
+
+    function getConfig() {
+        return {
+            "version": "v2",
+            "typingsPath": "typings",
+            "libPath": "lib",
+            "repo": {
+                "uriList": [{
+                        "sourceType": "1",
+                        "source": "http://www.tsdpm.com/repository_v2.json"
+                    }
+                ]
+            }
+        };
+    }
 
     function clean(done) {
         rimraf("typings", function (err) {
@@ -48,7 +49,7 @@ describe('api', () =>{
 
         it('Should call load config callback', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 done();
@@ -57,7 +58,7 @@ describe('api', () =>{
 
         it('Callback "tsd" parameter cannot be null' , (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 assert.isNotNull(tsd);
@@ -70,7 +71,7 @@ describe('api', () =>{
 
         it('Should install jquery and backbone typings', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["jquery", "backbone"], function (er, data) {
@@ -83,9 +84,9 @@ describe('api', () =>{
             });
         });
 
-        it('Should emit end event', (done) =>{
+        it('Should emit "end" event', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["jquery"])
@@ -98,9 +99,35 @@ describe('api', () =>{
             });
         });
 
+        it('Should emit "error" event', (done) =>{
+
+            var cfg = {
+                "version": "v2",
+                "typingsPath": "typings",
+                "libPath": "lib",
+                "repo": {
+                    "uriList": [{
+                            "sourceType": "1",
+                            "source": "http://www.tsdpm.com/repository_vx.json"
+                        }
+                    ]
+                }
+            };
+
+            tsd.load(cfg, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["notexists"])
+                    .on('error', function(err){
+                        done();
+                    })
+                    .on('end', function(data){});
+            });
+        });
+
         it('Callback "data" parameter should return installed informations', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["jquery"], function (er, data) {
@@ -130,7 +157,7 @@ describe('api', () =>{
 
         it('Should save dependencies to the json', function (done) {
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["jquery"], function (er, data) {
@@ -154,7 +181,7 @@ describe('api', () =>{
 
         it('Should install typings dependencies', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["express"], "*")
@@ -169,7 +196,7 @@ describe('api', () =>{
 
         it('Should install typings dependencies with callback', (done) =>{
 
-            tsd.load(config, function (tsd, er) {
+            tsd.load(getConfig(), function (tsd, er) {
                 if (er) throw er;
 
                 tsd.commands.install(["express"], "*", function (er, data) {
