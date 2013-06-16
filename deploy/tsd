@@ -34,7 +34,7 @@ if (isMain) {
         if(typeof callback !== 'function') {
         	if(callback == "*") {
 	        	args[2] = 'install*';
-	        	callback = null;
+	        	callback = arguments[2];
 	        }
         }
 

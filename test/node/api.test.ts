@@ -76,8 +76,8 @@ describe('api', () =>{
                 tsd.commands.install(["jquery", "backbone"], function (er, data) {
                     if (er) throw er;
 
-                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
-                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
+                    assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
+                    assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
                     done();
                 });
             });
@@ -91,8 +91,8 @@ describe('api', () =>{
                 tsd.commands.install(["jquery"])
                     .on('error', function(err){})
                     .on('end', function(data){
-                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
-                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
                         done();
                     });
             });
@@ -146,7 +146,7 @@ describe('api', () =>{
                         }
                     }
 
-                    assert.ok(ok);
+                    assert.isTrue(ok);
                     done();
                 });
             });
@@ -160,12 +160,26 @@ describe('api', () =>{
                 tsd.commands.install(["express"], "*")
                     .on('error', function(err){})
                     .on('end', function(data){
-                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "express")));
-                        assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "node")));
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "express")));
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "node")));
                         done();
                     });
             });
         });
 
+        it('Should install typings dependencies with callback', (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["express"], "*", function (er, data) {
+                    if (er) throw er;
+
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "express")));
+                        assert.isTrue(fs.existsSync(path.join("typings", "DefinitelyTyped", "node")));
+                    done();
+                });
+            });
+        });
     });
 });
