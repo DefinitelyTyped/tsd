@@ -30,11 +30,11 @@ describe('api', () =>{
     function clean(done) {
         rimraf("typings", function (err) {
             if (err) throw new Error('Unable to remove test directory');
-            done();
+            setTimeout(done, 100);
         });
     }
 
-    beforeEach(function (done) {
+    before(function (done) {
         process.chdir(path.join("test/node"));
         clean(done);
     });
@@ -44,10 +44,21 @@ describe('api', () =>{
         done();
     });
 
+    describe('load-config', () =>{
+
+        it('Should call load config callback', (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+                done();
+            });
+
+        });
+    });
+
     describe('install', () =>{
 
         it('Should install jquery typing', (done) =>{
-            this.timeout(0);
 
             tsd.load(config, function (tsd, er) {
                 if (er) throw er;
