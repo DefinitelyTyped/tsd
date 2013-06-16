@@ -50,7 +50,7 @@ describe('api', () =>{
 
             tsd.load(config, function (tsd, er) {
                 if (er) throw er;
-                
+
                 done();
             });
         });
@@ -68,14 +68,15 @@ describe('api', () =>{
 
     describe('install', () =>{
 
-        it('Should install jquery typing', (done) =>{
+        it('Should install jquery and backbone typings', (done) =>{
 
             tsd.load(config, function (tsd, er) {
                 if (er) throw er;
 
-                tsd.commands.install(["jquery"], function (er, data) {
+                tsd.commands.install(["jquery", "backbone"], function (er, data) {
                 if (er) throw er;
                     assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery")));
+                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone")));
                     done();
                 });
             });
