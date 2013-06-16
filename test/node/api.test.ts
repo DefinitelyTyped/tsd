@@ -74,13 +74,67 @@ describe('api', () =>{
                 if (er) throw er;
 
                 tsd.commands.install(["jquery", "backbone"], function (er, data) {
-                if (er) throw er;
-                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery")));
-                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone")));
+                    if (er) throw er;
+
+                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "jquery", "jquery.d.ts")));
+                    assert.ok(fs.existsSync(path.join("typings", "DefinitelyTyped", "backbone", "backbone.d.ts")));
                     done();
                 });
             });
+        });
 
+        it('Callback "data" parameter should return installed informations', (done) =>{
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["jquery"], function (er, data) {
+                    if (er) throw er;
+
+                    var expected = {
+                        typings: {
+                            "jquery@1.9": {
+                                "repo": {
+                                    "sourceType": "1",
+                                    "source": "http://www.tsdpm.com/repository_v2.json"
+                                },
+                                "key": "ab94ec25-d89a-483d-a904-66db6d77a174",
+                                "uri": {
+                                    "source": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery/jquery.d.ts",
+                                    "sourceType": 1
+                                }
+                            }
+                        }
+                    };
+
+                    assert.deepEqual(expected, data);
+                    done();
+                });
+            });
+        });
+
+        it('Should save dependencies to the json', function (done) {
+
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["jquery"], function (er, data) {
+                    if (er) throw er;
+                    
+                    var json = JSON.parse(fs.readFileSync("tsd-config.json"));
+                    assert.ok(json.dependencies);
+
+                    var ok = false;
+                    for(var attr in json.dependencies) {
+                        if(attr.substr(0, 6) == "jquery") {
+                            ok = true;
+                        }
+                    }
+
+                    assert.ok(ok);
+                    done();
+                });
+            });
         });
     });
 });

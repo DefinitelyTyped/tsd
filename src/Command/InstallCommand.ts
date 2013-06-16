@@ -194,7 +194,16 @@ module Command {
             }
 
             if (isFinish) {
-                callback();
+                var data = {};
+                for (var attr in this._map) {
+                    for(var key in this.cfg.dependencies) {
+                        if(key.split('@')[0] == attr) {
+                            data[key] = this.cfg.dependencies[key];
+                        }
+                    }
+                }
+
+                callback(null, {typings: data});
             }
         }
 
