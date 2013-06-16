@@ -2,20 +2,41 @@
 
 declare var assert:chai.Assert;
 
+var tsd = require("../../deploy/tsd");
+
+var fs = require('fs');
+var path = require('path');
+
 var _:UnderscoreStatic = <any>require('../../libs/underscore');
 
-describe('verify repo', () =>{
+// tsd config
+var config = {
+    "version": "v2",
+    "typingsPath": "typings",
+    "libPath": "lib",
+    "repo": {
+        "uriList": [{
+                "sourceType": "1",
+                "source": "http://www.tsdpm.com/repository_v2.json"
+            }
+        ]
+    }
+};
 
-    var fs = require('fs');
-    var path = require('path');
+describe('api', () =>{
 
-    before(()=>{
+    describe('install', () =>{
+        it('Should install jquery typing', (done) =>{
 
-    });
-    describe('source data', () =>{
-        it('has content', () =>{
-            //dummy for now
-            assert.ok('yes');
+            tsd.load(config, function (tsd, er) {
+                if (er) throw er;
+
+                tsd.commands.install(["jquery"], function (er, data) {
+                if (er) throw er;
+                    assert.ok(fs.existsSync(path.join(config.typingsPath, "jquery")));
+                    done();
+                });
+            });
         });
     });
 });
