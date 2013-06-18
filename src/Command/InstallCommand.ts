@@ -1,9 +1,4 @@
-﻿///<reference path='ICommand.ts'/>
-///<reference path='../System/Web/WebRequest.ts'/>
-///<reference path='../System/IO/FileManager.ts'/>
-///<reference path='../System/IO/DirectoryManager.ts'/>
-///<reference path='../System/Console.ts'/>
-///<reference path='../System/Uri.ts'/>
+﻿///<reference path='_ref.ts'/>
 
 module Command {
 
@@ -16,6 +11,8 @@ module Command {
         private _withDep = false;
         private _withRepoIndex = false;
         private _isFull: bool;
+        private _path = require('path');
+
 
         constructor(public cfg: Config) { super(); }
 
@@ -57,18 +54,19 @@ module Command {
             }
         }
 
-        private save(url: string, name: string, version: string, key: string, content: string, tsdUri: TsdUri, repo: TsdUri): void {
-            var uri = Uri.parseUri(url);
+        private save(uri: string, name: string, version: string, key: string, content: string, repo: string): void {
 
-            this.normalizeGithubUrl(uri);
+            var uriParsed = Uri.parseUri(uri);
+
+            this.normalizeGithubUrl(uriParsed);
 
             var path = '';
 
-            if (tsdUri.relative) {
-                path = this.cfg.typingsPath + '/' + tsdUri.relative + '/';
-            } else {
-                path = this.cfg.typingsPath + uri.directory;
-            }
+            /*if (tsdUri.relative) {
+                path = _path.join(this.cfg.typingsPath, tsdUri.relative, '');
+            } else {*/
+                path = this._path.join(this.cfg.typingsPath, uriParsed.directory);
+           // }
 
             if (!System.IO.DirectoryManager.handle.directoryExists(path)) {
                 System.IO.DirectoryManager.handle.createDirectory(path);
@@ -80,12 +78,12 @@ module Command {
             System.Console.writeLine("");
 
             if (repo) {
-                this.cfg.addDependency(name, version, key, tsdUri, repo);
+                this.cfg.addDependency(name, version, key, uri, repo);
                 this.cfg.save();
             }
         }
 
-        private saveLib(tsdUri: TsdUri): void {
+        /*private saveLib(tsdUri: TsdUri): void {
             var uri = Uri.parseUri(tsdUri.source);
 
             this.normalizeGithubUrl(uri);
@@ -112,7 +110,7 @@ module Command {
                 this.saveFile(path + '/' + name, body);
                 System.Console.writeLine("+-- " + name + " -> " + path + name + '\n');
             });
-        }
+        }*/
 
         private find(key: string, libs: DataSource.Lib[]): DataSource.Lib { 
             for (var i = 0; i < libs.length; i++) {
@@ -143,7 +141,7 @@ module Command {
             return versions[0];
         }
 
-        private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[], repo: TsdUri, callback: (err?, data?) => any): void {
+        private install(targetLib: DataSource.Lib, targetVersion: string, libs: DataSource.Lib[], repo: string, callback: (err?, data?) => any): void {
             if(this.cacheContains(targetLib.name))
                 return;
 
@@ -152,11 +150,16 @@ module Command {
             } else {
                 var version = this.getVersion(targetLib.versions, targetVersion);
 
-                Helper.getSourceContent(version.uri, (body: string) => {
-                    this.save(version.uri.source, targetLib.name, version.version, version.key, body, version.uri, repo);
+                Helper.getSourceContent(version.uri, (err: any, body: string) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
+
+                    this.save(version.uri, targetLib.name, version.version, version.key, body, repo);
                     this._cache.push(targetLib.name);
 
-                    if (this._isFull) {
+                    /*if (this._isFull) {
                         var lib = (version.lib || {});
                         if (lib.sources) {
                             for (var i = 0; i < lib.sources.length; i++) {
@@ -164,7 +167,7 @@ module Command {
                                 this.saveLib(source.uri);
                             }
                         }
-                    }
+                    }*/
 
                     if (this._withDep) {
                         var deps = (<DataSource.LibDep[]>version.dependencies) || [];
@@ -194,11 +197,20 @@ module Command {
             }
 
             if (isFinish) {
-                callback();
+                var data = {};
+                for (var attr in this._map) {
+                    for(var key in this.cfg.dependencies) {
+                        if(key.split('@')[0] == attr) {
+                            data[key] = this.cfg.dependencies[key];
+                        }
+                    }
+                }
+
+                callback(null, {typings: data});
             }
         }
 
-        private execInternal(index: number, uriList: TsdUri[], args: Array, callback: (err?, data?) => any) {
+        private execInternal(index: number, uriList: string[], args: Array, callback: (err?, data?) => any) {
             var targetLib: DataSource.Lib;
 
             var tryInstall = (libs, lib: string) => {
@@ -220,7 +232,12 @@ module Command {
             }
 
             var dataSource = Helper.getDataSource(uriList[index]);
-            dataSource.all((libs) => {
+            dataSource.all((err, libs) => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+
                 var index = (this._withRepoIndex ? 4 : 3);
                 var lib = args[index];
                 while (lib) {

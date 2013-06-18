@@ -1,6 +1,4 @@
-///<reference path='ICommand.ts'/>
-///<reference path='../Config.ts'/>
-///<reference path='../System/IO/FileManager.ts'/>
+///<reference path='_ref.ts'/>
 
 module Command {
 
@@ -17,14 +15,11 @@ module Command {
         private saveConfigFile(): void {
             var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
             sw.write('{\n'
-                    + '    "version": "v2",\n'
+                    + '    "version": "v3",\n'
                     + '    "typingsPath": "typings",\n'
-                    + '    "libPath": "lib",\n'
                     + '    "repo": {\n'
-                    + '        "uriList": [{\n'
-                    + '                "sourceType": "1",\n'
-                    + '                "source": "http://www.tsdpm.com/repository_v2.json"\n'
-                    + '            }\n'
+                    + '        "uriList": [\n'
+                    + '            "http://www.tsdpm.com/repository_v2.json"\n'
                     + '        ]\n'
                     + '    },\n'
                     + '    "dependencies": {}\n'

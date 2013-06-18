@@ -1,4 +1,4 @@
-///<reference path='../Common.ts'/>
+///<reference path='_ref.ts'/>
 
 module Command {
 

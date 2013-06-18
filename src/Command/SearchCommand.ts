@@ -1,5 +1,4 @@
-﻿///<reference path='../Common.ts'/>
-///<reference path='ICommand.ts'/>
+﻿///<reference path='_ref.ts'/>
 
 module Command {
 
@@ -40,7 +39,7 @@ module Command {
             return found;
         }
 
-        private showResults(dataSource: DataSource.IDataSource, uriList: TsdUri[], args: Array){
+        private showResults(dataSource: DataSource.IDataSource, uriList: string[], args: Array){
             dataSource.all((libs) => {
                 var repoNumber = this._indexSync - 1;
                 var foundLibs: DataSource.Lib[] = [];

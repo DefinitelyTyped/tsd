@@ -1,10 +1,4 @@
-﻿///<reference path='../Common.ts'/>
-///<reference path='ICommand.ts'/>
-///<reference path='../System/Web/WebRequest.ts'/>
-///<reference path='../System/IO/FileManager.ts'/>
-///<reference path='../System/IO/DirectoryManager.ts'/>
-///<reference path='../System/Console.ts'/>
-///<reference path='../System/Uri.ts'/>
+﻿///<reference path='_ref.ts'/>
 
 module Command {
 
@@ -47,12 +41,12 @@ module Command {
                 System.Console.writeLine("          key: " + version.key);
                 System.Console.writeLine("      version: " + version.version);
                 System.Console.writeLine("       author: " + Common.format(0, 60, version.author.name + ' (' + version.author.url + ')'));
-                System.Console.writeLine("          url: " + Common.format(0, 60, version.uri.source));
+                System.Console.writeLine("          url: " + Common.format(0, 60, version.uri));
                 System.Console.writeLine("");
             }
         }
 
-        private execInternal(index: number, uriList: TsdUri[], args: Array) {
+        private execInternal(index: number, uriList: string[], args: Array) {
             var targetLib: DataSource.Lib;
 
             var tryGetInfo = (libs, lib: string) => {

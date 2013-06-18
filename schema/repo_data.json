@@ -1,9 +1,9 @@
 {
-    "type": "object",
     "$schema": "http://json-schema.org/draft-04/schema",
     "id": "tsd_repo_data",
+    "type": "object",
+    "required": ["name", "description", "versions"],
     "properties": {
-        "required": ["name", "description", "versions"],
         "name": {
             "type": "string"
         },

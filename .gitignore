@@ -42,3 +42,9 @@ node_modules
 _tmp.*
 tsd.csproj
 tsd.sln
+
+#
+# test directory
+#
+test/node/typings/
+test/node/tsd-config.json

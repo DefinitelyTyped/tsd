@@ -1,7 +1,4 @@
-///<reference path='../Common.ts'/>
-///<reference path='ICommand.ts'/>
-///<reference path='../System/IO/DirectoryManager.ts'/>
-///<reference path='../System/Console.ts'/>
+///<reference path='_ref.ts'/>
 
 module Command {
 

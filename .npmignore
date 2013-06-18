@@ -11,6 +11,7 @@
 .jshintrc
 Gruntfile.js
 tsd-config.json
+/tsd-deftools
 /typings
 
 /test

@@ -7,7 +7,7 @@ module DataSource {
         public version: string;
         public key: string;
         public dependencies: LibDep[];
-        public uri: TsdUri;
+        public uri: string;
         public author: { name: string; url: string; };
         public lib: any;
     }
@@ -29,8 +29,8 @@ module DataSource {
     }
 
     export interface IDataSource {
-        all: (callback: (data: DataSource.Lib[]) => void ) => void;
+        all: (callback: (err:any, data: DataSource.Lib[]) => void ) => void;
         find: (keys: string[]) => Lib;
-        content: (callback: (data: string) => void ) => any;
+        content: (callback: (err: any, data: string) => void ) => any;
     }
 }

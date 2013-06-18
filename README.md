@@ -1,5 +1,5 @@
-TSD - A TypeScript definition package manager
-=============================================
+# TSD - A TypeScript definition package manager
+[![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd)
 
 TSD is a TypeScript definition file package manager.  let you easily download and install definition files to use in TypeScript projects.
 

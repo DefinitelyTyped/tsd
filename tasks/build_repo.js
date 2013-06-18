@@ -22,7 +22,7 @@ module.exports = function (grunt){
         var timer = Date.now();
 
         var repo = [];
-        var repo_v2 = [];
+        var repo_v3 = {repo:[]};
         var repo_site = [];
 
         grunt.util._.each(this.filesSrc, function (src, i){
@@ -44,10 +44,7 @@ module.exports = function (grunt){
                     version: obj.versions[x].version,
                     key: obj.versions[x].key,
                     dependencies: obj.versions[x].dependencies,
-                    uri: {
-                        source: obj.versions[x].url,
-                        sourceType: 1
-                    },
+                    uri: obj.versions[x].url,
                     author: {
                         name: obj.versions[x].author,
                         url: obj.versions[x].author_url
@@ -56,7 +53,7 @@ module.exports = function (grunt){
                 delete obj.versions[x].lib;
             }
 
-            repo_v2.push(v2lib);
+            repo_v3.repo.push(v2lib);
 
             repo.push(obj);
 
@@ -73,13 +70,18 @@ module.exports = function (grunt){
         });
 
         var repoStr_v1 = JSON.stringify(repo, null, options.pretty);
-        var repoStr_v2 = JSON.stringify(repo_v2, null, options.pretty);
+        var repoStr_v3 = JSON.stringify(repo_v3, null, options.pretty);
         var repoStr_site = JSON.stringify(repo_site, null, options.pretty);
 
         grunt.file.write('./repo/repository.json', repoStr_v1);
-        grunt.file.write('./repo/repository_v2.json', repoStr_v2);
+        grunt.file.write('./repo/repository_v3.json', repoStr_v3);
         grunt.file.write('./repo/repository_site.json', repoStr_site);
         grunt.file.write('./repo/repository.js', 'var __repo = ' + repoStr_site + ';');
+
+        var AdmZip = require('adm-zip');
+        var zip = new AdmZip();
+        zip.addFile('repository_v3.json', repoStr_v3);
+        zip.writeZip('./repo/repository_v3.zip');
 
         grunt.log.ok('exported ' + counter + ' definitions (' + (Date.now() - timer) + 'ms)\n');
 

@@ -1,4 +1,4 @@
-///<reference path='../d.ts/node-0.8.d.ts'/>
+///<reference path='../../typings/DefinitelyTyped/node/node.d.ts'/>
 ///<reference path='../System/IO/StreamWriter.ts'/>
 
 module NodeJs { 

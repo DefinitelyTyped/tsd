@@ -2,26 +2,14 @@
 
 declare var unescape;
 
-enum SourceTypeEnum {
-	FileSystem,
-	Web
-}
-
-class TsdUri {
-    public sourceType: SourceTypeEnum;
-    public source: string;
-    public relative: string;
-    public pre: string;
-}
-
 class Repo {
-    public uriList: TsdUri[] = [];
+    public uriList: string[] = [];
 }
 
 class Config {
     public static FILE_NAME = 'tsd-config.json';
 
-    public version: string = "2.0";
+    public version: string = "v3";
     public typingsPath: string;
     public libPath: string;
 	public repo: Repo;
@@ -43,13 +31,12 @@ class Config {
 	public load(cfg?) {
 	    var cfg = cfg || Config.tryGetConfigFile();
 	    this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
-	    this.libPath = Config.isNull(cfg, 'libPath', 'lib');
 	    this.dependencies = Config.isNull(cfg, 'dependencies', []);
+	    this.version = Config.isNull(cfg, 'version', this.version);
 	    this.repo = Config.isNull(cfg, 'repo', {
-	        uriList: [{
-	            sourceType: SourceTypeEnum.Web,
-	            source: "http://www.tsdpm.com/repository_v2.json"
-	        }]
+	        uriList: [
+                "http://www.tsdpm.com/repository_v2.json"
+            ]
 	    });
 	}
 
@@ -60,9 +47,9 @@ class Config {
 	    }
 
 	    var cfg = {
-	        localPath: this.typingsPath,
-	        libPath: this.libPath,
+            typingsPath: this.typingsPath,
 	        repo: this.repo,
+            version: this.version,
 	        dependencies: dep
 	    };
 
@@ -72,7 +59,7 @@ class Config {
 	    sw.close();
 	}
 
-	public addDependency(name: string, version: string, key: string, uri: TsdUri, repo: TsdUri) {
+	public addDependency(name: string, version: string, key: string, uri: string, repo: string) {
 	    this.dependencies[name + '@' + version] = { repo: repo, key: key, uri: uri };
 	}
 }

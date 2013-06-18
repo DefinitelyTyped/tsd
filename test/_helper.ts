@@ -13,13 +13,14 @@ module helper {
     export function loadJSON(src:string, callback:(err, res:any) => void){
         fs.readFile(path.resolve(src), 'utf8', (err, file) =>{
             if (err || !file) return callback(err, null);
+            var json = null;
             try {
-                return callback(null, JSON.parse(file));
+                json = JSON.parse(file);
             }
             catch (err) {
                 return callback(err, null);
             }
-            return callback(null, null);
+            return callback(null, json);
         });
     }
 

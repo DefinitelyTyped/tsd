@@ -1,9 +1,4 @@
-﻿///<reference path='ICommand.ts'/>
-///<reference path='../System/Web/WebRequest.ts'/>
-///<reference path='../System/IO/FileManager.ts'/>
-///<reference path='../System/IO/DirectoryManager.ts'/>
-///<reference path='../System/Console.ts'/>
-///<reference path='../System/Uri.ts'/>
+﻿///<reference path='_ref.ts'/>
 
 module Command {
 
@@ -28,7 +23,7 @@ module Command {
                 System.Console.writeLine(' REPOSITORY LIST ');
                 System.Console.writeLine(' ------------------------------------------------------------------------------');
                 for (var i = 0; i < uriList.length; i++) {
-                    System.Console.writeLine(' [' + (index++) + '] ' + uriList[i].source);
+                    System.Console.writeLine(' [' + (index++) + '] ' + uriList[i]);
                 }
                 System.Console.writeLine(' ------------------------------------------------------------------------------');
                 System.Console.writeLine(' Total: ' + uriList.length + ' repositories.\n');
