@@ -1,0 +1,14 @@
+{
+    "name": "popcorn",
+    "description": "The HTML5 Media Framework",
+    "versions": [
+        {
+            "version": "1.3.0",
+            "key": "59ec3693-5e90-4171-adc1-4e565f691581",
+            "dependencies": [],
+            "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/popcorn/popcorn.d.ts",
+            "author": "grapswiz",
+            "author_url": "https://github.com/grapswiz"
+        }
+    ]
+}
