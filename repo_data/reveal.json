@@ -1,0 +1,14 @@
+{
+    "name": "reveal",
+    "description": "The HTML Presentation Framework",
+    "versions": [
+        {
+            "version": "2.4.0",
+            "key": "432c04df-0bfb-43a0-a1a9-0ba46319b924",
+            "dependencies": [],
+            "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/reveal/reveal.d.ts",
+            "author": "grapswiz",
+            "author_url": "https://github.com/grapswiz"
+        }
+    ]
+}
