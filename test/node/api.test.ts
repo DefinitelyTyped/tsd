@@ -18,8 +18,7 @@ describe('api', () =>{
     remoteRepo = "http://localhost:63342/tsd-origin/repo/repository_v3.json";
     remoteRepo = "file:///" + encodeURI(path.resolve("./repo/repository_v3.json").replace(/\\/g, '/'));
 
-    console.log('-> using repo: ' + remoteRepo);
-
+    //TODO use Config.ts.getDefault();
     function getConfig(){
         return {
             "version": "v3",
@@ -43,6 +42,8 @@ describe('api', () =>{
     }
 
     before(function (done){
+        console.log('-> using repo: ' + remoteRepo);
+
         schema = {
             repo_data: helper.readJSON('./schema/repo_data.json'),
             tsd_config: helper.readJSON('./schema/tsd-config_v3.json'),

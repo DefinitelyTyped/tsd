@@ -279,36 +279,65 @@ var Config = (function () {
         this.version = "v3";
         this.dependencies = {
         };
+        this.tv4 = require('tv4').tv4;
+        this.schema = JSON.parse(System.IO.FileManager.handle.readFile(Config.SCHEMA_PATH));
     }
     Config.FILE_NAME = 'tsd-config.json';
+    Config.CORE_REPO = 'http://www.tsdpm.com/repository_v2.json';
+    Config.SCHEMA_PATH = require('path').resolve('./schema/tsd-config_v3.json');
     Config.isNull = function isNull(cfg, key, alternativeValue) {
         return cfg[key] ? cfg[key] : alternativeValue;
     };
+    Config.cascadeProp = function cascadeProp(key, cfg, defaults, alternativeValue) {
+        if (typeof alternativeValue === "undefined") { alternativeValue = null; }
+        if(cfg.hasOwnProperty(key)) {
+            return cfg[key];
+        }
+        if(defaults.hasOwnProperty(key)) {
+            return defaults[key];
+        }
+        return alternativeValue;
+    };
     Config.tryGetConfigFile = function tryGetConfigFile() {
-        var cfg = {
-        };
+        var cfg;
         try  {
             cfg = JSON.parse(System.IO.FileManager.handle.readFile(Config.FILE_NAME));
         } catch (e) {
         }
         return cfg;
     };
+    Config.getDefault = function getDefault() {
+        return {
+            typingsPath: 'typings',
+            dependencies: {
+            },
+            version: 'v3',
+            repo: {
+                uriList: [
+                    Config.CORE_REPO
+                ]
+            }
+        };
+    };
     Config.prototype.load = function (cfg) {
         var cfg = cfg || Config.tryGetConfigFile();
-        this.typingsPath = Config.isNull(cfg, 'typingsPath', 'typings');
-        this.dependencies = Config.isNull(cfg, 'dependencies', []);
-        this.version = Config.isNull(cfg, 'version', this.version);
-        this.repo = Config.isNull(cfg, 'repo', {
-            uriList: [
-                "http://www.tsdpm.com/repository_v2.json"
-            ]
-        });
+        var def = Config.getDefault();
+        this.version = Config.cascadeProp('version', cfg, def);
+        this.typingsPath = Config.cascadeProp('typingsPath', cfg, def);
+        this.dependencies = Config.cascadeProp('dependencies', cfg, def);
+        this.repo = Config.cascadeProp('repo', cfg, def);
+        var res = this.tv4.validateResult(this, this.schema);
+        if(!res.valid) {
+            throw (new Error(res.error.message + ' -> ' + res.error.dataPath + ' -> ' + res.error.schemaPath));
+        }
     };
     Config.prototype.save = function () {
         var dep = {
         };
         for(var attr in this.dependencies) {
-            dep[attr] = this.dependencies[attr];
+            if(this.dependencies.hasOwnProperty(attr)) {
+                dep[attr] = this.dependencies[attr];
+            }
         }
         var cfg = {
             typingsPath: this.typingsPath,
@@ -316,10 +345,11 @@ var Config = (function () {
             version: this.version,
             dependencies: dep
         };
-        var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-        sw.write(JSON.stringify(cfg, null, 4));
-        sw.flush();
-        sw.close();
+        var res = this.tv4.validateResult(cfg, this.schema);
+        if(!res.valid) {
+            throw (new Error(res.error.message + ' -> ' + res.error.dataPath + ' -> ' + res.error.schemaPath));
+        }
+        System.IO.FileManager.handle.writeFile(Config.FILE_NAME, JSON.stringify(cfg, null, 4));
     };
     Config.prototype.addDependency = function (name, version, key, uri, repo) {
         this.dependencies[name + '@' + version] = {
@@ -1050,10 +1080,7 @@ var Command;
             return args[2] == this.shortcut;
         };
         CreateLocalConfigCommand.prototype.saveConfigFile = function () {
-            var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n' + '    "version": "v3",\n' + '    "typingsPath": "typings",\n' + '    "repo": {\n' + '        "uriList": [\n' + '            "http://www.tsdpm.com/repository_v2.json"\n' + '        ]\n' + '    },\n' + '    "dependencies": {}\n' + '}');
-            sw.flush();
-            sw.close();
+            System.IO.FileManager.handle.writeFile(Config.FILE_NAME, JSON.stringify(Config.getDefault(), null, 4));
         };
         CreateLocalConfigCommand.prototype.exec = function (args, callback) {
             if(System.IO.FileManager.handle.fileExists(Config.FILE_NAME)) {

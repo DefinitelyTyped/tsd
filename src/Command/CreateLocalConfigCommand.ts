@@ -13,19 +13,7 @@ module Command {
         }
 
         private saveConfigFile(): void {
-            var sw = System.IO.FileManager.handle.createFile(Config.FILE_NAME);
-            sw.write('{\n'
-                    + '    "version": "v3",\n'
-                    + '    "typingsPath": "typings",\n'
-                    + '    "repo": {\n'
-                    + '        "uriList": [\n'
-                    + '            "http://www.tsdpm.com/repository_v2.json"\n'
-                    + '        ]\n'
-                    + '    },\n'
-                    + '    "dependencies": {}\n'
-                    + '}');
-            sw.flush();
-            sw.close();
+            System.IO.FileManager.handle.writeFile(Config.FILE_NAME, JSON.stringify(Config.getDefault(), null, 4));
         }
 
         public exec(args: Array, callback: (err?, data?) => any): void {

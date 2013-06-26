@@ -1,0 +1,1 @@
+///<reference path="../typings/DefinitelyTyped/tv4/tv4.d.ts" />
