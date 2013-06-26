@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bbq/jquery.bbq.d.ts",
-      "author": "Adam R. Smith",
-      "author_url": "https://github.com/sunetos"
+      "authors": [
+        {
+          "name": "Adam R. Smith",
+          "url": "https://github.com/sunetos"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "5c2cc4ff-1d35-4a71-a1e4-666c35966c86",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/noVNC/noVNC.d.ts",
-      "author": "smithkl42",
-      "author_url": "https://github.com/smithkl42"
+      "authors": [
+        {
+          "name": "smithkl42",
+          "url": "https://github.com/smithkl42"
+        }
+      ]
     }
   ]
 }

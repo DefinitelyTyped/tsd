@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.elang/jquery.elang.d.ts",
-      "author": "Zoltan Sumegi",
-      "author_url": "https://github.com/sumegizoltan/"
+      "authors": [
+        {
+          "name": "Zoltan Sumegi",
+          "url": "https://github.com/sumegizoltan/"
+        }
+      ]
     }
   ]
 }

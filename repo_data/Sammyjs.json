@@ -7,8 +7,12 @@
       "key": "3FBC8337-4741-416D-B576-B55221CDA93A",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sammyjs/sammyjs.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

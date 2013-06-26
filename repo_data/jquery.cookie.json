@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
-      "author": "Roy Goode",
-      "author_url": "https://github.com/RoyGoode/"
+      "authors": [
+        {
+          "name": "Roy Goode",
+          "url": "https://github.com/RoyGoode/"
+        }
+      ]
     }
   ]
 }

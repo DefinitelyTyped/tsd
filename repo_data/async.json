@@ -7,12 +7,12 @@
       "key": "C9E5903D-85FB-4127-A487-0F8479942F42",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/async/async.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov",
-	  "lib": {
-		"target": "tsd-libs",
-		"dir": "async"
-	  }
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

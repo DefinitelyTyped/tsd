@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap.datepicker/bootstrap.datepicker.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "43E6CDBC-EAFC-4F54-A57E-C2CF2F287624",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tweenjs/tweenjs.d.ts",
-      "author": "Pedro Ferreira",
-      "author_url": "https://bitbucket.org/drk4"
+      "authors": [
+        {
+          "name": "Pedro Ferreira",
+          "url": "https://bitbucket.org/drk4"
+        }
+      ]
     }
   ]
 }

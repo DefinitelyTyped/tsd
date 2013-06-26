@@ -7,8 +7,12 @@
       "key": "47225973-c747-c78e-c3ed-ab29d2a8f166",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/numeraljs/numeraljs.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

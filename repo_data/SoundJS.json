@@ -7,8 +7,12 @@
       "key": "E6459F1B-6722-4B84-9E42-150F0D7740B1",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/soundjs/soundjs.d.ts",
-      "author": "Pedro Ferreira",
-      "author_url": "https://bitbucket.org/drk4"
+      "authors": [
+        {
+          "name": "Pedro Ferreira",
+          "url": "https://bitbucket.org/drk4"
+        }
+      ]
     }
   ]
 }

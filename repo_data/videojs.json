@@ -7,8 +7,12 @@
       "key": "04582243-c80d-42b5-9e69-d261303b8e72",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/videojs/videojs.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

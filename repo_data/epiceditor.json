@@ -7,8 +7,12 @@
       "key": "e4e11e3b-2489-4ef5-b2ee-a62e5c2ef90f",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/epiceditor/epiceditor.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

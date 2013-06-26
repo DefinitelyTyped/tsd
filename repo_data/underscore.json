@@ -7,8 +7,12 @@
       "key": "84ec0626-dd47-48ba-abd2-ec3a39356972",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore.d.ts",
-      "author": "Josh Baldwin",
-      "author_url": "https://github.com/jbaldwin/"
+      "authors": [
+        {
+          "name": "Josh Baldwin",
+          "url": "https://github.com/jbaldwin/"
+        }
+      ]
     }
   ]
 }

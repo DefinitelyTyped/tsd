@@ -7,8 +7,12 @@
       "key": "11c59009-52a2-4f8a-8192-fbb76f1b2d2d",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout/knockout.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

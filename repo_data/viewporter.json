@@ -7,8 +7,12 @@
       "key": "adda6a25-ee96-bdd4-3479-4c8efce6458",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/viewporter/viewporter.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/socket.io/socket.io.d.ts",
-      "author": "William Orr",
-      "author_url": "https://github.com/worr"
+      "authors": [
+        {
+          "name": "William Orr",
+          "url": "https://github.com/worr"
+        }
+      ]
     }
   ]
 }

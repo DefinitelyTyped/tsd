@@ -7,8 +7,12 @@
       "key": "a83479d2-912f-d2b-12c5-e70237506be5",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/box2d/box2dweb.d.ts",
-      "author": "Josh Baldwin",
-      "author_url": "https://github.com/jbaldwin/"
+      "authors": [
+        {
+          "name": "Josh Baldwin",
+          "url": "https://github.com/jbaldwin/"
+        }
+      ]
     }
   ]
 }

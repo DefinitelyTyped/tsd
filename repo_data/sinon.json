@@ -7,8 +7,12 @@
       "key": "2b44a7f1-c4ad-4f05-9208-f50000c22c64",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sinon/sinon-1.5.d.ts",
-      "author": "William Sears",
-      "author_url": "https://github.com/mrbigdog2u"
+      "authors": [
+        {
+          "name": "William Sears",
+          "url": "https://github.com/mrbigdog2u"
+        }
+      ]
     }
   ]
 }

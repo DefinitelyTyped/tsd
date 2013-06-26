@@ -7,8 +7,12 @@
       "key": "d19fe28b-3d84-77bd-1dda-b176cd96cda0",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/kolite/kolite.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

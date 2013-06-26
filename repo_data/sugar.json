@@ -7,8 +7,12 @@
       "key": "3479CE5E-C7C5-446B-9849-36DC418DC838",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sugar/sugar.d.ts",
-      "author": "Josh Baldwin",
-      "author_url": "https://github.com/jbaldwin/"
+      "authors": [
+        {
+          "name": "Josh Baldwin",
+          "url": "https://github.com/jbaldwin/"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "784332C5-6D27-4240-AE6B-59B2FF5854C1",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/signalr/signalr.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-mocks.d.ts",
-      "author": "Diego Vilar",
-      "author_url": "https://github.com/diegovilar"
+      "authors": [
+        {
+          "name": "Diego Vilar",
+          "url": "https://github.com/diegovilar"
+        }
+      ]
     }
   ]
 }

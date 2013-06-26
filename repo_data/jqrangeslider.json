@@ -7,8 +7,12 @@
       "key": "c7a49102-a8ab-5da2-4bc0-e5e0479e780e",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jqrangeslider/jqrangeslider.d.ts",
-      "author": "Dániel Tar",
-      "author_url": "https://github.com/qcz"
+      "authors": [
+        {
+          "name": "Dániel Tar",
+          "url": "https://github.com/qcz"
+        }
+      ]
     }
   ]
 }

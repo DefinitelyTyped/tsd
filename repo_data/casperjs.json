@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/casperjs/casperjs.d.ts",
-      "author": "Jed Hunsaker",
-      "author_url": "https://github.com/jedhunsaker"
+      "authors": [
+        {
+          "name": "Jed Hunsaker",
+          "url": "https://github.com/jedhunsaker"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "eec77bc7-9d10-9595-e7f6-2eb2d33871b",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/marked/marked.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

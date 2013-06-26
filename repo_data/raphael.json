@@ -7,8 +7,12 @@
       "key": "E6A34E99-68E8-42F8-9479-ABA9C575319C",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/raphael/raphael.d.ts",
-      "author": "CheCoxshall",
-      "author_url": "https://github.com/CheCoxshall"
+      "authors": [
+        {
+          "name": "CheCoxshall",
+          "url": "https://github.com/CheCoxshall"
+        }
+      ]
     }
   ]
 }

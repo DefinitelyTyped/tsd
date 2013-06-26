@@ -7,8 +7,12 @@
       "key": "6add22e0-3433-46ad-a44f-f62a4576a09b",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bgiframe/typescript.bgiframe.d.ts",
-      "author": "Zoltan Sumegi",
-      "author_url": "https://github.com/sumegizoltan"
+      "authors": [
+        {
+          "name": "Zoltan Sumegi",
+          "url": "https://github.com/sumegizoltan"
+        }
+      ]
     }
   ]
 }

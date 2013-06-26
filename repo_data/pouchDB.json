@@ -7,8 +7,12 @@
       "key": "6bc51b-30d-ca89-3ef-93f795c61dc1",
       "dependencies": [],
       "url": "undefined",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

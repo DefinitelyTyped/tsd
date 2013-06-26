@@ -7,8 +7,12 @@
       "key": "e54d105b-5167-4c17-8b58-e2a942fd28d8",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/i18next/i18next.d.ts",
-      "author": "Maarten Docter",
-      "author_url": "https://github.com/mdocter"
+      "authors": [
+        {
+          "name": "Maarten Docter",
+          "url": "https://github.com/mdocter"
+        }
+      ]
     }
   ]
 }

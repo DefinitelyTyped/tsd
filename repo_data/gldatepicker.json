@@ -7,8 +7,12 @@
       "key": "a02691f-e92a-cd79-2693-c5dda683ca94",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/gldatepicker/gldatepicker.d.ts",
-      "author": "Dániel Tar",
-      "author_url": "https://github.com/qcz"
+      "authors": [
+        {
+          "name": "Dániel Tar",
+          "url": "https://github.com/qcz"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "f22fa921-9879-4f22-a583-d38e158f2496",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/nodemailer/nodemailer.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

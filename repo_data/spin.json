@@ -7,8 +7,12 @@
       "key": "3844D795-5DAC-4AE2-9B3D-37DD342E2409",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/spin/spin.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "ba4324b2-eaa0-25cc-2de6-7467b48a8a74",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/cheerio/cheerio.d.ts",
-      "author": "Bret Little",
-      "author_url": "https://github.com/blittle"
+      "authors": [
+        {
+          "name": "Bret Little",
+          "url": "https://github.com/blittle"
+        }
+      ]
     }
   ]
 }

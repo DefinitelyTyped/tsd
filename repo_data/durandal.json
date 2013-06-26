@@ -16,8 +16,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/durandal/durandal.d.ts",
-      "author": "Evan Larsen",
-      "author_url": "http://nouvosoft.com/"
+      "authors": [
+        {
+          "name": "Evan Larsen",
+          "url": "http://nouvosoft.com/"
+        }
+      ]
     }
   ]
 }

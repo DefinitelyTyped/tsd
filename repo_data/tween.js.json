@@ -7,8 +7,12 @@
       "key": "FCC4519E-71A6-4C53-A78F-47FFE56215BC",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tween.js/tween.js.d.ts",
-      "author": "Adam R. Smith",
-      "author_url": "https://github.com/sunetos"
+      "authors": [
+        {
+          "name": "Adam R. Smith",
+          "url": "https://github.com/sunetos"
+        }
+      ]
     }
   ]
 }

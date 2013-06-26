@@ -7,12 +7,12 @@
       "key": "7dbd3273-31eb-479d-8079-ffa8eaae2f8f",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/ace/ace.d.ts",
-      "author": "Diullei Gomes",
-      "author_url": "https://github.com/Diullei",
-	  "lib": {
-		"target": "tsd-libs",
-		"dir": "ace-builds"
-	  }
+      "authors": [
+        {
+          "name": "Diullei Gomes",
+          "url": "https://github.com/Diullei"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "DA143CF3-8AFE-4DF9-B98E-85951A3A7B9C",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/node_redis/node_redis.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

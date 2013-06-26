@@ -7,8 +7,12 @@
       "key": "ba4d80a8-b9c-1b8a-7125-e9b449fe46df",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/swipeview/swipeview.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

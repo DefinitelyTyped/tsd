@@ -7,12 +7,12 @@
       "key": "e7cc3693-8491-494f-b7c6-786de1f9db85",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/amcharts/AmCharts.d.ts",
-      "author": "covobonomo",
-      "author_url": "https://github.com/covobonomo/",
-	  "lib": {
-		"target": "tsd-libs",
-		"dir": "amcharts"
-	  }
+      "authors": [
+        {
+          "name": "covobonomo",
+          "url": "https://github.com/covobonomo/"
+        }
+      ]
     }
   ]
 }

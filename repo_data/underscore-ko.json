@@ -16,8 +16,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore-ko/underscore-ko.d.ts",
-      "author": "Maurits Elbers",
-      "author_url": "https://github.com/MagicMau/"
+      "authors": [
+        {
+          "name": "Maurits Elbers",
+          "url": "https://github.com/MagicMau/"
+        }
+      ]
     }
   ]
 }

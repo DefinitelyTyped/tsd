@@ -7,8 +7,12 @@
       "key": "D8502E10-0504-4473-8257-E5E5D313C807",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/hammerjs/hammerjs.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

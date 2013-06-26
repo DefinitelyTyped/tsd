@@ -7,8 +7,12 @@
       "key": "e9f64db2-9783-4528-9872-52e272dbef25",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/leaflet/leaflet.d.ts",
-      "author": "Vladimir",
-      "author_url": "https://github.com/rgripper"
+      "authors": [
+        {
+          "name": "Vladimir",
+          "url": "https://github.com/rgripper"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "5EEF1C23-5A15-4584-BB96-A2160B323658",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/unity-webapi/unity-webapi.d.ts",
-      "author": "John Vrbanac",
-      "author_url": "https://github.com/jmvrbanac"
+      "authors": [
+        {
+          "name": "John Vrbanac",
+          "url": "https://github.com/jmvrbanac"
+        }
+      ]
     }
   ]
 }

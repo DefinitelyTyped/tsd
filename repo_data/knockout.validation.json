@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.validation/knockout.validation.d.ts",
-      "author": "Dan Ludwig",
-      "author_url": "https://github.com/danludwig"
+      "authors": [
+        {
+          "name": "Dan Ludwig",
+          "url": "https://github.com/danludwig"
+        }
+      ]
     }
   ]
 }

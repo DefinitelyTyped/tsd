@@ -7,8 +7,12 @@
       "key": "2AE44DF7-BEE5-4354-B68E-62A6067694FD",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/googlemaps/google.maps.d.ts",
-      "author": "Esben Nepper",
-      "author_url": "https://github.com/eNepper"
+      "authors": [
+        {
+          "name": "Esben Nepper",
+          "url": "https://github.com/eNepper"
+        }
+      ]
     }
   ]
 }

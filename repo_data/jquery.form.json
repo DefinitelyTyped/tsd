@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.form/jquery.form.d.ts",
-      "author": "François Guillot",
-      "author_url": "http://fguillot.developpez.com/"
+      "authors": [
+        {
+          "name": "François Guillot",
+          "url": "http://fguillot.developpez.com/"
+        }
+      ]
     }
   ]
 }

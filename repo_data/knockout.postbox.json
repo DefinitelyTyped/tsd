@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.postbox/knockout-postbox.d.ts",
-      "author": "Judah Gabriel",
-      "author_url": "https://github.com/JudahGabriel"
+      "authors": [
+        {
+          "name": "Judah Gabriel",
+          "url": "https://github.com/JudahGabriel"
+        }
+      ]
     }
   ]
 }

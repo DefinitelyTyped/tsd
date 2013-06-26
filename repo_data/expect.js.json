@@ -5,11 +5,14 @@
     {
       "version": "0.2.0",
       "key": "D95DFB45-7700-4E17-A25F-8183CB25DB63",
-      "dependencies": [
-      ],
+      "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/expect.js/expect.js.d.ts",
-      "author": "Teppei Sato",
-      "author_url": "https://github.com/teppeis"
+      "authors": [
+        {
+          "name": "Teppei Sato",
+          "url": "https://github.com/teppeis"
+        }
+      ]
     }
   ]
 }

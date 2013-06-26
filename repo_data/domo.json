@@ -7,8 +7,12 @@
       "key": "f5828915-4107-6908-a0a1-fd9ce0ec6fd8",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/domo/domo.d.ts",
-      "author": "Steve Fenton",
-      "author_url": "https://github.com/Steve-Fenton"
+      "authors": [
+        {
+          "name": "Steve Fenton",
+          "url": "https://github.com/Steve-Fenton"
+        }
+      ]
     }
   ]
 }

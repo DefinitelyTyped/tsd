@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.contextMenu/jquery.contextMenu.d.ts",
-      "author": "Natan Vivo",
-      "author_url": "https://github.com/nvivo/"
+      "authors": [
+        {
+          "name": "Natan Vivo",
+          "url": "https://github.com/nvivo/"
+        }
+      ]
     }
   ]
 }

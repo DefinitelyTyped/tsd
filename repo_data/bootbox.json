@@ -7,8 +7,12 @@
       "key": "15476ea2-feb6-49f6-ffdd-aa63f5b7f1a2",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootbox/bootbox.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

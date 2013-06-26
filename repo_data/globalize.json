@@ -7,8 +7,12 @@
       "key": "8D36F3C1-C418-4BDE-8E2C-2258C5E8E483",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/globalize/globalize.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

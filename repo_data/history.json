@@ -7,8 +7,12 @@
       "key": "4EFBB523-7D05-440E-ACB1-3E3191A5E466",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/history/history.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

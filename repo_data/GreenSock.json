@@ -7,8 +7,12 @@
       "key": "E08A7E0B-A7C4-4B49-982A-CF5D484A39A3",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/greensock/greensock.d.ts",
-      "author": "Robert S.",
-      "author_url": "https://github.com/codeBelt"
+      "authors": [
+        {
+          "name": "Robert S.",
+          "url": "https://github.com/codeBelt"
+        }
+      ]
     }
   ]
 }

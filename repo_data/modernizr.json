@@ -7,8 +7,12 @@
       "key": "D3D17555-E9EF-468E-B605-A4577B502D75",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/modernizr/modernizr.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

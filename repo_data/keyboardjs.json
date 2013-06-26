@@ -7,8 +7,12 @@
       "key": "77d5d4f5-9a2e-4837-8f00-c3239038d1ca",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/keyboardjs/keyboardjs.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

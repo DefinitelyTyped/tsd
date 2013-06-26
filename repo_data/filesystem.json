@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/filesystem/filesystem.d.ts",
-      "author": "Kon",
-      "author_url": "http://phyzkit.net/"
+      "authors": [
+        {
+          "name": "Kon",
+          "url": "http://phyzkit.net/"
+        }
+      ]
     }
   ]
 }

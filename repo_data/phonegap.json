@@ -7,8 +7,12 @@
       "key": "272ed09f-33c3-40c2-86bf-fa0aee183bae",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phonegap/phonegap.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

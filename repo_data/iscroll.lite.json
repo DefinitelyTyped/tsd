@@ -7,8 +7,12 @@
       "key": "8ad9ceb5-2802-4fcb-e902-c2f094b02a9b",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/iscroll/iscroll.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

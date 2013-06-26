@@ -7,8 +7,12 @@
       "key": "31f242da-ab6d-4b58-bacd-a6f493971a7a",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/qunit/qunit.d.ts",
-      "author": "Diullei Gomes",
-      "author_url": "https://github.com/Diullei"
+      "authors": [
+        {
+          "name": "Diullei Gomes",
+          "url": "https://github.com/Diullei"
+        }
+      ]
     }
   ]
 }

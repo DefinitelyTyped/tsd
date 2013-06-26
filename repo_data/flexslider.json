@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/flexSlider/flexSlider.d.ts",
-      "author": "Diullei Gomes",
-      "author_url": "https://github.com/Diullei"
+      "authors": [
+        {
+          "name": "Diullei Gomes",
+          "url": "https://github.com/Diullei"
+        }
+      ]
     }
   ]
 }

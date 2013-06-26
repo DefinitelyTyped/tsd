@@ -7,8 +7,12 @@
       "key": "84602CB7-E9F4-40AD-BB48-B17B2A819402",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/humane/humane.d.ts",
-      "author": "John Vrbanac",
-      "author_url": "https://github.com/jmvrbanac"
+      "authors": [
+        {
+          "name": "John Vrbanac",
+          "url": "https://github.com/jmvrbanac"
+        }
+      ]
     }
   ]
 }

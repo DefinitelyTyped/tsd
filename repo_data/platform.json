@@ -7,8 +7,12 @@
       "key": "e6e36d35-3e52-67af-cd8d-12f4de3dd6a5",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/platform/platform.d.ts",
-      "author": "Jake Hickman",
-      "author_url": "https://github.com/JakeH"
+      "authors": [
+        {
+          "name": "Jake Hickman",
+          "url": "https://github.com/JakeH"
+        }
+      ]
     }
   ]
 }

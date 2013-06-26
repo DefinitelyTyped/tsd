@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.jnotify/jquery.jnotify.d.ts",
-      "author": "James Curran",
-      "author_url": "https://github.com/jamescurran/"
+      "authors": [
+        {
+          "name": "James Curran",
+          "url": "https://github.com/jamescurran/"
+        }
+      ]
     }
   ]
 }

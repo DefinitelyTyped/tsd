@@ -16,8 +16,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockback/knockback.d.ts",
-      "author": "Marcel Binot",
-      "author_url": "https://github.com/docgit"
+      "authors": [
+        {
+          "name": "Marcel Binot",
+          "url": "https://github.com/docgit"
+        }
+      ]
     }
   ]
 }

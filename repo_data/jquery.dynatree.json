@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.dynatree/jquery.dynatree.d.ts",
-      "author": "François de Campredon",
-      "author_url": "https://github.com/fdecampredon"
+      "authors": [
+        {
+          "name": "François de Campredon",
+          "url": "https://github.com/fdecampredon"
+        }
+      ]
     }
   ]
 }

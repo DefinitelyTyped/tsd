@@ -7,8 +7,12 @@
       "key": "322B8488-2DF3-4347-A541-45E8190644D0",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/storejs/storejs.d.ts",
-      "author": "Vincent Bortone",
-      "author_url": "https://github.com/vbortone/"
+      "authors": [
+        {
+          "name": "Vincent Bortone",
+          "url": "https://github.com/vbortone/"
+        }
+      ]
     }
   ]
 }

@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/urijs/URI.d.ts",
-      "author": "RodneyJT",
-      "author_url": "https://github.com/RodneyJT"
+      "authors": [
+        {
+          "name": "RodneyJT",
+          "url": "https://github.com/RodneyJT"
+        }
+      ]
     }
   ]
 }

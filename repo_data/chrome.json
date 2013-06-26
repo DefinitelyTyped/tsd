@@ -7,8 +7,12 @@
       "key": "FE1EDD4D-CDC1-4B6D-ADE9-D5E43BA72F81",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chrome/chrome.d.ts",
-      "author": "Matthew Kimber",
-      "author_url": "https://github.com/matthewkimber"
+      "authors": [
+        {
+          "name": "Matthew Kimber",
+          "url": "https://github.com/matthewkimber"
+        }
+      ]
     }
   ]
 }

@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.transit/jquery.transit.d.ts",
-      "author": "William Sears",
-      "author_url": "https://github.com/MrBigDog2U"
+      "authors": [
+        {
+          "name": "William Sears",
+          "url": "https://github.com/MrBigDog2U"
+        }
+      ]
     }
   ]
 }

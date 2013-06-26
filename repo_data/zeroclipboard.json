@@ -7,8 +7,12 @@
       "key": "c9cbb57b-e9f7-4e87-b803-d5ff68c30d42",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/zeroclipboard/zeroclipboard.d.ts",
-      "author": "Eric J. Smith",
-      "author_url": "https://github.com/ejsmith"
+      "authors": [
+        {
+          "name": "Eric J. Smith",
+          "url": "https://github.com/ejsmith"
+        }
+      ]
     }
   ]
 }

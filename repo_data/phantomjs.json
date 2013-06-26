@@ -7,8 +7,12 @@
       "key": "e4b16b33-9238-4407-b29e-c386010b8579",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phantomjs/phantomjs.d.ts",
-      "author": "Jed Hunsaker",
-      "author_url": "https://github.com/jedhunsaker"
+      "authors": [
+        {
+          "name": "Jed Hunsaker",
+          "url": "https://github.com/jedhunsaker"
+        }
+      ]
     }
   ]
 }

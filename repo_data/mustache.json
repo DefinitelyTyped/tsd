@@ -7,8 +7,12 @@
       "key": "96C40747-B6A3-46F3-9B13-691D61A3DD08",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mustache/mustache.d.ts",
-      "author": "Boris Yankov",
-      "author_url": "https://github.com/borisyankov"
+      "authors": [
+        {
+          "name": "Boris Yankov",
+          "url": "https://github.com/borisyankov"
+        }
+      ]
     }
   ]
 }

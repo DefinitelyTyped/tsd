@@ -7,8 +7,12 @@
       "key": "5ebe9070-8eb7-4716-927-dfb1692da0fa",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mousetrap/mousetrap.d.ts",
-      "author": "Dániel Tar",
-      "author_url": "https://github.com/qcz"
+      "authors": [
+        {
+          "name": "Dániel Tar",
+          "url": "https://github.com/qcz"
+        }
+      ]
     }
   ]
 }

@@ -7,8 +7,12 @@
       "key": "81458086-1919-44BC-9D3F-ECC1D865CCAC",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa-nightly.d.ts",
-      "author": "bbss",
-      "author_url": "https://github.com/bbss"
+      "authors": [
+        {
+          "name": "bbss",
+          "url": "https://github.com/bbss"
+        }
+      ]
     }
   ]
 }

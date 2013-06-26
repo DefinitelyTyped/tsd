@@ -12,8 +12,12 @@
         }
       ],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.scrollTo/jquery.scrollTo.d.ts",
-      "author": "Neil Stalker",
-      "author_url": "https://github.com/nestalk"
+      "authors": [
+        {
+          "name": "Neil Stalker",
+          "url": "https://github.com/nestalk"
+        }
+      ]
     }
   ]
 }
