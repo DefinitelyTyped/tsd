@@ -41,7 +41,8 @@
     "chai-json-schema": "*",
     "grunt-mocha-test": "~0.4.0",
     "grunt-tv4": "*",
-    "rimraf": "latest"
+    "rimraf": "latest",
+    "grunt-contrib-jshint": "~0.6.0"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"

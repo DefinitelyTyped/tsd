@@ -2,9 +2,6 @@
 
 module.exports = function (grunt){
 
-    var fs = require('fs');
-    var path = require('path');
-
     grunt.registerMultiTask('build_repo', 'build definition repo data', function (){
 
         var options = this.options({
@@ -28,7 +25,7 @@ module.exports = function (grunt){
         var repo_v3 = {repo:[]};
         var repo_site = [];
 
-        grunt.util._.each(this.filesSrc, function (src, i){
+        grunt.util._.each(this.filesSrc, function (src){
 
             console.log(src);
             counter++;

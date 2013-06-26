@@ -2,10 +2,6 @@
 
 module.exports = function (grunt){
 
-    var fs = require('fs');
-    var path = require('path');
-    var util = require('util');
-
     grunt.registerMultiTask('upgrade_repo', 'forced upgrade definition repo data format', function (){
 
         var options = this.options({
@@ -22,7 +18,7 @@ module.exports = function (grunt){
         var counter = 0;
         var timer = Date.now();
 
-        grunt.util._.each(this.filesSrc, function (src, i){
+        grunt.util._.each(this.filesSrc, function (src){
 
             console.log(src);
             counter++;

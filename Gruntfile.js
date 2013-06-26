@@ -1,12 +1,10 @@
 module.exports = function (grunt){
     'use strict';
 
-    var path = require('path');
-    var util = require('util');
-
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-execute');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-mocha-test');
@@ -16,6 +14,15 @@ module.exports = function (grunt){
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        jshint: {
+            all: [
+                'Gruntfile.js',
+                'tasks/*.js',
+            ],
+            options: {
+                jshintrc: '.jshintrc'
+            }
+        },
         clean: {
             tmp : ['tmp', 'test/**/_tmp.*.*', 'test/node/typings', 'test/node/tsd-config.json'],
             build: ['deploy/*.js', 'deploy/*.json', 'tools/build.js', 'DefinitelyTyped'],
@@ -112,7 +119,7 @@ module.exports = function (grunt){
     grunt.registerTask('validate-data', ['tv4:repo_data']);
     grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'tv4:repo_v3', 'tv4:repo_site']);
 
-    grunt.registerTask('test-code', ['typescript:test_node', 'mochaTest']);
+    grunt.registerTask('test-code', ['typescript:test_node', 'jshint', 'mochaTest']);
 
     grunt.registerTask('build', ['clean:tmp', 'clean:build', 'compile-source', 'test-code']);
     grunt.registerTask('repo', ['clean:tmp', 'clean:repo','test-code', 'validate-data', 'build', 'build_repo:all', 'validate-repo', 'copy:export_repo']);
