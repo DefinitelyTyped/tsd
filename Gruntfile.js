@@ -85,9 +85,9 @@ module.exports = function (grunt){
                     'schema/repo_data.json': ['repo_data/*.json']
                 }
             },
-            repo_v2: {
+            repo_v3: {
                 files : {
-                    'schema/repository_v2.json': ['repo/repository_v2.json']
+                    'schema/repository_v3.json': ['repo/repository_v3.json']
                 }
             },
             repo_site: {
@@ -110,7 +110,7 @@ module.exports = function (grunt){
     grunt.registerTask('compile-source', ['typescript:source']);
 
     grunt.registerTask('validate-data', ['tv4:repo_data']);
-    grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'tv4:repo_v2', 'tv4:repo_site']);
+    grunt.registerTask('validate-repo', ['typescript:test_repo', 'mochaTest', 'tv4:repo_v3', 'tv4:repo_site']);
 
     grunt.registerTask('test-code', ['typescript:test_node', 'mochaTest']);
 
