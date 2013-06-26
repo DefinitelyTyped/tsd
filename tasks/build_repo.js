@@ -48,10 +48,7 @@ module.exports = function (grunt){
                     key: obj.versions[x].key,
                     dependencies: obj.versions[x].dependencies,
                     uri: obj.versions[x].url,
-                    authors: [{
-                        name: obj.versions[x].author,
-                        url: obj.versions[x].author_url
-                    }]
+                    authors: obj.versions[x].authors
                 });
                 delete obj.versions[x].lib;
             }
@@ -66,10 +63,7 @@ module.exports = function (grunt){
                 key: obj.versions[0].key,
                 dependencies: obj.versions[0].dependencies,
                 version: obj.versions[0].version,
-                authors: [{
-                    name: obj.versions[0].author,
-                    url: obj.versions[0].author_url
-                }],
+                authors: obj.versions[0].authors,
                 url: obj.versions[0].url
             });
         });

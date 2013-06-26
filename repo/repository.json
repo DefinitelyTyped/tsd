@@ -8,8 +8,12 @@
         "key": "ebb29277-4d32-46fd-a0ec-6c530ffec573",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/AzureMobileServicesClient/AzureMobileServicesClient.d.ts",
-        "author": "Morosinotto Daniele",
-        "author_url": "https://github.com/dmorosinotto/"
+        "authors": [
+          {
+            "name": "Morosinotto Daniele",
+            "url": "https://github.com/dmorosinotto/"
+          }
+        ]
       }
     ]
   },
@@ -27,8 +31,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap/bootstrap.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -41,8 +49,12 @@
         "key": "E08A7E0B-A7C4-4B49-982A-CF5D484A39A3",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/greensock/greensock.d.ts",
-        "author": "Robert S.",
-        "author_url": "https://github.com/codeBelt"
+        "authors": [
+          {
+            "name": "Robert S.",
+            "url": "https://github.com/codeBelt"
+          }
+        ]
       }
     ]
   },
@@ -55,8 +67,12 @@
         "key": "D8502E10-0504-4473-8257-E5E5D313C807",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/hammerjs/hammerjs.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -69,8 +85,12 @@
         "key": "C19BCFAA-F9D3-40BC-B0FD-AC8D06BF9789",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/highcharts/highcharts.d.ts",
-        "author": "Damiano Gambarotto",
-        "author_url": "https://github.com/damianog"
+        "authors": [
+          {
+            "name": "Damiano Gambarotto",
+            "url": "https://github.com/damianog"
+          }
+        ]
       }
     ]
   },
@@ -83,8 +103,12 @@
         "key": "3FBC8337-4741-416D-B576-B55221CDA93A",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sammyjs/sammyjs.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -97,8 +121,12 @@
         "key": "0B9D45DE-3046-4A93-964B-0EEA8CFFDE4A",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sockjs/sockjs.d.ts",
-        "author": "Emil Ivanov",
-        "author_url": "https://github.com/vladev"
+        "authors": [
+          {
+            "name": "Emil Ivanov",
+            "url": "https://github.com/vladev"
+          }
+        ]
       }
     ]
   },
@@ -111,8 +139,12 @@
         "key": "E6459F1B-6722-4B84-9E42-150F0D7740B1",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/soundjs/soundjs.d.ts",
-        "author": "Pedro Ferreira",
-        "author_url": "https://bitbucket.org/drk4"
+        "authors": [
+          {
+            "name": "Pedro Ferreira",
+            "url": "https://bitbucket.org/drk4"
+          }
+        ]
       }
     ]
   },
@@ -125,8 +157,12 @@
         "key": "CD94F66C-57A3-4FCA-B8BF-EA93D9D1B843",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/teechart/teechart.d.ts",
-        "author": "Steema Software SL.",
-        "author_url": "http://www.steema.com/"
+        "authors": [
+          {
+            "name": "Steema Software SL.",
+            "url": "http://www.steema.com/"
+          }
+        ]
       }
     ]
   },
@@ -139,8 +175,12 @@
         "key": "43E6CDBC-EAFC-4F54-A57E-C2CF2F287624",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tweenjs/tweenjs.d.ts",
-        "author": "Pedro Ferreira",
-        "author_url": "https://bitbucket.org/drk4"
+        "authors": [
+          {
+            "name": "Pedro Ferreira",
+            "url": "https://bitbucket.org/drk4"
+          }
+        ]
       }
     ]
   },
@@ -153,8 +193,12 @@
         "key": "81458086-1919-44BC-9D3F-ECC1D865CCAC",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa-nightly.d.ts",
-        "author": "bbss",
-        "author_url": "https://github.com/bbss"
+        "authors": [
+          {
+            "name": "bbss",
+            "url": "https://github.com/bbss"
+          }
+        ]
       }
     ]
   },
@@ -167,8 +211,12 @@
         "key": "625D38FB-E434-4306-8773-A1BC4A4170CD",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa.d.ts",
-        "author": "bbss",
-        "author_url": "https://github.com/bbss"
+        "authors": [
+          {
+            "name": "bbss",
+            "url": "https://github.com/bbss"
+          }
+        ]
       }
     ]
   },
@@ -181,8 +229,12 @@
         "key": "302735EF-0179-4F79-932B-7A0DB70EAED0",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/youtube/youtube.d.ts",
-        "author": "Daz Wilkin",
-        "author_url": "https://github.com/DazWilkin/"
+        "authors": [
+          {
+            "name": "Daz Wilkin",
+            "url": "https://github.com/DazWilkin/"
+          }
+        ]
       }
     ]
   },
@@ -195,8 +247,12 @@
         "key": "7dbd3273-31eb-479d-8079-ffa8eaae2f8f",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/ace/ace.d.ts",
-        "author": "Diullei Gomes",
-        "author_url": "https://github.com/Diullei"
+        "authors": [
+          {
+            "name": "Diullei Gomes",
+            "url": "https://github.com/Diullei"
+          }
+        ]
       }
     ]
   },
@@ -209,8 +265,12 @@
         "key": "e7cc3693-8491-494f-b7c6-786de1f9db85",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/amcharts/AmCharts.d.ts",
-        "author": "covobonomo",
-        "author_url": "https://github.com/covobonomo/"
+        "authors": [
+          {
+            "name": "covobonomo",
+            "url": "https://github.com/covobonomo/"
+          }
+        ]
       }
     ]
   },
@@ -228,8 +288,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-cookies.d.ts",
-        "author": "Diego Vilar",
-        "author_url": "https://github.com/diegovilar"
+        "authors": [
+          {
+            "name": "Diego Vilar",
+            "url": "https://github.com/diegovilar"
+          }
+        ]
       }
     ]
   },
@@ -247,8 +311,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-mocks.d.ts",
-        "author": "Diego Vilar",
-        "author_url": "https://github.com/diegovilar"
+        "authors": [
+          {
+            "name": "Diego Vilar",
+            "url": "https://github.com/diegovilar"
+          }
+        ]
       }
     ]
   },
@@ -266,8 +334,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-resource.d.ts",
-        "author": "Diego Vilar",
-        "author_url": "https://github.com/diegovilar"
+        "authors": [
+          {
+            "name": "Diego Vilar",
+            "url": "https://github.com/diegovilar"
+          }
+        ]
       }
     ]
   },
@@ -285,8 +357,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-sanitize.d.ts",
-        "author": "Diego Vilar",
-        "author_url": "https://github.com/diegovilar"
+        "authors": [
+          {
+            "name": "Diego Vilar",
+            "url": "https://github.com/diegovilar"
+          }
+        ]
       }
     ]
   },
@@ -304,8 +380,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular.d.ts",
-        "author": "Diego Vilar",
-        "author_url": "https://github.com/diegovilar"
+        "authors": [
+          {
+            "name": "Diego Vilar",
+            "url": "https://github.com/diegovilar"
+          }
+        ]
       }
     ]
   },
@@ -318,8 +398,12 @@
         "key": "C9E5903D-85FB-4127-A487-0F8479942F42",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/async/async.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -341,8 +425,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/backbone/backbone.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -355,8 +443,12 @@
         "key": "6add22e0-3433-46ad-a44f-f62a4576a09b",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bgiframe/typescript.bgiframe.d.ts",
-        "author": "Zoltan Sumegi",
-        "author_url": "https://github.com/sumegizoltan"
+        "authors": [
+          {
+            "name": "Zoltan Sumegi",
+            "url": "https://github.com/sumegizoltan"
+          }
+        ]
       }
     ]
   },
@@ -369,8 +461,12 @@
         "key": "15476ea2-feb6-49f6-ffdd-aa63f5b7f1a2",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootbox/bootbox.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -388,8 +484,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap-notify/bootstrap-notify.d.ts",
-        "author": "Blake Niemyjski",
-        "author_url": "https://github.com/niemyjski/"
+        "authors": [
+          {
+            "name": "Blake Niemyjski",
+            "url": "https://github.com/niemyjski/"
+          }
+        ]
       }
     ]
   },
@@ -407,8 +507,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap.datepicker/bootstrap.datepicker.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -421,8 +525,12 @@
         "key": "a83479d2-912f-d2b-12c5-e70237506be5",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/box2d/box2dweb.d.ts",
-        "author": "Josh Baldwin",
-        "author_url": "https://github.com/jbaldwin/"
+        "authors": [
+          {
+            "name": "Josh Baldwin",
+            "url": "https://github.com/jbaldwin/"
+          }
+        ]
       }
     ]
   },
@@ -435,16 +543,24 @@
         "key": "4421fef0-a443-402d-b0c8-643d22f2b990",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/breeze/breeze.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       },
       {
         "version": "1.0",
         "key": "62E7AD1D-D4E7-4210-9CD9-7D5AA3542445",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/breeze/breeze-1.0.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -462,8 +578,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/casperjs/casperjs.d.ts",
-        "author": "Jed Hunsaker",
-        "author_url": "https://github.com/jedhunsaker"
+        "authors": [
+          {
+            "name": "Jed Hunsaker",
+            "url": "https://github.com/jedhunsaker"
+          }
+        ]
       }
     ]
   },
@@ -476,8 +596,12 @@
         "key": "ba4324b2-eaa0-25cc-2de6-7467b48a8a74",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/cheerio/cheerio.d.ts",
-        "author": "Bret Little",
-        "author_url": "https://github.com/blittle"
+        "authors": [
+          {
+            "name": "Bret Little",
+            "url": "https://github.com/blittle"
+          }
+        ]
       }
     ]
   },
@@ -495,8 +619,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chosen/chosen.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -509,8 +637,12 @@
         "key": "FE1EDD4D-CDC1-4B6D-ADE9-D5E43BA72F81",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chrome/chrome.d.ts",
-        "author": "Matthew Kimber",
-        "author_url": "https://github.com/matthewkimber"
+        "authors": [
+          {
+            "name": "Matthew Kimber",
+            "url": "https://github.com/matthewkimber"
+          }
+        ]
       }
     ]
   },
@@ -523,8 +655,12 @@
         "key": "4EF706B3-CADB-4F59-9238-15760D3A999E",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/codemirror/codemirror.d.ts",
-        "author": "François de Campredon",
-        "author_url": "https://github.com/fdecampredon"
+        "authors": [
+          {
+            "name": "François de Campredon",
+            "url": "https://github.com/fdecampredon"
+          }
+        ]
       }
     ]
   },
@@ -537,8 +673,12 @@
         "key": "5FCAB0EB-0E61-42FF-8DCD-4C3521E48383",
         "dependencies": [],
         "url": "https://github.com/soywiz/typescript-node-definitions/raw/master/colors.d.ts",
-        "author": "Carlos Ballesteros Velasco",
-        "author_url": "https://github.com/soywiz"
+        "authors": [
+          {
+            "name": "Carlos Ballesteros Velasco",
+            "url": "https://github.com/soywiz"
+          }
+        ]
       }
     ]
   },
@@ -551,8 +691,12 @@
         "key": "FB6D422F-8C81-4889-8CBD-641ACEA2708C",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/commander/commander.d.ts",
-        "author": "Marcelo Dezem",
-        "author_url": "https://github.com/mdezem"
+        "authors": [
+          {
+            "name": "Marcelo Dezem",
+            "url": "https://github.com/mdezem"
+          }
+        ]
       }
     ]
   },
@@ -565,8 +709,12 @@
         "key": "2EE264FF-D8B9-49CD-8AD4-781A1111876B",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/d3/d3.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -579,8 +727,12 @@
         "key": "f5828915-4107-6908-a0a1-fd9ce0ec6fd8",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/domo/domo.d.ts",
-        "author": "Steve Fenton",
-        "author_url": "https://github.com/Steve-Fenton"
+        "authors": [
+          {
+            "name": "Steve Fenton",
+            "url": "https://github.com/Steve-Fenton"
+          }
+        ]
       }
     ]
   },
@@ -602,8 +754,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/durandal/durandal.d.ts",
-        "author": "Evan Larsen",
-        "author_url": "http://nouvosoft.com/"
+        "authors": [
+          {
+            "name": "Evan Larsen",
+            "url": "http://nouvosoft.com/"
+          }
+        ]
       }
     ]
   },
@@ -616,8 +772,12 @@
         "key": "9E6C1779-0C44-417A-81A3-E8008C4BC207",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/dustjs-linkedin/dustjs-linkedin.d.ts",
-        "author": "Marcelo Dezem",
-        "author_url": "https://github.com/mdezem"
+        "authors": [
+          {
+            "name": "Marcelo Dezem",
+            "url": "https://github.com/mdezem"
+          }
+        ]
       }
     ]
   },
@@ -635,8 +795,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/easeljs/easeljs.d.ts",
-        "author": "Pedro Ferreira",
-        "author_url": "https://bitbucket.org/drk4"
+        "authors": [
+          {
+            "name": "Pedro Ferreira",
+            "url": "https://bitbucket.org/drk4"
+          }
+        ]
       }
     ]
   },
@@ -654,8 +818,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/scroller/scroller.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -668,8 +836,12 @@
         "key": "BADFDF09-0F77-4B90-B1D8-A1BA0E2A6BFD",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/ember/ember.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -682,8 +854,12 @@
         "key": "e4e11e3b-2489-4ef5-b2ee-a62e5c2ef90f",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/epiceditor/epiceditor.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -696,8 +872,12 @@
         "key": "D95DFB45-7700-4E17-A25F-8183CB25DB63",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/expect.js/expect.js.d.ts",
-        "author": "Teppei Sato",
-        "author_url": "https://github.com/teppeis"
+        "authors": [
+          {
+            "name": "Teppei Sato",
+            "url": "https://github.com/teppeis"
+          }
+        ]
       }
     ]
   },
@@ -715,8 +895,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/express/express.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -729,8 +913,12 @@
         "key": "a64fe5a5-6b79-428b-8258-274d0ca139ad",
         "dependencies": [],
         "url": "https://github.com/zz9pa/extjsTypescript/raw/master/jsondocs/ext-4.1.1a.d.ts",
-        "author": "zz9pa",
-        "author_url": "https://github.com/zz9pa"
+        "authors": [
+          {
+            "name": "zz9pa",
+            "url": "https://github.com/zz9pa"
+          }
+        ]
       }
     ]
   },
@@ -743,8 +931,12 @@
         "key": "e353e6fc-5a1e-8fcd-f6fc-f9999ef34a4",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/fabricjs/fabricjs.d.ts",
-        "author": "Oliver Klemencic",
-        "author_url": "https://github.com/oklemencic/"
+        "authors": [
+          {
+            "name": "Oliver Klemencic",
+            "url": "https://github.com/oklemencic/"
+          }
+        ]
       }
     ]
   },
@@ -762,8 +954,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/fancybox/fancybox.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -781,8 +977,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/filesystem/filesystem.d.ts",
-        "author": "Kon",
-        "author_url": "http://phyzkit.net/"
+        "authors": [
+          {
+            "name": "Kon",
+            "url": "http://phyzkit.net/"
+          }
+        ]
       }
     ]
   },
@@ -795,8 +995,12 @@
         "key": "007409ae-997d-45e9-b8ad-ce234c5f5bf9",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/filewriter/filewriter.d.ts",
-        "author": "Kon",
-        "author_url": "http://phyzkit.net/"
+        "authors": [
+          {
+            "name": "Kon",
+            "url": "http://phyzkit.net/"
+          }
+        ]
       }
     ]
   },
@@ -814,8 +1018,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/flexSlider/flexSlider.d.ts",
-        "author": "Diullei Gomes",
-        "author_url": "https://github.com/Diullei"
+        "authors": [
+          {
+            "name": "Diullei Gomes",
+            "url": "https://github.com/Diullei"
+          }
+        ]
       }
     ]
   },
@@ -833,8 +1041,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/flot/jquery.flot.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -852,8 +1064,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/foundation/foundation.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -866,8 +1082,12 @@
         "key": "7975f234-9b73-439e-b95c-69efc5fc5acd",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/gamepad/gamepad.d.ts",
-        "author": "Kon",
-        "author_url": "http://phyzkit.net/"
+        "authors": [
+          {
+            "name": "Kon",
+            "url": "http://phyzkit.net/"
+          }
+        ]
       }
     ]
   },
@@ -880,8 +1100,12 @@
         "key": "a02691f-e92a-cd79-2693-c5dda683ca94",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/gldatepicker/gldatepicker.d.ts",
-        "author": "Dániel Tar",
-        "author_url": "https://github.com/qcz"
+        "authors": [
+          {
+            "name": "Dániel Tar",
+            "url": "https://github.com/qcz"
+          }
+        ]
       }
     ]
   },
@@ -894,8 +1118,12 @@
         "key": "8D36F3C1-C418-4BDE-8E2C-2258C5E8E483",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/globalize/globalize.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -908,8 +1136,12 @@
         "key": "8a8453ee-dc08-4fb7-8508-0c787137f8e7",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/google.analytics/ga.d.ts",
-        "author": "Ronnie Haakon Hegelund",
-        "author_url": "http://ronniehegelund.blogspot.dk"
+        "authors": [
+          {
+            "name": "Ronnie Haakon Hegelund",
+            "url": "http://ronniehegelund.blogspot.dk"
+          }
+        ]
       }
     ]
   },
@@ -922,8 +1154,12 @@
         "key": "2938159e-d613-4b6a-8dd9-dd7947c79827",
         "dependencies": [],
         "url": "https://github.com/RodneyJT/DefinitelyTyped/raw/master/google.feeds/google.feed.api.d.ts",
-        "author": "RodneyJT",
-        "author_url": "https://github.com/RodneyJT"
+        "authors": [
+          {
+            "name": "RodneyJT",
+            "url": "https://github.com/RodneyJT"
+          }
+        ]
       }
     ]
   },
@@ -936,8 +1172,12 @@
         "key": "86338f4c-55cc-4600-aa39-1f79340e16f2",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/google.geolocation/google.geolocation.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -950,8 +1190,12 @@
         "key": "2AE44DF7-BEE5-4354-B68E-62A6067694FD",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/googlemaps/google.maps.d.ts",
-        "author": "Esben Nepper",
-        "author_url": "https://github.com/eNepper"
+        "authors": [
+          {
+            "name": "Esben Nepper",
+            "url": "https://github.com/eNepper"
+          }
+        ]
       }
     ]
   },
@@ -964,8 +1208,12 @@
         "key": "BE9045CC-7333-471D-A441-2817D7410F06",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/handlebars/handlebars.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -978,8 +1226,12 @@
         "key": "4EFBB523-7D05-440E-ACB1-3E3191A5E466",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/history/history.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -992,8 +1244,12 @@
         "key": "84602CB7-E9F4-40AD-BB48-B17B2A819402",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/humane/humane.d.ts",
-        "author": "John Vrbanac",
-        "author_url": "https://github.com/jmvrbanac"
+        "authors": [
+          {
+            "name": "John Vrbanac",
+            "url": "https://github.com/jmvrbanac"
+          }
+        ]
       }
     ]
   },
@@ -1006,8 +1262,12 @@
         "key": "e54d105b-5167-4c17-8b58-e2a942fd28d8",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/i18next/i18next.d.ts",
-        "author": "Maarten Docter",
-        "author_url": "https://github.com/mdocter"
+        "authors": [
+          {
+            "name": "Maarten Docter",
+            "url": "https://github.com/mdocter"
+          }
+        ]
       }
     ]
   },
@@ -1020,8 +1280,12 @@
         "key": "2B8E0B68-91AE-4BB4-8999-D8B7D0778A83",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/impress/impress.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1034,8 +1298,12 @@
         "key": "d7876add-3616-ce29-f57c-b53820f4167",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/iscroll/iscroll-lite.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1048,8 +1316,12 @@
         "key": "8ad9ceb5-2802-4fcb-e902-c2f094b02a9b",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/iscroll/iscroll.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1067,8 +1339,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
-        "author": "Roy Goode",
-        "author_url": "https://github.com/RoyGoode"
+        "authors": [
+          {
+            "name": "Roy Goode",
+            "url": "https://github.com/RoyGoode"
+          }
+        ]
       }
     ]
   },
@@ -1086,8 +1362,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.clientSideLogging/jquery.clientSideLogging.d.ts",
-        "author": "Diullei Gomes",
-        "author_url": "https://github.com/Diullei"
+        "authors": [
+          {
+            "name": "Diullei Gomes",
+            "url": "https://github.com/Diullei"
+          }
+        ]
       }
     ]
   },
@@ -1105,8 +1385,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.transit/jquery.transit.d.ts",
-        "author": "William Sears",
-        "author_url": "https://github.com/MrBigDog2U"
+        "authors": [
+          {
+            "name": "William Sears",
+            "url": "https://github.com/MrBigDog2U"
+          }
+        ]
       }
     ]
   },
@@ -1124,8 +1408,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jake/jake.d.ts",
-        "author": "Kon",
-        "author_url": "http://phyzkit.net/"
+        "authors": [
+          {
+            "name": "Kon",
+            "url": "http://phyzkit.net/"
+          }
+        ]
       }
     ]
   },
@@ -1138,8 +1426,12 @@
         "key": "C86218A4-95A3-498D-8232-41270FBCC0CD",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jasmine/jasmine.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1152,8 +1444,12 @@
         "key": "c7a49102-a8ab-5da2-4bc0-e5e0479e780e",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jqrangeslider/jqrangeslider.d.ts",
-        "author": "Dániel Tar",
-        "author_url": "https://github.com/qcz"
+        "authors": [
+          {
+            "name": "Dániel Tar",
+            "url": "https://github.com/qcz"
+          }
+        ]
       }
     ]
   },
@@ -1171,8 +1467,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bbq/jquery.bbq.d.ts",
-        "author": "Adam R. Smith",
-        "author_url": "https://github.com/sunetos"
+        "authors": [
+          {
+            "name": "Adam R. Smith",
+            "url": "https://github.com/sunetos"
+          }
+        ]
       }
     ]
   },
@@ -1190,8 +1490,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bootstrap.wizard/jquery.bootstrap.wizard.d.ts",
-        "author": "Blake Niemyjski",
-        "author_url": "https://github.com/niemyjski"
+        "authors": [
+          {
+            "name": "Blake Niemyjski",
+            "url": "https://github.com/niemyjski"
+          }
+        ]
       }
     ]
   },
@@ -1209,8 +1513,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.contextMenu/jquery.contextMenu.d.ts",
-        "author": "Natan Vivo",
-        "author_url": "https://github.com/nvivo/"
+        "authors": [
+          {
+            "name": "Natan Vivo",
+            "url": "https://github.com/nvivo/"
+          }
+        ]
       }
     ]
   },
@@ -1228,8 +1536,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
-        "author": "Roy Goode",
-        "author_url": "https://github.com/RoyGoode/"
+        "authors": [
+          {
+            "name": "Roy Goode",
+            "url": "https://github.com/RoyGoode/"
+          }
+        ]
       }
     ]
   },
@@ -1247,8 +1559,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cycle/jquery.cycle.d.ts",
-        "author": "Fran�ois Guillot",
-        "author_url": "http://fguillot.developpez.com/"
+        "authors": [
+          {
+            "name": "Fran�ois Guillot",
+            "url": "http://fguillot.developpez.com/"
+          }
+        ]
       }
     ]
   },
@@ -1266,8 +1582,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.dynatree/jquery.dynatree.d.ts",
-        "author": "François de Campredon",
-        "author_url": "https://github.com/fdecampredon"
+        "authors": [
+          {
+            "name": "François de Campredon",
+            "url": "https://github.com/fdecampredon"
+          }
+        ]
       }
     ]
   },
@@ -1285,8 +1605,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.elang/jquery.elang.d.ts",
-        "author": "Zoltan Sumegi",
-        "author_url": "https://github.com/sumegizoltan/"
+        "authors": [
+          {
+            "name": "Zoltan Sumegi",
+            "url": "https://github.com/sumegizoltan/"
+          }
+        ]
       }
     ]
   },
@@ -1304,8 +1628,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.form/jquery.form.d.ts",
-        "author": "François Guillot",
-        "author_url": "http://fguillot.developpez.com/"
+        "authors": [
+          {
+            "name": "François Guillot",
+            "url": "http://fguillot.developpez.com/"
+          }
+        ]
       }
     ]
   },
@@ -1323,8 +1651,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.jnotify/jquery.jnotify.d.ts",
-        "author": "James Curran",
-        "author_url": "https://github.com/jamescurran/"
+        "authors": [
+          {
+            "name": "James Curran",
+            "url": "https://github.com/jamescurran/"
+          }
+        ]
       }
     ]
   },
@@ -1337,8 +1669,12 @@
         "key": "ab94ec25-d89a-483d-a904-66db6d77a174",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery/jquery.d.ts",
-        "author": "TypeScript samples",
-        "author_url": "https://typescript.codeplex.com/"
+        "authors": [
+          {
+            "name": "TypeScript samples",
+            "url": "https://typescript.codeplex.com/"
+          }
+        ]
       }
     ]
   },
@@ -1356,8 +1692,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.scrollTo/jquery.scrollTo.d.ts",
-        "author": "Neil Stalker",
-        "author_url": "https://github.com/nestalk"
+        "authors": [
+          {
+            "name": "Neil Stalker",
+            "url": "https://github.com/nestalk"
+          }
+        ]
       }
     ]
   },
@@ -1375,8 +1715,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.simplePagination/jquery.simplePagination.d.ts",
-        "author": "Natan Vivo",
-        "author_url": "https://github.com/nvivo/"
+        "authors": [
+          {
+            "name": "Natan Vivo",
+            "url": "https://github.com/nvivo/"
+          }
+        ]
       }
     ]
   },
@@ -1394,8 +1738,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.tagsmanager/jquery.tagsmanager.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -1413,8 +1761,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.timeago/jquery.timeago.d.ts",
-        "author": "Fran�ois Guillot",
-        "author_url": "http://fguillot.developpez.com/"
+        "authors": [
+          {
+            "name": "Fran�ois Guillot",
+            "url": "http://fguillot.developpez.com/"
+          }
+        ]
       }
     ]
   },
@@ -1432,8 +1784,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.timepicker/jquery.timepicker.d.ts",
-        "author": "Anwar Javed",
-        "author_url": "https://github.com/anwarjaved"
+        "authors": [
+          {
+            "name": "Anwar Javed",
+            "url": "https://github.com/anwarjaved"
+          }
+        ]
       }
     ]
   },
@@ -1451,8 +1807,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.validation/jquery.validation.d.ts",
-        "author": "François de Campredon",
-        "author_url": "https://github.com/fdecampredon"
+        "authors": [
+          {
+            "name": "François de Campredon",
+            "url": "https://github.com/fdecampredon"
+          }
+        ]
       }
     ]
   },
@@ -1470,8 +1830,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.watermark/jquery.watermark.d.ts",
-        "author": "Anwar Javed",
-        "author_url": "https://github.com/anwarjaved"
+        "authors": [
+          {
+            "name": "Anwar Javed",
+            "url": "https://github.com/anwarjaved"
+          }
+        ]
       }
     ]
   },
@@ -1489,8 +1853,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquerymobile/jquerymobile.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1508,8 +1876,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jqueryui/jqueryui.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1522,8 +1894,12 @@
         "key": "2bca2c6b-2351-4233-b1db-5286bf943707",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jsoneditoronline/jsoneditoronline.d.ts",
-        "author": "Jos de Jong",
-        "author_url": "https://github.com/josdejong"
+        "authors": [
+          {
+            "name": "Jos de Jong",
+            "url": "https://github.com/josdejong"
+          }
+        ]
       }
     ]
   },
@@ -1536,8 +1912,12 @@
         "key": "77d5d4f5-9a2e-4837-8f00-c3239038d1ca",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/keyboardjs/keyboardjs.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -1559,8 +1939,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockback/knockback.d.ts",
-        "author": "Marcel Binot",
-        "author_url": "https://github.com/docgit"
+        "authors": [
+          {
+            "name": "Marcel Binot",
+            "url": "https://github.com/docgit"
+          }
+        ]
       }
     ]
   },
@@ -1578,8 +1962,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.editables/ko.editables.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1592,8 +1980,12 @@
         "key": "11c59009-52a2-4f8a-8192-fbb76f1b2d2d",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout/knockout.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1611,8 +2003,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.mapping/knockout.mapping.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1630,8 +2026,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.postbox/knockout-postbox.d.ts",
-        "author": "Judah Gabriel",
-        "author_url": "https://github.com/JudahGabriel"
+        "authors": [
+          {
+            "name": "Judah Gabriel",
+            "url": "https://github.com/JudahGabriel"
+          }
+        ]
       }
     ]
   },
@@ -1649,8 +2049,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.validation/knockout.validation.d.ts",
-        "author": "Dan Ludwig",
-        "author_url": "https://github.com/danludwig"
+        "authors": [
+          {
+            "name": "Dan Ludwig",
+            "url": "https://github.com/danludwig"
+          }
+        ]
       }
     ]
   },
@@ -1668,8 +2072,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/knockout.viewmodel/knockout.viewmodel.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1682,8 +2090,12 @@
         "key": "d19fe28b-3d84-77bd-1dda-b176cd96cda0",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/kolite/kolite.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1696,8 +2108,12 @@
         "key": "e9f64db2-9783-4528-9872-52e272dbef25",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/leaflet/leaflet.d.ts",
-        "author": "Vladimir",
-        "author_url": "https://github.com/rgripper"
+        "authors": [
+          {
+            "name": "Vladimir",
+            "url": "https://github.com/rgripper"
+          }
+        ]
       }
     ]
   },
@@ -1710,8 +2126,12 @@
         "key": "11010f5a-233d-4095-a8d2-061f3ac64c01",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/libxmljs/libxmljs.d.ts",
-        "author": "François de Campredon",
-        "author_url": "https://github.com/fdecampredon"
+        "authors": [
+          {
+            "name": "François de Campredon",
+            "url": "https://github.com/fdecampredon"
+          }
+        ]
       }
     ]
   },
@@ -1724,16 +2144,24 @@
         "key": "F0C29FAB-9E82-4CC4-8BCE-418D28AF4A65",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.d.ts",
-        "author": "MarcinNajder",
-        "author_url": "https://github.com/marcinnajder"
+        "authors": [
+          {
+            "name": "MarcinNajder",
+            "url": "https://github.com/marcinnajder"
+          }
+        ]
       },
       {
         "version": "3.0.3-Beta4",
         "key": "5d10dbc5-3ce1-4c36-b344-8a98e1bc1e35",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/linq/linq.3.0.3-Beta4.d.ts",
-        "author": "MarcinNajder",
-        "author_url": "https://github.com/marcinnajder"
+        "authors": [
+          {
+            "name": "MarcinNajder",
+            "url": "https://github.com/marcinnajder"
+          }
+        ]
       }
     ]
   },
@@ -1746,8 +2174,12 @@
         "key": "eec77bc7-9d10-9595-e7f6-2eb2d33871b",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/marked/marked.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1760,8 +2192,12 @@
         "key": "D3D17555-E9EF-468E-B605-A4577B502D75",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/modernizr/modernizr.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1774,8 +2210,12 @@
         "key": "F0FBEE19-CED3-47F1-BD5C-0F726C37E8B3",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/moment/moment.d.ts",
-        "author": "Michael Lakerveld",
-        "author_url": "https://github.com/Lakerfield"
+        "authors": [
+          {
+            "name": "Michael Lakerveld",
+            "url": "https://github.com/Lakerfield"
+          }
+        ]
       }
     ]
   },
@@ -1788,8 +2228,12 @@
         "key": "5ebe9070-8eb7-4716-927-dfb1692da0fa",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mousetrap/mousetrap.d.ts",
-        "author": "Dániel Tar",
-        "author_url": "https://github.com/qcz"
+        "authors": [
+          {
+            "name": "Dániel Tar",
+            "url": "https://github.com/qcz"
+          }
+        ]
       }
     ]
   },
@@ -1807,8 +2251,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/msnodesql/msnodesql.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1821,8 +2269,12 @@
         "key": "96C40747-B6A3-46F3-9B13-691D61A3DD08",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mustache/mustache.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1835,8 +2287,12 @@
         "key": "5c2cc4ff-1d35-4a71-a1e4-666c35966c86",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/noVNC/noVNC.d.ts",
-        "author": "smithkl42",
-        "author_url": "https://github.com/smithkl42"
+        "authors": [
+          {
+            "name": "smithkl42",
+            "url": "https://github.com/smithkl42"
+          }
+        ]
       }
     ]
   },
@@ -1849,16 +2305,24 @@
         "key": "5372ddd2-2876-41fe-9243-9b61e0ac05a8",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/node/node.d.ts",
-        "author": "TypeScript samples",
-        "author_url": "https://typescript.codeplex.com/"
+        "authors": [
+          {
+            "name": "TypeScript samples",
+            "url": "https://typescript.codeplex.com/"
+          }
+        ]
       },
       {
         "version": "0.8",
         "key": "F6711A17-81AF-4E9C-A82D-855DDB1E7F3A",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/node/node-0.8.8.d.ts",
-        "author": "TypeScript samples",
-        "author_url": "https://typescript.codeplex.com/"
+        "authors": [
+          {
+            "name": "TypeScript samples",
+            "url": "https://typescript.codeplex.com/"
+          }
+        ]
       }
     ]
   },
@@ -1871,8 +2335,12 @@
         "key": "DA143CF3-8AFE-4DF9-B98E-85951A3A7B9C",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/node_redis/node_redis.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1885,8 +2353,12 @@
         "key": "f22fa921-9879-4f22-a583-d38e158f2496",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/nodemailer/nodemailer.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -1899,8 +2371,12 @@
         "key": "47225973-c747-c78e-c3ed-ab29d2a8f166",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/numeraljs/numeraljs.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -1913,8 +2389,12 @@
         "key": "e4b16b33-9238-4407-b29e-c386010b8579",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phantomjs/phantomjs.d.ts",
-        "author": "Jed Hunsaker",
-        "author_url": "https://github.com/jedhunsaker"
+        "authors": [
+          {
+            "name": "Jed Hunsaker",
+            "url": "https://github.com/jedhunsaker"
+          }
+        ]
       }
     ]
   },
@@ -1927,8 +2407,12 @@
         "key": "272ed09f-33c3-40c2-86bf-fa0aee183bae",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phonegap/phonegap.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1941,8 +2425,12 @@
         "key": "e6e36d35-3e52-67af-cd8d-12f4de3dd6a5",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/platform/platform.d.ts",
-        "author": "Jake Hickman",
-        "author_url": "https://github.com/JakeH"
+        "authors": [
+          {
+            "name": "Jake Hickman",
+            "url": "https://github.com/JakeH"
+          }
+        ]
       }
     ]
   },
@@ -1955,8 +2443,12 @@
         "key": "6bc51b-30d-ca89-3ef-93f795c61dc1",
         "dependencies": [],
         "url": "undefined",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -1969,8 +2461,12 @@
         "key": "27EFA90F-3854-43DE-949A-867A5683FB72",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/preloadjs/preloadjs.d.ts",
-        "author": "Pedro Ferreira",
-        "author_url": "https://bitbucket.org/drk4"
+        "authors": [
+          {
+            "name": "Pedro Ferreira",
+            "url": "https://bitbucket.org/drk4"
+          }
+        ]
       }
     ]
   },
@@ -1983,8 +2479,12 @@
         "key": "4f9b9ffb-5622-4e4c-9c87-76f4e5312842",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Q/Q.d.ts",
-        "author": "Barrie Nemetchek",
-        "author_url": "https://github.com/bnemetchek"
+        "authors": [
+          {
+            "name": "Barrie Nemetchek",
+            "url": "https://github.com/bnemetchek"
+          }
+        ]
       }
     ]
   },
@@ -1997,8 +2497,12 @@
         "key": "31f242da-ab6d-4b58-bacd-a6f493971a7a",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/qunit/qunit.d.ts",
-        "author": "Diullei Gomes",
-        "author_url": "https://github.com/Diullei"
+        "authors": [
+          {
+            "name": "Diullei Gomes",
+            "url": "https://github.com/Diullei"
+          }
+        ]
       }
     ]
   },
@@ -2011,8 +2515,12 @@
         "key": "E6A34E99-68E8-42F8-9479-ABA9C575319C",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/raphael/raphael.d.ts",
-        "author": "CheCoxshall",
-        "author_url": "https://github.com/CheCoxshall"
+        "authors": [
+          {
+            "name": "CheCoxshall",
+            "url": "https://github.com/CheCoxshall"
+          }
+        ]
       }
     ]
   },
@@ -2025,8 +2533,12 @@
         "key": "EA150585-414B-4671-9BE1-4105301E8742",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/requirejs/require.d.ts",
-        "author": "Josh Baldwin",
-        "author_url": "https://github.com/jbaldwin/"
+        "authors": [
+          {
+            "name": "Josh Baldwin",
+            "url": "https://github.com/jbaldwin/"
+          }
+        ]
       }
     ]
   },
@@ -2039,8 +2551,12 @@
         "key": "145285ff-dd99-47dc-958d-e55021769ab8",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/restify/restify.d.ts",
-        "author": "Bret Little",
-        "author_url": "https://github.com/blittle"
+        "authors": [
+          {
+            "name": "Bret Little",
+            "url": "https://github.com/blittle"
+          }
+        ]
       }
     ]
   },
@@ -2053,8 +2569,12 @@
         "key": "719c6d9d-881a-c5cf-c264-e13b1ee1590f",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.d.ts",
-        "author": "gsino",
-        "author_url": "http://www.codeplex.com/site/users/view/gsino"
+        "authors": [
+          {
+            "name": "gsino",
+            "url": "http://www.codeplex.com/site/users/view/gsino"
+          }
+        ]
       }
     ]
   },
@@ -2067,8 +2587,12 @@
         "key": "663d9def-e6ed-714f-f057-6ddfdcea46dd",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/scroller/easyscroller.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2081,8 +2605,12 @@
         "key": "8281CAD6-9876-4693-8719-40100B211850",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/select2/select2.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2095,8 +2623,12 @@
         "key": "784332C5-6D27-4240-AE6B-59B2FF5854C1",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/signalr/signalr.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2109,8 +2641,12 @@
         "key": "2b44a7f1-c4ad-4f05-9208-f50000c22c64",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sinon/sinon-1.5.d.ts",
-        "author": "William Sears",
-        "author_url": "https://github.com/mrbigdog2u"
+        "authors": [
+          {
+            "name": "William Sears",
+            "url": "https://github.com/mrbigdog2u"
+          }
+        ]
       }
     ]
   },
@@ -2128,8 +2664,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/socket.io/socket.io.d.ts",
-        "author": "William Orr",
-        "author_url": "https://github.com/worr"
+        "authors": [
+          {
+            "name": "William Orr",
+            "url": "https://github.com/worr"
+          }
+        ]
       }
     ]
   },
@@ -2142,8 +2682,12 @@
         "key": "3844D795-5DAC-4AE2-9B3D-37DD342E2409",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/spin/spin.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2156,8 +2700,12 @@
         "key": "9bf6b93-c470-c7d9-652a-bd1c31b01422",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/state-machine/state-machine.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2170,8 +2718,12 @@
         "key": "322B8488-2DF3-4347-A541-45E8190644D0",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/storejs/storejs.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -2184,8 +2736,12 @@
         "key": "3479CE5E-C7C5-446B-9849-36DC418DC838",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sugar/sugar.d.ts",
-        "author": "Josh Baldwin",
-        "author_url": "https://github.com/jbaldwin/"
+        "authors": [
+          {
+            "name": "Josh Baldwin",
+            "url": "https://github.com/jbaldwin/"
+          }
+        ]
       }
     ]
   },
@@ -2198,8 +2754,12 @@
         "key": "ba4d80a8-b9c-1b8a-7125-e9b449fe46df",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/swipeview/swipeview.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2212,8 +2772,12 @@
         "key": "676f6c84-088e-4ad8-a37b-69c286e92fec",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/threejs/three.d.ts",
-        "author": "Kon",
-        "author_url": "http://phyzkit.net/"
+        "authors": [
+          {
+            "name": "Kon",
+            "url": "http://phyzkit.net/"
+          }
+        ]
       }
     ]
   },
@@ -2226,8 +2790,12 @@
         "key": "384F77E4-257E-4050-9457-591FD85381A4",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/toastr/toastr.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2240,8 +2808,12 @@
         "key": "FCC4519E-71A6-4C53-A78F-47FFE56215BC",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tween.js/tween.js.d.ts",
-        "author": "Adam R. Smith",
-        "author_url": "https://github.com/sunetos"
+        "authors": [
+          {
+            "name": "Adam R. Smith",
+            "url": "https://github.com/sunetos"
+          }
+        ]
       }
     ]
   },
@@ -2263,8 +2835,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore-ko/underscore-ko.d.ts",
-        "author": "Maurits Elbers",
-        "author_url": "https://github.com/MagicMau/"
+        "authors": [
+          {
+            "name": "Maurits Elbers",
+            "url": "https://github.com/MagicMau/"
+          }
+        ]
       }
     ]
   },
@@ -2277,8 +2853,12 @@
         "key": "2B259BB1-D680-468B-835B-2F369D08184A",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore-typed.d.ts",
-        "author": "Josh Baldwin",
-        "author_url": "https://github.com/jbaldwin/"
+        "authors": [
+          {
+            "name": "Josh Baldwin",
+            "url": "https://github.com/jbaldwin/"
+          }
+        ]
       }
     ]
   },
@@ -2291,8 +2871,12 @@
         "key": "84ec0626-dd47-48ba-abd2-ec3a39356972",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/underscore/underscore.d.ts",
-        "author": "Josh Baldwin",
-        "author_url": "https://github.com/jbaldwin/"
+        "authors": [
+          {
+            "name": "Josh Baldwin",
+            "url": "https://github.com/jbaldwin/"
+          }
+        ]
       }
     ]
   },
@@ -2305,8 +2889,12 @@
         "key": "5EEF1C23-5A15-4584-BB96-A2160B323658",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/unity-webapi/unity-webapi.d.ts",
-        "author": "John Vrbanac",
-        "author_url": "https://github.com/jmvrbanac"
+        "authors": [
+          {
+            "name": "John Vrbanac",
+            "url": "https://github.com/jmvrbanac"
+          }
+        ]
       }
     ]
   },
@@ -2324,8 +2912,12 @@
           }
         ],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/urijs/URI.d.ts",
-        "author": "RodneyJT",
-        "author_url": "https://github.com/RodneyJT"
+        "authors": [
+          {
+            "name": "RodneyJT",
+            "url": "https://github.com/RodneyJT"
+          }
+        ]
       }
     ]
   },
@@ -2338,8 +2930,12 @@
         "key": "04582243-c80d-42b5-9e69-d261303b8e72",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/videojs/videojs.d.ts",
-        "author": "Vincent Bortone",
-        "author_url": "https://github.com/vbortone/"
+        "authors": [
+          {
+            "name": "Vincent Bortone",
+            "url": "https://github.com/vbortone/"
+          }
+        ]
       }
     ]
   },
@@ -2352,8 +2948,12 @@
         "key": "adda6a25-ee96-bdd4-3479-4c8efce6458",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/viewporter/viewporter.d.ts",
-        "author": "Boris Yankov",
-        "author_url": "https://github.com/borisyankov"
+        "authors": [
+          {
+            "name": "Boris Yankov",
+            "url": "https://github.com/borisyankov"
+          }
+        ]
       }
     ]
   },
@@ -2366,8 +2966,12 @@
         "key": "B100B107-49A2-43F9-8021-5A4A142D017D",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/vimeo/froogaloop.d.ts",
-        "author": "Daz Wilkin",
-        "author_url": "https://github.com/DazWilkin/"
+        "authors": [
+          {
+            "name": "Daz Wilkin",
+            "url": "https://github.com/DazWilkin/"
+          }
+        ]
       }
     ]
   },
@@ -2380,8 +2984,12 @@
         "key": "d2e85bb-3667-7d2e-9489-375edcd12d56",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webrtc/MediaStream.d.ts",
-        "author": "https://github.com/smithkl42",
-        "author_url": "smithkl42"
+        "authors": [
+          {
+            "name": "https://github.com/smithkl42",
+            "url": "smithkl42"
+          }
+        ]
       }
     ]
   },
@@ -2394,8 +3002,12 @@
         "key": "fa0c985-ac9f-634e-4ab6-e05c709e6a96",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webrtc/RTCPeerConnection.d.ts",
-        "author": "https://github.com/smithkl42",
-        "author_url": "smithkl42"
+        "authors": [
+          {
+            "name": "https://github.com/smithkl42",
+            "url": "smithkl42"
+          }
+        ]
       }
     ]
   },
@@ -2408,8 +3020,12 @@
         "key": "1726322F-7D9C-4199-B37D-C5DFC6E54D2B",
         "dependencies": [],
         "url": "https://gist.github.com/raw/3845543/828c41fe0e83d179155a49592efa5a5c09f3792f/result.js",
-        "author": "Juan Ignacio Dopazo",
-        "author_url": "https://github.com/juandopazo"
+        "authors": [
+          {
+            "name": "Juan Ignacio Dopazo",
+            "url": "https://github.com/juandopazo"
+          }
+        ]
       }
     ]
   },
@@ -2422,8 +3038,12 @@
         "key": "c9cbb57b-e9f7-4e87-b803-d5ff68c30d42",
         "dependencies": [],
         "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/zeroclipboard/zeroclipboard.d.ts",
-        "author": "Eric J. Smith",
-        "author_url": "https://github.com/ejsmith"
+        "authors": [
+          {
+            "name": "Eric J. Smith",
+            "url": "https://github.com/ejsmith"
+          }
+        ]
       }
     ]
   }
