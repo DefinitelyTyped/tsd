@@ -8,7 +8,7 @@ var fs = require('fs');
 var path = require('path');
 var rimraf = require('rimraf');
 
-var _:UnderscoreStatic = <any>require('../../libs/underscore');
+var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
 describe('api', () =>{
     var cwd = <any>process.cwd();
