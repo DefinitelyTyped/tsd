@@ -11,6 +11,9 @@ module.exports = function (grunt){
             pretty: 2
         });
 
+        var rimraf = require('rimraf');
+        rimraf.sync('./repo');
+
         if (this.filesSrc.length === 0) {
             grunt.log.ok('zero files selected');
             return;
