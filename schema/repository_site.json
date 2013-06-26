@@ -4,7 +4,7 @@
     "type": "array",
     "items": {
         "type": "object",
-        "required": ["name", "description", "url", "version", "author", "key", "dependencies"],
+        "required": ["name", "description", "url", "authors", "version", "key", "dependencies"],
         "properties": {
             "name": {
                 "type": "string"
@@ -18,11 +18,23 @@
             "version": {
                 "type": "string"
             },
-            "author": {
-                "type": "string"
-            },
-            "author_url": {
-                "type": "string"
+            "authors": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "url": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "email"
+                        }
+                    }
+                }
             },
             "key": {
                 "type": "string"

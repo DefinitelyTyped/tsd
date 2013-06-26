@@ -63,6 +63,14 @@ module.exports = function (grunt){
                 dest: 'test/repo/_tmp.test.js'
             }
         },
+        upgrade_repo: {
+            options: {
+                pretty: 2
+            },
+            all: {
+                src: ['repo_data/*.json']
+            }
+        },
         build_repo: {
             options: {
                 pretty: 2

@@ -14,13 +14,25 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["author", "version", "url", "key", "dependencies"],
+                "required": ["authors", "version", "url", "key", "dependencies"],
                 "properties": {
-                    "author": {
-                        "type": "string"
-                    },
-                    "author_url": {
-                        "type": "string"
+                    "authors": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["name"],
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "email"
+                                }
+                            }
+                        }
                     },
                     "version": {
                         "type": "string"

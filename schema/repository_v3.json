@@ -20,17 +20,23 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "required": ["author", "version", "key", "uri", "dependencies"],
+                            "required": ["authors", "version", "key", "uri", "dependencies"],
                             "properties": {
-                                "author": {
-                                    "type": "object",
-                                    "required": ["name"],
-                                    "properties": {
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "url": {
-                                            "type": "string"
+                                "authors": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "required": ["name"],
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "url": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "email"
+                                            }
                                         }
                                     }
                                 },
