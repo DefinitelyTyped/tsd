@@ -42,7 +42,8 @@
     "grunt-mocha-test": "~0.4.0",
     "grunt-tv4": "*",
     "rimraf": "latest",
-    "grunt-contrib-jshint": "~0.6.0"
+    "grunt-contrib-jshint": "~0.6.0",
+    "jshint-path-reporter": "~0.1.0"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"

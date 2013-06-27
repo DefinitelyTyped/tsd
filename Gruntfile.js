@@ -15,13 +15,13 @@ module.exports = function (grunt){
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
+            options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
+                reporter: './node_modules/jshint-path-reporter'
+            }),
             all: [
                 'Gruntfile.js',
                 'tasks/*.js',
-            ],
-            options: {
-                jshintrc: '.jshintrc'
-            }
+            ]
         },
         clean: {
             tmp : ['tmp', 'test/**/_tmp.*.*', 'test/node/typings', 'test/node/tsd-config.json'],
