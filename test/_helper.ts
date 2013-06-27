@@ -24,15 +24,15 @@ module helper {
         });
     }
 
-    export function dump(object:any, label?:string = '', depth?:number = 6, showHidden?:bool = false):any{
-        if (label) {
+    export function dump(object:any, label?:string, depth?:number = 6, showHidden?:bool = false):any {
+        if (typeof label !== 'undefined') {
             console.log(label + ':');
         }
         console.log(util.inspect(object, showHidden, depth, true));
     }
 
-    export function dumpJSON(object:any, label?:string = ''):any{
-        if (console.log) {
+    export function dumpJSON(object:any, label?:string):any {
+        if (typeof label !== 'undefined') {
             console.log(label + ':');
         }
         console.log(JSON.stringify(object, null, 4));
