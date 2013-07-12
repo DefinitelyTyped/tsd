@@ -12,5 +12,4 @@ chaii.use(require('chai-fuzzy'));
 chaii.use(require('chai-json-schema'));
 var assert = chaii.assert;
 
-
-require('mocha-unfunk-reporter').option('color', true);
+require('source-map-support').install();

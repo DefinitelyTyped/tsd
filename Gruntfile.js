@@ -53,7 +53,7 @@ module.exports = function (grunt){
                 target: 'es5',
                 base_path: 'src/',
                 declaration: false,
-                sourcemap: false
+                sourcemap: true
             },
             source: {
                 src: ['src/source.ts'],
