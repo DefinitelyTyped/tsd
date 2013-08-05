@@ -1,0 +1,42 @@
+{
+  "name": "nodejs",
+  "description": "Installs/Configures nodejs",
+  "long_description": "# <a name=\"title\"></a> nodejs-cookbook [![Build Status](https://secure.travis-ci.org/mdxp/nodejs-cookbook.png)](http://travis-ci.org/mdxp/nodejs-cookbook)\n\nDESCRIPTION\n===========\n\nInstalls Node.JS\n\nREQUIREMENTS\n============\n\n\n## Platform\n\n* Tested on Debian 6 and Ubuntu 10.04\n* Should work fine on Centos, RHEL, etc.\n\n## Cookbooks:\n\n* build-essential\n* apt\n\nOpscode cookbooks (http://github.com/opscode/cookbooks/tree/master)\n\nATTRIBUTES\n==========\n\n* nodejs['install_method'] = source or package\n* nodejs['version'] - release version of node to install\n* nodejs['src_url'] - download location for node source tarball\n* nodejs['dir'] - location where node will be installed, default /usr/local\n* nodejs['npm'] - version of npm to install\n* nodejs['npm_src_url'] - download location for npm source tarball\n\nUSAGE\n=====\n\nInclude the nodejs recipe to install node on your system based on the default installation method:\n\n*  include_recipe \"nodejs\"\n\nInclude the install_from_source recipe to install node from sources:\n\n*  include_recipe \"nodejs::install_from_source\"\n\nInclude the install_from_package recipe to install node from packages:\nNote that only apt (Ubuntu, Debian) appears to have up to date packages available.\nCentos, RHEL, etc are non-functional. (Try install_from_binary for those)\n\n*  include_recipe \"nodejs::install_from_package\"\n\nInclude the install_from_binary recipe to install node from official prebuilt binaries:\n(Currently Linux x86, x86_64 only)\n\n*  include_recipe \"nodejs::install_from_binary\"\n\nInclude the npm recipe to install npm:\n\n*  include_recipe \"nodejs::npm\"\n\nLICENSE and AUTHOR\n==================\n\nAuthor:: Marius Ducea (marius@promethost.com)\nAuthor:: Nathan L Smith (nlloyds@gmail.com)\n\nCopyright:: 2010-2012, Promet Solutions\nCopyright:: 2012, Cramer Development, Inc.\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n",
+  "maintainer": "Promet Solutions",
+  "maintainer_email": "marius@promethost.com",
+  "license": "Apache 2.0",
+  "platforms": {
+    "debian": ">= 0.0.0",
+    "ubuntu": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "smartos": ">= 0.0.0"
+  },
+  "dependencies": {
+    "build-essential": ">= 0.0.0",
+    "apt": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+    "nodejs": ">= 0.0.0"
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "nodejs": "Installs Node.JS based on the default installation method",
+    "nodejs::install_from_source": "Installs Node.JS from source",
+    "nodejs::install_from_binary": "Installs Node.JS from official binaries",
+    "nodejs::install_from_package": "Installs Node.JS from packages",
+    "nodejs::npm": "Installs npm from source - a package manager for node"
+  },
+  "version": "1.1.2"
+}
