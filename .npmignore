@@ -2,16 +2,16 @@
 .gitignore
 .gitmodules
 
-/repo_data
-/repo
-
 /tmp
 /src
 
 .jshintrc
 Gruntfile.js
 tsd-config.json
-/tsd-deftools
-/typings
 
+/typings
+/schema
 /test
+
+/cookbooks
+/Vagrantfile

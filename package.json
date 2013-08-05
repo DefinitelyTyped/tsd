@@ -1,10 +1,10 @@
 {
   "name": "tsd",
   "description": "The TypeScript definition package manager.",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "author": "Diullei Gomes",
   "contributors": [
-    "Bart van der Schoor"
+    "Bart van der Schoor <bartvanderschoor@gmail.com>"
   ],
   "licenses": [
     {
@@ -13,38 +13,36 @@
     }
   ],
   "main": {
-    "tsd": "deploy/main.js"
+    "tsd": "build/tsd.js"
   },
   "homepage": "https://github.com/Diullei/tsd",
   "engines": {
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "request": "latest",
-    "MD5": "~1.0.3",
-    "adm-zip": "~0.4.3",
-    "colors": "~0.6.0-1",
-    "tv4": "~1.0.3",
-    "underscore": "~1.4.4"
+    "colors": "~0.6.1",
+    "underscore": "~1.5.1",
+    "MD5": "~1.1.0",
+    "request": "~2.25.0",
+    "mkdirp": "~0.3.5",
+    "tv4": "~1.0.5"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-cli": "~0.1",
-    "grunt-typescript": "~0.1.5",
-    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "mocha-unfunk-reporter": "~0.2",
     "grunt-contrib-copy": "~0.4.1",
-    "grunt-execute": "~0.1.4",
-    "grunt-shell": "*",
-    "mocha-unfunk-reporter": "*",
-    "chai": "~1.7",
+    "rimraf": "~2.2.2",
     "chai-fuzzy": "~1.3.0",
-    "chai-json-schema": "*",
-    "grunt-mocha-test": "~0.4.0",
-    "grunt-tv4": "*",
-    "rimraf": "latest",
-    "grunt-contrib-jshint": "~0.6.0",
-    "jshint-path-reporter": "~0.1.0",
-    "source-map-support": "~0.1"
+    "chai": "~1.7.2",
+    "jshint-path-reporter": "~0.1.2",
+    "grunt-cli": "~0.1.9",
+    "grunt-contrib-jshint": "~0.6.2",
+    "source-map-support": "~0.2.1",
+    "grunt-mocha-test": "~0.6.2",
+    "grunt": "~0.4.1",
+    "grunt-typescript": "~0.1.6",
+    "chai-json-schema": "~1.0.4",
+    "async": "~0.2.9"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"

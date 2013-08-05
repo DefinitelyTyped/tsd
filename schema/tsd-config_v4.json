@@ -1,0 +1,41 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema",
+	"id": "tsd_config_v4",
+	"type": "object",
+	"required": ["version", "repo", "ref", "typingsPath"],
+	"properties": {
+		"version": {
+			"type": "string",
+			"enum": ["v4"]
+		},
+		"repo": {
+			"type": "string"
+		},
+		"ref": {
+			"type": "string"
+		},
+		"typingsPath": {
+			"type": "string"
+		},
+		"installed": {
+			"type": "object",
+			"_______________patternProperties": {
+				"^[\\S ]+$": {
+					"type": "object",
+					"required": ["repo", "key", "uri"],
+					"properties": {
+						"repo": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						},
+						"uri": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	}
+}
