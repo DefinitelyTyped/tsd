@@ -1,10 +1,8 @@
 ///<reference path="../_ref.ts" />
 
-///<reference path="../../src/tsd/context.ts" />
+///<reference path="../../src/tsd/context/Context.ts" />
 
-declare var assert:chai.Assert;
-
-module tsd {
+describe('Context', function () {
 
 	var fs = require('fs');
 	var path = require('path');
@@ -12,7 +10,7 @@ module tsd {
 
 	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
-	
+
 	describe('Paths', () => {
 		var paths:tsd.Paths;
 		it('is defined as function', () => {
@@ -29,14 +27,14 @@ module tsd {
 		//more in Context
 	});
 
-	describe('PackageInfo', () => {
-		var info:tsd.PackageInfo;
+	describe('PackageJSON', () => {
+		var info:tsd.PackageJSON;
 		it('is defined as function', () => {
-			assert.isFunction(tsd.PackageInfo);
+			assert.isFunction(tsd.PackageJSON);
 		});
 		describe('local', () => {
 			it('should return instance', () => {
-				info = PackageInfo.getLocal();
+				info = tsd.PackageJSON.getLocal();
 				assert.isObject(info, 'info');
 			});
 			it('should have properties', () => {
@@ -57,11 +55,11 @@ module tsd {
 		describe('default', () => {
 
 			var ctx:tsd.Context;
-			var schema:any;
+			var configSchema:any;
 
 			before(() => {
-				schema = xm.FileUtil.readJSONSync('schema/tsd-config_v4.json');
-				ctx = new Context();
+				configSchema = xm.FileUtil.readJSONSync('schema/tsd-config_v4.json');
+				ctx = new tsd.Context();
 			});
 			it('is instance', () => {
 				assert.ok(ctx);
@@ -72,12 +70,20 @@ module tsd {
 				assert.isString(ctx.packageInfo.version, 'version');
 				assert.isObject(ctx.packageInfo.pkg, 'pkg');
 			});
-			it('exports paths', () => {
+			it('exports valid paths', () => {
 				assert.isObject(ctx.paths, 'paths,');
-				assert.isString(ctx.paths.tmp, 'tmp');
-				assert.isString(ctx.paths.typings, 'typings');
-				assert.isString(ctx.paths.cache, 'cache');
+				assert.isDirectory(ctx.paths.tmp, 'tmp');
+				assert.isDirectory(ctx.paths.typings, 'typings');
+				assert.isDirectory(ctx.paths.cache, 'cache');
+
+				// not enforced
 				assert.isString(ctx.paths.config, 'config');
+
+				if (fs.existsSync(ctx.paths.config)) {
+					assert.jsonSchemaFile(ctx.paths.config, configSchema, 'config');
+				}
+
+				// TODO assert writability when assertion is implemented in chai-fs
 			});
 			it('exports config', () => {
 				assert.isObject(ctx.config, 'config');
@@ -88,8 +94,8 @@ module tsd {
 				assert.isObject(ctx.config.installed, 'installed');
 			});
 			it('exports valid formed config json', () => {
-				assert.jsonSchema(ctx.config.toJSON(), schema, 'toJSON');
+				assert.jsonSchema(ctx.config.toJSON(), configSchema, 'toJSON');
 			});
 		});
 	});
-}
+});

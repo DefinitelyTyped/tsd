@@ -1,14 +1,11 @@
 ///<reference path="../_ref.ts" />
 
-declare var assert:chai.Assert;
-
-module tsd {
+describe('tsd.Api', function () {
 
 	var tsd = require("../../build/tsd");
 
 	var fs = require('fs');
 	var path = require('path');
-	var rimraf = require('rimraf');
 
 	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
@@ -19,9 +16,9 @@ module tsd {
 		});
 
 		describe('install', () => {
-			describe('install', () => {
+			it('should install', () => {
 
 			});
 		});
 	});
-}
+});

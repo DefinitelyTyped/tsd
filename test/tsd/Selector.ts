@@ -1,11 +1,9 @@
 ///<reference path="../_ref.ts" />
 
-///<reference path="../../src/tsd/selector.ts" />
+///<reference path="../../src/tsd/Selector.ts" />
 ///<reference path="../../src/xm/iterate.ts" />
 
-declare var assert:chai.Assert;
-
-module tsd {
+describe('tsd.Selector', function () {
 
 	var fs = require('fs');
 	var path = require('path');
@@ -51,4 +49,4 @@ module tsd {
 			});
 		});
 	});
-}
+});

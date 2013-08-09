@@ -4,12 +4,19 @@
 ///<reference path="../typings/DefinitelyTyped/chai/chai-assert.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/chai/chai-json-schema-assert.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fuzzy-assert.d.ts" />
+///<reference path="../typings/DefinitelyTyped/chai/chai-fs-assert.d.ts" />
 
 ///<reference path="_helper.ts" />
 
-var chaii = require('chai');
-chaii.use(require('chai-fuzzy'));
-chaii.use(require('chai-json-schema'));
-var assert = chaii.assert;
+declare var assert:chai.Assert;
+
+var chai = require('chai');
+chai.use(require('chai-fuzzy'));
+chai.use(require('chai-json-schema'));
+chai.use(require('chai-fs'));
+chai.Assertion.includeStack = true;
+var assert = chai.assert;
+
+var _:UnderscoreStatic = require('underscore');
 
 require('source-map-support').install();

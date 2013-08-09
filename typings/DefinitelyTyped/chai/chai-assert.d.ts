@@ -5,6 +5,15 @@
 
 declare module chai
 {
+	function use(plugin:any):void;
+
+
+	interface ChaiAssertion
+	{
+		includeStack:bool;
+	}
+	var Assertion:chai.ChaiAssertion;
+
 	interface Assert
 	{
 		(express:any, msg?:string);

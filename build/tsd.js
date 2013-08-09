@@ -138,25 +138,119 @@ var xm;
     }
     xm.mapHash = mapHash;
 })(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var util = require('util');
+    require('colors');
+    var ConsoleLineWriter = (function () {
+        function ConsoleLineWriter() { }
+        ConsoleLineWriter.prototype.writeln = function (str) {
+            console.log(str);
+        };
+        return ConsoleLineWriter;
+    })();
+    xm.ConsoleLineWriter = ConsoleLineWriter;    
+    function getLogger(writer) {
+        writer = writer || new xm.ConsoleLineWriter();
+        var writeMulti = function (prefix, postfix, args) {
+            for(var i = 0, ii = args.length; i < ii; i++) {
+                writer.writeln(prefix + args[i] + postfix);
+            }
+        };
+        var plain = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            writeMulti('', '', args);
+        };
+        var logger = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            plain.apply(null, args);
+        };
+        logger.log = plain;
+        logger.warn = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            writeMulti('warn: '.yellow, '', args);
+        };
+        logger.error = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            writeMulti('error: '.red, '', args);
+        };
+        logger.debug = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            writeMulti('debug: '.cyan, '', args);
+        };
+        logger.inspect = function (value, label, depth) {
+            if (typeof depth === "undefined") { depth = 6; }
+            label = label ? label + ':\n' : '';
+            writer.writeln(label + util.inspect(value, {
+                showHidden: false,
+                depth: depth
+            }));
+        };
+        return logger;
+    }
+    xm.getLogger = getLogger;
+})(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    var fs = require('fs');
+    var path = require('path');
+    var PackageJSON = (function () {
+        function PackageJSON(pkg) {
+            this.pkg = pkg;
+            if(!this.pkg) {
+                throw new Error('no pkg');
+            }
+        }
+        Object.defineProperty(PackageJSON.prototype, "name", {
+            get: function () {
+                return this.pkg.name || null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(PackageJSON.prototype, "version", {
+            get: function () {
+                return this.pkg.version || '0';
+            },
+            enumerable: true,
+            configurable: true
+        });
+        PackageJSON.prototype.getNameVersion = function () {
+            return this.name + ' ' + this.version;
+        };
+        PackageJSON.prototype.getKey = function () {
+            return this.name + '-' + this.version;
+        };
+        PackageJSON.getLocal = function getLocal() {
+            var json = xm.FileUtil.readJSONSync(path.join(process.cwd(), 'package.json'));
+            return new PackageJSON(json);
+        };
+        return PackageJSON;
+    })();
+    tsd.PackageJSON = PackageJSON;    
+})(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
     var assert = require('assert');
-    var mkdirp = require('mkdirp');
     var tv4 = require('tv4').tv4;
-    var Context = (function () {
-        function Context(configPath) {
-            if (typeof configPath === "undefined") { configPath = null; }
-            this.packageInfo = PackageInfo.getLocal();
-            this.paths = new Paths(this.packageInfo);
-            this.config = Config.getLocal(configPath || this.paths.config);
-            this.paths.setTypings(this.config.typingsPath);
-        }
-        return Context;
-    })();
-    tsd.Context = Context;    
     var Installed = (function () {
         function Installed(selector, commit, hash) {
             if (typeof selector === "undefined") { selector = null; }
@@ -175,12 +269,33 @@ var tsd;
     var Config = (function () {
         function Config() {
             this.typingsPath = 'typings';
-            this.version = 'v3';
+            this.version = 'v4';
             this.repo = 'borisyankov/DefinitelyTyped';
             this.ref = 'master';
             this.installed = {
             };
         }
+        Object.defineProperty(Config.prototype, "repoOwner", {
+            get: function () {
+                return this.repo.split('/')[0];
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Config.prototype, "repoProject", {
+            get: function () {
+                return this.repo.split('/')[1];
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Config.prototype, "repoURL", {
+            get: function () {
+                return 'http://github.com/' + this.repo;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Config.prototype.toJSON = function () {
             var json = {
                 typingsPath: this.typingsPath,
@@ -219,6 +334,13 @@ var tsd;
         return Config;
     })();
     tsd.Config = Config;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var fs = require('fs');
+    var path = require('path');
+    var assert = require('assert');
+    var mkdirp = require('mkdirp');
     var Paths = (function () {
         function Paths(info) {
             assert.ok(info, 'info');
@@ -246,7 +368,7 @@ var tsd;
                 path.join(process.cwd(), 'tmp')
             ];
             for(var i = 0; i < candidateTmpDirs.length; i++) {
-                var candidatePath = path.join(candidateTmpDirs[i], 'phantomjs');
+                var candidatePath = path.join(candidateTmpDirs[i], info.getKey());
                 try  {
                     mkdirp.sync(candidatePath, '0777');
                     var testFile = path.join(candidatePath, now + '.tmp');
@@ -262,31 +384,41 @@ var tsd;
         return Paths;
     })();
     tsd.Paths = Paths;    
-    var PackageInfo = (function () {
-        function PackageInfo(name, version, pkg) {
-            this.name = name;
-            this.version = version;
-            this.pkg = pkg;
-            if(!this.name) {
-                throw new Error('no name');
-            }
-            if(!this.version) {
-                throw new Error('no version');
-            }
-            if(!this.pkg) {
-                throw new Error('no pkg');
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var fs = require('fs');
+    var path = require('path');
+    var util = require('util');
+    var assert = require('assert');
+    var mkdirp = require('mkdirp');
+    var tv4 = require('tv4').tv4;
+    var Context = (function () {
+        function Context(configPath, verbose) {
+            if (typeof configPath === "undefined") { configPath = null; }
+            if (typeof verbose === "undefined") { verbose = false; }
+            this.verbose = verbose;
+            this.log = xm.getLogger();
+            this.packageInfo = tsd.PackageJSON.getLocal();
+            this.paths = new tsd.Paths(this.packageInfo);
+            this.config = tsd.Config.getLocal(configPath || this.paths.config);
+            this.paths.setTypings(this.config.typingsPath);
+            if(this.verbose) {
+                this.logInfo(this.verbose);
             }
         }
-        PackageInfo.prototype.getNameVersion = function () {
-            return this.name + ' ' + this.version;
+        Context.prototype.logInfo = function (details) {
+            if (typeof details === "undefined") { details = false; }
+            this.log(this.packageInfo.getNameVersion());
+            this.log('repo: ' + this.config.repoURL + ' - #' + this.config.ref);
+            if(details) {
+                this.log.inspect(this.config, 'config');
+                this.log.inspect(this.paths, 'paths');
+            }
         };
-        PackageInfo.getLocal = function getLocal() {
-            var json = xm.FileUtil.readJSONSync(path.join(process.cwd(), 'package.json'));
-            return new PackageInfo(json.name, json.version, json);
-        };
-        return PackageInfo;
+        return Context;
     })();
-    tsd.PackageInfo = PackageInfo;    
+    tsd.Context = Context;    
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
