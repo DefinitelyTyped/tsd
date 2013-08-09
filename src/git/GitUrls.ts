@@ -1,4 +1,5 @@
 ///<reference path="../_ref.ts" />
+///<reference path="_ref.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/io/URLManager.ts" />
 
@@ -7,10 +8,10 @@ module git {
 	var assert = require('assert');
 	var _:UnderscoreStatic = require('underscore');
 
-	export class GitUrls extends xm.URLManager {
+	export class GitURLs extends xm.URLManager {
 
 		private _api:string = 'https://api.github.com/repos/{owner}/{project}';
-		private _raw:string = 'https://github.com{owner}/{project}/raw';
+		private _base:string = 'https://github.com/{owner}/{project}';
 
 		constructor(repoOwner:string, projectName:string) {
 			super();
@@ -24,38 +25,25 @@ module git {
 
 			// externalise later
 			this.addTemplate('api', this._api);
-			this.addTemplate('api:heads', this._api + '/git/refs/heads');
-			this.addTemplate('api:branch_head', this._api + '/git/refs/heads/{branch}');
-			this.addTemplate('api:commit', this._api + '/git/commits/{sha}');
-			this.addTemplate('api:tree', this._api + '/git/trees/{sha}');
-
-			this.addTemplate('raw:file', this._raw + '/{path}');
+			this.addTemplate('base', this._base);
+			this.addTemplate('raw', this._base + '/raw');
+			this.addTemplate('rawFile', this._base + '/raw/{+path}');
 		}
 
-		public branchHeadList():string {
-			return this.getURL('api:heads');
+		public api():string {
+			return this.getURL('api');
 		}
 
-		public branchHead(branch:String):string {
-			return this.getURL('api:branch_head', {
-				branch: branch
-			});
+		public base():string {
+			return this.getURL('base');
 		}
 
-		public commit(sha:string):string {
-			return this.getURL('api:commit', {
-				sha: sha
-			});
+		public raw(sha:string):string {
+			return this.getURL('raw');
 		}
 
-		public tree(sha:string):string {
-			return this.getURL('api:tree', {
-				sha: sha
-			});
-		}
-
-		public file(path:string):string {
-			return this.getURL('raw:file', {
+		public rawFile(path:string):string {
+			return this.getURL('rawFile', {
 				path: path
 			});
 		}

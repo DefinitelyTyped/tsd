@@ -3,85 +3,18 @@
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
+///<reference path="../xm/io/FileUtil.ts" />
+///<reference path="GitAPICachedJSONStore.ts" />
+///<reference path="GitAPICachedResult.ts" />
 
 module git {
 
+	var async:Async = require('async');
 	var _:UnderscoreStatic = require('underscore');
 	var assert = require('assert');
-
-
-	var asyncCB = (callback, ...args:any[]) => {
-		process.nextTick(() => {
-			callback.apply(null, args);
-		})
-	};
-
-	export class GitCachedResult {
-
-		private _key:string;
-		private _label:any;
-		private _data:any;
-		private _lastSet:Date;
-
-		constructor(label:String, key:string, data:any) {
-			assert.ok(label, 'label');
-			assert.ok(key, 'key');
-			assert.ok(data, 'data');
-
-			this._label = label;
-			this._key = key;
-			this.setData(data);
-		}
-
-		setData(data:any):void {
-			this._data = data;
-			this._lastSet = new Date();
-		}
-
-		toJSON():any {
-			return {
-				key: this.key,
-				data: this.data,
-				label: this.label,
-				lastSet: this.lastSet.getTime()
-			};
-		}
-
-		//TODO test this against toJSON()
-		static fromJSON(json:any):GitCachedResult {
-			assert.ok(json.label, 'json.label');
-			assert.ok(json.key, 'json.key');
-			assert.ok(json.data, 'json.data');
-			assert.ok(json.lastSet, 'json.lastSet');
-			var call = new GitCachedResult(json.label, json.key, json.data);
-			call._lastSet = new Date(json.lastSet);
-			return call;
-		}
-
-		getHash():string {
-			return xm.sha1(this._key);
-		}
-
-		getStoreKey():string {
-			return this._label + '_' + this.getHash();
-		}
-
-		get label():string {
-			return this._label;
-		}
-
-		get key():string {
-			return this._key;
-		}
-
-		get data():any {
-			return this._data;
-		}
-
-		get lastSet():Date {
-			return this._lastSet;
-		}
-	}
+	var mkdirp = require('mkdirp');
+	var fs = require('fs');
+	var path = require('path');
 
 	export class GitAPICached {
 
@@ -89,20 +22,30 @@ module git {
 		private _cache = new xm.KeyValueMap();
 		private _repoOwner:string;
 		private _projectName:string;
+		private _version:string = "3.0.0";
+		private _store;
+		private _defaultOpts:any = {
+			readCache: true,
+			writeCache: true,
+			readStore: true,
+			writeStore: true
+		};
 
-		stats = new xm.StatCounter();
+		stats = new xm.StatCounter(false);
 		rate:GitRateLimitInfo;
 
-		constructor(repoOwner:string, projectName:string) {
+		constructor(repoOwner:string, projectName:string, storeFolder:string) {
 			assert.ok(repoOwner, 'expected repoOwner argument');
 			assert.ok(projectName, 'expected projectName argument');
+			assert.ok(storeFolder, 'expected storeFolder argument');
 
 			this._repoOwner = repoOwner;
 			this._projectName = projectName;
+			this._store = new GitAPICachedJSONStore(this, path.join(storeFolder, 'git_api_cache'));
 
 			var GitHubApi = require("github");
 			this._api = new GitHubApi({
-				version: "3.0.0"
+				version: this._version
 			});
 			this.rate = new GitRateLimitInfo();
 		}
@@ -114,69 +57,137 @@ module git {
 			});
 		}
 
-		hasCached(key:string):bool {
-			return this._cache.has(key);
-		}
-
-		getCached(key:string):GitCachedResult {
-			return this._cache.get(key);
+		getCachedRaw(key:string, callback:(err, res:GitAPICachedResult) => void):void {
+			var self:git.GitAPICached = this;
+			if (self._cache.has(key)){
+				xm.callAsync(callback, null, self._cache.get(key));
+				return;
+			}
+			self._store.getResult(key, (err, res) => {
+				return callback(err, res);
+			});
 		}
 
 		getKey(label:string, keyTerms?:any):string {
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
-		getBranch(branch:string, finish:(err:any, index:any) => void):string {
-			var params = this.getRepoParams({branch: branch});
-			return this.doCachedCall('getBranch', params, (callback) => {
-				this._api.repos.getCommit(params, callback);
-			}, finish);
+		getBranch(branch:string, callback:(err:any, index:any) => void):string {
+			var params = this.getRepoParams({
+				branch: branch
+			});
+			return this.doCachedCall('getBranch', params, {}, (cb) => {
+				this._api.repos.getBranch(params, cb);
+			}, callback);
 		}
 
-		getBranches(finish:(err:any, index:any) => void):string {
+		getBranches(callback:(err, index:any) => void):string {
 			var params = this.getRepoParams({});
-			return this.doCachedCall('getBranches', params, (callback) => {
-				this._api.repos.getBranches(params, callback);
+
+			return this.doCachedCall('getBranches', params, {}, (cb) => {
+				this._api.repos.getBranches(params, cb);
+			}, callback);
+		}
+
+		getCommit(sha:string, finish:(err, index:any) => void):string {
+			var params = this.getRepoParams({
+				sha: sha
+			});
+			return this.doCachedCall('getCommit', params, {}, (cb) => {
+				this._api.repos.getCommit(params, cb);
 			}, finish);
 		}
 
-		getCommit(sha:string, finish:(err:any, index:any) => void):string {
-			var params = this.getRepoParams({sha: sha});
-			return this.doCachedCall('getCommit', params, (callback) => {
-				this._api.repos.getCommit(params, callback);
-			}, finish);
-		}
-
-		private doCachedCall(label:string, keyTerms:any, call:Function, callback:(err:any, index:any) => void):string {
+		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function, callback:(err, index:any) => void):string {
 			var key = this.getKey(label, keyTerms);
 			var self:git.GitAPICached = this;
+			opts = _.defaults(opts || {}, self._defaultOpts);
 
 			self.stats.count('called');
 
-			if (this._cache.has(key)) {
-				self.stats.count('cache-hit');
+			// in memory cache?
+			if (opts.readCache) {
+				if (this._cache.has(key)) {
+					self.stats.count('cache-hit');
 
-				asyncCB(callback, null, this._cache.get(key).data);
-				return key;
+					xm.callAsync(callback, null, this._cache.get(key).data);
+					return key;
+				}
+				self.stats.count('cache-miss');
+			}
+			else {
+				self.stats.count('cache-get-skip');
 			}
 
-			self.stats.count('cache-miss');
+			// subroutine
+			var execCall = () => {
+				self.stats.count('call-api');
 
-			call.call(this, (err:any, res:any) => {
-				self.rate.getFromRes(res);
+				// set scope!
+				call.call(this, (err, res:any) => {
+					self.rate.getFromRes(res);
 
-				if (err) {
-					self.stats.count('call-error');
-					callback(err, null);
-				}
-				else {
-					self.stats.count('cache-set');
-					// we got a keeper!
-					self._cache.set(key, new GitCachedResult(label, key, res));
-					callback(err, res);
-				}
-			});
+					if (err) {
+						self.stats.count('call-error');
+						return callback(err, null);
+					}
+					self.stats.count('call-success');
+
+					var cached = new GitAPICachedResult(label, key, res);
+
+					// memory storage?
+					if (opts.writeCache) {
+						self._cache.set(key, cached);
+						self.stats.count('cache-set');
+					}
+					else {
+						self.stats.count('cache-set-skip');
+					}
+
+					// permanent storage?
+					if (opts.writeStore) {
+						self._store.storeResult(cached, (err, info) => {
+							if (err) {
+								console.log(err);
+								self.stats.count('store-set-error');
+								return callback(err, null);
+							}
+							self.stats.count('store-set');
+							callback(err, res);
+						});
+					}
+					else {
+						self.stats.count('store-set-skip');
+						callback(err, res);
+					}
+				});
+			};
+
+			// in permanent store?
+			if (opts.readStore) {
+				self._store.getResult(key, (err, res) => {
+					if (err) {
+						self.stats.count('store-get-error');
+						return callback(err, null);
+					}
+					if (res) {
+						self.stats.count('store-hit');
+						return callback(null, res);
+					}
+					self.stats.count('store-miss');
+
+					execCall();
+				});
+			}
+			else {
+				self.stats.count('store-get-skip');
+				execCall();
+			}
 			return key;
+		}
+
+		getCacheKey():string {
+			return this._repoOwner + '-' + this._projectName + '-v' + this._version;
 		}
 	}
 

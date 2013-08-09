@@ -12,7 +12,11 @@ module xm {
 		return crypto.createHash('sha1').update(data).digest('hex');
 	}
 
-	// hash json-like data to string
+	// hash any json-like-object's data to a unique ident-string
+	// - instances with identical fields give same ident-string
+	// - output looks similar to json-string but with auto-sorted property order and other tweaks
+	// - non-reversible
+	// - can be lengthy: re-hash with md5/sha
 	export function jsonToIdent(obj:any):string {
 		var ret = '';
 		var sep = ';';
@@ -52,7 +56,7 @@ module xm {
 			ret += '}' + sep;
 		}
 		else {
-			throw (new Error('cannot serialise value:' + obj));
+			throw (new Error('cannot serialise value: ' + obj));
 		}
 		return ret;
 	}

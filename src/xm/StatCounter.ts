@@ -3,12 +3,16 @@ module xm {
 
 		stats:KeyValueMap = new KeyValueMap();
 
-		constructor() {
+		constructor(public log:bool) {
 
 		}
 
 		count(id:string, amount?:number = 1) {
 			this.stats.set(id, this.stats.get(id, 0) + amount);
+
+			if (this.log) {
+				console.log('-> ' + id + ': ' + this.stats.get(id));
+			}
 		}
 
 		get(id:string):number {
@@ -21,13 +25,10 @@ module xm {
 			});
 		}
 
-		hasAllZeros() {
-			this.stats.values().forEach((value) => {
-				if (value !== 0) {
-					return false;
-				}
+		hasAllZero() {
+			return !this.stats.values().some((value:number) => {
+				return value != 0;
 			});
-			return true;
 		}
 
 		clear() {

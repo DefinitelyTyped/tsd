@@ -1,6 +1,6 @@
 module xm {
 
-	var hasOwnProp:(v:string) => void = Object.prototype.hasOwnProperty;
+	var hasOwnProp:(v:string) => bool = Object.prototype.hasOwnProperty;
 
 	export interface IKeyValueMap {
 		has (key:string):bool;
@@ -14,7 +14,7 @@ module xm {
 		clear (keep?:string[]);
 	}
 
-	export class KeyValueMap {
+	export class KeyValueMap implements IKeyValueMap {
 
 		private _prefix:string = '#_';
 		//need proper type
@@ -76,7 +76,7 @@ module xm {
 			return ret;
 		}
 
-		values(allow?:string[]):any {
+		values(allow?:string[]):any[] {
 			var keys = this.keys();
 			var ret = [];
 			for (var i = 0, ii = keys.length; i < ii; i++) {

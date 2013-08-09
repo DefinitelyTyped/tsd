@@ -2,7 +2,6 @@
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
 ///<reference path="PackageJSON.ts" />
-///<reference path="PackageJSON.ts" />
 
 module tsd {
 

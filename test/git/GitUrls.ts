@@ -1,33 +1,33 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../src/git/GitUrls.ts" />
 
-describe('git.GitUrls', function () {
+describe('git.GitURLs', function () {
 
-	var urls:git.GitUrls;
-	var api = 'https://api.github.com/repos';
-	var base = api + '/foo/bar';
+	var urls:git.GitURLs;
 
 	it('should be defined', () => {
-		assert.isFunction(git.GitUrls, 'constructor');
+		assert.isFunction(git.GitURLs, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			urls = new git.GitUrls('foo', null);
+			urls = new git.GitURLs('foo', null);
 		});
 		assert.throws(() => {
-			urls = new git.GitUrls(null, null);
+			urls = new git.GitURLs(null, null);
 		});
 	});
 	it('should be constructor', () => {
-		urls = new git.GitUrls('foo', 'bar');
+		urls = new git.GitURLs('foo', 'bar');
 		assert.ok(urls, 'instance');
 	});
 	describe('direct', () => {
 		it('should return replaced urls', () => {
-			assert.strictEqual(urls.branchHeadList(), base + '/git/refs/heads', 'branchHeadList');
-			assert.strictEqual(urls.branchHead('master'), base + '/git/refs/heads/master', 'branchHead');
-			assert.strictEqual(urls.commit('abcdef'), base + '/git/commits/abcdef', 'commit');
-			assert.strictEqual(urls.tree('abcdef'), base + '/git/trees/abcdef', 'commit');
+			var api = 'https://api.github.com/repos/foo/bar';
+			var base = 'https://github.com/foo/bar';
+			var rawFile = base + '/raw/sub/folder/file.txt';
+			assert.strictEqual(urls.api(), api, 'api');
+			assert.strictEqual(urls.base(), base, 'base');
+			assert.strictEqual(urls.rawFile('sub/folder/file.txt'), rawFile, 'rawFile');
 		});
 	});
 });

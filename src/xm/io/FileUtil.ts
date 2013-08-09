@@ -1,4 +1,5 @@
 ///<reference path="../../_ref.ts" />
+///<reference path="../callAsync.ts" />
 
 module xm {
 
@@ -6,6 +7,7 @@ module xm {
 	var path = require('path');
 	var util = require('util');
 
+	// TODO refactor to functions (xm.fs)
 	export class FileUtil {
 
 		static readJSONSync(src:string):any {
@@ -27,25 +29,11 @@ module xm {
 		}
 
 		static writeJSONSync(src:string, data:any, callback:(err, res:any) => void) {
-			var str;
-			try {
-				str = JSON.stringify(data, null, 4);
-			}
-			catch (err) {
-				return callback(err, null)
-			}
-			fs.writeFileSync(path.resolve(src), str, 'utf8');
+			fs.writeFileSync(path.resolve(src), JSON.stringify(data, null, 2), 'utf8');
 		}
 
 		static writeJSON(src:string, data:any, callback:(err, res:any) => void) {
-			var str;
-			try {
-				str = JSON.stringify(data, null, 4);
-			}
-			catch (err) {
-				return callback(err, null)
-			}
-			fs.writeFile(path.resolve(src), str, 'utf8', callback);
+			fs.writeFile(path.resolve(src), JSON.stringify(data, null, 2), 'utf8', callback);
 		}
 	}
 }

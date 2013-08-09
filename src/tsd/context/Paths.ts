@@ -14,14 +14,15 @@ module tsd {
 
 		public tmp:string;
 		public typings:string;
-		public cache:string;
 		public config:string;
+
+		public cache:string;
 
 		constructor(info:PackageJSON) {
 			assert.ok(info, 'info');
 
 			this.tmp = Paths.findTmpDir(info);
-			this.cache = path.join(process.cwd(), 'tsd');
+			this.cache = path.join(this.tmp, 'tsd');
 			mkdirp.sync(this.cache);
 
 			this.typings = path.join(process.cwd(), 'typings');

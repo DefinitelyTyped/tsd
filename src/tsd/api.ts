@@ -1,4 +1,6 @@
 ///<reference path="_ref.ts" />
+///<reference path="Core.ts" />
+///<reference path="context/Context.ts" />
 
 module xm {
 
@@ -15,16 +17,15 @@ module xm {
 
 	export class APIResult {
 		constructor(){
-			
+
 		}
 	}
 
 	export class API {
 
-		/*constructor(public info:ToolInfo, public repos:Repos){
-			if (!this.info) throw new Error('no info');
-			if (!this.repos) throw new Error('no repos');
-		}*/
+		constructor(public context:tsd.Context){
+			if (!this.context) throw new Error('no context');
+		}
 
 		/**
 		 List files matching selector:
