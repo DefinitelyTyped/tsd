@@ -59,7 +59,7 @@ module xm {
 
 		public getTemplate(id:string):URLTemplate {
 			if (!this._templates.has(id)) {
-				throw (new Error('undefined template: ' + id))
+				throw (new Error('undefined url template: ' + id))
 			}
 			return this._templates.get(id);
 		}

@@ -1,10 +1,10 @@
 ///<reference path="../_ref.ts" />
-///<reference path="context/Context.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/io/hash.ts" />
+///<reference path="../xm/io/Logger.ts" />
 
-module tsd {
+module git {
 
 	var _:UnderscoreStatic = require('underscore');
 	var assert = require('assert');
@@ -24,6 +24,10 @@ module tsd {
 		private _lastSet:Date;
 
 		constructor(label:String, key:string, data:any) {
+			assert.ok(label, 'label');
+			assert.ok(key, 'key');
+			assert.ok(data, 'data');
+
 			this._label = label;
 			this._key = key;
 			this.setData(data);
@@ -38,7 +42,8 @@ module tsd {
 			return {
 				key: this.key,
 				data: this.data,
-				lastSet: this.lastSet.toUTCString()
+				label: this.label,
+				lastSet: this.lastSet.getTime()
 			};
 		}
 
@@ -78,29 +83,34 @@ module tsd {
 		}
 	}
 
-	export class GitCachedDataAPI {
+	export class GitAPICached {
 
 		private _api:any;
 		private _cache = new xm.KeyValueMap();
+		private _repoOwner:string;
+		private _projectName:string;
 
 		stats = new xm.StatCounter();
 		rate:GitRateLimitInfo;
 
-		constructor(private _context:Context) {
-			assert.ok(_context, 'context');
+		constructor(repoOwner:string, projectName:string) {
+			assert.ok(repoOwner, 'expected repoOwner argument');
+			assert.ok(projectName, 'expected projectName argument');
+
+			this._repoOwner = repoOwner;
+			this._projectName = projectName;
 
 			var GitHubApi = require("github");
 			this._api = new GitHubApi({
 				version: "3.0.0"
 			});
-
-			this.rate = new GitRateLimitInfo(this._context.log);
+			this.rate = new GitRateLimitInfo();
 		}
 
 		getRepoParams(vars:any):any {
 			return _.defaults(vars, {
-				user: this._context.config.repoOwner,
-				repo: this._context.config.repoProject
+				user: this._repoOwner,
+				repo: this._projectName
 			});
 		}
 
@@ -114,6 +124,13 @@ module tsd {
 
 		getKey(label:string, keyTerms?:any):string {
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
+		}
+
+		getBranch(branch:string, finish:(err:any, index:any) => void):string {
+			var params = this.getRepoParams({branch: branch});
+			return this.doCachedCall('getBranch', params, (callback) => {
+				this._api.repos.getCommit(params, callback);
+			}, finish);
 		}
 
 		getBranches(finish:(err:any, index:any) => void):string {
@@ -132,7 +149,7 @@ module tsd {
 
 		private doCachedCall(label:string, keyTerms:any, call:Function, callback:(err:any, index:any) => void):string {
 			var key = this.getKey(label, keyTerms);
-			var self:tsd.GitCachedDataAPI = this;
+			var self:git.GitAPICached = this;
 
 			self.stats.count('called');
 
@@ -169,7 +186,7 @@ module tsd {
 		remaining:number = 0;
 		lastUpdate:Date = new Date();
 
-		constructor(public log:xm.Logger) {
+		constructor() {
 
 		}
 
@@ -182,10 +199,11 @@ module tsd {
 					this.remaining = parseInt(response.meta['x-ratelimit-remaining']);
 				}
 				this.lastUpdate = new Date();
-				if (this.log) {
-					this.log.debug('rate limit: ' + this.remaining + ' of ' + this.limit);
-				}
 			}
+		}
+
+		toStatus():string {
+			return 'rate limit: ' + this.remaining + ' of ' + this.limit + ' @ ' + this.lastUpdate.toLocaleString();
 		}
 
 		hasRemaining():bool {

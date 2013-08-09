@@ -1,23 +1,23 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../src/tsd/GitDataAPI.ts" />
+///<reference path="../../src/git/GitAPICached.ts" />
 ///<reference path="../../src/tsd/context/Context.ts" />
 
-describe('git.GitCachedDataAPI', function () {
+describe('git.GitAPICached', function () {
 
-	var api:tsd.GitCachedDataAPI;
+	var api:git.GitAPICached;
 	var context:tsd.Context;
 
 	it('should be defined', () => {
-		assert.isFunction(tsd.GitCachedDataAPI, 'constructor');
+		assert.isFunction(git.GitAPICached, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new tsd.GitCachedDataAPI(null);
+			api = new git.GitAPICached(null, null);
 		});
 	});
 	it('should be constructor', () => {
 		context = new tsd.Context();
-		api = new tsd.GitCachedDataAPI(context);
+		api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject);
 		assert.ok(api, 'instance');
 	});
 	describe('getRepoParams', () => {

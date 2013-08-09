@@ -1,27 +1,25 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../src/git/urls.ts" />
+///<reference path="../../src/git/GitUrls.ts" />
 
-describe('git.GitAPIUrls', function () {
+describe('git.GitUrls', function () {
 
-	var urls:git.GitAPIUrls;
-	var expected;
-	var actual;
+	var urls:git.GitUrls;
 	var api = 'https://api.github.com/repos';
 	var base = api + '/foo/bar';
 
 	it('should be defined', () => {
-		assert.isFunction(git.GitAPIUrls, 'constructor');
+		assert.isFunction(git.GitUrls, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			urls = new git.GitAPIUrls('foo', null);
+			urls = new git.GitUrls('foo', null);
 		});
 		assert.throws(() => {
-			urls = new git.GitAPIUrls(null, null);
+			urls = new git.GitUrls(null, null);
 		});
 	});
 	it('should be constructor', () => {
-		urls = new git.GitAPIUrls('foo', 'bar');
+		urls = new git.GitUrls('foo', 'bar');
 		assert.ok(urls, 'instance');
 	});
 	describe('direct', () => {
