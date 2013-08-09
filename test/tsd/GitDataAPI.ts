@@ -20,9 +20,9 @@ describe('git.GitCachedDataAPI', function () {
 		api = new tsd.GitCachedDataAPI(context);
 		assert.ok(api, 'instance');
 	});
-	describe('getUserParams', () => {
+	describe('getRepoParams', () => {
 		it('should return user data', () => {
-			var params = api.getUserParams({extra: 123});
+			var params = api.getRepoParams({extra: 123});
 			assert.propertyVal(params, 'user', context.config.repoOwner);
 			assert.propertyVal(params, 'repo', context.config.repoProject);
 			assert.propertyVal(params, 'extra', 123, 'additional data');

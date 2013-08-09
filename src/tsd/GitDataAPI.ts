@@ -2,33 +2,26 @@
 ///<reference path="context/Context.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
+///<reference path="../xm/io/hash.ts" />
 
 module tsd {
 
 	var _:UnderscoreStatic = require('underscore');
 	var assert = require('assert');
 
-	var crypto = require('crypto');
-	var md5 = function (data:string) {
-		return crypto.createHash('md5').update(data).digest('hex');
-	};
-	var sha1 = function (data:string) {
-		return crypto.createHash('sha1').update(data).digest('hex');
-	};
 
-	var asyncCB = (callback, err, ...args:any[]) => {
+	var asyncCB = (callback, ...args:any[]) => {
 		process.nextTick(() => {
-			args.unshift(err);
 			callback.apply(null, args);
 		})
 	};
 
 	export class GitCachedResult {
 
-		_key:string;
-		_label:any;
-		_data:any;
-		_lastSet:Date;
+		private _key:string;
+		private _label:any;
+		private _data:any;
+		private _lastSet:Date;
 
 		constructor(label:String, key:string, data:any) {
 			this._label = label;
@@ -61,7 +54,7 @@ module tsd {
 		}
 
 		getHash():string {
-			return sha1(this._key);
+			return xm.sha1(this._key);
 		}
 
 		getStoreKey():string {
@@ -87,10 +80,11 @@ module tsd {
 
 	export class GitCachedDataAPI {
 
-		_api:any;
-		_cache = new xm.KeyValueMap();
-		rate:GitRateLimitInfo;
+		private _api:any;
+		private _cache = new xm.KeyValueMap();
+
 		stats = new xm.StatCounter();
+		rate:GitRateLimitInfo;
 
 		constructor(private _context:Context) {
 			assert.ok(_context, 'context');
@@ -103,7 +97,7 @@ module tsd {
 			this.rate = new GitRateLimitInfo(this._context.log);
 		}
 
-		getUserParams(vars:any):any {
+		getRepoParams(vars:any):any {
 			return _.defaults(vars, {
 				user: this._context.config.repoOwner,
 				repo: this._context.config.repoProject
@@ -118,31 +112,37 @@ module tsd {
 			return this._cache.get(key);
 		}
 
-		//TODO make it accept and sort object keys
-		getKey(label:string, keyTerms?:string[]):string {
-			keyTerms = keyTerms ? keyTerms.slice(0) : [];
-			keyTerms.unshift('#key', label);
-
-			keyTerms = keyTerms.map((term) => {
-				//TODO add proper escaping (also linebreaks)
-				return term.replace(';', '\\;');
-			});
-			return keyTerms.join('; ');
+		getKey(label:string, keyTerms?:any):string {
+			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
-		private doCachedCall(label:string, keyTerms:string[], call:Function, callback:(err:any, index:any) => void):string {
+		getBranches(finish:(err:any, index:any) => void):string {
+			var params = this.getRepoParams({});
+			return this.doCachedCall('getBranches', params, (callback) => {
+				this._api.repos.getBranches(params, callback);
+			}, finish);
+		}
+
+		getCommit(sha:string, finish:(err:any, index:any) => void):string {
+			var params = this.getRepoParams({sha: sha});
+			return this.doCachedCall('getCommit', params, (callback) => {
+				this._api.repos.getCommit(params, callback);
+			}, finish);
+		}
+
+		private doCachedCall(label:string, keyTerms:any, call:Function, callback:(err:any, index:any) => void):string {
 			var key = this.getKey(label, keyTerms);
 			var self:tsd.GitCachedDataAPI = this;
 
 			self.stats.count('called');
 
 			if (this._cache.has(key)) {
-				self._context.log.debug('cache-hit: ' + key);
 				self.stats.count('cache-hit');
 
 				asyncCB(callback, null, this._cache.get(key).data);
 				return key;
 			}
+
 			self.stats.count('cache-miss');
 
 			call.call(this, (err:any, res:any) => {
@@ -150,29 +150,16 @@ module tsd {
 
 				if (err) {
 					self.stats.count('call-error');
-					console.log(err);
 					callback(err, null);
 				}
 				else {
-					self._context.log.debug('cache-set: ' + key);
 					self.stats.count('cache-set');
+					// we got a keeper!
 					self._cache.set(key, new GitCachedResult(label, key, res));
 					callback(err, res);
 				}
 			});
 			return key;
-		}
-
-		getBranches(finish:(err:any, index:any) => void):string {
-			return this.doCachedCall('getBranches', [], (callback) => {
-				this._api.repos.getBranches(this.getUserParams({}), callback);
-			}, finish);
-		}
-
-		getCommit(sha:string, finish:(err:any, index:any) => void):string {
-			return this.doCachedCall('getCommit', [sha], (callback) => {
-				this._api.repos.getCommit(this.getUserParams({sha: sha}), callback);
-			}, finish);
 		}
 	}
 
