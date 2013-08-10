@@ -1,15 +1,18 @@
 module.exports = function (grunt) {
 	'use strict';
 
-	grunt.loadNpmTasks('grunt-typescript');
-	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-mocha-test');
+	var groan = require('./lib/groan').link(grunt);
+	groan.loadNpm(
+		'grunt-contrib-jshint',
+		'grunt-contrib-copy',
+		'grunt-contrib-clean',
+		'grunt-typescript',
+		'grunt-mocha-test'
+	);
+	// groan.autoNpm();
+	groan.loadTasks('tasks');
 
-	grunt.loadTasks('tasks');
-
-	grunt.initConfig({
+	groan.config({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
@@ -22,11 +25,14 @@ module.exports = function (grunt) {
 			]
 		},
 		clean: {
-			tmp: ['tmp', 'test/**/_tmp.*.*', 'test/tmp/**/*', ],
+			tmp: ['tmp', 'test/**/_tmp.*.*', 'test/tmp/**/*'],
 			build: ['build/*.js']
 		},
 		copy: {
-		},
+		}
+	});
+
+	groan.config({
 		typescript: {
 			options: {
 				module: 'commonjs',
@@ -39,55 +45,65 @@ module.exports = function (grunt) {
 			source: {
 				src: ['src/tsd.ts'],
 				dest: 'build/tsd.js'
-			},
-			test_tsd: {
-				option: {base_path: 'test/tsd/'},
-				src: ['test/tsd/*.ts'],
-				dest: 'test/tsd/_tmp.test.js'
-			},
-			test_git: {
-				option: {base_path: 'test/git/'},
-				src: ['test/git/*.ts'],
-				dest: 'test/git/_tmp.test.js'
-			},
-			test_xm: {
-				option: {base_path: 'test/xm/'},
-				src: ['test/xm/*.ts'],
-				dest: 'test/xm/_tmp.test.js'
 			}
 		},
 		mochaTest: {
+			options: {
+				reporter: 'mocha-unfunk-reporter',
+				timeout: 5000
+			},
 			any: {
-				src: ['test/**/*.test.js'],
-				options: {
-					reporter: 'mocha-unfunk-reporter',
-					timeout: 5000
-				}
+				src: ['test/**/*.test.js']
 			}
 		}
 	});
 
-	grunt.registerTask('compile_source', ['typescript:source']);
+	groan.define('typeMocha', function (grr, id) {
+		grr.addTask('clean_dev');
+		grr.addConf('typescript', {
+			options: {base_path: 'test/' + id + '/'},
+			src: ['test/' + id + '/*.ts'],
+			dest: 'test/' + id + '/_tmp.test.js'
+		});
+		/*grr.addConf('jshint', id, {
+			src: ['test/' + id + '/**_____/*.test.js']
+		});*/
+		//grr.task('jshint');
+		grr.addConf('mochaTest', id, {
+			src: ['test/' + id + '/**/*.test.js'],
+			options: {
+				timeout: grr.getParam('timeout', 2000)
+			}
+		});
+		if (grr.getParam('timeout', 0) > 2000) {
+			grr.addGroup('slow');
+		}
+	});
+	groan.create('typeMocha', 'tsd', {timeout: 5000}, 'ts,core');
+	groan.create('typeMocha', 'xm,git', null, 'ts,lib');
 
-	grunt.registerTask('build_tests', [
-		'typescript:test_xm',
-		'typescript:test_git',
-		'typescript:test_tsd'
-	]);
+	groan.alias('compile_source', 'typescript:source');
 
-	grunt.registerTask('test_code', ['build_tests', 'mochaTest']);
+	// groan this
+	groan.alias('build_tests', 'groan-select:tsSub');
 
-	grunt.registerTask('build', ['clean:tmp', 'clean:build', 'jshint', 'compile_source']);
+	groan.alias('test_code', 'build_tests; mochaTest');
+	groan.alias('clean_dev', 'clean:tmp; clean:build');
+	groan.alias('prep', 'clean_dev; jshint');
 
 	// cli commands
-	grunt.registerTask('default', ['test']);
-	grunt.registerTask('test', ['build', 'test_code']);
+	groan.alias('build', 'prep; compile_source');
+	groan.alias('test', 'build; test_code');
+	groan.alias('default', 'test');
+
+	groan.alias('dev', 'prep; groan-select:ts');
 
 	// additional editor toolbar mappings
-	grunt.registerTask('dev', []);
-	grunt.registerTask('edit_01', []);
-	grunt.registerTask('edit_02', []);
-	grunt.registerTask('edit_03', []);
-	grunt.registerTask('edit_04', []);
-	grunt.registerTask('edit_05', []);
+	groan.alias('edit_01', 'groan-group:test_ts');
+	groan.alias('edit_02', 'groan:tsd');
+	groan.alias('edit_03', 'groan:xm');
+	groan.alias('edit_04', 'groan:git');
+	groan.alias('edit_05', 'groan-type:typeMocha');
+
+	groan.init();
 };
