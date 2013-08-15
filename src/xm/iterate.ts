@@ -1,4 +1,12 @@
-module xm {
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ module xm {
 	export function eachElem(collection:any[], callback:(value:any, index:number, collection:any[]) => void, thisArg?:Object) {
 		for (var i = 0, ii = collection.length; i < ii; i++) {
 			if (callback.call(thisArg, collection[i], i, collection) === false) {

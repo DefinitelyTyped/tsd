@@ -1,6 +1,7 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
+///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
@@ -21,6 +22,9 @@ module git {
 		dir:string;
 
 		constructor(public api:GitAPICached, dir:string) {
+			xm.assertVar('api', api, GitAPICached);
+			xm.assertVar('dir', dir, 'string');
+
 			this.dir = path.join(dir, api.getCacheKey());
 		}
 
@@ -48,6 +52,7 @@ module git {
 		}
 
 		getResult(key:string, callback:(err, res:GitAPICachedResult) => void) {
+
 			var self:GitAPICachedJSONStore = this;
 
 			self.init((err) => {

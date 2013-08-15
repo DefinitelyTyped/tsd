@@ -6,7 +6,7 @@
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fuzzy-assert.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fs-assert.d.ts" />
 
-///<reference path="_helper.ts" />
+///<reference path="helper.ts" />
 
 declare var assert:chai.Assert;
 

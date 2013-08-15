@@ -1,4 +1,12 @@
-///<reference path="../_ref.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ ///<reference path="../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 
@@ -12,7 +20,7 @@ module xm {
 		getLabels():string {
 			var ret = this.id;
 			if (this.label) {
-				ret += ' (' + this.label + ')'
+				ret += ' (' + this.label + ')';
 			}
 			if (this.hint) {
 				var arr = [];

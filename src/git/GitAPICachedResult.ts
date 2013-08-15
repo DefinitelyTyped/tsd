@@ -1,5 +1,6 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../xm/callAsync.ts" />
+///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/io/hash.ts" />
@@ -23,9 +24,9 @@ module git {
 		private _lastSet:Date;
 
 		constructor(label:String, key:string, data:any) {
-			assert.ok(label, 'label');
-			assert.ok(key, 'key');
-			assert.ok(data, 'data');
+			xm.assertVar('label', label, 'string');
+			xm.assertVar('key', key, 'string');
+			xm.assertVar('data', data, 'object');
 
 			this._label = label;
 			this._key = key;
@@ -33,6 +34,7 @@ module git {
 		}
 
 		setData(data:any):void {
+			xm.assertVar('data', data, 'object');
 			this._data = data;
 			this._lastSet = new Date();
 		}
@@ -48,10 +50,12 @@ module git {
 
 		//TODO test this against toJSON()
 		static fromJSON(json:any):GitAPICachedResult {
-			assert.ok(json.label, 'json.label');
-			assert.ok(json.key, 'json.key');
-			assert.ok(json.data, 'json.data');
-			assert.ok(json.lastSet, 'json.lastSet');
+			// whTODOy not JSON Schema?
+			xm.assertVar('label', json.label, 'string');
+			xm.assertVar('key', json.key, 'string');
+			xm.assertVar('data', json.data, 'object');
+			xm.assertVar('lastSet', json.lastSet, 'number');
+
 			var call = new GitAPICachedResult(json.label, json.key, json.data);
 			call._lastSet = new Date(json.lastSet);
 			return call;

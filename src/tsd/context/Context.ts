@@ -1,6 +1,7 @@
 ///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
+///<reference path="../../xm/io/mkdirCheck.ts" />
 ///<reference path="PackageJSON.ts" />
 ///<reference path="Config.ts" />
 ///<reference path="Paths.ts" />
@@ -16,24 +17,26 @@ module tsd {
 
 	export class Context {
 
-		public packageInfo:PackageJSON;
-		public paths:Paths;
-		public config:Config;
-		public log:xm.Logger = xm.getLogger();
+		packageInfo:PackageJSON;
+		paths:Paths;
+		config:Config;
+		log:xm.Logger = xm.log;
 
 		constructor(configPath:string = null, public verbose?:bool = false) {
+			xm.assertVar('configPath', configPath, 'string', true);
+
 			this.packageInfo = PackageJSON.getLocal();
 			this.paths = new Paths(this.packageInfo);
 			this.config = Config.getLocal(configPath || this.paths.config);
 
-			this.paths.setTypings(this.config.typingsPath);
+			this.paths.typings = xm.mkdirCheck(this.config.typingsPath, true);
 
 			if (this.verbose) {
 				this.logInfo(this.verbose);
 			}
 		}
 
-		public logInfo(details:bool = false):void {
+		logInfo(details:bool = false):void {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repoURL + ' - #' + this.config.ref);
 			if (details) {

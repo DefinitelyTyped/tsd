@@ -1,5 +1,6 @@
 ///<reference path="_ref.ts" />
 ///<reference path="../src/xm/io/FileUtil.ts" />
+///<reference path="../src/xm/io/Logger.ts" />
 
 module helper {
 

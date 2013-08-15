@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/xm/io/hash.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/xm/io/hash.ts" />
 
 describe('xm.hash', function () {
 
@@ -18,16 +18,24 @@ describe('xm.hash', function () {
 			assert.strictEqual(hash, expected, 'preset');
 			assert.strictEqual(hash, xm.md5('foo bar'), 'repeatable');
 		});
-	})
+	});
 	describe('jsonToIdent()', () => {
 		describe('objects', () => {
+
+			//TODO document intended differences (it a bit unclear now)
+
 			var valueA = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+
 			var valueB = {c: [1, 2, 3], d: {b: 'bravo', a: 11, c: [11, 22, 33]}, a: 1, b: 'B'};
 
-			var valueX1 = {a: 2, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+			var valueX1 = {a: 222, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+
 			var valueX2 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'nope', c: [11, 22, 33]}};
+
 			var valueX3 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22]}};
+
 			var valueX4 = {a: 1, b: 'XX', c: [3, 2, 1], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+
 			var valueX5 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo'}};
 
 			it('should return identical hash for same object', () => {
@@ -47,25 +55,25 @@ describe('xm.hash', function () {
 				var alt;
 				alt = xm.jsonToIdent(valueX1);
 				assert.notStrictEqual(ori, alt, 'valueA -> valueX1');
-				alt =  xm.jsonToIdent(valueX2)
+				alt = xm.jsonToIdent(valueX2);
 				assert.notStrictEqual(ori, alt, 'valueA -> valueX2');
-				alt =  xm.jsonToIdent(valueX3)
+				alt = xm.jsonToIdent(valueX3);
 				assert.notStrictEqual(ori, alt, 'valueA -> valueX3');
-				alt =  xm.jsonToIdent(valueX4)
+				alt = xm.jsonToIdent(valueX4);
 				assert.notStrictEqual(ori, alt, 'valueA -> valueX4');
-				alt =  xm.jsonToIdent(valueX5)
+				alt = xm.jsonToIdent(valueX5);
 				assert.notStrictEqual(ori, alt, 'valueA -> valueX5');
 			});
 			it('should throw on Function', () => {
 				assert.throws(() => {
-					console.log(xm.jsonToIdent({a:1, b:function(x){
+					console.log(xm.jsonToIdent({a: 1, b: function (x) {
 						return x * x;
 					}}));
 				});
 			});
 			it('should throw on RegExp', () => {
 				assert.throws(() => {
-					console.log(xm.jsonToIdent({a:1, b:/^[0-9]+$/}));
+					console.log(xm.jsonToIdent({a: 1, b: /^[0-9]+$/}));
 				});
 			});
 			it('should serialise Date, include millisecond level', () => {

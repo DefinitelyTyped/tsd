@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/xm/RegExpGlue.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/xm/RegExpGlue.ts" />
 
 describe('xm.RexExpGlue', () => {
 
@@ -13,7 +13,7 @@ describe('xm.RexExpGlue', () => {
 		assert.ok(new (xm.RegExpGlue)());
 	});
 	it('is static accesible', () => {
-		assert.ok(xm.RegExpGlue.get())
+		assert.ok(xm.RegExpGlue.get());
 	});
 	it('extracts RegExp bodies', () => {
 		exp = xm.RegExpGlue.get();
@@ -65,7 +65,7 @@ describe('xm.RexExpGlue', () => {
 
 	describe('.append()', () => {
 		it('to same instance', () => {
-			exp = xm.RegExpGlue.get()
+			exp = xm.RegExpGlue.get();
 			assert.ok(exp);
 			assert.strictEqual(exp, exp.append());
 		});

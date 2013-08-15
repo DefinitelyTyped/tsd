@@ -1,0 +1,30 @@
+{
+	"rules": {
+		"bitwise": true,
+		"classname": true,
+		"curly": true,
+		"debug": true,
+		"dupkey": true,
+		"eofline": false,
+		"eqeqeq": true,
+		"evil": true,
+		"forin": true,
+		"__indent": [true, 4],
+		"labelpos": true,
+		"labelundef": true,
+		"__maxlen should be lower__": "but legacy code",
+		"maxlen": [true, 180],
+		"noarg": true,
+		"noconsole": [true, "debug, info, time, timeEnd, trace"],
+		"noconstruct": true,
+		"noempty": false,
+		"__oneline": [true, "check-whitespace"],
+		"quotemark": [true, "single"],
+		"radix": true,
+		"semicolon": true,
+		"sub": false,
+		"trailing": true,
+		"varname": false,
+		"whitespace": false
+	}
+}

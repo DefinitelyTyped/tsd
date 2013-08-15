@@ -9,26 +9,28 @@ module tsd {
 	export class PackageJSON {
 
 		constructor(public pkg:any) {
-			if (!this.pkg) throw new Error('no pkg');
+			if (!this.pkg) {
+				throw new Error('no pkg');
+			}
 		}
 
-		public get name():string {
+		get name():string {
 			return this.pkg.name || null;
 		}
 
-		public get version():string {
+		get version():string {
 			return this.pkg.version || '0';
 		}
 
-		public getNameVersion():string {
-			return this.name + ' ' + this.version
+		getNameVersion():string {
+			return this.name + ' ' + this.version;
 		}
 
-		public getKey():string {
-			return this.name + '-' + this.version
+		getKey():string {
+			return this.name + '-' + this.version;
 		}
 
-		public static getLocal():PackageJSON {
+		static getLocal():PackageJSON {
 			var json = xm.FileUtil.readJSONSync(path.join(process.cwd(), 'package.json'));
 			return new PackageJSON(json);
 		}

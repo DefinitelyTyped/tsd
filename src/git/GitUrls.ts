@@ -1,5 +1,6 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="_ref.ts" />
+///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/io/URLManager.ts" />
 
@@ -15,8 +16,8 @@ module git {
 
 		constructor(repoOwner:string, projectName:string) {
 			super();
-			assert.ok(repoOwner, 'expected repoOwner argument');
-			assert.ok(projectName, 'expected projectName argument');
+			xm.assertVar('repoOwner', repoOwner, 'string');
+			xm.assertVar('projectName', projectName, 'string');
 
 			this.setVars({
 				owner: repoOwner,

@@ -1,3 +1,10 @@
+/*
+* imported from typescript-xm package
+*
+* Bart van der Schoor
+* https://github.com/Bartvds/typescript-xm
+* License: MIT - 2013
+* */
 module xm {
 	export class StatCounter {
 
@@ -11,7 +18,7 @@ module xm {
 			this.stats.set(id, this.stats.get(id, 0) + amount);
 
 			if (this.log) {
-				console.log('-> ' + id + ': ' + this.stats.get(id));
+				xm.log('-> ' + id + ': ' + this.stats.get(id));
 			}
 		}
 
@@ -27,7 +34,7 @@ module xm {
 
 		hasAllZero() {
 			return !this.stats.values().some((value:number) => {
-				return value != 0;
+				return value !== 0;
 			});
 		}
 

@@ -1,4 +1,12 @@
-module xm {
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ module xm {
 
 	var util = require('util');
 	require('colors');
@@ -50,11 +58,13 @@ module xm {
 		logger.debug = (...args:any[]) => {
 			writeMulti('debug: '.cyan, '', args);
 		};
-		logger.inspect = (value:any, label?:string, depth?:number = 6) => {
+		logger.inspect = (value:any, label?:string, depth?:number = 8) => {
 			label = label ? label + ':\n' : '';
 			writer.writeln(label + util.inspect(value, {showHidden: false, depth: depth }));
 		};
 
 		return logger;
 	}
+
+	export var log:Logger = getLogger();
 }

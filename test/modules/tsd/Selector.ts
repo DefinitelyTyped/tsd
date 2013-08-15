@@ -1,9 +1,9 @@
-///<reference path="../_ref.ts" />
+///<reference path='../../_ref.ts' />
 
-///<reference path="../../src/tsd/Selector.ts" />
-///<reference path="../../src/xm/iterate.ts" />
+///<reference path='../../../src/tsd/Selector.ts' />
+///<reference path='../../../src/xm/iterate.ts' />
 
-describe('tsd.Selector', function () {
+describe('Selector', function () {
 
 	var fs = require('fs');
 	var path = require('path');
@@ -24,16 +24,16 @@ describe('tsd.Selector', function () {
 			});
 		});
 
-		describe('selects', () => {
+		/*describe('selects', () => {
 			var selectors = {
-				"async": {
-					files: ["async/async.d.ts"]
+				'async': {
+					files: ['async/async.d.ts']
 				},
-				"async/async": {
-					files: ["async/async.d.ts"]
+				'async/async': {
+					files: ['async/async.d.ts']
 				},
-				"gapi.youtube": {
-					files: ["gapi.youtube/gapi.youtube.d.ts"]
+				'gapi.youtube': {
+					files: ['gapi.youtube/gapi.youtube.d.ts']
 				}
 			};
 
@@ -43,10 +43,10 @@ describe('tsd.Selector', function () {
 			};
 
 			xm.eachProp(selectors, (value:any, selector:string) => {
-				it('selector "' + selector + '"', () => {
+				it('selector ' + selector + '', () => {
 
 				});
 			});
-		});
+		}); //*/
 	});
 });

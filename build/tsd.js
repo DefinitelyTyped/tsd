@@ -158,7 +158,7 @@ var xm;
             writeMulti('debug: '.cyan, '', args);
         };
         logger.inspect = function (value, label, depth) {
-            if (typeof depth === "undefined") { depth = 6; }
+            if (typeof depth === "undefined") { depth = 8; }
             label = label ? label + ':\n' : '';
             writer.writeln(label + util.inspect(value, {
                 showHidden: false,
@@ -168,6 +168,37 @@ var xm;
         return logger;
     }
     xm.getLogger = getLogger;
+    xm.log = getLogger();
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    function mkdirCheck(dir, writable) {
+        if (typeof writable === "undefined") { writable = false; }
+        var mkdirp = require('mkdirp');
+        var path = require('path');
+        var fs = require('fs');
+        if(fs.existsSync(dir)) {
+            if(!fs.statSync(dir).isDirectory()) {
+                throw (new Error('path exists but is not a directory: ' + dir));
+            }
+            if(writable) {
+                fs.chmodSync(dir, '0664');
+            }
+        } else {
+            if(writable) {
+                mkdirp.sync(dir, '0664');
+            } else {
+                mkdirp.sync(dir);
+            }
+        }
+        if(writable) {
+            var testFile = path.join(dir, 'mkdirCheck_' + Date.now() + '.tmp');
+            fs.writeFileSync(testFile, 'test');
+            fs.unlinkSync(testFile);
+        }
+        return dir;
+    }
+    xm.mkdirCheck = mkdirCheck;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
@@ -272,6 +303,7 @@ var tsd;
             return json;
         };
         Config.getLocal = function getLocal(file) {
+            xm.assertVar('file', file, 'string');
             var cfg = new Config();
             var json;
             if(fs.existsSync(file)) {
@@ -304,25 +336,22 @@ var tsd;
     var fs = require('fs');
     var path = require('path');
     var assert = require('assert');
-    var mkdirp = require('mkdirp');
     var Paths = (function () {
         function Paths(info) {
+            this.info = info;
             assert.ok(info, 'info');
-            this.tmp = Paths.findTmpDir(info);
-            this.cache = path.join(this.tmp, 'tsd');
-            mkdirp.sync(this.cache);
-            this.typings = path.join(process.cwd(), 'typings');
+            this.setTmp(Paths.findTmpDir(info));
+            this.setCache(path.join(this.tmp, 'tsd_cache'));
+            this.typings = xm.mkdirCheck(path.join(process.cwd(), 'typings'), true);
             this.config = path.join(process.cwd(), 'tsd-config.json');
         }
-        Paths.prototype.setTypings = function (dir) {
-            if(fs.existsSync(dir)) {
-                if(!fs.statSync(dir).isDirectory()) {
-                    throw (new Error('path exists but is not a directory: ' + dir));
-                }
-            } else {
-                this.typings = dir;
-                mkdirp.sync(dir);
-            }
+        Paths.prototype.setTmp = function (dir) {
+            this.tmp = xm.mkdirCheck(dir, true);
+            return dir;
+        };
+        Paths.prototype.setCache = function (dir) {
+            this.cache = xm.mkdirCheck(dir, true);
+            return dir;
         };
         Paths.findTmpDir = function findTmpDir(info) {
             var now = Date.now();
@@ -334,10 +363,7 @@ var tsd;
             for(var i = 0; i < candidateTmpDirs.length; i++) {
                 var candidatePath = path.join(candidateTmpDirs[i], info.getKey());
                 try  {
-                    mkdirp.sync(candidatePath, '0777');
-                    var testFile = path.join(candidatePath, now + '.tmp');
-                    fs.writeFileSync(testFile, 'test');
-                    fs.unlinkSync(testFile);
+                    xm.mkdirCheck(candidatePath);
                     return candidatePath;
                 } catch (e) {
                     console.log(candidatePath, 'is not writable:', e.message);
@@ -362,11 +388,12 @@ var tsd;
             if (typeof configPath === "undefined") { configPath = null; }
             if (typeof verbose === "undefined") { verbose = false; }
             this.verbose = verbose;
-            this.log = xm.getLogger();
+            this.log = xm.log;
+            xm.assertVar('configPath', configPath, 'string', true);
             this.packageInfo = tsd.PackageJSON.getLocal();
             this.paths = new tsd.Paths(this.packageInfo);
             this.config = tsd.Config.getLocal(configPath || this.paths.config);
-            this.paths.setTypings(this.config.typingsPath);
+            this.paths.typings = xm.mkdirCheck(this.config.typingsPath, true);
             if(this.verbose) {
                 this.logInfo(this.verbose);
             }
@@ -497,7 +524,7 @@ var xm;
             if (typeof amount === "undefined") { amount = 1; }
             this.stats.set(id, this.stats.get(id, 0) + amount);
             if(this.log) {
-                console.log('-> ' + id + ': ' + this.stats.get(id));
+                xm.log('-> ' + id + ': ' + this.stats.get(id));
             }
         };
         StatCounter.prototype.get = function (id) {
@@ -511,7 +538,7 @@ var xm;
         };
         StatCounter.prototype.hasAllZero = function () {
             return !this.stats.values().some(function (value) {
-                return value != 0;
+                return value !== 0;
             });
         };
         StatCounter.prototype.clear = function () {
@@ -530,6 +557,30 @@ var xm;
         return StatCounter;
     })();
     xm.StatCounter = StatCounter;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    function assertVar(label, value, type, opt) {
+        if (typeof opt === "undefined") { opt = false; }
+        var valueType = typeof value;
+        var typeKind = typeof type;
+        if(!value && (valueType === 'undefined' || valueType === 'object')) {
+            if(!opt) {
+                throw (new Error('expected "' + label + '" to be defined but got "' + value + '"'));
+            }
+        } else if(typeKind === 'function') {
+            if(value.constructor instanceof type) {
+                throw (new Error('expected "' + label + '" to be instanceof "' + type + '" but got "' + value.constructor + '": ' + value));
+            }
+        } else if(typeKind === 'string') {
+            if(valueType !== type) {
+                throw (new Error('expected "' + label + '" expected typeof "' + type + '" but got "' + valueType + '": ' + value));
+            }
+        } else {
+            throw (new Error('bad type assertion parameter "' + type + '" for "' + label + '"'));
+        }
+    }
+    xm.assertVar = assertVar;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -588,14 +639,15 @@ var git;
     var path = require('path');
     var GitAPICachedResult = (function () {
         function GitAPICachedResult(label, key, data) {
-            assert.ok(label, 'label');
-            assert.ok(key, 'key');
-            assert.ok(data, 'data');
+            xm.assertVar('label', label, 'string');
+            xm.assertVar('key', key, 'string');
+            xm.assertVar('data', data, 'object');
             this._label = label;
             this._key = key;
             this.setData(data);
         }
         GitAPICachedResult.prototype.setData = function (data) {
+            xm.assertVar('data', data, 'object');
             this._data = data;
             this._lastSet = new Date();
         };
@@ -608,10 +660,10 @@ var git;
             };
         };
         GitAPICachedResult.fromJSON = function fromJSON(json) {
-            assert.ok(json.label, 'json.label');
-            assert.ok(json.key, 'json.key');
-            assert.ok(json.data, 'json.data');
-            assert.ok(json.lastSet, 'json.lastSet');
+            xm.assertVar('label', json.label, 'string');
+            xm.assertVar('key', json.key, 'string');
+            xm.assertVar('data', json.data, 'object');
+            xm.assertVar('lastSet', json.lastSet, 'number');
             var call = new GitAPICachedResult(json.label, json.key, json.data);
             call._lastSet = new Date(json.lastSet);
             return call;
@@ -662,6 +714,8 @@ var git;
     var GitAPICachedJSONStore = (function () {
         function GitAPICachedJSONStore(api, dir) {
             this.api = api;
+            xm.assertVar('api', api, git.GitAPICached);
+            xm.assertVar('dir', dir, 'string');
             this.dir = path.join(dir, api.getCacheKey());
         }
         GitAPICachedJSONStore.prototype.init = function (callback) {
@@ -734,30 +788,31 @@ var git;
     var async = require('async');
     var _ = require('underscore');
     var assert = require('assert');
-    var mkdirp = require('mkdirp');
     var fs = require('fs');
     var path = require('path');
+    var mkdirp = require('mkdirp');
+    var Github = require('github');
     var GitAPICached = (function () {
         function GitAPICached(repoOwner, projectName, storeFolder) {
-            this._cache = new xm.KeyValueMap();
-            this._version = "3.0.0";
+            this._version = '3.0.0';
             this._defaultOpts = {
-                readCache: true,
-                writeCache: true,
-                readStore: true,
-                writeStore: true
+                cacheGet: true,
+                cacheSet: true,
+                storeGet: true,
+                storeSet: true
             };
+            this.debug = true;
             this.stats = new xm.StatCounter(false);
-            assert.ok(repoOwner, 'expected repoOwner argument');
-            assert.ok(projectName, 'expected projectName argument');
-            assert.ok(storeFolder, 'expected storeFolder argument');
+            xm.assertVar('repoOwner', repoOwner, 'string');
+            xm.assertVar('projectName', projectName, 'string');
+            xm.assertVar('storeFolder', storeFolder, 'string');
             this._repoOwner = repoOwner;
             this._projectName = projectName;
-            this._store = new git.GitAPICachedJSONStore(this, path.join(storeFolder, 'git_api_cache'));
-            var GitHubApi = require("github");
-            this._api = new GitHubApi({
+            this._api = new Github({
                 version: this._version
             });
+            this._cache = new xm.KeyValueMap();
+            this._store = new git.GitAPICachedJSONStore(this, storeFolder);
             this.rate = new GitRateLimitInfo();
         }
         GitAPICached.prototype.getRepoParams = function (vars) {
@@ -788,6 +843,10 @@ var git;
             var params = this.getRepoParams({
                 branch: branch
             });
+            if(this.debug) {
+                xm.log.log('getBranch');
+                xm.log.inspect(params);
+            }
             return this.doCachedCall('getBranch', params, {
             }, function (cb) {
                 _this._api.repos.getBranch(params, cb);
@@ -807,6 +866,10 @@ var git;
             var params = this.getRepoParams({
                 sha: sha
             });
+            if(this.debug) {
+                xm.log.log('getCommit');
+                xm.log.inspect(params);
+            }
             return this.doCachedCall('getCommit', params, {
             }, function (cb) {
                 _this._api.repos.getCommit(params, cb);
@@ -819,7 +882,7 @@ var git;
             opts = _.defaults(opts || {
             }, self._defaultOpts);
             self.stats.count('called');
-            if(opts.readCache) {
+            if(opts.cacheGet) {
                 if(this._cache.has(key)) {
                     self.stats.count('cache-hit');
                     xm.callAsync(callback, null, this._cache.get(key).data);
@@ -832,20 +895,20 @@ var git;
             var execCall = function () {
                 self.stats.count('call-api');
                 call.call(_this, function (err, res) {
-                    self.rate.getFromRes(res);
+                    _this.rate.readFromRes(res);
                     if(err) {
                         self.stats.count('call-error');
                         return callback(err, null);
                     }
                     self.stats.count('call-success');
                     var cached = new git.GitAPICachedResult(label, key, res);
-                    if(opts.writeCache) {
+                    if(opts.cacheSet) {
                         self._cache.set(key, cached);
                         self.stats.count('cache-set');
                     } else {
                         self.stats.count('cache-set-skip');
                     }
-                    if(opts.writeStore) {
+                    if(opts.storeSet) {
                         self._store.storeResult(cached, function (err, info) {
                             if(err) {
                                 console.log(err);
@@ -861,7 +924,7 @@ var git;
                     }
                 });
             };
-            if(opts.readStore) {
+            if(opts.storeGet) {
                 self._store.getResult(key, function (err, res) {
                     if(err) {
                         self.stats.count('store-get-error');
@@ -892,13 +955,13 @@ var git;
             this.remaining = 0;
             this.lastUpdate = new Date();
         }
-        GitRateLimitInfo.prototype.getFromRes = function (response) {
+        GitRateLimitInfo.prototype.readFromRes = function (response) {
             if(response && _.isObject(response.meta)) {
                 if(response.meta.hasOwnProperty('x-ratelimit-limit')) {
-                    this.limit = parseInt(response.meta['x-ratelimit-limit']);
+                    this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
                 }
                 if(response.meta.hasOwnProperty('x-ratelimit-remaining')) {
-                    this.remaining = parseInt(response.meta['x-ratelimit-remaining']);
+                    this.remaining = parseInt(response.meta['x-ratelimit-remaining'], 10);
                 }
                 this.lastUpdate = new Date();
             }
@@ -986,8 +1049,8 @@ var git;
                 _super.call(this);
             this._api = 'https://api.github.com/repos/{owner}/{project}';
             this._base = 'https://github.com/{owner}/{project}';
-            assert.ok(repoOwner, 'expected repoOwner argument');
-            assert.ok(projectName, 'expected projectName argument');
+            xm.assertVar('repoOwner', repoOwner, 'string');
+            xm.assertVar('projectName', projectName, 'string');
             this.setVars({
                 owner: repoOwner,
                 project: projectName
@@ -1018,20 +1081,58 @@ var git;
 var tsd;
 (function (tsd) {
     var async = require('async');
-    var Core = (function () {
-        function Core(context) {
+    var assert = require('assert');
+    var path = require('path');
+    var APICore = (function () {
+        function APICore(context) {
             this.context = context;
+            xm.assertVar('context', context, tsd.Context);
             this.gitURL = new git.GitURLs(context.config.repoOwner, context.config.repoProject);
-            this.gitAPI = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, context.paths.cache);
+            this.gitAPI = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, path.join(context.paths.cache, 'git'));
+            this.gitAPI.stats.log = true;
         }
-        Core.prototype.init = function (callback) {
+        APICore.prototype.getIndex = function (callback) {
+            var self = this;
+            self.context.log.debug('APICore.getIndex');
+            self.gitAPI.getBranch(this.context.config.ref, function (err, index) {
+                self.context.log.debug('APICore.gitAPI.getBranch');
+                if(err) {
+                    return callback(err, null);
+                }
+                return callback(null, index);
+            });
         };
-        return Core;
+        APICore.prototype.select = function (selector, options, callback) {
+            var self = this;
+            self.context.log.debug('select');
+            self.getIndex(function (err, index) {
+                if(err) {
+                    return callback(err, null);
+                }
+                callback(null, null);
+            });
+        };
+        return APICore;
     })();
-    tsd.Core = Core;    
+    tsd.APICore = APICore;    
 })(tsd || (tsd = {}));
-var xm;
-(function (xm) {
+var tsd;
+(function (tsd) {
+    var Selector = (function () {
+        function Selector() {
+        }
+        return Selector;
+    })();
+    tsd.Selector = Selector;    
+    var Def = (function () {
+        function Def() {
+        }
+        return Def;
+    })();
+    tsd.Def = Def;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
@@ -1041,23 +1142,40 @@ var xm;
         }
         return APIOptions;
     })();
-    xm.APIOptions = APIOptions;    
+    tsd.APIOptions = APIOptions;    
     var APIResult = (function () {
-        function APIResult() {
+        function APIResult(operation, selector, selection) {
+            this.operation = operation;
+            this.selector = selector;
+            this.selection = selection;
+            xm.assertVar('operation', operation, 'string');
+            xm.assertVar('selector', selector, tsd.Selector);
         }
         return APIResult;
     })();
-    xm.APIResult = APIResult;    
+    tsd.APIResult = APIResult;    
     var API = (function () {
         function API(context) {
             this.context = context;
-            if(!this.context) {
+            if(!context) {
                 throw new Error('no context');
             }
+            this._core = new tsd.APICore(this.context);
         }
         API.prototype.search = function (selector, options, callback) {
+            var res = new APIResult('search', selector);
+            this._core.select(selector, options, function (err, selection) {
+                res.error = err;
+                res.selection = selection;
+                callback(err, res);
+            });
         };
         API.prototype.deps = function (selector, options, callback) {
+            var res = new APIResult('deps', selector);
+            this._core.select(selector, options, function (err, selection) {
+                res.error = err;
+                callback(err, res);
+            });
         };
         API.prototype.install = function (selector, options, callback) {
         };
@@ -1071,17 +1189,8 @@ var xm;
         };
         return API;
     })();
-    xm.API = API;    
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    var Selector = (function () {
-        function Selector() {
-        }
-        return Selector;
-    })();
-    xm.Selector = Selector;    
-})(xm || (xm = {}));
+    tsd.API = API;    
+})(tsd || (tsd = {}));
 var xm;
 (function (xm) {
     var ExposeCommand = (function () {

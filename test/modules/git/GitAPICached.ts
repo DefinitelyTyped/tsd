@@ -1,15 +1,21 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/git/GitAPICached.ts" />
-///<reference path="../../src/tsd/context/Context.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/git/GitAPICached.ts" />
+///<reference path="../../../src/tsd/context/Context.ts" />
 
-describe('git.GitAPICached', function () {
+describe.skip('git.GitAPICached', function () {
 
 	var api:git.GitAPICached;
 	var context:tsd.Context;
 
+	var tmpDir = './test/tmp/GitAPICached';
+
 	var testStat = (api:git.GitAPICached, id:string, num:number, label?:string) => {
 		assert.strictEqual(api.stats.get(id), num, label ? label + ':' + id : id);
 	};
+
+	before(() => {
+		context = new tsd.Context();
+	});
 
 	it('should be defined', () => {
 		assert.isFunction(git.GitAPICached, 'constructor');
@@ -20,12 +26,13 @@ describe('git.GitAPICached', function () {
 		});
 	});
 	it('should be constructor', () => {
-		context = new tsd.Context();
-		api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, './test/tmp');
-		assert.ok(api, 'instance');
+		api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, tmpDir);
+		assert.isObject(api, 'instance');
 	});
 	describe('getRepoParams', () => {
 		it('should return user data', () => {
+			assert.isObject(api, 'instance');
+
 			var params = api.getRepoParams({extra: 123});
 			assert.propertyVal(params, 'user', context.config.repoOwner);
 			assert.propertyVal(params, 'repo', context.config.repoProject);
@@ -34,18 +41,20 @@ describe('git.GitAPICached', function () {
 	});
 	describe('getKey', () => {
 		it('should return same key for same values', () => {
+			assert.isObject(api, 'instance');
+
 			var keys = ['aa', 'bb', 'cc'];
 			assert.strictEqual(api.getKey('lbl', keys), api.getKey('lbl', keys), 'basic');
 		});
 	});
 	describe('getBranches', () => {
 
-		var tmpDir = './test/tmp';
-
 		it('should not be cached', (done:(err?) => void) => {
+			assert.isObject(api, 'instance');
+
 			api.getCachedRaw(api.getKey('bleh blah'), (err, data) => {
 				if (err) {
-					context.log.inspect(err);
+					xm.log.inspect(err);
 				}
 				assert.notOk(err, 'callback err');
 				assert.notOk(data, 'callback data');
@@ -63,7 +72,7 @@ describe('git.GitAPICached', function () {
 
 			var key = api.getBranches((err, data) => {
 				if (err) {
-					context.log.inspect(err);
+					xm.log.inspect(err);
 				}
 				assert.notOk(err, 'callback err');
 				assert.ok(data, 'callback data');
@@ -82,7 +91,7 @@ describe('git.GitAPICached', function () {
 				// should be in cache
 				api.getCachedRaw(key, (err, data) => {
 					if (err) {
-						context.log.inspect(err);
+						xm.log.inspect(err);
 					}
 					assert.notOk(err, 'getCachedRaw err');
 					assert.ok(data, 'getCachedRaw data');
@@ -90,7 +99,7 @@ describe('git.GitAPICached', function () {
 					// get again, should be cached
 					var key2 = api.getBranches((err, data) => {
 						if (err) {
-							context.log.inspect(err);
+							xm.log.inspect(err);
 						}
 						assert.notOk(err, 'second callback err');
 						assert.ok(data, 'second callback data');
@@ -109,7 +118,7 @@ describe('git.GitAPICached', function () {
 						// should still be in cache
 						api.getCachedRaw(key2, (err, data) => {
 							if (err) {
-								context.log.inspect(err);
+								xm.log.inspect(err);
 							}
 							assert.notOk(err, 'second getCachedRaw err');
 							assert.ok(data, 'second getCachedRaw data');
@@ -128,7 +137,7 @@ describe('git.GitAPICached', function () {
 
 			api.getBranches((err, data) => {
 				if (err) {
-					context.log.inspect(err);
+					xm.log.inspect(err);
 				}
 				assert.notOk(err, 'callback err');
 				assert.ok(data, 'callback data');

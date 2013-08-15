@@ -1,9 +1,9 @@
-///<reference path="../_ref.ts" />
+///<reference path="../../_ref.ts" />
 
-///<reference path="../../src/tsd/context/Context.ts" />
-///<reference path="../../src/tsd/context/Paths.ts" />
-///<reference path="../../src/tsd/context/Config.ts" />
-///<reference path="../../src/tsd/context/PackageJSON.ts" />
+///<reference path="../../../src/tsd/context/Context.ts" />
+///<reference path="../../../src/tsd/context/Paths.ts" />
+///<reference path="../../../src/tsd/context/Config.ts" />
+///<reference path="../../../src/tsd/context/PackageJSON.ts" />
 
 describe('Context', function () {
 

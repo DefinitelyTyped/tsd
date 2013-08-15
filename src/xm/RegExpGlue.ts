@@ -1,3 +1,11 @@
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
 ///<reference path="_ref.ts" />
 
 module xm {
@@ -84,7 +92,8 @@ module xm {
 				}
 				chunks.push(trim[1]);
 			}, this);
-			return new RegExp(chunks.join(glueBody), flags)
+
+			return new RegExp(chunks.join(glueBody), flags);
 		}
 	}
 }

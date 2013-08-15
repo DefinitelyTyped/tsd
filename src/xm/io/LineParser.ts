@@ -1,4 +1,12 @@
-///<reference path="../_ref.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ ///<reference path="../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 
@@ -116,10 +124,10 @@ module xm {
 				lineCount++;
 				log('line: ' + lineCount);
 				/*
-				console.log('line:');
-				console.log(line);
-				console.log('cursor: ' + cursor);
-				*/
+				 console.log('line:');
+				 console.log(line);
+				 console.log('cursor: ' + cursor);
+				 */
 
 				//break some development loops :)
 				if (lineCount > safetyBreak) {
@@ -258,8 +266,8 @@ module xm {
 				throw(new Error(this.parser.getName() + ' group index ' + num + ' > ' + (this.match.length - 2)));
 			}
 			/*if (this.parser.groupsMin >= 0 && num >= this.parser.groupsMin) {
-				throw(new Error(this.getName() + ' group index ' + num + ' >= parser.groupsMin ' + (this.parser.groupsMin)));
-			}*/
+			 throw(new Error(this.getName() + ' group index ' + num + ' >= parser.groupsMin ' + (this.parser.groupsMin)));
+			 }*/
 			num += 1;
 			if (num < 1 || num > this.match.length) {
 				return alt;

@@ -17,7 +17,7 @@ module tsd {
 
 		}
 
-		public toString() {
+		toString() {
 			return this.selector;
 		}
 	}
@@ -28,30 +28,30 @@ module tsd {
 
 	export class Config {
 
-		public typingsPath:string = 'typings';
-		public version:string = 'v4';
-		public repo:string = 'borisyankov/DefinitelyTyped';
-		public ref:string = 'master';
+		typingsPath:string = 'typings';
+		version:string = 'v4';
+		repo:string = 'borisyankov/DefinitelyTyped';
+		ref:string = 'master';
 
-		public installed:InstalledMap = {};
+		installed:InstalledMap = {};
 
 		constructor() {
 
 		}
 
-		public get repoOwner():string {
+		get repoOwner():string {
 			return this.repo.split('/')[0];
 		}
 
-		public get repoProject():string {
+		get repoProject():string {
 			return this.repo.split('/')[1];
 		}
 
-		public get repoURL():string {
+		get repoURL():string {
 			return 'http://github.com/' + this.repo;
 		}
 
-		public toJSON() {
+		toJSON() {
 			var json = {
 				typingsPath: this.typingsPath,
 				version: this.version,
@@ -62,7 +62,9 @@ module tsd {
 			return json;
 		}
 
-		public static getLocal(file:string):Config {
+		static getLocal(file:string):Config {
+			xm.assertVar('file', file, 'string');
+
 			var cfg = new Config();
 			var json:any;
 

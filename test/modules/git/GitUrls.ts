@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/git/GitUrls.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/git/GitUrls.ts" />
 
 describe('git.GitURLs', function () {
 

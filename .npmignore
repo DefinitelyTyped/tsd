@@ -2,13 +2,14 @@
 .gitignore
 .gitmodules
 
-/tmp
+tmp/
 /src
 
 .jshintrc
 Gruntfile.js
 tsd-config.json
 
+/cache
 /typings
 /schema
 /test

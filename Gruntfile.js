@@ -1,38 +1,43 @@
 module.exports = function (grunt) {
 	'use strict';
 
-	var groan = require('./lib/groan').link(grunt);
-	groan.loadNpm(
+	var gtx = require('gruntfile-gtx').wrap(grunt);
+
+	gtx.loadNpm([
 		'grunt-contrib-jshint',
 		'grunt-contrib-copy',
 		'grunt-contrib-clean',
+		'grunt-tslint',
 		'grunt-typescript',
 		'grunt-mocha-test'
-	);
-	// groan.autoNpm();
-	groan.loadTasks('tasks');
+	]);
+	// gtx.autoNpm();
+	// gtx.loadTasks('tasks');
 
-	groan.config({
+	gtx.addConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
 				reporter: './node_modules/jshint-path-reporter'
 			}),
-			all: [
-				'Gruntfile.js',
-				'tasks/*.js',
-				'lib/*.js'
-			]
+			support: ['Gruntfile.js', 'tasks/*.js']
+		},
+		tslint: {
+			options: {
+				configuration: grunt.file.readJSON('tslint.json')
+			},
+			source: ['src/**/*.ts']
 		},
 		clean: {
-			tmp: ['tmp', 'test/**/_tmp.*.*', 'test/tmp/**/*'],
-			build: ['build/*.js']
+			tmp: ['tmp/**/*', 'test/tmp/**/*'],
+			build: ['build/*.js', 'build/*.js.map']
 		},
-		copy: {
-		}
-	});
-
-	groan.config({
+		mochaTest: {
+			options: {
+				reporter: 'mocha-unfunk-reporter',
+				timeout: 3000
+			}
+		},
 		typescript: {
 			options: {
 				module: 'commonjs',
@@ -46,64 +51,57 @@ module.exports = function (grunt) {
 				src: ['src/tsd.ts'],
 				dest: 'build/tsd.js'
 			}
-		},
-		mochaTest: {
+		}
+	});
+
+	// module tester
+	gtx.define('moduleTest', function (macro, id) {
+
+		var testPath = 'test/modules/' + id + '/';
+
+		macro.newTask('clean', [testPath + 'tmp/**/*']);
+		macro.newTask('tslint', {
+			src: [testPath + '**/*.ts']
+		});
+		macro.newTask('typescript', {
 			options: {
-				reporter: 'mocha-unfunk-reporter',
-				timeout: 5000
+				base_path: testPath
 			},
-			any: {
-				src: ['test/**/*.test.js']
-			}
-		}
-	});
-
-	groan.define('typeMocha', function (grr, id) {
-		grr.addTask('clean_dev');
-		grr.addConf('typescript', {
-			options: {base_path: 'test/' + id + '/'},
-			src: ['test/' + id + '/*.ts'],
-			dest: 'test/' + id + '/_tmp.test.js'
+			src: [testPath + '**/*.ts'],
+			dest: testPath + 'tmp/' + id + '.test.js'
 		});
-		/*grr.addConf('jshint', id, {
-			src: ['test/' + id + '/**_____/*.test.js']
-		});*/
-		//grr.task('jshint');
-		grr.addConf('mochaTest', id, {
-			src: ['test/' + id + '/**/*.test.js'],
+		macro.newTask('mochaTest', {
 			options: {
-				timeout: grr.getParam('timeout', 2000)
-			}
+				timeout: macro.getParam('timeout', 2000)
+			},
+			src: [testPath + '**/*.test.js']
 		});
-		if (grr.getParam('timeout', 0) > 2000) {
-			grr.addGroup('slow');
-		}
+		macro.tag('test');
+		macro.tag('module');
 	});
-	groan.create('typeMocha', 'tsd', {timeout: 5000}, 'ts,core');
-	groan.create('typeMocha', 'xm,git', null, 'ts,lib');
 
-	groan.alias('compile_source', 'typescript:source');
+	// assemble!
 
-	// groan this
-	groan.alias('build_tests', 'groan-select:tsSub');
-
-	groan.alias('test_code', 'build_tests; mochaTest');
-	groan.alias('clean_dev', 'clean:tmp; clean:build');
-	groan.alias('prep', 'clean_dev; jshint');
+	gtx.alias('prep', ['clean:tmp', 'jshint:support']);
 
 	// cli commands
-	groan.alias('build', 'prep; compile_source');
-	groan.alias('test', 'build; test_code');
-	groan.alias('default', 'test');
+	gtx.alias('build', ['prep', 'clean:build', 'tslint:source', 'typescript:source']);
+	gtx.alias('test', ['build', 'gtx-group:test']);
+	gtx.alias('default', 'test');
 
-	groan.alias('dev', 'prep; groan-select:ts');
+	// modules
+	gtx.create('api,cli,tsd', 'moduleTest', null, 'core');
+	gtx.create('xm,git', 'moduleTest', null, 'lib');
+
+	gtx.alias('dev', 'gtx-group:core');
 
 	// additional editor toolbar mappings
-	groan.alias('edit_01', 'groan-group:test_ts');
-	groan.alias('edit_02', 'groan:tsd');
-	groan.alias('edit_03', 'groan:xm');
-	groan.alias('edit_04', 'groan:git');
-	groan.alias('edit_05', 'groan-type:typeMocha');
+	gtx.alias('edit_01', 'gtx:tsd');
+	gtx.alias('edit_02', 'gtx:api');
+	gtx.alias('edit_03', 'gtx:cli');
+	gtx.alias('edit_04', 'gtx:git');
+	gtx.alias('edit_05', 'gtx:xm');
 
-	groan.init();
+	// build and send to grunt.initConfig();
+	gtx.finalise();
 };

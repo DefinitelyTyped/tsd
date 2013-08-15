@@ -1,12 +1,11 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/xm/io/URLManager.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/xm/io/URLManager.ts" />
 
 describe('xm.URLManager', function () {
 
 	var urls:xm.URLManager;
 	var expected;
 	var actual;
-	var base = 'https://example.com/{name}/{value}';
 
 	it('should be defined', () => {
 		assert.isFunction(xm.URLManager, 'constructor');

@@ -1,4 +1,12 @@
-///<reference path="../../_ref.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ ///<reference path="../../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 module xm {
 
@@ -25,7 +33,7 @@ module xm {
 
 		public addTemplate(id:string, url:string):void {
 			if (this._templates.has(id)) {
-				throw (new Error('cannot redefine template: ' + id))
+				throw (new Error('cannot redefine template: ' + id));
 			}
 			this._templates.set(id, template.parse(url));
 		}
@@ -43,7 +51,7 @@ module xm {
 		}
 
 		public getVar(id:string):string {
-			if (this._vars.hasOwnProperty(id)){
+			if (this._vars.hasOwnProperty(id)) {
 				return this._vars[id];
 			}
 			return null;
@@ -59,7 +67,7 @@ module xm {
 
 		public getTemplate(id:string):URLTemplate {
 			if (!this._templates.has(id)) {
-				throw (new Error('undefined url template: ' + id))
+				throw (new Error('undefined url template: ' + id));
 			}
 			return this._templates.get(id);
 		}

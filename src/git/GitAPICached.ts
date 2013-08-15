@@ -1,6 +1,7 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
+///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
@@ -12,41 +13,56 @@ module git {
 	var async:Async = require('async');
 	var _:UnderscoreStatic = require('underscore');
 	var assert = require('assert');
-	var mkdirp = require('mkdirp');
 	var fs = require('fs');
 	var path = require('path');
+	var mkdirp = require('mkdirp');
+
+	var Github = require('github');
+
+	export interface GithubApi {
+		repos:GithubRepos;
+	}
+	export interface GithubRepos {
+		getBranches(params:any, calback:GithubCallback);
+		getBranch(params:any, calback:GithubCallback);
+		getCommit(params:any, calback:GithubCallback);
+	}
+	export interface GithubCallback {
+		(err?:any, res?:any):void;
+	}
 
 	export class GitAPICached {
 
-		private _api:any;
-		private _cache = new xm.KeyValueMap();
+		private _api:GithubApi;
+		private _cache:xm.IKeyValueMap;
 		private _repoOwner:string;
 		private _projectName:string;
-		private _version:string = "3.0.0";
-		private _store;
+		private _version:string = '3.0.0';
+		private _store:GitAPICachedJSONStore;
 		private _defaultOpts:any = {
-			readCache: true,
-			writeCache: true,
-			readStore: true,
-			writeStore: true
+			cacheGet: true,
+			cacheSet: true,
+			storeGet: true,
+			storeSet: true
 		};
 
+		private _debug:bool = false;
 		stats = new xm.StatCounter(false);
 		rate:GitRateLimitInfo;
 
 		constructor(repoOwner:string, projectName:string, storeFolder:string) {
-			assert.ok(repoOwner, 'expected repoOwner argument');
-			assert.ok(projectName, 'expected projectName argument');
-			assert.ok(storeFolder, 'expected storeFolder argument');
+			xm.assertVar('repoOwner', repoOwner, 'string');
+			xm.assertVar('projectName', projectName, 'string');
+			xm.assertVar('storeFolder', storeFolder, 'string');
 
 			this._repoOwner = repoOwner;
 			this._projectName = projectName;
-			this._store = new GitAPICachedJSONStore(this, path.join(storeFolder, 'git_api_cache'));
-
-			var GitHubApi = require("github");
-			this._api = new GitHubApi({
+			this._api = <GithubApi> new Github({
 				version: this._version
 			});
+
+			this._cache = new xm.KeyValueMap();
+			this._store = new GitAPICachedJSONStore(this, storeFolder);
 			this.rate = new GitRateLimitInfo();
 		}
 
@@ -59,7 +75,7 @@ module git {
 
 		getCachedRaw(key:string, callback:(err, res:GitAPICachedResult) => void):void {
 			var self:git.GitAPICached = this;
-			if (self._cache.has(key)){
+			if (self._cache.has(key)) {
 				xm.callAsync(callback, null, self._cache.get(key));
 				return;
 			}
@@ -76,6 +92,10 @@ module git {
 			var params = this.getRepoParams({
 				branch: branch
 			});
+			if (this.debug) {
+				xm.log.log('getBranch');
+				xm.log.inspect(params);
+			}
 			return this.doCachedCall('getBranch', params, {}, (cb) => {
 				this._api.repos.getBranch(params, cb);
 			}, callback);
@@ -93,6 +113,11 @@ module git {
 			var params = this.getRepoParams({
 				sha: sha
 			});
+
+			if (this.debug) {
+				xm.log.log('getCommit');
+				xm.log.inspect(params);
+			}
 			return this.doCachedCall('getCommit', params, {}, (cb) => {
 				this._api.repos.getCommit(params, cb);
 			}, finish);
@@ -102,11 +127,10 @@ module git {
 			var key = this.getKey(label, keyTerms);
 			var self:git.GitAPICached = this;
 			opts = _.defaults(opts || {}, self._defaultOpts);
-
 			self.stats.count('called');
 
 			// in memory cache?
-			if (opts.readCache) {
+			if (opts.cacheGet) {
 				if (this._cache.has(key)) {
 					self.stats.count('cache-hit');
 
@@ -125,7 +149,7 @@ module git {
 
 				// set scope!
 				call.call(this, (err, res:any) => {
-					self.rate.getFromRes(res);
+					this.rate.readFromRes(res);
 
 					if (err) {
 						self.stats.count('call-error');
@@ -136,7 +160,7 @@ module git {
 					var cached = new GitAPICachedResult(label, key, res);
 
 					// memory storage?
-					if (opts.writeCache) {
+					if (opts.cacheSet) {
 						self._cache.set(key, cached);
 						self.stats.count('cache-set');
 					}
@@ -145,7 +169,7 @@ module git {
 					}
 
 					// permanent storage?
-					if (opts.writeStore) {
+					if (opts.storeSet) {
 						self._store.storeResult(cached, (err, info) => {
 							if (err) {
 								console.log(err);
@@ -164,7 +188,7 @@ module git {
 			};
 
 			// in permanent store?
-			if (opts.readStore) {
+			if (opts.storeGet) {
 				self._store.getResult(key, (err, res) => {
 					if (err) {
 						self.stats.count('store-get-error');
@@ -186,6 +210,15 @@ module git {
 			return key;
 		}
 
+		get debug():bool {
+			return this._debug;
+		}
+
+		set debug(value:bool) {
+			this._debug = value;
+			this.stats.log = value;
+		}
+
 		getCacheKey():string {
 			return this._repoOwner + '-' + this._projectName + '-v' + this._version;
 		}
@@ -201,13 +234,13 @@ module git {
 
 		}
 
-		getFromRes(response:any) {
+		readFromRes(response:any) {
 			if (response && _.isObject(response.meta)) {
 				if (response.meta.hasOwnProperty('x-ratelimit-limit')) {
-					this.limit = parseInt(response.meta['x-ratelimit-limit']);
+					this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
 				}
 				if (response.meta.hasOwnProperty('x-ratelimit-remaining')) {
-					this.remaining = parseInt(response.meta['x-ratelimit-remaining']);
+					this.remaining = parseInt(response.meta['x-ratelimit-remaining'], 10);
 				}
 				this.lastUpdate = new Date();
 			}

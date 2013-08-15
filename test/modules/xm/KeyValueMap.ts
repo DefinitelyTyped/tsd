@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../src/xm/KeyValueMap.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../../../src/xm/KeyValueMap.ts" />
 
 describe('xm.KeyValueMap', () => {
 
@@ -125,7 +125,7 @@ describe('xm.KeyValueMap', () => {
 				assert.ok(exp);
 				assert.deepEqual(Object.keys(exp), ['aa', 'bb__bb', 'cc']);
 				assert.strictEqual(map.get('aa'), exp.aa);
-				assert.strictEqual(map.get('bb__bb'), exp['bb__bb']);
+				assert.strictEqual(map.get('bb__bb'), exp.bb__bb);
 				assert.deepEqual(map.get('cc'), exp.cc);
 			});
 			it('to object filtered', () => {

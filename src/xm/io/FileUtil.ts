@@ -1,3 +1,11 @@
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
 ///<reference path="../../_ref.ts" />
 ///<reference path="../callAsync.ts" />
 
@@ -16,7 +24,9 @@ module xm {
 
 		static readJSON(src:string, callback:(err, res:any) => void) {
 			fs.readFile(path.resolve(src), 'utf8', (err, file) => {
-				if (err || !file) return callback(err, null);
+				if (err || !file) {
+					return callback(err, null);
+				}
 				var json = null;
 				try {
 					json = JSON.parse(file);
@@ -32,7 +42,7 @@ module xm {
 			fs.writeFileSync(path.resolve(src), JSON.stringify(data, null, 2), 'utf8');
 		}
 
-		static writeJSON(src:string, data:any, callback:(err, res:any) => void) {
+		static writeJSON(src:string, data:any, callback:(err) => void) {
 			fs.writeFile(path.resolve(src), JSON.stringify(data, null, 2), 'utf8', callback);
 		}
 	}

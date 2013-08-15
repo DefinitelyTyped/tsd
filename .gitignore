@@ -7,8 +7,11 @@ tsd.sln
 /.vagrant
 
 /node_modules
-/tmp
+
+/cache
 /test/tmp
 _tmp.*
+
+tmp/
 
 /*.tgz
