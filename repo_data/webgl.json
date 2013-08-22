@@ -1,0 +1,14 @@
+{
+  "name": "webgl",
+  "description": "webgl declaration files. Borrowed from the AWAY3D project. https://github.com/away3d/away3d-core-ts/blob/master/src/def/webgl.d.ts",
+  "versions": [
+    {
+      "version": "1.3",
+      "key": "9e67b74d-9fe4-4066-9cd2-ebc71d2c5364",
+      "dependencies": [],
+      "url": "https://github.com/xperiments/Pulsar/raw/master/src/libs/webgl.d.ts",
+      "author": "Pedro Casaubon @xperiments",
+      "author_url": "https://github.com/xperiments",
+    }
+  ]
+}
