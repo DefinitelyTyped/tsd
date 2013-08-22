@@ -1,0 +1,14 @@
+{
+  "name": "pixi",
+  "description": "Super fast HTML 5 2D rendering engine that uses webGL with canvas fallback",
+  "versions": [
+    {
+      "version": "1.3",
+      "key": "0d9282a0-e822-448e-a718-815ea382ff6d",
+      "dependencies": [],
+      "url": "https://github.com/xperiments/Pulsar/raw/master/src/libs/pixi.d.ts",
+      "author": "Pedro Casaubon @xperiments",
+      "author_url": "https://github.com/xperiments",
+    }
+  ]
+}
