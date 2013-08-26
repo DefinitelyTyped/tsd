@@ -1,7 +1,7 @@
 ///<reference path="../../_ref.ts" />
 ///<reference path="../../../src/xm/io/URLManager.ts" />
 
-describe('xm.URLManager', function () {
+describe('xm.URLManager', () => {
 
 	var urls:xm.URLManager;
 	var expected;

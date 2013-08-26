@@ -1,7 +1,7 @@
 ///<reference path="../../_ref.ts" />
 ///<reference path="../../../src/xm/io/hash.ts" />
 
-describe('xm.hash', function () {
+describe('xm.hash', () => {
 
 	describe('sha1()', () => {
 		it('should return correct hash', () => {

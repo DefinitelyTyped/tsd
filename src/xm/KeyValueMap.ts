@@ -24,7 +24,7 @@
 
 	export class KeyValueMap implements IKeyValueMap {
 
-		private _prefix:string = '#_';
+		private _prefix:string = '#';
 		//need proper type
 		private _store;
 

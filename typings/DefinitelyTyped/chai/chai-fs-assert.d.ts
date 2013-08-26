@@ -34,8 +34,8 @@ declare module chai {
 		fileContent(path:string, data, msg?:string);
 		notFileContent(path:string, data, msg?:string);
 
-		jsonFile(path:string, schema:any, msg?:string);
-		notJsonFile(path:string, schema:any, msg?:string);
+		jsonFile(path:string, msg?:string);
+		notJsonFile(path:string, msg?:string);
 
 		jsonSchemaFile(path:string, schema:any, msg?:string);
 		notJsonSchemaFile(path:string, schema:any, msg?:string);

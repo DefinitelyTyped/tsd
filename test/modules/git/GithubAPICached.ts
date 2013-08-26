@@ -1,32 +1,35 @@
 ///<reference path="../../_ref.ts" />
-///<reference path="../../../src/git/GitAPICached.ts" />
+///<reference path="../../../src/git/GithubAPICached.ts" />
 ///<reference path="../../../src/tsd/context/Context.ts" />
 
-describe.skip('git.GitAPICached', function () {
+describe.skip('git.GithubAPICached', () => {
 
-	var api:git.GitAPICached;
+	var api:git.GithubAPICached;
 	var context:tsd.Context;
 
-	var tmpDir = './test/tmp/GitAPICached';
+	var repo:git.GithubRepo;
 
-	var testStat = (api:git.GitAPICached, id:string, num:number, label?:string) => {
+	var tmpDir = './test/tmp/GithubAPICached';
+
+	var testStat = (api:git.GithubAPICached, id:string, num:number, label?:string) => {
 		assert.strictEqual(api.stats.get(id), num, label ? label + ':' + id : id);
 	};
 
 	before(() => {
 		context = new tsd.Context();
+		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 	});
 
 	it('should be defined', () => {
-		assert.isFunction(git.GitAPICached, 'constructor');
+		assert.isFunction(git.GithubAPICached, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new git.GitAPICached(null, null, null);
+			api = new git.GithubAPICached(null, null);
 		});
 	});
 	it('should be constructor', () => {
-		api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, tmpDir);
+		api = new git.GithubAPICached(repo, tmpDir);
 		assert.isObject(api, 'instance');
 	});
 	describe('getRepoParams', () => {
@@ -65,7 +68,7 @@ describe.skip('git.GitAPICached', function () {
 
 		it('should cache and return data', (done:(err?) => void) => {
 
-			api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, tmpDir);
+			api = new git.GithubAPICached(repo, tmpDir);
 			//api.stats.log = true;
 
 			assert.isTrue(api.stats.hasAllZero(), 'pretest stats');
@@ -130,7 +133,7 @@ describe.skip('git.GitAPICached', function () {
 		});
 
 		it('should return data from store', (done:(err?) => void) => {
-			api = new git.GitAPICached(context.config.repoOwner, context.config.repoProject, tmpDir);
+			api = new git.GithubAPICached(repo, tmpDir);
 			//api.stats.log = true;
 
 			assert.isTrue(api.stats.hasAllZero(), 'pretest stats');

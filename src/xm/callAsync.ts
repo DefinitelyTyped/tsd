@@ -11,5 +11,5 @@
 		process.nextTick(() => {
 			callback.apply(null, args);
 		});
-	};
+	}
 }

@@ -5,8 +5,8 @@
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
-///<reference path="GitAPICached.ts" />
-///<reference path="GitAPICachedResult.ts" />
+///<reference path="GithubAPICached.ts" />
+///<reference path="GithubAPICachedResult.ts" />
 
 module git {
 
@@ -17,19 +17,21 @@ module git {
 	var fs = require('fs');
 	var path = require('path');
 
-	export class GitAPICachedJSONStore {
+	//TODO generalise this for re-use
+
+	export class GithubAPICachedJSONStore {
 
 		dir:string;
 
-		constructor(public api:GitAPICached, dir:string) {
-			xm.assertVar('api', api, GitAPICached);
+		constructor(public api:git.GithubAPICached, dir:string) {
+			xm.assertVar('api', api, git.GithubAPICached);
 			xm.assertVar('dir', dir, 'string');
 
 			this.dir = path.join(dir, api.getCacheKey());
 		}
 
 		init(callback:(err) => void) {
-			var self:GitAPICachedJSONStore = this;
+			var self:GithubAPICachedJSONStore = this;
 
 			fs.exists(self.dir, (exists:bool) => {
 				if (!exists) {
@@ -51,16 +53,16 @@ module git {
 			});
 		}
 
-		getResult(key:string, callback:(err, res:GitAPICachedResult) => void) {
+		getResult(key:string, callback:(err, res:GithubAPICachedResult) => void) {
 
-			var self:GitAPICachedJSONStore = this;
+			var self:GithubAPICachedJSONStore = this;
 
 			self.init((err) => {
 				if (err) {
 					return callback(err, null);
 				}
 
-				var src = path.join(self.dir, GitAPICachedResult.getHash(key) + '.json');
+				var src = path.join(self.dir, GithubAPICachedResult.getHash(key) + '.json');
 
 				fs.exists(src, (exists:bool) => {
 					if (!exists) {
@@ -73,7 +75,7 @@ module git {
 						}
 						var cached;
 						try {
-							cached = GitAPICachedResult.fromJSON(json);
+							cached = GithubAPICachedResult.fromJSON(json);
 						}
 						catch (e) {
 							return callback(src + ':' + e, null);
@@ -84,14 +86,14 @@ module git {
 			});
 		}
 
-		storeResult(res:GitAPICachedResult, callback:(err, info) => void) {
-			var self:GitAPICachedJSONStore = this;
+		storeResult(res:GithubAPICachedResult, callback:(err, info) => void) {
+			var self:GithubAPICachedJSONStore = this;
 
 			self.init((err) => {
 				if (err) {
 					return callback(err, null);
 				}
-				var src = path.join(self.dir, GitAPICachedResult.getHash(res.key) + '.json');
+				var src = path.join(self.dir, GithubAPICachedResult.getHash(res.key) + '.json');
 				var data = JSON.stringify(res.toJSON(), null, 2);
 
 				fs.writeFile(src, data, (err) => {

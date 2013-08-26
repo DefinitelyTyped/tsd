@@ -1,7 +1,7 @@
 ///<reference path="_ref.ts" />
 ///<reference path="APICore.ts" />
 ///<reference path="context/Context.ts" />
-///<reference path="Selector.ts" />
+///<reference path="data/Selector.ts" />
 
 module tsd {
 
@@ -9,24 +9,6 @@ module tsd {
 	var path = require('path');
 	var util = require('util');
 	var async:Async = require('async');
-
-	export class APIOptions {
-		constructor() {
-
-		}
-	}
-
-	export class APIResult {
-
-		removed:tsd.Def[];
-		added:tsd.Def[];
-		error:any;
-
-		constructor(public operation?:string, public selector?:tsd.Selector, public selection?:tsd.Def[]) {
-			xm.assertVar('operation', operation, 'string');
-			xm.assertVar('selector', selector, tsd.Selector);
-		}
-	}
 
 	export class API {
 
@@ -41,47 +23,39 @@ module tsd {
 		}
 
 		// List files matching selector:
-		search(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
-			var res = new APIResult('search', selector);
-			this._core.select(selector, options, (err, selection:tsd.Def[]) => {
-				res.error = err;
-				res.selection = selection;
-				callback(err, res);
-			});
+		search(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+			// var res = new APIResult('search', selector);
+
 		}
 
 		// Download files matching selector, and recursively solve reference dependencies.
-		deps(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
-			var res = new APIResult('deps', selector);
-			this._core.select(selector, options, (err, selection:tsd.Def[]) => {
-				res.error = err;
+		deps(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+			// var res = new APIResult('deps', selector);
 
-				callback(err, res);
-			});
 		}
 
 		// Install all files matching selector:
-		install(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+		install(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
 
 		}
 
 		// Download selection and parse header info
-		details(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+		details(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
 
 		}
 
 		// Compare repo data with local installed file and check for changes. First only use hashes and checksum/ but later this can be detailed with a fancyfied diff.
-		compare(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+		compare(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
 
 		}
 
 		// Run compare and get latest files.
-		update(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+		update(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
 
 		}
 
 		// Init project by either creating default files or read existing config
-		init(selector:tsd.Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
+		init(selector:Selector, options:APIOptions, callback:(err, res:APIResult) => void) {
 
 		}
 	}

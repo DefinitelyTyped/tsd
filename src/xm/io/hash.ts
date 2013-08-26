@@ -28,11 +28,15 @@
 	export function jsonToIdent(obj:any):string {
 		var ret = '';
 		var sep = ';';
-		if (_.isString(obj)) {
+		var type = typeof obj;
+		if (type === 'string') {
 			ret += JSON.stringify(obj) + sep;
 		}
-		else if (_.isNumber(obj)) {
+		else if (type === 'number') {
 			ret += JSON.stringify(obj) + sep;
+		}
+		else if (type === 'boolean') {
+			ret += String(obj) + sep;
 		}
 		else if (_.isDate(obj)) {
 			// funky to be unique type and include get milliseconds
@@ -45,13 +49,13 @@
 			});
 			ret += ']' + sep;
 		}
-		else if (_.isFunction(obj)) {
+		else if (type === 'function') {
 			// we could, but let's not
-			throw (new Error('cannot serialise Function'));
+			throw (new Error('jsonToIdent: cannot serialise Function'));
 		}
 		else if (_.isRegExp(obj)) {
 			// we could, but let's not
-			throw (new Error('cannot serialise RegExp'));
+			throw (new Error('jsonToIdent: cannot serialise RegExp'));
 		}
 		// object last
 		else if (_.isObject(obj)) {
@@ -64,7 +68,7 @@
 			ret += '}' + sep;
 		}
 		else {
-			throw (new Error('cannot serialise value: ' + obj));
+			throw (new Error('jsonToIdent: cannot serialise value: ' + obj));
 		}
 		return ret;
 	}

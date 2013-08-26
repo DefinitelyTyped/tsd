@@ -5,8 +5,9 @@
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
-///<reference path="GitAPICachedJSONStore.ts" />
-///<reference path="GitAPICachedResult.ts" />
+///<reference path="GithubAPICachedJSONStore.ts" />
+///<reference path="GithubAPICachedResult.ts" />
+///<reference path="GithubRepo.ts" />
 
 module git {
 
@@ -19,26 +20,31 @@ module git {
 
 	var Github = require('github');
 
-	export interface GithubApi {
-		repos:GithubRepos;
+	export interface GithubJS {
+		repos:git.GithubJSRepos;
+		gitdata:git.GithubJSData;
 	}
-	export interface GithubRepos {
-		getBranches(params:any, calback:GithubCallback);
-		getBranch(params:any, calback:GithubCallback);
-		getCommit(params:any, calback:GithubCallback);
+	export interface GithubJSRepos {
+		getBranches(params:any, calback:git.GithubJSCallback);
+		getBranch(params:any, calback:git.GithubJSCallback);
+		getCommits(params:any, calback:git.GithubJSCallback);
 	}
-	export interface GithubCallback {
+	export interface GithubJSData {
+		getCommit(params:any, calback:git.GithubJSCallback);
+		getTree(params:any, calback:git.GithubJSCallback);
+		getBlob(params:any, calback:git.GithubJSCallback);
+	}
+	export interface GithubJSCallback {
 		(err?:any, res?:any):void;
 	}
 
-	export class GitAPICached {
+	export class GithubAPICached {
 
-		private _api:GithubApi;
+		private _api:git.GithubJS;
 		private _cache:xm.IKeyValueMap;
-		private _repoOwner:string;
-		private _projectName:string;
+		private _repo:GithubRepo;
 		private _version:string = '3.0.0';
-		private _store:GitAPICachedJSONStore;
+		private _store:GithubAPICachedJSONStore;
 		private _defaultOpts:any = {
 			cacheGet: true,
 			cacheSet: true,
@@ -50,31 +56,29 @@ module git {
 		stats = new xm.StatCounter(false);
 		rate:GitRateLimitInfo;
 
-		constructor(repoOwner:string, projectName:string, storeFolder:string) {
-			xm.assertVar('repoOwner', repoOwner, 'string');
-			xm.assertVar('projectName', projectName, 'string');
+		constructor(repo:GithubRepo, storeFolder:string) {
+			xm.assertVar('repo', repo, GithubRepo);
 			xm.assertVar('storeFolder', storeFolder, 'string');
 
-			this._repoOwner = repoOwner;
-			this._projectName = projectName;
-			this._api = <GithubApi> new Github({
+			this._repo = repo;
+			this._api = <git.GithubJS> new Github({
 				version: this._version
 			});
 
 			this._cache = new xm.KeyValueMap();
-			this._store = new GitAPICachedJSONStore(this, storeFolder);
+			this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
 			this.rate = new GitRateLimitInfo();
 		}
 
 		getRepoParams(vars:any):any {
 			return _.defaults(vars, {
-				user: this._repoOwner,
-				repo: this._projectName
+				user: this._repo.ownerName,
+				repo: this._repo.projectName
 			});
 		}
 
-		getCachedRaw(key:string, callback:(err, res:GitAPICachedResult) => void):void {
-			var self:git.GitAPICached = this;
+		getCachedRaw(key:string, callback:(err, res:GithubAPICachedResult) => void):void {
+			var self:git.GithubAPICached = this;
 			if (self._cache.has(key)) {
 				xm.callAsync(callback, null, self._cache.get(key));
 				return;
@@ -88,44 +92,63 @@ module git {
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
-		getBranch(branch:string, callback:(err:any, index:any) => void):string {
-			var params = this.getRepoParams({
-				branch: branch
-			});
-			if (this.debug) {
-				xm.log.log('getBranch');
-				xm.log.inspect(params);
-			}
-			return this.doCachedCall('getBranch', params, {}, (cb) => {
-				this._api.repos.getBranch(params, cb);
-			}, callback);
-		}
-
-		getBranches(callback:(err, index:any) => void):string {
+		getBranches(callback:(err, data:any) => void):string {
 			var params = this.getRepoParams({});
-
 			return this.doCachedCall('getBranches', params, {}, (cb) => {
 				this._api.repos.getBranches(params, cb);
 			}, callback);
 		}
 
-		getCommit(sha:string, finish:(err, index:any) => void):string {
+		getBranch(branch:string, callback:(err:any, data:any) => void):string {
+			var params = this.getRepoParams({
+				branch: branch
+			});
+			return this.doCachedCall('getBranch', params, {}, (cb) => {
+				this._api.repos.getBranch(params, cb);
+			}, callback);
+		}
+
+		getTree(sha:string, recursive:bool, callback:(err:any, data:any) => void):string {
+			var params = this.getRepoParams({
+				sha: sha,
+				recursive: recursive
+			});
+			return this.doCachedCall('getTree', params, {}, (cb) => {
+				this._api.gitdata.getTree(params, cb);
+			}, callback);
+		}
+
+		getCommit(sha:string, finish:(err, data:any) => void):string {
 			var params = this.getRepoParams({
 				sha: sha
 			});
-
-			if (this.debug) {
-				xm.log.log('getCommit');
-				xm.log.inspect(params);
-			}
 			return this.doCachedCall('getCommit', params, {}, (cb) => {
-				this._api.repos.getCommit(params, cb);
+				this._api.gitdata.getCommit(params, cb);
 			}, finish);
 		}
 
-		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function, callback:(err, index:any) => void):string {
+		getBlob(sha:string, finish:(err, data:any) => void):string {
+			var params = this.getRepoParams({
+				sha: sha,
+				per_page: 100
+			});
+			return this.doCachedCall('getBlob', params, {}, (cb) => {
+				this._api.gitdata.getBlob(params, cb);
+			}, finish);
+		}
+
+		getCommits(sha:string, finish:(err, data:any) => void):string {
+			var params = this.getRepoParams({
+				sha: sha
+			});
+			return this.doCachedCall('getCommits', params, {}, (cb) => {
+				this._api.repos.getCommits(params, cb);
+			}, finish);
+		}
+
+		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function, callback:(err, data:any) => void):string {
 			var key = this.getKey(label, keyTerms);
-			var self:git.GitAPICached = this;
+			var self:git.GithubAPICached = this;
 			opts = _.defaults(opts || {}, self._defaultOpts);
 			self.stats.count('called');
 
@@ -157,7 +180,7 @@ module git {
 					}
 					self.stats.count('call-success');
 
-					var cached = new GitAPICachedResult(label, key, res);
+					var cached = new git.GithubAPICachedResult(label, key, res);
 
 					// memory storage?
 					if (opts.cacheSet) {
@@ -189,14 +212,14 @@ module git {
 
 			// in permanent store?
 			if (opts.storeGet) {
-				self._store.getResult(key, (err, res) => {
+				self._store.getResult(key, (err, res:GithubAPICachedResult) => {
 					if (err) {
 						self.stats.count('store-get-error');
 						return callback(err, null);
 					}
 					if (res) {
 						self.stats.count('store-hit');
-						return callback(null, res);
+						return callback(null, res.data);
 					}
 					self.stats.count('store-miss');
 
@@ -220,7 +243,7 @@ module git {
 		}
 
 		getCacheKey():string {
-			return this._repoOwner + '-' + this._projectName + '-v' + this._version;
+			return this._repo.getCacheKey() + '-v' + this._version;
 		}
 	}
 

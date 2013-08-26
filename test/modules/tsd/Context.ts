@@ -5,11 +5,10 @@
 ///<reference path="../../../src/tsd/context/Config.ts" />
 ///<reference path="../../../src/tsd/context/PackageJSON.ts" />
 
-describe('Context', function () {
+describe('Context', () => {
 
 	var fs = require('fs');
 	var path = require('path');
-	var rimraf = require('rimraf');
 
 	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 

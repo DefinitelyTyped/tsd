@@ -20,3 +20,11 @@ var assert = chai.assert;
 var _:UnderscoreStatic = require('underscore');
 
 require('source-map-support').install();
+
+before(() => {
+	// create some empty dirs (cannot check-in empty dirs to git)
+	//mkdirp.sync('./test/tmp');
+	//mkdirp.sync('./tmp');
+
+	assert.isDirectory('./test/tmp');
+});

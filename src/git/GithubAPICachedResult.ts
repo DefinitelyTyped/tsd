@@ -16,7 +16,7 @@ module git {
 	var fs = require('fs');
 	var path = require('path');
 
-	export class GitAPICachedResult {
+	export class GithubAPICachedResult {
 
 		private _key:string;
 		private _label:any;
@@ -49,14 +49,14 @@ module git {
 		}
 
 		//TODO test this against toJSON()
-		static fromJSON(json:any):GitAPICachedResult {
+		static fromJSON(json:any):GithubAPICachedResult {
 			// whTODOy not JSON Schema?
 			xm.assertVar('label', json.label, 'string');
 			xm.assertVar('key', json.key, 'string');
 			xm.assertVar('data', json.data, 'object');
 			xm.assertVar('lastSet', json.lastSet, 'number');
 
-			var call = new GitAPICachedResult(json.label, json.key, json.data);
+			var call = new git.GithubAPICachedResult(json.label, json.key, json.data);
 			call._lastSet = new Date(json.lastSet);
 			return call;
 		}

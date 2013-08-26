@@ -6,7 +6,7 @@
  * License: MIT - 2013
  * */
 
- module xm {
+module xm {
 
 	var util = require('util');
 	require('colors');
@@ -35,7 +35,11 @@
 
 		var writeMulti = (prefix:string, postfix:string, args:any[]) => {
 			for (var i = 0, ii = args.length; i < ii; i++) {
-				writer.writeln(prefix + args[i] + postfix);
+				var value = args[i];
+				if (value && typeof value === 'object') {
+					value = util.inspect(value, {showHidden: false, depth: 8});
+				}
+				writer.writeln(prefix + value + postfix);
 			}
 		};
 
