@@ -1,20 +1,8 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../xm/callAsync.ts" />
 ///<reference path="../xm/assertVar.ts" />
-///<reference path="../xm/KeyValueMap.ts" />
-///<reference path="../xm/StatCounter.ts" />
-///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
-///<reference path="../xm/io/FileUtil.ts" />
 
 module git {
-
-	var async:Async = require('async');
-	var _:UnderscoreStatic = require('underscore');
-	var assert = require('assert');
-	var mkdirp = require('mkdirp');
-	var fs = require('fs');
-	var path = require('path');
 
 	export class GithubAPICachedResult {
 

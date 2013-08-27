@@ -1,24 +1,36 @@
 ///<reference path="../../_ref.ts" />
 ///<reference path="../../../src/git/GithubURLManager.ts" />
 
-describe('git.GitURLs', () => {
+describe('git.GithubRepo', () => {
 
+	var repo:git.GithubRepo;
 	var urls:git.GithubURLManager;
-
-	it('should be defined', () => {
-		assert.isFunction(git.GithubURLManager, 'constructor');
-	});
-	it('should throw on bad params', () => {
-		assert.throws(() => {
-			urls = new git.GithubURLManager(null);
+	describe('GithubRepo', () => {
+		it('should be defined', () => {
+			assert.isFunction(git.GithubRepo, 'GithubRepo.constructor');
+		});
+		it('should throw on bad params', () => {
+			assert.throws(() => {
+				repo = new git.GithubRepo(null, null);
+			});
+		});
+		it('should be constructor', () => {
+			repo = new git.GithubRepo('foo', 'bar');
+			urls = repo.urls;
+			assert.ok(urls, 'instance');
 		});
 	});
-	it('should be constructor', () => {
-		urls = new git.GithubRepo('foo', 'bar').urls;
-		assert.ok(urls, 'instance');
-	});
-	describe('direct', () => {
+	describe('GithubURLManager', () => {
+		it('should be defined', () => {
+			assert.isFunction(git.GithubURLManager, 'GithubURLManager.constructor');
+		});
+		it('should throw on bad params', () => {
+			assert.throws(() => {
+				urls = new git.GithubURLManager(null);
+			});
+		});
 		it('should return replaced urls', () => {
+			urls = new git.GithubRepo('foo', 'bar').urls;
 			var api = 'https://api.github.com/repos/foo/bar';
 			var raw = 'https://raw.github.com/foo/bar';
 			var base = 'https://github.com/foo/bar';

@@ -2,14 +2,15 @@
 ///<reference path="../../../src/git/GithubAPICached.ts" />
 ///<reference path="../../../src/tsd/context/Context.ts" />
 
-describe.skip('git.GithubAPICached', () => {
+describe('git.GithubAPICached', () => {
 
 	var api:git.GithubAPICached;
 	var context:tsd.Context;
 
 	var repo:git.GithubRepo;
 
-	var tmpDir = './test/tmp/GithubAPICached';
+	var path = require('path');
+	var tmpDir = path.join(__dirname);
 
 	var testStat = (api:git.GithubAPICached, id:string, num:number, label?:string) => {
 		assert.strictEqual(api.stats.get(id), num, label ? label + ':' + id : id);
@@ -18,6 +19,7 @@ describe.skip('git.GithubAPICached', () => {
 	before(() => {
 		context = new tsd.Context();
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
+		context.paths.setTmp(tmpDir);
 	});
 
 	it('should be defined', () => {
@@ -52,36 +54,32 @@ describe.skip('git.GithubAPICached', () => {
 	});
 	describe('getBranches', () => {
 
-		it('should not be cached', (done:(err?) => void) => {
+		it('should not be cached', (done:() => void) => {
 			assert.isObject(api, 'instance');
 
-			api.getCachedRaw(api.getKey('bleh blah'), (err, data) => {
-				if (err) {
-					xm.log.inspect(err);
-				}
-				assert.notOk(err, 'callback err');
+			api.getCachedRaw(api.getKey('bleh blah')).then((data) => {
 				assert.notOk(data, 'callback data');
-
+			},(err) => {
+				xm.log.inspect(err);
+				assert.notOk(err, 'callback err');
+			}).fin(() => {
 				done();
-			});
+			}).done();
 		});
 
-		it('should cache and return data', (done:(err?) => void) => {
+		it('should cache and return data', (done:() => void) => {
 
 			api = new git.GithubAPICached(repo, tmpDir);
-			//api.stats.log = true;
+			api.debug = true;
 
 			assert.isTrue(api.stats.hasAllZero(), 'pretest stats');
 
-			var key = api.getBranches((err, data) => {
-				if (err) {
-					xm.log.inspect(err);
-				}
-				assert.notOk(err, 'callback err');
-				assert.ok(data, 'callback data');
-				assert.isString(key, 'key');
+			api.getBranches().then((data) => {
+				xm.log('getBranches 1');
 
-				testStat(api, 'called', 1, 'first');
+				assert.ok(data, 'callback data');
+
+				testStat(api, 'invoked', 1, 'first');
 
 				testStat(api, 'cache-hit', 0, 'first');
 				testStat(api, 'cache-miss', 1, 'first');
@@ -91,61 +89,40 @@ describe.skip('git.GithubAPICached', () => {
 				testStat(api, 'store-miss', 1, 'first');
 				testStat(api, 'store-set', 1, 'first');
 
-				// should be in cache
-				api.getCachedRaw(key, (err, data) => {
-					if (err) {
-						xm.log.inspect(err);
-					}
-					assert.notOk(err, 'getCachedRaw err');
-					assert.ok(data, 'getCachedRaw data');
+				// get again, should be cached
+				return api.getBranches();
+			},(err) => {
+				assert(false, 'error: ' + err);
+			}).then((data) => {
+				xm.log('getBranches 2');
 
-					// get again, should be cached
-					var key2 = api.getBranches((err, data) => {
-						if (err) {
-							xm.log.inspect(err);
-						}
-						assert.notOk(err, 'second callback err');
-						assert.ok(data, 'second callback data');
+				assert.ok(data, 'second callback data');
 
-						assert.strictEqual(key, key2, 'identical keys');
+				testStat(api, 'invoked', 2, 'second');
+				testStat(api, 'cache-hit', 1, 'second');
+				testStat(api, 'cache-miss', 1, 'second');
+				testStat(api, 'cache-set', 1, 'second');
 
-						testStat(api, 'called', 2, 'second');
-						testStat(api, 'cache-hit', 1, 'second');
-						testStat(api, 'cache-miss', 1, 'second');
-						testStat(api, 'cache-set', 1, 'second');
-
-						testStat(api, 'store-hit', 0, 'second');
-						testStat(api, 'store-miss', 1, 'second');
-						testStat(api, 'store-set', 1, 'second');
-
-						// should still be in cache
-						api.getCachedRaw(key2, (err, data) => {
-							if (err) {
-								xm.log.inspect(err);
-							}
-							assert.notOk(err, 'second getCachedRaw err');
-							assert.ok(data, 'second getCachedRaw data');
-							done(err);
-						});
-					});
-				});
-			});
+				testStat(api, 'store-hit', 0, 'second');
+				testStat(api, 'store-miss', 1, 'second');
+				testStat(api, 'store-set', 1, 'second');
+			},(err) => {
+				assert(false, 'error: ' + err);
+			}).fin(() => {
+				done();
+			}).done();
 		});
 
-		it('should return data from store', (done:(err?) => void) => {
+		it('should return data from store', (done:() => void) => {
 			api = new git.GithubAPICached(repo, tmpDir);
-			//api.stats.log = true;
+			api.debug = true;
 
 			assert.isTrue(api.stats.hasAllZero(), 'pretest stats');
 
-			api.getBranches((err, data) => {
-				if (err) {
-					xm.log.inspect(err);
-				}
-				assert.notOk(err, 'callback err');
+			api.getBranches().then((data) => {
 				assert.ok(data, 'callback data');
 
-				testStat(api, 'called', 1);
+				testStat(api, 'invoked', 1);
 
 				testStat(api, 'cache-hit', 0);
 				testStat(api, 'cache-miss', 1);
@@ -154,9 +131,11 @@ describe.skip('git.GithubAPICached', () => {
 				testStat(api, 'store-hit', 1);
 				testStat(api, 'store-miss', 0);
 				testStat(api, 'store-set', 0);
-
+			},(err) => {
+				assert(false, 'error: ' + err);
+			}).fin(() => {
 				done();
-			});
+			}).done();
 		});
 	});
 });

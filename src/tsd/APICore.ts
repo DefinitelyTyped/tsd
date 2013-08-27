@@ -3,6 +3,7 @@
 ///<reference path="../git/GithubRawFile.ts" />
 ///<reference path="../xm/callAsync.ts" />
 ///<reference path="../xm/assertVar.ts" />
+///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="data/Decoder.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="data/Definition.ts" />
@@ -10,7 +11,7 @@
 
 module tsd {
 
-	var async:Async = require('async');
+	var Q:QStatic = require('q');
 	var assert = require('assert');
 	var path = require('path');
 	var pointer = require('jsonpointer.js');
@@ -27,6 +28,7 @@ module tsd {
 
 		error:string;
 		patternMatch:DefFile[];
+		//files = new xm.KeyValueMap();
 
 		constructor(public operation:string, public selector:Selector, public options?:APIOptions) {
 			xm.assertVar('operation', operation, 'string');
@@ -53,107 +55,93 @@ module tsd {
 
 			this.definitions = new tsd.DefinitionData();
 
-			this.gitRepo = new git.GithubRepo(
-				context.config.repoOwner,
-				context.config.repoProject
-			);
+			this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 
 			this.gitURL = new git.GithubURLManager(this.gitRepo);
 			this.gitAPI = new git.GithubAPICached(this.gitRepo,
-				path.join(context.paths.cache, 'git')
+			path.join(context.paths.cache, 'git')
 			);
 			this.gitRaw = new git.GithubRawFile(this.gitURL);
 		}
 
-		getIndex(callback:(err) => void) {
+		getIndex():Qpromise {
 			var self:APICore = this;
 
 			if (this.definitions.hasBranch()) {
-				xm.callAsync(callback, null);
-				return;
+				return Q(null);
 			}
 
-			self.gitAPI.getBranch(this.context.config.ref, (err:any, branchData:any) => {
-				if (err) {
-					return callback(err);
-				}
+			var branchData;
 
-				var sha = pointer.get(branchData, branch_tree);
+			return self.gitAPI.getBranch(this.context.config.ref).then((data:any) => {
+				var sha = pointer.get(data, branch_tree);
 				if (!sha) {
-					return callback('missing sha hash');
+					throw new Error('missing sha hash');
 				}
+				//keep for later
+				branchData = data;
+				return self.gitAPI.getTree(sha, true);
+			})
+			.then((data:any) => {
+				//xm.log(data);
+				self.definitions.setBranchTree(branchData, data);
 
-				self.gitAPI.getTree(sha, true, (err:any, data:any) => {
-					if (err) {
-						return callback(err);
-					}
-
-					//xm.log(data);
-
-					self.definitions.setBranch(branchData, data);
-
-					return callback(null);
-				});
+				return null;
 			});
 		}
 
-		select(selector:Selector, options:APIOptions, callback:(err, result:APIResult) => void) {
+		select(selector:Selector, options:APIOptions):Qpromise {
 			var self:APICore = this;
 
 			var result = new APIResult('select', selector, options);
 
-			self.getIndex((err) => {
-				if (err) {
-					return callback(err, null);
-				}
-
+			return self.getIndex().then(() => {
 				result.patternMatch = selector.pattern.matchTo(self.definitions.list);
 
-				var tasks = {};
+				var tasks = [];
 
 				//TODO fix crude filter
 				/*if (selector.requiresHistory) {
 				 if (result.patternMatch.length > 1) {
 				 result.error = 'history selection requires single match, got ' + result.patternMatch.length;
-				 return xm.callAsync(callback, result.error, result);
+				 throw(new Error(result.error));
 				 }
-				 tasks['history'] = (callback:(err, res) => void) => {
-				 xm.callAsync(callback, null, null);
-				 };
 				 }*/
-				if (selector.requiresSource) {
+				//if (selector.requiresSource) {
 					if (result.patternMatch.length > 1) {
 						result.error = 'source filtering selection requires single match, got ' + result.patternMatch.length;
-						return xm.callAsync(callback, result.error, result);
+						throw(new Error(result.error));
 					}
 
-					tasks['source'] = (callback:(err, res) => void) => {
+					var file = result.patternMatch[0];
 
-						var file = result.patternMatch[0];
+					return self.gitRaw.getFile(self.definitions.commitSha, file.path).then((content) => {
+						//xm.log('getFile');
+						//xm.log(content);
 
-						self.gitRaw.getFile(self.definitions.commitSha, file.path, (err, content) => {
-							if (err) {
-								return callback(err, null);
-							}
-							//xm.log(content);
+						//TODO this is not right
+						file.content = content;
 
-							callback(err, null);
+						return file;
+					}).then((file) => {
+						//TODO better query bu sha instead of branch name (better auto-caching)
+						return self.gitAPI.getPathCommits(self.context.config.ref, file.path).then((data) => {
+							xm.log('getPathCommits');
+							xm.log(data);
+							return data;
 						});
-					};
-				}
-				if (selector.sha) {
-					// check sha
-					result.error = 'implement sha filter';
-					return xm.callAsync(callback, result.error, result);
-				}
+					}).then(() => {
+						// beh
+						return result;
+					});
+				//}
+				/*if (selector.sha) {
+				 // check sha
+				 result.error = 'implement sha filter';
+				 throw(new Error(result.error));
+				 }*/
 				//apply selector
-
-				async.series(tasks,
-					(err, res) => {
-
-						callback(err, result);
-					}
-				);
+				return Q.reject(new Error('what to do?'));
 			});
 		}
 	}

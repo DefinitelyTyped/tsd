@@ -64,7 +64,9 @@
     "chai-json-schema": "~1.0.4",
     "chai-fs": "~0.0.1",
     "async": "~0.2.9",
-    "grunt-tslint": "~0.2"
+    "grunt-tslint": "~0.2",
+    "chai-as-promised": "~3.3.1",
+    "grunt-execute": "~0.1.5"
   },
   "peerDependencies": {
     "grunt": "0.4.1"

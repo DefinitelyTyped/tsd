@@ -40,8 +40,20 @@ interface QStatic {
 	try(method: Function, ...args: any[]): Qpromise;
 	fbind(method: Function, ...args: any[]): Qpromise;
 	fcall(method: Function, ...args: any[]): Qpromise;
+
+	nfcall(method: Function, ...args: any[]): Qpromise;
+	nfapply(method: Function, args: any[]): Qpromise;
+	ninvoke(scope: any, methodName: string, ...args: any[]): Qpromise;
+	npost(scope: any, methodName: string, args: any[]): Qpromise;
+
+	denodeify(method: Function): Function;
+	nbind(method: Function, scope: any): Function;
+
+
 	all(promises: Qpromise[]): Qpromise;
 	allResolved(promises: Qpromise[]): Qpromise;
+	allSettled(values: any[]): Qpromise;
+
 	resolve(object:any):Qpromise;
 	spread(onFulfilled: Function, onRejected: Function): Qpromise;
 	timeout(ms: number): Qpromise;
@@ -53,7 +65,7 @@ interface QStatic {
 	valueOf(): any;
 	defer(): Qdeferred;
 	(value: any): Qpromise;
-	reject(): Qpromise;
+	reject(reason :any): Qpromise;
 	promise(factory: { resolve: Function; reject: Function; notify: Function; }): Qpromise;
 	isPromise(value: any): bool;
 	async(generatorFunction: any): Qdeferred;

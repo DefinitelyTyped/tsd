@@ -9,6 +9,7 @@ module.exports = function (grunt) {
 		'grunt-contrib-clean',
 		'grunt-tslint',
 		'grunt-typescript',
+		'grunt-execute',
 		'grunt-mocha-test'
 	]);
 	// gtx.autoNpmPkg();
@@ -53,6 +54,18 @@ module.exports = function (grunt) {
 			source: {
 				src: ['src/tsd.ts'],
 				dest: 'build/tsd.js'
+			},
+			dev: {
+				src: ['src/dev.ts'],
+				dest: 'tmp/dev.js'
+			}
+		},
+		execute: {
+			dev: {
+				before: function (grunt) {
+					grunt.log.writeln('devdevedvedv');
+				},
+				src: ['tmp/dev.js']
 			}
 		}
 	});
@@ -76,7 +89,7 @@ module.exports = function (grunt) {
 		});
 		macro.newTask('mochaTest', {
 			options: {
-				timeout: macro.getParam('timeout', 2000)
+				timeout: macro.getParam('timeout', 3000)
 			},
 			src: [testPath + '**/*.test.js']
 		});
@@ -93,13 +106,13 @@ module.exports = function (grunt) {
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');
 
-	gtx.alias('dev', 'gtx-group:core');
 
 	// modules
 	gtx.create('api,cli,tsd', 'moduleTest', null, 'core');
 	gtx.create('xm,git', 'moduleTest', null, 'lib');
 
-	gtx.alias('dev', 'gtx-group:core');
+	gtx.alias('run', 'gtx-group:core');
+	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);
 
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');

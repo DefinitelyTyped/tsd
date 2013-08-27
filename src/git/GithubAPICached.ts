@@ -13,6 +13,7 @@ module git {
 
 	var async:Async = require('async');
 	var _:UnderscoreStatic = require('underscore');
+	var Q:QStatic = require('q');
 	var assert = require('assert');
 	var fs = require('fs');
 	var path = require('path');
@@ -43,7 +44,7 @@ module git {
 		private _api:git.GithubJS;
 		private _cache:xm.IKeyValueMap;
 		private _repo:GithubRepo;
-		private _version:string = '3.0.0';
+		private _formatVersion:string = '0.0.1';
 		private _store:GithubAPICachedJSONStore;
 		private _defaultOpts:any = {
 			cacheGet: true,
@@ -62,7 +63,7 @@ module git {
 
 			this._repo = repo;
 			this._api = <git.GithubJS> new Github({
-				version: this._version
+				version: '3.0.0'
 			});
 
 			this._cache = new xm.KeyValueMap();
@@ -77,88 +78,101 @@ module git {
 			});
 		}
 
-		getCachedRaw(key:string, callback:(err, res:GithubAPICachedResult) => void):void {
+		getCachedRaw(key:string):Qpromise {
 			var self:git.GithubAPICached = this;
 			if (self._cache.has(key)) {
-				xm.callAsync(callback, null, self._cache.get(key));
-				return;
+				return Q.fcall(() => {
+					return self._cache.get(key);
+				});
 			}
-			self._store.getResult(key, (err, res) => {
-				return callback(err, res);
-			});
+			return self._store.getResult(key);
 		}
 
 		getKey(label:string, keyTerms?:any):string {
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
-		getBranches(callback:(err, data:any) => void):string {
+		getBranches():Qpromise {
 			var params = this.getRepoParams({});
 			return this.doCachedCall('getBranches', params, {}, (cb) => {
 				this._api.repos.getBranches(params, cb);
-			}, callback);
+			});
 		}
 
-		getBranch(branch:string, callback:(err:any, data:any) => void):string {
+		getBranch(branch:string):Qpromise {
 			var params = this.getRepoParams({
 				branch: branch
 			});
 			return this.doCachedCall('getBranch', params, {}, (cb) => {
 				this._api.repos.getBranch(params, cb);
-			}, callback);
+			});
 		}
 
-		getTree(sha:string, recursive:bool, callback:(err:any, data:any) => void):string {
+		getTree(sha:string, recursive:bool):Qpromise {
 			var params = this.getRepoParams({
 				sha: sha,
 				recursive: recursive
 			});
 			return this.doCachedCall('getTree', params, {}, (cb) => {
 				this._api.gitdata.getTree(params, cb);
-			}, callback);
+			});
 		}
 
-		getCommit(sha:string, finish:(err, data:any) => void):string {
+		getCommit(sha:string):Qpromise {
 			var params = this.getRepoParams({
 				sha: sha
 			});
 			return this.doCachedCall('getCommit', params, {}, (cb) => {
 				this._api.gitdata.getCommit(params, cb);
-			}, finish);
+			});
 		}
 
-		getBlob(sha:string, finish:(err, data:any) => void):string {
+		getBlob(sha:string):Qpromise {
 			var params = this.getRepoParams({
 				sha: sha,
 				per_page: 100
 			});
 			return this.doCachedCall('getBlob', params, {}, (cb) => {
 				this._api.gitdata.getBlob(params, cb);
-			}, finish);
+			});
 		}
 
-		getCommits(sha:string, finish:(err, data:any) => void):string {
+		getCommits(sha:string):Qpromise {
 			var params = this.getRepoParams({
+				per_page : 100,
 				sha: sha
 			});
 			return this.doCachedCall('getCommits', params, {}, (cb) => {
 				this._api.repos.getCommits(params, cb);
-			}, finish);
+			});
 		}
 
-		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function, callback:(err, data:any) => void):string {
+		getPathCommits(sha:string, path:String):Qpromise {
+			var params = this.getRepoParams({
+				per_page : 100,
+				sha : sha,
+				path: path
+			});
+			return this.doCachedCall('getCommits', params, {}, (cb) => {
+				this._api.repos.getCommits(params, cb);
+			});
+		}
+
+		//TODO promise-ify this further
+		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function):Qpromise {
 			var key = this.getKey(label, keyTerms);
 			var self:git.GithubAPICached = this;
 			opts = _.defaults(opts || {}, self._defaultOpts);
-			self.stats.count('called');
+			self.stats.count('invoked');
 
 			// in memory cache?
 			if (opts.cacheGet) {
 				if (this._cache.has(key)) {
 					self.stats.count('cache-hit');
 
-					xm.callAsync(callback, null, this._cache.get(key).data);
-					return key;
+					return Q.fcall(() => {
+						return this._cache.get(key).data;
+					});
 				}
 				self.stats.count('cache-miss');
 			}
@@ -166,17 +180,23 @@ module git {
 				self.stats.count('cache-get-skip');
 			}
 
+			var defer = Q.defer();
+
 			// subroutine
 			var execCall = () => {
 				self.stats.count('call-api');
 
-				// set scope!
-				call.call(this, (err, res:any) => {
-					this.rate.readFromRes(res);
+				// classic callback
+				call.call(null, (err, res:any) => {
+					self.rate.readFromRes(res);
+					if (self._debug) {
+						xm.log(self.rate.toStatus());
+					}
 
 					if (err) {
 						self.stats.count('call-error');
-						return callback(err, null);
+						defer.reject(err);
+						return;
 					}
 					self.stats.count('call-success');
 
@@ -193,44 +213,45 @@ module git {
 
 					// permanent storage?
 					if (opts.storeSet) {
-						self._store.storeResult(cached, (err, info) => {
+						self._store.storeResult(cached, (err) => {
 							if (err) {
-								console.log(err);
 								self.stats.count('store-set-error');
-								return callback(err, null);
+								defer.reject(err);
 							}
-							self.stats.count('store-set');
-							callback(err, res);
+							else {
+								self.stats.count('store-set');
+								defer.resolve(res);
+							}
 						});
 					}
 					else {
 						self.stats.count('store-set-skip');
-						callback(err, res);
+						defer.resolve(res);
 					}
 				});
 			};
 
 			// in permanent store?
 			if (opts.storeGet) {
-				self._store.getResult(key, (err, res:GithubAPICachedResult) => {
-					if (err) {
-						self.stats.count('store-get-error');
-						return callback(err, null);
-					}
+				self._store.getResult(key).then((res:GithubAPICachedResult) => {
 					if (res) {
 						self.stats.count('store-hit');
-						return callback(null, res.data);
+						defer.resolve(res.data);
 					}
-					self.stats.count('store-miss');
-
-					execCall();
+					else {
+						self.stats.count('store-miss');
+						execCall();
+					}
+				}, (err) => {
+					self.stats.count('store-get-error');
+					defer.reject(err);
 				});
 			}
 			else {
 				self.stats.count('store-get-skip');
 				execCall();
 			}
-			return key;
+			return defer.promise;
 		}
 
 		get debug():bool {
@@ -243,7 +264,7 @@ module git {
 		}
 
 		getCacheKey():string {
-			return this._repo.getCacheKey() + '-v' + this._version;
+			return this._repo.getCacheKey() + '-v' + this._formatVersion;
 		}
 	}
 

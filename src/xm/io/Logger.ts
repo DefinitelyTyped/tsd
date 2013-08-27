@@ -34,13 +34,17 @@ module xm {
 		writer = writer || new xm.ConsoleLineWriter();
 
 		var writeMulti = (prefix:string, postfix:string, args:any[]) => {
+			var ret = [];
 			for (var i = 0, ii = args.length; i < ii; i++) {
 				var value = args[i];
 				if (value && typeof value === 'object') {
-					value = util.inspect(value, {showHidden: false, depth: 8});
+					ret.push(util.inspect(value, {showHidden: false, depth: 8}));
 				}
-				writer.writeln(prefix + value + postfix);
+				else {
+					ret.push(value);
+				}
 			}
+			writer.writeln(prefix + ret.join('; ') + postfix);
 		};
 
 		var plain = (...args:any[]) => {

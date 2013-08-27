@@ -23,7 +23,8 @@ module tsd {
 		public project:string;
 		public name:string;
 		public semver:string;
-		public head:DefCommit;
+		public head:tsd.DefVersion;
+		public content:string;
 
 		constructor(path?:string) {
 			this.path = path;
@@ -54,30 +55,30 @@ module tsd {
 			file.name = match[2];
 			// path.semver = match[3];
 
-			file.head = new DefCommit(file, sha);
+			file.head = new tsd.DefVersion(file, sha);
 
 			return file;
 		}
 	}
 
 	//single definition file in repo (non-parsed)
-	export class DefCommit {
+	export class DefVersion {
 
 		public sha:string;
 		public date:Date;
 		public file:DefFile;
 
 		// linked list (only care for single chain
-		public newer:DefCommit;
-		public older:DefCommit;
+		public newer:tsd.DefVersion;
+		public older:tsd.DefVersion;
 
 		constructor(file:DefFile, sha:string) {
 			this.file = file;
 			this.sha = sha;
 		}
 
-		get head():DefCommit {
-			var def:DefCommit = this;
+		get head():tsd.DefVersion {
+			var def:tsd.DefVersion = this;
 			while (def.newer) {
 				def = def.newer;
 			}
@@ -113,7 +114,8 @@ module tsd {
 			return !!this._branchName && this._list.length > 0;
 		}
 
-		setBranch(branch:any, tree:any):void {
+		// assume recursive
+		setBranchTree(branch:any, tree:any):void {
 			xm.assertVar('branch', branch, 'object');
 			xm.assertVar('tree', tree, 'object');
 
@@ -133,6 +135,10 @@ module tsd {
 					}
 				}
 			}, this);
+		}
+
+		addFile(def:DefFile) {
+			this._list.push(def);
 		}
 
 		getPaths():string[] {
@@ -157,10 +163,6 @@ module tsd {
 
 		toString():string {
 			return '[' + this._branchName + ']';
-		}
-
-		addFile(def:DefFile) {
-			this._list.push(def);
 		}
 
 		get branchName():string {

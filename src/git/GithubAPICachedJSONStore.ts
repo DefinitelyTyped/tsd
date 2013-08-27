@@ -12,11 +12,12 @@ module git {
 
 	var async:Async = require('async');
 	var _:UnderscoreStatic = require('underscore');
+	var Q:QStatic = require('q');
 	var assert = require('assert');
 	var mkdirp = require('mkdirp');
 	var fs = require('fs');
 	var path = require('path');
-
+	var FS:Qfs = require('q-io/fs');
 	//TODO generalise this for re-use
 
 	export class GithubAPICachedJSONStore {
@@ -30,75 +31,76 @@ module git {
 			this.dir = path.join(dir, api.getCacheKey());
 		}
 
-		init(callback:(err) => void) {
+		init():Qpromise {
 			var self:GithubAPICachedJSONStore = this;
 
-			fs.exists(self.dir, (exists:bool) => {
+			return FS.exists(self.dir).then((exists:bool) => {
 				if (!exists) {
-					mkdirp(self.dir, (err) => {
-						if (err) {
-							return callback('cannot create dir: ' + self.dir + ': ' + err);
-						}
-						return callback(null);
-					});
+					return Q.nfcall(mkdirp, self.dir);
 				}
 				else {
-					fs.stat(self.dir, (err, stats) => {
-						if (!stats.isDirectory()) {
-							return callback('is not a directory: ' + self.dir);
+					return FS.isDirectory(self.dir).then((isDir:bool) => {
+						if (isDir) {
+							return null;
 						}
-						return callback(null);
+						else {
+							throw new Error('is not a directory: ' + self.dir);
+						}
 					});
 				}
 			});
+			//return defer.promise;
 		}
 
-		getResult(key:string, callback:(err, res:GithubAPICachedResult) => void) {
-
+		getResult(key:string):Qpromise {
 			var self:GithubAPICachedJSONStore = this;
+			var src = path.join(self.dir, GithubAPICachedResult.getHash(key) + '.json');
 
-			self.init((err) => {
-				if (err) {
-					return callback(err, null);
-				}
+			return self.init().then(() => {
+				return FS.exists(src);
+			}
+			).then((exists:bool) => {
+				if (exists) {
+					//return Q.nfcall(xm.FileUtil.readJSON, src);
 
-				var src = path.join(self.dir, GithubAPICachedResult.getHash(key) + '.json');
-
-				fs.exists(src, (exists:bool) => {
-					if (!exists) {
-						return callback(null, null);
-					}
+					var defererer:Qdeferred = Q.defer();
 
 					xm.FileUtil.readJSON(src, (err, json) => {
 						if (err) {
-							return callback(err, null);
+							defererer.reject(err);
 						}
-						var cached;
-						try {
-							cached = GithubAPICachedResult.fromJSON(json);
+						else {
+							var cached;
+							try {
+								cached = GithubAPICachedResult.fromJSON(json);
+							}
+							catch (e) {
+								defererer.reject(new Error(src + ':' + e));
+								return;
+							}
+							defererer.resolve(cached);
 						}
-						catch (e) {
-							return callback(src + ':' + e, null);
-						}
-						callback(null, cached);
 					});
-				});
+					return defererer.promise;
+				}
+				else {
+					return null;
+				}
 			});
 		}
 
 		storeResult(res:GithubAPICachedResult, callback:(err, info) => void) {
 			var self:GithubAPICachedJSONStore = this;
 
-			self.init((err) => {
-				if (err) {
-					return callback(err, null);
-				}
+			self.init().then(() => {
 				var src = path.join(self.dir, GithubAPICachedResult.getHash(res.key) + '.json');
 				var data = JSON.stringify(res.toJSON(), null, 2);
 
 				fs.writeFile(src, data, (err) => {
 					callback(err, {src: src});
 				});
+			}, (err) => {
+				callback(err, null);
 			});
 		}
 	}

@@ -37,8 +37,7 @@ describe('APICore', () => {
 	});
 	describe('getIndex', () => {
 		it('should return data', (done) => {
-			api.getIndex((err) => {
-				assert.notOk(err, 'err');
+			api.getIndex().then(() => {
 
 				api.context.log('api -> getIndex');
 
@@ -48,9 +47,7 @@ describe('APICore', () => {
 
 				//xm.log(api.definitions.toDump());
 				//xm.log(api.definitions.getPaths());
-
-				done();
-			});
+			}).fin(done).done();
 		});
 	});
 	describe('search', () => {
@@ -58,19 +55,17 @@ describe('APICore', () => {
 			var selector = new tsd.Selector('async/async');
 			selector.references = true;
 
-			api.select(selector, null, (err, result:tsd.APIResult) => {
-				assert.notOk(err, 'err');
-				assert.ok(result, 'result,');
+			api.select(selector, null).then((result:tsd.APIResult) => {
+				assert.ok(result, 'result');
 
 				api.context.log('api -> search');
 
 				xm.log.inspect(result);
 
+				assert.ok(result.patternMatch, 'result.patternMatch');
 				assert.operator(result.patternMatch.length, '>=', 1, 'result.patternMatch');
 
-
-				done();
-			});
+			}).fin(done).done();
 		});
 	});
 });

@@ -2,15 +2,14 @@
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="GithubURLManager.ts" />
-///<reference path="GithubRepo.ts" />
 
 module git {
 
 	var request = require('request');
+	var Q:QStatic = require('q');
 
 	export class GithubRawFile {
 
-		private _repo:GithubRepo;
 		private _urls:git.GithubURLManager;
 
 		constructor(urls:git.GithubURLManager) {
@@ -19,26 +18,21 @@ module git {
 			this._urls = urls;
 		}
 
-		getFile(commit:string, path:string, callback:(err, content:any) => void) {
+		getFile(commit:string, path:string):Qpromise {
 			var opts = {
 				url: this._urls.rawFile(commit, path)
 			};
 
 			xm.log(opts.url);
 
-			request.get(opts, (err, res) => {
-				if (err) {
-					return callback(err, null);
+			return Q.nfcall(request.get, opts).then((res) => {
+				res = res[0];
+				if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
+					throw new Error('unexpected status code: ' + res.statusCode);
 				}
-				if (res.statusCode >= 200 && res.statusCode < 400) {
-					// according to the headers raw github is binary encoded
-					// so let's pull it through a buffer.toString()
-					//TODO verify this shouldn't be utf8
-					var content = new Buffer(res.body).toString();
-
-					return callback(null, content);
-				}
-				return callback('unexpected status code: ' + res.statusCode, null);
+				// according to the headers raw github is binary encoded, but from what? utf8?
+				//TODO find correct way to handle this
+				return String(res.body);
 			});
 		}
 	}
