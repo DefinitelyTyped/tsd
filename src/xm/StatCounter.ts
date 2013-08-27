@@ -1,25 +1,27 @@
 /*
-* imported from typescript-xm package
-*
-* Bart van der Schoor
-* https://github.com/Bartvds/typescript-xm
-* License: MIT - 2013
-* */
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
 module xm {
 	export class StatCounter {
 
 		stats:KeyValueMap = new KeyValueMap();
 
-		constructor(public log:bool) {
+		constructor(public log:bool = false) {
 
 		}
 
-		count(id:string, amount?:number = 1) {
-			this.stats.set(id, this.stats.get(id, 0) + amount);
+		count(id:string, amount?:number = 1):number {
+			var value = this.stats.get(id, 0) + amount;
+			this.stats.set(id, value);
 
 			if (this.log) {
 				xm.log('-> ' + id + ': ' + this.stats.get(id));
 			}
+			return value;
 		}
 
 		get(id:string):number {

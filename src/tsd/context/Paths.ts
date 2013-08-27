@@ -2,13 +2,13 @@
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
 ///<reference path="../../xm/io/mkdirCheck.ts" />
-///<reference path="PackageJSON.ts" />
+///<reference path="../../xm/data/PackageJSON.ts" />
 
 module tsd {
 
 	var fs = require('fs');
+	var os = require('os');
 	var path = require('path');
-	var assert = require('assert');
 
 	export class Paths {
 
@@ -18,36 +18,49 @@ module tsd {
 
 		cache:string;
 
-		constructor(public info:PackageJSON) {
-			assert.ok(info, 'info');
+		constructor(public info:xm.PackageJSON) {
+			xm.assertVar('info', info, xm.PackageJSON);
 
+			//TODO move creation to a method
 			this.setTmp(Paths.findTmpDir(info));
-			this.setCache(path.join(this.tmp, 'tsd_cache'));
 
-			this.typings = xm.mkdirCheck(path.join(process.cwd(), 'typings'), true);
+			//TODO move to user profile similar to npm?
+			this.setCache(path.join(this.tmp, 'cache'));
+
+			this.typings = xm.mkdirCheck(path.resolve(process.cwd(), 'typings'), true);
 			this.config = path.join(process.cwd(), 'tsd-config.json');
 		}
 
 		setTmp(dir:string):string {
-			this.tmp = xm.mkdirCheck(dir, true);
-			return dir;
+			dir = xm.mkdirCheck(dir, true);
+			this.tmp = dir;
+			return this.tmp;
 		}
 
 		setCache(dir:string):string {
-			this.cache = xm.mkdirCheck(dir, true);
+			dir = xm.mkdirCheck(dir, true);
+			this.cache = dir;
 			return dir;
 		}
 
-		static findTmpDir(info:PackageJSON):string {
+		static findTmpDir(info:xm.PackageJSON):string {
+			xm.assertVar('info', info, xm.PackageJSON);
+
 			var now = Date.now();
 			var candidateTmpDirs = [
-				process.env['TMPDIR'] || '/tmp',
+				process.env['TMPDIR'],
 				info.pkg.tmp,
-				path.join(process.cwd(), 'tmp')
+				os.tmpdir(),
+				path.resolve(process.cwd(), 'tmp')
 			];
 
+			var key = info.getKey();
+
 			for (var i = 0; i < candidateTmpDirs.length; i++) {
-				var candidatePath = path.join(candidateTmpDirs[i], info.getKey());
+				if (!candidateTmpDirs[i]) {
+					continue;
+				}
+				var candidatePath = path.resolve(candidateTmpDirs[i], key);
 
 				try {
 					xm.mkdirCheck(candidatePath);

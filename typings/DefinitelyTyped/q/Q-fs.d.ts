@@ -4,10 +4,10 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 interface Qfs {
-	open(path:string, options:any):Qpromise;
-	read(path:string, options:any):Qpromise;
-	write(path:string, content:any, options:any):Qpromise;
-	append(path:string, content:any, options:any):Qpromise;
+	open(path:string, options?:any):Qpromise;
+	read(path:string, options?:any):Qpromise;
+	write(path:string, content:any, options?:any):Qpromise;
+	append(path:string, content:any, options?:any):Qpromise;
 	copy(source:string, target:string):Qpromise;
 	copyTree(source:string, target:string):Qpromise;
 	list(path:string):Qpromise;

@@ -10,6 +10,7 @@ module.exports = function (grunt) {
 		'grunt-tslint',
 		'grunt-typescript',
 		'grunt-execute',
+		'grunt-shell',
 		'grunt-mocha-test'
 	]);
 	// gtx.autoNpmPkg();
@@ -51,13 +52,25 @@ module.exports = function (grunt) {
 				// should be on but is buggy
 				sourcemap: false
 			},
-			source: {
-				src: ['src/tsd.ts'],
-				dest: 'build/tsd.js'
+			api: {
+				src: ['src/api.ts'],
+				dest: 'build/api.js'
+			},
+			cli: {
+				src: ['src/cli.ts'],
+				dest: 'build/cli.js'
 			},
 			dev: {
 				src: ['src/dev.ts'],
 				dest: 'tmp/dev.js'
+			}
+		},
+		shell: {
+			cli: {
+				command: 'node ./build/cli --help',
+				options: {
+					stdout: true
+				}
 			}
 		},
 		execute: {
@@ -77,15 +90,15 @@ module.exports = function (grunt) {
 
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
 
+		macro.newTask('tslint', {
+			src: [testPath + '**/*.ts']
+		});
 		macro.newTask('typescript', {
 			options: {
 				base_path: testPath
 			},
 			src: [testPath + '**/*.ts'],
 			dest: testPath + 'tmp/' + id + '.test.js'
-		});
-		macro.newTask('tslint', {
-			src: [testPath + '**/*.ts']
 		});
 		macro.newTask('mochaTest', {
 			options: {
@@ -102,7 +115,7 @@ module.exports = function (grunt) {
 	gtx.alias('prep', ['clean:tmp', 'jshint:support']);
 
 	// cli commands
-	gtx.alias('build', ['prep', 'clean:build', 'typescript:source', 'tslint:source', 'mochaTest:integrity']);
+	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'tslint:source', 'mochaTest:integrity']);
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');
 
@@ -111,7 +124,7 @@ module.exports = function (grunt) {
 	gtx.create('api,cli,tsd', 'moduleTest', null, 'core');
 	gtx.create('xm,git', 'moduleTest', null, 'lib');
 
-	gtx.alias('run', 'gtx-group:core');
+	gtx.alias('run', ['build', 'shell:cli']);
 	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);
 
 	// additional editor toolbar mappings

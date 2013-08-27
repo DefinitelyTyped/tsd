@@ -1,6 +1,7 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/io/Logger.ts" />
+///<reference path="../xm/io/hash.ts" />
 
 module git {
 
@@ -30,6 +31,7 @@ module git {
 		toJSON():any {
 			return {
 				key: this.key,
+				hash: this.getHash(),
 				data: this.data,
 				label: this.label,
 				lastSet: this.lastSet.getTime()
@@ -51,6 +53,10 @@ module git {
 
 		static getHash(key:string):string {
 			return xm.sha1(key);
+		}
+
+		getHash():string {
+			return GithubAPICachedResult.getHash(this._key);
 		}
 
 		get label():string {

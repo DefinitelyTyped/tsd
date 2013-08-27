@@ -8,13 +8,13 @@
 
  module xm {
 
+	 var mkdirp = require('mkdirp');
+	 var path = require('path');
+	 var fs = require('fs');
+
 	// TODO proper chmod access
 	export function mkdirCheck(dir:string, writable?:bool = false):string {
-
-		var mkdirp = require('mkdirp');
-		var path = require('path');
-		var fs = require('fs');
-
+		dir = path.resolve(dir);
 		if (fs.existsSync(dir)) {
 			if (!fs.statSync(dir).isDirectory()) {
 				throw (new Error('path exists but is not a directory: ' + dir));

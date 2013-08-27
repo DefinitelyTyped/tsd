@@ -6,16 +6,15 @@
 
 describe('Selector', () => {
 
-	var list:tsd.DefFile[];
+	var list:tsd.Definition[];
 
-	function addFile(name) {
-		list.push(tsd.DefFile.getFrom(name, xm.sha1(name)));
-	}
 
 	before(() => {
 		list = [];
+		//dummy list
+		var commit = xm.sha1('dummy!!');
 		xm.FileUtil.readJSONSync('test/fixtures/paths-few.json').forEach((path) => {
-			addFile(path);
+			list.push(tsd.Definition.getFrom(path, xm.sha1(path), commit));
 		});
 	});
 
@@ -28,10 +27,10 @@ describe('Selector', () => {
 
 	describe('SelectorFilePattern', () => {
 		var pattern:tsd.SelectorFilePattern;
-		var files:tsd.DefFile[];
+		var files:tsd.Definition[];
 
 		it('async 1', () => {
-			pattern = new tsd.SelectorFilePattern('async/async');
+			pattern = new tsd.SelectorFilePattern('async');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);
@@ -41,6 +40,16 @@ describe('Selector', () => {
 		});
 
 		it('async 2', () => {
+			pattern = new tsd.SelectorFilePattern('async/async');
+			assert.isObject(pattern, 'pattern');
+
+			files = pattern.matchTo(list);
+
+			assert.isArray(files, 'files');
+			assert.lengthOf(files, 1, 'files');
+		});
+
+		it('async 3', () => {
 			pattern = new tsd.SelectorFilePattern('async/*');
 			assert.isObject(pattern, 'pattern');
 
@@ -50,7 +59,7 @@ describe('Selector', () => {
 			assert.lengthOf(files, 1, 'files');
 		});
 
-		it('jquery 1', () => {
+		it('jquery 2', () => {
 			pattern = new tsd.SelectorFilePattern('jquery/jquery');
 			assert.isObject(pattern, 'pattern');
 
@@ -60,7 +69,7 @@ describe('Selector', () => {
 			assert.lengthOf(files, 1, 'files');
 		});
 
-		it('jquery 2', () => {
+		it('jquery 3', () => {
 			pattern = new tsd.SelectorFilePattern('jquery*/jquery*');
 			assert.isObject(pattern, 'pattern');
 

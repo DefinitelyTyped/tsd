@@ -16,13 +16,13 @@
     }
   ],
   "bin": {
-    "tsd": "build/tsd.js"
+    "tsd": "build/cli.js"
+  },
+  "main": {
+    "tsd": "build/api.js"
   },
   "scripts": {
     "test": "grunt test"
-  },
-  "main": {
-    "tsd": "build/tsd.js"
   },
   "homepage": "https://github.com/Diullei/tsd",
   "engines": {
@@ -40,7 +40,9 @@
     "semver": "~2.1.0",
     "jsonpointer.js": "~0.3.0",
     "q": "~0.9.6",
-    "q-io": "~1.9.4"
+    "q-io": "~1.9.4",
+    "optimist": "~0.6.0",
+    "pkginfo": "~0.3.0"
   },
   "____notes": [
     "fix ~tildes before release",
@@ -66,7 +68,8 @@
     "async": "~0.2.9",
     "grunt-tslint": "~0.2",
     "chai-as-promised": "~3.3.1",
-    "grunt-execute": "~0.1.5"
+    "grunt-execute": "~0.1.5",
+    "grunt-shell": "~0.3.1"
   },
   "peerDependencies": {
     "grunt": "0.4.1"

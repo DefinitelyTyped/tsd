@@ -1,7 +1,7 @@
 ///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
-///<reference path="PackageJSON.ts" />
+///<reference path="../../xm/data/PackageJSON.ts" />
 
 module tsd {
 
@@ -11,7 +11,7 @@ module tsd {
 	var assert = require('assert');
 	var tv4:TV4 = require('tv4').tv4;
 
-	export class Installed {
+	/*export class Installed {
 
 		constructor(public selector:string = null, public commit:string = null, public hash:string = null) {
 
@@ -24,7 +24,7 @@ module tsd {
 
 	export interface InstalledMap {
 		[selector: string]: Installed;
-	}
+	}*/
 
 	export class Config {
 
@@ -33,10 +33,8 @@ module tsd {
 		repo:string = 'borisyankov/DefinitelyTyped';
 		ref:string = 'master';
 
-		installed:InstalledMap = {};
-
-		constructor() {
-
+		constructor(public schema:any) {
+			xm.assertVar('schema', schema, 'object');
 		}
 
 		get repoOwner():string {
@@ -45,10 +43,6 @@ module tsd {
 
 		get repoProject():string {
 			return this.repo.split('/')[1];
-		}
-
-		get repoURL():string {
-			return 'http://github.com/' + this.repo;
 		}
 
 		toJSON() {
@@ -62,17 +56,22 @@ module tsd {
 			return json;
 		}
 
-		static getLocal(file:string):Config {
+		static getLocal(schema:any, file:string):Config {
+			xm.assertVar('schema', schema, 'object');
 			xm.assertVar('file', file, 'string');
 
-			var cfg = new Config();
+			var cfg = new Config(schema);
 			var json:any;
 
 			if (fs.existsSync(file)) {
 
+				var stats = fs.statSync(file);
+				if (stats.isDirectory()) {
+					throw (new Error('config path exists but is a directory: ' + file));
+				}
+
 				json = xm.FileUtil.readJSONSync(file);
 
-				var schema = xm.FileUtil.readJSONSync(path.join(process.cwd(), 'schema', 'tsd-config_v4.json'));
 				var res = tv4.validateResult(json, schema);
 
 				if (!res.valid || res.missing.length > 0) {

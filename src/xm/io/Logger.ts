@@ -30,8 +30,10 @@ module xm {
 		inspect(value:any, label?:string, depth?:number):void;
 	}
 
-	export function getLogger(writer?:xm.LineWriter):Logger {
+	export function getLogger(label?:string, writer?:xm.LineWriter):Logger {
 		writer = writer || new xm.ConsoleLineWriter();
+
+		label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
 
 		var writeMulti = (prefix:string, postfix:string, args:any[]) => {
 			var ret = [];
@@ -44,7 +46,7 @@ module xm {
 					ret.push(value);
 				}
 			}
-			writer.writeln(prefix + ret.join('; ') + postfix);
+			writer.writeln(label + prefix + ret.join('; ') + postfix);
 		};
 
 		var plain = (...args:any[]) => {

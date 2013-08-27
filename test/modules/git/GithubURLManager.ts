@@ -1,10 +1,11 @@
 ///<reference path="../../_ref.ts" />
 ///<reference path="../../../src/git/GithubURLManager.ts" />
 
-describe('git.GithubRepo', () => {
+describe('git.GithubRepo / git.GithubURLManager', () => {
 
 	var repo:git.GithubRepo;
 	var urls:git.GithubURLManager;
+
 	describe('GithubRepo', () => {
 		it('should be defined', () => {
 			assert.isFunction(git.GithubRepo, 'GithubRepo.constructor');
@@ -20,6 +21,7 @@ describe('git.GithubRepo', () => {
 			assert.ok(urls, 'instance');
 		});
 	});
+
 	describe('GithubURLManager', () => {
 		it('should be defined', () => {
 			assert.isFunction(git.GithubURLManager, 'GithubURLManager.constructor');

@@ -1,39 +1,39 @@
 ///<reference path="../../_ref.ts" />
-///<reference path="../../../src/tsd/APICore.ts" />
+///<reference path="../../../src/tsd/Core.ts" />
 ///<reference path="../../../src/tsd/data/Definition.ts" />
 ///<reference path="../../../src/tsd/data/Selector.ts" />
 
-describe('APICore', () => {
+describe('Core', () => {
 
 	var fs = require('fs');
 	var path = require('path');
 
 	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
-	var api:tsd.APICore;
+	var api:tsd.Core;
 	var context:tsd.Context;
 	before(() => {
 		context = new tsd.Context();
 		context.paths.setTmp('./tmp');
-		context.paths.setCache('./cache/APICore');
+		context.paths.setCache('./cache/Core');
 
 		assert.isDirectory(context.paths.tmp, 'context.paths.tmp');
 		assert.isDirectory(context.paths.cache, 'context.paths.cache');
 	});
 
 	it('should be defined', () => {
-		assert.isFunction(tsd.APICore, 'constructor');
+		assert.isFunction(tsd.Core, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new tsd.APICore(null);
+			api = new tsd.Core(null);
 		});
 	});
 	it('should be constructor', () => {
-		api = new tsd.APICore(context);
+		api = new tsd.Core(context);
 		assert.isObject(api, 'constructor');
 
-		api.gitAPI.debug = true;
+		//api.gitAPI.debug = true;
 	});
 	describe('getIndex', () => {
 		it('should return data', (done) => {
@@ -43,7 +43,7 @@ describe('APICore', () => {
 
 				//xm.log.inspect(api.definitions.list);
 
-				assert.operator(api.definitions.list.length, '>', 200, 'definitions.list');
+				assert.operator(api.index.list.length, '>', 200, 'definitions.list');
 
 				//xm.log(api.definitions.toDump());
 				//xm.log(api.definitions.getPaths());
@@ -53,17 +53,17 @@ describe('APICore', () => {
 	describe('search', () => {
 		it('should return data', (done) => {
 			var selector = new tsd.Selector('async/async');
-			selector.references = true;
+			//selector.resolveReferences = true;
 
 			api.select(selector, null).then((result:tsd.APIResult) => {
 				assert.ok(result, 'result');
 
 				api.context.log('api -> search');
 
-				xm.log.inspect(result);
+				//xm.log.inspect(result);
 
-				assert.ok(result.patternMatch, 'result.patternMatch');
-				assert.operator(result.patternMatch.length, '>=', 1, 'result.patternMatch');
+				assert.ok(result.nameMatches, 'result.nameMatch');
+				assert.operator(result.nameMatches.length, '>=', 1, 'result.nameMatch');
 
 			}).fin(done).done();
 		});

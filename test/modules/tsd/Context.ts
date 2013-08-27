@@ -3,7 +3,7 @@
 ///<reference path="../../../src/tsd/context/Context.ts" />
 ///<reference path="../../../src/tsd/context/Paths.ts" />
 ///<reference path="../../../src/tsd/context/Config.ts" />
-///<reference path="../../../src/tsd/context/PackageJSON.ts" />
+///<reference path="../../../src/xm/data/PackageJSON.ts" />
 
 describe('Context', () => {
 
@@ -30,13 +30,13 @@ describe('Context', () => {
 	});
 
 	describe('PackageJSON', () => {
-		var info:tsd.PackageJSON;
+		var info:xm.PackageJSON;
 		it('is defined as function', () => {
-			assert.isFunction(tsd.PackageJSON);
+			assert.isFunction(xm.PackageJSON);
 		});
 		describe('local', () => {
 			it('should return instance', () => {
-				info = tsd.PackageJSON.getLocal();
+				info = xm.PackageJSON.getLocal();
 				assert.isObject(info, 'info');
 			});
 			it('should have properties', () => {
@@ -93,7 +93,7 @@ describe('Context', () => {
 				assert.isString(ctx.config.version, 'version');
 				assert.isString(ctx.config.repo, 'repo');
 				assert.isString(ctx.config.ref, 'ref');
-				assert.isObject(ctx.config.installed, 'installed');
+				//assert.isObject(ctx.config.installed, 'installed');
 			});
 			it('exports valid formed config json', () => {
 				assert.jsonSchema(ctx.config.toJSON(), configSchema, 'toJSON');

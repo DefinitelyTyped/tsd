@@ -1,5 +1,5 @@
 
-module tsd {
+module git {
 
 	var decoders = {
 		'base64': function (value:string):string {
@@ -8,13 +8,13 @@ module tsd {
 		'utf-8': function (value:string):string {
 			return new Buffer(value, 'utf8').toString();
 		},
-		'plain': function (value:string):string {
-			return String(value);
+		'raw': function (value:string):string {
+			return value;
 		}
 	};
 
 	export function getDecodedBlob(blobJSON:any) {
-		var encoding = 'plain';
+		var encoding = 'raw';
 		if (!blobJSON.encoding && decoders.hasOwnProperty(blobJSON.encoding)){
 			encoding = blobJSON.encoding;
 		}

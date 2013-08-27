@@ -23,12 +23,13 @@ module git {
 	export class GithubAPICachedJSONStore {
 
 		dir:string;
+		private _formatVersion:string = '0.0.2';
 
 		constructor(public api:git.GithubAPICached, dir:string) {
 			xm.assertVar('api', api, git.GithubAPICached);
 			xm.assertVar('dir', dir, 'string');
 
-			this.dir = path.join(dir, api.getCacheKey());
+			this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
 		}
 
 		init():Qpromise {
@@ -49,7 +50,6 @@ module git {
 					});
 				}
 			});
-			//return defer.promise;
 		}
 
 		getResult(key:string):Qpromise {
@@ -58,30 +58,18 @@ module git {
 
 			return self.init().then(() => {
 				return FS.exists(src);
-			}
-			).then((exists:bool) => {
+			}).then((exists:bool) => {
 				if (exists) {
-					//return Q.nfcall(xm.FileUtil.readJSON, src);
-
-					var defererer:Qdeferred = Q.defer();
-
-					xm.FileUtil.readJSON(src, (err, json) => {
-						if (err) {
-							defererer.reject(err);
+					return Q.nfcall(xm.FileUtil.readJSON, src).then((json) => {
+						var cached;
+						try {
+							cached = GithubAPICachedResult.fromJSON(json);
 						}
-						else {
-							var cached;
-							try {
-								cached = GithubAPICachedResult.fromJSON(json);
-							}
-							catch (e) {
-								defererer.reject(new Error(src + ':' + e));
-								return;
-							}
-							defererer.resolve(cached);
+						catch (e) {
+							throw(new Error(src + ':' + e));
 						}
+						return cached;
 					});
-					return defererer.promise;
 				}
 				else {
 					return null;
@@ -89,18 +77,16 @@ module git {
 			});
 		}
 
-		storeResult(res:GithubAPICachedResult, callback:(err, info) => void) {
+		storeResult(res:GithubAPICachedResult):Qpromise {
 			var self:GithubAPICachedJSONStore = this;
 
-			self.init().then(() => {
-				var src = path.join(self.dir, GithubAPICachedResult.getHash(res.key) + '.json');
-				var data = JSON.stringify(res.toJSON(), null, 2);
+			var src = path.join(self.dir, res.getHash() + '.json');
 
-				fs.writeFile(src, data, (err) => {
-					callback(err, {src: src});
-				});
-			}, (err) => {
-				callback(err, null);
+			return self.init().then(() => {
+				var data = JSON.stringify(res.toJSON(), null, 2);
+				return FS.write(src, data);
+			}).then(() => {
+				return {src: src};
 			});
 		}
 	}

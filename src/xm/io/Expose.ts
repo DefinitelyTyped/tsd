@@ -6,68 +6,179 @@
  * License: MIT - 2013
  * */
 
- ///<reference path="../_ref.ts" />
+///<reference path="../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
+///<reference path="../callAsync.ts" />
 
 module xm {
 
-	class ExposeCommand {
-		constructor(public id:string, public execute:(args:any) => void, public label?:string, public hint?:any) {
+	function padLeft(str:string, len:number, char:string):string {
+		str = String(str);
+		char = String(char).charAt(0);
+		while (str.length < len) {
+			str = char + str;
+		}
+		return str;
+	}
+
+	function padRight(str:string, len:number, char:string):string {
+		str = String(str);
+		char = String(char).charAt(0);
+		while (str.length < len) {
+			str = str + char;
+		}
+		return str;
+	}
+
+	function repeat(str:string, len:number):string {
+		return new Array(len).join(str);
+	}
+
+	var optimist = require('optimist');
+
+	export interface ExposeAction extends Function{
+		(args:any, done:(err) => void):void;
+	}
+
+	export interface ExposeOption {
+		name:string;
+		description:string;
+		short:string;
+		type:string;
+		placeholder:string;
+		default:any;
+		command:string;
+	}
+
+	export class ExposeCommand {
+
+		constructor(public id:string, public execute:ExposeAction, public label?:string, public options?:string[] = [], public variadic:string[] = []) {
 
 		}
 
-		getLabels():string {
-			var ret = this.id;
-			if (this.label) {
-				ret += ' (' + this.label + ')';
-			}
-			if (this.hint) {
-				var arr = [];
-				xm.eachProp(this.hint, (label, id) => {
-					arr.push('     --' + id + ' ' + label + '');
-				});
-				if (arr.length > 0) {
-					ret += '\n' + arr.join('\n');
-				}
-			}
-			return ret;
+		init():void {
+
 		}
 	}
 
 	export class Expose {
 
 		private _commands = new KeyValueMap();
+		private _options = new KeyValueMap();
+		private _commandOpts:string[] = [];
+		private _isInit = false;
 
-		constructor() {
-			this.add('help', () => {
-				console.log('available commands:');
-				xm.eachProp(this._commands.keys().sort(), (id) => {
-					console.log('   ' + this._commands.get(id).getLabels());
-				});
+		constructor(public title?:string = '') {
+			this.command('help', () => {
+
+				this.printCommands();
+
 			}, 'usage help');
-			//this.map('h', 'help');
+
+			this.defineOption({
+				name: 'help',
+				short: 'h',
+				description: 'display usage help',
+				type: 'flag',
+				default: null,
+				placeholder: null,
+				command: 'help'
+			});
 		}
 
-		executeArgv(argv:any, alt?:string) {
+		defineOption(data:ExposeOption) {
+			if (this._options.has(data.name)) {
+				throw new Error('option id collision on ' + data.name);
+			}
+			this._options.set(data.name, data);
+		}
+
+		command(id:string, def:(args:any) => void, label?:string, options?:any, variadic?:any) {
+			if (this._commands.has(id)) {
+				throw new Error('id collision on ' + id);
+			}
+			this._commands.set(id, new ExposeCommand(id, def, label, options, variadic));
+		}
+
+		init():void {
+			if (this._isInit) {
+				return;
+			}
+			this._isInit = true;
+			xm.eachProp(this._options.keys(), (id) => {
+				var option:ExposeOption = this._options.get(id);
+				optimist.alias(option.name, option.short);
+				if (option.type === 'flag') {
+					optimist.boolean(option.name);
+				}
+				else if (option.type === 'string') {
+					optimist.string(option.name);
+				}
+				optimist.default(option.name, option.default);
+				if (option.command) {
+					this._commandOpts.push(option.name);
+				}
+			});
+
+			xm.eachProp(this._commands.keys(), (id) => {
+				this._commands.get(id).init();
+			});
+		}
+
+		executeArgv(argvRaw:any, alt?:string) {
+			this.init();
+
+			var argv = optimist.parse(argvRaw);
 			if (!argv || argv._.length === 0) {
 				if (alt && this._commands.has(alt)) {
-					this.execute(alt);
-				}
-				this.execute('help');
-			}
-			else {
-				if (this.has(argv._[0])) {
-					this.execute(argv._[0], argv);
+					this.execute(alt, argv);
 				}
 				else {
-					console.log('command not found: ' + argv._[0]);
-					this.execute('help');
+					this.execute('help', argv);
 				}
+				return;
+			}
+
+			for (var i = 0, ii = this._commandOpts.length; i < ii; i++) {
+				var name = this._commandOpts[i];
+				if (argv[name]) {
+					console.log('command opt ' + name);
+					this.execute(this._options.get(name).command, argv);
+					return;
+				}
+			}
+
+			var use = argv._.shift();
+			if (use === 'node') {
+				//ditch "node <script>"
+				argv._.shift();
+			}
+			use = argv._.shift();
+
+			if (typeof use === 'undefined') {
+				if (alt && this._commands.has(alt)) {
+					console.log('undefined command, use default');
+					this.execute(alt, argv);
+				}
+				else {
+					console.log('undefined command');
+					this.execute('help', argv);
+				}
+			}
+			else if (this._commands.has(use)) {
+				// actual command
+				this.execute(use, argv);
+			}
+			else {
+				console.log('command not found: ' + use);
+				this.execute('help', argv, false);
 			}
 		}
 
 		execute(id:string, args:any = null, head:bool = true) {
+			this.init();
+
 			if (!this._commands.has(id)) {
 				console.log('\nunknown command ' + id + '\n');
 				return;
@@ -76,25 +187,89 @@ module xm {
 				console.log('\n-> ' + id + '\n');
 			}
 			var f:ExposeCommand = this._commands.get(id);
-			f.execute.call(null, args);
+			f.execute.call(f, args);
 		}
 
-		add(id:string, def:(args:any) => void, label?:string, hint?:any) {
-			if (this._commands.has(id)) {
-				throw new Error('id collision on ' + id);
+		printCommands():void {
+			if (this.title) {
+				console.log(this.title + '\n');
 			}
-			this._commands.set(id, new ExposeCommand(id, def, label, hint));
+
+			if (this._commandOpts.length > 0) {
+				console.log('global options:\n');
+
+				var opts = [];
+				var maxTopOptionLen = 0;
+				//TODO DRY options printing
+				xm.eachProp(this._commandOpts.sort(), (name) => {
+					var option:ExposeOption = this._options.get(name);
+					var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
+					var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+					opts.push({
+						name: name,
+						usage: tmp,
+						option: option
+					});
+					maxTopOptionLen = Math.max(tmp.length, maxTopOptionLen);
+				});
+				xm.eachProp(opts, (opt) => {
+					console.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
+				});
+				console.log('');
+			}
+
+			console.log('commands:\n');
+
+			var maxCommandLen = 0;
+			var maxOptionLen = 0;
+			var commands = [];
+
+			xm.eachProp(this._commands.keys().sort(), (id) => {
+				var data = {
+					id: id,
+					label: id,
+					cmd: this._commands.get(id),
+					options: []
+				};
+
+				if (data.cmd.variadic.length > 0) {
+					data.label += ' <' + data.cmd.variadic.join(', ') + '>';
+				}
+
+				maxCommandLen = Math.max(data.label.length, maxCommandLen);
+
+				xm.eachProp(data.cmd.options, (name:string) => {
+					var option:ExposeOption = this._options.get(name);
+					var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
+					var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+
+					maxOptionLen = Math.max(tmp.length, maxOptionLen);
+					data.options.push({
+						usage: tmp,
+						option: option
+					});
+
+				});
+				commands.push(data);
+			});
+
+			var padOpts = '    ';//repeat(' ', maxCommandLen + 2);
+
+			xm.eachProp(commands, (data) => {
+				console.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
+
+				xm.eachProp(data.options, (opt:any) => {
+					console.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
+				});
+			});
 		}
 
-		has(id:string):bool {
+		hasCommand(id:string):bool {
 			return this._commands.has(id);
 		}
 
-		map(id:string, to:string) {
-			var self = this;
-			this.add(id, () => {
-				self.execute(to, false);
-			});
+		getCommand(id:string):xm.ExposeCommand {
+			return this._commands.get(id);
 		}
 	}
 }
