@@ -21,16 +21,16 @@ describe('Selector', () => {
 	describe('basics', () => {
 		it('is defined', () => {
 			assert.ok(tsd.Selector, 'Selector');
-			assert.ok(tsd.SelectorFilePattern, 'SelectorFilePattern');
+			assert.ok(tsd.SelectorPattern, 'SelectorFilePattern');
 		});
 	});
 
 	describe('SelectorFilePattern', () => {
-		var pattern:tsd.SelectorFilePattern;
+		var pattern:tsd.SelectorPattern;
 		var files:tsd.Definition[];
 
 		it('async 1', () => {
-			pattern = new tsd.SelectorFilePattern('async');
+			pattern = new tsd.SelectorPattern('async');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);
@@ -40,7 +40,7 @@ describe('Selector', () => {
 		});
 
 		it('async 2', () => {
-			pattern = new tsd.SelectorFilePattern('async/async');
+			pattern = new tsd.SelectorPattern('async/async');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);
@@ -50,7 +50,7 @@ describe('Selector', () => {
 		});
 
 		it('async 3', () => {
-			pattern = new tsd.SelectorFilePattern('async/*');
+			pattern = new tsd.SelectorPattern('async/*');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);
@@ -60,7 +60,7 @@ describe('Selector', () => {
 		});
 
 		it('jquery 2', () => {
-			pattern = new tsd.SelectorFilePattern('jquery/jquery');
+			pattern = new tsd.SelectorPattern('jquery/jquery');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);
@@ -70,7 +70,7 @@ describe('Selector', () => {
 		});
 
 		it('jquery 3', () => {
-			pattern = new tsd.SelectorFilePattern('jquery*/jquery*');
+			pattern = new tsd.SelectorPattern('jquery*/jquery*');
 			assert.isObject(pattern, 'pattern');
 
 			files = pattern.matchTo(list);

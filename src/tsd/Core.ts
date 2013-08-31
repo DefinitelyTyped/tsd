@@ -4,8 +4,10 @@
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="data/DefUtil.ts" />
 ///<reference path="data/DefVersion.ts" />
-///<reference path="data/Definition.ts" />
-///<reference path="data/DefinitionIndex.ts" />
+///<reference path="data/Def.ts" />
+///<reference path="data/DefIndex.ts" />
+///<reference path="data/DefInfoParser.ts" />
+///<reference path="data/DefInfo.ts" />
 
 ///<reference path="API.ts" />
 
@@ -26,11 +28,13 @@ module tsd {
 		}
 	}
 
+	//TODO rename to DefSelection?
 	export class APIResult {
 
 		error:string;
-		nameMatches:tsd.Definition[];
+		nameMatches:tsd.Def[];
 		selection:tsd.DefVersion[];
+		written:string[];
 		//files = new xm.KeyValueMap();
 
 		constructor(public selector:Selector, public options?:APIOptions) {
@@ -43,18 +47,20 @@ module tsd {
 
 		}
 	}
-
+	/*
+	Core: operational core logic
+	 */
 	export class Core {
 
 		gitRepo:git.GithubRepo;
 		gitAPI:git.GithubAPICached;
 		gitRaw:git.GithubRawCached;
-		index:tsd.DefinitionIndex;
+		index:tsd.DefIndex;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
 
-			this.index = new tsd.DefinitionIndex();
+			this.index = new tsd.DefIndex();
 
 			this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
@@ -104,15 +110,15 @@ module tsd {
 
 				//var tasks = [];
 				/*
-				//TODO fix crude filter
-				if (selector.requiresHistory) {
-					if (result.nameMatch.length > 1) {
-						result.error = 'history selection requires single match, got ' + result.nameMatch.length;
-						throw(new Error(result.error));
-					}
-				}
-				//if (selector.requiresSource) {
-				/*if (nameMatch.length > 1) {
+				 //TODO fix crude filter
+				 if (selector.requiresHistory) {
+				 if (result.nameMatch.length > 1) {
+				 result.error = 'history selection requires single match, got ' + result.nameMatch.length;
+				 throw(new Error(result.error));
+				 }
+				 }
+				 //if (selector.requiresSource) {
+				 /*if (nameMatch.length > 1) {
 				 result.error = 'source filtering selection requires single match, got ' + nameMatch.length;
 				 throw(new Error(result.error));
 				 }
@@ -140,7 +146,59 @@ module tsd {
 			});
 		}
 
-		writeSingleFile(file:DefVersion):Qpromise {
+		loadContent(file:tsd.DefVersion):Qpromise {
+			var self:Core = this;
+
+			if (file.content) {
+				return Q(file.content);
+			}
+			return self.gitRaw.getFile(file.commitSha, file.def.path).then((content) => {
+				file.content = String(content);
+				return file;
+			});
+		}
+
+		loadContentBulk(list:tsd.DefVersion[]):Qpromise {
+			var self:Core = this;
+
+			return Q.all(list.map((file:DefVersion) => {
+				return self.loadContent(file);
+			})).thenResolve(list);
+		}
+
+		parseDefInfo(file:tsd.DefVersion):Qpromise {
+			var self:Core = this;
+
+			return self.loadContent(file).then((file:tsd.DefVersion) => {
+				var parser = new tsd.DefInfoParser(self.context.verbose);
+				if (file.info) {
+					file.info.resetFields();
+				}
+				else {
+					file.info = new tsd.DefInfo();
+				}
+
+				parser.parse(file.info, file.content);
+
+				if (!file.info.isValid()) {
+					xm.log.warn('bad parse in: ' + file);
+				}
+				return file;
+			});//.thenResolve(file);
+		}
+
+		parseDefInfoBulk(list:tsd.DefVersion[]):Qpromise {
+			var self:Core = this;
+
+			// needed?
+			list = DefUtil.uniqueDefPaths(list);
+
+			return Q.all(list.map((file:tsd.DefVersion) => {
+				return self.parseDefInfo(file);
+			})).thenResolve(list);
+		}
+
+		writeFile(file:DefVersion):Qpromise {
 			var self:Core = this;
 
 			var target = path.resolve(self.context.paths.typings, file.def.path);
@@ -150,9 +208,8 @@ module tsd {
 				if (file.content) {
 					return file.content;
 				}
-				return self.gitRaw.getFile(file.commitSha, file.def.path);
-			}).then((content) => {
-				file.content = content;
+				return self.loadContent(file);
+			}).then(() => {
 				return FS.exists(target);
 			}).then((exists:bool) => {
 				if (exists) {
@@ -166,23 +223,19 @@ module tsd {
 			});
 		}
 
-		//TODO use to DefVersion[] instead of Definition[]
-		writeFiles(list:tsd.DefVersion[]):Qpromise {
+		writeFileBulk(list:tsd.DefVersion[]):Qpromise {
 			var self:Core = this;
 
 			// needed?
 			list = DefUtil.uniqueDefPaths(list);
 
-			return Q.all(list.map((file:DefVersion) => {
-				return self.writeSingleFile(file);
+			return Q.all(list.map((file:tsd.DefVersion) => {
+				return self.writeFile(file);
 			}));
 		}
 
-		saveToConfig(list:tsd.DefVersion[]):Qpromise {
+		saveToConfigBulk(list:tsd.DefVersion[]):Qpromise {
 			var self:Core = this;
-
-			// needed?
-			list = DefUtil.uniqueDefPaths(list);
 
 			return Q.reject(new Error('not yet implemented'));
 		}

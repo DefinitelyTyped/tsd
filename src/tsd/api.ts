@@ -9,7 +9,9 @@ module tsd {
 	var util = require('util');
 	var Q:QStatic = require('Q');
 	var FS:Qfs = require('Q-io/fs');
-
+	/*
+	 API: the high-level API used by dependants
+	*/
 	export class API {
 
 		private _core:tsd.Core;
@@ -30,20 +32,18 @@ module tsd {
 		// Install all files matching selector:
 		install(selector:tsd.Selector, options:tsd.APIOptions):Qpromise {
 			return this._core.select(selector, options).then((res:tsd.APIResult) => {
-				return this._core.writeFiles(res.selection);
+				return this._core.writeFileBulk(res.selection).then((paths) => {
+					res.written = paths;
+
+				}).thenResolve(res);
 			});
 		}
 
-		// Clear caches
-		purge():Qpromise {
-			// add proper safety checks (let's not accidentally rimraf root)
-			return Q.reject(new Error('not yet implemented'));
-		}
-
 		// Download selection and parse header info
-		details(selector:Selector, options:APIOptions):Qpromise {
+		info(selector:Selector, options:APIOptions):Qpromise {
 			return this._core.select(selector, options).then((res:tsd.APIResult) => {
-				//return this._core.writeFiles(res.selection);
+				//nest for scope
+				return this._core.parseDefInfoBulk(res.selection).thenResolve(res);
 			});
 		}
 
@@ -60,6 +60,12 @@ module tsd {
 
 		// Run compare and get latest files.
 		update(selector:Selector, options:APIOptions):Qpromise {
+			return Q.reject(new Error('not yet implemented'));
+		}
+
+		// Clear caches
+		purge():Qpromise {
+			// add proper safety checks (let's not accidentally rimraf root)
 			return Q.reject(new Error('not yet implemented'));
 		}
 	}

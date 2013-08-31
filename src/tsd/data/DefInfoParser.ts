@@ -1,10 +1,12 @@
-///<reference path="_ref.ts" />
+///<reference path="../_ref.ts" />
 ///<reference path="../../xm/RegExpGlue.ts" />
 ///<reference path="../../xm/io/LineParser.ts" />
 ///<reference path="../../xm/data/AuthorInfo.ts" />
 ///<reference path="DefInfo.ts" />
 
 module tsd {
+
+	//TODO replace vanilla RegExp with XRegExp?
 
 	export class ParseError {
 		constructor(public message:string = '', public text?:string = '', public ref?:any = null) {
@@ -135,20 +137,16 @@ module tsd {
 		return res;
 	};
 
-	export class DefHeaderParser {
+	export class DefInfoParser {
 
 		parser:xm.LineParserCore;
 
 		constructor(public verbose?:bool = false) {
-			this.init();
-		}
-
-		init() {
 
 		}
 
 		parse(data:tsd.DefInfo, source:string):void {
-			//console.log('parse: ', data.combi());
+			//xm.log('parse: ', data.combi());
 
 			data.resetFields();
 
@@ -179,7 +177,7 @@ module tsd {
 			}, fields));
 
 			this.parser.addParser(new xm.LineParser('defAuthorUrlAlt', defAuthorUrlAlt, 2, (match:xm.LineParserMatch) => {
-				data.authors.push(new xm.(match.getGroup(0), match.getGroup(1)));
+				data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
 			}, fields));
 
 			this.parser.addParser(new xm.LineParser('defAuthorAppend', wordsUrl, 2, (match:xm.LineParserMatch) => {
@@ -187,7 +185,6 @@ module tsd {
 			}, fields));
 
 			fields = mutate(fields, null, ['defAuthorAppend']);
-
 			fields = mutate(fields, null, ['reposUrl','reposUrlAlt']);
 
 			this.parser.addParser(new xm.LineParser('reposUrl', reposUrl, 1, (match:xm.LineParserMatch) => {
@@ -204,10 +201,10 @@ module tsd {
 
 			this.parser.addParser(new xm.LineParser('comment', commentLine, 0, null, ['comment']));
 
-			//console.log(this.parser.getInfo());
+			//xm.log(this.parser.getInfo());
 
 			if (this.verbose) {
-				console.log(this.parser.getInfo());
+				xm.log(this.parser.getInfo());
 			}
 
 			this.parser.parse(source, ['head']);

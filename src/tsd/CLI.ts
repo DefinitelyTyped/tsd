@@ -9,7 +9,13 @@ module tsd {
 
 	function getContext(args?:any):tsd.Context {
 		xm.assertVar('args', args, 'object');
-		return new tsd.Context(args.config, args.verbose);
+		var context = new tsd.Context(args.config, args.verbose);
+
+		if (args.dev) {
+			context.paths.setTmp(path.join(path.dirname(xm.PackageJSON.find()), 'tmp', 'cli'));
+			context.paths.setCache(path.join(path.dirname(xm.PackageJSON.find()), 'cache'));
+		}
+		return context;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -34,7 +40,7 @@ module tsd {
 		return Q.fcall(() => {
 			var job = new Job();
 			if (args._.length === 0) {
-				throw new Error('pass a name selector pattern');
+				throw new Error('pass one selector pattern');
 			}
 			job.context = getContext(args);
 			job.api = new tsd.API(job.context);
@@ -83,17 +89,35 @@ module tsd {
 			command: null
 		});
 
+		expose.defineOption({
+			name: 'dev',
+			short: null,
+			description: 'development mode',
+			type: 'flag',
+			default: null,
+			placeholder: null,
+			command: null
+		});
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		function reportError(err) {
-			xm.log('->' + 'an error occured!'.red);
+			xm.log('-> ' + 'an error occured!'.red);
+			xm.log('');
 			xm.log(err);
 		}
 
 		function reportSucces(result) {
-			xm.log('->' + 'success!'.green);
+			xm.log('-> ' + 'success!'.green);
 			if (result) {
-				xm.log.inspect(result, null, 2);
+				xm.log('');
+				result.selection.forEach((def:tsd.DefVersion) => {
+					xm.log(def.toString());
+					if (def.info) {
+						xm.log(def.info.toString());
+						xm.log(def.info);
+					}
+				});
 			}
 		}
 
@@ -103,7 +127,7 @@ module tsd {
 			xm.log(xm.PackageJSON.getLocal().version);
 		}, 'display version');
 
-		expose.command('info', (args:any) => {
+		expose.command('settings', (args:any) => {
 			getContext(args).logInfo(true);
 		}, 'display config settings');
 
@@ -123,28 +147,31 @@ module tsd {
 			}).done(reportSucces, reportError);
 		}, 'install definitions', jobOptions(), ['selector']);
 
-		expose.command('details', (args:any) => {
+		expose.command('info', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-				return job.api.details(job.selector, job.options);
+				return job.api.info(job.selector, job.options);
 
-			}).done((result:APIResult) => {
-				//hackable
-				reportSucces(result);
-			}, reportError);
+			}).done(reportSucces, reportError);
 
 		}, 'show definition details', jobOptions(), ['selector']);
-
 
 		expose.command('deps', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
 				return job.api.deps(job.selector, job.options);
 
 			}).done((result:APIResult) => {
-				//hackable
-				reportSucces(result);
+				reportSucces(null);
+
+				result.selection.forEach((def:tsd.DefVersion) => {
+					xm.log(def.toString());
+					def.dependencies.forEach((def:tsd.DefVersion) => {
+						xm.log(' - ' + def.toString());
+					});
+				});
 			}, reportError);
 
 		}, 'list dependencies', jobOptions(), ['selector']);
+
 		/*expose.command('purge', (args:any) => {
 		 var api = new API(getContext(args));
 

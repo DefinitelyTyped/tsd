@@ -6,20 +6,20 @@
  * License: MIT - 2013
  * */
 
- ///<reference path="../_ref.ts" />
+///<reference path="../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 
 module xm {
 
 	var util = require('util');
+	var trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
 
 	export class LineParserCore {
 
 		parsers = new xm.KeyValueMap();
 
 		//works nicely but will keep matching empty strings at final line, so guard and compare index + length
-		trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
 
 		constructor(public verbose?:bool = false) {
 
@@ -103,8 +103,8 @@ module xm {
 
 			var safetyBreak = 20;
 
-			this.trimmedLine.lastIndex = 0;
-			while (line = this.trimmedLine.exec(source)) {
+			trimmedLine.lastIndex = 0;
+			while (line = trimmedLine.exec(source)) {
 				log('-----------------------------------------------------------------------------------------');
 
 				if (line[0].length === 0) {
@@ -119,7 +119,7 @@ module xm {
 
 				//pre-advance cursor
 				cursor = line.index + line[0].length;
-				this.trimmedLine.lastIndex = cursor;
+				trimmedLine.lastIndex = cursor;
 
 				lineCount++;
 				log('line: ' + lineCount);
@@ -232,7 +232,7 @@ module xm {
 
 		match(str:string, offset:number, limit:number):LineParserMatch {
 			this.exp.lastIndex = offset;
-			var match:RegExpExecArray = this.exp.exec(str);
+			var match = this.exp.exec(str);
 			if (!match || match.length < 1) {
 				return null;
 			}
@@ -250,7 +250,7 @@ module xm {
 	//single match
 	export class LineParserMatch {
 
-		constructor(public parser:LineParser, public match:RegExpExecArray) {
+		constructor(public parser:LineParser, public match) {
 		}
 
 		extract():void {

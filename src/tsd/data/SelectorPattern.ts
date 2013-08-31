@@ -1,6 +1,5 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../xm/RegExpGlue.ts" />
-///<reference path="Definition.ts" />
 
 module tsd {
 
@@ -10,17 +9,20 @@ module tsd {
 	var wordLazy = /[\w_\.-]*?/;
 	var wordGlob:RegExp = /(\**)([\w_\.-]*?)(\**)/;
 
+	//TODO replace RegExpGlue with XRegExp
+
 	// simple pattern: *project*/*name*
 	var patternSplit:RegExp = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
 	function escapeExp(str) {
+		//TODO this needs hardening
 		return str.replace('.', '\\.');
 	}
 
 	//TODO use minimatch?
 	//TODO use semver-postfix?
-	export class SelectorFilePattern {
+	export class SelectorPattern {
 
 		pattern:string;
 		projectExp:RegExp;
@@ -31,7 +33,7 @@ module tsd {
 			this.pattern = pattern;
 		}
 
-		matchTo(list:tsd.Definition[]):tsd.Definition[] {
+		matchTo(list:tsd.Def[]):tsd.Def[] {
 			return list.filter(this.getFilterFunc(), this);
 		}
 
@@ -130,30 +132,30 @@ module tsd {
 			//xm.log(this.nameExp);
 		}
 
-		private getFilterFunc():(file:tsd.Definition) => bool {
+		private getFilterFunc():(file:tsd.Def) => bool {
 			this.compile();
 
 			// get an efficient filter function
-			var self:tsd.SelectorFilePattern = this;
+			var self:tsd.SelectorPattern = this;
 			if (this.nameExp) {
 				if (this.projectExp) {
-					return (file:tsd.Definition) => {
+					return (file:tsd.Def) => {
 						return self.projectExp.test(file.project) && self.nameExp.test(file.name);
 					};
 				}
 				else {
-					return (file:tsd.Definition) => {
+					return (file:tsd.Def) => {
 						return self.nameExp.test(file.name);
 					};
 				}
 			}
 			else if (this.projectExp) {
-				return (file:tsd.Definition) => {
+				return (file:tsd.Def) => {
 					return self.projectExp.test(file.name);
 				};
 			}
 			else {
-				throw (new Error('SelectorFilePattern cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
+				throw (new Error('SelectorFilePattern cannot compile pattern: ' + JSON.stringify(<any>this.pattern) + ''));
 			}
 		}
 	}

@@ -11,13 +11,15 @@
 module xm {
 
 	var _:UnderscoreStatic = require('underscore');
-	var template:URLTemplateParser = require('url-template');
+	var uriTemplates:URLTemplateParser = require('uri-templates');
 
 	export interface URLTemplateParser {
-		parse(template:string):URLTemplate;
+		(template:string):URLTemplate;
 	}
 	export interface URLTemplate {
-		expand(vars:any):string;
+		fillFromObject(vars:any):string;
+		fill(callback:(varName:string) => string):string;
+		fromUri(uri:string):any;
 	}
 
 	export class URLManager {
@@ -35,15 +37,7 @@ module xm {
 			if (this._templates.has(id)) {
 				throw (new Error('cannot redefine template: ' + id));
 			}
-			this._templates.set(id, template.parse(url));
-		}
-
-		public addTemplates(map:any):void {
-			for (var id in map) {
-				if (map.hasOwnProperty(id)) {
-					this.addTemplate(id, map[id]);
-				}
-			}
+			this._templates.set(id, uriTemplates(url));
 		}
 
 		public setVar(id:string, value:any):void {
@@ -74,9 +68,9 @@ module xm {
 
 		public getURL(id:string, vars?:any):string {
 			if (vars) {
-				return this.getTemplate(id).expand(_.defaults(vars, this._vars));
+				return this.getTemplate(id).fillFromObject(_.defaults(vars, this._vars));
 			}
-			return this.getTemplate(id).expand(this._vars);
+			return this.getTemplate(id).fillFromObject(this._vars);
 		}
 	}
 }

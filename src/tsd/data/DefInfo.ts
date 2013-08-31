@@ -1,4 +1,5 @@
 ///<reference path="../_ref.ts" />
+///<reference path="Def.ts" />
 
 module tsd {
 
@@ -18,10 +19,7 @@ module tsd {
 		//reposName:string;
 		reposUrl:string;
 
-		sourcePath:string = '';
-
 		references:string[] = [];
-		dependencies:tsd.Definition[] = [];
 
 		constructor() {
 			this.resetAll();
@@ -29,7 +27,7 @@ module tsd {
 
 		resetFields() {
 			this.name = '';
-			this.version = '*';
+			this.version = '';
 			this.submodule = '';
 			this.description = '';
 			this.projectUrl = '';
@@ -43,13 +41,25 @@ module tsd {
 			this.resetFields();
 
 			this.references = [];
-			this.dependencies = [];
-			this.sourcePath = '';
+		}
+
+		toString():string {
+			var ret = this.name;
+			if (this.submodule) {
+				ret += ' ' + this.submodule;
+			}
+			if (this.version) {
+				ret += ' ' + this.version;
+			}
+			if (this.description) {
+				ret += ' ' + JSON.stringify(<any>this.description);
+			}
+			return ret;
 		}
 
 		isValid():bool {
 			// || !this.description
-			if (!this.name || !this.version || !this.projectUrl) {
+			if (!this.name) {
 				return false;
 			}
 			if (this.authors.length === 0) {

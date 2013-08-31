@@ -123,6 +123,9 @@ var xm;
         writer = writer || new xm.ConsoleLineWriter();
         label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
         var writeMulti = function (prefix, postfix, args) {
+            if(logger.mute) {
+                return;
+            }
             var ret = [];
             for(var i = 0, ii = args.length; i < ii; i++) {
                 var value = args[i];
@@ -144,14 +147,15 @@ var xm;
             }
             writeMulti('', '', args);
         };
-        var logger = function () {
+        var logger = (function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
             plain.apply(null, args);
-        };
+        });
         logger.log = plain;
+        logger.mute = false;
         logger.warn = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
@@ -209,9 +213,13 @@ var xm;
             }
         }
         if(writable) {
-            var testFile = path.join(dir, 'mkdirCheck_' + Date.now() + '.tmp');
-            fs.writeFileSync(testFile, 'test');
-            fs.unlinkSync(testFile);
+            var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+            try  {
+                fs.writeFileSync(testFile, 'test');
+                fs.unlinkSync(testFile);
+            } catch (e) {
+                throw new Error('no write access to: ' + dir + ' -> ' + e);
+            }
         }
         return dir;
     }
@@ -410,6 +418,7 @@ var tsd;
     var mkdirp = require('mkdirp');
     var Q = require('Q');
     var tv4 = require('tv4').tv4;
+    require('source-map-support').install();
     var Context = (function () {
         function Context(configPath, verbose) {
             if (typeof configPath === "undefined") { configPath = null; }
@@ -810,7 +819,7 @@ var git;
 var xm;
 (function (xm) {
     var _ = require('underscore');
-    var template = require('url-template');
+    var uriTemplates = require('uri-templates');
     var URLManager = (function () {
         function URLManager(common) {
             this._templates = new xm.KeyValueMap();
@@ -824,14 +833,7 @@ var xm;
             if(this._templates.has(id)) {
                 throw (new Error('cannot redefine template: ' + id));
             }
-            this._templates.set(id, template.parse(url));
-        };
-        URLManager.prototype.addTemplates = function (map) {
-            for(var id in map) {
-                if(map.hasOwnProperty(id)) {
-                    this.addTemplate(id, map[id]);
-                }
-            }
+            this._templates.set(id, uriTemplates(url));
         };
         URLManager.prototype.setVar = function (id, value) {
             this._vars[id] = '' + value;
@@ -857,9 +859,9 @@ var xm;
         };
         URLManager.prototype.getURL = function (id, vars) {
             if(vars) {
-                return this.getTemplate(id).expand(_.defaults(vars, this._vars));
+                return this.getTemplate(id).fillFromObject(_.defaults(vars, this._vars));
             }
-            return this.getTemplate(id).expand(this._vars);
+            return this.getTemplate(id).fillFromObject(this._vars);
         };
         return URLManager;
     })();
@@ -1213,6 +1215,7 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
+    var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
     var DefUtil = (function () {
         function DefUtil() { }
         DefUtil.getHeads = function getHeads(list) {
@@ -1239,20 +1242,30 @@ for(var i = 0, ii = list.length; i < ii; i++) {
             }
             return ret;
         };
+        DefUtil.extractReferences = function extractReferences(source) {
+            var ret = [];
+            referenceTag.lastIndex = 0;
+            var match;
+            while((match = referenceTag.exec(source))) {
+                referenceTag.lastIndex = match.index + match[0].length;
+                ret.push(match[1]);
+            }
+            return ret;
+        };
         return DefUtil;
     })();
     tsd.DefUtil = DefUtil;    
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
-    var Definition = (function () {
-        function Definition(path) {
+    var Def = (function () {
+        function Def(path) {
             this.path = path;
         }
-        Definition.prototype.toString = function () {
+        Def.prototype.toString = function () {
             return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
         };
-        Definition.getFrom = function getFrom(path, blobSha, commitSha) {
+        Def.getFrom = function getFrom(path, blobSha, commitSha) {
             var defExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/g;
             defExp.lastIndex = 0;
             var match = defExp.exec(path);
@@ -1265,20 +1278,71 @@ var tsd;
             if(match[1].length < 1 || match[2].length < 1) {
                 return null;
             }
-            var file = new tsd.Definition(path);
+            var file = new tsd.Def(path);
             file.project = match[1];
             file.name = match[2];
             file.head = new tsd.DefVersion(file, blobSha, commitSha);
             return file;
         };
-        return Definition;
+        return Def;
     })();
-    tsd.Definition = Definition;    
+    tsd.Def = Def;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var endSlashTrim = /\/?$/;
+    var DefInfo = (function () {
+        function DefInfo() {
+            this.references = [];
+            this.resetAll();
+        }
+        DefInfo.prototype.resetFields = function () {
+            this.name = '';
+            this.version = '';
+            this.submodule = '';
+            this.description = '';
+            this.projectUrl = '';
+            this.authors = [];
+            this.reposUrl = '';
+        };
+        DefInfo.prototype.resetAll = function () {
+            this.resetFields();
+            this.references = [];
+        };
+        DefInfo.prototype.toString = function () {
+            var ret = this.name;
+            if(this.submodule) {
+                ret += ' ' + this.submodule;
+            }
+            if(this.version) {
+                ret += ' ' + this.version;
+            }
+            if(this.description) {
+                ret += ' ' + JSON.stringify(this.description);
+            }
+            return ret;
+        };
+        DefInfo.prototype.isValid = function () {
+            if(!this.name) {
+                return false;
+            }
+            if(this.authors.length === 0) {
+                return false;
+            }
+            if(!this.reposUrl) {
+                return false;
+            }
+            return true;
+        };
+        return DefInfo;
+    })();
+    tsd.DefInfo = DefInfo;    
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
     var DefVersion = (function () {
         function DefVersion(def, blobSha, commitSha) {
+            this.dependencies = [];
             this.def = def;
             this.blobSha = blobSha;
             this.commitSha = commitSha;
@@ -1314,44 +1378,53 @@ var tsd;
 (function (tsd) {
     var pointer = require('jsonpointer.js');
     var commit_sha = '/commit/sha';
-    var DefinitionIndex = (function () {
-        function DefinitionIndex() {
-            this._list = [];
+    var DefIndex = (function () {
+        function DefIndex() {
+            this._list = new xm.Set();
+            this._map = new xm.KeyValueMap();
         }
-        DefinitionIndex.prototype.hasData = function () {
-            return !!this._branchName && this._list.length > 0;
+        DefIndex.prototype.hasData = function () {
+            return !!this._branchName && this._list.count() > 0;
         };
-        DefinitionIndex.prototype.setBranchTree = function (branch, tree) {
+        DefIndex.prototype.setBranchTree = function (branch, tree) {
             var _this = this;
             xm.assertVar('branch', branch, 'object');
             xm.assertVar('tree', tree, 'object');
             this._branchName = branch.name;
             this._commitSha = pointer.get(branch, commit_sha);
             this._treeSha = tree.sha;
-            this._list = [];
+            this._list.clear();
+            this._map.clear();
             var def;
             tree.tree.forEach(function (elem) {
                 var char = elem.path.charAt(0);
                 if(elem.type === 'blob' && char !== '.' && char !== '_') {
-                    def = tsd.Definition.getFrom(elem.path, elem.sha, _this._commitSha);
+                    def = tsd.Def.getFrom(elem.path, elem.sha, _this._commitSha);
                     if(def) {
                         _this.addFile(def);
                     }
                 }
             }, this);
         };
-        DefinitionIndex.prototype.addFile = function (def) {
-            this._list.push(def);
+        DefIndex.prototype.addFile = function (def) {
+            this._list.add(def);
+            this._map.set(def.path, def);
         };
-        DefinitionIndex.prototype.getPaths = function () {
-            return this._list.map(function (file) {
+        DefIndex.prototype.hasPath = function (path) {
+            return this._map.has(path);
+        };
+        DefIndex.prototype.getFileByPath = function (path) {
+            return this._map.get(path, null);
+        };
+        DefIndex.prototype.getPaths = function () {
+            return this._list.values().map(function (file) {
                 return file.path;
             }, this);
         };
-        DefinitionIndex.prototype.toDump = function () {
+        DefIndex.prototype.toDump = function () {
             var ret = [];
             ret.push(this.toString());
-            this._list.forEach(function (file) {
+            this._list.values().forEach(function (file) {
                 ret.push('  ' + file.toString());
                 var def = file.head;
                 while(def) {
@@ -1361,145 +1434,40 @@ var tsd;
             }, this);
             return ret.join('\n');
         };
-        DefinitionIndex.prototype.toString = function () {
+        DefIndex.prototype.toString = function () {
             return '[' + this._branchName + ']';
         };
-        Object.defineProperty(DefinitionIndex.prototype, "branchName", {
+        Object.defineProperty(DefIndex.prototype, "branchName", {
             get: function () {
                 return this._branchName;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DefinitionIndex.prototype, "commitSha", {
+        Object.defineProperty(DefIndex.prototype, "commitSha", {
             get: function () {
                 return this._commitSha;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DefinitionIndex.prototype, "treeSha", {
+        Object.defineProperty(DefIndex.prototype, "treeSha", {
             get: function () {
                 return this._treeSha;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DefinitionIndex.prototype, "list", {
+        Object.defineProperty(DefIndex.prototype, "list", {
             get: function () {
-                return this._list;
+                return this._list.values();
             },
             enumerable: true,
             configurable: true
         });
-        return DefinitionIndex;
+        return DefIndex;
     })();
-    tsd.DefinitionIndex = DefinitionIndex;    
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    var Q = require('q');
-    var FS = require('q-io/fs');
-    var assert = require('assert');
-    var path = require('path');
-    var mkdirp = require('mkdirp');
-    var pointer = require('jsonpointer.js');
-    var branch_tree = '/commit/commit/tree/sha';
-    var APIOptions = (function () {
-        function APIOptions() {
-        }
-        return APIOptions;
-    })();
-    tsd.APIOptions = APIOptions;    
-    var APIResult = (function () {
-        function APIResult(selector, options) {
-            this.selector = selector;
-            this.options = options;
-            xm.assertVar('selector', selector, tsd.Selector);
-        }
-        return APIResult;
-    })();
-    tsd.APIResult = APIResult;    
-    var APISelection = (function () {
-        function APISelection() {
-        }
-        return APISelection;
-    })();
-    tsd.APISelection = APISelection;    
-    var Core = (function () {
-        function Core(context) {
-            this.context = context;
-            xm.assertVar('context', context, tsd.Context);
-            this.index = new tsd.DefinitionIndex();
-            this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
-            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
-            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(context.paths.cache, 'git_raw'));
-        }
-        Core.prototype.getIndex = function () {
-            var self = this;
-            if(this.index.hasData()) {
-                return Q(null);
-            }
-            var branchData;
-            return self.gitAPI.getBranch(self.context.config.ref).then(function (data) {
-                var sha = pointer.get(data, branch_tree);
-                if(!sha) {
-                    throw new Error('missing sha hash');
-                }
-                branchData = data;
-                return self.gitAPI.getTree(sha, true);
-            }).then(function (data) {
-                self.index.setBranchTree(branchData, data);
-                return null;
-            });
-        };
-        Core.prototype.select = function (selector, options) {
-            var self = this;
-            var result = new APIResult(selector, options);
-            return self.getIndex().then(function () {
-                result.nameMatches = selector.pattern.matchTo(self.index.list);
-                result.selection = tsd.DefUtil.getHeads(result.nameMatches);
-                return result;
-            });
-        };
-        Core.prototype.writeSingleFile = function (file) {
-            var self = this;
-            var target = path.resolve(self.context.paths.typings, file.def.path);
-            var dir = path.dirname(target);
-            return Q.nfcall(mkdirp, dir).then(function () {
-                if(file.content) {
-                    return file.content;
-                }
-                return self.gitRaw.getFile(file.commitSha, file.def.path);
-            }).then(function (content) {
-                file.content = content;
-                return FS.exists(target);
-            }).then(function (exists) {
-                if(exists) {
-                    return FS.remove(target);
-                }
-                return null;
-            }).then(function () {
-                return FS.write(target, file.content);
-            }).then(function () {
-                return target;
-            });
-        };
-        Core.prototype.writeFiles = function (list) {
-            var self = this;
-            list = tsd.DefUtil.uniqueDefPaths(list);
-            return Q.all(list.map(function (file) {
-                return self.writeSingleFile(file);
-            }));
-        };
-        Core.prototype.saveToConfig = function (list) {
-            var self = this;
-            list = tsd.DefUtil.uniqueDefPaths(list);
-            return Q.reject(new Error('not yet implemented'));
-        };
-        return Core;
-    })();
-    tsd.Core = Core;    
+    tsd.DefIndex = DefIndex;    
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
@@ -1587,6 +1555,555 @@ var xm;
     })();
     xm.RegExpGlue = RegExpGlue;    
 })(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var util = require('util');
+    var trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
+    var LineParserCore = (function () {
+        function LineParserCore(verbose) {
+            if (typeof verbose === "undefined") { verbose = false; }
+            this.verbose = verbose;
+            this.parsers = new xm.KeyValueMap();
+        }
+        LineParserCore.prototype.addParser = function (parser) {
+            this.parsers.set(parser.id, parser);
+        };
+        LineParserCore.prototype.getInfo = function () {
+            var ret = {
+            };
+            ret.parsers = this.parsers.keys().sort();
+            return ret;
+        };
+        LineParserCore.prototype.getParser = function (id) {
+            return this.parsers.get(id, null);
+        };
+        LineParserCore.prototype.link = function () {
+            var self = this;
+            xm.eachElem(this.parsers.values(), function (parser) {
+                xm.eachElem(parser.nextIds, function (id) {
+                    var p = self.parsers.get(id);
+                    if(p) {
+                        parser.next.push(p);
+                    } else {
+                        console.log('cannot find parser: ' + id);
+                    }
+                });
+            });
+        };
+        LineParserCore.prototype.get = function (ids) {
+            var self = this;
+            return xm.reduceArray(ids, [], function (memo, id) {
+                if(!self.parsers.has(id)) {
+                    console.log('missing parser ' + id);
+                    return memo;
+                }
+                memo.push(self.parsers.get(id));
+                return memo;
+            });
+        };
+        LineParserCore.prototype.all = function () {
+            return this.parsers.values();
+        };
+        LineParserCore.prototype.listIds = function (parsers) {
+            return xm.reduceArray(parsers, [], function (memo, parser) {
+                memo.push(parser.id);
+                return memo;
+            });
+        };
+        LineParserCore.prototype.parse = function (source, asType) {
+            var log = this.verbose ? function () {
+                var rest = [];
+                for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                    rest[_i] = arguments[_i + 0];
+                }
+                console.log.apply(console, rest);
+            } : function () {
+                var rest = [];
+                for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                    rest[_i] = arguments[_i + 0];
+                }
+            };
+            log('source.length: ' + source.length);
+            log('asType: ' + asType);
+            this.link();
+            var res = [];
+            var possibles = asType ? this.get(asType) : this.all();
+            var length = source.length;
+            var line;
+            var i, ii;
+            var offset = 0;
+            var cursor = 0;
+            var lineCount = 0;
+            var procLineCount = 0;
+            var safetyBreak = 20;
+            trimmedLine.lastIndex = 0;
+            while(line = trimmedLine.exec(source)) {
+                log('-----------------------------------------------------------------------------------------');
+                if(line[0].length === 0) {
+                    console.log('zero length line match?');
+                    break;
+                }
+                if(line.index + line[0].lengt === cursor) {
+                    console.log('cursor not advancing?');
+                    break;
+                }
+                cursor = line.index + line[0].length;
+                trimmedLine.lastIndex = cursor;
+                lineCount++;
+                log('line: ' + lineCount);
+                if(lineCount > safetyBreak) {
+                    console.log('\n\n\n\nsafetyBreak bail at ' + lineCount + '> ' + safetyBreak + '!\n\n\n\n\n');
+                    throw ('parser safetyBreak bail!');
+                }
+                if(line.length < 5) {
+                    log('skip bad line match');
+                } else if(typeof line[2] === 'undefined' || line[2] === '') {
+                    log('skip empty line');
+                } else {
+                    procLineCount++;
+                    var text = line[2];
+                    log('[[' + text + ']]');
+                    log('---');
+                    var choice = [];
+                    for(i = 0 , ii = possibles.length; i < ii; i++) {
+                        var parser = possibles[i];
+                        var match = parser.match(text, offset, cursor);
+                        if(match) {
+                            log(parser.getName() + ' -> match!');
+                            log(match.match);
+                            choice.push(match);
+                            break;
+                        } else {
+                            log(parser.getName());
+                        }
+                    }
+                    log('---');
+                    log('choices ' + choice.length);
+                    if(choice.length === 0) {
+                        log('cannot match line');
+                        break;
+                    } else if(choice.length === 1) {
+                        log('single match line');
+                        log('using ' + choice[0].parser.id);
+                        res.push(choice[0]);
+                        possibles = choice[0].parser.next;
+                        log('switching possibles: [' + this.listIds(possibles) + ']');
+                    } else {
+                        log('multi match line');
+                        log('using ' + choice[0].parser.id);
+                        res.push(choice[0]);
+                        possibles = choice[0].parser.next;
+                        log('switching possibles: [' + this.listIds(possibles) + ']');
+                    }
+                }
+                if(possibles.length === 0) {
+                    log('no more possibles, break');
+                    break;
+                }
+                if(cursor >= length) {
+                    log('done ' + cursor + ' >= ' + length + ' lineCount: ' + lineCount);
+                    break;
+                }
+            }
+            log('--------------');
+            log('total lineCount: ' + lineCount);
+            log('procLineCount: ' + procLineCount);
+            log('res.length: ' + res.length);
+            log(' ');
+            if(res.length > 0) {
+                xm.eachElem(res, function (match) {
+                    match.extract();
+                });
+            }
+        };
+        return LineParserCore;
+    })();
+    xm.LineParserCore = LineParserCore;    
+    var LineParser = (function () {
+        function LineParser(id, exp, groupsMin, callback, nextIds) {
+            if (typeof nextIds === "undefined") { nextIds = []; }
+            this.id = id;
+            this.exp = exp;
+            this.groupsMin = groupsMin;
+            this.callback = callback;
+            this.nextIds = nextIds;
+            this.next = [];
+        }
+        LineParser.prototype.match = function (str, offset, limit) {
+            this.exp.lastIndex = offset;
+            var match = this.exp.exec(str);
+            if(!match || match.length < 1) {
+                return null;
+            }
+            if(this.groupsMin >= 0 && match.length < this.groupsMin) {
+                throw (new Error(this.getName() + 'bad match expected ' + this.groupsMin + ' groups, got ' + (this.match.length - 1)));
+            }
+            return new LineParserMatch(this, match);
+        };
+        LineParser.prototype.getName = function () {
+            return this.id;
+        };
+        return LineParser;
+    })();
+    xm.LineParser = LineParser;    
+    var LineParserMatch = (function () {
+        function LineParserMatch(parser, match) {
+            this.parser = parser;
+            this.match = match;
+        }
+        LineParserMatch.prototype.extract = function () {
+            if(this.parser.callback) {
+                this.parser.callback(this);
+            }
+        };
+        LineParserMatch.prototype.getGroup = function (num, alt) {
+            if (typeof alt === "undefined") { alt = ''; }
+            if(num >= this.match.length - 1) {
+                throw (new Error(this.parser.getName() + ' group index ' + num + ' > ' + (this.match.length - 2)));
+            }
+            num += 1;
+            if(num < 1 || num > this.match.length) {
+                return alt;
+            }
+            if(typeof this.match[num] === 'undefined') {
+                return alt;
+            }
+            return this.match[num];
+        };
+        LineParserMatch.prototype.getGroupFloat = function (num, alt) {
+            if (typeof alt === "undefined") { alt = 0; }
+            var value = parseFloat(this.getGroup(num));
+            if(isNaN(value)) {
+                return alt;
+            }
+            return value;
+        };
+        LineParserMatch.prototype.getName = function () {
+            return this.parser.getName();
+        };
+        return LineParserMatch;
+    })();
+    xm.LineParserMatch = LineParserMatch;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var endSlashTrim = /\/?$/;
+    var AuthorInfo = (function () {
+        function AuthorInfo(name, url, email) {
+            if (typeof name === "undefined") { name = ''; }
+            if (typeof url === "undefined") { url = undefined; }
+            if (typeof email === "undefined") { email = undefined; }
+            this.name = name;
+            this.url = url;
+            this.email = email;
+            if(this.url) {
+                this.url = this.url.replace(endSlashTrim, '');
+            }
+        }
+        AuthorInfo.prototype.toString = function () {
+            return '[' + this.name + (this.email ? ' @ ' + this.email : '') + (this.url ? ' <' + this.url + '>' : '') + ']';
+        };
+        AuthorInfo.prototype.toJSON = function () {
+            var obj = {
+                name: this.name
+            };
+            if(this.url) {
+                obj.url = this.url;
+            }
+            if(this.email) {
+                obj.email = this.email;
+            }
+            return obj;
+        };
+        return AuthorInfo;
+    })();
+    xm.AuthorInfo = AuthorInfo;    
+})(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    var ParseError = (function () {
+        function ParseError(message, text, ref) {
+            if (typeof message === "undefined") { message = ''; }
+            if (typeof text === "undefined") { text = ''; }
+            if (typeof ref === "undefined") { ref = null; }
+            this.message = message;
+            this.text = text;
+            this.ref = ref;
+        }
+        return ParseError;
+    })();
+    tsd.ParseError = ParseError;    
+    var endSlashTrim = /\/?$/;
+    var glue = xm.RegExpGlue.get;
+    var expStart = /^/;
+    var expEnd = /$/;
+    var spaceReq = /[ \t]+/;
+    var spaceOpt = /[ \t]*/;
+    var anyGreedy = /.*/;
+    var anyLazy = /.*?/;
+    var anyGreedyCap = /(.*)/;
+    var anyLazyCap = /(.*?)/;
+    var identifierCap = /([\w\._-]*(?:[ \t]*[\w\._-]+)*?)/;
+    var versionCap = /-?v?(\d+\.\d+\.?\d*\.?\d*)?/;
+    var wordsCap = /([\w \t_-]+[\w]+)/;
+    var labelCap = /([\w_-]+[\w]+)/;
+    var delimStart = /[<\[\{\(]/;
+    var delimStartOpt = /[<\[\{\(]?/;
+    var delimEnd = /[\)\}\]>]/;
+    var delimEndOpt = /[\)\}\]>]?/;
+    var seperatorOpt = /[,;]?/;
+    var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
+    var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)(?:(?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
+    var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
+    var commentStart = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).join();
+    var optUrl = glue('(?:', spaceOpt, delimStartOpt, urlFullCap, delimEndOpt, ')?').join();
+    var commentLine = glue(commentStart).append(anyLazyCap).append(spaceOpt, expEnd).join();
+    var referencePath = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).append(referenceTag).append(spaceOpt, expEnd).join();
+    var typeHead = glue(commentStart).append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap).append(/[ \t:-]+/, versionCap, spaceOpt).append(anyGreedy, expEnd).join('i');
+    var projectUrl = glue(commentStart).append(/Project/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var defAuthorUrl = glue(commentStart).append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt).append(wordsCap, optUrl).append(spaceOpt, seperatorOpt, spaceOpt, expEnd).join('i');
+    var defAuthorUrlAlt = glue(commentStart).append(/Author[ \t]*:?/, spaceOpt).append(wordsCap, optUrl).append(spaceOpt, seperatorOpt, spaceOpt, expEnd).join('i');
+    var reposUrl = glue(commentStart).append(/Definitions/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var reposUrlAlt = glue(commentStart).append(/DefinitelyTyped/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var labelUrl = glue(commentStart).append(labelCap, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var labelWordsUrl = glue(commentStart).append(labelCap, spaceOpt, /:?/, spaceOpt).append(wordsCap, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var wordsUrl = glue(commentStart).append(wordsCap, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
+    var mutate = function (base, add, remove) {
+        var res = base ? base.slice(0) : [];
+        var i, ii, index;
+        if(add) {
+            for(i = 0 , ii = add.length; i < ii; i++) {
+                res.push(add[i]);
+            }
+        }
+        if(remove) {
+            for(i = 0 , ii = remove.length; i < ii; i++) {
+                while((index = res.indexOf(remove[i])) > -1) {
+                    res.splice(index, 1);
+                }
+            }
+        }
+        return res;
+    };
+    var DefInfoParser = (function () {
+        function DefInfoParser(verbose) {
+            if (typeof verbose === "undefined") { verbose = false; }
+            this.verbose = verbose;
+        }
+        DefInfoParser.prototype.parse = function (data, source) {
+            data.resetFields();
+            this.parser = new xm.LineParserCore(this.verbose);
+            var fields = [
+                'projectUrl', 
+                'defAuthorUrl', 
+                'defAuthorUrlAlt', 
+                'reposUrl', 
+                'reposUrlAlt', 
+                'referencePath'
+            ];
+            this.parser.addParser(new xm.LineParser('any', anyGreedyCap, 0, null, [
+                'head', 
+                'any'
+            ]));
+            this.parser.addParser(new xm.LineParser('head', typeHead, 2, function (match) {
+                data.name = match.getGroup(0, data.name);
+                data.version = match.getGroup(1, data.version);
+            }, fields));
+            fields = mutate(fields, null, [
+                'projectUrl'
+            ]);
+            this.parser.addParser(new xm.LineParser('projectUrl', projectUrl, 1, function (match) {
+                data.projectUrl = match.getGroup(0, data.projectUrl).replace(endSlashTrim, '');
+            }, fields));
+            fields = mutate(fields, [
+                'defAuthorAppend'
+            ], [
+                'defAuthorUrl', 
+                'defAuthorUrlAlt'
+            ]);
+            this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 2, function (match) {
+                data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
+            }, fields));
+            this.parser.addParser(new xm.LineParser('defAuthorUrlAlt', defAuthorUrlAlt, 2, function (match) {
+                data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
+            }, fields));
+            this.parser.addParser(new xm.LineParser('defAuthorAppend', wordsUrl, 2, function (match) {
+                data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
+            }, fields));
+            fields = mutate(fields, null, [
+                'defAuthorAppend'
+            ]);
+            fields = mutate(fields, null, [
+                'reposUrl', 
+                'reposUrlAlt'
+            ]);
+            this.parser.addParser(new xm.LineParser('reposUrl', reposUrl, 1, function (match) {
+                data.reposUrl = match.getGroup(0, data.reposUrl).replace(endSlashTrim, '');
+            }, fields));
+            this.parser.addParser(new xm.LineParser('reposUrlAlt', reposUrlAlt, 1, function (match) {
+                data.reposUrl = match.getGroup(0, data.reposUrl).replace(endSlashTrim, '');
+            }, fields));
+            this.parser.addParser(new xm.LineParser('referencePath', referencePath, 1, function (match) {
+                data.references.push(match.getGroup(0));
+            }, [
+                'referencePath'
+            ]));
+            this.parser.addParser(new xm.LineParser('comment', commentLine, 0, null, [
+                'comment'
+            ]));
+            if(this.verbose) {
+                xm.log(this.parser.getInfo());
+            }
+            this.parser.parse(source, [
+                'head'
+            ]);
+        };
+        return DefInfoParser;
+    })();
+    tsd.DefInfoParser = DefInfoParser;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var Q = require('q');
+    var FS = require('q-io/fs');
+    var assert = require('assert');
+    var path = require('path');
+    var mkdirp = require('mkdirp');
+    var pointer = require('jsonpointer.js');
+    var branch_tree = '/commit/commit/tree/sha';
+    var APIOptions = (function () {
+        function APIOptions() {
+        }
+        return APIOptions;
+    })();
+    tsd.APIOptions = APIOptions;    
+    var APIResult = (function () {
+        function APIResult(selector, options) {
+            this.selector = selector;
+            this.options = options;
+            xm.assertVar('selector', selector, tsd.Selector);
+        }
+        return APIResult;
+    })();
+    tsd.APIResult = APIResult;    
+    var APISelection = (function () {
+        function APISelection() {
+        }
+        return APISelection;
+    })();
+    tsd.APISelection = APISelection;    
+    var Core = (function () {
+        function Core(context) {
+            this.context = context;
+            xm.assertVar('context', context, tsd.Context);
+            this.index = new tsd.DefIndex();
+            this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
+            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
+            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(context.paths.cache, 'git_raw'));
+        }
+        Core.prototype.getIndex = function () {
+            var self = this;
+            if(this.index.hasData()) {
+                return Q(null);
+            }
+            var branchData;
+            return self.gitAPI.getBranch(self.context.config.ref).then(function (data) {
+                var sha = pointer.get(data, branch_tree);
+                if(!sha) {
+                    throw new Error('missing sha hash');
+                }
+                branchData = data;
+                return self.gitAPI.getTree(sha, true);
+            }).then(function (data) {
+                self.index.setBranchTree(branchData, data);
+                return null;
+            });
+        };
+        Core.prototype.select = function (selector, options) {
+            var self = this;
+            var result = new APIResult(selector, options);
+            return self.getIndex().then(function () {
+                result.nameMatches = selector.pattern.matchTo(self.index.list);
+                result.selection = tsd.DefUtil.getHeads(result.nameMatches);
+                return result;
+            });
+        };
+        Core.prototype.loadContent = function (file) {
+            var self = this;
+            if(file.content) {
+                return Q(file.content);
+            }
+            return self.gitRaw.getFile(file.commitSha, file.def.path).then(function (content) {
+                file.content = String(content);
+                return file;
+            });
+        };
+        Core.prototype.loadContentBulk = function (list) {
+            var self = this;
+            return Q.all(list.map(function (file) {
+                return self.loadContent(file);
+            })).thenResolve(list);
+        };
+        Core.prototype.parseDefInfo = function (file) {
+            var self = this;
+            return self.loadContent(file).then(function (file) {
+                var parser = new tsd.DefInfoParser(self.context.verbose);
+                if(file.info) {
+                    file.info.resetFields();
+                } else {
+                    file.info = new tsd.DefInfo();
+                }
+                parser.parse(file.info, file.content);
+                if(!file.info.isValid()) {
+                    xm.log.warn('bad parse in: ' + file);
+                }
+                return file;
+            });
+        };
+        Core.prototype.parseDefInfoBulk = function (list) {
+            var self = this;
+            list = tsd.DefUtil.uniqueDefPaths(list);
+            return Q.all(list.map(function (file) {
+                return self.parseDefInfo(file);
+            })).thenResolve(list);
+        };
+        Core.prototype.writeFile = function (file) {
+            var self = this;
+            var target = path.resolve(self.context.paths.typings, file.def.path);
+            var dir = path.dirname(target);
+            return Q.nfcall(mkdirp, dir).then(function () {
+                if(file.content) {
+                    return file.content;
+                }
+                return self.loadContent(file);
+            }).then(function () {
+                return FS.exists(target);
+            }).then(function (exists) {
+                if(exists) {
+                    return FS.remove(target);
+                }
+                return null;
+            }).then(function () {
+                return FS.write(target, file.content);
+            }).then(function () {
+                return target;
+            });
+        };
+        Core.prototype.writeFileBulk = function (list) {
+            var self = this;
+            list = tsd.DefUtil.uniqueDefPaths(list);
+            return Q.all(list.map(function (file) {
+                return self.writeFile(file);
+            }));
+        };
+        Core.prototype.saveToConfigBulk = function (list) {
+            var self = this;
+            return Q.reject(new Error('not yet implemented'));
+        };
+        return Core;
+    })();
+    tsd.Core = Core;    
+})(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
     var wordParts = /[\w_\.-]/;
@@ -1598,15 +2115,15 @@ var tsd;
     function escapeExp(str) {
         return str.replace('.', '\\.');
     }
-    var SelectorFilePattern = (function () {
-        function SelectorFilePattern(pattern) {
+    var SelectorPattern = (function () {
+        function SelectorPattern(pattern) {
             xm.assertVar('pattern', pattern, 'string');
             this.pattern = pattern;
         }
-        SelectorFilePattern.prototype.matchTo = function (list) {
+        SelectorPattern.prototype.matchTo = function (list) {
             return list.filter(this.getFilterFunc(), this);
         };
-        SelectorFilePattern.prototype.compile = function () {
+        SelectorPattern.prototype.compile = function () {
             if(!this.pattern) {
                 throw (new Error('SelectorFilePattern undefined pattern'));
             }
@@ -1618,7 +2135,7 @@ var tsd;
                 this.compileSingle();
             }
         };
-        SelectorFilePattern.prototype.compileSingle = function () {
+        SelectorPattern.prototype.compileSingle = function () {
             patternSingle.lastIndex = 0;
             var match = patternSingle.exec(this.pattern);
             if(match.length < 4) {
@@ -1644,7 +2161,7 @@ var tsd;
                 this.nameExp = glue.join('i');
             }
         };
-        SelectorFilePattern.prototype.compileSplit = function () {
+        SelectorPattern.prototype.compileSplit = function () {
             patternSplit.lastIndex = 0;
             var match = patternSplit.exec(this.pattern);
             if(match.length < 7) {
@@ -1684,7 +2201,7 @@ var tsd;
                 this.nameExp = glue.join('i');
             }
         };
-        SelectorFilePattern.prototype.getFilterFunc = function () {
+        SelectorPattern.prototype.getFilterFunc = function () {
             this.compile();
             var self = this;
             if(this.nameExp) {
@@ -1705,17 +2222,17 @@ var tsd;
                 throw (new Error('SelectorFilePattern cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
             }
         };
-        return SelectorFilePattern;
+        return SelectorPattern;
     })();
-    tsd.SelectorFilePattern = SelectorFilePattern;    
+    tsd.SelectorPattern = SelectorPattern;    
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
     var Selector = (function () {
         function Selector(pattern) {
             if (typeof pattern === "undefined") { pattern = '*'; }
-            xm.assertVar('pattern', pattern, tsd.SelectorFilePattern);
-            this.pattern = new tsd.SelectorFilePattern(pattern);
+            xm.assertVar('pattern', pattern, tsd.SelectorPattern);
+            this.pattern = new tsd.SelectorPattern(pattern);
         }
         Object.defineProperty(Selector.prototype, "requiresSource", {
             get: function () {
@@ -1755,14 +2272,15 @@ var tsd;
         API.prototype.install = function (selector, options) {
             var _this = this;
             return this._core.select(selector, options).then(function (res) {
-                return _this._core.writeFiles(res.selection);
+                return _this._core.writeFileBulk(res.selection).then(function (paths) {
+                    res.written = paths;
+                }).thenResolve(res);
             });
         };
-        API.prototype.purge = function () {
-            return Q.reject(new Error('not yet implemented'));
-        };
-        API.prototype.details = function (selector, options) {
+        API.prototype.info = function (selector, options) {
+            var _this = this;
             return this._core.select(selector, options).then(function (res) {
+                return _this._core.parseDefInfoBulk(res.selection).thenResolve(res);
             });
         };
         API.prototype.deps = function (selector, options) {
@@ -1774,10 +2292,51 @@ var tsd;
         API.prototype.update = function (selector, options) {
             return Q.reject(new Error('not yet implemented'));
         };
+        API.prototype.purge = function () {
+            return Q.reject(new Error('not yet implemented'));
+        };
         return API;
     })();
     tsd.API = API;    
 })(tsd || (tsd = {}));
+var xm;
+(function (xm) {
+    var Set = (function () {
+        function Set() {
+            this._content = [];
+        }
+        Set.prototype.has = function (value) {
+            return this._content.indexOf(value) > -1;
+        };
+        Set.prototype.add = function (value) {
+            if(this._content.indexOf(value) < 0) {
+                this._content.push(value);
+            }
+        };
+        Set.prototype.remove = function (value) {
+            var i = this._content.indexOf(value);
+            if(i > -1) {
+                this._content.splice(i, 1);
+            }
+        };
+        Set.prototype.values = function () {
+            return this._content.slice(0);
+        };
+        Set.prototype.import = function (values) {
+            for(var i = 0, ii = values.length; i < ii; i++) {
+                this.add(values[i]);
+            }
+        };
+        Set.prototype.clear = function () {
+            this._content = [];
+        };
+        Set.prototype.count = function () {
+            return this._content.length;
+        };
+        return Set;
+    })();
+    xm.Set = Set;    
+})(xm || (xm = {}));
 var xm;
 (function (xm) {
     function padLeft(str, len, char) {
@@ -2001,7 +2560,12 @@ var tsd;
     var Q = require('q');
     function getContext(args) {
         xm.assertVar('args', args, 'object');
-        return new tsd.Context(args.config, args.verbose);
+        var context = new tsd.Context(args.config, args.verbose);
+        if(args.dev) {
+            context.paths.setTmp(path.join(path.dirname(xm.PackageJSON.find()), 'tmp', 'cli'));
+            context.paths.setCache(path.join(path.dirname(xm.PackageJSON.find()), 'cache'));
+        }
+        return context;
     }
     var defaultJobOptions = [
         'config', 
@@ -2019,7 +2583,7 @@ var tsd;
         return Q.fcall(function () {
             var job = new Job();
             if(args._.length === 0) {
-                throw new Error('pass a name selector pattern');
+                throw new Error('pass one selector pattern');
             }
             job.context = getContext(args);
             job.api = new tsd.API(job.context);
@@ -2057,20 +2621,37 @@ var tsd;
             placeholder: null,
             command: null
         });
+        expose.defineOption({
+            name: 'dev',
+            short: null,
+            description: 'development mode',
+            type: 'flag',
+            default: null,
+            placeholder: null,
+            command: null
+        });
         function reportError(err) {
-            xm.log('->' + 'an error occured!'.red);
+            xm.log('-> ' + 'an error occured!'.red);
+            xm.log('');
             xm.log(err);
         }
         function reportSucces(result) {
-            xm.log('->' + 'success!'.green);
+            xm.log('-> ' + 'success!'.green);
             if(result) {
-                xm.log.inspect(result, null, 2);
+                xm.log('');
+                result.selection.forEach(function (def) {
+                    xm.log(def.toString());
+                    if(def.info) {
+                        xm.log(def.info.toString());
+                        xm.log(def.info);
+                    }
+                });
             }
         }
         expose.command('version', function (args) {
             xm.log(xm.PackageJSON.getLocal().version);
         }, 'display version');
-        expose.command('info', function (args) {
+        expose.command('settings', function (args) {
             getContext(args).logInfo(true);
         }, 'display config settings');
         expose.command('search', function (args) {
@@ -2087,12 +2668,10 @@ var tsd;
         }, 'install definitions', jobOptions(), [
             'selector'
         ]);
-        expose.command('details', function (args) {
+        expose.command('info', function (args) {
             getSelectorJob(args).then(function (job) {
-                return job.api.details(job.selector, job.options);
-            }).done(function (result) {
-                reportSucces(result);
-            }, reportError);
+                return job.api.info(job.selector, job.options);
+            }).done(reportSucces, reportError);
         }, 'show definition details', jobOptions(), [
             'selector'
         ]);
@@ -2100,7 +2679,13 @@ var tsd;
             getSelectorJob(args).then(function (job) {
                 return job.api.deps(job.selector, job.options);
             }).done(function (result) {
-                reportSucces(result);
+                reportSucces(null);
+                result.selection.forEach(function (def) {
+                    xm.log(def.toString());
+                    def.dependencies.forEach(function (def) {
+                        xm.log(' - ' + def.toString());
+                    });
+                });
             }, reportError);
         }, 'list dependencies', jobOptions(), [
             'selector'

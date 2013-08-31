@@ -4,4 +4,5 @@
 ///<reference path="data/Selector.ts" />
 
 ///<reference path="../xm/KeyValueMap.ts" />
+///<reference path="../xm/Set.ts" />
 ///<reference path="../xm/callAsync.ts" />

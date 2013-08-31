@@ -6,19 +6,21 @@ module tsd {
 	var pointer = require('jsonpointer.js');
 	var commit_sha:string = '/commit/sha';
 
-	export class DefinitionIndex {
+	export class DefIndex {
 
 		private _branchName:string;
 		private _treeSha:string;
 		private _commitSha:string;
-		private _list:tsd.Definition[] = [];
+		//TODO swap for set
+		private _list:xm.Set = new xm.Set();
+		private _map:xm.KeyValueMap = new xm.KeyValueMap();
 
 		constructor() {
 
 		}
 
 		hasData():bool {
-			return !!this._branchName && this._list.length > 0;
+			return !!this._branchName && this._list.count() > 0;
 		}
 
 		// assume recursive
@@ -29,14 +31,15 @@ module tsd {
 			this._branchName = branch.name;
 			this._commitSha = pointer.get(branch, commit_sha);
 			this._treeSha = tree.sha;
-			this._list = [];
+			this._list.clear();
+			this._map.clear();
 
-			var def:tsd.Definition;
+			var def:tsd.Def;
 
 			tree.tree.forEach((elem:git.GithubJSONTreeElem) => {
 				var char = elem.path.charAt(0);
 				if (elem.type === 'blob' && char !== '.' && char !== '_') {
-					def = tsd.Definition.getFrom(elem.path, elem.sha, this._commitSha);
+					def = tsd.Def.getFrom(elem.path, elem.sha, this._commitSha);
 					if (def) {
 						this.addFile(def);
 					}
@@ -44,13 +47,21 @@ module tsd {
 			}, this);
 		}
 
-		addFile(def:tsd.Definition) {
-			//TODO enforce unique?
-			this._list.push(def);
+		addFile(def:tsd.Def) {
+			this._list.add(def);
+			this._map.set(def.path, def);
+		}
+
+		hasPath(path:string):bool {
+			return this._map.has(path);
+		}
+
+		getFileByPath(path:string):tsd.Def {
+			return this._map.get(path, null);
 		}
 
 		getPaths():string[] {
-			return this._list.map((file:tsd.Definition) => {
+			return this._list.values().map((file:tsd.Def) => {
 				return file.path;
 			}, this);
 		}
@@ -58,7 +69,7 @@ module tsd {
 		toDump():string {
 			var ret:string[] = [];
 			ret.push(this.toString());
-			this._list.forEach((file:tsd.Definition) => {
+			this._list.values().forEach((file:tsd.Def) => {
 				ret.push('  ' + file.toString());
 				var def = file.head;
 				while (def) {
@@ -85,8 +96,9 @@ module tsd {
 			return this._treeSha;
 		}
 
-		get list():tsd.Definition[] {
-			return this._list;
+		get list():tsd.Def[] {
+			//need generics
+			return <tsd.Def[]>this._list.values();
 		}
 	}
 }

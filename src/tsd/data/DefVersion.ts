@@ -1,23 +1,27 @@
 ///<reference path="../_ref.ts" />
-///<reference path="Definition.ts" />
+///<reference path="Def.ts" />
+///<reference path="DefInfo.ts" />
 
 module tsd {
 
 	export class DefVersion {
 
-		public blobSha:string;
+		blobSha:string;
 		// commitSha should be an array? as a blob can exist in many commits
-		public commitSha:string;
-		//public date:Date;
-		public def:tsd.Definition;
+		commitSha:string;
+		//date:Date;
+		def:tsd.Def;
 
-		public content:string;
+		content:string;
+		dependencies:tsd.DefVersion[] = [];
+
+		info:tsd.DefInfo;
 
 		// linked list (only care for single chain
-		public newer:tsd.DefVersion;
-		public older:tsd.DefVersion;
+		newer:tsd.DefVersion;
+		older:tsd.DefVersion;
 
-		constructor(def:tsd.Definition, blobSha:string, commitSha:string) {
+		constructor(def:tsd.Def, blobSha:string, commitSha:string) {
 			this.def = def;
 			this.blobSha = blobSha;
 			this.commitSha = commitSha;

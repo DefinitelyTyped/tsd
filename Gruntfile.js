@@ -130,7 +130,7 @@ module.exports = function (grunt) {
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');
 	gtx.alias('edit_02', 'gtx:api');
-	gtx.alias('edit_03', 'gtx:cli');
+	gtx.alias('edit_03', 'build', 'gtx:cli');
 	gtx.alias('edit_04', 'gtx:git');
 	gtx.alias('edit_05', 'gtx:xm');
 

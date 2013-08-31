@@ -16,6 +16,8 @@ module tsd {
 	var Q = require('Q');
 	var tv4:TV4 = require('tv4').tv4;
 
+	require('source-map-support').install();
+
 	export class Context {
 
 		packageInfo:xm.PackageJSON;
@@ -34,6 +36,7 @@ module tsd {
 
 			this.paths.typings = xm.mkdirCheck(this.config.typingsPath, true);
 
+			//sweet stacks
 			Q.longStackSupport = true;
 
 			if (this.verbose) {

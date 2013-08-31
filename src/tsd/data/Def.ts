@@ -4,7 +4,7 @@
 module tsd {
 
 	//single definition in repo (identified by it path)
-	export class Definition {
+	export class Def {
 
 		// unique identifier: 'project/name' (should be 'project/name-v0.1.3-alpha')
 		public path:string;
@@ -26,7 +26,7 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		static getFrom(path:string, blobSha:string, commitSha:string):tsd.Definition {
+		static getFrom(path:string, blobSha:string, commitSha:string):tsd.Def {
 			var defExp:RegExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/g;
 			defExp.lastIndex = 0;
 
@@ -40,7 +40,7 @@ module tsd {
 			if (match[1].length < 1 || match[2].length < 1) {
 				return null;
 			}
-			var file = new tsd.Definition(path);
+			var file = new tsd.Def(path);
 			file.project = match[1];
 			file.name = match[2];
 			// path.semver = match[3];

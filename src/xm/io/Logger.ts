@@ -28,14 +28,18 @@ module xm {
 		error(...args:any[]):void;
 		debug(...args:any[]):void;
 		inspect(value:any, label?:string, depth?:number):void;
+		mute:bool;
 	}
 
-	export function getLogger(label?:string, writer?:xm.LineWriter):Logger {
+	export function getLogger(label?:string, writer?:xm.LineWriter):xm.Logger {
 		writer = writer || new xm.ConsoleLineWriter();
 
 		label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
 
 		var writeMulti = (prefix:string, postfix:string, args:any[]) => {
+			if (logger.mute) {
+				return;
+			}
 			var ret = [];
 			for (var i = 0, ii = args.length; i < ii; i++) {
 				var value = args[i];
@@ -53,12 +57,12 @@ module xm {
 			writeMulti('', '', args);
 		};
 
-		var logger:any = (...args:any[]) => {
+		var logger:Logger = <Logger>((...args:any[]) => {
 			plain.apply(null, args);
-		};
+		});
 		// alias
 		logger.log = plain;
-
+		logger.mute = false;
 		logger.warn = (...args:any[]) => {
 			writeMulti('warn: '.yellow, '', args);
 		};
@@ -76,5 +80,5 @@ module xm {
 		return logger;
 	}
 
-	export var log:Logger = getLogger();
+	export var log:xm.Logger = getLogger();
 }

@@ -15,6 +15,9 @@ interface Qpromise {
 	fail(errorCallback: Function): Qpromise;
 	fin(finallyCallback: Function): Qpromise;
 	then(onFulfilled?: Function, onRejected?: Function, onProgress?: Function): Qpromise;
+	thenResolve(value: any): Qpromise;
+	thenReject(reason: any): Qpromise;
+
 	spread(onFulfilled: Function, onRejected?: Function): Qpromise;
 	catch(onRejected: Function): Qpromise;
 	progress(onProgress: Function): Qpromise;

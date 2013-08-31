@@ -1,6 +1,5 @@
 ///<reference path="../../_ref.ts" />
 ///<reference path="../../../src/tsd/Core.ts" />
-///<reference path="../../../src/tsd/data/Definition.ts" />
 ///<reference path="../../../src/tsd/data/Selector.ts" />
 
 describe('Core', () => {
@@ -15,7 +14,7 @@ describe('Core', () => {
 	before(() => {
 		context = new tsd.Context();
 		context.paths.setTmp('./tmp');
-		context.paths.setCache('./cache/Core');
+		context.paths.setCache('./cache');
 
 		assert.isDirectory(context.paths.tmp, 'context.paths.tmp');
 		assert.isDirectory(context.paths.cache, 'context.paths.cache');
