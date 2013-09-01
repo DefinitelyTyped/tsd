@@ -1,6 +1,6 @@
 ///<reference path="../../_ref.ts" />
-///<reference path="../../../src/tsd/Core.ts" />
-///<reference path="../../../src/tsd/data/Selector.ts" />
+///<reference path="../../../src/tsd/logic/Core.ts" />
+///<reference path="../../../src/tsd/select/Selector.ts" />
 
 describe('Core', () => {
 
@@ -38,7 +38,7 @@ describe('Core', () => {
 		it('should return data', (done) => {
 			api.getIndex().then(() => {
 
-				api.context.log('api -> getIndex');
+				//api.context.log('api -> getIndex');
 
 				//xm.log.inspect(api.definitions.list);
 
@@ -54,10 +54,10 @@ describe('Core', () => {
 			var selector = new tsd.Selector('async/async');
 			//selector.resolveReferences = true;
 
-			api.select(selector, null).then((result:tsd.APIResult) => {
+			api.select(selector).then((result:tsd.APIResult) => {
 				assert.ok(result, 'result');
 
-				api.context.log('api -> search');
+				//api.context.log('api -> search');
 
 				//xm.log.inspect(result);
 

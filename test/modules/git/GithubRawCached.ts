@@ -2,7 +2,7 @@
 ///<reference path="../../../src/git/GithubRawCached.ts" />
 ///<reference path="../../../src/tsd/context/Context.ts" />
 
-describe('git.GithubRawCached', () => {
+describe.skip('git.GithubRawCached', () => {
 
 	var raw:git.GithubRawCached;
 
@@ -76,7 +76,9 @@ describe('git.GithubRawCached', () => {
 				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();
-			}).done();
+			}).done(null, (err) => {
+				assert(false, 'error: ' + err);
+			});
 		});
 	});
 });

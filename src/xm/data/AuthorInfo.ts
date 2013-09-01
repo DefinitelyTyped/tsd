@@ -11,7 +11,7 @@ module xm {
 		}
 
 		toString():string {
-			return '[' + this.name + (this.email ? ' @ ' + this.email : '') + (this.url ? ' <' + this.url + '>' : '') + ']';
+			return this.name + (this.email ? ' @ ' + this.email : '') + (this.url ? ' <' + this.url + '>' : '');
 		}
 
 		toJSON():any {

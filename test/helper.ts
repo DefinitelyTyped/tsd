@@ -8,6 +8,8 @@ module helper {
 	var path = require('path');
 	var util = require('util');
 
+	require('source-map-support').install();
+
 	export function dump(object:any, label?:string, depth?:number = 6, showHidden?:bool = false):any{
 		if (typeof label !== 'undefined') {
 			console.log(label + ':');

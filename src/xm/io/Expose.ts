@@ -62,6 +62,8 @@ module xm {
 		}
 	}
 
+	//TODO better support for global options; not only .command but also a .global
+	//TODO add per-command sub-help like npm
 	export class Expose {
 
 		private _commands = new KeyValueMap();
@@ -190,6 +192,7 @@ module xm {
 			f.execute.call(f, args);
 		}
 
+		//TODO clean ugly method (after fixing global options)
 		printCommands():void {
 			if (this.title) {
 				console.log(this.title + '\n');

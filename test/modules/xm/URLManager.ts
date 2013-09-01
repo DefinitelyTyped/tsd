@@ -4,8 +4,8 @@
 describe('xm.URLManager', () => {
 
 	var urls:xm.URLManager;
-	var expected;
-	var actual;
+	var expected:string;
+	var actual:xm.URLTemplate;
 
 	it('should be defined', () => {
 		assert.isFunction(xm.URLManager, 'constructor');
@@ -38,12 +38,15 @@ describe('xm.URLManager', () => {
 		it('should be defined', () => {
 			actual = urls.getTemplate('main');
 			assert.isObject(actual);
-			assert.isFunction(actual.expand);
+
+			assert.isFunction(actual.fillFromObject, 'fillFromObject');
+			assert.isFunction(actual.fromUri, 'fromUri');
+			assert.isFunction(actual.fill, 'fill');
 		});
 		it('should return template', () => {
 			actual = urls.getTemplate('main');
 			expected = 'https://example.com/foo/bar/some';
-			assert.strictEqual(actual.expand({name: 'foo', value: 'bar', sub: 'some'}), expected);
+			assert.strictEqual(actual.fillFromObject({name: 'foo', value: 'bar', sub: 'some'}), expected);
 		});
 	});
 

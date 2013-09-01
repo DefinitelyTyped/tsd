@@ -1,5 +1,6 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../xm/RegExpGlue.ts" />
+///<reference path="../data/Def.ts" />
 
 module tsd {
 
@@ -9,36 +10,33 @@ module tsd {
 	var wordLazy = /[\w_\.-]*?/;
 	var wordGlob:RegExp = /(\**)([\w_\.-]*?)(\**)/;
 
-	//TODO replace RegExpGlue with XRegExp
-
 	// simple pattern: *project*/*name*
 	var patternSplit:RegExp = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
 	function escapeExp(str) {
-		//TODO this needs hardening
+		//this needs hardening (or ditch)
 		return str.replace('.', '\\.');
 	}
 
-	//TODO use minimatch?
+	//TODO use minimatch or replace RegExpGlue with XRegExp
 	//TODO use semver-postfix?
-	export class SelectorPattern {
+	export class NameMatcher {
 
 		pattern:string;
-		projectExp:RegExp;
-		nameExp:RegExp;
+		private projectExp:RegExp;
+		private nameExp:RegExp;
 
 		constructor(pattern:string) {
 			xm.assertVar('pattern', pattern, 'string');
 			this.pattern = pattern;
 		}
 
-		matchTo(list:tsd.Def[]):tsd.Def[] {
+		filter(list:tsd.Def[]):tsd.Def[] {
 			return list.filter(this.getFilterFunc(), this);
 		}
 
 		// crude compilator
-		//TODO rewrite for proper globbing?
 		private compile():void {
 			if (!this.pattern) {
 				throw (new Error('SelectorFilePattern undefined pattern'));
@@ -132,26 +130,26 @@ module tsd {
 			//xm.log(this.nameExp);
 		}
 
+		//TODO (auto) cache compile result
 		private getFilterFunc():(file:tsd.Def) => bool {
 			this.compile();
 
 			// get an efficient filter function
-			var self:tsd.SelectorPattern = this;
 			if (this.nameExp) {
 				if (this.projectExp) {
 					return (file:tsd.Def) => {
-						return self.projectExp.test(file.project) && self.nameExp.test(file.name);
+						return this.projectExp.test(file.project) && this.nameExp.test(file.name);
 					};
 				}
 				else {
 					return (file:tsd.Def) => {
-						return self.nameExp.test(file.name);
+						return this.nameExp.test(file.name);
 					};
 				}
 			}
 			else if (this.projectExp) {
 				return (file:tsd.Def) => {
-					return self.projectExp.test(file.name);
+					return this.projectExp.test(file.name);
 				};
 			}
 			else {

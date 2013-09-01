@@ -1,7 +1,7 @@
 ///<reference path="_ref.ts" />
-///<reference path="Core.ts" />
+///<reference path="logic/Core.ts" />
 ///<reference path="context/Context.ts" />
-///<reference path="data/Selector.ts" />
+///<reference path="select/Selector.ts" />
 
 module tsd {
 
@@ -14,7 +14,7 @@ module tsd {
 	*/
 	export class API {
 
-		private _core:tsd.Core;
+		private _core:Core;
 
 		constructor(public context:tsd.Context) {
 			if (!context) {
@@ -25,13 +25,13 @@ module tsd {
 		}
 
 		// List files matching selector:
-		search(selector:tsd.Selector, options:tsd.APIOptions):Qpromise {
-			return this._core.select(selector, options);
+		search(selector:Selector):Qpromise {
+			return this._core.select(selector);
 		}
 
 		// Install all files matching selector:
-		install(selector:tsd.Selector, options:tsd.APIOptions):Qpromise {
-			return this._core.select(selector, options).then((res:tsd.APIResult) => {
+		install(selector:Selector):Qpromise {
+			return this._core.select(selector).then((res:tsd.APIResult) => {
 				return this._core.writeFileBulk(res.selection).then((paths) => {
 					res.written = paths;
 
@@ -39,34 +39,44 @@ module tsd {
 			});
 		}
 
-		// Download selection and parse header info
-		info(selector:Selector, options:APIOptions):Qpromise {
-			return this._core.select(selector, options).then((res:tsd.APIResult) => {
+		// Download selection and parse and display header info
+		info(selector:Selector):Qpromise {
+			return this._core.select(selector).then((res:tsd.APIResult) => {
 				//nest for scope
 				return this._core.parseDefInfoBulk(res.selection).thenResolve(res);
 			});
 		}
 
-		// Download files matching selector, and recursively solve reference dependencies.
-		deps(selector:Selector, options:APIOptions):Qpromise {
+		// Load commit history
+		history(selector:Selector):Qpromise {
+			return this._core.select(selector).then((res:tsd.APIResult) => {
+				// filter Defs from all selected versions
+				res.definitions = tsd.DefUtil.uniqueDefs(tsd.DefUtil.getDefs(res.selection));
+				//TODO limit history to Selector's date filter?
+				return this._core.loadHistoryBulk(res.definitions).thenResolve(res);
+			});
+		}
+
+		//TODO Download files matching selector, and recursively solve reference dependencies.
+		deps(selector:Selector):Qpromise {
 			// var res = new APIResult('deps', selector);
-			return Q.reject(new Error('not yet implemented'));
+			return Q.reject(new Error('not implemented yet'));
 		}
 
-		// Compare repo data with local installed file and check for changes. First only use hashes and checksum/ but later this can be detailed with a fancyfied diff.
-		compare(selector:Selector, options:APIOptions):Qpromise {
-			return Q.reject(new Error('not yet implemented'));
+		//TODO Compare repo data with local installed file and check for changes. First only use hashes and checksum/ but later this can be detailed with a fancyfied diff.
+		compare(selector:Selector):Qpromise {
+			return Q.reject(new Error('not implemented yet'));
 		}
 
-		// Run compare and get latest files.
-		update(selector:Selector, options:APIOptions):Qpromise {
-			return Q.reject(new Error('not yet implemented'));
+		//TODO Run compare and get latest files.
+		update(selector:Selector):Qpromise {
+			return Q.reject(new Error('not implemented yet'));
 		}
 
-		// Clear caches
+		//TODO Clear caches
 		purge():Qpromise {
-			// add proper safety checks (let's not accidentally rimraf root)
-			return Q.reject(new Error('not yet implemented'));
+			// add proper safety checks (let's not accidentally rimraf root during development)
+			return Q.reject(new Error('not implemented yet'));
 		}
 	}
 }

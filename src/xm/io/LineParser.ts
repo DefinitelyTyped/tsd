@@ -40,10 +40,9 @@ module xm {
 		}
 
 		link() {
-			var self:LineParserCore = this;
 			xm.eachElem(this.parsers.values(), (parser:LineParser) => {
 				xm.eachElem(parser.nextIds, (id:string) => {
-					var p = self.parsers.get(id);
+					var p = this.parsers.get(id);
 					if (p) {
 						parser.next.push(p);
 					}
@@ -55,13 +54,12 @@ module xm {
 		}
 
 		get(ids:string[]):LineParser[] {
-			var self:LineParserCore = this;
 			return reduceArray(ids, [], (memo:LineParser[], id:string) => {
-				if (!self.parsers.has(id)) {
+				if (!this.parsers.has(id)) {
 					console.log('missing parser ' + id);
 					return memo;
 				}
-				memo.push(self.parsers.get(id));
+				memo.push(this.parsers.get(id));
 				return memo;
 			});
 		}

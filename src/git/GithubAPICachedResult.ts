@@ -39,8 +39,8 @@ module git {
 		}
 
 		//TODO test this against toJSON()
+		//TODO why not JSON Schema?
 		static fromJSON(json:any):GithubAPICachedResult {
-			// whTODOy not JSON Schema?
 			xm.assertVar('label', json.label, 'string');
 			xm.assertVar('key', json.key, 'string');
 			xm.assertVar('data', json.data, 'object');

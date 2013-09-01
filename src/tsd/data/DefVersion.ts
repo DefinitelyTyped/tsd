@@ -6,43 +6,39 @@ module tsd {
 
 	export class DefVersion {
 
-		blobSha:string;
-		// commitSha should be an array? as a blob can exist in many commits
-		commitSha:string;
-		//date:Date;
-		def:tsd.Def;
+		private _def:tsd.Def;
+		//commit
+		private _commit:tsd.DefCommit;
+		creationCommit:bool;
+
+		//NOTE blobs are not workable with
+		//blobSha:string;
 
 		content:string;
 		dependencies:tsd.DefVersion[] = [];
 
 		info:tsd.DefInfo;
 
-		// linked list (only care for single chain
-		newer:tsd.DefVersion;
-		older:tsd.DefVersion;
 
-		constructor(def:tsd.Def, blobSha:string, commitSha:string) {
-			this.def = def;
-			this.blobSha = blobSha;
-			this.commitSha = commitSha;
+		constructor(def:tsd.Def, commit:tsd.DefCommit) {
+			xm.assertVar('def', def, tsd.Def);
+			xm.assertVar('commit', commit, tsd.DefCommit);
+
+			this._def = def;
+			this._commit = commit;
 		}
 
-		get head():tsd.DefVersion {
-			var def:tsd.DefVersion = this;
-			while (def.newer) {
-				def = def.newer;
-			}
-			return def;
+		get def():tsd.Def {
+			return this._def;
 		}
 
-		get short():string {
-			return (this.blobSha ? this.blobSha.substr(0, 8) : '<no sha>');
+		get commit():tsd.DefCommit {
+			return this._commit;
 		}
 
 		toString():string {
-			var str = (this.def ? this.def.path : '<no file>');
-			str += ' : ' + (this.blobSha ? this.blobSha.substr(0, 8) : '<no sha>');
-			//str += (this.date ? ' : ' + this.date.toString() : '');
+			var str = (this._def ? this._def.path : '<no def>');
+			str += ' : ' + (this.commit ? this.commit.commitShort : '<no blob-sha>');
 			return str;
 		}
 	}

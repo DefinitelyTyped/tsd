@@ -3,22 +3,28 @@
 
 module tsd {
 
+
+	var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
+
 	//single definition in repo (identified by it path)
 	export class Def {
 
-		// unique identifier: 'project/name' (should be 'project/name-v0.1.3-alpha')
-		public path:string;
+		// unique identifier: 'project/name' (should support 'project/name-v0.1.3-alpha')
+		path:string;
 
 		// split
-		public project:string;
-		public name:string;
+		project:string;
+		name:string;
 		//used?
-		public semver:string;
+		semver:string;
 
-		// head of a linked-list of versions in the git repo
-		public head:tsd.DefVersion;
+		//the commit where we
 
-		constructor(path?:string) {
+		head:tsd.DefVersion;
+		history:tsd.DefVersion[] = [];
+
+		constructor(path:string) {
+			xm.assertVar('path', path, 'string');
 			this.path = path;
 		}
 
@@ -26,11 +32,17 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		static getFrom(path:string, blobSha:string, commitSha:string):tsd.Def {
-			var defExp:RegExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/g;
-			defExp.lastIndex = 0;
+		static isDef(path:string):bool {
+			return nameExp.test(path);
+		}
 
-			var match = defExp.exec(path);
+		static getPath(path:string):bool {
+			return nameExp.test(path);
+		}
+
+		static getFrom(path:string):tsd.Def {
+
+			var match = nameExp.exec(path);
 			if (!match) {
 				return null;
 			}
@@ -43,9 +55,8 @@ module tsd {
 			var file = new tsd.Def(path);
 			file.project = match[1];
 			file.name = match[2];
+			//TODO support semver postfix 'project/name-v0.1.3-alpha'
 			// path.semver = match[3];
-
-			file.head = new tsd.DefVersion(file, blobSha, commitSha);
 
 			return file;
 		}

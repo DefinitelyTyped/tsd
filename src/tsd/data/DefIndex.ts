@@ -1,104 +1,191 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../git/GithubJSON.ts" />
+///<reference path="DefCommit.ts" />
 
 module tsd {
 
 	var pointer = require('jsonpointer.js');
 	var commit_sha:string = '/commit/sha';
 
+	var branch_tree_sha:string = '/commit/commit/tree/sha';
+
 	export class DefIndex {
 
 		private _branchName:string;
-		private _treeSha:string;
-		private _commitSha:string;
-		//TODO swap for set
-		private _list:xm.Set = new xm.Set();
-		private _map:xm.KeyValueMap = new xm.KeyValueMap();
+		private _hasIndex:bool = false;
+		private _indexCommit:tsd.DefCommit;
+
+		private _definitions:xm.KeyValueMap = new xm.KeyValueMap();
+		private _commits:xm.KeyValueMap = new xm.KeyValueMap();
+		private _versions:xm.KeyValueMap = new xm.KeyValueMap();
 
 		constructor() {
 
 		}
 
-		hasData():bool {
-			return !!this._branchName && this._list.count() > 0;
+		hasIndex():bool {
+			return this._hasIndex;
 		}
 
-		// assume recursive
-		setBranchTree(branch:any, tree:any):void {
+		// assumes recursive
+		init(branch:any, tree:any):void {
+			if (this._hasIndex) {
+				return;
+			}
+
+			this._commits.clear();
+			this._versions.clear();
+			this._definitions.clear();
+
 			xm.assertVar('branch', branch, 'object');
 			xm.assertVar('tree', tree, 'object');
 
+			var commitSha = pointer.get(branch, commit_sha);
+			var treeSha = tree.sha;
+			var sha = pointer.get(branch, branch_tree_sha);
+
+			xm.assertVar('sha', sha, 'string');
+			xm.assertVar('treeSha', treeSha, 'string');
+			xm.assertVar('commitSha', commitSha, 'string');
+
+			//verify tree is from branch (compare sha's)
+			if (sha !== treeSha) {
+				throw new Error('missing branch and tree sha mismatch');
+			}
+
 			this._branchName = branch.name;
-			this._commitSha = pointer.get(branch, commit_sha);
-			this._treeSha = tree.sha;
-			this._list.clear();
-			this._map.clear();
+
+			this._indexCommit = this.procureCommit(commitSha);
+			this._indexCommit.parseJSON(branch.commit);
 
 			var def:tsd.Def;
+			var file:tsd.DefVersion;
 
 			tree.tree.forEach((elem:git.GithubJSONTreeElem) => {
 				var char = elem.path.charAt(0);
-				if (elem.type === 'blob' && char !== '.' && char !== '_') {
-					def = tsd.Def.getFrom(elem.path, elem.sha, this._commitSha);
-					if (def) {
-						this.addFile(def);
+				if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDef(elem.path)) {
+					def = this.procureDef(elem.path);
+					if (!def) {
+						return;
 					}
+					file = this.procureVersion(def, this._indexCommit);
+					if (!file) {
+						return;
+					}
+					def.head = file;
 				}
-			}, this);
+			});
+			this._hasIndex = true;
 		}
 
-		addFile(def:tsd.Def) {
-			this._list.add(def);
-			this._map.set(def.path, def);
+		setHistory(def:tsd.Def, commits:any[]):void {
+			def.history = [];
+
+			commits.map((json) => {
+				if (!json || !json.sha) {
+					xm.log.inspect(json, 'weird: json no sha');
+				}
+				var commit = this.procureCommit(json.sha);
+				if (!commit) {
+					xm.log.inspect('weird: no commit for sha ' + json.sha);
+					throw new Error('huh?');
+				}
+				commit.parseJSON(json);
+
+				def.history.push(this.procureVersion(def, commit));
+			});
+		}
+
+		private procureCommit(commitSha:string):tsd.DefCommit {
+			var commit:tsd.DefCommit;
+			if (this._commits.has(commitSha)) {
+				commit = this._commits.get(commitSha);
+			}
+			else {
+				commit = new DefCommit(commitSha);
+				this._commits.set(commitSha, commit);
+			}
+			return commit;
+		}
+
+		private procureDef(path:string):tsd.Def {
+			var def:tsd.Def = null;
+
+			if (this._definitions.has(path)) {
+				def = this._definitions.get(path);
+			}
+			else {
+				def = Def.getFrom(path);
+				if (def) {
+					this._definitions.set(path, def);
+				}
+			}
+			return def;
+		}
+
+		private procureVersion(def:tsd.Def, commit:tsd.DefCommit):tsd.DefVersion {
+			var file:tsd.DefVersion;
+
+			var key = def.path + '|' + commit.commitSha;
+
+			if (this._versions.has(key)) {
+				file = this._versions.get(key);
+				//needed? should not happen..
+				if (file.def !== def) {
+					throw new Error('weird: internal data mismatch: version does not belong to file: ' + file.def + ' -> ' + commit);
+				}
+			}
+			else {
+				file = new DefVersion(def, commit);
+				this._versions.set(key, file);
+			}
+			return file;
+		}
+
+		getFile(def:Def) {
+			this._definitions.get(def.path, null);
 		}
 
 		hasPath(path:string):bool {
-			return this._map.has(path);
+			return this._definitions.has(path);
 		}
 
-		getFileByPath(path:string):tsd.Def {
-			return this._map.get(path, null);
+		getDefByPath(path:string):Def {
+			return this._definitions.get(path, null);
 		}
 
 		getPaths():string[] {
-			return this._list.values().map((file:tsd.Def) => {
+			return this._definitions.values().map((file:Def) => {
 				return file.path;
-			}, this);
+			});
 		}
 
 		toDump():string {
 			var ret:string[] = [];
 			ret.push(this.toString());
-			this._list.values().forEach((file:tsd.Def) => {
-				ret.push('  ' + file.toString());
-				var def = file.head;
-				while (def) {
-					ret.push('    - ' + def.short);
-					def = def.older;
+			this._definitions.values().forEach((def:Def) => {
+				ret.push('  ' + def.toString());
+				ret.push('  ' + def.head.toString());
+				if (def.history) {
+					def.history.forEach((file:DefVersion) => {
+						ret.push('    - ' + file.toString());
+					});
 				}
-			}, this);
+			});
 			return ret.join('\n');
-		}
-
-		toString():string {
-			return '[' + this._branchName + ']';
 		}
 
 		get branchName():string {
 			return this._branchName;
 		}
 
-		get commitSha():string {
-			return this._commitSha;
-		}
-
-		get treeSha():string {
-			return this._treeSha;
-		}
-
-		get list():tsd.Def[] {
+		get list():Def[] {
 			//need generics
-			return <tsd.Def[]>this._list.values();
+			return <Def[]>this._definitions.values();
+		}
+
+		toString():string {
+			return '[' + this._branchName + ']';
 		}
 	}
 }

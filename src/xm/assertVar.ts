@@ -7,6 +7,7 @@
  * */
 
  module xm {
+	 //TODO write tests.. fix.. type is broken, instanceof isweird
 	export function assertVar(label:string, value:any, type:any, opt?:bool = false):void {
 		var valueType = typeof value;
 		var typeKind = typeof type;
@@ -24,7 +25,7 @@
 		}
 		else if (typeKind === 'string') {
 			if (valueType !== type) {
-				throw (new Error('expected "' + label + '" expected typeof "' + type + '" but got "' + valueType + '": ' + value));
+				throw (new Error('expected "' + label + '" to be typeof "' + type + '" but got "' + valueType + '": ' + value));
 			}
 		}
 		else {

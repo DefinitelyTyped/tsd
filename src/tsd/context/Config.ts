@@ -11,21 +11,6 @@ module tsd {
 	var assert = require('assert');
 	var tv4:TV4 = require('tv4').tv4;
 
-	/*export class Installed {
-
-		constructor(public selector:string = null, public commit:string = null, public hash:string = null) {
-
-		}
-
-		toString() {
-			return this.selector;
-		}
-	}
-
-	export interface InstalledMap {
-		[selector: string]: Installed;
-	}*/
-
 	export class Config {
 
 		typingsPath:string = 'typings';

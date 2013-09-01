@@ -5,21 +5,21 @@
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
+///<reference path="../xm/io/mkdirCheck.ts" />
 ///<reference path="GithubAPICached.ts" />
 ///<reference path="GithubAPICachedResult.ts" />
 
 module git {
 
-	var async:Async = require('async');
-	var _:UnderscoreStatic = require('underscore');
 	var Q:QStatic = require('q');
 	var assert = require('assert');
-	var mkdirp = require('mkdirp');
 	var fs = require('fs');
 	var path = require('path');
 	var FS:Qfs = require('q-io/fs');
-	//TODO generalise this for re-use
 
+	//TODO consider alternate storage
+	//TODO generalise this for re-use?
+	//TODO add gzip compression?
 	export class GithubAPICachedJSONStore {
 
 		dir:string;
@@ -33,19 +33,17 @@ module git {
 		}
 
 		init():Qpromise {
-			var self:GithubAPICachedJSONStore = this;
-
-			return FS.exists(self.dir).then((exists:bool) => {
+			return FS.exists(this.dir).then((exists:bool) => {
 				if (!exists) {
-					return Q.nfcall(mkdirp, self.dir);
+					return xm.mkdirCheckQ(this.dir);
 				}
 				else {
-					return FS.isDirectory(self.dir).then((isDir:bool) => {
+					return FS.isDirectory(this.dir).then((isDir:bool) => {
 						if (isDir) {
 							return null;
 						}
 						else {
-							throw new Error('is not a directory: ' + self.dir);
+							throw new Error('is not a directory: ' + this.dir);
 						}
 					});
 				}
@@ -53,10 +51,9 @@ module git {
 		}
 
 		getResult(key:string):Qpromise {
-			var self:GithubAPICachedJSONStore = this;
-			var src = path.join(self.dir, GithubAPICachedResult.getHash(key) + '.json');
+			var src = path.join(this.dir, GithubAPICachedResult.getHash(key) + '.json');
 
-			return self.init().then(() => {
+			return this.init().then(() => {
 				return FS.exists(src);
 			}).then((exists:bool) => {
 				if (exists) {
@@ -78,11 +75,9 @@ module git {
 		}
 
 		storeResult(res:GithubAPICachedResult):Qpromise {
-			var self:GithubAPICachedJSONStore = this;
+			var src = path.join(this.dir, res.getHash() + '.json');
 
-			var src = path.join(self.dir, res.getHash() + '.json');
-
-			return self.init().then(() => {
+			return this.init().then(() => {
 				var data = JSON.stringify(res.toJSON(), null, 2);
 				return FS.write(src, data);
 			}).then(() => {

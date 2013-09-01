@@ -17,14 +17,13 @@ module git {
 	var assert = require('assert');
 	var fs = require('fs');
 	var path = require('path');
-	var mkdirp = require('mkdirp');
 
 	var Github = require('github');
 
 	//move to a .d.ts?
 	export interface GithubJS {
 		repos:git.GithubJSRepos;
-		gitdata:git.GithubJSData;
+		data:git.GithubJSData;
 	}
 	export interface GithubJSRepos {
 		getBranches(params:any, calback:git.GithubJSCallback);
@@ -40,6 +39,11 @@ module git {
 		(err?:any, res?:any):void;
 	}
 
+	/*
+	 GithubAPICached: access github rest api with local cache (evading rate-limit)
+	 */
+	//TODO implement http://developer.github.com/v3/#conditional-requests (add last-mod + etag to json store)
+	//TODO find out if a HEAD requests counts for rate-limiting
 	export class GithubAPICached {
 
 		private _api:git.GithubJS;
@@ -103,7 +107,7 @@ module git {
 				recursive: recursive
 			});
 			return this.doCachedCall('getTree', params, {}, (cb) => {
-				this._api.gitdata.getTree(params, cb);
+				this._api.data.getTree(params, cb);
 			});
 		}
 
@@ -112,7 +116,7 @@ module git {
 				sha: sha
 			});
 			return this.doCachedCall('getCommit', params, {}, (cb) => {
-				this._api.gitdata.getCommit(params, cb);
+				this._api.data.getCommit(params, cb);
 			});
 		}
 
@@ -122,11 +126,12 @@ module git {
 				per_page: 100
 			});
 			return this.doCachedCall('getBlob', params, {}, (cb) => {
-				this._api.gitdata.getBlob(params, cb);
+				this._api.data.getBlob(params, cb);
 			});
 		}
 
 		getCommits(sha:string):Qpromise {
+			//TODO support auto pagination
 			var params = this.getRepoParams({
 				per_page: 100,
 				sha: sha
@@ -137,6 +142,7 @@ module git {
 		}
 
 		getPathCommits(sha:string, path:String):Qpromise {
+			//TODO support auto pagination
 			var params = this.getRepoParams({
 				per_page: 100,
 				sha: sha,
@@ -148,44 +154,44 @@ module git {
 		}
 
 		//TODO promise-ify this further
+		//TODO harden against race conditions?
 		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function):Qpromise {
 			var key = this.getKey(label, keyTerms);
-			var self:git.GithubAPICached = this;
 
-			opts = _.defaults(opts || {}, self._defaultOpts);
+			opts = _.defaults(opts || {}, this._defaultOpts);
 
-			self.stats.count('invoked');
+			this.stats.count('invoked');
 
 			var defer = Q.defer();
 
 			// subroutine
 			var execCall = () => {
-				self.stats.count('call-api');
+				this.stats.count('call-api');
 
 				// classic callback
 				call.call(null, (err, res:any) => {
-					self.rate.readFromRes(res);
-					if (self._debug) {
-						xm.log(self.rate.toStatus());
+					this.rate.readFromRes(res);
+					if (this._debug) {
+						xm.log(this.rate.toStatus());
 					}
 
 					if (err) {
-						self.stats.count('call-error');
+						this.stats.count('call-error');
 						defer.reject(err);
 						return;
 					}
-					self.stats.count('call-success');
+					this.stats.count('call-success');
 
 					var cached = new git.GithubAPICachedResult(label, key, res);
 
 					// permanent storage?
-					self._store.storeResult(cached).then((info) => {
+					this._store.storeResult(cached).then((info) => {
 						if (err) {
-							self.stats.count('store-set-error');
+							this.stats.count('store-set-error');
 							defer.reject(err);
 						}
 						else {
-							self.stats.count('store-set');
+							this.stats.count('store-set');
 							defer.resolve(res);
 						}
 					});
@@ -193,17 +199,17 @@ module git {
 			};
 
 			// in permanent store?
-			self._store.getResult(key).then((res:GithubAPICachedResult) => {
+			this._store.getResult(key).then((res:GithubAPICachedResult) => {
 				if (res) {
-					self.stats.count('store-hit');
+					this.stats.count('store-hit');
 					defer.resolve(res.data);
 				}
 				else {
-					self.stats.count('store-miss');
+					this.stats.count('store-miss');
 					execCall();
 				}
 			}, (err) => {
-				self.stats.count('store-get-error');
+				this.stats.count('store-get-error');
 				defer.reject(err);
 			});
 			return defer.promise;

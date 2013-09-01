@@ -75,5 +75,6 @@ interface QStatic {
 	nextTick(callback: Function);
 	oneerror: any;
 	longStackJumpLimit: number;
+	longStackSupport: bool;
 }
 declare var Q: QStatic;

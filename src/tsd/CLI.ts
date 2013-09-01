@@ -1,6 +1,7 @@
 ///<reference path="_ref.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/Expose.ts" />
+///<reference path="../xm/DateUtil.ts" />
 
 module tsd {
 
@@ -31,8 +32,7 @@ module tsd {
 	class Job {
 		context:tsd.Context;
 		api:tsd.API;
-		selector:tsd.Selector;
-		options:tsd.APIOptions;
+		selector:Selector;
 	}
 
 	function getSelectorJob(args:any):Qpromise {
@@ -46,7 +46,6 @@ module tsd {
 			job.api = new tsd.API(job.context);
 
 			job.selector = new Selector(args._[0]);
-			job.options = new APIOptions();
 			// TODO parse options
 			return job;
 		});
@@ -125,39 +124,81 @@ module tsd {
 
 		expose.command('version', (args:any) => {
 			xm.log(xm.PackageJSON.getLocal().version);
-		}, 'display version');
+		}, 'Display version');
 
 		expose.command('settings', (args:any) => {
 			getContext(args).logInfo(true);
-		}, 'display config settings');
+		}, 'Display config settings');
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.command('search', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-				return job.api.search(job.selector, job.options);
+				return job.api.search(job.selector);
 
 			}).done(reportSucces, reportError);
-		}, 'search definitions', jobOptions(), ['selector']);
+		}, 'Search definitions', jobOptions(), ['selector']);
 
 		expose.command('install', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-				return job.api.install(job.selector, job.options);
+				return job.api.install(job.selector);
 
 			}).done(reportSucces, reportError);
-		}, 'install definitions', jobOptions(), ['selector']);
+		}, 'Install definitions', jobOptions(), ['selector']);
 
 		expose.command('info', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-				return job.api.info(job.selector, job.options);
+				return job.api.info(job.selector);
 
 			}).done(reportSucces, reportError);
 
-		}, 'show definition details', jobOptions(), ['selector']);
+		}, 'Show definition details', jobOptions(), ['selector']);
+
+		expose.command('history', (args:any) => {
+			getSelectorJob(args).then((job:Job) => {
+				return job.api.history(job.selector);
+
+			}).done((result:APIResult) => {
+				reportSucces(null);
+
+				result.definitions.forEach((def:tsd.Def) => {
+					xm.log('');
+					xm.log(def.toString());
+					xm.log('----');
+
+					def.history.slice(0).reverse().forEach((file:tsd.DefVersion) => {
+						if (file.commit) {
+							var line = file.commit.commitShort;
+
+							line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
+							line += ' | ' + file.commit.gitAuthor.name;
+							if (file.commit.hubAuthor) {
+								line += ' @' + file.commit.hubAuthor.login;
+							}
+							xm.log(line);
+							xm.log(file.commit.message.toString());
+							xm.log('');
+						}
+						else {
+							xm.log('   ' + '<no commmit>');
+						}
+
+						if (file.info && file.info.isValid()) {
+							xm.log(file.info.toString());
+							file.info.authors.forEach((author:xm.AuthorInfo) => {
+								xm.log(' - ' + author.toString());
+							});
+							xm.log('');
+						}
+					});
+				});
+			}, reportError);
+
+		}, 'Show definition history', jobOptions(), ['selector']);
 
 		expose.command('deps', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-				return job.api.deps(job.selector, job.options);
+				return job.api.deps(job.selector);
 
 			}).done((result:APIResult) => {
 				reportSucces(null);
@@ -170,7 +211,7 @@ module tsd {
 				});
 			}, reportError);
 
-		}, 'list dependencies', jobOptions(), ['selector']);
+		}, 'List dependencies', jobOptions(), ['selector']);
 
 		/*expose.command('purge', (args:any) => {
 		 var api = new API(getContext(args));

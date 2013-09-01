@@ -3,5 +3,5 @@
 
 describe('CLIOptions', () => {
 
-	// test parsing CLI arguments to correct selector + options
+	//TODO test parsing CLI arguments to correct selector + options etc (how? who knows?)
 });

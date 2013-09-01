@@ -27,18 +27,18 @@ module tsd {
 			//TODO move to user profile similar to npm?
 			this.setCache(path.join(this.tmp, 'cache'));
 
-			this.typings = xm.mkdirCheck(path.resolve(process.cwd(), 'typings'), true);
+			this.typings = xm.mkdirCheckSync(path.resolve(process.cwd(), 'typings'), true);
 			this.config = path.join(process.cwd(), 'tsd-config.json');
 		}
 
 		setTmp(dir:string):string {
-			dir = xm.mkdirCheck(dir, true);
+			dir = xm.mkdirCheckSync(dir, true);
 			this.tmp = dir;
 			return this.tmp;
 		}
 
 		setCache(dir:string):string {
-			dir = xm.mkdirCheck(dir, true);
+			dir = xm.mkdirCheckSync(dir, true);
 			this.cache = dir;
 			return dir;
 		}
@@ -63,7 +63,7 @@ module tsd {
 				var candidatePath = path.resolve(candidateTmpDirs[i], key);
 
 				try {
-					xm.mkdirCheck(candidatePath);
+					xm.mkdirCheckSync(candidatePath);
 					return candidatePath;
 				} catch (e) {
 					console.log(candidatePath, 'is not writable:', e.message);

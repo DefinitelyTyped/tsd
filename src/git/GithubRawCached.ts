@@ -1,6 +1,7 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
+///<reference path="../xm/io/mkdirCheck.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="GithubURLManager.ts" />
 
@@ -8,7 +9,6 @@ module git {
 
 	var request = require('request');
 	var path = require('path');
-	var mkdirp = require('mkdirp');
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
 
@@ -29,32 +29,31 @@ module git {
 			this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
 		}
 
+		//TODO refactor or wrap: load by commit-sha, but save to blob-sha: keep a data file that maps this (maybe not in this class though)
 		getFile(commitSha:string, filePath:string):Qpromise {
-			var self:GithubRawCached = this;
-
-			self.stats.count('invoked');
+			this.stats.count('invoked');
 
 			var tmp = filePath.split(/\/|\\\//g);
 			tmp.unshift(commitSha);
 			tmp.unshift(this._dir);
 
-			var file = path.join.apply(null, tmp);
+			var storeFile = path.join.apply(null, tmp);
 			if (this._debug) {
-				xm.log(file);
+				xm.log(storeFile);
 			}
 
-			return FS.exists(file).then((exists:bool) => {
+			return FS.exists(storeFile).then((exists:bool) => {
 				if (exists) {
-					return FS.isFile(file).then((isFile:bool) => {
+					return FS.isFile(storeFile).then((isFile:bool) => {
 						if (!isFile) {
-							throw(new Error('path exists but is not a file: ' + file));
+							throw(new Error('path exists but is not a file: ' + storeFile));
 						}
-						self.stats.count('store-hit');
-						return FS.read(file);
+						this.stats.count('store-hit');
+						return FS.read(storeFile);
 					});
 				}
 				else {
-					self.stats.count('store-miss');
+					this.stats.count('store-miss');
 
 					var opts = {
 						url: this._repo.urls.rawFile(commitSha, filePath)
@@ -68,13 +67,18 @@ module git {
 							throw new Error('unexpected status code: ' + res.statusCode);
 						}
 						// according to the headers raw github is binary encoded, but from what? utf8?
-						//TODO find correct way to handle binary encoding type
+						//TODO find correct way to handle binary encoding type (low prio)
 						var content = String(res.body);
 
-						return Q.nfcall(mkdirp, path.dirname(file)).then(() => {
-							return FS.write(file, content);
+						return xm.mkdirCheckQ(path.dirname(storeFile)).then(() => {
+							return FS.write(storeFile, content);
 						}).then(() => {
-							self.stats.count('store-set');
+							this.stats.count('store-set');
+							return content;
+						}, (err) => {
+							this.stats.count('store-error');
+							//throw(err);
+							//TODO whut2do?
 							return content;
 						});
 					});
