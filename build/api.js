@@ -156,6 +156,13 @@ var xm;
         });
         logger.log = plain;
         logger.mute = false;
+        logger.ok = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            writeMulti('ok: '.green, '', args);
+        };
         logger.warn = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
@@ -592,13 +599,14 @@ var xm;
             if (typeof log === "undefined") { log = false; }
             this.log = log;
             this.stats = new xm.KeyValueMap();
+            this.logger = xm.log;
         }
         StatCounter.prototype.count = function (id, amount) {
             if (typeof amount === "undefined") { amount = 1; }
             var value = this.stats.get(id, 0) + amount;
             this.stats.set(id, value);
-            if(this.log) {
-                xm.log('-> ' + id + ': ' + this.stats.get(id));
+            if(this.log && this.logger) {
+                this.logger('-> ' + id + ': ' + this.stats.get(id));
             }
             return value;
         };
@@ -847,7 +855,6 @@ var git;
 })(git || (git = {}));
 var xm;
 (function (xm) {
-    var _ = require('underscore');
     var uriTemplates = require('uri-templates');
     var URLManager = (function () {
         function URLManager(common) {
@@ -1176,6 +1183,7 @@ var git;
         function GithubRawCached(repo, storeFolder) {
             this._debug = false;
             this._formatVersion = '0.0.1';
+            this._active = new xm.KeyValueMap();
             this.stats = new xm.StatCounter(false);
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
@@ -1188,11 +1196,22 @@ var git;
             var tmp = filePath.split(/\/|\\\//g);
             tmp.unshift(commitSha);
             tmp.unshift(this._dir);
+            var key = commitSha + '/' + filePath;
             var storeFile = path.join.apply(null, tmp);
             if(this._debug) {
                 xm.log(storeFile);
             }
-            return FS.exists(storeFile).then(function (exists) {
+            if(this._active.has(key)) {
+                this.stats.count('active-hit');
+                return this._active.get(key).then(function (content) {
+                    _this.stats.count('active-resolve');
+                    return content;
+                }, function (err) {
+                    _this.stats.count('active-error');
+                    throw err;
+                });
+            }
+            var promise = FS.exists(storeFile).then(function (exists) {
                 if(exists) {
                     return FS.isFile(storeFile).then(function (isFile) {
                         if(!isFile) {
@@ -1222,10 +1241,14 @@ var git;
                         }, function (err) {
                             _this.stats.count('store-error');
                             return content;
+                        }).then(function () {
+                            _this._active.remove(key);
                         });
                     });
                 }
             });
+            this._active.set(key, promise);
+            return promise;
         };
         Object.defineProperty(GithubRawCached.prototype, "debug", {
             get: function () {
@@ -1244,7 +1267,8 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
-    var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
+    var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+    var leadingExp = /^\.\.\//;
     var DefUtil = (function () {
         function DefUtil() { }
         DefUtil.getDefs = function getDefs(list) {
@@ -1293,13 +1317,53 @@ for(var i = 0, ii = list.length; i < ii; i++) {
             }
             return ret;
         };
-        DefUtil.extractReferencTags = function extractReferencTags(source) {
+        DefUtil.extractReferenceTags = function extractReferenceTags(source) {
             var ret = [];
             var match;
+            if(!referenceTag.global) {
+                throw new Error('referenceTag RegExp must have global flag');
+            }
             referenceTag.lastIndex = 0;
             while((match = referenceTag.exec(source))) {
                 if(match.length > 0 && match[1].length > 0) {
                     ret.push(match[1]);
+                }
+            }
+            return ret;
+        };
+        DefUtil.contains = function contains(list, file) {
+            for(var i = 0, ii = list.length; i < ii; i++) {
+                if(list[i].def.path === file.def.path) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        DefUtil.mergeDependencies = function mergeDependencies(list) {
+            var ret = [];
+            for(var i = 0, ii = list.length; i < ii; i++) {
+                var file = list[i];
+                if(!DefUtil.contains(ret, file)) {
+                    ret.push(file);
+                }
+                for(var j = 0, jj = file.dependencies.length; j < jj; j++) {
+                    var tmp = file.dependencies[j];
+                    if(!DefUtil.contains(ret, tmp)) {
+                        ret.push(tmp);
+                    }
+                }
+            }
+            return ret;
+        };
+        DefUtil.extractDependencies = function extractDependencies(list) {
+            var ret = [];
+            for(var i = 0, ii = list.length; i < ii; i++) {
+                var file = list[i];
+                for(var j = 0, jj = file.dependencies.length; j < jj; j++) {
+                    var tmp = file.dependencies[j];
+                    if(!DefUtil.contains(ret, tmp) && !DefUtil.contains(list, tmp)) {
+                        ret.push(tmp);
+                    }
                 }
             }
             return ret;
@@ -1320,7 +1384,7 @@ var tsd;
         Def.prototype.toString = function () {
             return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
         };
-        Def.isDef = function isDef(path) {
+        Def.isDefPath = function isDefPath(path) {
             return nameExp.test(path);
         };
         Def.getPath = function getPath(path) {
@@ -1401,11 +1465,22 @@ var tsd;
     var DefVersion = (function () {
         function DefVersion(def, commit) {
             this.dependencies = [];
+            this.solved = false;
             xm.assertVar('def', def, tsd.Def);
             xm.assertVar('commit', commit, tsd.DefCommit);
             this._def = def;
             this._commit = commit;
         }
+        Object.defineProperty(DefVersion.prototype, "key", {
+            get: function () {
+                if(!this._def || !this._commit) {
+                    return null;
+                }
+                return this._def.path + '-' + this._commit.commitSha;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(DefVersion.prototype, "def", {
             get: function () {
                 return this._def;
@@ -1422,7 +1497,7 @@ var tsd;
         });
         DefVersion.prototype.toString = function () {
             var str = (this._def ? this._def.path : '<no def>');
-            str += ' : ' + (this.commit ? this.commit.commitShort : '<no blob-sha>');
+            str += ' : ' + (this._commit ? this._commit.commitShort : '<no blob-sha>');
             return str;
         };
         return DefVersion;
@@ -1431,24 +1506,24 @@ var tsd;
 })(tsd || (tsd = {}));
 var git;
 (function (git) {
-    var GitCommitUser = (function () {
-        function GitCommitUser() { }
-        GitCommitUser.prototype.toString = function () {
+    var GitUserCommit = (function () {
+        function GitUserCommit() { }
+        GitUserCommit.prototype.toString = function () {
             return (this.name ? this.name : '<no name>') + ' ' + (this.email ? '<' + this.email + '>' : '<no email>');
         };
-        GitCommitUser.fromJSON = function fromJSON(json) {
+        GitUserCommit.fromJSON = function fromJSON(json) {
             if(!json) {
                 return null;
             }
-            var ret = new GitCommitUser();
+            var ret = new git.GitUserCommit();
             ret.name = json.name;
             ret.email = json.email;
             ret.date = new Date(Date.parse(json.date));
             return ret;
         };
-        return GitCommitUser;
+        return GitUserCommit;
     })();
-    git.GitCommitUser = GitCommitUser;    
+    git.GitUserCommit = GitUserCommit;    
 })(git || (git = {}));
 var git;
 (function (git) {
@@ -1509,8 +1584,8 @@ var tsd;
             this._treeSha = pointer.get(commit, branch_tree_sha);
             this.hubAuthor = git.GithubUser.fromJSON(commit.author);
             this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
-            this.gitAuthor = git.GitCommitUser.fromJSON(commit.commit.author);
-            this.gitCommitter = git.GitCommitUser.fromJSON(commit.commit.committer);
+            this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
+            this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
             this.message.parse(commit.commit.message);
         };
         DefCommit.prototype.toString = function () {
@@ -1575,7 +1650,7 @@ var tsd;
             var file;
             tree.tree.forEach(function (elem) {
                 var char = elem.path.charAt(0);
-                if(elem.type === 'blob' && char !== '.' && char !== '_' && tsd.Def.isDef(elem.path)) {
+                if(elem.type === 'blob' && char !== '.' && char !== '_' && tsd.Def.isDefPath(elem.path)) {
                     def = _this.procureDef(elem.path);
                     if(!def) {
                         return;
@@ -1661,11 +1736,6 @@ var tsd;
             this._definitions.values().forEach(function (def) {
                 ret.push('  ' + def.toString());
                 ret.push('  ' + def.head.toString());
-                if(def.history) {
-                    def.history.forEach(function (file) {
-                        ret.push('    - ' + file.toString());
-                    });
-                }
             });
             return ret.join('\n');
         };
@@ -2042,18 +2112,6 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
-    var ParseError = (function () {
-        function ParseError(message, text, ref) {
-            if (typeof message === "undefined") { message = ''; }
-            if (typeof text === "undefined") { text = ''; }
-            if (typeof ref === "undefined") { ref = null; }
-            this.message = message;
-            this.text = text;
-            this.ref = ref;
-        }
-        return ParseError;
-    })();
-    tsd.ParseError = ParseError;    
     var endSlashTrim = /\/?$/;
     var glue = xm.RegExpGlue.get;
     var expStart = /^/;
@@ -2089,7 +2147,7 @@ var tsd;
     var labelUrl = glue(commentStart).append(labelCap, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
     var labelWordsUrl = glue(commentStart).append(labelCap, spaceOpt, /:?/, spaceOpt).append(wordsCap, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
     var wordsUrl = glue(commentStart).append(wordsCap, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
-    var mutate = function (base, add, remove) {
+    function mutate(base, add, remove) {
         var res = base ? base.slice(0) : [];
         var i, ii, index;
         if(add) {
@@ -2105,7 +2163,7 @@ var tsd;
             }
         }
         return res;
-    };
+    }
     var DefInfoParser = (function () {
         function DefInfoParser(verbose) {
             if (typeof verbose === "undefined") { verbose = false; }
@@ -2186,15 +2244,97 @@ var tsd;
 var tsd;
 (function (tsd) {
     var Q = require('q');
+    var leadingExp = /^\.\.\//;
+    var Resolver = (function () {
+        function Resolver(core) {
+            this._active = new xm.KeyValueMap();
+            this.stats = new xm.StatCounter();
+            xm.assertVar('core', core, tsd.Core);
+            this._core = core;
+            this.stats.log = this._core.context.verbose;
+        }
+        Resolver.prototype.resolve = function (list) {
+            var _this = this;
+            list = tsd.DefUtil.uniqueDefVersion(list);
+            return Q.all(list.map(function (file) {
+                return _this.solveOne(file);
+            })).thenResolve(list);
+        };
+        Resolver.prototype.solveOne = function (file) {
+            var _this = this;
+            if(file.solved) {
+                this.stats.count('solved-early');
+                return Q(file);
+            }
+            xm.log('check ' + file.toString());
+            if(this._active.has(file.key)) {
+                this.stats.count('active-has');
+                return this._active.get(file.key);
+            } else {
+                this.stats.count('active-miss');
+            }
+            var promise = this._core.loadContent(file).then(function (file) {
+                _this.stats.count('file-parse');
+                file.dependencies = [];
+                var refs = tsd.DefUtil.extractReferenceTags(file.content);
+                refs = refs.reduce(function (memo, refPath) {
+                    refPath = refPath.replace(leadingExp, '');
+                    if(refPath.indexOf('/') < 0) {
+                        refPath = file.def.project + '/' + refPath;
+                    }
+                    if(tsd.Def.isDefPath(refPath)) {
+                        xm.log(refPath);
+                        memo.push(refPath);
+                    } else {
+                        xm.log.warn('not a reference: ' + refPath);
+                    }
+                    return memo;
+                }, []);
+                var queued = refs.reduce(function (memo, refPath) {
+                    if(_this._core.index.hasPath(refPath)) {
+                        var dep = _this._core.index.getDefByPath(refPath).head;
+                        file.dependencies.push(dep);
+                        _this.stats.count('dep-added');
+                        if(!dep.solved && !_this._active.has(dep.key)) {
+                            _this.stats.count('dep-recurse');
+                            memo.push(_this.solveOne(dep));
+                        }
+                    } else {
+                        xm.log.warn('path reference not in index: ' + refPath);
+                    }
+                    return memo;
+                }, []);
+                file.solved = true;
+                _this._active.remove(file.key);
+                _this.stats.count('active-remove');
+                xm.log('done ' + file.toString());
+                if(queued.length > 0) {
+                    _this.stats.count('subload-start');
+                    return Q.all(queued);
+                }
+                return Q(file);
+            }).thenResolve(file);
+            this.stats.count('active-set');
+            this._active.set(file.key, promise);
+            return promise;
+        };
+        return Resolver;
+    })();
+    tsd.Resolver = Resolver;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var Q = require('q');
     var FS = require('q-io/fs');
-    var assert = require('assert');
     var path = require('path');
     var pointer = require('jsonpointer.js');
     var branch_tree = '/commit/commit/tree/sha';
+    var leadingExp = /^\.\.\//;
     var APIResult = (function () {
         function APIResult(index, selector) {
             this.index = index;
             this.selector = selector;
+            xm.assertVar('index', index, tsd.DefIndex);
             xm.assertVar('selector', selector, tsd.Selector);
         }
         return APIResult;
@@ -2204,6 +2344,7 @@ var tsd;
         function Core(context) {
             this.context = context;
             xm.assertVar('context', context, tsd.Context);
+            this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
             this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
             this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
@@ -2235,18 +2376,10 @@ var tsd;
             return this.getIndex().then(function (index) {
                 result.nameMatches = selector.pattern.filter(_this.index.list);
                 result.selection = tsd.DefUtil.getHeads(result.nameMatches);
-                var extra = [];
-                return Q.all(extra).then(function () {
-                    if(selector.resolveDependencies) {
-                        return _this.resolveDepencendiesBulk(result.selection);
-                    }
-                    return null;
-                }).then(function () {
-                    if(selector.requiresSource) {
-                        return _this.loadContentBulk(result.selection);
-                    }
-                    return null;
-                });
+                if(selector.resolveDependencies) {
+                    return _this.resolveDepencendiesBulk(result.selection);
+                }
+                return null;
             }).thenResolve(result);
         };
         Core.prototype.loadContent = function (file) {
@@ -2281,14 +2414,8 @@ var tsd;
                 return _this.loadHistory(file);
             })).thenResolve(list);
         };
-        Core.prototype.resolveDepencendies = function (file) {
-            return null;
-        };
         Core.prototype.resolveDepencendiesBulk = function (list) {
-            var _this = this;
-            return Q.all(list.map(function (file) {
-                return _this.resolveDepencendies(file);
-            })).thenResolve(list);
+            return this.resolver.resolve(list);
         };
         Core.prototype.parseDefInfo = function (file) {
             var _this = this;
@@ -2491,13 +2618,6 @@ var tsd;
             xm.assertVar('pattern', pattern, 'string');
             this.pattern = new tsd.NameMatcher(pattern);
         }
-        Object.defineProperty(Selector.prototype, "requiresSource", {
-            get: function () {
-                return !!(this.resolveDependencies || this.infoMatcher);
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(Selector.prototype, "requiresHistory", {
             get: function () {
                 return !!(this.beforeDate || this.afterDate);
@@ -2528,9 +2648,19 @@ var tsd;
         };
         API.prototype.install = function (selector) {
             var _this = this;
+            selector.resolveDependencies = true;
             return this._core.select(selector).then(function (res) {
-                return _this._core.writeFileBulk(res.selection).then(function (paths) {
+                var files = res.selection;
+                return _this._core.writeFileBulk(files).then(function (paths) {
                     res.written = paths;
+                    if(selector.resolveDependencies) {
+                        var deps = tsd.DefUtil.extractDependencies(files);
+                        if(deps.length > 0) {
+                            xm.log('deps:' + deps.join('\n'));
+                            return _this._core.writeFileBulk(deps);
+                        }
+                    }
+                    return null;
                 }).thenResolve(res);
             });
         };
@@ -2548,7 +2678,10 @@ var tsd;
             });
         };
         API.prototype.deps = function (selector) {
-            return Q.reject(new Error('not implemented yet'));
+            var _this = this;
+            return this._core.select(selector).then(function (res) {
+                return _this._core.resolveDepencendiesBulk(res.selection).thenResolve(res);
+            });
         };
         API.prototype.compare = function (selector) {
             return Q.reject(new Error('not implemented yet'));
@@ -2647,6 +2780,7 @@ var xm;
             this._options = new xm.KeyValueMap();
             this._commandOpts = [];
             this._isInit = false;
+            this._nodeBin = false;
             this.command('help', function () {
                 _this.printCommands();
             }, 'usage help');
@@ -2680,13 +2814,17 @@ var xm;
             this._isInit = true;
             xm.eachProp(this._options.keys(), function (id) {
                 var option = _this._options.get(id);
-                optimist.alias(option.name, option.short);
+                if(option.short) {
+                    optimist.alias(option.name, option.short);
+                }
                 if(option.type === 'flag') {
                     optimist.boolean(option.name);
                 } else if(option.type === 'string') {
                     optimist.string(option.name);
                 }
-                optimist.default(option.name, option.default);
+                if(option.hasOwnProperty('default')) {
+                    optimist.default(option.name, option.default);
+                }
                 if(option.command) {
                     _this._commandOpts.push(option.name);
                 }
@@ -2697,6 +2835,8 @@ var xm;
         };
         Expose.prototype.executeArgv = function (argvRaw, alt) {
             this.init();
+            this._nodeBin = argvRaw[0] === 'node';
+            console.log(this._nodeBin);
             var argv = optimist.parse(argvRaw);
             if(!argv || argv._.length === 0) {
                 if(alt && this._commands.has(alt)) {
@@ -2736,7 +2876,7 @@ var xm;
         };
         Expose.prototype.execute = function (id, args, head) {
             if (typeof args === "undefined") { args = null; }
-            if (typeof head === "undefined") { head = true; }
+            if (typeof head === "undefined") { head = false; }
             this.init();
             if(!this._commands.has(id)) {
                 console.log('\nunknown command ' + id + '\n');
@@ -2814,6 +2954,13 @@ var xm;
         Expose.prototype.getCommand = function (id) {
             return this._commands.get(id);
         };
+        Object.defineProperty(Expose.prototype, "nodeBin", {
+            get: function () {
+                return this._nodeBin;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Expose;
     })();
     xm.Expose = Expose;    
@@ -2928,6 +3075,42 @@ var tsd;
                 });
             }
         }
+        function prinDefHead(def) {
+            xm.log('');
+            xm.log(def.toString());
+            xm.log('----');
+        }
+        function prinFileHead(file) {
+            xm.log('');
+            xm.log(file.toString());
+            xm.log('----');
+        }
+        function printFileCommit(file) {
+            if(file.commit) {
+                var line = '   ' + file.commit.commitShort;
+                line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
+                line += ' | ' + file.commit.gitAuthor.name;
+                if(file.commit.hubAuthor) {
+                    line += ' @' + file.commit.hubAuthor.login;
+                }
+                xm.log(line);
+                xm.log('   ' + file.commit.message.subject);
+                xm.log('----');
+            } else {
+                xm.log('   ' + '<no commmit>');
+                xm.log('----');
+            }
+        }
+        function printFileInfo(file) {
+            if(file.info && file.info.isValid()) {
+                xm.log('   ' + file.info.toString());
+                xm.log('      ' + file.info.projectUrl);
+                file.info.authors.forEach(function (author) {
+                    xm.log('      ' + author.toString());
+                });
+                xm.log('----');
+            }
+        }
         expose.command('version', function (args) {
             xm.log(xm.PackageJSON.getLocal().version);
         }, 'Display version');
@@ -2937,21 +3120,42 @@ var tsd;
         expose.command('search', function (args) {
             getSelectorJob(args).then(function (job) {
                 return job.api.search(job.selector);
-            }).done(reportSucces, reportError);
+            }).done(function (result) {
+                reportSucces(null);
+                result.selection.forEach(function (file) {
+                    prinFileHead(file);
+                    printFileInfo(file);
+                    printFileCommit(file);
+                });
+            }, reportError);
         }, 'Search definitions', jobOptions(), [
             'selector'
         ]);
         expose.command('install', function (args) {
             getSelectorJob(args).then(function (job) {
                 return job.api.install(job.selector);
-            }).done(reportSucces, reportError);
+            }).done(function (result) {
+                reportSucces(null);
+                result.selection.forEach(function (file) {
+                    prinFileHead(file);
+                    printFileInfo(file);
+                    printFileCommit(file);
+                });
+            }, reportError);
         }, 'Install definitions', jobOptions(), [
             'selector'
         ]);
         expose.command('info', function (args) {
             getSelectorJob(args).then(function (job) {
                 return job.api.info(job.selector);
-            }).done(reportSucces, reportError);
+            }).done(function (result) {
+                reportSucces(null);
+                result.selection.forEach(function (file) {
+                    prinFileHead(file);
+                    printFileInfo(file);
+                    printFileCommit(file);
+                });
+            }, reportError);
         }, 'Show definition details', jobOptions(), [
             'selector'
         ]);
@@ -2961,30 +3165,11 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.definitions.forEach(function (def) {
-                    xm.log('');
-                    xm.log(def.toString());
-                    xm.log('----');
+                    prinDefHead(def);
+                    printFileInfo(def.head);
                     def.history.slice(0).reverse().forEach(function (file) {
-                        if(file.commit) {
-                            var line = file.commit.commitShort;
-                            line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
-                            line += ' | ' + file.commit.gitAuthor.name;
-                            if(file.commit.hubAuthor) {
-                                line += ' @' + file.commit.hubAuthor.login;
-                            }
-                            xm.log(line);
-                            xm.log(file.commit.message.toString());
-                            xm.log('');
-                        } else {
-                            xm.log('   ' + '<no commmit>');
-                        }
-                        if(file.info && file.info.isValid()) {
-                            xm.log(file.info.toString());
-                            file.info.authors.forEach(function (author) {
-                                xm.log(' - ' + author.toString());
-                            });
-                            xm.log('');
-                        }
+                        printFileInfo(file);
+                        printFileCommit(file);
                     });
                 });
             }, reportError);
@@ -2997,10 +3182,19 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.selection.forEach(function (def) {
-                    xm.log(def.toString());
-                    def.dependencies.forEach(function (def) {
-                        xm.log(' - ' + def.toString());
-                    });
+                    prinFileHead(def);
+                    printFileInfo(def);
+                    if(def.dependencies.length > 0) {
+                        def.dependencies.forEach(function (def) {
+                            xm.log(' - ' + def.toString());
+                            if(def.dependencies.length > 0) {
+                                def.dependencies.forEach(function (def) {
+                                    xm.log('    - ' + def.toString());
+                                });
+                            }
+                        });
+                        xm.log('----');
+                    }
                 });
             }, reportError);
         }, 'List dependencies', jobOptions(), [

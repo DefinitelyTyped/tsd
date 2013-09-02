@@ -7,6 +7,11 @@
  * */
 
  module xm {
+
+	/*
+	 various helper to iterate stuff, saves inckusing underscore
+	 */
+	//TODO decide what to do with this: seems modern JS + TypeScript 0.9 is good enough? only keep Object iterators?
 	export function eachElem(collection:any[], callback:(value:any, index:number, collection:any[]) => void, thisArg?:any = null) {
 		for (var i = 0, ii = collection.length; i < ii; i++) {
 			if (callback.call(thisArg, collection[i], i, collection) === false) {

@@ -7,8 +7,12 @@ module xm {
 		return r;
 	}
 
+	/*
+	 DateUtil: do stuff with dates
+	 */
 	export module DateUtil {
 
+		// human friendly compact UTC time (maybe append 'UTC'?)
 		export function toNiceUTC(date:Date) {
 			return date.getUTCFullYear()
 			+ '-' + pad(date.getUTCMonth() + 1)

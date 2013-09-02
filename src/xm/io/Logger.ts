@@ -24,6 +24,7 @@ module xm {
 	export interface Logger  {
 		(...args:any[]):void;
 		log(...args:any[]):void;
+		ok(...args:any[]):void;
 		warn(...args:any[]):void;
 		error(...args:any[]):void;
 		debug(...args:any[]):void;
@@ -63,6 +64,9 @@ module xm {
 		// alias
 		logger.log = plain;
 		logger.mute = false;
+		logger.ok = (...args:any[]) => {
+			writeMulti('ok: '.green, '', args);
+		};
 		logger.warn = (...args:any[]) => {
 			writeMulti('warn: '.yellow, '', args);
 		};

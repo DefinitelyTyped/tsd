@@ -8,6 +8,9 @@ module tsd {
 	var pointer = require('jsonpointer.js');
 	var branch_tree_sha:string = '/commit/commit/tree/sha';
 
+	/*
+	 DefCommit: meta-data for a single github commit
+	 */
 	export class DefCommit {
 
 		//NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
@@ -20,8 +23,10 @@ module tsd {
 		hubAuthor:git.GithubUser;
 		hubCommitter:git.GithubUser;
 
-		gitAuthor:git.GitCommitUser;
-		gitCommitter:git.GitCommitUser;
+		gitAuthor:git.GitUserCommit;
+		gitCommitter:git.GitUserCommit;
+
+		//moar fields?
 
 		constructor(commitSha:string) {
 			xm.assertVar('commitSha', commitSha, 'string');
@@ -41,8 +46,8 @@ module tsd {
 			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
 			this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
 
-			this.gitAuthor = git.GitCommitUser.fromJSON(commit.commit.author);
-			this.gitCommitter = git.GitCommitUser.fromJSON(commit.commit.committer);
+			this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
+			this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
 
 			this.message.parse(commit.commit.message);
 		}

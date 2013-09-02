@@ -11,7 +11,7 @@ module tsd {
 	var FS:Qfs = require('Q-io/fs');
 	/*
 	 API: the high-level API used by dependants
-	*/
+	 */
 	export class API {
 
 		private _core:Core;
@@ -24,16 +24,31 @@ module tsd {
 			this._core = new tsd.Core(this.context);
 		}
 
-		// List files matching selector:
+		// List files matching selector
 		search(selector:Selector):Qpromise {
 			return this._core.select(selector);
 		}
 
-		// Install all files matching selector:
+		// Install all files matching selector
 		install(selector:Selector):Qpromise {
+			//hard for now
+			//TODO make proper cli option
+			selector.resolveDependencies = true;
+
 			return this._core.select(selector).then((res:tsd.APIResult) => {
-				return this._core.writeFileBulk(res.selection).then((paths) => {
+				var files = res.selection;
+				return this._core.writeFileBulk(files).then((paths) => {
+					//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 					res.written = paths;
+
+					if (selector.resolveDependencies) {
+						var deps = tsd.DefUtil.extractDependencies(files);
+						if (deps.length > 0) {
+							xm.log('deps:' + deps.join('\n'));
+							return this._core.writeFileBulk(deps);
+						}
+					}
+					return null;
 
 				}).thenResolve(res);
 			});
@@ -57,13 +72,14 @@ module tsd {
 			});
 		}
 
-		//TODO Download files matching selector, and recursively solve reference dependencies.
+		//Download files matching selector and solve dependencies.
 		deps(selector:Selector):Qpromise {
-			// var res = new APIResult('deps', selector);
-			return Q.reject(new Error('not implemented yet'));
+			return this._core.select(selector).then((res:tsd.APIResult) => {
+				return this._core.resolveDepencendiesBulk(res.selection).thenResolve(res);
+			});
 		}
 
-		//TODO Compare repo data with local installed file and check for changes. First only use hashes and checksum/ but later this can be detailed with a fancyfied diff.
+		//TODO Compare repo data with local installed file and check for changes.
 		compare(selector:Selector):Qpromise {
 			return Q.reject(new Error('not implemented yet'));
 		}

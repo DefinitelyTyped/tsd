@@ -3,10 +3,11 @@
 
 module tsd {
 
-
 	var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
 
-	//single definition in repo (identified by it path)
+	/*
+	 Def: single definition in repo (identified by its path)
+	 */
 	export class Def {
 
 		// unique identifier: 'project/name' (should support 'project/name-v0.1.3-alpha')
@@ -32,7 +33,7 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		static isDef(path:string):bool {
+		static isDefPath(path:string):bool {
 			return nameExp.test(path);
 		}
 

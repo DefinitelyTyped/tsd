@@ -6,13 +6,8 @@
 
 module tsd {
 
-	//TODO replace vanilla RegExp with XRegExp?
+	//TODO replace vanilla RegExp with XRegExp? (low prio)
 
-	export class ParseError {
-		constructor(public message:string = '', public text?:string = '', public ref?:any = null) {
-
-		}
-	}
 	var endSlashTrim = /\/?$/;
 
 	var glue = xm.RegExpGlue.get;
@@ -54,72 +49,73 @@ module tsd {
 	var optUrl = glue('(?:', spaceOpt, delimStartOpt, urlFullCap, delimEndOpt, ')?').join();
 
 	var commentLine = glue(commentStart)
-		.append(anyLazyCap)
-		.append(spaceOpt, expEnd)
-		.join();
+	.append(anyLazyCap)
+	.append(spaceOpt, expEnd)
+	.join();
 
 	var referencePath = glue(expStart, spaceOpt, /\/\/+/, spaceOpt)
-		.append(referenceTag)
-		.append(spaceOpt, expEnd)
-		.join();
+	.append(referenceTag)
+	.append(spaceOpt, expEnd)
+	.join();
 
 	var typeHead = glue(commentStart)
-		.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
-		.append(/[ \t:-]+/, versionCap, spaceOpt)
-		.append(anyGreedy, expEnd)
-		.join('i');
+	.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
+	.append(/[ \t:-]+/, versionCap, spaceOpt)
+	.append(anyGreedy, expEnd)
+	.join('i');
 
 	var projectUrl = glue(commentStart)
-		.append(/Project/, spaceOpt, /:?/, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(/Project/, spaceOpt, /:?/, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
 
 	var defAuthorUrl = glue(commentStart)
-		.append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt)
-		.append(wordsCap, optUrl)
-		.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
-		.join('i');
+	.append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt)
+	.append(wordsCap, optUrl)
+	.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
+	.join('i');
 
 	var defAuthorUrlAlt = glue(commentStart)
-		.append(/Author[ \t]*:?/, spaceOpt)
-		.append(wordsCap, optUrl)
-		.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
-		.join('i');
+	.append(/Author[ \t]*:?/, spaceOpt)
+	.append(wordsCap, optUrl)
+	.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
+	.join('i');
 
 	var reposUrl = glue(commentStart)
-		.append(/Definitions/, spaceOpt, /:?/, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(/Definitions/, spaceOpt, /:?/, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
 	var reposUrlAlt = glue(commentStart)
-		.append(/DefinitelyTyped/, spaceOpt, /:?/, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(/DefinitelyTyped/, spaceOpt, /:?/, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
 	var labelUrl = glue(commentStart)
-		.append(labelCap, spaceOpt, /:?/, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(labelCap, spaceOpt, /:?/, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
 	var labelWordsUrl = glue(commentStart)
-		.append(labelCap, spaceOpt, /:?/, spaceOpt)
-		.append(wordsCap, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(labelCap, spaceOpt, /:?/, spaceOpt)
+	.append(wordsCap, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
 	var wordsUrl = glue(commentStart)
-		.append(wordsCap, spaceOpt)
-		.append(delimStartOpt, urlFullCap, delimEndOpt)
-		.append(spaceOpt, expEnd)
-		.join('i');
+	.append(wordsCap, spaceOpt)
+	.append(delimStartOpt, urlFullCap, delimEndOpt)
+	.append(spaceOpt, expEnd)
+	.join('i');
 
-	var mutate = (base:string[], add:string[], remove:string[]) => {
+	// dry helper
+	function mutate(base:string[], add:string[], remove:string[]) => {
 		var res = base ? base.slice(0) : [];
 		var i , ii, index;
 		if (add) {
@@ -135,8 +131,11 @@ module tsd {
 			}
 		}
 		return res;
-	};
+	}
 
+	/*
+	 DefInfoParser: parse definition source-code for info header
+	 */
 	export class DefInfoParser {
 
 		parser:xm.LineParserCore;
@@ -145,6 +144,7 @@ module tsd {
 
 		}
 
+		//TODO evolve a better solution to the way line parsers are chained
 		parse(data:tsd.DefInfo, source:string):void {
 			//xm.log('parse: ', data.combi());
 
@@ -170,7 +170,7 @@ module tsd {
 			}, fields));
 
 
-			fields = mutate(fields, ['defAuthorAppend'], ['defAuthorUrl','defAuthorUrlAlt']);
+			fields = mutate(fields, ['defAuthorAppend'], ['defAuthorUrl', 'defAuthorUrlAlt']);
 
 			this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 2, (match:xm.LineParserMatch) => {
 				data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
@@ -185,7 +185,7 @@ module tsd {
 			}, fields));
 
 			fields = mutate(fields, null, ['defAuthorAppend']);
-			fields = mutate(fields, null, ['reposUrl','reposUrlAlt']);
+			fields = mutate(fields, null, ['reposUrl', 'reposUrlAlt']);
 
 			this.parser.addParser(new xm.LineParser('reposUrl', reposUrl, 1, (match:xm.LineParserMatch) => {
 				data.reposUrl = match.getGroup(0, data.reposUrl).replace(endSlashTrim, '');

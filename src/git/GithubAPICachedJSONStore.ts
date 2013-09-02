@@ -16,8 +16,10 @@ module git {
 	var fs = require('fs');
 	var path = require('path');
 	var FS:Qfs = require('q-io/fs');
-
-	//TODO consider alternate storage
+	/*
+	 GithubAPICachedJSONStore: data-store for cached github api results
+	*/
+	//TODO consider alternate storage? not worth it?
 	//TODO generalise this for re-use?
 	//TODO add gzip compression?
 	export class GithubAPICachedJSONStore {
@@ -32,7 +34,7 @@ module git {
 			this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
 		}
 
-		init():Qpromise {
+		private init():Qpromise {
 			return FS.exists(this.dir).then((exists:bool) => {
 				if (!exists) {
 					return xm.mkdirCheckQ(this.dir);

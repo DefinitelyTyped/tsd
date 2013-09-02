@@ -10,7 +10,9 @@ module tsd {
 	var util = require('util');
 	var assert = require('assert');
 	var tv4:TV4 = require('tv4').tv4;
-
+	/*
+	 Config: local config file
+	*/
 	export class Config {
 
 		typingsPath:string = 'typings';
@@ -70,6 +72,7 @@ module tsd {
 					throw (new Error('malformed config: doesn\'t comply with schema'));
 				}
 
+				//TODO harden validation
 				cfg.typingsPath = json.typingsPath;
 				cfg.version = json.version;
 				cfg.repo = json.repo;

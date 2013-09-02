@@ -1,8 +1,10 @@
 module git {
 
-	// simple committer from git itself
+	/*
+	 GitCommitUser: basic git committer
+	  */
 	//TODO rename? but to what?
-	export class GitCommitUser {
+	export class GitUserCommit {
 		name:string;
 		email:string;
 		date:Date;
@@ -11,11 +13,11 @@ module git {
 			return (this.name ? this.name : '<no name>') + ' ' + (this.email ? '<' + this.email + '>' : '<no email>');
 		}
 
-		static fromJSON(json:any):GitCommitUser {
+		static fromJSON(json:any):git.GitUserCommit {
 			if (!json) {
 				return null;
 			}
-			var ret = new GitCommitUser();
+			var ret = new git.GitUserCommit();
 			ret.name = json.name;
 			ret.email = json.email;
 			//TODO verifiy

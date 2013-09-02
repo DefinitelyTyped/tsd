@@ -40,7 +40,7 @@ module git {
 	}
 
 	/*
-	 GithubAPICached: access github rest api with local cache (evading rate-limit)
+	 GithubAPICached: access github rest-api with local cache (evading the non-auth rate-limit)
 	 */
 	//TODO implement http://developer.github.com/v3/#conditional-requests (add last-mod + etag to json store)
 	//TODO find out if a HEAD requests counts for rate-limiting

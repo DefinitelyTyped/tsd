@@ -2,12 +2,13 @@
 
 module git {
 
+	//single user on Github (with profilem gravatar etc)
 	export class GithubUser {
 
 		id:number;
 		login:string;
 		avatar_url:string;
-		//moar
+		//moar fields?
 
 		toString():string {
 			return (this.login ? this.login : '<no login>') + (this.id ? '[' + this.id + ']' : '<no id>');

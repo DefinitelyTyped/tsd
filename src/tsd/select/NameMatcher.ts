@@ -18,7 +18,9 @@ module tsd {
 		//this needs hardening (or ditch)
 		return str.replace('.', '\\.');
 	}
-
+	/*
+	 NameMatcher: match name selector (globs etc)
+	 */
 	//TODO use minimatch or replace RegExpGlue with XRegExp
 	//TODO use semver-postfix?
 	export class NameMatcher {

@@ -19,18 +19,23 @@ module tsd {
 	require('source-map-support').install();
 	process.setMaxListeners(20);
 
+	/*
+	 Context: bundles the configuration and core functionality
+	 */
 	export class Context {
 
 		paths:Paths;
 		config:Config;
 		packageInfo:xm.PackageJSON;
+
+		//drop this? (xm.log is pretty global already)
 		log:xm.Logger = xm.log;
 
 		constructor(configPath:string = null, public verbose?:bool = false) {
 			xm.assertVar('configPath', configPath, 'string', true);
 
 			//TODO should not auto-create folders (add method).
-			//TODO also promisify (for virtual filesystem: )
+			//TODO also promisify using Q-io
 
 			this.packageInfo = xm.PackageJSON.getLocal();
 			this.paths = new Paths(this.packageInfo);

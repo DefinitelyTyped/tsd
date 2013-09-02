@@ -3,6 +3,11 @@
 
 module git {
 
+	/*
+	 GithubRepo: basic github repo info
+	 */
+	//TODO consider merging api and raw instances to this? maybe bundle in a new class?
+	//TODO freeze or make getters of props?
 	export class GithubRepo {
 
 		urls:git.GithubURLManager;

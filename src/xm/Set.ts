@@ -8,6 +8,9 @@
 
 module xm {
 
+	/*
+	 ISet: yer basic set interface
+	 */
 	export interface ISet {
 		has (value:any):bool;
 		add (value:any):void;
@@ -17,7 +20,9 @@ module xm {
 		clear ():void;
 		count ():number;
 	}
-
+	/*
+	 Set: yer basic set: unordered but unique values
+	 */
 	export class Set implements ISet {
 
 		private _content:any[] = [];

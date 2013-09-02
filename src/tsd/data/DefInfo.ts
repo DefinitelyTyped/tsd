@@ -5,9 +5,9 @@ module tsd {
 
 	var endSlashTrim = /\/?$/;
 
-	//TODO move to xm
-
-	//single definition file in repo (parsed)
+	/*
+	 DefInfo: parsed info from single definition source
+	 */
 	export class DefInfo {
 		name:string;
 		version:string;

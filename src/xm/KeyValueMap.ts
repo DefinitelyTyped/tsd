@@ -6,10 +6,15 @@
  * License: MIT - 2013
  * */
 
- module xm {
+module xm {
 
 	var hasOwnProp:(v:string) => bool = Object.prototype.hasOwnProperty;
 
+	//TODO: generics for TS 0.9
+
+	/*
+	 IKeyValueMap: key-value map
+	 */
 	export interface IKeyValueMap {
 		has (key:string):bool;
 		get(key:string, alt?:any):any;
@@ -21,7 +26,9 @@
 		export (keys?:string[]):any;
 		clear (keep?:string[]);
 	}
-
+	/*
+	 KeyValueMap: yer basic string key-value map, safe from property interference
+	 */
 	export class KeyValueMap implements IKeyValueMap {
 
 		private _prefix:string = '#';

@@ -6,10 +6,11 @@ describe('tsd', function () {
 	chai.Assertion.includeStack = true;
 	var assert = chai.assert;
 
-	var pkg;
 	describe('package.json', function () {
 
-		it('validly formed', function () {
+		var pkg;
+
+		it('valid formed', function () {
 			assert.jsonFile('package.json');
 
 			pkg = grunt.file.readJSON('package.json');

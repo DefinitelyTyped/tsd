@@ -7,7 +7,11 @@
  * */
 
  module xm {
-	 //TODO write tests.. fix.. type is broken, instanceof isweird
+	 /*
+	  assertVar: assert a variable (like a function argument) and throw informative error on assertion failure
+	  */
+	 //TODO write tests
+	 //TODO expand validation options, add RegExp /string length
 	export function assertVar(label:string, value:any, type:any, opt?:bool = false):void {
 		var valueType = typeof value;
 		var typeKind = typeof type;

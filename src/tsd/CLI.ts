@@ -53,6 +53,9 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/*
+	 runARGV: run raw cli arguments, like process.argv
+	 */
 	export function runARGV(argvRaw:any, configPath?:string) {
 
 		var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
@@ -120,6 +123,50 @@ module tsd {
 			}
 		}
 
+		function prinDefHead(def:tsd.Def) {
+			xm.log('');
+			xm.log(def.toString());
+			xm.log('----');
+		}
+
+		function prinFileHead(file:tsd.DefVersion) {
+			xm.log('');
+			xm.log(file.toString());
+			xm.log('----');
+		}
+
+		function printFileCommit(file:tsd.DefVersion) {
+			if (file.commit) {
+				var line = '   ' + file.commit.commitShort;
+
+				line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
+				line += ' | ' + file.commit.gitAuthor.name;
+				if (file.commit.hubAuthor) {
+					line += ' @' + file.commit.hubAuthor.login;
+				}
+				xm.log(line);
+
+				//TODO full indent message
+				xm.log('   ' + file.commit.message.subject);
+				xm.log('----');
+			}
+			else {
+				xm.log('   ' + '<no commmit>');
+				xm.log('----');
+			}
+		}
+
+		function printFileInfo(file:tsd.DefVersion) {
+			if (file.info && file.info.isValid()) {
+				xm.log('   ' + file.info.toString());
+				xm.log('      ' + file.info.projectUrl);
+				file.info.authors.forEach((author:xm.AuthorInfo) => {
+					xm.log('      ' + author.toString());
+				});
+				xm.log('----');
+			}
+		}
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.command('version', (args:any) => {
@@ -136,21 +183,46 @@ module tsd {
 			getSelectorJob(args).then((job:Job) => {
 				return job.api.search(job.selector);
 
-			}).done(reportSucces, reportError);
+			}).done((result:APIResult) => {
+				reportSucces(null);
+
+				//TODO report on overwrite
+				result.selection.forEach((file:tsd.DefVersion) => {
+					prinFileHead(file);
+					printFileInfo(file);
+					printFileCommit(file);
+				});
+			}, reportError);
 		}, 'Search definitions', jobOptions(), ['selector']);
 
 		expose.command('install', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
 				return job.api.install(job.selector);
 
-			}).done(reportSucces, reportError);
+			}).done((result:APIResult) => {
+				reportSucces(null);
+				//TODO report on written/skipped
+				result.selection.forEach((file:tsd.DefVersion) => {
+					prinFileHead(file);
+					printFileInfo(file);
+					printFileCommit(file);
+				});
+			}, reportError);
 		}, 'Install definitions', jobOptions(), ['selector']);
 
 		expose.command('info', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
 				return job.api.info(job.selector);
 
-			}).done(reportSucces, reportError);
+			}).done((result:APIResult) => {
+				reportSucces(null);
+
+				result.selection.forEach((file:tsd.DefVersion) => {
+					prinFileHead(file);
+					printFileInfo(file);
+					printFileCommit(file);
+				});
+			}, reportError);
 
 		}, 'Show definition details', jobOptions(), ['selector']);
 
@@ -162,34 +234,12 @@ module tsd {
 				reportSucces(null);
 
 				result.definitions.forEach((def:tsd.Def) => {
-					xm.log('');
-					xm.log(def.toString());
-					xm.log('----');
+					prinDefHead(def);
+					printFileInfo(def.head);
 
 					def.history.slice(0).reverse().forEach((file:tsd.DefVersion) => {
-						if (file.commit) {
-							var line = file.commit.commitShort;
-
-							line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
-							line += ' | ' + file.commit.gitAuthor.name;
-							if (file.commit.hubAuthor) {
-								line += ' @' + file.commit.hubAuthor.login;
-							}
-							xm.log(line);
-							xm.log(file.commit.message.toString());
-							xm.log('');
-						}
-						else {
-							xm.log('   ' + '<no commmit>');
-						}
-
-						if (file.info && file.info.isValid()) {
-							xm.log(file.info.toString());
-							file.info.authors.forEach((author:xm.AuthorInfo) => {
-								xm.log(' - ' + author.toString());
-							});
-							xm.log('');
-						}
+						printFileInfo(file);
+						printFileCommit(file);
 					});
 				});
 			}, reportError);
@@ -204,10 +254,20 @@ module tsd {
 				reportSucces(null);
 
 				result.selection.forEach((def:tsd.DefVersion) => {
-					xm.log(def.toString());
-					def.dependencies.forEach((def:tsd.DefVersion) => {
-						xm.log(' - ' + def.toString());
-					});
+					prinFileHead(def);
+					printFileInfo(def);
+
+					if (def.dependencies.length > 0) {
+						def.dependencies.forEach((def:tsd.DefVersion) => {
+							xm.log(' - ' + def.toString());
+							if (def.dependencies.length > 0) {
+								def.dependencies.forEach((def:tsd.DefVersion) => {
+									xm.log('    - ' + def.toString());
+								});
+							}
+						});
+						xm.log('----');
+					}
 				});
 			}, reportError);
 

@@ -1,7 +1,9 @@
 ///<reference path="../xm/KeyValueMap.ts" />
 
 module git {
-
+	/*
+	 getDecodedBlob: decoders for github blob-api
+	*/
 	var decoders = new xm.KeyValueMap({
 		'base64': function (value:string):string {
 			return new Buffer(value, 'base64').toString();

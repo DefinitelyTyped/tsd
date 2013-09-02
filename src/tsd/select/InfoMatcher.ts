@@ -5,7 +5,7 @@ module tsd {
 	/*
 	 DefInfoMatcher: test against DefInfo
 	 */
-	//TODO implement InfoMatcher
+	//TODO implement InfoMatcher (something like NameMatcher)
 	export class InfoMatcher {
 
 		//return result object for uix report?

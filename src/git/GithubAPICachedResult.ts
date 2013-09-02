@@ -5,6 +5,10 @@
 
 module git {
 
+	/*
+	 GithubAPICachedResult: single cached result object for github api
+	*/
+	//TODO add more hardening / verification
 	export class GithubAPICachedResult {
 
 		private _key:string;
@@ -38,8 +42,8 @@ module git {
 			};
 		}
 
-		//TODO test this against toJSON()
-		//TODO why not JSON Schema?
+		//TODO unit-test this against toJSON()
+		//TODO maybe JSON Schema? overkill?
 		static fromJSON(json:any):GithubAPICachedResult {
 			xm.assertVar('label', json.label, 'string');
 			xm.assertVar('key', json.key, 'string');

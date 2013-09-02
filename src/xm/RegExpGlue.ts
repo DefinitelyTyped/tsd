@@ -14,6 +14,9 @@ module xm {
 	var flagFilter = /[gim]/;
 	//var flagFilter = /[gixsm]/;
 
+	/*
+	 RegExpGlue: glue RegExp's and strings together into longer RegExps
+	 */
 	export class RegExpGlue {
 
 		parts:any[] = [];

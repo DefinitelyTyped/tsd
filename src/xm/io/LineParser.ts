@@ -15,11 +15,12 @@ module xm {
 	var util = require('util');
 	var trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
 
+	/*
+	 LineParserCore: parse lines based text using RegExps
+	 */
 	export class LineParserCore {
 
 		parsers = new xm.KeyValueMap();
-
-		//works nicely but will keep matching empty strings at final line, so guard and compare index + length
 
 		constructor(public verbose?:bool = false) {
 
@@ -39,7 +40,7 @@ module xm {
 			return this.parsers.get(id, null);
 		}
 
-		link() {
+		private link() {
 			xm.eachElem(this.parsers.values(), (parser:LineParser) => {
 				xm.eachElem(parser.nextIds, (id:string) => {
 					var p = this.parsers.get(id);
@@ -219,7 +220,9 @@ module xm {
 			}
 		}
 	}
-
+	/*
+	 LineParser: reusable parser in a LineParserCore
+	 */
 	export class LineParser {
 
 		next:LineParser[] = [];
@@ -245,7 +248,9 @@ module xm {
 			return this.id;
 		}
 	}
-	//single match
+	/*
+	 LineParserMatch: single match from LineParser
+	 */
 	export class LineParserMatch {
 
 		constructor(public parser:LineParser, public match) {

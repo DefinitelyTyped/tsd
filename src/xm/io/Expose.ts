@@ -62,6 +62,9 @@ module xm {
 		}
 	}
 
+	/*
+	 Expose: cli command manager, wraps optimist with better usage generator and other utils
+	 */
 	//TODO better support for global options; not only .command but also a .global
 	//TODO add per-command sub-help like npm
 	export class Expose {
@@ -70,6 +73,7 @@ module xm {
 		private _options = new KeyValueMap();
 		private _commandOpts:string[] = [];
 		private _isInit = false;
+		private _nodeBin = false;
 
 		constructor(public title?:string = '') {
 			this.command('help', () => {
@@ -110,14 +114,18 @@ module xm {
 			this._isInit = true;
 			xm.eachProp(this._options.keys(), (id) => {
 				var option:ExposeOption = this._options.get(id);
-				optimist.alias(option.name, option.short);
+				if (option.short) {
+					optimist.alias(option.name, option.short);
+				}
 				if (option.type === 'flag') {
 					optimist.boolean(option.name);
 				}
 				else if (option.type === 'string') {
 					optimist.string(option.name);
 				}
-				optimist.default(option.name, option.default);
+				if (option.hasOwnProperty('default')) {
+					optimist.default(option.name, option.default);
+				}
 				if (option.command) {
 					this._commandOpts.push(option.name);
 				}
@@ -130,6 +138,9 @@ module xm {
 
 		executeArgv(argvRaw:any, alt?:string) {
 			this.init();
+
+			this._nodeBin = argvRaw[0] === 'node';
+			console.log(this._nodeBin);
 
 			var argv = optimist.parse(argvRaw);
 			if (!argv || argv._.length === 0) {
@@ -178,7 +189,7 @@ module xm {
 			}
 		}
 
-		execute(id:string, args:any = null, head:bool = true) {
+		execute(id:string, args:any = null, head:bool = false) {
 			this.init();
 
 			if (!this._commands.has(id)) {
@@ -273,6 +284,10 @@ module xm {
 
 		getCommand(id:string):xm.ExposeCommand {
 			return this._commands.get(id);
+		}
+
+		get nodeBin():bool {
+			return this._nodeBin;
 		}
 	}
 }

@@ -3,9 +3,14 @@
 
 module tsd {
 
-	var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
+	var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
-	//TODO fix duplication in logic.. why bother?
+	var leadingExp = /^\.\.\//;
+
+	/*
+	 DefUtil: static helpers
+	 */
+	//TODO why not global function instead?
 	export class DefUtil {
 
 		static getDefs(list:tsd.DefVersion[]):tsd.Def[] {
@@ -58,17 +63,63 @@ module tsd {
 			return ret;
 		}
 
-		static extractReferencTags(source:string):string[] {
+		static extractReferenceTags(source:string):string[] {
 			var ret:string[] = [];
 			var match;
+
+			if (!referenceTag.global) {
+				throw new Error('referenceTag RegExp must have global flag');
+			}
 			referenceTag.lastIndex = 0;
+
 			while ((match = referenceTag.exec(source))) {
-				//referenceTag.lastIndex = match.index + match[0].length;
 				if (match.length > 0 && match[1].length > 0) {
 					ret.push(match[1]);
 				}
 			}
+
 			return ret;
 		}
+
+		static contains(list:tsd.DefVersion[], file:tsd.DefVersion):bool {
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				if (list[i].def.path === file.def.path) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static mergeDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = [];
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				var file = list[i];
+				if (!DefUtil.contains(ret, file)) {
+					ret.push(file);
+				}
+				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
+					var tmp =  file.dependencies[j];
+					if (!DefUtil.contains(ret, tmp)) {
+						ret.push(tmp);
+					}
+				}
+			}
+			return ret;
+		}
+
+		static extractDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = [];
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				var file = list[i];
+				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
+					var tmp = file.dependencies[j];
+					if (!DefUtil.contains(ret, tmp) && !DefUtil.contains(list, tmp)) {
+						ret.push(tmp);
+					}
+				}
+			}
+			return ret;
+		}
+
 	}
 }

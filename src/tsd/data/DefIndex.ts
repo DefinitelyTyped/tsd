@@ -9,12 +9,19 @@ module tsd {
 
 	var branch_tree_sha:string = '/commit/commit/tree/sha';
 
+	/*
+	 DefIndex: holds the data for a repo branch in git
+
+	 for now loosely coupled to the github api version, might be possible to de-couple, at least from the format version (but not really worth it?)
+	 */
+	//TODO consider cutting coupling with github api fomat or at least verifying more (low prio)
 	export class DefIndex {
 
 		private _branchName:string;
 		private _hasIndex:bool = false;
 		private _indexCommit:tsd.DefCommit;
 
+		//TODO add generics when moved to TS 0.9
 		private _definitions:xm.KeyValueMap = new xm.KeyValueMap();
 		private _commits:xm.KeyValueMap = new xm.KeyValueMap();
 		private _versions:xm.KeyValueMap = new xm.KeyValueMap();
@@ -28,6 +35,7 @@ module tsd {
 		}
 
 		// assumes recursive
+		//TODO consider more verification or decoupling of data (low prio)
 		init(branch:any, tree:any):void {
 			if (this._hasIndex) {
 				return;
@@ -63,7 +71,7 @@ module tsd {
 
 			tree.tree.forEach((elem:git.GithubJSONTreeElem) => {
 				var char = elem.path.charAt(0);
-				if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDef(elem.path)) {
+				if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDefPath(elem.path)) {
 					def = this.procureDef(elem.path);
 					if (!def) {
 						return;
@@ -79,6 +87,7 @@ module tsd {
 		}
 
 		setHistory(def:tsd.Def, commits:any[]):void {
+			//force reset for robustness
 			def.history = [];
 
 			commits.map((json) => {
@@ -166,11 +175,11 @@ module tsd {
 			this._definitions.values().forEach((def:Def) => {
 				ret.push('  ' + def.toString());
 				ret.push('  ' + def.head.toString());
-				if (def.history) {
-					def.history.forEach((file:DefVersion) => {
-						ret.push('    - ' + file.toString());
-					});
-				}
+				/*if (def.history) {
+				 def.history.forEach((file:DefVersion) => {
+				 ret.push('    - ' + file.toString());
+				 });
+				 }*/
 			});
 			return ret.join('\n');
 		}

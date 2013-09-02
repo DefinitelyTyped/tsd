@@ -10,7 +10,6 @@
 ///<reference path="../KeyValueMap.ts" />
 module xm {
 
-	var _:UnderscoreStatic = require('underscore');
 	var uriTemplates:URLTemplateParser = require('uri-templates');
 
 	export interface URLTemplateParser {
@@ -21,7 +20,9 @@ module xm {
 		fill(callback:(varName:string) => string):string;
 		fromUri(uri:string):any;
 	}
-
+	/*
+	 URLManager: hold url-templates
+	 */
 	export class URLManager {
 
 		private _templates:xm.KeyValueMap = new xm.KeyValueMap();

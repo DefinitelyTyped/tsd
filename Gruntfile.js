@@ -11,6 +11,7 @@ module.exports = function (grunt) {
 		'grunt-typescript',
 		'grunt-execute',
 		'grunt-shell',
+		'grunt-todos',
 		'grunt-mocha-test'
 	]);
 	// gtx.autoNpmPkg();
@@ -31,6 +32,18 @@ module.exports = function (grunt) {
 				configuration: grunt.file.readJSON('tslint.json')
 			},
 			source: ['src/**/*.ts']
+		},
+		todos: {
+			all: {
+				options: {
+					verbose: false,
+					priorities: {
+						low: null,
+						med: /(TODO|FIXME)/
+					}
+				},
+				src: ['src/**/*.ts', 'test/**/*.ts']
+			}
 		},
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],

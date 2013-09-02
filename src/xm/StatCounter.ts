@@ -6,9 +6,13 @@
  * License: MIT - 2013
  * */
 module xm {
+	/*
+	 StatCounter: manages named numeric counters, handy for minimalistic stats
+	 */
 	export class StatCounter {
 
 		stats:KeyValueMap = new KeyValueMap();
+		logger:Logger = xm.log;
 
 		constructor(public log:bool = false) {
 
@@ -18,8 +22,8 @@ module xm {
 			var value = this.stats.get(id, 0) + amount;
 			this.stats.set(id, value);
 
-			if (this.log) {
-				xm.log('-> ' + id + ': ' + this.stats.get(id));
+			if (this.log && this.logger) {
+				this.logger('-> ' + id + ': ' + this.stats.get(id));
 			}
 			return value;
 		}

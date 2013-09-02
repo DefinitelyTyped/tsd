@@ -1,6 +1,9 @@
 module git {
-	//TODO moar! (is there a simple tool for this?)
 
+	/*
+	 interfaces for githuv json responses
+	 */
+	//TODO moar! (is there a simple tool for this?)
 	export interface GithubJSONTreeElem {
 		mode:string;
 		type:string;
@@ -17,7 +20,5 @@ module git {
 		path:string;
 		size:number;
 		url:string;
-
-
 	}
 }

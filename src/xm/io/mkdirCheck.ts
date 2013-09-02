@@ -14,8 +14,9 @@ module xm {
 	var path = require('path');
 	var fs = require('fs');
 	/*
-	 mkdirCheck: like mkdirp but with writable rights and verification
+	 mkdirCheck: like mkdirp but with writable rights and verification, synchronous
 	 */
+	//TODO unit test this
 	export function mkdirCheckSync(dir:string, writable?:bool = false):string {
 		dir = path.resolve(dir);
 		if (fs.existsSync(dir)) {
@@ -48,7 +49,10 @@ module xm {
 		return dir;
 	}
 
-	//TODO test this
+	/*
+	 mkdirCheckQ: like mkdirp but with writable rights and verification, returns a promise
+	 */
+	//TODO unit test this
 	export function mkdirCheckQ(dir:string, writable?:bool = false):Qpromise {
 		dir = path.resolve(dir);
 

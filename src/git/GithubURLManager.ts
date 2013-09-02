@@ -10,6 +10,9 @@ module git {
 	var assert = require('assert');
 	var _:UnderscoreStatic = require('underscore');
 
+	/*
+	 GithubURLManager: url-templates for common urls
+	*/
 	export class GithubURLManager extends xm.URLManager {
 
 		private _base:string = 'https://github.com/{owner}/{project}';

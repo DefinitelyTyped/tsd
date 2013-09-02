@@ -8,21 +8,24 @@
 ///<reference path="../data/DefIndex.ts" />
 ///<reference path="../data/DefInfoParser.ts" />
 ///<reference path="../data/DefInfo.ts" />
-
-///<reference path="../API.ts" />
 ///<reference path="../data/DefIndex.ts" />
+///<reference path="../API.ts" />
+
+///<reference path="Resolver.ts" />
 
 module tsd {
 
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
-	var assert = require('assert');
 	var path = require('path');
 	var pointer = require('jsonpointer.js');
 
 	var branch_tree:string = '/commit/commit/tree/sha';
 
+	var leadingExp = /^\.\.\//;
+
 	//TODO rename to DefSelection?
+	//TODO add useful methods to result (wrap some helpers from DefUtils)
 	export class APIResult {
 
 		error:string;
@@ -33,11 +36,12 @@ module tsd {
 		//files = new xm.KeyValueMap();
 
 		constructor(public index:DefIndex, public selector:Selector) {
+			xm.assertVar('index', index, DefIndex);
 			xm.assertVar('selector', selector, Selector);
 		}
 	}
 	/*
-	Core: operational core logic
+	 Core: operational core logics
 	 */
 	//TODO split over files? why bother?
 	export class Core {
@@ -46,11 +50,13 @@ module tsd {
 		gitAPI:git.GithubAPICached;
 		gitRaw:git.GithubRawCached;
 
-		//TODO make collection, keep collection of DefIndex's (map against branch ref)
 		index:tsd.DefIndex;
+		resolver:tsd.Resolver;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
+
+			this.resolver = new tsd.Resolver(this);
 
 			this.index = new tsd.DefIndex();
 
@@ -62,8 +68,7 @@ module tsd {
 			this.gitRaw.debug = this.context.verbose;
 		}
 
-		//TODO harden loader tasks against race conditions? hmm..
-		//TODO parameterise index selection
+		//TODO harden loader tasks against race conditions?
 		getIndex():Qpromise {
 			if (this.index.hasIndex()) {
 				return Q(this.index);
@@ -87,8 +92,7 @@ module tsd {
 				return this.index;
 			});
 		}
-		//TODO move select() to /select package
-		//TODO find better selection model (no god-method but iterative)
+
 		select(selector:Selector):Qpromise {
 			var result = new APIResult(this.index, selector);
 
@@ -99,29 +103,12 @@ module tsd {
 				result.selection = tsd.DefUtil.getHeads(result.nameMatches);
 				//result.definitions = result.nameMatches.slice(0);
 
-				var extra = [];
-				/*if (selector.requiresHistory) {
-					if (result.selection.length > 3) {
-						throw new Error('history selection requires single match, got ' + result.selection.length);
-					}
-					extra.push(this.loadHistoryBulk(tsd.DefUtil.getDefs(result.selection)));
+				//TODO apply some more filters in steps? or find better selection model (no god-method but iterative)
+				if (selector.resolveDependencies) {
+					return this.resolveDepencendiesBulk(result.selection);
 				}
+				return null;
 
-				if (selector.requiresSource) {
-					extra.push(this.loadContentBulk(result.selection));
-				}*/
-
-				return Q.all(extra).then(() => {
-					if (selector.resolveDependencies) {
-						return this.resolveDepencendiesBulk(result.selection);
-					}
-					return null;
-				}).then(() => {
-					if (selector.requiresSource) {
-						return this.loadContentBulk(result.selection);
-					}
-					return null;
-				});
 			}).thenResolve(result);
 		}
 
@@ -161,17 +148,8 @@ module tsd {
 			})).thenResolve(list);
 		}
 
-		resolveDepencendies(file:tsd.DefVersion):Qpromise {
-			///TODO tricky.. needs to manage simultaneous loading (race conditions)
-			return null;
-		}
-
 		resolveDepencendiesBulk(list:tsd.DefVersion[]):Qpromise {
-			//list = tsd.DefUtil.uniqueDefs(list);
-
-			return Q.all(list.map((file:DefVersion) => {
-				return this.resolveDepencendies(file);
-			})).thenResolve(list);
+			return this.resolver.resolve(list);
 		}
 
 		parseDefInfo(file:tsd.DefVersion):Qpromise {
