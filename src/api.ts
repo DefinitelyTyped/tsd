@@ -1,6 +1,6 @@
 ///<reference path="_ref.ts" />
 ///<reference path="tsd/_ref.ts" />
-///<reference path="tsd/api_ren.ts" />
+///<reference path="tsd/API.ts" />
 ///<reference path="tsd/CLI.ts" />
 
 (module).exports = {

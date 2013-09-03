@@ -1,5 +1,5 @@
 ///<reference path="Core.ts" />
-///<reference path="../api_ren.ts" />
+///<reference path="../API.ts" />
 ///<reference path="../data/DefUtil.ts" />
 ///<reference path="../data/Def.ts" />
 ///<reference path="../data/DefVersion.ts" />

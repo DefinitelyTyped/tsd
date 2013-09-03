@@ -12,7 +12,7 @@ module tsd {
 	var path = require('path');
 	var util = require('util');
 	var assert = require('assert');
-	var Q:QStatic = require('Q');
+	var Q:QStatic = require('q');
 	var tv4:TV4 = require('tv4').tv4;
 
 	//TODO mode this into more central spot, always-run?

@@ -559,7 +559,7 @@ var tsd;
     var path = require('path');
     var util = require('util');
     var assert = require('assert');
-    var Q = require('Q');
+    var Q = require('q');
     var tv4 = require('tv4').tv4;
     require('source-map-support').install();
     process.setMaxListeners(20);
