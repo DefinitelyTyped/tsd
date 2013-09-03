@@ -22,20 +22,20 @@ module tsd {
 	/*
 	 Context: bundles the configuration and core functionality
 	 */
+	//TODO also promisify using Q-io
 	export class Context {
 
 		paths:Paths;
 		config:Config;
 		packageInfo:xm.PackageJSON;
 
-		//drop this? (xm.log is pretty global already)
+		//TODO drop this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.log;
 
 		constructor(configPath:string = null, public verbose?:bool = false) {
 			xm.assertVar('configPath', configPath, 'string', true);
 
 			//TODO should not auto-create folders (add method).
-			//TODO also promisify using Q-io
 
 			this.packageInfo = xm.PackageJSON.getLocal();
 			this.paths = new Paths(this.packageInfo);
@@ -55,10 +55,11 @@ module tsd {
 
 		logInfo(details:bool = false):void {
 			this.log(this.packageInfo.getNameVersion());
-			this.log('repo: ' + this.config.repo + ' - #' + this.config.ref);
+			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
 			if (details) {
-				this.log.inspect(this.config, 'config');
 				this.log.inspect(this.paths, 'paths');
+				this.log.inspect(this.config, 'config');
+				this.log.inspect(this.config.getInstalled(), 'config');
 			}
 		}
 	}

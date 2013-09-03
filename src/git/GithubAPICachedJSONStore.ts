@@ -2,6 +2,7 @@
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/assertVar.ts" />
+///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
@@ -32,6 +33,8 @@ module git {
 			xm.assertVar('dir', dir, 'string');
 
 			this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		private init():Qpromise {

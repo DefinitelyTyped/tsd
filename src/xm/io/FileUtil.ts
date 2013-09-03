@@ -15,6 +15,9 @@ module xm {
 	var path = require('path');
 	var util = require('util');
 
+	/*
+	 FileUtil: do stuff with files
+	 */
 	// TODO refactor to functions (xm.fs)
 	export class FileUtil {
 

@@ -1,4 +1,5 @@
 ///<reference path="../_ref.ts" />
+///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/mkdirCheck.ts" />
@@ -32,6 +33,8 @@ module git {
 
 			this._repo = repo;
 			this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		//TODO cache promises while loading to harden against race conditions
@@ -104,7 +107,7 @@ module git {
 						}, (err) => {
 							this.stats.count('store-error');
 							//TODO whut2do?
-							xm.warn('could not write to store');
+							xm.log.warn('could not write to store');
 							//throw(err);
 							//still return data?
 							return content;

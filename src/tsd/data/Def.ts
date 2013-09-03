@@ -19,14 +19,19 @@ module tsd {
 		//used?
 		semver:string;
 
-		//the commit where we
-
+		//version from the DefIndex commit +tree (may be not our edit)
 		head:tsd.DefVersion;
+
+		//versions from commits that changed this file
 		history:tsd.DefVersion[] = [];
 
 		constructor(path:string) {
 			xm.assertVar('path', path, 'string');
 			this.path = path;
+		}
+
+		get pathTerm():string {
+			return this.path.replace(/\.d\.ts$/, '');
 		}
 
 		toString():string {

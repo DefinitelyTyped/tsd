@@ -24,6 +24,8 @@ module git {
 			subjectExp.lastIndex = 0;
 			var match = subjectExp.exec(this.text);
 			this.subject = (match && match.length > 1 ? match[1] : '');
+			this.body = '';
+			this.footer = '';
 			//TODO extract body and footer too
 		}
 

@@ -10,6 +10,7 @@
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 ///<reference path="../callAsync.ts" />
+///<reference path="../ObjectUtil.ts" />
 
 module xm {
 
@@ -67,6 +68,7 @@ module xm {
 	 */
 	//TODO better support for global options; not only .command but also a .global
 	//TODO add per-command sub-help like npm
+	//TODO add feature for printable placeholder sub-info (format etc)
 	export class Expose {
 
 		private _commands = new KeyValueMap();
@@ -91,6 +93,8 @@ module xm {
 				placeholder: null,
 				command: 'help'
 			});
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		defineOption(data:ExposeOption) {
@@ -112,6 +116,7 @@ module xm {
 				return;
 			}
 			this._isInit = true;
+
 			xm.eachProp(this._options.keys(), (id) => {
 				var option:ExposeOption = this._options.get(id);
 				if (option.short) {
@@ -140,7 +145,6 @@ module xm {
 			this.init();
 
 			this._nodeBin = argvRaw[0] === 'node';
-			console.log(this._nodeBin);
 
 			var argv = optimist.parse(argvRaw);
 			if (!argv || argv._.length === 0) {
@@ -156,7 +160,7 @@ module xm {
 			for (var i = 0, ii = this._commandOpts.length; i < ii; i++) {
 				var name = this._commandOpts[i];
 				if (argv[name]) {
-					console.log('command opt ' + name);
+					//xm.log('command opt ' + name);
 					this.execute(this._options.get(name).command, argv);
 					return;
 				}
@@ -171,11 +175,11 @@ module xm {
 
 			if (typeof use === 'undefined') {
 				if (alt && this._commands.has(alt)) {
-					console.log('undefined command, use default');
+					xm.log.warn('undefined command, using default');
 					this.execute(alt, argv);
 				}
 				else {
-					console.log('undefined command');
+					xm.log.warn('undefined command');
 					this.execute('help', argv);
 				}
 			}
@@ -184,7 +188,7 @@ module xm {
 				this.execute(use, argv);
 			}
 			else {
-				console.log('command not found: ' + use);
+				xm.log.warn('command not found: ' + use);
 				this.execute('help', argv, false);
 			}
 		}
@@ -193,11 +197,11 @@ module xm {
 			this.init();
 
 			if (!this._commands.has(id)) {
-				console.log('\nunknown command ' + id + '\n');
+				xm.log.error('\nunknown command ' + id + '\n');
 				return;
 			}
 			if (head) {
-				console.log('\n-> ' + id + '\n');
+				xm.log('\n-> ' + id + '\n');
 			}
 			var f:ExposeCommand = this._commands.get(id);
 			f.execute.call(f, args);
@@ -206,11 +210,11 @@ module xm {
 		//TODO clean ugly method (after fixing global options)
 		printCommands():void {
 			if (this.title) {
-				console.log(this.title + '\n');
+				xm.log(this.title + '\n');
 			}
 
 			if (this._commandOpts.length > 0) {
-				console.log('global options:\n');
+				xm.log('global options:\n');
 
 				var opts = [];
 				var maxTopOptionLen = 0;
@@ -227,12 +231,12 @@ module xm {
 					maxTopOptionLen = Math.max(tmp.length, maxTopOptionLen);
 				});
 				xm.eachProp(opts, (opt) => {
-					console.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
+					xm.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
 				});
-				console.log('');
+				xm.log('');
 			}
 
-			console.log('commands:\n');
+			xm.log('commands:\n');
 
 			var maxCommandLen = 0;
 			var maxOptionLen = 0;
@@ -270,10 +274,10 @@ module xm {
 			var padOpts = '    ';//repeat(' ', maxCommandLen + 2);
 
 			xm.eachProp(commands, (data) => {
-				console.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
+				xm.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
 
 				xm.eachProp(data.options, (opt:any) => {
-					console.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
+					xm.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
 				});
 			});
 		}

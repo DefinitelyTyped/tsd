@@ -3,30 +3,38 @@
 
 module xm {
 
-	var fs = require('fs');
-	var path = require('path');
 	var pkginfo = require('pkginfo');
 
+	/*
+	 PackageJSON: wrap a package.json
+	 */
+	//TODO add typed json-pointers? (low prio)
 	export class PackageJSON {
 
+		private _pkg:any;
 		private static _local:PackageJSON;
 
-		constructor(public pkg:any, public path?:string = null) {
-			if (!this.pkg) {
-				throw new Error('no pkg');
-			}
+		constructor(pkg:any, public path?:string = null) {
+			xm.assertVar('pkg', pkg, 'object');
+			this._pkg = pkg;
+
+			xm.ObjectUtil.hidePrefixed(this);
+		}
+
+		get raw():any {
+			return this._pkg;
 		}
 
 		get name():string {
-			return this.pkg.name || null;
+			return this._pkg.name || null;
 		}
 
 		get description():string {
-			return this.pkg.description || '';
+			return this._pkg.description || '';
 		}
 
 		get version():string {
-			return this.pkg.version || '0.0.0';
+			return this._pkg.version || '0.0.0';
 		}
 
 		getNameVersion():string {

@@ -33,6 +33,8 @@ module tsd {
 
 			this._def = def;
 			this._commit = commit;
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		get key():string {

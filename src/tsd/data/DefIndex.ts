@@ -1,5 +1,6 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../git/GithubJSON.ts" />
+///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="DefCommit.ts" />
 
 module tsd {
@@ -22,21 +23,29 @@ module tsd {
 		private _indexCommit:tsd.DefCommit;
 
 		//TODO add generics when moved to TS 0.9
-		private _definitions:xm.KeyValueMap = new xm.KeyValueMap();
-		private _commits:xm.KeyValueMap = new xm.KeyValueMap();
-		private _versions:xm.KeyValueMap = new xm.KeyValueMap();
+		private _definitions:xm.IKeyValueMap = new xm.KeyValueMap();
+		private _commits:xm.IKeyValueMap = new xm.KeyValueMap();
+		private _versions:xm.IKeyValueMap = new xm.KeyValueMap();
 
 		constructor() {
 
+			//hide from inspect()
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		hasIndex():bool {
 			return this._hasIndex;
 		}
 
-		// assumes recursive
-		//TODO consider more verification or decoupling of data (low prio)
+		/*
+		 init from branch (commit) and tree json, assumes recursive tree
+		 */
+		//TODO add more input data verification
+		//TODO consider decoupling of github api data (low prio)
 		init(branch:any, tree:any):void {
+			xm.assertVar('branch', branch, 'object');
+			xm.assertVar('tree', tree, 'object');
+
 			if (this._hasIndex) {
 				return;
 			}
@@ -86,11 +95,18 @@ module tsd {
 			this._hasIndex = true;
 		}
 
-		setHistory(def:tsd.Def, commits:any[]):void {
+		/*
+		 set the history of a single file from from json data
+		 */
+		setHistory(def:tsd.Def, commitJsonArray:any[]):void {
+			xm.assertVar('def', def, tsd.Def);
+			xm.assertVar('commits', commitJsonArray, 'array');
+
 			//force reset for robustness
 			def.history = [];
 
-			commits.map((json) => {
+			//TODO harden data validation
+			commitJsonArray.map((json) => {
 				if (!json || !json.sha) {
 					xm.log.inspect(json, 'weird: json no sha');
 				}
@@ -105,7 +121,12 @@ module tsd {
 			});
 		}
 
-		private procureCommit(commitSha:string):tsd.DefCommit {
+		/*
+		 get a DefCommit for a sha (enforces single instances)
+		 */
+		procureCommit(commitSha:string):tsd.DefCommit {
+			xm.assertVar('commitSha', commitSha, 'sha1');
+
 			var commit:tsd.DefCommit;
 			if (this._commits.has(commitSha)) {
 				commit = this._commits.get(commitSha);
@@ -117,7 +138,12 @@ module tsd {
 			return commit;
 		}
 
-		private procureDef(path:string):tsd.Def {
+		/*
+		 get a Def for a path (enforces single instances)
+		 */
+		procureDef(path:string):tsd.Def {
+			xm.assertVar('path', path, 'string');
+
 			var def:tsd.Def = null;
 
 			if (this._definitions.has(path)) {
@@ -125,21 +151,28 @@ module tsd {
 			}
 			else {
 				def = Def.getFrom(path);
-				if (def) {
-					this._definitions.set(path, def);
+				if (!def) {
+					throw new Error('cannot parse path to def: ' + path);
 				}
+				this._definitions.set(path, def);
 			}
 			return def;
 		}
 
-		private procureVersion(def:tsd.Def, commit:tsd.DefCommit):tsd.DefVersion {
+		/*
+		 get a DefVersion for a Def + DefCommit combination (enforces single instances)
+		 */
+		procureVersion(def:tsd.Def, commit:tsd.DefCommit):tsd.DefVersion {
+			xm.assertVar('def', def, tsd.Def);
+			xm.assertVar('commit', commit, tsd.DefCommit);
+
 			var file:tsd.DefVersion;
 
 			var key = def.path + '|' + commit.commitSha;
 
 			if (this._versions.has(key)) {
 				file = this._versions.get(key);
-				//needed? should not happen..
+				//NOTE: should not happen but keep robust
 				if (file.def !== def) {
 					throw new Error('weird: internal data mismatch: version does not belong to file: ' + file.def + ' -> ' + commit);
 				}
@@ -151,16 +184,46 @@ module tsd {
 			return file;
 		}
 
-		getFile(def:Def) {
-			this._definitions.get(def.path, null);
+		/*
+		 attempt to get a DefVersion (and its Def and DefCommit) for a path + commitSha combination (enforces single instances)
+		 */
+		procureVersionFromSha(path:string, commitSha:string):tsd.DefVersion {
+			xm.assertVar('path', path, 'string');
+			xm.assertVar('commitSha', commitSha, 'sha1');
+
+			var def:tsd.Def = this.getDef(path);
+			if (!def) {
+				xm.log.warn('path not in index, attempt-adding: ' + path);
+
+				//attempt creation
+				def = this.procureDef(path);
+			}
+			if (!def) {
+				throw new Error('cannot procure definition for path: ' + path);
+			}
+
+			var commit:tsd.DefCommit = this.procureCommit(commitSha);
+			if (!commit) {
+				throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
+			}
+			if (!commit.hasMetaData()) {
+				//TODO always load meta data? meh?
+			}
+			var file:tsd.DefVersion = this.procureVersion(def, commit);
+			if (!file) {
+				throw new Error('cannot procure definition version for path: ' + path + ' -> commit: ' + commit.commitSha);
+			}
+			// need to look it up
+
+			return file;
 		}
 
-		hasPath(path:string):bool {
-			return this._definitions.has(path);
-		}
-
-		getDefByPath(path:string):Def {
+		getDef(path:string):tsd.Def {
 			return this._definitions.get(path, null);
+		}
+
+		hasDef(path:string):bool {
+			return this._definitions.has(path);
 		}
 
 		getPaths():string[] {
@@ -189,8 +252,12 @@ module tsd {
 		}
 
 		get list():Def[] {
-			//need generics
+			//need generics :)
 			return <Def[]>this._definitions.values();
+		}
+
+		get indexCommit():tsd.DefCommit {
+			return this._indexCommit;
 		}
 
 		toString():string {

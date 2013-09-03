@@ -2,6 +2,7 @@
 ///<reference path="_ref.ts" />
 ///<reference path="GithubRepo.ts" />
 ///<reference path="../xm/assertVar.ts" />
+///<reference path="../xm/ObjectUtil />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/io/URLManager.ts" />
 
@@ -33,6 +34,8 @@ module git {
 			this.addTemplate('base', this._base);
 			this.addTemplate('raw', this._raw);
 			this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		public api():string {

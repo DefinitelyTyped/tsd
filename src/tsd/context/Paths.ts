@@ -10,6 +10,7 @@ module tsd {
 	var os = require('os');
 	var path = require('path');
 
+	//TODO clean this up, add Q-io (with Context refactoring)
 	export class Paths {
 
 		tmp:string;
@@ -43,13 +44,14 @@ module tsd {
 			return dir;
 		}
 
+		//TODO ditch this cargo-cult google-rip thing for proper version (and in Q-io)
 		static findTmpDir(info:xm.PackageJSON):string {
 			xm.assertVar('info', info, xm.PackageJSON);
 
 			var now = Date.now();
 			var candidateTmpDirs = [
 				process.env['TMPDIR'],
-				info.pkg.tmp,
+				info.raw.tmp,
 				os.tmpdir(),
 				path.resolve(process.cwd(), 'tmp')
 			];

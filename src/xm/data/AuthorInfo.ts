@@ -2,9 +2,12 @@ module xm {
 
 	var endSlashTrim = /\/?$/;
 
+	/*
+	 AuthorInfo: basic info
+	 */
 	export class AuthorInfo {
 
-		constructor(public name:string = '', public url:string = undefined, public email:string = undefined) {
+		constructor(public name:string = '', public url:string = null, public email:string = null) {
 			if (this.url) {
 				this.url = this.url.replace(endSlashTrim, '');
 			}

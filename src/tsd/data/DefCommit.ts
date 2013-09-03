@@ -17,6 +17,7 @@ module tsd {
 
 		private _commitSha:string;
 		private _treeSha:string;
+		private _hasMeta:bool = false;
 
 		message:git.GitCommitMessage = new git.GitCommitMessage();
 
@@ -32,6 +33,8 @@ module tsd {
 			xm.assertVar('commitSha', commitSha, 'string');
 
 			this._commitSha = commitSha;
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		parseJSON(commit:any):void {
@@ -50,14 +53,32 @@ module tsd {
 			this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
 
 			this.message.parse(commit.commit.message);
+			this._hasMeta = true;
+		}
+
+		hasMetaData():bool {
+			return this._hasMeta;
 		}
 
 		toString():string {
-			return this.commitShort;
+			return this._treeSha;
 		}
 
+		//TODO verify ths order is optimal
+		get changeDate():Date {
+			if (this.gitAuthor) {
+				return this.gitAuthor.date;
+			}
+			if (this.gitCommitter) {
+				return this.gitCommitter.date;
+			}
+			return null;
+		}
+
+		//human friendly
+		//TODO centralise sha1-shortening in a util?
 		get commitShort():string {
-			return this._commitSha.substr(0, 8);
+			return this._commitSha ? this._commitSha.substr(0, 8) : '<no sha>';
 		}
 
 		get commitSha():string {

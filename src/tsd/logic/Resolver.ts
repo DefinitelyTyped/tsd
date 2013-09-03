@@ -27,23 +27,21 @@ module tsd {
 			this.stats.log = this._core.context.verbose;
 		}
 
-		resolve(list:tsd.DefVersion[]):Qpromise {
+		resolveBulk(list:tsd.DefVersion[]):Qpromise {
 
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.solveOne(file);
+				return this.resolve(file);
 			})).thenResolve(list);
 		}
 
-		private solveOne(file:tsd.DefVersion):Qpromise {
+		resolve(file:tsd.DefVersion):Qpromise {
 			// easy bail
 			if (file.solved) {
 				this.stats.count('solved-early');
 				return Q(file);
 			}
-
-			xm.log('check ' + file.toString());
 
 			//handle race conditions
 			if (this._active.has(file.key)) {
@@ -74,7 +72,6 @@ module tsd {
 						refPath = file.def.project + '/' + refPath;
 					}
 					if (tsd.Def.isDefPath(refPath)) {
-						xm.log(refPath);
 						memo.push(refPath);
 					}
 					else {
@@ -83,11 +80,11 @@ module tsd {
 					return memo;
 				}, []);
 
-				//story to solve and colelct promises for unsolved references
+				//story to solve and collect promises for unsolved references
 				var queued = <Qpromise[]>refs.reduce((memo:any[], refPath) => {
-					if (this._core.index.hasPath(refPath)) {
+					if (this._core.index.hasDef(refPath)) {
 						//use .head (could use same commit but that would be version hell with interdependent definitions)
-						var dep:DefVersion = this._core.index.getDefByPath(refPath).head;
+						var dep:DefVersion = this._core.index.getDef(refPath).head;
 						file.dependencies.push(dep);
 						this.stats.count('dep-added');
 
@@ -97,7 +94,7 @@ module tsd {
 							//xm.log('recurse ' + dep.toString());
 
 							//lets go deeper
-							memo.push(this.solveOne(dep));
+							memo.push(this.resolve(dep));
 						}
 					}
 					else {
@@ -113,8 +110,6 @@ module tsd {
 				//remove solved promise
 				this._active.remove(file.key);
 				this.stats.count('active-remove');
-
-				xm.log('done ' + file.toString());
 
 				if (queued.length > 0) {
 					this.stats.count('subload-start');

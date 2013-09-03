@@ -268,35 +268,43 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
-    var fs = require('fs');
-    var path = require('path');
     var pkginfo = require('pkginfo');
     var PackageJSON = (function () {
         function PackageJSON(pkg, path) {
             if (typeof path === "undefined") { path = null; }
-            this.pkg = pkg;
             this.path = path;
-            if(!this.pkg) {
-                throw new Error('no pkg');
-            }
+            xm.assertVar('pkg', pkg, 'object');
+            this._pkg = pkg;
+            xm.ObjectUtil.defineProps(this, [
+                '_pkg'
+            ], {
+                enumerable: false
+            });
         }
+        Object.defineProperty(PackageJSON.prototype, "raw", {
+            get: function () {
+                return this._pkg;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(PackageJSON.prototype, "name", {
             get: function () {
-                return this.pkg.name || null;
+                return this._pkg.name || null;
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(PackageJSON.prototype, "description", {
             get: function () {
-                return this.pkg.description || '';
+                return this._pkg.description || '';
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(PackageJSON.prototype, "version", {
             get: function () {
-                return this.pkg.version || '0.0.0';
+                return this._pkg.version || '0.0.0';
             },
             enumerable: true,
             configurable: true
@@ -324,6 +332,32 @@ var xm;
     })();
     xm.PackageJSON = PackageJSON;    
 })(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var ObjectUtil = (function () {
+        function ObjectUtil() { }
+        ObjectUtil.defineProp = function defineProp(object, property, settings) {
+            Object.defineProperty(object, property, settings);
+        };
+        ObjectUtil.defineProps = function defineProps(object, propertyNames, settings) {
+            propertyNames.forEach(function (property) {
+                ObjectUtil.defineProp(object, property, settings);
+            });
+        };
+        ObjectUtil.hidePrefixed = function hidePrefixed(object, ownOnly) {
+            if (typeof ownOnly === "undefined") { ownOnly = true; }
+            for(var property in object) {
+                if(property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
+                    ObjectUtil.defineProp(object, property, {
+                        enumerable: false
+                    });
+                }
+            }
+        };
+        return ObjectUtil;
+    })();
+    xm.ObjectUtil = ObjectUtil;    
+})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     var fs = require('fs');
@@ -331,14 +365,35 @@ var tsd;
     var util = require('util');
     var assert = require('assert');
     var tv4 = require('tv4').tv4;
+    var InstalledDef = (function () {
+        function InstalledDef(path) {
+            this.path = path;
+        }
+        InstalledDef.prototype.update = function (source) {
+            xm.assertVar('file', source, tsd.DefVersion);
+            if(typeof source.content !== 'string' || source.content.length === 0) {
+                throw new Error('expected file to have .content: ' + source.def.path);
+            }
+            this.path = source.def.path;
+            this.commitSha = source.commit.commitSha;
+            this.contentHash = xm.md5(source.content);
+        };
+        InstalledDef.prototype.toString = function () {
+            return this.path;
+        };
+        return InstalledDef;
+    })();
+    tsd.InstalledDef = InstalledDef;    
     var Config = (function () {
         function Config(schema) {
-            this.schema = schema;
             this.typingsPath = 'typings';
             this.version = 'v4';
             this.repo = 'borisyankov/DefinitelyTyped';
             this.ref = 'master';
+            this._installed = new xm.KeyValueMap();
             xm.assertVar('schema', schema, 'object');
+            this._schema = schema;
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Object.defineProperty(Config.prototype, "repoOwner", {
             get: function () {
@@ -354,6 +409,40 @@ var tsd;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Config.prototype, "schema", {
+            get: function () {
+                return this._schema;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Config.prototype.addFile = function (file) {
+            xm.assertVar('file', file, tsd.DefVersion);
+            xm.log(file.toString());
+            var def;
+            if(this._installed.has(file.def.path)) {
+                def = this._installed.get(file.def.path);
+            } else {
+                def = new tsd.InstalledDef();
+            }
+            def.update(file);
+            this._installed.set(file.def.path, def);
+        };
+        Config.prototype.hasFile = function (path) {
+            xm.assertVar('path', path, 'string');
+            return this._installed.has(path);
+        };
+        Config.prototype.getFile = function (path) {
+            xm.assertVar('path', path, 'string');
+            return this._installed.get(path, null);
+        };
+        Config.prototype.removeFile = function (path) {
+            xm.assertVar('path', path, 'string');
+            this._installed.remove(path);
+        };
+        Config.prototype.getInstalled = function () {
+            return this._installed.values();
+        };
         Config.prototype.toJSON = function () {
             var json = {
                 typingsPath: this.typingsPath,
@@ -363,7 +452,39 @@ var tsd;
                 installed: {
                 }
             };
+            this._installed.values().forEach(function (file) {
+                json.installed[file.path] = {
+                    commit: file.commitSha,
+                    hash: file.contentHash
+                };
+            });
             return json;
+        };
+        Config.prototype.parseJSON = function (json) {
+            var _this = this;
+            xm.assertVar('json', json, 'object');
+            var res = tv4.validateResult(json, this._schema);
+            if(!res.valid || res.missing.length > 0) {
+                xm.log(res.error.message);
+                if(res.error.dataPath) {
+                    xm.log(res.error.dataPath);
+                }
+                if(res.error.schemaPath) {
+                    xm.log(res.error.schemaPath);
+                }
+                throw (new Error('malformed config: doesn\'t comply with schema'));
+            }
+            this.typingsPath = json.typingsPath;
+            this.version = json.version;
+            this.repo = json.repo;
+            this.ref = json.ref;
+            this._installed.clear();
+            xm.eachProp(json.installed, function (data, path) {
+                var installed = new tsd.InstalledDef(path);
+                installed.commitSha = data.commit;
+                installed.contentHash = data.hash;
+                _this._installed.set(path, installed);
+            });
         };
         Config.getLocal = function getLocal(schema, file) {
             xm.assertVar('schema', schema, 'object');
@@ -376,21 +497,7 @@ var tsd;
                     throw (new Error('config path exists but is a directory: ' + file));
                 }
                 json = xm.FileUtil.readJSONSync(file);
-                var res = tv4.validateResult(json, schema);
-                if(!res.valid || res.missing.length > 0) {
-                    console.log(res.error.message);
-                    if(res.error.dataPath) {
-                        console.log(res.error.dataPath);
-                    }
-                    if(res.error.schemaPath) {
-                        console.log(res.error.schemaPath);
-                    }
-                    throw (new Error('malformed config: doesn\'t comply with schema'));
-                }
-                cfg.typingsPath = json.typingsPath;
-                cfg.version = json.version;
-                cfg.repo = json.repo;
-                cfg.ref = json.ref;
+                cfg.parseJSON(json);
             }
             return cfg;
         };
@@ -427,7 +534,7 @@ var tsd;
             var now = Date.now();
             var candidateTmpDirs = [
                 process.env['TMPDIR'], 
-                info.pkg.tmp, 
+                info.raw.tmp, 
                 os.tmpdir(), 
                 path.resolve(process.cwd(), 'tmp')
             ];
@@ -480,10 +587,11 @@ var tsd;
         Context.prototype.logInfo = function (details) {
             if (typeof details === "undefined") { details = false; }
             this.log(this.packageInfo.getNameVersion());
-            this.log('repo: ' + this.config.repo + ' - #' + this.config.ref);
+            this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
             if(details) {
-                this.log.inspect(this.config, 'config');
                 this.log.inspect(this.paths, 'paths');
+                this.log.inspect(this.config, 'config');
+                this.log.inspect(this.config.getInstalled(), 'config');
             }
         };
         return Context;
@@ -501,6 +609,7 @@ var xm;
             if(data) {
                 this.import(data);
             }
+            xm.ObjectUtil.hidePrefixed(this);
         }
         KeyValueMap.prototype.has = function (key) {
             if(typeof key === 'undefined') {
@@ -643,11 +752,42 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    function isArray(value) {
+        return Array.isArray(value);
+    }
+    function isObject(value) {
+        return typeof value === 'object' && value && !isArray(value);
+    }
+    function isNumber(value) {
+        return typeof value === 'number' && !isNaN(value);
+    }
+    function isSha(value) {
+        if(typeof value !== 'string') {
+            return false;
+        }
+        return /^[0-9a-f]{40}$/.test(value);
+    }
+    function isMd5(value) {
+        if(typeof value !== 'string') {
+            return false;
+        }
+        return /^[0-9a-f]{32}$/.test(value);
+    }
+    var typeAssert = {
+        sha1: isSha,
+        md5: isMd5,
+        object: isObject,
+        array: isArray,
+        number: isNumber
+    };
     function assertVar(label, value, type, opt) {
         if (typeof opt === "undefined") { opt = false; }
+        if(arguments.length < 3) {
+            throw (new Error('assertVar() expected at least 3 arguments but got "' + value + '"'));
+        }
         var valueType = typeof value;
         var typeKind = typeof type;
-        if(!value && (valueType === 'undefined' || valueType === 'object')) {
+        if(valueType === 'undefined' || (!value && valueType === 'object')) {
             if(!opt) {
                 throw (new Error('expected "' + label + '" to be defined but got "' + value + '"'));
             }
@@ -656,7 +796,12 @@ var xm;
                 throw (new Error('expected "' + label + '" to be instanceof "' + type + '" but got "' + value.constructor + '": ' + value));
             }
         } else if(typeKind === 'string') {
-            if(valueType !== type) {
+            if(typeAssert.hasOwnProperty(type)) {
+                var check = typeAssert[type];
+                if(!check(value)) {
+                    throw (new Error('expected "' + label + '" to be a "' + type + '" but got "' + valueType + '": ' + value));
+                }
+            } else if(valueType !== type) {
                 throw (new Error('expected "' + label + '" to be typeof "' + type + '" but got "' + valueType + '": ' + value));
             }
         } else {
@@ -667,14 +812,13 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    var crypto = require('crypto');
     var _ = require('underscore');
     function md5(data) {
-        var crypto = require('crypto');
         return crypto.createHash('md5').update(data).digest('hex');
     }
     xm.md5 = md5;
     function sha1(data) {
-        var crypto = require('crypto');
         return crypto.createHash('sha1').update(data).digest('hex');
     }
     xm.sha1 = sha1;
@@ -801,6 +945,7 @@ var git;
             xm.assertVar('api', api, git.GithubAPICached);
             xm.assertVar('dir', dir, 'string');
             this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
+            xm.ObjectUtil.hidePrefixed(this);
         }
         GithubAPICachedJSONStore.prototype.init = function () {
             var _this = this;
@@ -928,6 +1073,7 @@ var git;
             this.addTemplate('base', this._base);
             this.addTemplate('raw', this._raw);
             this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
+            xm.ObjectUtil.hidePrefixed(this);
         }
         GithubURLManager.prototype.api = function () {
             return this.getURL('api');
@@ -992,6 +1138,7 @@ var git;
             });
             this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
             this.rate = new GitRateLimitInfo();
+            xm.ObjectUtil.hidePrefixed(this);
         }
         GithubAPICached.prototype.getRepoParams = function (vars) {
             return _.defaults(vars, {
@@ -1189,6 +1336,7 @@ var git;
             xm.assertVar('storeFolder', storeFolder, 'string');
             this._repo = repo;
             this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
+            xm.ObjectUtil.hidePrefixed(this);
         }
         GithubRawCached.prototype.getFile = function (commitSha, filePath) {
             var _this = this;
@@ -1240,9 +1388,11 @@ var git;
                             return content;
                         }, function (err) {
                             _this.stats.count('store-error');
+                            xm.log.warn('could not write to store');
                             return content;
-                        }).then(function () {
+                        }).then(function (content) {
                             _this._active.remove(key);
+                            return content;
                         });
                     });
                 }
@@ -1267,7 +1417,7 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
-    var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+    var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
     var leadingExp = /^\.\.\//;
     var DefUtil = (function () {
         function DefUtil() { }
@@ -1320,11 +1470,11 @@ for(var i = 0, ii = list.length; i < ii; i++) {
         DefUtil.extractReferenceTags = function extractReferenceTags(source) {
             var ret = [];
             var match;
-            if(!referenceTag.global) {
-                throw new Error('referenceTag RegExp must have global flag');
+            if(!referenceTagExp.global) {
+                throw new Error('referenceTagExp RegExp must have global flag');
             }
-            referenceTag.lastIndex = 0;
-            while((match = referenceTag.exec(source))) {
+            referenceTagExp.lastIndex = 0;
+            while((match = referenceTagExp.exec(source))) {
                 if(match.length > 0 && match[1].length > 0) {
                     ret.push(match[1]);
                 }
@@ -1368,6 +1518,54 @@ for(var i = 0, ii = list.length; i < ii; i++) {
             }
             return ret;
         };
+        DefUtil.matchCommit = function matchCommit(list, commitSha) {
+            var ret = [];
+            for(var i = 0, ii = list.length; i < ii; i++) {
+                var file = list[i];
+                if(file.commit && file.commit.commitSha === commitSha) {
+                    ret.push(file);
+                }
+            }
+            return ret;
+        };
+        DefUtil.haveContent = function haveContent(list) {
+            var ret = [];
+            for(var i = 0, ii = list.length; i < ii; i++) {
+                var file = list[i];
+                if(typeof file.content === 'string' && file.content.length > 0) {
+                    ret.push(file);
+                }
+            }
+            return ret;
+        };
+        DefUtil.fileCompare = function fileCompare(aa, bb) {
+            if(!bb) {
+                return 1;
+            }
+            if(!aa) {
+                return -1;
+            }
+            if(aa.def.path < bb.def.path) {
+                return -1;
+            } else if(aa.def.path > bb.def.path) {
+                return -1;
+            }
+            return -1;
+        };
+        DefUtil.defCompare = function defCompare(aa, bb) {
+            if(!bb) {
+                return 1;
+            }
+            if(!aa) {
+                return -1;
+            }
+            if(aa.path < bb.path) {
+                return -1;
+            } else if(aa.path > bb.path) {
+                return -1;
+            }
+            return -1;
+        };
         return DefUtil;
     })();
     tsd.DefUtil = DefUtil;    
@@ -1381,6 +1579,13 @@ var tsd;
             xm.assertVar('path', path, 'string');
             this.path = path;
         }
+        Object.defineProperty(Def.prototype, "pathTerm", {
+            get: function () {
+                return this.path.replace(/\.d\.ts$/, '');
+            },
+            enumerable: true,
+            configurable: true
+        });
         Def.prototype.toString = function () {
             return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
         };
@@ -1470,6 +1675,7 @@ var tsd;
             xm.assertVar('commit', commit, tsd.DefCommit);
             this._def = def;
             this._commit = commit;
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Object.defineProperty(DefVersion.prototype, "key", {
             get: function () {
@@ -1558,6 +1764,8 @@ var git;
             subjectExp.lastIndex = 0;
             var match = subjectExp.exec(this.text);
             this.subject = (match && match.length > 1 ? match[1] : '');
+            this.body = '';
+            this.footer = '';
         };
         GitCommitMessage.prototype.toString = function () {
             return (typeof this.subject === 'string' ? this.subject : '<no subject>');
@@ -1572,9 +1780,11 @@ var tsd;
     var branch_tree_sha = '/commit/commit/tree/sha';
     var DefCommit = (function () {
         function DefCommit(commitSha) {
+            this._hasMeta = false;
             this.message = new git.GitCommitMessage();
             xm.assertVar('commitSha', commitSha, 'string');
             this._commitSha = commitSha;
+            xm.ObjectUtil.hidePrefixed(this);
         }
         DefCommit.prototype.parseJSON = function (commit) {
             xm.assertVar('commit', commit, 'object');
@@ -1587,13 +1797,30 @@ var tsd;
             this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
             this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
             this.message.parse(commit.commit.message);
+            this._hasMeta = true;
+        };
+        DefCommit.prototype.hasMetaData = function () {
+            return this._hasMeta;
         };
         DefCommit.prototype.toString = function () {
-            return this.commitShort;
+            return this._treeSha;
         };
+        Object.defineProperty(DefCommit.prototype, "changeDate", {
+            get: function () {
+                if(this.gitAuthor) {
+                    return this.gitAuthor.date;
+                }
+                if(this.gitCommitter) {
+                    return this.gitCommitter.date;
+                }
+                return null;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(DefCommit.prototype, "commitShort", {
             get: function () {
-                return this._commitSha.substr(0, 8);
+                return this._commitSha ? this._commitSha.substr(0, 8) : '<no sha>';
             },
             enumerable: true,
             configurable: true
@@ -1620,12 +1847,15 @@ var tsd;
             this._definitions = new xm.KeyValueMap();
             this._commits = new xm.KeyValueMap();
             this._versions = new xm.KeyValueMap();
+            xm.ObjectUtil.hidePrefixed(this);
         }
         DefIndex.prototype.hasIndex = function () {
             return this._hasIndex;
         };
         DefIndex.prototype.init = function (branch, tree) {
             var _this = this;
+            xm.assertVar('branch', branch, 'object');
+            xm.assertVar('tree', tree, 'object');
             if(this._hasIndex) {
                 return;
             }
@@ -1664,10 +1894,12 @@ var tsd;
             });
             this._hasIndex = true;
         };
-        DefIndex.prototype.setHistory = function (def, commits) {
+        DefIndex.prototype.setHistory = function (def, commitJsonArray) {
             var _this = this;
+            xm.assertVar('def', def, tsd.Def);
+            xm.assertVar('commits', commitJsonArray, 'array');
             def.history = [];
-            commits.map(function (json) {
+            commitJsonArray.map(function (json) {
                 if(!json || !json.sha) {
                     xm.log.inspect(json, 'weird: json no sha');
                 }
@@ -1681,6 +1913,7 @@ var tsd;
             });
         };
         DefIndex.prototype.procureCommit = function (commitSha) {
+            xm.assertVar('commitSha', commitSha, 'sha1');
             var commit;
             if(this._commits.has(commitSha)) {
                 commit = this._commits.get(commitSha);
@@ -1691,18 +1924,22 @@ var tsd;
             return commit;
         };
         DefIndex.prototype.procureDef = function (path) {
+            xm.assertVar('path', path, 'string');
             var def = null;
             if(this._definitions.has(path)) {
                 def = this._definitions.get(path);
             } else {
                 def = tsd.Def.getFrom(path);
-                if(def) {
-                    this._definitions.set(path, def);
+                if(!def) {
+                    throw new Error('cannot parse path to def: ' + path);
                 }
+                this._definitions.set(path, def);
             }
             return def;
         };
         DefIndex.prototype.procureVersion = function (def, commit) {
+            xm.assertVar('def', def, tsd.Def);
+            xm.assertVar('commit', commit, tsd.DefCommit);
             var file;
             var key = def.path + '|' + commit.commitSha;
             if(this._versions.has(key)) {
@@ -1716,14 +1953,34 @@ var tsd;
             }
             return file;
         };
-        DefIndex.prototype.getFile = function (def) {
-            this._definitions.get(def.path, null);
+        DefIndex.prototype.procureVersionFromSha = function (path, commitSha) {
+            xm.assertVar('path', path, 'string');
+            xm.assertVar('commitSha', commitSha, 'sha1');
+            var def = this.getDef(path);
+            if(!def) {
+                xm.log.warn('path not in index, attempt-adding: ' + path);
+                def = this.procureDef(path);
+            }
+            if(!def) {
+                throw new Error('cannot procure definition for path: ' + path);
+            }
+            var commit = this.procureCommit(commitSha);
+            if(!commit) {
+                throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
+            }
+            if(!commit.hasMetaData()) {
+            }
+            var file = this.procureVersion(def, commit);
+            if(!file) {
+                throw new Error('cannot procure definition version for path: ' + path + ' -> commit: ' + commit.commitSha);
+            }
+            return file;
         };
-        DefIndex.prototype.hasPath = function (path) {
-            return this._definitions.has(path);
-        };
-        DefIndex.prototype.getDefByPath = function (path) {
+        DefIndex.prototype.getDef = function (path) {
             return this._definitions.get(path, null);
+        };
+        DefIndex.prototype.hasDef = function (path) {
+            return this._definitions.has(path);
         };
         DefIndex.prototype.getPaths = function () {
             return this._definitions.values().map(function (file) {
@@ -1749,6 +2006,13 @@ var tsd;
         Object.defineProperty(DefIndex.prototype, "list", {
             get: function () {
                 return this._definitions.values();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DefIndex.prototype, "indexCommit", {
+            get: function () {
+                return this._indexCommit;
             },
             enumerable: true,
             configurable: true
@@ -2082,8 +2346,8 @@ var xm;
     var AuthorInfo = (function () {
         function AuthorInfo(name, url, email) {
             if (typeof name === "undefined") { name = ''; }
-            if (typeof url === "undefined") { url = undefined; }
-            if (typeof email === "undefined") { email = undefined; }
+            if (typeof url === "undefined") { url = null; }
+            if (typeof email === "undefined") { email = null; }
             this.name = name;
             this.url = url;
             this.email = email;
@@ -2253,20 +2517,19 @@ var tsd;
             this._core = core;
             this.stats.log = this._core.context.verbose;
         }
-        Resolver.prototype.resolve = function (list) {
+        Resolver.prototype.resolveBulk = function (list) {
             var _this = this;
             list = tsd.DefUtil.uniqueDefVersion(list);
             return Q.all(list.map(function (file) {
-                return _this.solveOne(file);
+                return _this.resolve(file);
             })).thenResolve(list);
         };
-        Resolver.prototype.solveOne = function (file) {
+        Resolver.prototype.resolve = function (file) {
             var _this = this;
             if(file.solved) {
                 this.stats.count('solved-early');
                 return Q(file);
             }
-            xm.log('check ' + file.toString());
             if(this._active.has(file.key)) {
                 this.stats.count('active-has');
                 return this._active.get(file.key);
@@ -2283,7 +2546,6 @@ var tsd;
                         refPath = file.def.project + '/' + refPath;
                     }
                     if(tsd.Def.isDefPath(refPath)) {
-                        xm.log(refPath);
                         memo.push(refPath);
                     } else {
                         xm.log.warn('not a reference: ' + refPath);
@@ -2291,13 +2553,13 @@ var tsd;
                     return memo;
                 }, []);
                 var queued = refs.reduce(function (memo, refPath) {
-                    if(_this._core.index.hasPath(refPath)) {
-                        var dep = _this._core.index.getDefByPath(refPath).head;
+                    if(_this._core.index.hasDef(refPath)) {
+                        var dep = _this._core.index.getDef(refPath).head;
                         file.dependencies.push(dep);
                         _this.stats.count('dep-added');
                         if(!dep.solved && !_this._active.has(dep.key)) {
                             _this.stats.count('dep-recurse');
-                            memo.push(_this.solveOne(dep));
+                            memo.push(_this.resolve(dep));
                         }
                     } else {
                         xm.log.warn('path reference not in index: ' + refPath);
@@ -2307,7 +2569,6 @@ var tsd;
                 file.solved = true;
                 _this._active.remove(file.key);
                 _this.stats.count('active-remove');
-                xm.log('done ' + file.toString());
                 if(queued.length > 0) {
                     _this.stats.count('subload-start');
                     return Q.all(queued);
@@ -2330,16 +2591,6 @@ var tsd;
     var pointer = require('jsonpointer.js');
     var branch_tree = '/commit/commit/tree/sha';
     var leadingExp = /^\.\.\//;
-    var APIResult = (function () {
-        function APIResult(index, selector) {
-            this.index = index;
-            this.selector = selector;
-            xm.assertVar('index', index, tsd.DefIndex);
-            xm.assertVar('selector', selector, tsd.Selector);
-        }
-        return APIResult;
-    })();
-    tsd.APIResult = APIResult;    
     var Core = (function () {
         function Core(context) {
             this.context = context;
@@ -2372,8 +2623,8 @@ var tsd;
         };
         Core.prototype.select = function (selector) {
             var _this = this;
-            var result = new APIResult(this.index, selector);
-            return this.getIndex().then(function (index) {
+            var result = new tsd.APIResult(this.index, selector);
+            return this.getIndex().then(function () {
                 result.nameMatches = selector.pattern.filter(_this.index.list);
                 result.selection = tsd.DefUtil.getHeads(result.nameMatches);
                 if(selector.resolveDependencies) {
@@ -2381,6 +2632,90 @@ var tsd;
                 }
                 return null;
             }).thenResolve(result);
+        };
+        Core.prototype.procureDef = function (path) {
+            var _this = this;
+            return this.getIndex().then(function () {
+                var def = _this.index.procureDef(path);
+                if(!def) {
+                    return Q.reject(new Error('cannot get def for path: ' + path));
+                }
+                return Q(def);
+            });
+        };
+        Core.prototype.procureFile = function (path, commitSha) {
+            var _this = this;
+            return this.getIndex().then(function () {
+                var file = _this.index.procureVersionFromSha(path, commitSha);
+                if(!file) {
+                    return Q.reject(new Error('cannot get file for path: ' + path));
+                }
+                return Q(file);
+            });
+        };
+        Core.prototype.procureCommit = function (commitSha) {
+            var _this = this;
+            return this.getIndex().then(function () {
+                var commit = _this.index.procureCommit(commitSha);
+                if(!commit) {
+                    return Q.reject(new Error('cannot commit def for commitSha: ' + path));
+                }
+                return Q(commit);
+            });
+        };
+        Core.prototype.findFile = function (path, commitShaFragment) {
+            return Q.reject('implement me!');
+        };
+        Core.prototype.installFile = function (file, addToConfig) {
+            if (typeof addToConfig === "undefined") { addToConfig = true; }
+            var _this = this;
+            return this.useFile(file).then(function (targetPath) {
+                if(_this.context.config.hasFile(file.def.path)) {
+                    _this.context.config.getFile(file.def.path).update(file);
+                } else if(addToConfig) {
+                    _this.context.config.addFile(file);
+                }
+                return targetPath;
+            });
+        };
+        Core.prototype.installFileBulk = function (list, addToConfig) {
+            if (typeof addToConfig === "undefined") { addToConfig = true; }
+            var _this = this;
+            var written = new xm.KeyValueMap();
+            return Q.all(list.map(function (file) {
+                return _this.installFile(file, addToConfig).then(function (targetPath) {
+                    written.set(targetPath, file);
+                });
+            })).thenResolve(written);
+        };
+        Core.prototype.saveConfig = function () {
+            var _this = this;
+            var json = JSON.stringify(this.context.config.toJSON(), null, 2);
+            return FS.write(this.context.paths.config, json).then(function () {
+                xm.log('config written to: ' + _this.context.paths.config);
+                return _this.context.paths.config;
+            });
+        };
+        Core.prototype.reinstallBulk = function (list) {
+            var _this = this;
+            var written = new xm.KeyValueMap();
+            return Q.all(list.map(function (installed) {
+                return _this.procureFile(installed.path, installed.commitSha).then(function (file) {
+                    return _this.installFile(file, true).then(function (targetPath) {
+                        written.set(targetPath, file);
+                        return file;
+                    });
+                });
+            })).thenResolve(written);
+        };
+        Core.prototype.loadCommitMetaData = function (commit) {
+            if(commit.hasMetaData()) {
+                return Q(commit);
+            }
+            return this.gitAPI.getCommit(commit.commitSha).then(function (json) {
+                commit.parseJSON(json);
+                return commit;
+            });
         };
         Core.prototype.loadContent = function (file) {
             if(file.content) {
@@ -2414,8 +2749,11 @@ var tsd;
                 return _this.loadHistory(file);
             })).thenResolve(list);
         };
+        Core.prototype.resolveDepencendies = function (file) {
+            return this.resolver.resolve(file);
+        };
         Core.prototype.resolveDepencendiesBulk = function (list) {
-            return this.resolver.resolve(list);
+            return this.resolver.resolveBulk(list);
         };
         Core.prototype.parseDefInfo = function (file) {
             var _this = this;
@@ -2440,37 +2778,44 @@ var tsd;
                 return _this.parseDefInfo(file);
             })).thenResolve(list);
         };
-        Core.prototype.writeFile = function (file) {
+        Core.prototype.useFile = function (file, overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
-            var target = path.resolve(this.context.paths.typings, file.def.path);
-            var dir = path.dirname(target);
-            return xm.mkdirCheckQ(dir).then(function () {
+            var targetPath = path.resolve(this.context.paths.typings, file.def.path);
+            var dir = path.dirname(targetPath);
+            return FS.exists(targetPath).then(function (exists) {
+                if(exists && !overwrite) {
+                    return null;
+                }
+                return xm.mkdirCheckQ(dir);
+            }).then(function () {
                 if(file.content) {
                     return file.content;
                 }
                 return _this.loadContent(file);
             }).then(function () {
-                return FS.exists(target);
+                return FS.exists(targetPath);
             }).then(function (exists) {
                 if(exists) {
-                    return FS.remove(target);
+                    return FS.remove(targetPath);
                 }
                 return null;
             }).then(function () {
-                return FS.write(target, file.content);
+                return FS.write(targetPath, file.content);
             }).then(function () {
-                return target;
+                return targetPath;
             });
         };
-        Core.prototype.writeFileBulk = function (list) {
+        Core.prototype.useFileBulk = function (list, overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
             list = tsd.DefUtil.uniqueDefVersion(list);
+            var written = new xm.KeyValueMap();
             return Q.all(list.map(function (file) {
-                return _this.writeFile(file);
-            }));
-        };
-        Core.prototype.saveToConfigBulk = function (list) {
-            return Q.reject(new Error('not yet implemented'));
+                return _this.useFile(file, overwrite).then(function (targetPath) {
+                    written.set(targetPath, file);
+                });
+            })).thenResolve(written);
         };
         return Core;
     })();
@@ -2635,43 +2980,77 @@ var tsd;
     var util = require('util');
     var Q = require('Q');
     var FS = require('Q-io/fs');
+    var APIResult = (function () {
+        function APIResult(index, selector) {
+            if (typeof selector === "undefined") { selector = null; }
+            this.index = index;
+            this.selector = selector;
+            this.written = new xm.KeyValueMap();
+            xm.assertVar('index', index, tsd.DefIndex);
+            xm.assertVar('selector', selector, tsd.Selector, true);
+        }
+        return APIResult;
+    })();
+    tsd.APIResult = APIResult;    
     var API = (function () {
         function API(context) {
             this.context = context;
-            if(!context) {
-                throw new Error('no context');
-            }
+            xm.assertVar('context', context, tsd.Context);
             this._core = new tsd.Core(this.context);
         }
         API.prototype.search = function (selector) {
+            xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector);
         };
         API.prototype.install = function (selector) {
             var _this = this;
+            xm.assertVar('selector', selector, tsd.Selector);
             selector.resolveDependencies = true;
             return this._core.select(selector).then(function (res) {
                 var files = res.selection;
-                return _this._core.writeFileBulk(files).then(function (paths) {
-                    res.written = paths;
-                    if(selector.resolveDependencies) {
-                        var deps = tsd.DefUtil.extractDependencies(files);
-                        if(deps.length > 0) {
-                            xm.log('deps:' + deps.join('\n'));
-                            return _this._core.writeFileBulk(deps);
-                        }
+                files = tsd.DefUtil.mergeDependencies(files);
+                return _this._core.installFileBulk(files).then(function (written) {
+                    if(!written) {
+                        throw new Error('expected install paths');
                     }
-                    return null;
+                    res.written = written;
+                    return _this._core.saveConfig();
                 }).thenResolve(res);
             });
         };
+        API.prototype.directInstall = function (path, commitSha) {
+            var _this = this;
+            xm.assertVar('path', path, 'string');
+            xm.assertVar('commitSha', commitSha, 'sha1');
+            var res = new tsd.APIResult(this._core.index, null);
+            return this._core.procureFile(path, commitSha).then(function (file) {
+                return _this._core.installFile(file).then(function (targetPath) {
+                    res.written.set(targetPath, file);
+                    return null;
+                });
+            }).thenResolve(res);
+        };
+        API.prototype.installFragment = function (path, commitShaFragment) {
+            var _this = this;
+            xm.assertVar('path', path, 'string');
+            var res = new tsd.APIResult(this._core.index, null);
+            return this._core.findFile(path, commitShaFragment).then(function (file) {
+                return _this._core.installFile(file).then(function (targetPath) {
+                    res.written.set(targetPath, file);
+                    return res;
+                });
+            }).thenResolve(res);
+        };
         API.prototype.info = function (selector) {
             var _this = this;
+            xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector).then(function (res) {
                 return _this._core.parseDefInfoBulk(res.selection).thenResolve(res);
             });
         };
         API.prototype.history = function (selector) {
             var _this = this;
+            xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector).then(function (res) {
                 res.definitions = tsd.DefUtil.uniqueDefs(tsd.DefUtil.getDefs(res.selection));
                 return _this._core.loadHistoryBulk(res.definitions).thenResolve(res);
@@ -2679,14 +3058,24 @@ var tsd;
         };
         API.prototype.deps = function (selector) {
             var _this = this;
+            xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector).then(function (res) {
                 return _this._core.resolveDepencendiesBulk(res.selection).thenResolve(res);
             });
         };
+        API.prototype.reinstall = function () {
+            var res = new tsd.APIResult(this._core.index, null);
+            return this._core.reinstallBulk(this.context.config.getInstalled()).then(function (map) {
+                res.written = map;
+                return res;
+            }).thenResolve(res);
+        };
         API.prototype.compare = function (selector) {
+            xm.assertVar('selector', selector, tsd.Selector);
             return Q.reject(new Error('not implemented yet'));
         };
         API.prototype.update = function (selector) {
+            xm.assertVar('selector', selector, tsd.Selector);
             return Q.reject(new Error('not implemented yet'));
         };
         API.prototype.purge = function () {
@@ -2793,6 +3182,7 @@ var xm;
                 placeholder: null,
                 command: 'help'
             });
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Expose.prototype.defineOption = function (data) {
             if(this._options.has(data.name)) {
@@ -2836,7 +3226,6 @@ var xm;
         Expose.prototype.executeArgv = function (argvRaw, alt) {
             this.init();
             this._nodeBin = argvRaw[0] === 'node';
-            console.log(this._nodeBin);
             var argv = optimist.parse(argvRaw);
             if(!argv || argv._.length === 0) {
                 if(alt && this._commands.has(alt)) {
@@ -2849,7 +3238,6 @@ var xm;
             for(var i = 0, ii = this._commandOpts.length; i < ii; i++) {
                 var name = this._commandOpts[i];
                 if(argv[name]) {
-                    console.log('command opt ' + name);
                     this.execute(this._options.get(name).command, argv);
                     return;
                 }
@@ -2861,16 +3249,16 @@ var xm;
             use = argv._.shift();
             if(typeof use === 'undefined') {
                 if(alt && this._commands.has(alt)) {
-                    console.log('undefined command, use default');
+                    xm.log.warn('undefined command, using default');
                     this.execute(alt, argv);
                 } else {
-                    console.log('undefined command');
+                    xm.log.warn('undefined command');
                     this.execute('help', argv);
                 }
             } else if(this._commands.has(use)) {
                 this.execute(use, argv);
             } else {
-                console.log('command not found: ' + use);
+                xm.log.warn('command not found: ' + use);
                 this.execute('help', argv, false);
             }
         };
@@ -2879,11 +3267,11 @@ var xm;
             if (typeof head === "undefined") { head = false; }
             this.init();
             if(!this._commands.has(id)) {
-                console.log('\nunknown command ' + id + '\n');
+                xm.log.error('\nunknown command ' + id + '\n');
                 return;
             }
             if(head) {
-                console.log('\n-> ' + id + '\n');
+                xm.log('\n-> ' + id + '\n');
             }
             var f = this._commands.get(id);
             f.execute.call(f, args);
@@ -2891,10 +3279,10 @@ var xm;
         Expose.prototype.printCommands = function () {
             var _this = this;
             if(this.title) {
-                console.log(this.title + '\n');
+                xm.log(this.title + '\n');
             }
             if(this._commandOpts.length > 0) {
-                console.log('global options:\n');
+                xm.log('global options:\n');
                 var opts = [];
                 var maxTopOptionLen = 0;
                 xm.eachProp(this._commandOpts.sort(), function (name) {
@@ -2909,11 +3297,11 @@ var xm;
                     maxTopOptionLen = Math.max(tmp.length, maxTopOptionLen);
                 });
                 xm.eachProp(opts, function (opt) {
-                    console.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
+                    xm.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
                 });
-                console.log('');
+                xm.log('');
             }
-            console.log('commands:\n');
+            xm.log('commands:\n');
             var maxCommandLen = 0;
             var maxOptionLen = 0;
             var commands = [];
@@ -2942,9 +3330,9 @@ var xm;
             });
             var padOpts = '    ';
             xm.eachProp(commands, function (data) {
-                console.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
+                xm.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
                 xm.eachProp(data.options, function (opt) {
-                    console.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
+                    xm.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
                 });
             });
         };
@@ -3007,20 +3395,27 @@ var tsd;
         function Job() { }
         return Job;
     })();    
-    function getSelectorJob(args) {
+    function getAPIJob(args) {
         return Q.fcall(function () {
             var job = new Job();
+            job.context = getContext(args);
+            job.api = new tsd.API(job.context);
+            return job;
+        });
+    }
+    function getSelectorJob(args) {
+        return getAPIJob(args).then(function (job) {
             if(args._.length === 0) {
                 throw new Error('pass one selector pattern');
             }
-            job.context = getContext(args);
-            job.api = new tsd.API(job.context);
             job.selector = new tsd.Selector(args._[0]);
             return job;
         });
     }
     function runARGV(argvRaw, configPath) {
         var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
+        var directNode = (argvRaw && argvRaw.length > 0 && argvRaw[0] === 'node');
+        xm.log.debug('called directly as node param: ' + 'forcing dev mode (for now)'.cyan);
         expose.defineOption({
             name: 'version',
             short: 'V',
@@ -3044,7 +3439,7 @@ var tsd;
             short: null,
             description: 'verbose output',
             type: 'flag',
-            default: null,
+            default: (directNode ? true : null),
             placeholder: null,
             command: null
         });
@@ -3060,11 +3455,16 @@ var tsd;
         function reportError(err) {
             xm.log('-> ' + 'an error occured!'.red);
             xm.log('');
-            xm.log(err);
+            if(err.stack) {
+                xm.log(err.stack);
+            } else {
+                xm.log(String(err));
+            }
         }
         function reportSucces(result) {
             xm.log('-> ' + 'success!'.green);
             if(result) {
+                xm.assertVar('result', result, tsd.APIResult);
                 xm.log('');
                 result.selection.forEach(function (def) {
                     xm.log(def.toString());
@@ -3102,12 +3502,20 @@ var tsd;
             }
         }
         function printFileInfo(file) {
-            if(file.info && file.info.isValid()) {
-                xm.log('   ' + file.info.toString());
-                xm.log('      ' + file.info.projectUrl);
-                file.info.authors.forEach(function (author) {
-                    xm.log('      ' + author.toString());
-                });
+            if(file.info) {
+                if(file.info.isValid()) {
+                    xm.log('   ' + file.info.toString());
+                    xm.log('      ' + file.info.projectUrl);
+                    file.info.authors.forEach(function (author) {
+                        xm.log('      ' + author.toString());
+                    });
+                    xm.log('----');
+                } else {
+                    xm.log('   ' + '<invalid info>');
+                    xm.log('----');
+                }
+            } else {
+                xm.log('   ' + '<no info>');
                 xm.log('----');
             }
         }
@@ -3136,13 +3544,30 @@ var tsd;
                 return job.api.install(job.selector);
             }).done(function (result) {
                 reportSucces(null);
-                result.selection.forEach(function (file) {
-                    prinFileHead(file);
-                    printFileInfo(file);
-                    printFileCommit(file);
+                xm.log('');
+                result.written.keys().sort().forEach(function (path) {
+                    var file = result.written.get(path);
+                    xm.log(file.toString());
+                    xm.log('');
                 });
             }, reportError);
         }, 'Install definitions', jobOptions(), [
+            'selector'
+        ]);
+        ;
+        expose.command('reinstall', function (args) {
+            getAPIJob(args).then(function (job) {
+                return job.api.reinstall();
+            }).done(function (result) {
+                reportSucces(null);
+                xm.log('');
+                result.written.keys().sort().forEach(function (path) {
+                    var file = result.written.get(path);
+                    xm.log(file.toString());
+                    xm.log('');
+                });
+            }, reportError);
+        }, 'Re-install definitions from config', jobOptions(), [
             'selector'
         ]);
         expose.command('info', function (args) {
@@ -3150,7 +3575,7 @@ var tsd;
                 return job.api.info(job.selector);
             }).done(function (result) {
                 reportSucces(null);
-                result.selection.forEach(function (file) {
+                result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
                     prinFileHead(file);
                     printFileInfo(file);
                     printFileCommit(file);
@@ -3164,7 +3589,7 @@ var tsd;
                 return job.api.history(job.selector);
             }).done(function (result) {
                 reportSucces(null);
-                result.definitions.forEach(function (def) {
+                result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
                     prinDefHead(def);
                     printFileInfo(def.head);
                     def.history.slice(0).reverse().forEach(function (file) {
@@ -3181,14 +3606,14 @@ var tsd;
                 return job.api.deps(job.selector);
             }).done(function (result) {
                 reportSucces(null);
-                result.selection.forEach(function (def) {
+                result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
                     prinFileHead(def);
                     printFileInfo(def);
                     if(def.dependencies.length > 0) {
-                        def.dependencies.forEach(function (def) {
+                        def.dependencies.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
                             xm.log(' - ' + def.toString());
                             if(def.dependencies.length > 0) {
-                                def.dependencies.forEach(function (def) {
+                                def.dependencies.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
                                     xm.log('    - ' + def.toString());
                                 });
                             }
@@ -3215,3 +3640,4 @@ var tsd;
         return new tsd.API(new tsd.Context(configPath, verbose));
     }
 };
+//@ sourceMappingURL=api.js.map

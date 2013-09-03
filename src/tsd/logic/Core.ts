@@ -9,6 +9,7 @@
 ///<reference path="../data/DefInfoParser.ts" />
 ///<reference path="../data/DefInfo.ts" />
 ///<reference path="../data/DefIndex.ts" />
+///<reference path="../context/Config.ts" />
 ///<reference path="../API.ts" />
 
 ///<reference path="Resolver.ts" />
@@ -23,23 +24,6 @@ module tsd {
 	var branch_tree:string = '/commit/commit/tree/sha';
 
 	var leadingExp = /^\.\.\//;
-
-	//TODO rename to DefSelection?
-	//TODO add useful methods to result (wrap some helpers from DefUtils)
-	export class APIResult {
-
-		error:string;
-		nameMatches:tsd.Def[];
-		selection:tsd.DefVersion[];
-		definitions:tsd.Def[];
-		written:string[];
-		//files = new xm.KeyValueMap();
-
-		constructor(public index:DefIndex, public selector:Selector) {
-			xm.assertVar('index', index, DefIndex);
-			xm.assertVar('selector', selector, Selector);
-		}
-	}
 	/*
 	 Core: operational core logics
 	 */
@@ -60,6 +44,7 @@ module tsd {
 
 			this.index = new tsd.DefIndex();
 
+			//TODO bundle these into one? meh?
 			this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
 			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(context.paths.cache, 'git_raw'));
@@ -68,7 +53,10 @@ module tsd {
 			this.gitRaw.debug = this.context.verbose;
 		}
 
-		//TODO harden loader tasks against race conditions?
+		/*
+		 lazy get or load the current DefIndex
+		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
+		 */
 		getIndex():Qpromise {
 			if (this.index.hasIndex()) {
 				return Q(this.index);
@@ -93,10 +81,14 @@ module tsd {
 			});
 		}
 
+		/*
+		 run a selector against a DefIndex
+		 promise: ApiResult
+		 */
 		select(selector:Selector):Qpromise {
 			var result = new APIResult(this.index, selector);
 
-			return this.getIndex().then((index:DefIndex) => {
+			return this.getIndex().then(() => {
 
 				result.nameMatches = selector.pattern.filter(this.index.list);
 				// default to all heads
@@ -112,6 +104,138 @@ module tsd {
 			}).thenResolve(result);
 		}
 
+		/*
+		 procure a Def instance for a path
+		 promise: Def: either fresh or with existing data
+		 */
+		procureDef(path:string):Qpromise {
+			return this.getIndex().then(() => {
+				var def:tsd.Def = this.index.procureDef(path);
+				if (!def) {
+					return Q.reject(new Error('cannot get def for path: ' + path));
+				}
+				return Q(def);
+			});
+		}
+
+		/*
+		 procure a DefVersion instance for a path and commit
+		 promise: DefVersion: either fresh or with existing data
+		 */
+		procureFile(path:string, commitSha:string):Qpromise {
+			return this.getIndex().then(() => {
+				var file:tsd.DefVersion = this.index.procureVersionFromSha(path, commitSha);
+				if (!file) {
+					return Q.reject(new Error('cannot get file for path: ' + path));
+				}
+				return Q(file);
+			});
+		}
+
+		/*
+		 procure a DefCommit instance for a commit sha
+		 promise: DefCommit: either fresh or with existing data
+		 */
+		procureCommit(commitSha:string):Qpromise {
+			return this.getIndex().then(() => {
+				var commit:tsd.DefCommit = this.index.procureCommit(commitSha);
+				if (!commit) {
+					return Q.reject(new Error('cannot commit def for commitSha: ' + path));
+				}
+				return Q(commit);
+			});
+		}
+
+		/*
+		 find a DefVersion based on its path and a partial commit sha
+		 promise: DefVersion
+		 */
+		findFile(path:string, commitShaFragment:string):Qpromise {
+			//TODO implement partial commitSha lookup, tricky as it could be a random commit and not just an actual change)
+			return Q.reject('implement me!');
+		}
+
+		/*
+		 install a DefVersion and add to config
+		 promise: string: absolute path of written file
+		 */
+		installFile(file:tsd.DefVersion, addToConfig:bool = true):Qpromise {
+			return this.useFile(file).then((targetPath:string) => {
+				//xm.log(paths.keys().join('\n'));
+
+				if (this.context.config.hasFile(file.def.path)) {
+					this.context.config.getFile(file.def.path).update(file);
+				}
+				else if (addToConfig) {
+					this.context.config.addFile(file);
+				}
+				return targetPath;
+			});
+		}
+
+		/*
+		 bulk version of installFile()
+		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 */
+		installFileBulk(list:tsd.DefVersion[], addToConfig:bool = true):Qpromise {
+			var written:xm.IKeyValueMap = new xm.KeyValueMap();
+
+			return Q.all(list.map((file:tsd.DefVersion) => {
+				return this.installFile(file, addToConfig).then((targetPath:string) => {
+					written.set(targetPath, file);
+				});
+			})).thenResolve(written);
+		}
+
+
+		/*
+		 save current config to project json
+		 promise: string: absolute path of written file
+		 */
+		saveConfig():Qpromise {
+			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
+
+			return FS.write(this.context.paths.config, json).then(() => {
+				xm.log('config written to: ' + this.context.paths.config);
+				return this.context.paths.config;
+			});
+		}
+
+		/*
+		 reinstall multiple DefVersion's from InstalledDef data
+		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 */
+		reinstallBulk(list:tsd.InstalledDef[]):Qpromise {
+			var written = new xm.KeyValueMap();
+
+			return Q.all(list.map((installed:tsd.InstalledDef) => {
+				return this.procureFile(installed.path, installed.commitSha).then((file:tsd.DefVersion)=> {
+					return this.installFile(file, true).then((targetPath:string) => {
+						written.set(targetPath, file);
+						return file;
+					});
+				});
+			})).thenResolve(written);
+		}
+
+		/*
+		 lazy load a single DefCommit meta data
+		 promise: DefCommit with meta data fields (authors, message etc)
+		 */
+		loadCommitMetaData(commit:tsd.DefCommit):Qpromise {
+			if (commit.hasMetaData()) {
+				return Q(commit);
+			}
+			return this.gitAPI.getCommit(commit.commitSha).then((json:any) => {
+				commit.parseJSON(json);
+				return commit;
+			});
+		}
+
+		/*
+		 lazy load a single DefVersion file content
+		 promise: DefVersion; with raw .content loaded
+		 */
 		loadContent(file:tsd.DefVersion):Qpromise {
 			if (file.content) {
 				return Q(file.content);
@@ -122,24 +246,36 @@ module tsd {
 			});
 		}
 
+		/*
+		 bulk version of loadContent
+		 promise: array: bulk results of single calls
+		 */
 		loadContentBulk(list:tsd.DefVersion[]):Qpromise {
 			return Q.all(list.map((file:DefVersion) => {
 				return this.loadContent(file);
 			})).thenResolve(list);
 		}
 
+		/*
+		 lazy load a DefVersion commit history meta data
+		 promise: Def with .history filled with DefVersion
+		 */
 		loadHistory(file:tsd.Def):Qpromise {
 			if (file.history.length > 0) {
 				return Q(file);
 			}
 			return this.gitAPI.getPathCommits(this.context.config.ref, file.path).then((content:any[]) => {
 				//xm.log.inspect(content, null, 2);
+				//TODO add pagination support (see github api docs)
 				this.index.setHistory(file, content);
 				return file;
-				//TODO add pagination support (see github api docs)
 			});
 		}
 
+		/*
+		 bulk version of loadHistory()
+		 promise: array: bulk results of single calls
+		 */
 		loadHistoryBulk(list:tsd.Def[]):Qpromise {
 			list = tsd.DefUtil.uniqueDefs(list);
 
@@ -148,10 +284,27 @@ module tsd {
 			})).thenResolve(list);
 		}
 
-		resolveDepencendiesBulk(list:tsd.DefVersion[]):Qpromise {
-			return this.resolver.resolve(list);
+		/*
+		 lazy resolve a DefVersion's dependencies
+		 promise: DefVersion: with .dependencies resolved (recursive)
+		 */
+		//TODO ditch wrapper function? meh?
+		resolveDepencendies(file:tsd.DefVersion):Qpromise {
+			return this.resolver.resolve(file);
 		}
 
+		/*
+		 bulk version of resolveDepencendies()
+		 promise: array: bulk results of single calls
+		 */
+		resolveDepencendiesBulk(list:tsd.DefVersion[]):Qpromise {
+			return this.resolver.resolveBulk(list);
+		}
+
+		/*
+		 lazy load a DefVersion content and parse header for DefInfo meta data
+		 promise: DefVersion: with raw .content text and .info DefInfo filled with parsed meta data
+		 */
 		parseDefInfo(file:tsd.DefVersion):Qpromise {
 			return this.loadContent(file).then((file:tsd.DefVersion) => {
 				var parser = new tsd.DefInfoParser(this.context.verbose);
@@ -173,6 +326,10 @@ module tsd {
 			});//.thenResolve(file);
 		}
 
+		/*
+		 bulk version of parseDefInfo()
+		 promise: array: bulk results of single calls
+		 */
 		parseDefInfoBulk(list:tsd.DefVersion[]):Qpromise {
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
@@ -182,40 +339,56 @@ module tsd {
 			})).thenResolve(list);
 		}
 
-		writeFile(file:DefVersion):Qpromise {
-			var target = path.resolve(this.context.paths.typings, file.def.path);
-			var dir = path.dirname(target);
+		/*
+		 lazy load and save a single DefVersion to typings folder
+		 promise: absolute path of written file
+		 */
+		useFile(file:tsd.DefVersion, overwrite:bool = true):Qpromise {
+			var targetPath = path.resolve(this.context.paths.typings, file.def.path);
+			var dir = path.dirname(targetPath);
 
-			return xm.mkdirCheckQ(dir).then(():any => {
+			return FS.exists(targetPath).then((exists:bool) => {
+				if (exists && !overwrite) {
+					return null;
+				}
+				return xm.mkdirCheckQ(dir);
+			}).then(():any => {
 				if (file.content) {
 					return file.content;
 				}
 				return this.loadContent(file);
 			}).then(() => {
-				return FS.exists(target);
+				//check again? (race?)
+				return FS.exists(targetPath);
 			}).then((exists:bool) => {
 				if (exists) {
-					return FS.remove(target);
+					return FS.remove(targetPath);
 				}
 				return null;
 			}).then(() => {
-				return FS.write(target, file.content);
+				return FS.write(targetPath, file.content);
 			}).then(() => {
-				return target;
+				//return the target path
+				return targetPath;
 			});
 		}
 
-		writeFileBulk(list:tsd.DefVersion[]):Qpromise {
+		/*
+		 bulk version of useFile()
+		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 */
+		useFileBulk(list:tsd.DefVersion[], overwrite:bool = true):Qpromise {
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
-			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.writeFile(file);
-			}));
-		}
+			//this could be a bit more then just 'written'
+			var written = new xm.KeyValueMap();
 
-		saveToConfigBulk(list:tsd.DefVersion[]):Qpromise {
-			return Q.reject(new Error('not yet implemented'));
+			return Q.all(list.map((file:tsd.DefVersion) => {
+				return this.useFile(file, overwrite).then((targetPath:string) => {
+					written.set(targetPath, file);
+				});
+			})).thenResolve(written);
 		}
 	}
 }

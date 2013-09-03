@@ -3,7 +3,7 @@
 
 module tsd {
 
-	var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
 	var leadingExp = /^\.\.\//;
 
@@ -67,12 +67,12 @@ module tsd {
 			var ret:string[] = [];
 			var match;
 
-			if (!referenceTag.global) {
-				throw new Error('referenceTag RegExp must have global flag');
+			if (!referenceTagExp.global) {
+				throw new Error('referenceTagExp RegExp must have global flag');
 			}
-			referenceTag.lastIndex = 0;
+			referenceTagExp.lastIndex = 0;
 
-			while ((match = referenceTag.exec(source))) {
+			while ((match = referenceTagExp.exec(source))) {
 				if (match.length > 0 && match[1].length > 0) {
 					ret.push(match[1]);
 				}
@@ -98,7 +98,7 @@ module tsd {
 					ret.push(file);
 				}
 				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
-					var tmp =  file.dependencies[j];
+					var tmp = file.dependencies[j];
 					if (!DefUtil.contains(ret, tmp)) {
 						ret.push(tmp);
 					}
@@ -119,6 +119,62 @@ module tsd {
 				}
 			}
 			return ret;
+		}
+
+		static matchCommit(list:tsd.DefVersion[], commitSha:string):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = [];
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				var file = list[i];
+				if (file.commit && file.commit.commitSha === commitSha) {
+					ret.push(file);
+				}
+			}
+			return ret;
+		}
+
+		static haveContent(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = [];
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				var file = list[i];
+				if (typeof file.content === 'string' && file.content.length > 0) {
+					ret.push(file);
+				}
+			}
+			return ret;
+		}
+
+		static fileCompare(aa:tsd.DefVersion, bb:tsd.DefVersion):number {
+			if (!bb) {
+				return 1;
+			}
+			if (!aa) {
+				return -1;
+			}
+			if (aa.def.path < bb.def.path) {
+				return -1;
+			}
+			else if (aa.def.path > bb.def.path) {
+				return -1;
+			}
+			//hmm.. now what?
+			return -1;
+		}
+
+		static defCompare(aa:tsd.Def, bb:tsd.Def):number {
+			if (!bb) {
+				return 1;
+			}
+			if (!aa) {
+				return -1;
+			}
+			if (aa.path < bb.path) {
+				return -1;
+			}
+			else if (aa.path > bb.path) {
+				return -1;
+			}
+			//hmm.. now what?
+			return -1;
 		}
 
 	}

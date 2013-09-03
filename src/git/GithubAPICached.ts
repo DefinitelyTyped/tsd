@@ -2,6 +2,7 @@
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/assertVar.ts" />
+///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
@@ -68,6 +69,8 @@ module git {
 
 			this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
 			this.rate = new GitRateLimitInfo();
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		getRepoParams(vars:any):any {

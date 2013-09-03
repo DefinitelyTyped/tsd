@@ -63,7 +63,7 @@ module.exports = function (grunt) {
 				base_path: 'src/',
 				declaration: false,
 				// should be on but is buggy
-				sourcemap: false
+				sourcemap: true
 			},
 			api: {
 				src: ['src/api.ts'],

@@ -40,6 +40,7 @@ module xm {
 			if (data) {
 				this.import(data);
 			}
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		has(key:string):bool {
