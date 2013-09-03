@@ -10,7 +10,7 @@
 ///<reference path="../data/DefInfo.ts" />
 ///<reference path="../data/DefIndex.ts" />
 ///<reference path="../context/Config.ts" />
-///<reference path="../API.ts" />
+///<reference path="../api_ren.ts" />
 
 ///<reference path="Resolver.ts" />
 

@@ -275,11 +275,7 @@ var xm;
             this.path = path;
             xm.assertVar('pkg', pkg, 'object');
             this._pkg = pkg;
-            xm.ObjectUtil.defineProps(this, [
-                '_pkg'
-            ], {
-                enumerable: false
-            });
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Object.defineProperty(PackageJSON.prototype, "raw", {
             get: function () {

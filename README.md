@@ -1,4 +1,6 @@
-# TSD - A TypeScript definition package manager
+# TSD
+
+> TypeScript Definition Package Manager
 
 [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd)
 
