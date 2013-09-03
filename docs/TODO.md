@@ -1,6 +1,12 @@
 # TSD 0.5.x TODO
 
-#### Local changes
+Tracking work that needs to be done
+
+## Issues
+
+This info might later migrate to the github issue tracker.
+
+## Local changes
 
 Browse the code in `/src` and `/test` for `//TODO` comments,
 
@@ -8,7 +14,9 @@ Or use `$ grunt todos` for an overview. :point_left::+1:
 
 :warning: Most (but not all) of these are file/class/block 'local' changes so easy to fix without conflicts (filling out prototype stuff, hardening, re-implement etc), note: some are more important then others.
 
-#### Global / mutli-file changes:
+See the [INFO.md](INFO.md) for project development info.
+
+## Global / mutli-file changes:
 
 Must fix:
 
@@ -23,6 +31,8 @@ Must fix:
 * -
 * [ ] Add some options and unify names (both cli as API)
 * [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
+* [ ] Find solution to update TSDPM.com (use TSD molule API? does it run a Node.js server?)
+* [ ] Add method for (re) initialisation of config (when you want to start in non-default branch etc)
 
 Should fix:
 
