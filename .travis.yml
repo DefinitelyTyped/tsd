@@ -1,6 +1,5 @@
 language: node_js
 node_js:
-  - "0.11"
   - "0.10"
 
 notifications:
@@ -10,3 +9,6 @@ branches:
   only:
     - develop-0.5.x
     - develop-0.4.x
+
+env:
+  - TRAVIS=true

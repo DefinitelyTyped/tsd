@@ -5,7 +5,9 @@
 tmp/
 /src
 
+.travis.yml
 .jshintrc
+.tslint.json
 Gruntfile.js
 tsd-config.json
 
