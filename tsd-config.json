@@ -1,39 +1,11 @@
 {
-  "typingsPath": "tmp/typings_v4",
+  "typingsPath": "typings",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
   "installed": {
-    "angularjs/angular-cookies.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "01f2127ab06d220f4176c7c2a4f05e35"
-    },
-    "angularjs/angular-mocks.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "8a0be1acc847d342da5d5f62960fc951"
-    },
-    "angularjs/angular-resource.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "bfc89ea8ccee49184eb0e9775cb67fcf"
-    },
-    "angularjs/angular-sanitize.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "3989245163468ab7b98cb7b610bc950f"
-    },
-    "angularjs/angular-scenario.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "95c07431802c07892b23a150e6c18b9b"
-    },
-    "angularjs/angular.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "b28995eca15c5c5a3215e554f7a23b74"
-    },
-    "jquery/jquery.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
-      "hash": "daee672de4bb1330b0c3d8fcdea04c82"
-    },
     "async/async.d.ts": {
-      "commit": "9653895ef1f7d5051d3c059b4ab683a1ca7d8420",
+      "commit": "f19d6cc6e3dd2dd143624a0b9bb6aff86a21488e",
       "hash": "fb3987f1fae34dd648c82319b8cf983b"
     }
   }

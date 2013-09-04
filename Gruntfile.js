@@ -1,6 +1,11 @@
 module.exports = function (grunt) {
 	'use strict';
 
+	var isVagrant = (process.env.PWD === '/vagrant');
+	if (isVagrant) {
+		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
+	}
+
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 
 	gtx.loadNpm([
@@ -132,10 +137,13 @@ module.exports = function (grunt) {
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');
 
+	var longTimer = (isVagrant ? 20000 : 5000);
 
 	// modules
-	gtx.create('api,cli,tsd', 'moduleTest', null, 'core');
-	gtx.create('xm,git', 'moduleTest', null, 'lib');
+	gtx.create('api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib');
+	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
+	gtx.create('xm', 'moduleTest', null, 'lib');
 
 	gtx.alias('run', ['build', 'shell:cli']);
 	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);

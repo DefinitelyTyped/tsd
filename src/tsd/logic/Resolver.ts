@@ -25,10 +25,10 @@ module tsd {
 			this._core = core;
 
 			this.stats.log = this._core.context.verbose;
+			this.stats.logger = xm.getLogger('Resolver');
 		}
 
 		resolveBulk(list:tsd.DefVersion[]):Qpromise {
-
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
@@ -80,7 +80,7 @@ module tsd {
 					return memo;
 				}, []);
 
-				//story to solve and collect promises for unsolved references
+				//store to solve and collect promises for unsolved references
 				var queued = <Qpromise[]>refs.reduce((memo:any[], refPath) => {
 					if (this._core.index.hasDef(refPath)) {
 						//use .head (could use same commit but that would be version hell with interdependent definitions)

@@ -1,6 +1,8 @@
 ///<reference path="_ref.ts" />
 ///<reference path="../src/xm/io/FileUtil.ts" />
 ///<reference path="../src/xm/io/Logger.ts" />
+///<reference path="../src/xm/data/PackageJSON.ts" />
+///<reference path="../src/tsd/context/Const.ts" />
 
 module helper {
 
@@ -8,7 +10,9 @@ module helper {
 	var path = require('path');
 	var util = require('util');
 
-	require('source-map-support').install();
+	export function getCacheDir():string {
+		return path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+	}
 
 	export function dump(object:any, label?:string, depth?:number = 6, showHidden?:bool = false):any{
 		if (typeof label !== 'undefined') {

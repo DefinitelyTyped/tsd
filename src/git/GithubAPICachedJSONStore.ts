@@ -26,7 +26,9 @@ module git {
 	export class GithubAPICachedJSONStore {
 
 		dir:string;
-		private _formatVersion:string = '0.0.2';
+		stats:xm.StatCounter = new xm.StatCounter();
+
+		private _formatVersion:string = '0.0.3';
 
 		constructor(public api:git.GithubAPICached, dir:string) {
 			xm.assertVar('api', api, git.GithubAPICached);
@@ -34,13 +36,16 @@ module git {
 
 			this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
 
+			this.stats.log = this.api.debug;
+			this.stats.logger = xm.getLogger('GithubAPICachedJSONStore');
+
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		private init():Qpromise {
 			return FS.exists(this.dir).then((exists:bool) => {
 				if (!exists) {
-					return xm.mkdirCheckQ(this.dir);
+					return xm.mkdirCheckQ(this.dir, true);
 				}
 				else {
 					return FS.isDirectory(this.dir).then((isDir:bool) => {
@@ -52,41 +57,62 @@ module git {
 						}
 					});
 				}
+			}).fail((err) => {
+				this.stats.count('init-error');
+				xm.log.error(err);
+				throw err;
 			});
 		}
 
 		getResult(key:string):Qpromise {
 			var src = path.join(this.dir, GithubAPICachedResult.getHash(key) + '.json');
 
+			this.stats.count('get-called');
+
 			return this.init().then(() => {
 				return FS.exists(src);
 			}).then((exists:bool) => {
 				if (exists) {
-					return Q.nfcall(xm.FileUtil.readJSON, src).then((json) => {
+					this.stats.count('get-exists');
+					return xm.FileUtil.readJSONPromise(src).then((json) => {
 						var cached;
 						try {
 							cached = GithubAPICachedResult.fromJSON(json);
 						}
 						catch (e) {
+							this.stats.count('get-read-error');
 							throw(new Error(src + ':' + e));
 						}
+						this.stats.count('get-read-success');
 						return cached;
 					});
 				}
 				else {
+					this.stats.count('get-miss');
 					return null;
 				}
+			}).fail((err) => {
+				this.stats.count('get-error');
+				xm.log.error(err);
+				throw err;
 			});
 		}
 
 		storeResult(res:GithubAPICachedResult):Qpromise {
-			var src = path.join(this.dir, res.getHash() + '.json');
+			var dest = path.join(this.dir, res.getHash() + '.json');
+
+			this.stats.count('store-called');
 
 			return this.init().then(() => {
 				var data = JSON.stringify(res.toJSON(), null, 2);
-				return FS.write(src, data);
+				return FS.write(dest, data);
 			}).then(() => {
-				return {src: src};
+				this.stats.count('store-written');
+				return {dest: dest};
+			}).fail((err) => {
+				this.stats.count('store-error');
+				xm.log.error(err);
+				throw err;
 			});
 		}
 	}

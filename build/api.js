@@ -1,49 +1,115 @@
 var xm;
 (function (xm) {
-    function callAsync(callback) {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            args[_i] = arguments[_i + 1];
+    var Q = require('q');
+    var FS = require('q-io/fs');
+    var mkdirp = require('mkdirp');
+    var path = require('path');
+    var fs = require('fs');
+    function mkdirCheckSync(dir, writable, testWritable) {
+        if (typeof writable === "undefined") { writable = false; }
+        if (typeof testWritable === "undefined") { testWritable = false; }
+        dir = path.resolve(dir);
+        if(fs.existsSync(dir)) {
+            if(!fs.statSync(dir).isDirectory()) {
+                throw (new Error('path exists but is not a directory: ' + dir));
+            }
+            if(writable) {
+                fs.chmodSync(dir, '0664');
+            }
+        } else {
+            if(writable) {
+                mkdirp.sync(dir, '0664');
+            } else {
+                mkdirp.sync(dir);
+            }
         }
-        process.nextTick(function () {
-            callback.apply(null, args);
-        });
+        if(testWritable) {
+            var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+            try  {
+                fs.writeFileSync(testFile, 'test');
+                fs.unlinkSync(testFile);
+            } catch (e) {
+                throw new Error('no write access to: ' + dir + ' -> ' + e);
+            }
+        }
+        return dir;
     }
-    xm.callAsync = callAsync;
+    xm.mkdirCheckSync = mkdirCheckSync;
+    function mkdirCheckQ(dir, writable, testWritable) {
+        if (typeof writable === "undefined") { writable = false; }
+        if (typeof testWritable === "undefined") { testWritable = false; }
+        dir = path.resolve(dir);
+        return FS.exists(dir).then(function (exists) {
+            if(exists) {
+                return FS.isDirectory(dir).then(function (isDir) {
+                    if(!isDir) {
+                        throw (new Error('path exists but is not a directory: ' + dir));
+                    }
+                    if(writable) {
+                        return FS.chmod(dir, '0664');
+                    }
+                    return null;
+                });
+            }
+            if(writable) {
+                return Q.nfcall(mkdirp, dir, '0664');
+            }
+            return Q.nfcall(mkdirp, dir);
+        }).then(function () {
+            if(testWritable) {
+                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+                return FS.write(testFile, 'test').then(function () {
+                    return FS.remove(testFile);
+                }).catch(function (err) {
+                    throw new Error('no write access to: ' + dir + ' -> ' + err);
+                });
+            }
+            return null;
+        }).thenResolve(dir);
+    }
+    xm.mkdirCheckQ = mkdirCheckQ;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
     var fs = require('fs');
+    var Q = require('q');
+    var FS = require('q-io/fs');
     var path = require('path');
     var util = require('util');
-    var FileUtil = (function () {
-        function FileUtil() { }
-        FileUtil.readJSONSync = function readJSONSync(src) {
-            return JSON.parse(fs.readFileSync(src, 'utf8'));
-        };
-        FileUtil.readJSON = function readJSON(src, callback) {
-            fs.readFile(path.resolve(src), 'utf8', function (err, file) {
-                if(err || !file) {
-                    return callback(err, null);
-                }
-                var json = null;
-                try  {
-                    json = JSON.parse(file);
-                } catch (err) {
-                    return callback(err, null);
-                }
-                return callback(null, json);
+    (function (FileUtil) {
+        function readJSONSync(src) {
+            return JSON.parse(fs.readFileSync(src, {
+                encoding: 'utf8'
+            }));
+        }
+        FileUtil.readJSONSync = readJSONSync;
+        function readJSONPromise(src) {
+            return FS.read(src, {
+                encoding: 'utf8'
+            }).then(function (text) {
+                return JSON.parse(text);
             });
-        };
-        FileUtil.writeJSONSync = function writeJSONSync(src, data, callback) {
-            fs.writeFileSync(path.resolve(src), JSON.stringify(data, null, 2), 'utf8');
-        };
-        FileUtil.writeJSON = function writeJSON(src, data, callback) {
-            fs.writeFile(path.resolve(src), JSON.stringify(data, null, 2), 'utf8', callback);
-        };
-        return FileUtil;
-    })();
-    xm.FileUtil = FileUtil;    
+        }
+        FileUtil.readJSONPromise = readJSONPromise;
+        function writeJSONSync(dest, data) {
+            dest = path.resolve(dest);
+            xm.mkdirCheckSync(path.dirname(dest));
+            fs.writeFileSync(dest, JSON.stringify(data, null, 2), {
+                encoding: 'utf8'
+            });
+        }
+        FileUtil.writeJSONSync = writeJSONSync;
+        function writeJSONPromise(dest, data) {
+            dest = path.resolve(dest);
+            return xm.mkdirCheckQ(path.dirname(dest), true).then(function () {
+                return FS.write(dest, JSON.stringify(data, null, 2), {
+                    encoding: 'utf8'
+                });
+            });
+        }
+        FileUtil.writeJSONPromise = writeJSONPromise;
+    })(xm.FileUtil || (xm.FileUtil = {}));
+    var FileUtil = xm.FileUtil;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -199,75 +265,6 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
-    var Q = require('q');
-    var FS = require('q-io/fs');
-    var mkdirp = require('mkdirp');
-    var path = require('path');
-    var fs = require('fs');
-    function mkdirCheckSync(dir, writable) {
-        if (typeof writable === "undefined") { writable = false; }
-        dir = path.resolve(dir);
-        if(fs.existsSync(dir)) {
-            if(!fs.statSync(dir).isDirectory()) {
-                throw (new Error('path exists but is not a directory: ' + dir));
-            }
-            if(writable) {
-                fs.chmodSync(dir, '0664');
-            }
-        } else {
-            if(writable) {
-                mkdirp.sync(dir, '0664');
-            } else {
-                mkdirp.sync(dir);
-            }
-        }
-        if(writable) {
-            var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-            try  {
-                fs.writeFileSync(testFile, 'test');
-                fs.unlinkSync(testFile);
-            } catch (e) {
-                throw new Error('no write access to: ' + dir + ' -> ' + e);
-            }
-        }
-        return dir;
-    }
-    xm.mkdirCheckSync = mkdirCheckSync;
-    function mkdirCheckQ(dir, writable) {
-        if (typeof writable === "undefined") { writable = false; }
-        dir = path.resolve(dir);
-        return FS.exists(dir).then(function (exists) {
-            if(exists) {
-                return FS.isDirectory(dir).then(function (isDir) {
-                    if(!isDir) {
-                        throw (new Error('path exists but is not a directory: ' + dir));
-                    }
-                    if(writable) {
-                        return FS.chmod(dir, '0664');
-                    }
-                    return null;
-                });
-            }
-            if(writable) {
-                return Q.nfcall(mkdirp, dir, '0664');
-            }
-            return Q.nfcall(mkdirp, dir);
-        }).then(function () {
-            if(writable) {
-                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-                return FS.write(testFile, 'test').then(function () {
-                    return FS.remove(testFile);
-                }).catch(function (err) {
-                    throw new Error('no write access to: ' + dir + ' -> ' + err);
-                });
-            }
-            return null;
-        }).thenResolve(dir);
-    }
-    xm.mkdirCheckQ = mkdirCheckQ;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
     var pkginfo = require('pkginfo');
     var PackageJSON = (function () {
         function PackageJSON(pkg, path) {
@@ -382,13 +379,13 @@ var tsd;
     tsd.InstalledDef = InstalledDef;    
     var Config = (function () {
         function Config(schema) {
-            this.typingsPath = 'typings';
-            this.version = 'v4';
-            this.repo = 'borisyankov/DefinitelyTyped';
-            this.ref = 'master';
             this._installed = new xm.KeyValueMap();
             xm.assertVar('schema', schema, 'object');
             this._schema = schema;
+            this.typingsPath = tsd.Const.typingsFolder;
+            this.version = tsd.Const.configVersion;
+            this.repo = tsd.Const.definitelyRepo;
+            this.ref = tsd.Const.mainBranch;
             xm.ObjectUtil.hidePrefixed(this);
         }
         Object.defineProperty(Config.prototype, "repoOwner", {
@@ -459,14 +456,15 @@ var tsd;
         Config.prototype.parseJSON = function (json) {
             var _this = this;
             xm.assertVar('json', json, 'object');
+            this._installed.clear();
             var res = tv4.validateResult(json, this._schema);
             if(!res.valid || res.missing.length > 0) {
-                xm.log(res.error.message);
+                xm.log.error(res.error.message);
                 if(res.error.dataPath) {
-                    xm.log(res.error.dataPath);
+                    xm.log.error(res.error.dataPath);
                 }
                 if(res.error.schemaPath) {
-                    xm.log(res.error.schemaPath);
+                    xm.log.error(res.error.schemaPath);
                 }
                 throw (new Error('malformed config: doesn\'t comply with schema'));
             }
@@ -474,7 +472,6 @@ var tsd;
             this.version = json.version;
             this.repo = json.repo;
             this.ref = json.ref;
-            this._installed.clear();
             xm.eachProp(json.installed, function (data, path) {
                 var installed = new tsd.InstalledDef(path);
                 installed.commitSha = data.commit;
@@ -482,73 +479,32 @@ var tsd;
                 _this._installed.set(path, installed);
             });
         };
-        Config.getLocal = function getLocal(schema, file) {
-            xm.assertVar('schema', schema, 'object');
-            xm.assertVar('file', file, 'string');
-            var cfg = new Config(schema);
-            var json;
-            if(fs.existsSync(file)) {
-                var stats = fs.statSync(file);
-                if(stats.isDirectory()) {
-                    throw (new Error('config path exists but is a directory: ' + file));
-                }
-                json = xm.FileUtil.readJSONSync(file);
-                cfg.parseJSON(json);
-            }
-            return cfg;
-        };
         return Config;
     })();
     tsd.Config = Config;    
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
-    var fs = require('fs');
-    var os = require('os');
+    tsd.Const = {
+        configFile: 'tsd-config.json',
+        cacheDir: 'tsd-cache',
+        configSchemaFile: 'tsd-config_v4.json',
+        typingsFolder: 'typings',
+        configVersion: 'v4',
+        definitelyRepo: 'borisyankov/DefinitelyTyped',
+        mainBranch: 'master'
+    };
+    Object.freeze(tsd.Const);
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
     var path = require('path');
     var Paths = (function () {
-        function Paths(info) {
-            this.info = info;
-            xm.assertVar('info', info, xm.PackageJSON);
-            this.setTmp(Paths.findTmpDir(info));
-            this.setCache(path.join(this.tmp, 'cache'));
-            this.typings = xm.mkdirCheckSync(path.resolve(process.cwd(), 'typings'), true);
-            this.config = path.join(process.cwd(), 'tsd-config.json');
+        function Paths() {
+            this.startCwd = path.resolve(process.cwd());
+            this.configFile = path.resolve(this.startCwd, tsd.Const.configFile);
+            this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
         }
-        Paths.prototype.setTmp = function (dir) {
-            dir = xm.mkdirCheckSync(dir, true);
-            this.tmp = dir;
-            return this.tmp;
-        };
-        Paths.prototype.setCache = function (dir) {
-            dir = xm.mkdirCheckSync(dir, true);
-            this.cache = dir;
-            return dir;
-        };
-        Paths.findTmpDir = function findTmpDir(info) {
-            xm.assertVar('info', info, xm.PackageJSON);
-            var now = Date.now();
-            var candidateTmpDirs = [
-                process.env['TMPDIR'], 
-                info.raw.tmp, 
-                os.tmpdir(), 
-                path.resolve(process.cwd(), 'tmp')
-            ];
-            var key = info.getKey();
-            for(var i = 0; i < candidateTmpDirs.length; i++) {
-                if(!candidateTmpDirs[i]) {
-                    continue;
-                }
-                var candidatePath = path.resolve(candidateTmpDirs[i], key);
-                try  {
-                    xm.mkdirCheckSync(candidatePath);
-                    return candidatePath;
-                } catch (e) {
-                    console.log(candidatePath, 'is not writable:', e.message);
-                }
-            }
-            throw (new Error('can not find a writable tmp directory.'));
-        };
         return Paths;
     })();
     tsd.Paths = Paths;    
@@ -563,22 +519,21 @@ var tsd;
     var tv4 = require('tv4').tv4;
     require('source-map-support').install();
     process.setMaxListeners(20);
+    Q.longStackSupport = true;
     var Context = (function () {
-        function Context(configPath, verbose) {
-            if (typeof configPath === "undefined") { configPath = null; }
+        function Context(configFile, verbose) {
+            if (typeof configFile === "undefined") { configFile = null; }
             if (typeof verbose === "undefined") { verbose = false; }
+            this.configFile = configFile;
             this.verbose = verbose;
             this.log = xm.log;
-            xm.assertVar('configPath', configPath, 'string', true);
             this.packageInfo = xm.PackageJSON.getLocal();
-            this.paths = new tsd.Paths(this.packageInfo);
-            var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(this.packageInfo.path), 'schema', 'tsd-config_v4.json'));
-            this.config = tsd.Config.getLocal(schema, configPath || this.paths.config);
-            this.paths.typings = xm.mkdirCheckSync(this.config.typingsPath, true);
-            Q.longStackSupport = true;
-            if(this.verbose) {
-                this.logInfo(true);
+            this.paths = new tsd.Paths();
+            if(configFile) {
+                this.paths.configFile = path.resolve(configFile);
             }
+            var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+            this.config = new tsd.Config(schema);
         }
         Context.prototype.logInfo = function (details) {
             if (typeof details === "undefined") { details = false; }
@@ -706,12 +661,11 @@ var xm;
             this.stats = new xm.KeyValueMap();
             this.logger = xm.log;
         }
-        StatCounter.prototype.count = function (id, amount) {
-            if (typeof amount === "undefined") { amount = 1; }
-            var value = this.stats.get(id, 0) + amount;
+        StatCounter.prototype.count = function (id, label) {
+            var value = this.stats.get(id, 0) + 1;
             this.stats.set(id, value);
             if(this.log && this.logger) {
-                this.logger('-> ' + id + ': ' + this.stats.get(id));
+                this.logger('-> ' + id + ': ' + this.stats.get(id) + (label ? ': ' + label : ''));
             }
             return value;
         };
@@ -795,7 +749,7 @@ var xm;
             if(typeAssert.hasOwnProperty(type)) {
                 var check = typeAssert[type];
                 if(!check(value)) {
-                    throw (new Error('expected "' + label + '" to be a "' + type + '" but got "' + valueType + '": ' + value));
+                    throw (new Error('expected "' + label + '" to be a "' + type + '": ' + value));
                 }
             } else if(valueType !== type) {
                 throw (new Error('expected "' + label + '" to be typeof "' + type + '" but got "' + valueType + '": ' + value));
@@ -861,13 +815,11 @@ var git;
         function GithubAPICachedResult(label, key, data) {
             xm.assertVar('label', label, 'string');
             xm.assertVar('key', key, 'string');
-            xm.assertVar('data', data, 'object');
             this._label = label;
             this._key = key;
             this.setData(data);
         }
         GithubAPICachedResult.prototype.setData = function (data) {
-            xm.assertVar('data', data, 'object');
             this._data = data;
             this._lastSet = new Date();
         };
@@ -937,17 +889,20 @@ var git;
     var GithubAPICachedJSONStore = (function () {
         function GithubAPICachedJSONStore(api, dir) {
             this.api = api;
-            this._formatVersion = '0.0.2';
+            this.stats = new xm.StatCounter();
+            this._formatVersion = '0.0.3';
             xm.assertVar('api', api, git.GithubAPICached);
             xm.assertVar('dir', dir, 'string');
             this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
+            this.stats.log = this.api.debug;
+            this.stats.logger = xm.getLogger('GithubAPICachedJSONStore');
             xm.ObjectUtil.hidePrefixed(this);
         }
         GithubAPICachedJSONStore.prototype.init = function () {
             var _this = this;
             return FS.exists(this.dir).then(function (exists) {
                 if(!exists) {
-                    return xm.mkdirCheckQ(_this.dir);
+                    return xm.mkdirCheckQ(_this.dir, true);
                 } else {
                     return FS.isDirectory(_this.dir).then(function (isDir) {
                         if(isDir) {
@@ -957,37 +912,58 @@ var git;
                         }
                     });
                 }
+            }).fail(function (err) {
+                _this.stats.count('init-error');
+                xm.log.error(err);
+                throw err;
             });
         };
         GithubAPICachedJSONStore.prototype.getResult = function (key) {
+            var _this = this;
             var src = path.join(this.dir, git.GithubAPICachedResult.getHash(key) + '.json');
+            this.stats.count('get-called');
             return this.init().then(function () {
                 return FS.exists(src);
             }).then(function (exists) {
                 if(exists) {
-                    return Q.nfcall(xm.FileUtil.readJSON, src).then(function (json) {
+                    _this.stats.count('get-exists');
+                    return xm.FileUtil.readJSONPromise(src).then(function (json) {
                         var cached;
                         try  {
                             cached = git.GithubAPICachedResult.fromJSON(json);
                         } catch (e) {
+                            _this.stats.count('get-read-error');
                             throw (new Error(src + ':' + e));
                         }
+                        _this.stats.count('get-read-success');
                         return cached;
                     });
                 } else {
+                    _this.stats.count('get-miss');
                     return null;
                 }
+            }).fail(function (err) {
+                _this.stats.count('get-error');
+                xm.log.error(err);
+                throw err;
             });
         };
         GithubAPICachedJSONStore.prototype.storeResult = function (res) {
-            var src = path.join(this.dir, res.getHash() + '.json');
+            var _this = this;
+            var dest = path.join(this.dir, res.getHash() + '.json');
+            this.stats.count('store-called');
             return this.init().then(function () {
                 var data = JSON.stringify(res.toJSON(), null, 2);
-                return FS.write(src, data);
+                return FS.write(dest, data);
             }).then(function () {
+                _this.stats.count('store-written');
                 return {
-                    src: src
+                    dest: dest
                 };
+            }).fail(function (err) {
+                _this.stats.count('store-error');
+                xm.log.error(err);
+                throw err;
             });
         };
         return GithubAPICachedJSONStore;
@@ -1036,7 +1012,20 @@ var xm;
         };
         URLManager.prototype.getURL = function (id, vars) {
             if(vars) {
-                return this.getTemplate(id).fillFromObject(_.defaults(vars, this._vars));
+                var obj = {
+                };
+                var name;
+                for(name in this._vars) {
+                    if(this._vars.hasOwnProperty(name)) {
+                        obj[name] = this._vars[name];
+                    }
+                }
+                for(name in vars) {
+                    if(vars.hasOwnProperty(name)) {
+                        obj[name] = vars[name];
+                    }
+                }
+                return this.getTemplate(id).fillFromObject(obj);
             }
             return this.getTemplate(id).fillFromObject(this._vars);
         };
@@ -1125,7 +1114,7 @@ var git;
             this._defaultOpts = {
             };
             this._debug = false;
-            this.stats = new xm.StatCounter(false);
+            this.stats = new xm.StatCounter();
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
             this._repo = repo;
@@ -1134,6 +1123,7 @@ var git;
             });
             this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
             this.rate = new GitRateLimitInfo();
+            this.stats.logger = xm.getLogger('GithubAPICached');
             xm.ObjectUtil.hidePrefixed(this);
         }
         GithubAPICached.prototype.getRepoParams = function (vars) {
@@ -1179,7 +1169,7 @@ var git;
             });
             return this.doCachedCall('getTree', params, {
             }, function (cb) {
-                _this._api.data.getTree(params, cb);
+                _this._api.gitdata.getTree(params, cb);
             });
         };
         GithubAPICached.prototype.getCommit = function (sha) {
@@ -1189,7 +1179,7 @@ var git;
             });
             return this.doCachedCall('getCommit', params, {
             }, function (cb) {
-                _this._api.data.getCommit(params, cb);
+                _this._api.gitdata.getCommit(params, cb);
             });
         };
         GithubAPICached.prototype.getBlob = function (sha) {
@@ -1200,7 +1190,7 @@ var git;
             });
             return this.doCachedCall('getBlob', params, {
             }, function (cb) {
-                _this._api.data.getBlob(params, cb);
+                _this._api.gitdata.getBlob(params, cb);
             });
         };
         GithubAPICached.prototype.getCommits = function (sha) {
@@ -1231,43 +1221,54 @@ var git;
             var key = this.getKey(label, keyTerms);
             opts = _.defaults(opts || {
             }, this._defaultOpts);
-            this.stats.count('invoked');
+            this.stats.count('invoked', label);
+            if(this._debug) {
+                xm.log(opts);
+                xm.log(keyTerms);
+            }
             var defer = Q.defer();
             var execCall = function () {
-                _this.stats.count('call-api');
-                call.call(null, function (err, res) {
+                _this.stats.count('call-api', label);
+                var cb = function (err, res) {
                     _this.rate.readFromRes(res);
                     if(_this._debug) {
                         xm.log(_this.rate.toStatus());
                     }
                     if(err) {
-                        _this.stats.count('call-error');
+                        _this.stats.count('call-error', label);
                         defer.reject(err);
                         return;
                     }
-                    _this.stats.count('call-success');
+                    _this.stats.count('call-success', label);
                     var cached = new git.GithubAPICachedResult(label, key, res);
                     _this._store.storeResult(cached).then(function (info) {
                         if(err) {
-                            _this.stats.count('store-set-error');
+                            _this.stats.count('store-set-error', label);
                             defer.reject(err);
                         } else {
-                            _this.stats.count('store-set');
+                            _this.stats.count('store-set', label);
                             defer.resolve(res);
                         }
                     });
-                });
+                };
+                try  {
+                    call.call(null, cb);
+                } catch (e) {
+                    _this.stats.count('call-function-error', label);
+                    xm.log(e);
+                    defer.reject(e);
+                }
             };
             this._store.getResult(key).then(function (res) {
                 if(res) {
-                    _this.stats.count('store-hit');
+                    _this.stats.count('store-hit', label);
                     defer.resolve(res.data);
                 } else {
-                    _this.stats.count('store-miss');
+                    _this.stats.count('store-miss', label);
                     execCall();
                 }
             }, function (err) {
-                _this.stats.count('store-get-error');
+                _this.stats.count('store-get-error', label);
                 defer.reject(err);
             });
             return defer.promise;
@@ -1279,6 +1280,7 @@ var git;
             set: function (value) {
                 this._debug = value;
                 this.stats.log = value;
+                this._store.stats.log = value;
             },
             enumerable: true,
             configurable: true
@@ -1325,7 +1327,7 @@ var git;
     var GithubRawCached = (function () {
         function GithubRawCached(repo, storeFolder) {
             this._debug = false;
-            this._formatVersion = '0.0.1';
+            this._formatVersion = '0.0.2';
             this._active = new xm.KeyValueMap();
             this.stats = new xm.StatCounter(false);
             xm.assertVar('repo', repo, git.GithubRepo);
@@ -1333,6 +1335,7 @@ var git;
             this._repo = repo;
             this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
             xm.ObjectUtil.hidePrefixed(this);
+            this.stats.logger = xm.getLogger('GithubRawCached');
         }
         GithubRawCached.prototype.getFile = function (commitSha, filePath) {
             var _this = this;
@@ -1340,7 +1343,7 @@ var git;
             var tmp = filePath.split(/\/|\\\//g);
             tmp.unshift(commitSha);
             tmp.unshift(this._dir);
-            var key = commitSha + '/' + filePath;
+            var key = commitSha + '|' + filePath;
             var storeFile = path.join.apply(null, tmp);
             if(this._debug) {
                 xm.log(storeFile);
@@ -1367,15 +1370,19 @@ var git;
                 } else {
                     _this.stats.count('store-miss');
                     var opts = {
-                        url: _this._repo.urls.rawFile(commitSha, filePath)
+                        url: _this._repo.urls.rawFile(commitSha, filePath),
+                        timeout: 7070
                     };
+                    _this.stats.count('request-call');
                     if(_this._debug) {
-                        xm.log(opts.url);
+                        xm.log(opts);
                     }
                     return Q.nfcall(request.get, opts).spread(function (res) {
                         if(!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
+                            _this.stats.count('request-error');
                             throw new Error('unexpected status code: ' + res.statusCode);
                         }
+                        _this.stats.count('request-complete');
                         var content = String(res.body);
                         return xm.mkdirCheckQ(path.dirname(storeFile)).then(function () {
                             return FS.write(storeFile, content);
@@ -1386,12 +1393,23 @@ var git;
                             _this.stats.count('store-error');
                             xm.log.warn('could not write to store');
                             return content;
-                        }).then(function (content) {
-                            _this._active.remove(key);
-                            return content;
                         });
+                    }, function (err) {
+                        _this.stats.count('request-error');
+                        xm.log.error(err);
+                        throw err;
+                    }).then(function (content) {
+                        xm.log(content);
+                        xm.log('loaded content');
+                        return content;
+                    }, function (err) {
+                        xm.log.warn('could not write to err');
+                        return null;
                     });
                 }
+            }).then(function (content) {
+                _this._active.remove(key);
+                return content;
             });
             this._active.set(key, promise);
             return promise;
@@ -2512,6 +2530,7 @@ var tsd;
             xm.assertVar('core', core, tsd.Core);
             this._core = core;
             this.stats.log = this._core.context.verbose;
+            this.stats.logger = xm.getLogger('Resolver');
         }
         Resolver.prototype.resolveBulk = function (list) {
             var _this = this;
@@ -2590,31 +2609,51 @@ var tsd;
     var Core = (function () {
         function Core(context) {
             this.context = context;
+            this.stats = new xm.StatCounter();
             xm.assertVar('context', context, tsd.Context);
             this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
-            this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
-            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
-            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(context.paths.cache, 'git_raw'));
+            this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
+            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
+            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
             this.gitAPI.debug = this.context.verbose;
             this.gitRaw.debug = this.context.verbose;
+            this.stats.log = this.context.verbose;
+            this.stats.logger = xm.getLogger('Core');
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Core.prototype.getIndex = function () {
             var _this = this;
+            this.stats.count('index-called');
             if(this.index.hasIndex()) {
+                this.stats.count('index-hit');
                 return Q(this.index);
             }
+            this.stats.count('index-miss');
             var branchData;
+            this.stats.count('index-branch-get');
             return this.gitAPI.getBranch(this.context.config.ref).then(function (data) {
                 var sha = pointer.get(data, branch_tree);
                 if(!sha) {
+                    _this.stats.count('index-branch-get-fail');
                     throw new Error('missing sha hash');
                 }
+                _this.stats.count('index-branch-get-success');
+                _this.stats.count('index-tree-get');
                 branchData = data;
                 return _this.gitAPI.getTree(sha, true);
+            }, function (err) {
+                _this.stats.count('index-branch-get-error');
+                xm.log.error(err);
+                throw err;
             }).then(function (data) {
+                _this.stats.count('index-tree-get-success');
                 _this.index.init(branchData, data);
                 return _this.index;
+            }, function (err) {
+                _this.stats.count('index-tree-get-error');
+                xm.log.error(err);
+                throw err;
             });
         };
         Core.prototype.select = function (selector) {
@@ -2684,12 +2723,31 @@ var tsd;
                 });
             })).thenResolve(written);
         };
+        Core.prototype.readConfig = function (optional) {
+            if (typeof optional === "undefined") { optional = false; }
+            var _this = this;
+            return FS.exists(this.context.paths.configFile).then(function (exists) {
+                if(!exists) {
+                    if(!optional) {
+                        throw new Error('cannot locate file: ' + _this.context.paths.configFile);
+                    }
+                    return null;
+                }
+                return xm.FileUtil.readJSONPromise(_this.context.paths.configFile).then(function (json) {
+                    _this.context.config.parseJSON(json);
+                    return null;
+                });
+            });
+        };
         Core.prototype.saveConfig = function () {
             var _this = this;
             var json = JSON.stringify(this.context.config.toJSON(), null, 2);
-            return FS.write(this.context.paths.config, json).then(function () {
-                xm.log('config written to: ' + _this.context.paths.config);
-                return _this.context.paths.config;
+            var dir = path.dirname(this.context.paths.configFile);
+            return xm.mkdirCheckQ(dir, true).then(function () {
+                return FS.write(_this.context.paths.configFile, json);
+            }).then(function () {
+                xm.log('config written to: ' + _this.context.paths.configFile);
+                return _this.context.paths.configFile;
             });
         };
         Core.prototype.reinstallBulk = function (list) {
@@ -2777,29 +2835,24 @@ var tsd;
         Core.prototype.useFile = function (file, overwrite) {
             if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
-            var targetPath = path.resolve(this.context.paths.typings, file.def.path);
+            var targetPath = path.resolve(this.context.config.typingsPath, file.def.path);
             var dir = path.dirname(targetPath);
             return FS.exists(targetPath).then(function (exists) {
                 if(exists && !overwrite) {
                     return null;
                 }
-                return xm.mkdirCheckQ(dir);
-            }).then(function () {
-                if(file.content) {
-                    return file.content;
-                }
-                return _this.loadContent(file);
-            }).then(function () {
-                return FS.exists(targetPath);
-            }).then(function (exists) {
-                if(exists) {
-                    return FS.remove(targetPath);
-                }
-                return null;
-            }).then(function () {
-                return FS.write(targetPath, file.content);
-            }).then(function () {
-                return targetPath;
+                return _this.loadContent(file).then(function () {
+                    return FS.exists(targetPath);
+                }).then(function (exists) {
+                    if(exists) {
+                        return FS.remove(targetPath);
+                    }
+                    return xm.mkdirCheckQ(dir, true);
+                }).then(function () {
+                    return FS.write(targetPath, file.content);
+                }).then(function () {
+                    return targetPath;
+                });
             });
         };
         Core.prototype.useFileBulk = function (list, overwrite) {
@@ -2838,7 +2891,7 @@ var tsd;
         };
         NameMatcher.prototype.compile = function () {
             if(!this.pattern) {
-                throw (new Error('SelectorFilePattern undefined pattern'));
+                throw (new Error('NameMatcher undefined pattern'));
             }
             this.projectExp = null;
             this.nameExp = null;
@@ -2852,7 +2905,7 @@ var tsd;
             patternSingle.lastIndex = 0;
             var match = patternSingle.exec(this.pattern);
             if(match.length < 4) {
-                throw (new Error('SelectorFilePattern bad match: "' + match + '"'));
+                throw (new Error('NameMatcher bad match: "' + match + '"'));
             }
             var glue;
             var gotMatch = false;
@@ -2878,7 +2931,7 @@ var tsd;
             patternSplit.lastIndex = 0;
             var match = patternSplit.exec(this.pattern);
             if(match.length < 7) {
-                throw (new Error('SelectorFilePattern bad match: "' + match + '"'));
+                throw (new Error('NameMatcher bad match: "' + match + '"'));
             }
             var glue;
             var gotProject = false;
@@ -2932,7 +2985,7 @@ var tsd;
                     return _this.projectExp.test(file.name);
                 };
             } else {
-                throw (new Error('SelectorFilePattern cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
+                throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
             }
         };
         return NameMatcher;
@@ -2974,8 +3027,8 @@ var tsd;
 (function (tsd) {
     var path = require('path');
     var util = require('util');
-    var Q = require('Q');
-    var FS = require('Q-io/fs');
+    var Q = require('q');
+    var FS = require('q-io/fs');
     var APIResult = (function () {
         function APIResult(index, selector) {
             if (typeof selector === "undefined") { selector = null; }
@@ -2993,7 +3046,14 @@ var tsd;
             this.context = context;
             xm.assertVar('context', context, tsd.Context);
             this._core = new tsd.Core(this.context);
+            xm.ObjectUtil.hidePrefixed(this);
         }
+        API.prototype.readConfig = function (optional) {
+            return this._core.readConfig(optional).thenResolve(null);
+        };
+        API.prototype.saveConfig = function () {
+            return this._core.saveConfig().thenResolve(null);
+        };
         API.prototype.search = function (selector) {
             xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector);
@@ -3118,6 +3178,19 @@ var xm;
         return Set;
     })();
     xm.Set = Set;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    function callAsync(callback) {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            args[_i] = arguments[_i + 1];
+        }
+        process.nextTick(function () {
+            callback.apply(null, args);
+        });
+    }
+    xm.callAsync = callAsync;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -3370,12 +3443,12 @@ var tsd;
 (function (tsd) {
     var path = require('path');
     var Q = require('q');
+    var FS = require('q-io/fs');
     function getContext(args) {
         xm.assertVar('args', args, 'object');
         var context = new tsd.Context(args.config, args.verbose);
         if(args.dev) {
-            context.paths.setTmp(path.join(path.dirname(xm.PackageJSON.find()), 'tmp', 'cli'));
-            context.paths.setCache(path.join(path.dirname(xm.PackageJSON.find()), 'cache'));
+            context.paths.cacheDir = path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
         }
         return context;
     }
@@ -3393,22 +3466,35 @@ var tsd;
     })();    
     function getAPIJob(args) {
         return Q.fcall(function () {
+            if(args.config) {
+                return FS.isFile(args.config).then(function (isFile) {
+                    if(!isFile) {
+                        throw new Error('specified config is not a file: ' + args.config);
+                    }
+                    return null;
+                });
+            }
+            return null;
+        }).then(function () {
             var job = new Job();
             job.context = getContext(args);
             job.api = new tsd.API(job.context);
-            return job;
+            var required = (!!args.config);
+            return job.api.readConfig(required).then(function () {
+                return job;
+            });
         });
     }
     function getSelectorJob(args) {
         return getAPIJob(args).then(function (job) {
-            if(args._.length === 0) {
+            if(args._.length !== 1) {
                 throw new Error('pass one selector pattern');
             }
             job.selector = new tsd.Selector(args._[0]);
             return job;
         });
     }
-    function runARGV(argvRaw, configPath) {
+    function runARGV(argvRaw) {
         var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
         var directNode = (argvRaw && argvRaw.length > 0 && argvRaw[0] === 'node');
         xm.log.debug('called directly as node param: ' + 'forcing dev mode (for now)'.cyan);

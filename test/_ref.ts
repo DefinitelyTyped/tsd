@@ -7,8 +7,11 @@
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fs-assert.d.ts" />
 
 ///<reference path="helper.ts" />
+///<reference path="../src/xm/io/Logger.ts" />
 
 declare var assert:chai.Assert;
+
+var mkdirp = require('mkdirp');
 
 var chai = require('chai');
 chai.use(require('chai-fuzzy'));
@@ -17,14 +20,12 @@ chai.use(require('chai-fs'));
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
 
-var _:UnderscoreStatic = require('underscore');
-
 require('source-map-support').install();
 
 before(() => {
 	// create some empty dirs (cannot check-in empty dirs to git)
-	//mkdirp.sync('./test/tmp');
 	//mkdirp.sync('./tmp');
 
+	mkdirp.sync('./test/tmp');
 	assert.isDirectory('./test/tmp');
 });

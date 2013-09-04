@@ -7,8 +7,8 @@ module tsd {
 
 	var path = require('path');
 	var util = require('util');
-	var Q:QStatic = require('Q');
-	var FS:Qfs = require('Q-io/fs');
+	var Q:QStatic = require('q');
+	var FS:Qfs = require('q-io/fs');
 
 	/*
 	 APIResult: hold result data (composition and meaning may vary)
@@ -43,6 +43,24 @@ module tsd {
 			xm.assertVar('context', context, tsd.Context);
 
 			this._core = new tsd.Core(this.context);
+
+			xm.ObjectUtil.hidePrefixed(this);
+		}
+
+		/*
+		 read the config from Context.path.configFile
+		 promise: null
+		 */
+		readConfig(optional:bool):Qpromise {
+			return this._core.readConfig(optional).thenResolve(null);
+		}
+
+		/*
+		 save the config from Context.path.configFile
+		 promise: null
+		 */
+		saveConfig():Qpromise {
+			return this._core.saveConfig().thenResolve(null);
 		}
 
 		/*

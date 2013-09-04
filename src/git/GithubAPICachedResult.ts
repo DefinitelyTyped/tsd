@@ -19,7 +19,6 @@ module git {
 		constructor(label:String, key:string, data:any) {
 			xm.assertVar('label', label, 'string');
 			xm.assertVar('key', key, 'string');
-			xm.assertVar('data', data, 'object');
 
 			this._label = label;
 			this._key = key;
@@ -27,7 +26,7 @@ module git {
 		}
 
 		setData(data:any):void {
-			xm.assertVar('data', data, 'object');
+			//TODO add data check?
 			this._data = data;
 			this._lastSet = new Date();
 		}

@@ -1,6 +1,6 @@
 # TSD 0.5.x INFO
 
-Some development notes that will help understanding how TDS 0.5.x is rebuild
+> Some development notes that will help understanding how TDS 0.5.x is rebuild
 
 ## Usage
 
@@ -27,7 +27,7 @@ Use DefinitelyTyped's Github repos directly as data source
 * Use the Github REST apis
 * Github API offers full access to Git and Repos data
 * Github API is rate limited to 60 request per hour unless authenticated
-* Gitraw RAW gets file content and is not rate limited
+* Github RAW gets file content and is not rate limited
 
 Solution: 
 
@@ -37,9 +37,9 @@ Solution:
 
 Complications:
 
-* While git defines a unique file as a blob (by sha) the RAW interface gets files by their path and commit-sha.
+* While git itself defines a unique file as a blob (by sha) the RAW interface only returns files by their path and commit-sha.
 * Using full commit-trees is undesirable as DefinitelyTyped has many commits and many files.
-* A commit + tree listing a file is not necessary the commit that changed that specific file (that requires a more specific query).
+* A commit + tree listing files is not necessary the commit that changed that specific file (it requires a more specific query).
 
 ## Model
 
@@ -51,7 +51,7 @@ Depends heavily on Promise's for async operation (using the excellent [kriskowal
 
 Code in `/src`, also contains the 2 main files to compile to `/build` (`cli` and `api`)
 
-Code modules (short names, because lazy :)
+Code modules: (short names, because lazy :)
 
 `/tsd` - all TSD specific code
 `/git` - holds Git and Github specific code (not coupled to TSD) 
@@ -71,13 +71,12 @@ Data structure files in `/tsd/data`
 	* Identified as the combination of a `Def` and a `DefCommit`
 	* It can hold the source code and the derivatives (parsed info, resolved dependencies, history etc)
 	* Note: due to the rate-limit on the API the file content is get from Github RAW by path + commit-sha (instead of blob-sha): it is not workable to identify `DefVersion`s by their blob-sha without busting the rate-limit. Depending on the flow this means there can be `DefVersion` instances with different commits but identical file contents.
-	* No
 * A single commit is a `DefCommit`. 
 	* Identified by its git sha.
 	* Can hold meta-data (authors, message etc) 
 	* Due to the many commits in DefinitelyTyped not all commits are loaded: only when relevant.
-	* Due to the large amount of definitions in DefinitelyTyped and our limit on API use a `DefCommit`does NOT contain use the git tree objects. 
-* The other files are support or data objects uses by the others. 
+	* Due to the large amount of definitions in DefinitelyTyped and our limit on API-use, a `DefCommit` does NOT contain a git tree-object (as each generation tree contains many identical blobs).
+* The other files are support or data objects uses by these main types. 
 
 Context and config model in `/tsd/context`
 

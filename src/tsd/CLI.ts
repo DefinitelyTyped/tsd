@@ -1,12 +1,15 @@
 ///<reference path="_ref.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/Expose.ts" />
+///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/DateUtil.ts" />
+///<reference path="context/Context.ts" />
 
 module tsd {
 
 	var path = require('path');
 	var Q:QStatic = require('q');
+	var FS:Qfs = require('q-io/fs');
 
 	function getContext(args?:any):tsd.Context {
 		xm.assertVar('args', args, 'object');
@@ -14,8 +17,7 @@ module tsd {
 		var context = new tsd.Context(args.config, args.verbose);
 
 		if (args.dev) {
-			context.paths.setTmp(path.join(path.dirname(xm.PackageJSON.find()), 'tmp', 'cli'));
-			context.paths.setCache(path.join(path.dirname(xm.PackageJSON.find()), 'cache'));
+			context.paths.cacheDir = path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
 		return context;
 	}
@@ -40,20 +42,39 @@ module tsd {
 	function getAPIJob(args:any):Qpromise {
 		// callback for easy error reporting
 		return Q.fcall(() => {
+			//verify valid path
+			if (args.config) {
+				return FS.isFile(<string>args.config).then((isFile:bool) => {
+					if (!isFile) {
+						throw new Error('specified config is not a file: ' + args.config);
+					}
+					return null;
+				});
+			}
+			return null;
+		}).then(() => {
 			var job = new Job();
 			job.context = getContext(args);
 			job.api = new tsd.API(job.context);
-			// TODO parse options
-			return job;
+
+			// TODO parse more options
+
+			var required:bool = (!!args.config);
+			return job.api.readConfig(required).then(() => {
+				return job;
+			});
 		});
 	}
 
 	function getSelectorJob(args:any):Qpromise {
 		// callback for easy error reporting
 		return getAPIJob(args).then((job:Job) => {
-			if (args._.length === 0) {
+			if (args._.length !== 1) {
 				throw new Error('pass one selector pattern');
 			}
+
+			// TODO multiple selectors
+
 			job.selector = new Selector(args._[0]);
 			return job;
 		});
@@ -64,7 +85,7 @@ module tsd {
 	/*
 	 runARGV: run raw cli arguments, like process.argv
 	 */
-	export function runARGV(argvRaw:any, configPath?:string) {
+	export function runARGV(argvRaw:any) {
 
 		var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
 

@@ -5,6 +5,7 @@
 ///<reference path="../../xm/data/PackageJSON.ts" />
 ///<reference path="Config.ts" />
 ///<reference path="Paths.ts" />
+///<reference path="Const.ts" />
 
 module tsd {
 
@@ -18,6 +19,7 @@ module tsd {
 	//TODO mode this into more central spot, always-run?
 	require('source-map-support').install();
 	process.setMaxListeners(20);
+	Q.longStackSupport = true;
 
 	/*
 	 Context: bundles the configuration and core functionality
@@ -32,25 +34,18 @@ module tsd {
 		//TODO drop this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.log;
 
-		constructor(configPath:string = null, public verbose?:bool = false) {
-			xm.assertVar('configPath', configPath, 'string', true);
-
-			//TODO should not auto-create folders (add method).
+		constructor(public configFile?:string = null, public verbose?:bool = false) {
+			//xm.assertVar('configPath', configPath, 'string', true);
 
 			this.packageInfo = xm.PackageJSON.getLocal();
-			this.paths = new Paths(this.packageInfo);
 
-			var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(this.packageInfo.path), 'schema', 'tsd-config_v4.json'));
-			this.config = Config.getLocal(schema, configPath || this.paths.config);
-
-			this.paths.typings = xm.mkdirCheckSync(this.config.typingsPath, true);
-
-			//sweet stacks
-			Q.longStackSupport = true;
-
-			if (this.verbose) {
-				this.logInfo(true);
+			this.paths = new Paths();
+			if (configFile) {
+				this.paths.configFile = path.resolve(configFile);
 			}
+			var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+
+			this.config = new Config(schema);
 		}
 
 		logInfo(details:bool = false):void {

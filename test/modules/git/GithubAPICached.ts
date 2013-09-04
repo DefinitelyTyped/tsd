@@ -10,8 +10,7 @@ describe.skip('git.GithubAPICached', () => {
 	var repo:git.GithubRepo;
 
 	var path = require('path');
-	var tmpDir = path.join(__dirname);
-	var cacheDir = path.join(tmpDir, 'git_api');
+	var cacheDir;
 
 	var testStat = (api:git.GithubAPICached, id:string, num:number, label?:string) => {
 		assert.strictEqual(api.stats.get(id), num, label ? label + ':' + id : id);
@@ -19,8 +18,11 @@ describe.skip('git.GithubAPICached', () => {
 
 	before(() => {
 		context = new tsd.Context();
+		context.paths.cacheDir = path.resolve(__dirname, tsd.Const.cacheDir);
+
+		cacheDir = path.join(context.paths.cacheDir, 'git_api');
+
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
-		context.paths.setTmp(tmpDir);
 	});
 
 	it('should be defined', () => {
@@ -57,13 +59,14 @@ describe.skip('git.GithubAPICached', () => {
 	describe('getBranches', () => {
 
 		it('should not be cached', (done:() => void) => {
-			assert.isObject(api, 'instance');
+			api = new git.GithubAPICached(repo, cacheDir);
+			//api.debug = true;
 
 			api.getCachedRaw(api.getKey('bleh blah')).then((data) => {
 				assert.notOk(data, 'callback data');
 			},(err) => {
-				xm.log.inspect(err);
-				assert.notOk(err, 'callback err');
+				xm.log.error(err);
+				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();
 			}).done();
@@ -90,6 +93,7 @@ describe.skip('git.GithubAPICached', () => {
 				// get again, should be cached
 				return api.getBranches();
 			},(err) => {
+				xm.log.error(err);
 				assert(false, 'error: ' + err);
 			}).then((data) => {
 				//xm.log('getBranches 2');
@@ -102,6 +106,7 @@ describe.skip('git.GithubAPICached', () => {
 				testStat(api, 'store-miss', 1, 'second');
 				testStat(api, 'store-set', 1, 'second');
 			},(err) => {
+				xm.log.error(err);
 				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();

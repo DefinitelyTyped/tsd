@@ -42,7 +42,7 @@ describe('Context', () => {
 			it('should have properties', () => {
 				assert.isString(info.name, 'name');
 				assert.isString(info.version, 'version');
-				assert.isObject(info.pkg, 'pkg');
+				assert.isObject(info.raw, 'pkg');
 			});
 		});
 		//more in Context
@@ -70,20 +70,15 @@ describe('Context', () => {
 				assert.isObject(ctx.packageInfo, 'packageInfo');
 				assert.isString(ctx.packageInfo.name, 'name');
 				assert.isString(ctx.packageInfo.version, 'version');
-				assert.isObject(ctx.packageInfo.pkg, 'pkg');
+				assert.isObject(ctx.packageInfo.raw, 'pkg');
 			});
 			it('exports valid paths', () => {
 				assert.isObject(ctx.paths, 'paths,');
-				assert.isDirectory(ctx.paths.tmp, 'tmp');
-				assert.isDirectory(ctx.paths.typings, 'typings');
-				assert.isDirectory(ctx.paths.cache, 'cache');
+				assert.isDirectory(ctx.paths.startCwd, 'startCwd');
 
-				// not enforced
-				assert.isString(ctx.paths.config, 'config');
-
-				if (fs.existsSync(ctx.paths.config)) {
+				/*if (fs.existsSync(ctx.paths.config)) {
 					assert.jsonSchemaFile(ctx.paths.config, configSchema, 'config');
-				}
+				}*/
 
 				// TODO assert writability when assertion is implemented in chai-fs
 			});

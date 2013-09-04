@@ -36,6 +36,7 @@ module tsd {
 
 		index:tsd.DefIndex;
 		resolver:tsd.Resolver;
+		stats = new xm.StatCounter();
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
@@ -45,12 +46,17 @@ module tsd {
 			this.index = new tsd.DefIndex();
 
 			//TODO bundle these into one? meh?
-			this.gitRepo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
-			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(context.paths.cache, 'git_api'));
-			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(context.paths.cache, 'git_raw'));
+			this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
+			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
+			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
 
 			this.gitAPI.debug = this.context.verbose;
 			this.gitRaw.debug = this.context.verbose;
+
+			this.stats.log = this.context.verbose;
+			this.stats.logger = xm.getLogger('Core');
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		/*
@@ -58,26 +64,42 @@ module tsd {
 		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
 		 */
 		getIndex():Qpromise {
+			this.stats.count('index-called');
 			if (this.index.hasIndex()) {
+				this.stats.count('index-hit');
 				return Q(this.index);
 			}
+			this.stats.count('index-miss');
 
 			var branchData;
+
+			this.stats.count('index-branch-get');
 
 			return this.gitAPI.getBranch(this.context.config.ref).then((data:any) => {
 				var sha = pointer.get(data, branch_tree);
 				if (!sha) {
+					this.stats.count('index-branch-get-fail');
 					throw new Error('missing sha hash');
 				}
+				this.stats.count('index-branch-get-success');
+				this.stats.count('index-tree-get');
 				//keep for later
 				branchData = data;
 				return this.gitAPI.getTree(sha, true);
-			})
-			.then((data:any) => {
+			},(err) => {
+				this.stats.count('index-branch-get-error');
+				xm.log.error(err);
+				throw err;
+			}).then((data:any) => {
 				//xm.log(data);
+				this.stats.count('index-tree-get-success');
 				this.index.init(branchData, data);
 
 				return this.index;
+			}, (err) => {
+				this.stats.count('index-tree-get-error');
+				xm.log.error(err);
+				throw err;
 			});
 		}
 
@@ -187,6 +209,24 @@ module tsd {
 			})).thenResolve(written);
 		}
 
+		/*
+		 load the current configFile, optional to not throw error on missing file
+		 promise: null
+		 */
+		readConfig(optional?:bool = false):Qpromise {
+			return FS.exists(this.context.paths.configFile).then((exists) => {
+				if (!exists) {
+					if (!optional) {
+						throw new Error('cannot locate file: ' + this.context.paths.configFile);
+					}
+					return null;
+				}
+				return xm.FileUtil.readJSONPromise(this.context.paths.configFile).then((json) => {
+					this.context.config.parseJSON(json);
+					return null;
+				});
+			});
+		}
 
 		/*
 		 save current config to project json
@@ -194,10 +234,13 @@ module tsd {
 		 */
 		saveConfig():Qpromise {
 			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
+			var dir = path.dirname(this.context.paths.configFile);
 
-			return FS.write(this.context.paths.config, json).then(() => {
-				xm.log('config written to: ' + this.context.paths.config);
-				return this.context.paths.config;
+			return xm.mkdirCheckQ(dir, true).then(() => {
+				return FS.write(this.context.paths.configFile, json);
+			}).then(() => {
+				xm.log('config written to: ' + this.context.paths.configFile);
+				return this.context.paths.configFile;
 			});
 		}
 
@@ -344,32 +387,29 @@ module tsd {
 		 promise: absolute path of written file
 		 */
 		useFile(file:tsd.DefVersion, overwrite:bool = true):Qpromise {
-			var targetPath = path.resolve(this.context.paths.typings, file.def.path);
+			var targetPath = path.resolve(this.context.config.typingsPath, file.def.path);
 			var dir = path.dirname(targetPath);
 
 			return FS.exists(targetPath).then((exists:bool) => {
 				if (exists && !overwrite) {
+					//bail
 					return null;
 				}
-				return xm.mkdirCheckQ(dir);
-			}).then(():any => {
-				if (file.content) {
-					return file.content;
-				}
-				return this.loadContent(file);
-			}).then(() => {
-				//check again? (race?)
-				return FS.exists(targetPath);
-			}).then((exists:bool) => {
-				if (exists) {
-					return FS.remove(targetPath);
-				}
-				return null;
-			}).then(() => {
-				return FS.write(targetPath, file.content);
-			}).then(() => {
-				//return the target path
-				return targetPath;
+				//write
+				return this.loadContent(file).then(() => {
+					//check again? (race?)
+					return FS.exists(targetPath);
+				}).then((exists:bool) => {
+					if (exists) {
+						return FS.remove(targetPath);
+					}
+					return xm.mkdirCheckQ(dir, true);
+				}).then(() => {
+					return FS.write(targetPath, file.content);
+				}).then(() => {
+					//return the target path
+					return targetPath;
+				});
 			});
 		}
 

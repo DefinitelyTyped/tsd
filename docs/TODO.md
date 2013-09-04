@@ -1,10 +1,12 @@
 # TSD 0.5.x TODO
 
-Tracking work that needs to be done
+> Tracking work that needs to be done
+
+See the [INFO.md](INFO.md) for project development info.
 
 ## Issues
 
-This info might later migrate to the github issue tracker.
+This info might later migrate to the Github Issue tracker.
 
 ## Local changes
 
@@ -14,9 +16,8 @@ Or use `$ grunt todos` for an overview. :point_left::+1:
 
 :warning: Most (but not all) of these are file/class/block 'local' changes so easy to fix without conflicts (filling out prototype stuff, hardening, re-implement etc), note: some are more important then others.
 
-See the [INFO.md](INFO.md) for project development info.
 
-## Global / mutli-file changes:
+## Global / multi-file changes:
 
 Must fix:
 
@@ -26,37 +27,43 @@ Must fix:
 * -
 * [ ] Decide on caching directory: sub folder of tmp? home/user? need tmp at all?
 * [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
-* [ ] Change Context objects to use Q/Q-io and not auto-create folders at init until properly configured.
+* [x] Change Context objects to use Q/Q-io and not auto-create folders at init until properly configured.
 * [ ] Decide if raw.github needs its cache; maybe just keep for testing but skip for production?
 * -
-* [ ] Add some options and unify names (both cli as API)
+* [ ] Add some options and unify their names (both for CLI as API)
 * [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
-* [ ] Find solution to update TSDPM.com (use TSD molule API? does it run a Node.js server?)
-* [ ] Add method for (re) initialisation of config (when you want to start in non-default branch etc)
+* [ ] Find solution to update TSDPM.com (use module API? does it run a Node.js server?)
+* [ ] Verify correct promise error handling (in mid-flow, at end of api & cli and in tests)
 
 Should fix:
 
+* [ ] Add support for multiple Selectors 
 * [ ] Add InfoMatcher to Selector / select()
 * [ ] Add search-by-date to history-command, add as DateMatcher to Selector / select()
 * [ ] Add manual purge/flush-command
 * [ ] Add periodic automated purge/flush
-* [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)  
+* [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
+* * [ ] Add command for (re) initialisation of config (when you want to start in non-default branch etc)  
 * [ ] Import tests for header parser from tsd-deftools @bartvds
-* [ ] Improve DefInfo/Parser to extract more info
+* [ ] Improve / harden DefInfo/Parser to extract more info, from more files
 * [ ] Add a global store for JSON pointers and RegExps etc
-* [ ] Refactor Core: split up: index/select stuff vs helper methods/objects
 * [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
-* [ ] Decide if API and/or Core etc need a queue-sytem hardening (module use might be race condition unsafe)
+* [ ] Decide if API and/or Core etc need a queue-sytem hardening (module use might (partially) be race condition unsafe)
 * [ ] Sweep used modules: require() and package.json
 * [ ] Improve Expose for crisper CLI help screen layout (table/columns)
 * [ ] Add npm pre-publish tests
+* [ ] Update config's JSON-Schema and improve validation reporting
+* [ ] Sweep and optimise reference-paths, but how?
+* [ ] Verify "use strict" (needed in node?)
+* [ ] Consider adding timeouts?
 
 Could fix:
 
 * [ ] Consider g-zip for caches
+* [ ] Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * [ ] Check for missing extra commands (compare etc)
-* [ ] Add TSD release updates/news to CLI console (pull package.json oid from github)
-* [ ] Add property locking: Object.freeze() etc to data objects; ditch getters-only private vars for groze/read-only.
+* [ ] Add TSD release/updates news to CLI console (periodically pull package.json from github)
+* [ ] Add property locking: Object.freeze() etc to data objects; ditch getters-only private vars for freeze/read-only.
 * [ ] Add feature to open a browser to see the pages on github? (diffs, comments etc)
 * [ ] Add feature to open a browser at a project's url (from info)
 

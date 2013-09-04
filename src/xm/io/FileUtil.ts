@@ -7,11 +7,13 @@
  * */
 
 ///<reference path="../../_ref.ts" />
-///<reference path="../callAsync.ts" />
+///<reference path="mkdirCheck.ts" />
 
 module xm {
 
 	var fs = require('fs');
+	var Q:QStatic = require('q');
+	var FS:Qfs = require('q-io/fs');
 	var path = require('path');
 	var util = require('util');
 
@@ -19,34 +21,29 @@ module xm {
 	 FileUtil: do stuff with files
 	 */
 	// TODO refactor to functions (xm.fs)
-	export class FileUtil {
+	export module FileUtil {
 
-		static readJSONSync(src:string):any {
-			return JSON.parse(fs.readFileSync(src, 'utf8'));
+		export function readJSONSync(src:string):any {
+			return JSON.parse(fs.readFileSync(src, {encoding: 'utf8'}));
 		}
 
-		static readJSON(src:string, callback:(err, res:any) => void) {
-			fs.readFile(path.resolve(src), 'utf8', (err, file) => {
-				if (err || !file) {
-					return callback(err, null);
-				}
-				var json = null;
-				try {
-					json = JSON.parse(file);
-				}
-				catch (err) {
-					return callback(err, null);
-				}
-				return callback(null, json);
+		export function readJSONPromise(src:string):Qpromise {
+			return FS.read(src ,{encoding: 'utf8'}).then((text:string) => {
+				return JSON.parse(text);
 			});
 		}
 
-		static writeJSONSync(src:string, data:any, callback:(err, res:any) => void) {
-			fs.writeFileSync(path.resolve(src), JSON.stringify(data, null, 2), 'utf8');
+		export function writeJSONSync(dest:string, data:any) {
+			dest = path.resolve(dest);
+			xm.mkdirCheckSync(path.dirname(dest));
+			fs.writeFileSync(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 		}
 
-		static writeJSON(src:string, data:any, callback:(err) => void) {
-			fs.writeFile(path.resolve(src), JSON.stringify(data, null, 2), 'utf8', callback);
+		export function writeJSONPromise(dest:string, data:any):Qpromise {
+			dest = path.resolve(dest);
+			return xm.mkdirCheckQ(path.dirname(dest), true).then(() => {
+				return FS.write(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
+			});
 		}
 	}
 }

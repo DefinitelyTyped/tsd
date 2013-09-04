@@ -41,7 +41,7 @@ module tsd {
 		// crude compilator
 		private compile():void {
 			if (!this.pattern) {
-				throw (new Error('SelectorFilePattern undefined pattern'));
+				throw (new Error('NameMatcher undefined pattern'));
 			}
 			this.projectExp = null;
 			this.nameExp = null;
@@ -61,7 +61,7 @@ module tsd {
 			var match = patternSingle.exec(this.pattern);
 
 			if (match.length < 4) {
-				throw (new Error('SelectorFilePattern bad match: "' + match + '"'));
+				throw (new Error('NameMatcher bad match: "' + match + '"'));
 			}
 			var glue:xm.RegExpGlue;
 
@@ -90,7 +90,7 @@ module tsd {
 			var match = patternSplit.exec(this.pattern);
 
 			if (match.length < 7) {
-				throw (new Error('SelectorFilePattern bad match: "' + match + '"'));
+				throw (new Error('NameMatcher bad match: "' + match + '"'));
 			}
 			var glue:xm.RegExpGlue;
 
@@ -155,7 +155,7 @@ module tsd {
 				};
 			}
 			else {
-				throw (new Error('SelectorFilePattern cannot compile pattern: ' + JSON.stringify(<any>this.pattern) + ''));
+				throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(<any>this.pattern) + ''));
 			}
 		}
 	}

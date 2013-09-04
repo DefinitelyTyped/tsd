@@ -18,12 +18,12 @@ module xm {
 
 		}
 
-		count(id:string, amount?:number = 1):number {
-			var value = this.stats.get(id, 0) + amount;
+		count(id:string, label?:string):number {
+			var value = this.stats.get(id, 0) + 1;
 			this.stats.set(id, value);
 
 			if (this.log && this.logger) {
-				this.logger('-> ' + id + ': ' + this.stats.get(id));
+				this.logger('-> ' + id + ': ' + this.stats.get(id) + (label ? ': ' + label : ''));
 			}
 			return value;
 		}

@@ -70,7 +70,7 @@ module xm {
 			if (typeAssert.hasOwnProperty(type)) {
 				var check = typeAssert[type];
 				if (!check(value)) {
-					throw (new Error('expected "' + label + '" to be a "' + type + '" but got "' + valueType + '": ' + value));
+					throw (new Error('expected "' + label + '" to be a "' + type + '": ' + value));
 				}
 			}
 			else if (valueType !== type) {

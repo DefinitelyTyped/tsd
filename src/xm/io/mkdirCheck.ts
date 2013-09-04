@@ -7,7 +7,7 @@
  * */
 
 module xm {
-
+	//TODO move to FileUtil
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
 	var mkdirp = require('mkdirp');
@@ -17,7 +17,7 @@ module xm {
 	 mkdirCheck: like mkdirp but with writable rights and verification, synchronous
 	 */
 	//TODO unit test this
-	export function mkdirCheckSync(dir:string, writable?:bool = false):string {
+	export function mkdirCheckSync(dir:string, writable?:bool = false, testWritable?:bool = false):string {
 		dir = path.resolve(dir);
 		if (fs.existsSync(dir)) {
 			if (!fs.statSync(dir).isDirectory()) {
@@ -35,7 +35,7 @@ module xm {
 				mkdirp.sync(dir);
 			}
 		}
-		if (writable) {
+		if (testWritable) {
 			var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
 			try {
 				fs.writeFileSync(testFile, 'test');
@@ -53,7 +53,7 @@ module xm {
 	 mkdirCheckQ: like mkdirp but with writable rights and verification, returns a promise
 	 */
 	//TODO unit test this
-	export function mkdirCheckQ(dir:string, writable?:bool = false):Qpromise {
+	export function mkdirCheckQ(dir:string, writable?:bool = false, testWritable?:bool = false):Qpromise {
 		dir = path.resolve(dir);
 
 		return FS.exists(dir).then((exists:bool) => {
@@ -73,7 +73,7 @@ module xm {
 			}
 			return Q.nfcall(mkdirp, dir);
 		}).then(() => {
-			if (writable) {
+			if (testWritable) {
 				var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
 
 				return FS.write(testFile, 'test').then(() => {

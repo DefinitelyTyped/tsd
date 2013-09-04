@@ -43,10 +43,10 @@ module tsd {
 	 */
 	export class Config {
 
-		typingsPath:string = 'typings';
-		version:string = 'v4';
-		repo:string = 'borisyankov/DefinitelyTyped';
-		ref:string = 'master';
+		typingsPath:string;
+		version:string;
+		repo:string;
+		ref:string;
 
 		private _installed:xm.KeyValueMap = new xm.KeyValueMap();
 		private _schema:any;
@@ -54,6 +54,12 @@ module tsd {
 		constructor(schema:any) {
 			xm.assertVar('schema', schema, 'object');
 			this._schema = schema;
+
+			//import defaults
+			this.typingsPath = tsd.Const.typingsFolder;
+			this.version = tsd.Const.configVersion;
+			this.repo = tsd.Const.definitelyRepo;
+			this.ref = tsd.Const.mainBranch;
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
@@ -106,6 +112,7 @@ module tsd {
 			return this._installed.values();
 		}
 
+		//TODO unit test this against JSON-Schema (maybe always?)
 		toJSON():any {
 			var json = {
 				typingsPath: this.typingsPath,
@@ -130,15 +137,18 @@ module tsd {
 		parseJSON(json:any) {
 			xm.assertVar('json', json, 'object');
 
+			this._installed.clear();
+
 			var res = tv4.validateResult(json, this._schema);
 
+			//TODO improve formatting
 			if (!res.valid || res.missing.length > 0) {
-				xm.log(res.error.message);
+				xm.log.error(res.error.message);
 				if (res.error.dataPath) {
-					xm.log(res.error.dataPath);
+					xm.log.error(res.error.dataPath);
 				}
 				if (res.error.schemaPath) {
-					xm.log(res.error.schemaPath);
+					xm.log.error(res.error.schemaPath);
 				}
 				throw (new Error('malformed config: doesn\'t comply with schema'));
 			}
@@ -149,7 +159,6 @@ module tsd {
 			this.repo = json.repo;
 			this.ref = json.ref;
 
-			this._installed.clear();
 
 			xm.eachProp(json.installed, (data:any, path:string) => {
 
@@ -161,27 +170,6 @@ module tsd {
 
 				this._installed.set(path, installed);
 			});
-		}
-
-		//TODO move this to async Q-io (with rest of Context/Path refactor)
-		static getLocal(schema:any, file:string):Config {
-			xm.assertVar('schema', schema, 'object');
-			xm.assertVar('file', file, 'string');
-
-			var cfg = new Config(schema);
-			var json:any;
-
-			if (fs.existsSync(file)) {
-
-				var stats = fs.statSync(file);
-				if (stats.isDirectory()) {
-					throw (new Error('config path exists but is a directory: ' + file));
-				}
-				json = xm.FileUtil.readJSONSync(file);
-
-				cfg.parseJSON(json);
-			}
-			return cfg;
 		}
 	}
 }

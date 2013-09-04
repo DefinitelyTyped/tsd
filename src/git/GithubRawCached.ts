@@ -17,12 +17,13 @@ module git {
 	 GithubRawCached: get files from raw.github.com and cache on disk
 	 */
 	//TODO add pruning/clear feature
+	//TODO add skip-cache feature
 	export class GithubRawCached {
 
 		private _repo:git.GithubRepo;
 		private _dir:string;
 		private _debug:bool = false;
-		private _formatVersion:string = '0.0.1';
+		private _formatVersion:string = '0.0.2';
 		private _active:xm.KeyValueMap = new xm.KeyValueMap();
 
 		stats = new xm.StatCounter(false);
@@ -35,9 +36,10 @@ module git {
 			this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
 
 			xm.ObjectUtil.hidePrefixed(this);
+
+			this.stats.logger = xm.getLogger('GithubRawCached');
 		}
 
-		//TODO cache promises while loading to harden against race conditions
 		getFile(commitSha:string, filePath:string):Qpromise {
 			this.stats.count('invoked');
 
@@ -45,7 +47,7 @@ module git {
 			tmp.unshift(commitSha);
 			tmp.unshift(this._dir);
 
-			var key = commitSha + '/' + filePath;
+			var key = commitSha + '|' + filePath;
 
 			var storeFile = path.join.apply(null, tmp);
 			if (this._debug) {
@@ -74,7 +76,7 @@ module git {
 						}
 						this.stats.count('store-hit');
 
-						//read from cache and be done
+						//read from cache
 						return FS.read(storeFile);
 					});
 				}
@@ -83,17 +85,22 @@ module git {
 					this.stats.count('store-miss');
 
 					var opts = {
-						url: this._repo.urls.rawFile(commitSha, filePath)
+						url: this._repo.urls.rawFile(commitSha, filePath),
+						timeout : 7070
 					};
+
+					this.stats.count('request-call');
 					if (this._debug) {
-						xm.log(opts.url);
+						xm.log(opts);
 					}
 
 					//do the actual download
 					return Q.nfcall(request.get, opts).spread((res) => {
 						if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
+							this.stats.count('request-error');
 							throw new Error('unexpected status code: ' + res.statusCode);
 						}
+						this.stats.count('request-complete');
 						// according to the headers raw github is binary encoded, but from what? utf8?
 						//TODO find correct way to handle binary encoding type (low prio)
 						var content = String(res.body);
@@ -111,15 +118,32 @@ module git {
 							//throw(err);
 							//still return data?
 							return content;
-						}).then((content) => {
-							// make this catch() instead?
-							// drop the promise from active list
-							this._active.remove(key);
-							//be done
-							return content;
 						});
+					}, (err) => {
+						this.stats.count('request-error');
+						xm.log.error(err);
+						throw err;
+					}).then((content) => {
+
+						//TMP DEBUG CODE
+
+						xm.log(content);
+						xm.log('loaded content');
+						return content;
+					}, (err) => {
+
+						//TMP DEBUG CODE
+
+						xm.log.warn('could not write to err');
+						//throw(err);
+						//still return data?
+						return null;
 					});
 				}
+			}).then((content) => {
+				// drop the promise from active list
+				this._active.remove(key);
+				return content;
 			});
 			//keep promise while we are loading
 			this._active.set(key, promise);

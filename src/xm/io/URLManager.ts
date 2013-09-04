@@ -6,7 +6,7 @@
  * License: MIT - 2013
  * */
 
- ///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
 module xm {
 
@@ -69,7 +69,19 @@ module xm {
 
 		public getURL(id:string, vars?:any):string {
 			if (vars) {
-				return this.getTemplate(id).fillFromObject(_.defaults(vars, this._vars));
+				var obj = {};
+				var name;
+				for (name in this._vars) {
+					if (this._vars.hasOwnProperty(name)) {
+						obj[name] = this._vars[name];
+					}
+				}
+				for (name in vars) {
+					if (vars.hasOwnProperty(name)) {
+						obj[name] = vars[name];
+					}
+				}
+				return this.getTemplate(id).fillFromObject(obj);
 			}
 			return this.getTemplate(id).fillFromObject(this._vars);
 		}

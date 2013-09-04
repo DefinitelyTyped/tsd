@@ -24,7 +24,7 @@ module git {
 	//move to a .d.ts?
 	export interface GithubJS {
 		repos:git.GithubJSRepos;
-		data:git.GithubJSData;
+		gitdata:git.GithubJSData;
 	}
 	export interface GithubJSRepos {
 		getBranches(params:any, calback:git.GithubJSCallback);
@@ -55,7 +55,7 @@ module git {
 
 		private _debug:bool = false;
 
-		stats = new xm.StatCounter(false);
+		stats = new xm.StatCounter();
 		rate:GitRateLimitInfo;
 
 		constructor(repo:GithubRepo, storeFolder:string) {
@@ -69,6 +69,8 @@ module git {
 
 			this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
 			this.rate = new GitRateLimitInfo();
+
+			this.stats.logger = xm.getLogger('GithubAPICached');
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
@@ -110,7 +112,7 @@ module git {
 				recursive: recursive
 			});
 			return this.doCachedCall('getTree', params, {}, (cb) => {
-				this._api.data.getTree(params, cb);
+				this._api.gitdata.getTree(params, cb);
 			});
 		}
 
@@ -119,7 +121,7 @@ module git {
 				sha: sha
 			});
 			return this.doCachedCall('getCommit', params, {}, (cb) => {
-				this._api.data.getCommit(params, cb);
+				this._api.gitdata.getCommit(params, cb);
 			});
 		}
 
@@ -129,7 +131,7 @@ module git {
 				per_page: 100
 			});
 			return this.doCachedCall('getBlob', params, {}, (cb) => {
-				this._api.data.getBlob(params, cb);
+				this._api.gitdata.getBlob(params, cb);
 			});
 		}
 
@@ -157,62 +159,77 @@ module git {
 		}
 
 		//TODO promise-ify this further
-		//TODO harden against race conditions?
+		//TODO harden against race conditions? (use key to id request?)
 		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function):Qpromise {
 			var key = this.getKey(label, keyTerms);
 
 			opts = _.defaults(opts || {}, this._defaultOpts);
 
-			this.stats.count('invoked');
+			this.stats.count('invoked', label);
+
+			if (this._debug) {
+				xm.log(opts);
+				xm.log(keyTerms);
+			}
 
 			var defer = Q.defer();
 
 			// subroutine
 			var execCall = () => {
-				this.stats.count('call-api');
+				this.stats.count('call-api', label);
 
 				// classic callback
-				call.call(null, (err, res:any) => {
+				var cb = (err, res:any) => {
 					this.rate.readFromRes(res);
 					if (this._debug) {
 						xm.log(this.rate.toStatus());
 					}
 
 					if (err) {
-						this.stats.count('call-error');
+						this.stats.count('call-error', label);
 						defer.reject(err);
 						return;
 					}
-					this.stats.count('call-success');
+					this.stats.count('call-success', label);
 
 					var cached = new git.GithubAPICachedResult(label, key, res);
 
 					// permanent storage?
 					this._store.storeResult(cached).then((info) => {
 						if (err) {
-							this.stats.count('store-set-error');
+							this.stats.count('store-set-error', label);
 							defer.reject(err);
 						}
 						else {
-							this.stats.count('store-set');
+							this.stats.count('store-set', label);
 							defer.resolve(res);
 						}
 					});
-				});
+				};
+				//TODO move to a promise
+				// execute call, catch errors (ugly,
+				try {
+					call.call(null, cb);
+				}
+				catch (e) {
+					this.stats.count('call-function-error', label);
+					xm.log(e);
+					defer.reject(e);
+				}
 			};
 
 			// in permanent store?
 			this._store.getResult(key).then((res:GithubAPICachedResult) => {
 				if (res) {
-					this.stats.count('store-hit');
+					this.stats.count('store-hit', label);
 					defer.resolve(res.data);
 				}
 				else {
-					this.stats.count('store-miss');
+					this.stats.count('store-miss', label);
 					execCall();
 				}
 			}, (err) => {
-				this.stats.count('store-get-error');
+				this.stats.count('store-get-error', label);
 				defer.reject(err);
 			});
 			return defer.promise;
@@ -225,6 +242,7 @@ module git {
 		set debug(value:bool) {
 			this._debug = value;
 			this.stats.log = value;
+			this._store.stats.log = value;
 		}
 
 		getCacheKey():string {

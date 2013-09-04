@@ -1,51 +1,26 @@
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
-///<reference path="../../xm/io/mkdirCheck.ts" />
-///<reference path="../../xm/data/PackageJSON.ts" />
+///<reference path="../../xm/io/Logger.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="Const.ts" />
 
 module tsd {
 
-	var fs = require('fs');
-	var os = require('os');
 	var path = require('path');
 
-	//TODO clean this up, add Q-io (with Context refactoring)
 	export class Paths {
 
-		tmp:string;
-		typings:string;
-		config:string;
+		configFile:string;
+		cacheDir:string;
+		startCwd:string;
 
-		cache:string;
-
-		constructor(public info:xm.PackageJSON) {
-			xm.assertVar('info', info, xm.PackageJSON);
-
-			//TODO move creation to a method
-			this.setTmp(Paths.findTmpDir(info));
-
-			//TODO move to user profile similar to npm?
-			this.setCache(path.join(this.tmp, 'cache'));
-
-			this.typings = xm.mkdirCheckSync(path.resolve(process.cwd(), 'typings'), true);
-			this.config = path.join(process.cwd(), 'tsd-config.json');
-		}
-
-		setTmp(dir:string):string {
-			dir = xm.mkdirCheckSync(dir, true);
-			this.tmp = dir;
-			return this.tmp;
-		}
-
-		setCache(dir:string):string {
-			dir = xm.mkdirCheckSync(dir, true);
-			this.cache = dir;
-			return dir;
+		constructor() {
+			this.startCwd = path.resolve(process.cwd());
+			this.configFile = path.resolve(this.startCwd, tsd.Const.configFile);
+			this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
 		}
 
 		//TODO ditch this cargo-cult google-rip thing for proper version (and in Q-io)
-		static findTmpDir(info:xm.PackageJSON):string {
+		/*static findTmpDir(info:xm.PackageJSON):string {
 			xm.assertVar('info', info, xm.PackageJSON);
 
 			var now = Date.now();
@@ -72,6 +47,6 @@ module tsd {
 				}
 			}
 			throw (new Error('can not find a writable tmp directory.'));
-		}
+		}*/
 	}
 }
