@@ -1,5 +1,5 @@
 {
-  "typingsPath": "typings",
+  "typingsPath": "typings_test",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",

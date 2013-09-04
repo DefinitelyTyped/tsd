@@ -46,7 +46,10 @@ module git {
 		static fromJSON(json:any):GithubAPICachedResult {
 			xm.assertVar('label', json.label, 'string');
 			xm.assertVar('key', json.key, 'string');
-			xm.assertVar('data', json.data, 'object');
+
+			//TODO verify data a bit better
+			//xm.assertVar('data', json.data, 'object');
+
 			xm.assertVar('lastSet', json.lastSet, 'number');
 
 			var call = new git.GithubAPICachedResult(json.label, json.key, json.data);

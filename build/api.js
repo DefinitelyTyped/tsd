@@ -46,13 +46,13 @@ var xm;
                         throw (new Error('path exists but is not a directory: ' + dir));
                     }
                     if(writable) {
-                        return FS.chmod(dir, '0664');
+                        return FS.chmod(dir, '744');
                     }
                     return null;
                 });
             }
             if(writable) {
-                return Q.nfcall(mkdirp, dir, '0664');
+                return Q.nfcall(mkdirp, dir, '744');
             }
             return Q.nfcall(mkdirp, dir);
         }).then(function () {
@@ -835,7 +835,6 @@ var git;
         GithubAPICachedResult.fromJSON = function fromJSON(json) {
             xm.assertVar('label', json.label, 'string');
             xm.assertVar('key', json.key, 'string');
-            xm.assertVar('data', json.data, 'object');
             xm.assertVar('lastSet', json.lastSet, 'number');
             var call = new git.GithubAPICachedResult(json.label, json.key, json.data);
             call._lastSet = new Date(json.lastSet);
@@ -900,21 +899,21 @@ var git;
         }
         GithubAPICachedJSONStore.prototype.init = function () {
             var _this = this;
+            this.stats.count('init-called');
             return FS.exists(this.dir).then(function (exists) {
                 if(!exists) {
+                    _this.stats.count('init-create-dir', _this.dir);
                     return xm.mkdirCheckQ(_this.dir, true);
-                } else {
-                    return FS.isDirectory(_this.dir).then(function (isDir) {
-                        if(isDir) {
-                            return null;
-                        } else {
-                            throw new Error('is not a directory: ' + _this.dir);
-                        }
-                    });
                 }
+                return FS.isDirectory(_this.dir).then(function (isDir) {
+                    if(isDir) {
+                        return null;
+                    } else {
+                        throw new Error('is not a directory: ' + _this.dir);
+                    }
+                });
             }).fail(function (err) {
                 _this.stats.count('init-error');
-                xm.log.error(err);
                 throw err;
             });
         };
@@ -938,13 +937,11 @@ var git;
                         _this.stats.count('get-read-success');
                         return cached;
                     });
-                } else {
-                    _this.stats.count('get-miss');
-                    return null;
                 }
+                _this.stats.count('get-miss');
+                return null;
             }).fail(function (err) {
                 _this.stats.count('get-error');
-                xm.log.error(err);
                 throw err;
             });
         };
@@ -953,6 +950,15 @@ var git;
             var dest = path.join(this.dir, res.getHash() + '.json');
             this.stats.count('store-called');
             return this.init().then(function () {
+                return FS.exists(dest);
+            }).then(function (exists) {
+                if(exists) {
+                    _this.stats.count('store-overwrite');
+                    return FS.remove(dest);
+                }
+                _this.stats.count('store-new');
+                return null;
+            }).then(function () {
                 var data = JSON.stringify(res.toJSON(), null, 2);
                 return FS.write(dest, data);
             }).then(function () {
@@ -960,9 +966,8 @@ var git;
                 return {
                     dest: dest
                 };
-            }).fail(function (err) {
-                _this.stats.count('store-error');
-                xm.log.error(err);
+            }, function (err) {
+                _this.stats.count('store-write-error');
                 throw err;
             });
         };
@@ -1229,35 +1234,25 @@ var git;
             var defer = Q.defer();
             var execCall = function () {
                 _this.stats.count('call-api', label);
-                var cb = function (err, res) {
+                Q.nfcall(call).then(function (res) {
                     _this.rate.readFromRes(res);
                     if(_this._debug) {
                         xm.log(_this.rate.toStatus());
                     }
-                    if(err) {
-                        _this.stats.count('call-error', label);
-                        defer.reject(err);
-                        return;
-                    }
                     _this.stats.count('call-success', label);
                     var cached = new git.GithubAPICachedResult(label, key, res);
                     _this._store.storeResult(cached).then(function (info) {
-                        if(err) {
-                            _this.stats.count('store-set-error', label);
-                            defer.reject(err);
-                        } else {
-                            _this.stats.count('store-set', label);
-                            defer.resolve(res);
-                        }
+                        _this.stats.count('store-set', label);
+                        defer.resolve(res);
+                    }, function (err) {
+                        _this.stats.count('store-set-error', label);
+                        defer.reject(err);
                     });
-                };
-                try  {
-                    call.call(null, cb);
-                } catch (e) {
-                    _this.stats.count('call-function-error', label);
-                    xm.log(e);
-                    defer.reject(e);
-                }
+                }, function (err) {
+                    _this.stats.count('call-error', label);
+                    xm.log.error(err);
+                    defer.reject(err);
+                });
             };
             this._store.getResult(key).then(function (res) {
                 if(res) {
@@ -1370,8 +1365,7 @@ var git;
                 } else {
                     _this.stats.count('store-miss');
                     var opts = {
-                        url: _this._repo.urls.rawFile(commitSha, filePath),
-                        timeout: 7070
+                        url: _this._repo.urls.rawFile(commitSha, filePath)
                     };
                     _this.stats.count('request-call');
                     if(_this._debug) {
@@ -1384,27 +1378,19 @@ var git;
                         }
                         _this.stats.count('request-complete');
                         var content = String(res.body);
-                        return xm.mkdirCheckQ(path.dirname(storeFile)).then(function () {
+                        return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
                             return FS.write(storeFile, content);
                         }).then(function () {
                             _this.stats.count('store-set');
                             return content;
                         }, function (err) {
                             _this.stats.count('store-error');
-                            xm.log.warn('could not write to store');
                             return content;
                         });
                     }, function (err) {
                         _this.stats.count('request-error');
                         xm.log.error(err);
                         throw err;
-                    }).then(function (content) {
-                        xm.log(content);
-                        xm.log('loaded content');
-                        return content;
-                    }, function (err) {
-                        xm.log.warn('could not write to err');
-                        return null;
                     });
                 }
             }).then(function (content) {

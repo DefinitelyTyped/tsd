@@ -64,7 +64,7 @@ Main modules in `/tsd`
 
 Data structure files in `/tsd/data`
 
-* `DefIndex` is the central manager that holder the extracted repository data and is also a factory for the data objects. It will try to maintain only a single instance per identification and re-use/re-issue them.
+* `DefIndex` is the central model that holds the extracted repository data and is also a factory for the data objects. It will try to maintain only a single instance per identification and re-use/re-issue them. Does *not* perform IO or interaction with the application.
 * A single definition is a `Def`: 
 	* Identified as a project + file name (parsed from its path)
 * The Git versioned contents of a `Def` is a `DefVersion`. 
@@ -77,21 +77,23 @@ Data structure files in `/tsd/data`
 	* Due to the many commits in DefinitelyTyped not all commits are loaded: only when relevant.
 	* Due to the large amount of definitions in DefinitelyTyped and our limit on API-use, a `DefCommit` does NOT contain a git tree-object (as each generation tree contains many identical blobs).
 * The other files are support or data objects uses by these main types. 
+	* `DefUtils` has many utility helpers.   
 
 Context and config model in `/tsd/context`
 
-* `Context` bundles all settings for convenience (very handy with testing)
-	* Note: while the structure is good there is a historical conceptual flaw that is scheduled for fixing: originally all missing paths (like cache folders etc) are automatically recreated in constructor, but this is messy ad leaves cruft if you decide to change them (like after reading the config or in the tests).
+* `Context` bundles all settings sub-objects (very handy with testing).
 
 Logical building blocks in `/tsd/logic`
 
 * `Core` has the reusable functionality used to compose main features (used by itself and `API` etc)
+	*  :point_right: Most of the interesting functionality happens here :point_left:
 	* Also holds the central `DefIndex`
 * Other files are split-of from `Core` for clarity 
 
 Selector stuff `/tsd/select`
 
-* `Selector` and related data objects 
+* `Selector` and related data objects:
+	* `NameMatcher` matches the proejct/name-glob (needs expansion, see note in class)  
 
 ## Tests
 

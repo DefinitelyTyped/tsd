@@ -43,15 +43,12 @@ describe('git.GithubRawCached', () => {
 		var commitSha = '1eab71a53a7df593305bd9b8b27cb752cc045417';
 
 		it('should cache and return data', (done:() => void) => {
-			this.timeout(15000);
-
 			raw = new git.GithubRawCached(repo, cacheDir);
-			raw.debug = true;
+			//raw.debug = true;
 
 			assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
 
 			raw.getFile(commitSha, filePath).then((data) => {
-				xm.log('getFile 1');
 
 				assert.ok(data, 'callback data');
 
@@ -63,10 +60,9 @@ describe('git.GithubRawCached', () => {
 				// get again, should be cached
 				return raw.getFile(commitSha, filePath);
 			},(err) => {
-				xm.log.error(err);
+				xm.log.error('getFile 1', err);
 				assert(false, 'error: ' + err);
 			}).then((data) => {
-				xm.log('getFile 2');
 
 				assert.ok(data, 'second callback data');
 
@@ -76,7 +72,7 @@ describe('git.GithubRawCached', () => {
 				testStat(raw, 'store-set', 1, 'second');
 
 			},(err) => {
-				xm.log.error(err);
+				xm.log.error('getFile 2', err);
 				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();

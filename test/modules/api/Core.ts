@@ -14,7 +14,7 @@ describe('Core', () => {
 	before(() => {
 		context = new tsd.Context();
 		context.paths.cacheDir = path.resolve(__dirname, tsd.Const.cacheDir);
-		context.verbose = true;
+		//context.verbose = true;
 	});
 
 	it('should be defined', () => {

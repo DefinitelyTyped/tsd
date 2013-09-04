@@ -63,13 +63,13 @@ module xm {
 						throw (new Error('path exists but is not a directory: ' + dir));
 					}
 					if (writable) {
-						return FS.chmod(dir, '0664');
+						return FS.chmod(dir, '744');
 					}
 					return null;
 				});
 			}
 			if (writable) {
-				return Q.nfcall(mkdirp, dir, '0664');
+				return Q.nfcall(mkdirp, dir, '744');
 			}
 			return Q.nfcall(mkdirp, dir);
 		}).then(() => {

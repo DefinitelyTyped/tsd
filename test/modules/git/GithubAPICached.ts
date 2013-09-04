@@ -2,7 +2,7 @@
 ///<reference path="../../../src/git/GithubAPICached.ts" />
 ///<reference path="../../../src/tsd/context/Context.ts" />
 
-describe.skip('git.GithubAPICached', () => {
+describe('git.GithubAPICached', () => {
 
 	var api:git.GithubAPICached;
 
@@ -19,7 +19,6 @@ describe.skip('git.GithubAPICached', () => {
 	before(() => {
 		context = new tsd.Context();
 		context.paths.cacheDir = path.resolve(__dirname, tsd.Const.cacheDir);
-
 		cacheDir = path.join(context.paths.cacheDir, 'git_api');
 
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
@@ -58,14 +57,14 @@ describe.skip('git.GithubAPICached', () => {
 	});
 	describe('getBranches', () => {
 
-		it('should not be cached', (done:() => void) => {
+		it('should not return data for bogus key', (done:() => void) => {
 			api = new git.GithubAPICached(repo, cacheDir);
 			//api.debug = true;
 
 			api.getCachedRaw(api.getKey('bleh blah')).then((data) => {
 				assert.notOk(data, 'callback data');
 			},(err) => {
-				xm.log.error(err);
+				xm.log.error('getCachedRaw rejection', err);
 				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();
@@ -93,7 +92,7 @@ describe.skip('git.GithubAPICached', () => {
 				// get again, should be cached
 				return api.getBranches();
 			},(err) => {
-				xm.log.error(err);
+				xm.log.error('getBranches 1 rejection', err);
 				assert(false, 'error: ' + err);
 			}).then((data) => {
 				//xm.log('getBranches 2');
@@ -105,8 +104,8 @@ describe.skip('git.GithubAPICached', () => {
 				testStat(api, 'store-hit', 1, 'second');
 				testStat(api, 'store-miss', 1, 'second');
 				testStat(api, 'store-set', 1, 'second');
-			},(err) => {
-				xm.log.error(err);
+			},(err) => {;
+				xm.log.error('getBranches 2 rejection', err);
 				assert(false, 'error: ' + err);
 			}).fin(() => {
 				done();

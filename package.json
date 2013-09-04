@@ -25,6 +25,10 @@
     "test": "grunt test"
   },
   "homepage": "https://github.com/Diullei/tsd",
+  "repository" : {
+      "type" : "git"
+    , "url" : "http://github.com/Diullei/tsd.git"
+  },
   "engines": {
     "node": ">= 0.8.0"
   },

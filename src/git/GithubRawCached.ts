@@ -85,8 +85,7 @@ module git {
 					this.stats.count('store-miss');
 
 					var opts = {
-						url: this._repo.urls.rawFile(commitSha, filePath),
-						timeout : 7070
+						url: this._repo.urls.rawFile(commitSha, filePath)
 					};
 
 					this.stats.count('request-call');
@@ -106,7 +105,7 @@ module git {
 						var content = String(res.body);
 
 						//write it to cache
-						return xm.mkdirCheckQ(path.dirname(storeFile)).then(() => {
+						return xm.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
 							return FS.write(storeFile, content);
 						}).then(() => {
 							this.stats.count('store-set');
@@ -114,7 +113,6 @@ module git {
 						}, (err) => {
 							this.stats.count('store-error');
 							//TODO whut2do?
-							xm.log.warn('could not write to store');
 							//throw(err);
 							//still return data?
 							return content;
@@ -123,21 +121,6 @@ module git {
 						this.stats.count('request-error');
 						xm.log.error(err);
 						throw err;
-					}).then((content) => {
-
-						//TMP DEBUG CODE
-
-						xm.log(content);
-						xm.log('loaded content');
-						return content;
-					}, (err) => {
-
-						//TMP DEBUG CODE
-
-						xm.log.warn('could not write to err');
-						//throw(err);
-						//still return data?
-						return null;
 					});
 				}
 			}).then((content) => {

@@ -19,7 +19,7 @@ module git {
 	var FS:Qfs = require('q-io/fs');
 	/*
 	 GithubAPICachedJSONStore: data-store for cached github api results
-	*/
+	 */
 	//TODO consider alternate storage? not worth it?
 	//TODO generalise this for re-use?
 	//TODO add gzip compression?
@@ -43,23 +43,24 @@ module git {
 		}
 
 		private init():Qpromise {
+			this.stats.count('init-called');
+
 			return FS.exists(this.dir).then((exists:bool) => {
 				if (!exists) {
+					this.stats.count('init-create-dir', this.dir);
 					return xm.mkdirCheckQ(this.dir, true);
 				}
-				else {
-					return FS.isDirectory(this.dir).then((isDir:bool) => {
-						if (isDir) {
-							return null;
-						}
-						else {
-							throw new Error('is not a directory: ' + this.dir);
-						}
-					});
-				}
+
+				return FS.isDirectory(this.dir).then((isDir:bool) => {
+					if (isDir) {
+						return null;
+					}
+					else {
+						throw new Error('is not a directory: ' + this.dir);
+					}
+				});
 			}).fail((err) => {
 				this.stats.count('init-error');
-				xm.log.error(err);
 				throw err;
 			});
 		}
@@ -74,6 +75,7 @@ module git {
 			}).then((exists:bool) => {
 				if (exists) {
 					this.stats.count('get-exists');
+
 					return xm.FileUtil.readJSONPromise(src).then((json) => {
 						var cached;
 						try {
@@ -87,13 +89,10 @@ module git {
 						return cached;
 					});
 				}
-				else {
-					this.stats.count('get-miss');
-					return null;
-				}
+				this.stats.count('get-miss');
+				return null;
 			}).fail((err) => {
 				this.stats.count('get-error');
-				xm.log.error(err);
 				throw err;
 			});
 		}
@@ -104,14 +103,22 @@ module git {
 			this.stats.count('store-called');
 
 			return this.init().then(() => {
+				return FS.exists(dest);
+			}).then((exists:bool) => {
+				if (exists) {
+					this.stats.count('store-overwrite');
+					return FS.remove(dest);
+				}
+				this.stats.count('store-new');
+				return null;
+			}).then(() => {
 				var data = JSON.stringify(res.toJSON(), null, 2);
 				return FS.write(dest, data);
 			}).then(() => {
 				this.stats.count('store-written');
 				return {dest: dest};
-			}).fail((err) => {
-				this.stats.count('store-error');
-				xm.log.error(err);
+			}, (err) => {
+				this.stats.count('store-write-error');
 				throw err;
 			});
 		}

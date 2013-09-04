@@ -134,6 +134,7 @@ module.exports = function (grunt) {
 
 	// cli commands
 	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'tslint:source', 'mochaTest:integrity']);
+
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');
 

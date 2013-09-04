@@ -40,6 +40,10 @@ module git {
 		(err?:any, res?:any):void;
 	}
 
+	export interface GithubAPICallWrapper {
+		(cb:GithubJSCallback):void;
+	}
+
 	/*
 	 GithubAPICached: access github rest-api with local cache (evading the non-auth rate-limit)
 	 */
@@ -158,9 +162,8 @@ module git {
 			});
 		}
 
-		//TODO promise-ify this further
 		//TODO harden against race conditions? (use key to id request?)
-		private doCachedCall(label:string, keyTerms:any, opts:any, call:Function):Qpromise {
+		private doCachedCall(label:string, keyTerms:any, opts:any, call:GithubAPICallWrapper):Qpromise {
 			var key = this.getKey(label, keyTerms);
 
 			opts = _.defaults(opts || {}, this._defaultOpts);
@@ -178,17 +181,10 @@ module git {
 			var execCall = () => {
 				this.stats.count('call-api', label);
 
-				// classic callback
-				var cb = (err, res:any) => {
+				Q.nfcall(call).then((res) => {
 					this.rate.readFromRes(res);
 					if (this._debug) {
 						xm.log(this.rate.toStatus());
-					}
-
-					if (err) {
-						this.stats.count('call-error', label);
-						defer.reject(err);
-						return;
 					}
 					this.stats.count('call-success', label);
 
@@ -196,26 +192,17 @@ module git {
 
 					// permanent storage?
 					this._store.storeResult(cached).then((info) => {
-						if (err) {
-							this.stats.count('store-set-error', label);
-							defer.reject(err);
-						}
-						else {
-							this.stats.count('store-set', label);
-							defer.resolve(res);
-						}
+						this.stats.count('store-set', label);
+						defer.resolve(res);
+					}, (err) => {
+						this.stats.count('store-set-error', label);
+						defer.reject(err);
 					});
-				};
-				//TODO move to a promise
-				// execute call, catch errors (ugly,
-				try {
-					call.call(null, cb);
-				}
-				catch (e) {
-					this.stats.count('call-function-error', label);
-					xm.log(e);
-					defer.reject(e);
-				}
+				}, (err) => {
+					this.stats.count('call-error', label);
+					xm.log.error(err);
+					defer.reject(err);
+				});
 			};
 
 			// in permanent store?
