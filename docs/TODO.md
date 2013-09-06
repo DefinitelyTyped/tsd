@@ -31,7 +31,7 @@ Must fix:
 * -
 * [ ] Add some options and unify their names (both for CLI as API)
 * [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
-* [ ] Find solution to update TSDPM.com (use module API? does it run a Node.js server?)
+* [ ] Find solution to update TSDPM.com (use module API? does it run a Node.js server?) <- yes, it uses a nodejs server. It's hosted on heroku
 * [ ] Verify correct promise error handling (in mid-flow, at end of api & cli and in tests)
 * [ ] Add option for file overwrite (always on now)
 
