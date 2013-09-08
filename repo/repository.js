@@ -1962,7 +1962,7 @@ var __repo = [
         "url": "https://github.com/bnemetchek"
       }
     ],
-    "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Q/Q.d.ts"
+    "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/q/Q.d.ts"
   },
   {
     "name": "qunit",
