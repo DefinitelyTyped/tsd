@@ -588,6 +588,24 @@
     ]
   },
   {
+    "name": "chai",
+    "description": "BDD/TDD assertion library for node.js and the browser. Test framework agnostic.",
+    "versions": [
+      {
+        "version": "1.7.2",
+        "key": "2c1d1a83-7dcb-4845-9279-cea74267c476",
+        "dependencies": [],
+        "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chai/chai.d.ts",
+        "authors": [
+          {
+            "name": "Jed Hunsaker",
+            "url": "https://github.com/jedhunsaker/"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "cheerio",
     "description": "Fast, flexible, and lean implementation of core jQuery designed specifically for the server",
     "versions": [

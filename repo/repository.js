@@ -460,6 +460,20 @@ var __repo = [
     "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/casperjs/casperjs.d.ts"
   },
   {
+    "name": "chai",
+    "description": "BDD/TDD assertion library for node.js and the browser. Test framework agnostic.",
+    "key": "2c1d1a83-7dcb-4845-9279-cea74267c476",
+    "dependencies": [],
+    "version": "1.7.2",
+    "authors": [
+      {
+        "name": "Jed Hunsaker",
+        "url": "https://github.com/jedhunsaker/"
+      }
+    ],
+    "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chai/chai.d.ts"
+  },
+  {
     "name": "cheerio",
     "description": "Fast, flexible, and lean implementation of core jQuery designed specifically for the server",
     "key": "ba4324b2-eaa0-25cc-2de6-7467b48a8a74",
