@@ -588,6 +588,24 @@
     ]
   },
   {
+    "name": "chai",
+    "description": "BDD/TDD assertion library for node.js and the browser. Test framework agnostic.",
+    "versions": [
+      {
+        "version": "1.7.2",
+        "key": "2c1d1a83-7dcb-4845-9279-cea74267c476",
+        "dependencies": [],
+        "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/chai/chai.d.ts",
+        "authors": [
+          {
+            "name": "Jed Hunsaker",
+            "url": "https://github.com/jedhunsaker/"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "cheerio",
     "description": "Fast, flexible, and lean implementation of core jQuery designed specifically for the server",
     "versions": [
@@ -2184,6 +2202,24 @@
     ]
   },
   {
+    "name": "mocha",
+    "description": "simple, flexible, fun test framework",
+    "versions": [
+      {
+        "version": "1.9.0",
+        "key": "b9e68cdc-415a-4e21-9be6-5ff88ef8f02e",
+        "dependencies": [],
+        "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mocha/mocha.d.ts",
+        "authors": [
+          {
+            "name": "Kazi Manzur Rashid",
+            "url": "https://github.com/kazimanzurrashid/"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "modernizr",
     "description": "A JavaScript library that detects HTML5 and CSS3 feature.",
     "versions": [
@@ -2478,7 +2514,7 @@
         "version": "",
         "key": "4f9b9ffb-5622-4e4c-9c87-76f4e5312842",
         "dependencies": [],
-        "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/Q/Q.d.ts",
+        "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/q/Q.d.ts",
         "authors": [
           {
             "name": "Barrie Nemetchek",

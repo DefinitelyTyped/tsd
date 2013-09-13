@@ -1,0 +1,19 @@
+{
+  "name": "mocha",
+  "description": "simple, flexible, fun test framework",
+  "versions": [
+    {
+      "version": "1.9.0",
+      "key": "b9e68cdc-415a-4e21-9be6-5ff88ef8f02e",
+      "dependencies": [],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mocha/mocha.d.ts",
+      "authors": [
+        {
+          "name": "Kazi Manzur Rashid",
+          "url": "https://github.com/kazimanzurrashid/"
+        }
+      ]
+    }
+  ]
+}
+
