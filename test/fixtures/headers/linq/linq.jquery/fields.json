@@ -1,0 +1,16 @@
+{
+	"parsed": {
+		"name": "linq.jquery",
+		"version": "",
+		"submodule": "",
+		"description": "",
+		"projectUrl": "http://linqjs.codeplex.com",
+		"authors": [
+			{
+				"name": "neuecc",
+				"url": "http://www.codeplex.com/site/users/view/neuecc"
+			}
+		],
+		"reposUrl": ""
+	}
+}

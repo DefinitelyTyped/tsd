@@ -1,0 +1,17 @@
+{
+	"parsed": {
+		"name": "Microsoft.Windows.Azure.MobileService.Web",
+		"version": "1.0.0",
+		"submodule": "",
+		"description": "",
+		"projectUrl": "",
+		"authors": [
+			{
+				"name": "Morosinotto Daniele",
+				"url": "https://github.com/dmorosinotto/"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	},
+	"fields": ["name", "version"]
+}
