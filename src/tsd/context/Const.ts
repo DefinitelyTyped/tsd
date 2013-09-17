@@ -1,5 +1,6 @@
 module tsd {
 	export var Const = {
+		ident : 'tsd',
 		configFile : 'tsd-config.json',
 		cacheDir : 'tsd-cache',
 		configSchemaFile : 'tsd-config_v4.json',

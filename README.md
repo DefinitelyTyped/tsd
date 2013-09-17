@@ -4,18 +4,23 @@
 
 > TypeScript Definition Package Manager
 
-
 TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package manager. Easily download and install community contributed definition files to use in TypeScript projects from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
 :warning: Version `0.5.x` not backwards compatible with the config files from earlier versions.
 
-:bangbang: Version `0.5.x` is an alpha version and not ready for production. 
+:bangbang: Version `0.5.x` is a functional alpha version and not ready for production. 
 
 ### How to install
 
 :bangbang: Not yet. ~~TSD is installed using [node](http://nodejs.org/) and [npm](https://npmjs.org/). To install TSD use:~~
 
     $ npm install tsd -g
+
+:wrench: For development or preview from a git-checkout:
+
+	$ npm install
+	$ grunt build
+    $ npm install . -g
 
 ### Usage
 
@@ -29,6 +34,7 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
     $ tsd info <selector>
     $ tsd history <selector>
 	$ tsd reinstall
+	...
 	
 ### Options
 

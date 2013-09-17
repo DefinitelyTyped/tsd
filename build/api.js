@@ -486,6 +486,7 @@ var tsd;
 var tsd;
 (function (tsd) {
     tsd.Const = {
+        ident: 'tsd',
         configFile: 'tsd-config.json',
         cacheDir: 'tsd-cache',
         configSchemaFile: 'tsd-config_v4.json',
@@ -505,6 +506,18 @@ var tsd;
             this.configFile = path.resolve(this.startCwd, tsd.Const.configFile);
             this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
         }
+        Paths.getCacheDirName = function getCacheDirName() {
+            return (process.platform === 'win32' ? tsd.Const.cacheDir : '.' + tsd.Const.ident);
+        };
+        Paths.getUserHome = function getUserHome() {
+            return (process.env.HOME || process.env.USERPROFILE);
+        };
+        Paths.getUserCacheRoot = function getUserCacheRoot() {
+            return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
+        };
+        Paths.getUserCacheDir = function getUserCacheDir() {
+            return path.resolve(Paths.getUserCacheRoot(), Paths.getCacheDirName());
+        };
         return Paths;
     })();
     tsd.Paths = Paths;    
@@ -3094,7 +3107,7 @@ var tsd;
             var _this = this;
             xm.assertVar('selector', selector, tsd.Selector);
             return this._core.select(selector).then(function (res) {
-                res.definitions = tsd.DefUtil.uniqueDefs(tsd.DefUtil.getDefs(res.selection));
+                res.definitions = tsd.DefUtil.getDefs(res.selection);
                 return _this._core.loadHistoryBulk(res.definitions).thenResolve(res);
             });
         };
@@ -3180,26 +3193,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
-    function padLeft(str, len, char) {
-        str = String(str);
-        char = String(char).charAt(0);
-        while(str.length < len) {
-            str = char + str;
-        }
-        return str;
-    }
-    function padRight(str, len, char) {
-        str = String(str);
-        char = String(char).charAt(0);
-        while(str.length < len) {
-            str = str + char;
-        }
-        return str;
-    }
-    function repeat(str, len) {
-        return new Array(len).join(str);
-    }
     var optimist = require('optimist');
+    var Table = require('easy-table');
     var ExposeCommand = (function () {
         function ExposeCommand(id, execute, label, options, variadic) {
             if (typeof options === "undefined") { options = []; }
@@ -3222,20 +3217,20 @@ var xm;
             var _this = this;
             this._commands = new xm.KeyValueMap();
             this._options = new xm.KeyValueMap();
-            this._commandOpts = [];
             this._isInit = false;
             this._nodeBin = false;
             this.command('help', function () {
                 _this.printCommands();
-            }, 'usage help');
+            }, 'Display usage help');
             this.defineOption({
                 name: 'help',
                 short: 'h',
-                description: 'display usage help',
+                description: 'Display usage help',
                 type: 'flag',
                 default: null,
                 placeholder: null,
-                command: 'help'
+                command: 'help',
+                global: true
             });
             xm.ObjectUtil.hidePrefixed(this);
         }
@@ -3270,9 +3265,6 @@ var xm;
                 if(option.hasOwnProperty('default')) {
                     optimist.default(option.name, option.default);
                 }
-                if(option.command) {
-                    _this._commandOpts.push(option.name);
-                }
             });
             xm.eachProp(this._commands.keys(), function (id) {
                 _this._commands.get(id).init();
@@ -3281,6 +3273,9 @@ var xm;
         Expose.prototype.executeArgv = function (argvRaw, alt) {
             this.init();
             this._nodeBin = argvRaw[0] === 'node';
+            var options = this._options.values();
+            var opt;
+            var i, ii;
             var argv = optimist.parse(argvRaw);
             if(!argv || argv._.length === 0) {
                 if(alt && this._commands.has(alt)) {
@@ -3290,30 +3285,33 @@ var xm;
                 }
                 return;
             }
-            for(var i = 0, ii = this._commandOpts.length; i < ii; i++) {
-                var name = this._commandOpts[i];
-                if(argv[name]) {
-                    this.execute(this._options.get(name).command, argv);
+            for(i = 0 , ii = options.length; i < ii; i++) {
+                opt = options[i];
+                if(opt.command && argv[opt.name]) {
+                    this.execute(opt.command, argv);
                     return;
                 }
             }
-            var use = argv._.shift();
-            if(use === 'node') {
+            var cmd = argv._.shift();
+            if(cmd === 'node') {
                 argv._.shift();
             }
-            use = argv._.shift();
-            if(typeof use === 'undefined') {
+            cmd = argv._.shift();
+            if(typeof cmd === 'undefined') {
                 if(alt && this._commands.has(alt)) {
                     xm.log.warn('undefined command, using default');
+                    xm.log('');
                     this.execute(alt, argv);
                 } else {
                     xm.log.warn('undefined command');
+                    xm.log('');
                     this.execute('help', argv);
                 }
-            } else if(this._commands.has(use)) {
-                this.execute(use, argv);
+            } else if(this._commands.has(cmd)) {
+                this.execute(cmd, argv);
             } else {
-                xm.log.warn('command not found: ' + use);
+                xm.log.warn('command not found: ' + cmd);
+                xm.log('');
                 this.execute('help', argv, false);
             }
         };
@@ -3336,60 +3334,62 @@ var xm;
             if(this.title) {
                 xm.log(this.title + '\n');
             }
-            if(this._commandOpts.length > 0) {
-                xm.log('global options:\n');
-                var opts = [];
-                var maxTopOptionLen = 0;
-                xm.eachProp(this._commandOpts.sort(), function (name) {
-                    var option = _this._options.get(name);
-                    var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-                    var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
-                    opts.push({
-                        name: name,
-                        usage: tmp,
-                        option: option
-                    });
-                    maxTopOptionLen = Math.max(tmp.length, maxTopOptionLen);
-                });
-                xm.eachProp(opts, function (opt) {
-                    xm.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
-                });
-                xm.log('');
-            }
-            xm.log('commands:\n');
-            var maxCommandLen = 0;
-            var maxOptionLen = 0;
-            var commands = [];
-            xm.eachProp(this._commands.keys().sort(), function (id) {
-                var data = {
-                    id: id,
-                    label: id,
-                    cmd: _this._commands.get(id),
-                    options: []
-                };
-                if(data.cmd.variadic.length > 0) {
-                    data.label += ' <' + data.cmd.variadic.join(', ') + '>';
+            var optionString = function (option) {
+                var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
+                return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+            };
+            var globalOpts = new Table();
+            var commandOptNames = [];
+            var globalOptNames = [];
+            var commandPadding = '   ';
+            var optPadding = '      ';
+            var optKeys = this._options.keys().sort();
+            var options = this._options.values();
+            xm.eachElem(optKeys, function (name) {
+                var option = _this._options.get(name);
+                if(option.command) {
+                    globalOpts.cell('one', optPadding + optionString(option));
+                    globalOpts.cell('two', option.description);
+                    globalOpts.newRow();
+                    commandOptNames.push(option.name);
                 }
-                maxCommandLen = Math.max(data.label.length, maxCommandLen);
-                xm.eachProp(data.cmd.options, function (name) {
+            });
+            globalOpts.newRow();
+            xm.eachElem(optKeys, function (name) {
+                var option = _this._options.get(name);
+                if(option.global && !option.command) {
+                    globalOpts.cell('one', optPadding + optionString(option));
+                    globalOpts.cell('two', option.description);
+                    globalOpts.newRow();
+                    globalOptNames.push(option.name);
+                }
+            });
+            var commands = new Table();
+            xm.eachProp(this._commands.keys().sort(), function (id) {
+                var usage = id;
+                var cmd = _this._commands.get(id);
+                if(cmd.variadic.length > 0) {
+                    usage += ' <' + cmd.variadic.join(', ') + '>';
+                }
+                commands.cell('one', commandPadding + usage);
+                commands.cell('two', cmd.label);
+                commands.newRow();
+                xm.eachProp(cmd.options, function (name) {
                     var option = _this._options.get(name);
-                    var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-                    var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
-                    maxOptionLen = Math.max(tmp.length, maxOptionLen);
-                    data.options.push({
-                        usage: tmp,
-                        option: option
-                    });
+                    if(commandOptNames.indexOf(name) < 0) {
+                        commands.cell('one', optPadding + optionString(option));
+                        commands.cell('two', option.description);
+                        commands.newRow();
+                    }
                 });
-                commands.push(data);
+                commands.newRow();
             });
-            var padOpts = '    ';
-            xm.eachProp(commands, function (data) {
-                xm.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
-                xm.eachProp(data.options, function (opt) {
-                    xm.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
-                });
-            });
+            xm.log('commands:\n----');
+            xm.log(commands.print());
+            if(globalOptNames.length > 0) {
+                xm.log('global options:\n----');
+                xm.log(globalOpts.print());
+            }
         };
         Expose.prototype.hasCommand = function (id) {
             return this._commands.has(id);
@@ -3434,13 +3434,14 @@ var tsd;
         xm.assertVar('args', args, 'object');
         var context = new tsd.Context(args.config, args.verbose);
         if(args.dev) {
-            context.paths.cacheDir = path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+            context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+        } else {
+            context.paths.cacheDir = tsd.Paths.getUserCacheDir();
         }
         return context;
     }
     var defaultJobOptions = [
-        'config', 
-        'verbose'
+        'config'
     ];
     function jobOptions(merge) {
         if (typeof merge === "undefined") { merge = []; }
@@ -3465,7 +3466,7 @@ var tsd;
             var job = new Job();
             job.context = getContext(args);
             job.api = new tsd.API(job.context);
-            var required = (!!args.config);
+            var required = (typeof args.config !== undefined ? true : false);
             return job.api.readConfig(required).then(function () {
                 return job;
             });
@@ -3482,43 +3483,45 @@ var tsd;
     }
     function runARGV(argvRaw) {
         var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
-        var directNode = (argvRaw && argvRaw.length > 0 && argvRaw[0] === 'node');
-        xm.log.debug('called directly as node param: ' + 'forcing dev mode (for now)'.cyan);
         expose.defineOption({
             name: 'version',
             short: 'V',
-            description: 'display version information',
+            description: 'Display version information',
             type: 'flag',
             default: null,
             placeholder: null,
-            command: 'version'
+            command: 'version',
+            global: true
         });
         expose.defineOption({
             name: 'config',
-            description: 'path to config file',
+            description: 'Path to config file',
             short: 'c',
             type: 'string',
             default: null,
             placeholder: 'path',
-            command: null
+            command: null,
+            global: false
         });
         expose.defineOption({
             name: 'verbose',
             short: null,
-            description: 'verbose output',
+            description: 'Verbose output',
             type: 'flag',
-            default: (directNode ? true : null),
+            default: false,
             placeholder: null,
-            command: null
+            command: null,
+            global: true
         });
         expose.defineOption({
             name: 'dev',
             short: null,
-            description: 'development mode',
+            description: 'Development mode',
             type: 'flag',
             default: null,
             placeholder: null,
-            command: null
+            command: null,
+            global: true
         });
         function reportError(err) {
             xm.log('-> ' + 'an error occured!'.red);
@@ -3530,6 +3533,7 @@ var tsd;
             }
         }
         function reportSucces(result) {
+            xm.log('');
             xm.log('-> ' + 'success!'.green);
             if(result) {
                 xm.assertVar('result', result, tsd.APIResult);
@@ -3543,17 +3547,22 @@ var tsd;
                 });
             }
         }
-        function prinDefHead(def) {
+        function printSubHead(text) {
+            xm.log(' ' + text);
+            xm.log('----');
+        }
+        function printDefHead(def) {
             xm.log('');
             xm.log(def.toString());
             xm.log('----');
         }
-        function prinFileHead(file) {
+        function printFileHead(file) {
             xm.log('');
             xm.log(file.toString());
             xm.log('----');
         }
-        function printFileCommit(file) {
+        function printFileCommit(file, skipNull) {
+            if (typeof skipNull === "undefined") { skipNull = false; }
             if(file.commit) {
                 var line = '   ' + file.commit.commitShort;
                 line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
@@ -3564,12 +3573,13 @@ var tsd;
                 xm.log(line);
                 xm.log('   ' + file.commit.message.subject);
                 xm.log('----');
-            } else {
+            } else if(!skipNull) {
                 xm.log('   ' + '<no commmit>');
                 xm.log('----');
             }
         }
-        function printFileInfo(file) {
+        function printFileInfo(file, skipNull) {
+            if (typeof skipNull === "undefined") { skipNull = false; }
             if(file.info) {
                 if(file.info.isValid()) {
                     xm.log('   ' + file.info.toString());
@@ -3582,7 +3592,7 @@ var tsd;
                     xm.log('   ' + '<invalid info>');
                     xm.log('----');
                 }
-            } else {
+            } else if(!skipNull) {
                 xm.log('   ' + '<no info>');
                 xm.log('----');
             }
@@ -3599,7 +3609,7 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.selection.forEach(function (file) {
-                    prinFileHead(file);
+                    printFileHead(file);
                     printFileInfo(file);
                     printFileCommit(file);
                 });
@@ -3622,7 +3632,6 @@ var tsd;
         }, 'Install definitions', jobOptions(), [
             'selector'
         ]);
-        ;
         expose.command('reinstall', function (args) {
             getAPIJob(args).then(function (job) {
                 return job.api.reinstall();
@@ -3644,7 +3653,7 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
-                    prinFileHead(file);
+                    printFileHead(file);
                     printFileInfo(file);
                     printFileCommit(file);
                 });
@@ -3658,10 +3667,12 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                    prinDefHead(def);
-                    printFileInfo(def.head);
-                    def.history.slice(0).reverse().forEach(function (file) {
-                        printFileInfo(file);
+                    printDefHead(def);
+                    printSubHead('head:');
+                    printFileCommit(def.head);
+                    printSubHead('history:');
+                    def.history.slice(0).forEach(function (file) {
+                        printFileInfo(file, true);
                         printFileCommit(file);
                     });
                 });
@@ -3675,7 +3686,7 @@ var tsd;
             }).done(function (result) {
                 reportSucces(null);
                 result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
-                    prinFileHead(def);
+                    printFileHead(def);
                     printFileInfo(def);
                     if(def.dependencies.length > 0) {
                         def.dependencies.sort(tsd.DefUtil.fileCompare).forEach(function (def) {

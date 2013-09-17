@@ -1,12 +1,13 @@
-///<reference path="../../xm/io/Logger.ts" />
-///<reference path="../../xm/io/Logger.ts" />
-///<reference path="../../_ref.ts" />
-///<reference path="Const.ts" />
+///<reference path='../../xm/io/Logger.ts' />
+///<reference path='../../xm/io/Logger.ts' />
+///<reference path='../../_ref.ts' />
+///<reference path='Const.ts' />
 
 module tsd {
 
 	var path = require('path');
 
+	//sourced paths from npm and its dependencies (osenv/osenv.js, npmconf/config-defs.js)
 	export class Paths {
 
 		configFile:string;
@@ -19,34 +20,20 @@ module tsd {
 			this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
 		}
 
-		//TODO ditch this cargo-cult google-rip thing for proper version (and in Q-io)
-		/*static findTmpDir(info:xm.PackageJSON):string {
-			xm.assertVar('info', info, xm.PackageJSON);
+		static getCacheDirName():string {
+			return (process.platform === 'win32' ? Const.cacheDir : '.' + Const.ident);
+		}
 
-			var now = Date.now();
-			var candidateTmpDirs = [
-				process.env['TMPDIR'],
-				info.raw.tmp,
-				os.tmpdir(),
-				path.resolve(process.cwd(), 'tmp')
-			];
+		static getUserHome():string {
+			return (process.env.HOME || process.env.USERPROFILE);
+		}
 
-			var key = info.getKey();
+		static getUserCacheRoot():string {
+			return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
+		}
 
-			for (var i = 0; i < candidateTmpDirs.length; i++) {
-				if (!candidateTmpDirs[i]) {
-					continue;
-				}
-				var candidatePath = path.resolve(candidateTmpDirs[i], key);
-
-				try {
-					xm.mkdirCheckSync(candidatePath);
-					return candidatePath;
-				} catch (e) {
-					console.log(candidatePath, 'is not writable:', e.message);
-				}
-			}
-			throw (new Error('can not find a writable tmp directory.'));
-		}*/
+		static getUserCacheDir():string {
+			return path.resolve(Paths.getUserCacheRoot(), Paths.getCacheDirName());
+		}
 	}
 }

@@ -38,7 +38,7 @@ module xm {
 			});
 		}
 
-		hasAllZero() {
+		hasAllZero():bool {
 			return !this.stats.values().some((value:number) => {
 				return value !== 0;
 			});
@@ -48,7 +48,7 @@ module xm {
 			this.stats.clear();
 		}
 
-		getReport(label?:string) {
+		getReport(label?:string):string {
 			var ret = [];
 			var keys = this.stats.keys();
 			keys.sort();

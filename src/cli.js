@@ -1,4 +1,4 @@
-///<reference path="../typings/DefinitelyTyped/node/node.d.ts" />
+#!/usr/bin/env node
 
 // handler is compiled into main codebase
 require('./api').runARGV(process.argv);

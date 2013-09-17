@@ -52,7 +52,7 @@ module xm {
 			return this._content.slice(0);
 		}
 
-		import(values:string[]):void {
+		import(values:any[]):void {
 			for (var i = 0, ii = values.length; i < ii; i++) {
 				this.add(values[i]);
 			}

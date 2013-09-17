@@ -17,7 +17,10 @@ module tsd {
 		var context = new tsd.Context(args.config, args.verbose);
 
 		if (args.dev) {
-			context.paths.cacheDir = path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+		}
+		else {
+			context.paths.cacheDir = Paths.getUserCacheDir();
 		}
 		return context;
 	}
@@ -26,7 +29,7 @@ module tsd {
 
 	//DRY helpers: reuse / bundle init and arg parsing for selector based commands
 
-	var defaultJobOptions = ['config', 'verbose'];
+	var defaultJobOptions = ['config'];
 
 	function jobOptions(merge?:string[] = []):string[] {
 		return defaultJobOptions.concat(merge);
@@ -59,7 +62,7 @@ module tsd {
 
 			// TODO parse more options
 
-			var required:bool = (!!args.config);
+			var required:bool = (typeof args.config !== undefined ? true : false);
 			return job.api.readConfig(required).then(() => {
 				return job;
 			});
@@ -89,49 +92,49 @@ module tsd {
 
 		var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
 
-		var directNode = (argvRaw && argvRaw.length > 0 && argvRaw[0] === 'node');
-
-		xm.log.debug('called directly as node param: ' + 'forcing dev mode (for now)'.cyan);
-
 		//predefine
 		expose.defineOption({
 			name: 'version',
 			short: 'V',
-			description: 'display version information',
+			description: 'Display version information',
 			type: 'flag',
 			default: null,
 			placeholder: null,
-			command: 'version'
+			command: 'version',
+			global: true
 		});
 
 		expose.defineOption({
 			name: 'config',
-			description: 'path to config file',
+			description: 'Path to config file',
 			short: 'c',
 			type: 'string',
 			default: null,
 			placeholder: 'path',
-			command: null
+			command: null,
+			global: false
 		});
 
 		expose.defineOption({
 			name: 'verbose',
 			short: null,
-			description: 'verbose output',
+			description: 'Verbose output',
 			type: 'flag',
-			default: (directNode ? true : null),
+			default: false,
 			placeholder: null,
-			command: null
+			command: null,
+			global: true
 		});
 
 		expose.defineOption({
 			name: 'dev',
 			short: null,
-			description: 'development mode',
+			description: 'Development mode',
 			type: 'flag',
 			default: null,
 			placeholder: null,
-			command: null
+			command: null,
+			global: true
 		});
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -149,6 +152,7 @@ module tsd {
 		}
 
 		function reportSucces(result:tsd.APIResult) {
+			xm.log('');
 			xm.log('-> ' + 'success!'.green);
 			if (result) {
 				xm.assertVar('result', result, tsd.APIResult);
@@ -163,19 +167,24 @@ module tsd {
 			}
 		}
 
-		function prinDefHead(def:tsd.Def) {
+		function printSubHead(text:string) {
+			xm.log(' ' +text);
+			xm.log('----');
+		}
+
+		function printDefHead(def:tsd.Def) {
 			xm.log('');
 			xm.log(def.toString());
 			xm.log('----');
 		}
 
-		function prinFileHead(file:tsd.DefVersion) {
+		function printFileHead(file:tsd.DefVersion) {
 			xm.log('');
 			xm.log(file.toString());
 			xm.log('----');
 		}
 
-		function printFileCommit(file:tsd.DefVersion) {
+		function printFileCommit(file:tsd.DefVersion, skipNull?:bool = false) {
 			if (file.commit) {
 				var line = '   ' + file.commit.commitShort;
 
@@ -190,13 +199,13 @@ module tsd {
 				xm.log('   ' + file.commit.message.subject);
 				xm.log('----');
 			}
-			else {
+			else if (!skipNull) {
 				xm.log('   ' + '<no commmit>');
 				xm.log('----');
 			}
 		}
 
-		function printFileInfo(file:tsd.DefVersion) {
+		function printFileInfo(file:tsd.DefVersion, skipNull?:bool = false) {
 			if (file.info) {
 				if (file.info.isValid()) {
 					xm.log('   ' + file.info.toString());
@@ -211,7 +220,7 @@ module tsd {
 					xm.log('----');
 				}
 			}
-			else {
+			else if (!skipNull) {
 				xm.log('   ' + '<no info>');
 				xm.log('----');
 			}
@@ -238,7 +247,7 @@ module tsd {
 
 				//TODO report on overwrite
 				result.selection.forEach((file:tsd.DefVersion) => {
-					prinFileHead(file);
+					printFileHead(file);
 					printFileInfo(file);
 					printFileCommit(file);
 				});
@@ -262,7 +271,6 @@ module tsd {
 				});
 			}, reportError);
 		}, 'Install definitions', jobOptions(), ['selector']);
-		;
 
 		expose.command('reinstall', (args:any) => {
 			getAPIJob(args).then((job:Job) => {
@@ -291,7 +299,7 @@ module tsd {
 				reportSucces(null);
 
 				result.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion) => {
-					prinFileHead(file);
+					printFileHead(file);
 					printFileInfo(file);
 					printFileCommit(file);
 				});
@@ -307,11 +315,13 @@ module tsd {
 				reportSucces(null);
 
 				result.definitions.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
-					prinDefHead(def);
-					printFileInfo(def.head);
+					printDefHead(def);
+					printSubHead('head:');
+					printFileCommit(def.head);
+					printSubHead('history:');
 
-					def.history.slice(0).reverse().forEach((file:tsd.DefVersion) => {
-						printFileInfo(file);
+					def.history.slice(0).forEach((file:tsd.DefVersion) => {
+						printFileInfo(file, true);
 						printFileCommit(file);
 					});
 				});
@@ -321,14 +331,13 @@ module tsd {
 
 		expose.command('deps', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {
-
 				return job.api.deps(job.selector);
 
 			}).done((result:APIResult) => {
 				reportSucces(null);
 
 				result.selection.sort(tsd.DefUtil.fileCompare).forEach((def:tsd.DefVersion) => {
-					prinFileHead(def);
+					printFileHead(def);
 					printFileInfo(def);
 
 					//move ot method

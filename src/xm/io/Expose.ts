@@ -11,32 +11,12 @@
 ///<reference path="../iterate.ts" />
 ///<reference path="../callAsync.ts" />
 ///<reference path="../ObjectUtil.ts" />
+///<reference path="../../../typings/DefinitelyTyped/easy-table/easy-table.d.ts" />
 
 module xm {
 
-	function padLeft(str:string, len:number, char:string):string {
-		str = String(str);
-		char = String(char).charAt(0);
-		while (str.length < len) {
-			str = char + str;
-		}
-		return str;
-	}
-
-	function padRight(str:string, len:number, char:string):string {
-		str = String(str);
-		char = String(char).charAt(0);
-		while (str.length < len) {
-			str = str + char;
-		}
-		return str;
-	}
-
-	function repeat(str:string, len:number):string {
-		return new Array(len).join(str);
-	}
-
 	var optimist = require('optimist');
+	var Table:EasyTableStatic = require('easy-table');
 
 	export interface ExposeAction extends Function{
 		(args:any, done:(err) => void):void;
@@ -50,6 +30,7 @@ module xm {
 		placeholder:string;
 		default:any;
 		command:string;
+		global:bool;
 	}
 
 	export class ExposeCommand {
@@ -73,7 +54,6 @@ module xm {
 
 		private _commands = new KeyValueMap();
 		private _options = new KeyValueMap();
-		private _commandOpts:string[] = [];
 		private _isInit = false;
 		private _nodeBin = false;
 
@@ -82,16 +62,17 @@ module xm {
 
 				this.printCommands();
 
-			}, 'usage help');
+			}, 'Display usage help');
 
 			this.defineOption({
 				name: 'help',
 				short: 'h',
-				description: 'display usage help',
+				description: 'Display usage help',
 				type: 'flag',
 				default: null,
 				placeholder: null,
-				command: 'help'
+				command: 'help',
+				global: true
 			});
 
 			xm.ObjectUtil.hidePrefixed(this);
@@ -131,9 +112,6 @@ module xm {
 				if (option.hasOwnProperty('default')) {
 					optimist.default(option.name, option.default);
 				}
-				if (option.command) {
-					this._commandOpts.push(option.name);
-				}
 			});
 
 			xm.eachProp(this._commands.keys(), (id) => {
@@ -146,7 +124,13 @@ module xm {
 
 			this._nodeBin = argvRaw[0] === 'node';
 
+			var options:ExposeOption[] = this._options.values();
+			var opt:ExposeOption;
+			var i:number, ii:number;
+
 			var argv = optimist.parse(argvRaw);
+
+			//defaults
 			if (!argv || argv._.length === 0) {
 				if (alt && this._commands.has(alt)) {
 					this.execute(alt, argv);
@@ -157,38 +141,43 @@ module xm {
 				return;
 			}
 
-			for (var i = 0, ii = this._commandOpts.length; i < ii; i++) {
-				var name = this._commandOpts[i];
-				if (argv[name]) {
+			//command options (option that takes priority, like --version etc)
+			for (i = 0, ii = options.length; i < ii; i++) {
+				opt = options[i];
+				if (opt.command && argv[opt.name]) {
 					//xm.log('command opt ' + name);
-					this.execute(this._options.get(name).command, argv);
+					this.execute(opt.command, argv);
 					return;
 				}
 			}
 
-			var use = argv._.shift();
-			if (use === 'node') {
+			//clean argv 'bin' padding
+			var cmd = argv._.shift();
+			if (cmd === 'node') {
 				//ditch "node <script>"
 				argv._.shift();
 			}
-			use = argv._.shift();
+			cmd = argv._.shift();
 
-			if (typeof use === 'undefined') {
+			if (typeof cmd === 'undefined') {
 				if (alt && this._commands.has(alt)) {
 					xm.log.warn('undefined command, using default');
+					xm.log('');
 					this.execute(alt, argv);
 				}
 				else {
 					xm.log.warn('undefined command');
+					xm.log('');
 					this.execute('help', argv);
 				}
 			}
-			else if (this._commands.has(use)) {
+			else if (this._commands.has(cmd)) {
 				// actual command
-				this.execute(use, argv);
+				this.execute(cmd, argv);
 			}
 			else {
-				xm.log.warn('command not found: ' + use);
+				xm.log.warn('command not found: ' + cmd);
+				xm.log('');
 				this.execute('help', argv, false);
 			}
 		}
@@ -213,73 +202,72 @@ module xm {
 				xm.log(this.title + '\n');
 			}
 
-			if (this._commandOpts.length > 0) {
-				xm.log('global options:\n');
+			var optionString = (option:ExposeOption):string => {
+				var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
+				return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+			};
 
-				var opts = [];
-				var maxTopOptionLen = 0;
-				//TODO DRY options printing
-				xm.eachProp(this._commandOpts.sort(), (name) => {
-					var option:ExposeOption = this._options.get(name);
-					var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-					var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
-					opts.push({
-						name: name,
-						usage: tmp,
-						option: option
-					});
-					maxTopOptionLen = Math.max(tmp.length, maxTopOptionLen);
-				});
-				xm.eachProp(opts, (opt) => {
-					xm.log('  ' + padRight(opt.usage, maxTopOptionLen, ' ') + ' : ' + opt.option.description);
-				});
-				xm.log('');
-			}
+			var globalOpts:EasyTable = new Table();
 
-			xm.log('commands:\n');
+			var commandOptNames:string[] = [];
+			var globalOptNames:string[] = [];
 
-			var maxCommandLen = 0;
-			var maxOptionLen = 0;
-			var commands = [];
+			var commandPadding:string = '   ';
+			var optPadding:string = '      ';
+
+			var optKeys = this._options.keys().sort();
+			var options:ExposeOption[] = this._options.values();
+			xm.eachElem(optKeys, (name:string) => {
+				var option:ExposeOption = this._options.get(name);
+				if (option.command) {
+					globalOpts.cell('one', optPadding + optionString(option));
+					globalOpts.cell('two', option.description);
+					globalOpts.newRow();
+					commandOptNames.push(option.name);
+				}
+			});
+			globalOpts.newRow();
+			xm.eachElem(optKeys, (name:string) => {
+				var option:ExposeOption = this._options.get(name);
+				if (option.global && !option.command) {
+					globalOpts.cell('one', optPadding + optionString(option));
+					globalOpts.cell('two', option.description);
+					globalOpts.newRow();
+					globalOptNames.push(option.name);
+				}
+			});
+
+			var commands:EasyTable = new Table();
 
 			xm.eachProp(this._commands.keys().sort(), (id) => {
-				var data = {
-					id: id,
-					label: id,
-					cmd: this._commands.get(id),
-					options: []
-				};
-
-				if (data.cmd.variadic.length > 0) {
-					data.label += ' <' + data.cmd.variadic.join(', ') + '>';
+				var usage = id;
+				var cmd = this._commands.get(id);
+				if (cmd.variadic.length > 0) {
+					usage += ' <' + cmd.variadic.join(', ') + '>';
 				}
 
-				maxCommandLen = Math.max(data.label.length, maxCommandLen);
+				commands.cell('one', commandPadding + usage);
+				commands.cell('two', cmd.label);
+				commands.newRow();
 
-				xm.eachProp(data.cmd.options, (name:string) => {
+				xm.eachProp(cmd.options, (name:string) => {
 					var option:ExposeOption = this._options.get(name);
-					var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-					var tmp = (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
-
-					maxOptionLen = Math.max(tmp.length, maxOptionLen);
-					data.options.push({
-						usage: tmp,
-						option: option
-					});
-
+					if (commandOptNames.indexOf(name) < 0) {
+						commands.cell('one', optPadding + optionString(option));
+						commands.cell('two', option.description);
+						commands.newRow();
+					}
 				});
-				commands.push(data);
+				commands.newRow();
 			});
 
-			var padOpts = '    ';//repeat(' ', maxCommandLen + 2);
+			xm.log('commands:\n----');
+			xm.log(commands.print());
 
-			xm.eachProp(commands, (data) => {
-				xm.log('  ' + padRight(data.label, maxCommandLen, ' ') + ' : ' + data.cmd.label);
-
-				xm.eachProp(data.options, (opt:any) => {
-					xm.log(padOpts + padRight(opt.usage, maxOptionLen, ' ') + ' : ' + opt.option.description);
-				});
-			});
+			if (globalOptNames.length > 0) {
+				xm.log('global options:\n----');
+				xm.log(globalOpts.print());
+			}
 		}
 
 		hasCommand(id:string):bool {

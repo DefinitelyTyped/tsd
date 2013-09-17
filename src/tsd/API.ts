@@ -164,7 +164,7 @@ module tsd {
 
 			return this._core.select(selector).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
-				res.definitions = tsd.DefUtil.uniqueDefs(tsd.DefUtil.getDefs(res.selection));
+				res.definitions = tsd.DefUtil.getDefs(res.selection);
 				//TODO limit history to Selector's date filter?
 				return this._core.loadHistoryBulk(res.definitions).thenResolve(res);
 			});

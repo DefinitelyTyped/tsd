@@ -24,7 +24,6 @@ module tsd {
 	/*
 	 Context: bundles the configuration and core functionality
 	 */
-	//TODO also promisify using Q-io
 	export class Context {
 
 		paths:Paths;

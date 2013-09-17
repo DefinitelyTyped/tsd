@@ -2,7 +2,7 @@
 ///<reference path="_ref.ts" />
 ///<reference path="GithubRepo.ts" />
 ///<reference path="../xm/assertVar.ts" />
-///<reference path="../xm/ObjectUtil />
+///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/io/URLManager.ts" />
 

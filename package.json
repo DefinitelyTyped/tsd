@@ -16,18 +16,18 @@
     }
   ],
   "bin": {
-    "tsd": "build/cli.js"
+    "tsd": "./build/cli.js"
   },
   "main": {
-    "tsd": "build/api.js"
+    "tsd": "./build/api.js"
   },
   "scripts": {
     "test": "grunt test"
   },
   "homepage": "https://github.com/Diullei/tsd",
-  "repository" : {
-      "type" : "git"
-    , "url" : "http://github.com/Diullei/tsd.git"
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/Diullei/tsd.git"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -47,13 +47,9 @@
     "pkginfo": "0.3.0",
     "source-map-support": "0.2.3",
     "uri-templates": "0.1.1",
-    "optimist": "0.6.0"
+    "optimist": "0.6.0",
+    "easy-table": "0.2.0"
   },
-  "____notes": [
-    "fix ~tildes before release",
-    "clean this out: dev vs runtime, or used at all (or not specced)",
-    "npm prune"
-  ],
   "devDependencies": {
     "rimraf": "2.2.2",
     "grunt": "0.4.1",

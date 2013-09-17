@@ -1,19 +1,22 @@
 .npmignore
 .gitignore
 .gitmodules
+.idea
 
 tmp/
 /src
 
 .travis.yml
 .jshintrc
+.vagrant
 .tslint.json
 Gruntfile.js
 tsd-config.json
 
+/docs
+/tsd-cache
 /cache
 /typings
-/schema
 /test
 
 /cookbooks

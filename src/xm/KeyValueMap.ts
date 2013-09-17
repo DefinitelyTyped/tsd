@@ -21,8 +21,10 @@ module xm {
 		set (key:string, value:any);
 		remove (key:string);
 		keys ():string[];
+		//TODO ditch/reconsider values()'s allow[]
 		values (allow?:string[]):any[];
 		import (data:any, keys?:string[]):void;
+		//TODO ditch/reconsider export()'s keys[]
 		export (keys?:string[]):any;
 		clear (keep?:string[]);
 	}

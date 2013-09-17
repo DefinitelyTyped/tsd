@@ -17,7 +17,8 @@ module.exports = function (grunt) {
 		'grunt-execute',
 		'grunt-shell',
 		'grunt-todos',
-		'grunt-mocha-test'
+		'grunt-mocha-test',
+		'grunt-wrap'
 	]);
 	// gtx.autoNpmPkg();
 	// gtx.autoNpm();
@@ -53,6 +54,12 @@ module.exports = function (grunt) {
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			build: ['build/*.js', 'build/*.js.map']
+		},
+		copy: {
+			cli: {
+				src: ['src/cli.js'],
+				dest: 'build/cli.js'
+			}
 		},
 		mochaTest: {
 			options: {
@@ -133,7 +140,7 @@ module.exports = function (grunt) {
 	gtx.alias('prep', ['clean:tmp', 'jshint:support']);
 
 	// cli commands
-	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'tslint:source', 'mochaTest:integrity']);
+	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'copy:cli', 'tslint:source', 'mochaTest:integrity']);
 
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');

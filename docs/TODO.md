@@ -24,14 +24,15 @@ Must fix:
 * [ ] Improve tests for CLI
 * [ ] Improve tests for modules, parts and utils
 * -
-* [ ] Decide on caching directory: sub folder of tmp? home/user? need tmp at all?
+* [x] Decide on caching directory: home / AppData like npm
 * [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
 * [x] Change Context objects to use Q/Q-io and not auto-create folders at init until properly configured.
 * [ ] Decide if raw.github needs its cache; maybe just keep for testing but skip for production?
+* [x] Fix tsd global bin/cli, test using `$ npm install . -g`
 * -
 * [ ] Add some options and unify their names (both for CLI as API)
 * [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
-* [ ] Find solution to update TSDPM.com (use module API? does it run a Node.js server?) <- yes, it uses a nodejs server. It's hosted on heroku
+* [ ] Find solution to update TSDPM.com: use tsd's module api and authenticated github and a DefinitelyTyped github hook to the heroku app.
 * [ ] Verify correct promise error handling (in mid-flow, at end of api & cli and in tests)
 * [ ] Add option for file overwrite (always on now)
 
@@ -41,6 +42,8 @@ Should fix:
 * [ ] Add option for dependency install (always on now)
 * [ ] Add InfoMatcher to Selector / select()
 * [ ] Add search-by-date to history-command, add as DateMatcher to Selector / select()
+* [ ] Add remove/uninstall command
+* [ ] Add list command / option (display compact result listing for repo overview)
 * [ ] Add manual purge/flush-command
 * [ ] Add periodic automated purge/flush
 * [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
@@ -51,12 +54,13 @@ Should fix:
 * [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
 * [ ] Decide if API and/or Core etc need a queue-sytem hardening (module use might (partially) be race condition unsafe)
 * [ ] Sweep used modules: require() and package.json
-* [ ] Improve Expose for crisper CLI help screen layout (table/columns)
+* [x] Improve Expose for crisper CLI help screen layout (table/columns)
 * [ ] Add npm pre-publish tests
 * [ ] Update config's JSON-Schema and improve validation reporting
 * [ ] Sweep and optimise reference-paths, but how?
 * [ ] Verify "use strict" (needed in node?)
 * [ ] Consider adding timeouts?
+* [ ] Clean package.json: fix ~tildes before release, dev vs runtime, npm prune
 
 Could fix:
 
@@ -67,6 +71,6 @@ Could fix:
 * [ ] Add property locking: Object.freeze() etc to data objects; ditch getters-only private vars for freeze/read-only. (partially implemented using `xm.ObjectUtils`)
 * [ ] Add feature to open a browser to see the pages on github? (diffs, comments etc)
 * [ ] Add feature to open a browser at a project's url (from info)
-
+* [ ] Add fancy promise progress events + cli display (install etc)
 
 
