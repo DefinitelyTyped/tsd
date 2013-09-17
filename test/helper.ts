@@ -14,6 +14,13 @@ module helper {
 		return path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 	}
 
+	export function getContext() {
+		var context:tsd.Context;
+		context = new tsd.Context();
+		context.paths.cacheDir = getCacheDir();
+		return context;
+	}
+
 	export function dump(object:any, label?:string, depth?:number = 6, showHidden?:bool = false):any{
 		if (typeof label !== 'undefined') {
 			console.log(label + ':');

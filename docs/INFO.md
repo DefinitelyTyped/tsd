@@ -2,11 +2,15 @@
 
 > Some development notes that will help understanding how TDS 0.5.x is rebuild
 
-## Usage
+## Run it
 
-Currently TSD 0.5.x is heavy under development and not ready for global install. Instead use the git checkout
+Currently TSD 0.5.x is heavy under development. Use a git checkout to run it:
 
-Build and rest using grunt:
+Pull dependencies:
+
+	$ npm install
+
+Build and test using grunt:
 
 	$ grunt test
 
@@ -14,11 +18,26 @@ Build without running tests:
 
 	$ grunt build
 
-Use the test suite and/or a local checkout to develop. To run the CLI use:
+Use the test suite and/or a local checkout to develop. 
+
+To run the CLI use:
 
 	$ node ./build/cli.js <command>
 
+For a preview install the global `tsd` cli command from a git-checkout:
+
+	$ grunt build
+    $ npm install . -g
+	$ tsd -h
+    $ tsd <command>
+
 See the [TODO.md](TODO.md) document for info on where to find stuff to work on.
+
+See grunt help and for gtx commands:
+
+	$ grunt -h
+	$ grunt gtx:tsd
+	$ grunt gtx:git
 
 ## Main considerations:
 
@@ -37,9 +56,13 @@ Solution:
 
 Complications:
 
-* While git itself defines a unique file as a blob (by sha) the RAW interface only returns files by their path and commit-sha.
+* While git itself defines a unique file as a **blob** (by sha) the RAW interface only returns files by their path and **commit** (by sha). 
+	* There are many commits reusing the same blob.
+	* Working with blob hashes requires extra API requests to get hashes.
 * Using full commit-trees is undesirable as DefinitelyTyped has many commits and many files.
 * A commit + tree listing files is not necessary the commit that changed that specific file (it requires a more specific query).
+
+This sub-optimal but workable as the RAW api is not rate-limited: cache misses on identical blobs due to file name addressing on fast changing commit-sha's will only hurt bandwidth.
 
 ## Model
 

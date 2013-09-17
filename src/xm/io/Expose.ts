@@ -47,7 +47,6 @@ module xm {
 	/*
 	 Expose: cli command manager, wraps optimist with better usage generator and other utils
 	 */
-	//TODO better support for global options; not only .command but also a .global
 	//TODO add per-command sub-help like npm
 	//TODO add feature for printable placeholder sub-info (format etc)
 	export class Expose {

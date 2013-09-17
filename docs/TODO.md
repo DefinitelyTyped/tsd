@@ -48,7 +48,7 @@ Should fix:
 * [ ] Add periodic automated purge/flush
 * [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * * [ ] Add command for (re) initialisation of config (when you want to start in non-default branch etc)  
-* [ ] Import tests for header parser from tsd-deftools @bartvds
+* [x] Import tests for header parser from tsd-deftools @bartvds
 * [ ] Improve / harden DefInfo/Parser to extract more info, from more files
 * [ ] Add a global store for JSON pointers and RegExps etc
 * [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
@@ -61,16 +61,17 @@ Should fix:
 * [ ] Verify "use strict" (needed in node?)
 * [ ] Consider adding timeouts?
 * [ ] Clean package.json: fix ~tildes before release, dev vs runtime, npm prune
+* [ ] Add TSD release/updates news to CLI console (periodically pull package.json from github)
 
 Could fix:
 
 * [ ] Consider g-zip for caches
 * [ ] Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * [ ] Check for missing extra commands (compare etc)
-* [ ] Add TSD release/updates news to CLI console (periodically pull package.json from github)
 * [ ] Add property locking: Object.freeze() etc to data objects; ditch getters-only private vars for freeze/read-only. (partially implemented using `xm.ObjectUtils`)
 * [ ] Add feature to open a browser to see the pages on github? (diffs, comments etc)
 * [ ] Add feature to open a browser at a project's url (from info)
 * [ ] Add fancy promise progress events + cli display (install etc)
+* [ ] Improve blob cache by always resolving commit sha to blob in history and cache the blob/commit mappings. 
 
 

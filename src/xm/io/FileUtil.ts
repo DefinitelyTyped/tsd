@@ -27,8 +27,24 @@ module xm {
 			return JSON.parse(fs.readFileSync(src, {encoding: 'utf8'}));
 		}
 
+		export function readJSON(src:string, callback:(err, res:any) => void) {
+			fs.readFile(path.resolve(src), 'utf8', (err, file) => {
+				if (err || !file) {
+					return callback(err, null);
+				}
+				var json = null;
+				try {
+					json = JSON.parse(file);
+				}
+				catch (err) {
+					return callback(err, null);
+				}
+				return callback(null, json);
+			});
+		}
+
 		export function readJSONPromise(src:string):Qpromise {
-			return FS.read(src ,{encoding: 'utf8'}).then((text:string) => {
+			return FS.read(src, {encoding: 'utf8'}).then((text:string) => {
 				return JSON.parse(text);
 			});
 		}

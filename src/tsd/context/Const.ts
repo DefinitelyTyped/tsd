@@ -8,7 +8,9 @@ module tsd {
 		typingsFolder : 'typings',
 		configVersion: 'v4',
 		definitelyRepo: 'borisyankov/DefinitelyTyped',
-		mainBranch: 'master'
+		mainBranch: 'master',
+
+		shaShorten: 6
 	 };
 	//proper const
 	Object.freeze(Const);

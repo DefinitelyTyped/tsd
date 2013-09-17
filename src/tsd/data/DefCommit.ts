@@ -76,9 +76,8 @@ module tsd {
 		}
 
 		//human friendly
-		//TODO centralise sha1-shortening in a util?
 		get commitShort():string {
-			return this._commitSha ? this._commitSha.substr(0, 8) : '<no sha>';
+			return this._commitSha ? tsd.shaShort(this._commitSha) : '<no sha>';
 		}
 
 		get commitSha():string {

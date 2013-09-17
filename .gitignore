@@ -10,6 +10,7 @@ tsd.sln
 /build/*.map
 
 /cache
+/typings_test
 /tsd-cache
 /test/tmp
 _tmp.*

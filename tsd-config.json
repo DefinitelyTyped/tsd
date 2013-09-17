@@ -2,11 +2,8 @@
   "typingsPath": "typings_test",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
-  "ref": "master",
+  "ref": "0.8",
   "installed": {
-    "async/async.d.ts": {
-      "commit": "1ee70efa3a2b037c9b73cd29c1043b7a972234ce",
-      "hash": "fb3987f1fae34dd648c82319b8cf983b"
-    }
+
   }
 }

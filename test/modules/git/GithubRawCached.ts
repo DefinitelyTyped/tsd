@@ -59,9 +59,6 @@ describe('git.GithubRawCached', () => {
 
 				// get again, should be cached
 				return raw.getFile(commitSha, filePath);
-			},(err) => {
-				xm.log.error('getFile 1', err);
-				assert(false, 'error: ' + err);
 			}).then((data) => {
 
 				assert.ok(data, 'second callback data');
@@ -71,12 +68,8 @@ describe('git.GithubRawCached', () => {
 				testStat(raw, 'store-miss', 1, 'second');
 				testStat(raw, 'store-set', 1, 'second');
 
-			},(err) => {
-				xm.log.error('getFile 2', err);
-				assert(false, 'error: ' + err);
-			}).fin(() => {
 				done();
-			}).done();
+			}).done(null, done);
 		});
 	});
 });

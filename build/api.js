@@ -83,6 +83,21 @@ var xm;
             }));
         }
         FileUtil.readJSONSync = readJSONSync;
+        function readJSON(src, callback) {
+            fs.readFile(path.resolve(src), 'utf8', function (err, file) {
+                if(err || !file) {
+                    return callback(err, null);
+                }
+                var json = null;
+                try  {
+                    json = JSON.parse(file);
+                } catch (err) {
+                    return callback(err, null);
+                }
+                return callback(null, json);
+            });
+        }
+        FileUtil.readJSON = readJSON;
         function readJSONPromise(src) {
             return FS.read(src, {
                 encoding: 'utf8'
@@ -493,7 +508,8 @@ var tsd;
         typingsFolder: 'typings',
         configVersion: 'v4',
         definitelyRepo: 'borisyankov/DefinitelyTyped',
-        mainBranch: 'master'
+        mainBranch: 'master',
+        shaShorten: 6
     };
     Object.freeze(tsd.Const);
 })(tsd || (tsd = {}));
@@ -1833,7 +1849,7 @@ var tsd;
         });
         Object.defineProperty(DefCommit.prototype, "commitShort", {
             get: function () {
-                return this._commitSha ? this._commitSha.substr(0, 8) : '<no sha>';
+                return this._commitSha ? tsd.shaShort(this._commitSha) : '<no sha>';
             },
             enumerable: true,
             configurable: true
@@ -1856,7 +1872,9 @@ var tsd;
     var branch_tree_sha = '/commit/commit/tree/sha';
     var DefIndex = (function () {
         function DefIndex() {
+            this._branchName = null;
             this._hasIndex = false;
+            this._indexCommit = null;
             this._definitions = new xm.KeyValueMap();
             this._commits = new xm.KeyValueMap();
             this._versions = new xm.KeyValueMap();
@@ -2003,11 +2021,11 @@ var tsd;
         DefIndex.prototype.toDump = function () {
             var ret = [];
             ret.push(this.toString());
-            this._definitions.values().forEach(function (def) {
+            var arr = this._definitions.values();
+            arr.forEach(function (def) {
                 ret.push('  ' + def.toString());
-                ret.push('  ' + def.head.toString());
             });
-            return ret.join('\n');
+            return ret.join('\n') + '\n' + 'total ' + arr.length + ' definitions';
         };
         Object.defineProperty(DefIndex.prototype, "branchName", {
             get: function () {
@@ -3191,6 +3209,13 @@ var xm;
     }
     xm.callAsync = callAsync;
 })(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    function shaShort(sha) {
+        return sha.substr(0, tsd.Const.shaShorten);
+    }
+    tsd.shaShort = shaShort;
+})(tsd || (tsd = {}));
 var xm;
 (function (xm) {
     var optimist = require('optimist');

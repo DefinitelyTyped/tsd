@@ -63,12 +63,8 @@ describe('git.GithubAPICached', () => {
 
 			api.getCachedRaw(api.getKey('bleh blah')).then((data) => {
 				assert.notOk(data, 'callback data');
-			},(err) => {
-				xm.log.error('getCachedRaw rejection', err);
-				assert(false, 'error: ' + err);
-			}).fin(() => {
 				done();
-			}).done();
+			}).done(null, done);
 		});
 
 		it('should cache and return data from store', (done:() => void) => {
@@ -91,9 +87,6 @@ describe('git.GithubAPICached', () => {
 
 				// get again, should be cached
 				return api.getBranches();
-			},(err) => {
-				xm.log.error('getBranches 1 rejection', err);
-				assert(false, 'error: ' + err);
 			}).then((data) => {
 				//xm.log('getBranches 2');
 
@@ -104,12 +97,8 @@ describe('git.GithubAPICached', () => {
 				testStat(api, 'store-hit', 1, 'second');
 				testStat(api, 'store-miss', 1, 'second');
 				testStat(api, 'store-set', 1, 'second');
-			},(err) => {;
-				xm.log.error('getBranches 2 rejection', err);
-				assert(false, 'error: ' + err);
-			}).fin(() => {
 				done();
-			}).done();
+			}).done(null, done);
 		});
 	});
 });

@@ -18,9 +18,9 @@ module tsd {
 	//TODO consider cutting coupling with github api fomat or at least verifying more (low prio)
 	export class DefIndex {
 
-		private _branchName:string;
+		private _branchName:string = null;
 		private _hasIndex:bool = false;
-		private _indexCommit:tsd.DefCommit;
+		private _indexCommit:tsd.DefCommit = null;
 
 		//TODO add generics when moved to TS 0.9
 		private _definitions:xm.IKeyValueMap = new xm.KeyValueMap();
@@ -235,16 +235,17 @@ module tsd {
 		toDump():string {
 			var ret:string[] = [];
 			ret.push(this.toString());
-			this._definitions.values().forEach((def:Def) => {
+			var arr = this._definitions.values();
+			arr.forEach((def:Def) => {
 				ret.push('  ' + def.toString());
-				ret.push('  ' + def.head.toString());
+				//ret.push('  ' + def.head.toString());
 				/*if (def.history) {
 				 def.history.forEach((file:DefVersion) => {
 				 ret.push('    - ' + file.toString());
 				 });
 				 }*/
 			});
-			return ret.join('\n');
+			return ret.join('\n') + '\n' + 'total ' + arr.length + ' definitions';
 		}
 
 		get branchName():string {

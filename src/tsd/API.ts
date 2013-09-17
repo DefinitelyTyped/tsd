@@ -56,7 +56,7 @@ module tsd {
 		}
 
 		/*
-		 save the config from Context.path.configFile
+		 save the config to Context.path.configFile
 		 promise: null
 		 */
 		saveConfig():Qpromise {

@@ -6,3 +6,4 @@
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/Set.ts" />
 ///<reference path="../xm/callAsync.ts" />
+///<reference path="../tsd/util/util.ts" />
