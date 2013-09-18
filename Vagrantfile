@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
   config.vm.provision :chef_solo do |chef|
-    chef.log_level = :debug
+    # chef.log_level = :debug
     chef.cookbooks_path = "cookbooks"
 
     chef.add_recipe "main"

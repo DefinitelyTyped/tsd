@@ -14,11 +14,11 @@ var xm;
                 throw (new Error('path exists but is not a directory: ' + dir));
             }
             if(writable) {
-                fs.chmodSync(dir, '0664');
+                fs.chmodSync(dir, '744');
             }
         } else {
             if(writable) {
-                mkdirp.sync(dir, '0664');
+                mkdirp.sync(dir, '744');
             } else {
                 mkdirp.sync(dir);
             }
