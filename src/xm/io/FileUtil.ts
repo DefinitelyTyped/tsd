@@ -28,7 +28,7 @@ module xm {
 		}
 
 		export function readJSON(src:string, callback:(err, res:any) => void) {
-			fs.readFile(path.resolve(src), 'utf8', (err, file) => {
+			fs.readFile(path.resolve(src), {encoding: 'utf8'}, (err, file) => {
 				if (err || !file) {
 					return callback(err, null);
 				}

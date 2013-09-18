@@ -38,6 +38,10 @@ module tsd {
 			return list.filter(this.getFilterFunc(), this);
 		}
 
+		toString():string {
+			return this.pattern;
+		}
+
 		// crude compilator
 		private compile():void {
 			if (!this.pattern) {

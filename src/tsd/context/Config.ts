@@ -51,6 +51,8 @@ module tsd {
 		private _installed:xm.KeyValueMap = new xm.KeyValueMap();
 		private _schema:any;
 
+		log:xm.Logger = xm.getLogger('Config');
+
 		constructor(schema:any) {
 			xm.assertVar('schema', schema, 'object');
 			this._schema = schema;
@@ -141,16 +143,16 @@ module tsd {
 
 			var res = tv4.validateResult(json, this._schema);
 
-			//TODO improve formatting
+			//TODO improve formatting (could bundle it in tv4?)
 			if (!res.valid || res.missing.length > 0) {
-				xm.log.error(res.error.message);
+				this.log.error(res.error.message);
 				if (res.error.dataPath) {
-					xm.log.error(res.error.dataPath);
+					this.log.error(res.error.dataPath);
 				}
-				if (res.error.schemaPath) {
+				/*if (res.error.schemaPath) {
 					xm.log.error(res.error.schemaPath);
-				}
-				throw (new Error('malformed config: doesn\'t comply with schema'));
+				}*/
+				throw (new Error('malformed config: doesn\'t comply with json-schema'));
 			}
 
 			//TODO harden validation besides schema
@@ -159,14 +161,12 @@ module tsd {
 			this.repo = json.repo;
 			this.ref = json.ref;
 
-
 			xm.eachProp(json.installed, (data:any, path:string) => {
-
 				var installed = new tsd.InstalledDef(path);
 				installed.commitSha = data.commit;
 				installed.contentHash = data.hash;
 
-				//validate some more?
+				//TODO validate some more?
 
 				this._installed.set(path, installed);
 			});

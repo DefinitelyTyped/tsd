@@ -13,6 +13,7 @@ tmp/
 Gruntfile.js
 tsd-config.json
 
+/build
 /docs
 /tsd-cache
 /cache

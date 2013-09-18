@@ -27,13 +27,13 @@ Must fix:
 * [x] Decide on caching directory: home / AppData like npm
 * [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
 * [x] Change Context objects to use Q/Q-io and not auto-create folders at init until properly configured.
-* [ ] Decide if raw.github needs its cache; maybe just keep for testing but skip for production?
+* [ ] Add skip features to raw.github; enforced for testing from local fixtures. 
 * [x] Fix tsd global bin/cli, test using `$ npm install . -g`
 * -
 * [ ] Add some options and unify their names (both for CLI as API)
 * [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
-* [ ] Find solution to update TSDPM.com: use tsd's module api and authenticated github and a DefinitelyTyped github hook to the heroku app.
-* [ ] Verify correct promise error handling (in mid-flow, at end of api & cli and in tests)
+* [ ] Build solution to update TSDPM.com: use tsd's module api and authenticated github and a DefinitelyTyped github hook to the heroku app.
+* [ ] Verify correct promise error handling (in mid-flow, at end of api & cli ~~and in tests~~)
 * [ ] Add option for file overwrite (always on now)
 
 Should fix:
@@ -47,16 +47,16 @@ Should fix:
 * [ ] Add manual purge/flush-command
 * [ ] Add periodic automated purge/flush
 * [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* * [ ] Add command for (re) initialisation of config (when you want to start in non-default branch etc)  
+* [ ] Add command for (re) initialisation of config (when you want to start in non-default branch etc)  
 * [x] Import tests for header parser from tsd-deftools @bartvds
 * [ ] Improve / harden DefInfo/Parser to extract more info, from more files
 * [ ] Add a global store for JSON pointers and RegExps etc
-* [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
 * [ ] Decide if API and/or Core etc need a queue-sytem hardening (module use might (partially) be race condition unsafe)
-* [ ] Sweep used modules: require() and package.json
 * [x] Improve Expose for crisper CLI help screen layout (table/columns)
 * [ ] Add npm pre-publish tests
 * [ ] Update config's JSON-Schema and improve validation reporting
+* [ ] Sweep used modules: require() and package.json
+* [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
 * [ ] Sweep and optimise reference-paths, but how?
 * [ ] Verify "use strict" (needed in node?)
 * [ ] Consider adding timeouts?

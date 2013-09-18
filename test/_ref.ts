@@ -5,12 +5,12 @@
 ///<reference path="../typings/DefinitelyTyped/chai/chai-json-schema-assert.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fuzzy-assert.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/chai/chai-fs-assert.d.ts" />
-///<reference path="../typings/DefinitelyTyped/chai/chai-as-promised.d.ts" />
+///<reference path="../typings/DefinitelyTyped/chai/chai-as-promised-assert.d.ts" />
 
 ///<reference path="helper.ts" />
 ///<reference path="../src/xm/io/Logger.ts" />
 
-declare var assert:chai.Assert;
+//declare var assert:chai.Assert;
 
 var mkdirp = require('mkdirp');
 
@@ -20,7 +20,7 @@ chai.use(require('chai-json-schema'));
 chai.use(require('chai-fs'));
 chai.use(require('chai-as-promised'));
 chai.Assertion.includeStack = true;
-var assert = chai.assert;
+var assert:chai.Assert = chai.assert;
 
 require('mocha-as-promised')();
 require('source-map-support').install();

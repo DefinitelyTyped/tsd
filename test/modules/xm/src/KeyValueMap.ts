@@ -1,5 +1,5 @@
-///<reference path="../../_ref.ts" />
-///<reference path="../../../src/xm/KeyValueMap.ts" />
+///<reference path="../../../_ref.ts" />
+///<reference path="../../../../src/xm/KeyValueMap.ts" />
 
 describe('xm.KeyValueMap', () => {
 

@@ -38,6 +38,8 @@ module tsd {
 		resolver:tsd.Resolver;
 		stats = new xm.StatCounter();
 
+		log = xm.getLogger('Core');
+
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
 
@@ -54,7 +56,7 @@ module tsd {
 			this.gitRaw.debug = this.context.verbose;
 
 			this.stats.log = this.context.verbose;
-			this.stats.logger = xm.getLogger('Core');
+			this.stats.logger = xm.getLogger('Core.stats');
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
@@ -88,17 +90,17 @@ module tsd {
 				return this.gitAPI.getTree(sha, true);
 			},(err) => {
 				this.stats.count('index-branch-get-error');
-				xm.log.error(err);
+				this.log.error(err);
 				throw err;
 			}).then((data:any) => {
-				//xm.log(data);
+				//this.log(data);
 				this.stats.count('index-tree-get-success');
 				this.index.init(branchData, data);
 
 				return this.index;
 			}, (err) => {
 				this.stats.count('index-tree-get-error');
-				xm.log.error(err);
+				this.log.error(err);
 				throw err;
 			});
 		}
@@ -183,7 +185,7 @@ module tsd {
 		 */
 		installFile(file:tsd.DefVersion, addToConfig:bool = true):Qpromise {
 			return this.useFile(file).then((targetPath:string) => {
-				//xm.log(paths.keys().join('\n'));
+				//this.log(paths.keys().join('\n'));
 
 				if (this.context.config.hasFile(file.def.path)) {
 					this.context.config.getFile(file.def.path).update(file);
@@ -239,7 +241,7 @@ module tsd {
 			return xm.mkdirCheckQ(dir, true).then(() => {
 				return FS.write(this.context.paths.configFile, json);
 			}).then(() => {
-				xm.log('config written to: ' + this.context.paths.configFile);
+				this.log('config written to: ' + this.context.paths.configFile);
 				return this.context.paths.configFile;
 			});
 		}
@@ -308,7 +310,7 @@ module tsd {
 				return Q(file);
 			}
 			return this.gitAPI.getPathCommits(this.context.config.ref, file.path).then((content:any[]) => {
-				//xm.log.inspect(content, null, 2);
+				//this.log.inspect(content, null, 2);
 				//TODO add pagination support (see github api docs)
 				this.index.setHistory(file, content);
 				return file;
@@ -362,7 +364,7 @@ module tsd {
 				parser.parse(file.info, file.content);
 
 				if (!file.info.isValid()) {
-					xm.log.warn('bad parse in: ' + file);
+					this.log.warn('bad parse in: ' + file);
 					//TODO print more debug info
 				}
 				return file;

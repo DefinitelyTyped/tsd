@@ -17,8 +17,7 @@ module.exports = function (grunt) {
 		'grunt-execute',
 		'grunt-shell',
 		'grunt-todos',
-		'grunt-mocha-test',
-		'grunt-wrap'
+		'grunt-mocha-test'
 	]);
 	// gtx.autoNpmPkg();
 	// gtx.autoNpm();
@@ -31,7 +30,8 @@ module.exports = function (grunt) {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
 				reporter: './node_modules/jshint-path-reporter'
 			}),
-			support: ['Gruntfile.js', 'tasks/*.js', 'test/*.js']
+			support: ['Gruntfile.js', 'tasks/*.js', 'test/*.js'],
+			fixtures: ['test/**/fixtures/**/*.js']
 		},
 		tslint: {
 			options: {
@@ -116,20 +116,20 @@ module.exports = function (grunt) {
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
 
 		macro.newTask('tslint', {
-			src: [testPath + '**/*.ts']
+			src: [testPath + 'src/**/*.ts']
 		});
 		macro.newTask('typescript', {
 			options: {
 				base_path: testPath
 			},
-			src: [testPath + '**/*.ts'],
+			src: [testPath + 'src/**/*.ts'],
 			dest: testPath + 'tmp/' + id + '.test.js'
 		});
 		macro.newTask('mochaTest', {
 			options: {
 				timeout: macro.getParam('timeout', 3000)
 			},
-			src: [testPath + '**/*.test.js']
+			src: [testPath + 'tmp/**/*.test.js']
 		});
 		macro.tag('test');
 		macro.tag('module');
@@ -137,7 +137,7 @@ module.exports = function (grunt) {
 
 	// assemble!
 
-	gtx.alias('prep', ['clean:tmp', 'jshint:support']);
+	gtx.alias('prep', ['clean:tmp', 'jshint:support', 'jshint:fixtures']);
 
 	// cli commands
 	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'copy:cli', 'tslint:source', 'mochaTest:integrity']);
@@ -148,7 +148,7 @@ module.exports = function (grunt) {
 	var longTimer = (isVagrant ? 20000 : 5000);
 
 	// modules
-	gtx.create('api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	gtx.create('api,cli,core', 'moduleTest', {timeout: longTimer}, 'core');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('xm', 'moduleTest', null, 'lib');
@@ -159,7 +159,8 @@ module.exports = function (grunt) {
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');
 	gtx.alias('edit_02', 'gtx:api');
-	gtx.alias('edit_03', 'build', 'gtx:cli');
+	//gtx.alias('edit_03', 'build', 'gtx:cli');
+	gtx.alias('edit_03', 'gtx:core');
 	gtx.alias('edit_04', 'gtx:git');
 	gtx.alias('edit_05', 'gtx:xm');
 

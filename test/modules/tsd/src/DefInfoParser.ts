@@ -1,6 +1,7 @@
-///<reference path='../../_ref.ts' />
-///<reference path='../../../src/xm/io/FileUtil.ts' />
-///<reference path='helper/HeaderHelper.ts' />
+///<reference path="../../../_ref.ts" />
+///<reference path="../../../helper.ts" />
+///<reference path="../../../../src/xm/io/FileUtil.ts" />
+///<reference path="../helper/HeaderHelper.ts" />
 
 
 describe('DefInfoParser', () => {
@@ -12,7 +13,7 @@ describe('DefInfoParser', () => {
 	var filter;// = ['async', 'expect.js'];
 
 	before((done:(err?) => void) => {
-		helper.loadHeaderFixtures(path.resolve('test', 'fixtures', 'headers'), (err, res:helper.HeaderAssert[]) => {
+		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers'), (err, res:helper.HeaderAssert[]) => {
 			if (err) {
 				return done(err);
 			}
@@ -41,6 +42,7 @@ describe('DefInfoParser', () => {
 			function testProp(def, data, parsed, prop) {
 				assert.strictEqual(data[prop], parsed[prop], def.key + ' .' + prop);
 			}
+
 			_.each(data, (def:helper.HeaderAssert) => {
 				assert.ok(def, def.key + ' ok');
 

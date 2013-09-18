@@ -226,5 +226,9 @@ module tsd {
 			// add proper safety checks (let's not accidentally rimraf root during development)
 			return Q.reject(new Error('not implemented yet'));
 		}
+
+		get core():tsd.Core {
+			return this._core;
+		}
 	}
 }

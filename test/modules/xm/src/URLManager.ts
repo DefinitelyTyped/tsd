@@ -1,5 +1,5 @@
-///<reference path="../../_ref.ts" />
-///<reference path="../../../src/xm/io/URLManager.ts" />
+///<reference path="../../../_ref.ts" />
+///<reference path="../../../../src/xm/io/URLManager.ts" />
 
 describe('xm.URLManager', () => {
 

@@ -1,6 +1,6 @@
-///<reference path="../../_ref.ts" />
-///<reference path="../../../src/git/GithubRawCached.ts" />
-///<reference path="../../../src/tsd/context/Context.ts" />
+///<reference path="../../../_ref.ts" />
+///<reference path="../../../../src/git/GithubRawCached.ts" />
+///<reference path="../../../../src/tsd/context/Context.ts" />
 
 describe('git.GithubRawCached', () => {
 

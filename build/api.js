@@ -84,7 +84,9 @@ var xm;
         }
         FileUtil.readJSONSync = readJSONSync;
         function readJSON(src, callback) {
-            fs.readFile(path.resolve(src), 'utf8', function (err, file) {
+            fs.readFile(path.resolve(src), {
+                encoding: 'utf8'
+            }, function (err, file) {
                 if(err || !file) {
                     return callback(err, null);
                 }
@@ -395,6 +397,7 @@ var tsd;
     var Config = (function () {
         function Config(schema) {
             this._installed = new xm.KeyValueMap();
+            this.log = xm.getLogger('Config');
             xm.assertVar('schema', schema, 'object');
             this._schema = schema;
             this.typingsPath = tsd.Const.typingsFolder;
@@ -474,14 +477,11 @@ var tsd;
             this._installed.clear();
             var res = tv4.validateResult(json, this._schema);
             if(!res.valid || res.missing.length > 0) {
-                xm.log.error(res.error.message);
+                this.log.error(res.error.message);
                 if(res.error.dataPath) {
-                    xm.log.error(res.error.dataPath);
+                    this.log.error(res.error.dataPath);
                 }
-                if(res.error.schemaPath) {
-                    xm.log.error(res.error.schemaPath);
-                }
-                throw (new Error('malformed config: doesn\'t comply with schema'));
+                throw (new Error('malformed config: doesn\'t comply with json-schema'));
             }
             this.typingsPath = json.typingsPath;
             this.version = json.version;
@@ -555,7 +555,7 @@ var tsd;
             if (typeof verbose === "undefined") { verbose = false; }
             this.configFile = configFile;
             this.verbose = verbose;
-            this.log = xm.log;
+            this.log = xm.getLogger('Context');
             this.packageInfo = xm.PackageJSON.getLocal();
             this.paths = new tsd.Paths();
             if(configFile) {
@@ -801,6 +801,10 @@ var xm;
         return crypto.createHash('sha1').update(data).digest('hex');
     }
     xm.sha1 = sha1;
+    function sha1Short(data) {
+        return crypto.createHash('sha1').update(data).digest('hex').substring(0, 8);
+    }
+    xm.sha1Short = sha1Short;
     function jsonToIdent(obj) {
         var ret = '';
         var sep = ';';
@@ -837,6 +841,15 @@ var xm;
         return ret;
     }
     xm.jsonToIdent = jsonToIdent;
+    function jsonToIdentHash(obj, length) {
+        if (typeof length === "undefined") { length = 0; }
+        var ident = sha1(jsonToIdent(obj));
+        if(length > 0) {
+            ident = ident.substr(0, length);
+        }
+        return ident;
+    }
+    xm.jsonToIdentHash = jsonToIdentHash;
 })(xm || (xm = {}));
 var git;
 (function (git) {
@@ -1902,7 +1915,7 @@ var tsd;
             xm.assertVar('treeSha', treeSha, 'string');
             xm.assertVar('commitSha', commitSha, 'string');
             if(sha !== treeSha) {
-                throw new Error('missing branch and tree sha mismatch');
+                throw new Error('branch and tree sha mismatch');
             }
             this._branchName = branch.name;
             this._indexCommit = this.procureCommit(commitSha);
@@ -2627,6 +2640,7 @@ var tsd;
         function Core(context) {
             this.context = context;
             this.stats = new xm.StatCounter();
+            this.log = xm.getLogger('Core');
             xm.assertVar('context', context, tsd.Context);
             this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
@@ -2636,7 +2650,7 @@ var tsd;
             this.gitAPI.debug = this.context.verbose;
             this.gitRaw.debug = this.context.verbose;
             this.stats.log = this.context.verbose;
-            this.stats.logger = xm.getLogger('Core');
+            this.stats.logger = xm.getLogger('Core.stats');
             xm.ObjectUtil.hidePrefixed(this);
         }
         Core.prototype.getIndex = function () {
@@ -2661,7 +2675,7 @@ var tsd;
                 return _this.gitAPI.getTree(sha, true);
             }, function (err) {
                 _this.stats.count('index-branch-get-error');
-                xm.log.error(err);
+                _this.log.error(err);
                 throw err;
             }).then(function (data) {
                 _this.stats.count('index-tree-get-success');
@@ -2669,7 +2683,7 @@ var tsd;
                 return _this.index;
             }, function (err) {
                 _this.stats.count('index-tree-get-error');
-                xm.log.error(err);
+                _this.log.error(err);
                 throw err;
             });
         };
@@ -2763,7 +2777,7 @@ var tsd;
             return xm.mkdirCheckQ(dir, true).then(function () {
                 return FS.write(_this.context.paths.configFile, json);
             }).then(function () {
-                xm.log('config written to: ' + _this.context.paths.configFile);
+                _this.log('config written to: ' + _this.context.paths.configFile);
                 return _this.context.paths.configFile;
             });
         };
@@ -2837,7 +2851,7 @@ var tsd;
                 }
                 parser.parse(file.info, file.content);
                 if(!file.info.isValid()) {
-                    xm.log.warn('bad parse in: ' + file);
+                    _this.log.warn('bad parse in: ' + file);
                 }
                 return file;
             });
@@ -2905,6 +2919,9 @@ var tsd;
         }
         NameMatcher.prototype.filter = function (list) {
             return list.filter(this.getFilterFunc(), this);
+        };
+        NameMatcher.prototype.toString = function () {
+            return this.pattern;
         };
         NameMatcher.prototype.compile = function () {
             if(!this.pattern) {
@@ -3025,6 +3042,7 @@ var tsd;
     var Selector = (function () {
         function Selector(pattern) {
             if (typeof pattern === "undefined") { pattern = '*'; }
+            this.resolveDependencies = false;
             this.limit = 10;
             xm.assertVar('pattern', pattern, 'string');
             this.pattern = new tsd.NameMatcher(pattern);
@@ -3036,6 +3054,9 @@ var tsd;
             enumerable: true,
             configurable: true
         });
+        Selector.prototype.toString = function () {
+            return this.pattern.pattern;
+        };
         return Selector;
     })();
     tsd.Selector = Selector;    
@@ -3154,6 +3175,13 @@ var tsd;
         API.prototype.purge = function () {
             return Q.reject(new Error('not implemented yet'));
         };
+        Object.defineProperty(API.prototype, "core", {
+            get: function () {
+                return this._core;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return API;
     })();
     tsd.API = API;    

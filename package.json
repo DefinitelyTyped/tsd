@@ -38,7 +38,6 @@
     "underscore": "1.5.1",
     "request": "2.25.0",
     "mkdirp": "0.3.5",
-    "tv4": "1.0.5",
     "jsonpointer.js": "0.3.0",
     "semver": "2.1.0",
     "github": "0.1.10",
@@ -48,7 +47,8 @@
     "source-map-support": "0.2.3",
     "uri-templates": "0.1.1",
     "optimist": "0.6.0",
-    "easy-table": "0.2.0"
+    "easy-table": "0.2.0",
+    "tv4": "~1.0.8"
   },
   "devDependencies": {
     "rimraf": "2.2.2",

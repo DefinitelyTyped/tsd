@@ -19,6 +19,10 @@ module xm {
 		return crypto.createHash('sha1').update(data).digest('hex');
 	}
 
+	export function sha1Short(data:string):string {
+		return crypto.createHash('sha1').update(data).digest('hex').substring(0, 8);
+	}
+
 	// hash any json-like-object's data to a ident-string
 	// - instances with identical fields and values give identical ident-string
 	// - output looks similar to json-string but with auto-sorted property order and other tweaks
@@ -70,5 +74,13 @@ module xm {
 			throw (new Error('jsonToIdent: cannot serialise value: ' + obj));
 		}
 		return ret;
+	}
+
+	export function jsonToIdentHash(obj:any, length:number=0):string {
+		var ident = sha1(jsonToIdent(obj));
+		if (length > 0) {
+			ident = ident.substr(0, length);
+		}
+		return ident;
 	}
 }

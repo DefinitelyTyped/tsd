@@ -11,7 +11,7 @@ module tsd {
 
 		pattern:NameMatcher;
 
-		resolveDependencies:bool;
+		resolveDependencies:bool = false;
 
 		//TODO implement something like these
 		//dateMatcher:DateMatcher;
@@ -19,6 +19,7 @@ module tsd {
 		limit:number = 10;
 		beforeDate:Date;
 		afterDate:Date;
+		commitSha:string;
 
 		constructor(pattern?:string = '*') {
 			xm.assertVar('pattern', pattern, 'string');
@@ -31,6 +32,10 @@ module tsd {
 
 		get requiresHistory():bool {
 			return !!(this.beforeDate || this.afterDate);
+		}
+
+		toString():string {
+			return this.pattern.pattern;
 		}
 	}
 }

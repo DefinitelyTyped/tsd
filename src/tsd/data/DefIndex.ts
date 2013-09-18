@@ -67,7 +67,7 @@ module tsd {
 
 			//verify tree is from branch (compare sha's)
 			if (sha !== treeSha) {
-				throw new Error('missing branch and tree sha mismatch');
+				throw new Error('branch and tree sha mismatch');
 			}
 
 			this._branchName = branch.name;

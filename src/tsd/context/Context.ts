@@ -30,8 +30,8 @@ module tsd {
 		config:Config;
 		packageInfo:xm.PackageJSON;
 
-		//TODO drop this log? (xm.log is pretty global already)
-		log:xm.Logger = xm.log;
+		//TODO use more of this log? (xm.log is pretty global already)
+		log:xm.Logger = xm.getLogger('Context');
 
 		constructor(public configFile?:string = null, public verbose?:bool = false) {
 			//xm.assertVar('configPath', configPath, 'string', true);

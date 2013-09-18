@@ -1,5 +1,5 @@
-///<reference path="../../_ref.ts" />
-///<reference path="../../../src/xm/io/hash.ts" />
+///<reference path="../../../_ref.ts" />
+///<reference path="../../../../src/xm/io/hash.ts" />
 
 describe('xm.hash', () => {
 
