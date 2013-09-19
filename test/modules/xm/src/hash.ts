@@ -20,70 +20,84 @@ describe('xm.hash', () => {
 		});
 	});
 	describe('jsonToIdent()', () => {
-		describe('objects', () => {
 
-			//TODO document intended differences (it a bit unclear now)
+		//TODO document intended differences (it a bit unclear now)
 
-			var valueA = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+		var valueA = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
 
-			var valueB = {c: [1, 2, 3], d: {b: 'bravo', a: 11, c: [11, 22, 33]}, a: 1, b: 'B'};
+		var valueB = {c: [1, 2, 3], d: {b: 'bravo', a: 11, c: [11, 22, 33]}, a: 1, b: 'B'};
 
-			var valueX1 = {a: 222, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+		var valueX1 = {a: 222, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
 
-			var valueX2 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'nope', c: [11, 22, 33]}};
+		var valueX2 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'nope', c: [11, 22, 33]}};
 
-			var valueX3 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22]}};
+		var valueX3 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22]}};
 
-			var valueX4 = {a: 1, b: 'XX', c: [3, 2, 1], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
+		var valueX4 = {a: 1, b: 'XX', c: [3, 2, 1], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
 
-			var valueX5 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo'}};
+		var valueX5 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo'}};
 
-			it('should return identical hash for same object', () => {
-				var ori = xm.jsonToIdent(valueA);
-				var alt = xm.jsonToIdent(valueA);
-				assert.isString(ori, 'ori');
-				assert.isString(alt, 'alt');
-				assert.strictEqual(ori, alt);
+		it('should return identical hash for same object', () => {
+			var ori = xm.jsonToIdent(valueA);
+			var alt = xm.jsonToIdent(valueA);
+			assert.isString(ori, 'ori');
+			assert.isString(alt, 'alt');
+			assert.strictEqual(ori, alt);
+		});
+		it('should return identical hash for reordered data', () => {
+			var ori = xm.jsonToIdent(valueA);
+			var alt = xm.jsonToIdent(valueB);
+			assert.strictEqual(ori, alt);
+		});
+		it('should return different hash for different data', () => {
+			var ori = xm.jsonToIdent(valueA);
+			var alt;
+			alt = xm.jsonToIdent(valueX1);
+			assert.notStrictEqual(ori, alt, 'valueA -> valueX1');
+			alt = xm.jsonToIdent(valueX2);
+			assert.notStrictEqual(ori, alt, 'valueA -> valueX2');
+			alt = xm.jsonToIdent(valueX3);
+			assert.notStrictEqual(ori, alt, 'valueA -> valueX3');
+			alt = xm.jsonToIdent(valueX4);
+			assert.notStrictEqual(ori, alt, 'valueA -> valueX4');
+			alt = xm.jsonToIdent(valueX5);
+			assert.notStrictEqual(ori, alt, 'valueA -> valueX5');
+		});
+		it('should throw on Function', () => {
+			assert.throws(() => {
+				xm.jsonToIdent({a: 1, b: function (x) {
+					return x * x;
+				}});
 			});
-			it('should return identical hash for reordered data', () => {
-				var ori = xm.jsonToIdent(valueA);
-				var alt = xm.jsonToIdent(valueB);
-				assert.strictEqual(ori, alt);
+		});
+		it('should throw on RegExp', () => {
+			assert.throws(() => {
+				xm.jsonToIdent({a: 1, b: /^[0-9]+$/});
 			});
-			it('should return different hash for different data', () => {
-				var ori = xm.jsonToIdent(valueA);
-				var alt;
-				alt = xm.jsonToIdent(valueX1);
-				assert.notStrictEqual(ori, alt, 'valueA -> valueX1');
-				alt = xm.jsonToIdent(valueX2);
-				assert.notStrictEqual(ori, alt, 'valueA -> valueX2');
-				alt = xm.jsonToIdent(valueX3);
-				assert.notStrictEqual(ori, alt, 'valueA -> valueX3');
-				alt = xm.jsonToIdent(valueX4);
-				assert.notStrictEqual(ori, alt, 'valueA -> valueX4');
-				alt = xm.jsonToIdent(valueX5);
-				assert.notStrictEqual(ori, alt, 'valueA -> valueX5');
-			});
-			it('should throw on Function', () => {
-				assert.throws(() => {
-					console.log(xm.jsonToIdent({a: 1, b: function (x) {
-						return x * x;
-					}}));
-				});
-			});
-			it('should throw on RegExp', () => {
-				assert.throws(() => {
-					console.log(xm.jsonToIdent({a: 1, b: /^[0-9]+$/}));
-				});
-			});
-			it('should serialise Date, include millisecond level', () => {
-				var valueA = new Date();
-				var ori = xm.jsonToIdent(valueA);
-				var alt = xm.jsonToIdent(new Date(valueA.getTime()));
-				assert.strictEqual(ori, alt, 'identical values');
-				alt = xm.jsonToIdent(new Date(valueA.getTime() + 2));
-				assert.notStrictEqual(ori, alt, 'milli second');
-			});
+		});
+		it('should serialise Date, include millisecond level', () => {
+			var valueA = new Date();
+			var ori = xm.jsonToIdent(valueA);
+			var alt = xm.jsonToIdent(new Date(valueA.getTime()));
+			assert.strictEqual(ori, alt, 'identical values');
+			alt = xm.jsonToIdent(new Date(valueA.getTime() + 2));
+			assert.notStrictEqual(ori, alt, 'milli second');
+		});
+	});
+
+	describe('jsonToIdentHash()', () => {
+		it('should return same hash for similar objects', () => {
+			var valueA = {a: 1, b: 2, c: 3};
+			var valueB = {b: 2, c: 3, a: 1};
+			var hashA = xm.jsonToIdentHash(valueA, 16);
+			var hashB = xm.jsonToIdentHash(valueB, 16);
+			var expected = 'e47fb2071f83fdce';
+			assert.lengthOf(hashA, 16, 'hashA');
+			assert.lengthOf(hashB, 16, 'hashA');
+			assert.isString(hashA, 'hashA');
+			assert.isString(hashB, 'hashB');
+			assert.strictEqual(hashA, hashB, 'equal');
+			assert.strictEqual(hashA, expected, 'preset hash');
 		});
 	});
 });

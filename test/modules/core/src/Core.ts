@@ -1,4 +1,5 @@
 ///<reference path="../../../_ref.ts" />
+///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/tsd/logic/Core.ts" />
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
 

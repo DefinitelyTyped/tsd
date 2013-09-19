@@ -13,6 +13,9 @@ describe('xm.KeyValueMap', () => {
 	});
 
 	describe('default', () => {
+
+		//TODO rewrite tests so no state has to be kept between cases
+
 		before(() => {
 			map = new xm.KeyValueMap();
 		});
@@ -24,9 +27,9 @@ describe('xm.KeyValueMap', () => {
 			assert.ok(map);
 		});
 		it('returns undefined for unset data', () => {
-			assert.ok(!map.get(null));
-			assert.ok(!map.get(''));
-			assert.ok(!map.get('xyz'));
+			assert.notOk(map.get(null));
+			assert.notOk(map.get(''));
+			assert.notOk(map.get('xyz'));
 		});
 		it('returns alt value for unset data', () => {
 			assert.strictEqual(map.get('xyz', 'abc'), 'abc');
@@ -62,7 +65,7 @@ describe('xm.KeyValueMap', () => {
 			it('removes data by name', () => {
 				map.remove('bb__bb');
 				map.remove('cc');
-				assert.ok(!map.get('bb__bb'));
+				assert.notOk(map.get('bb__bb'));
 				assert.strictEqual(map.get('bb__bb', 123), 123);
 				assert.deepEqual(map.keys(), ['aa']);
 			});

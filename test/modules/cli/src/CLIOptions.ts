@@ -1,4 +1,5 @@
 ///<reference path="../../../_ref.ts" />
+///<reference path="../../../tsdHelper.ts" />
 
 
 describe('CLIOptions', () => {

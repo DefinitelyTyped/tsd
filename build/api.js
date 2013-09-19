@@ -156,9 +156,9 @@ var xm;
     xm.eachElem = eachElem;
     function eachProp(collection, callback, thisArg) {
         if (typeof thisArg === "undefined") { thisArg = null; }
-        for(var key in collection) {
-            if(collection.hasOwnProperty(key)) {
-                if(callback.call(thisArg, collection[key], key, collection) === false) {
+        for(var prop in collection) {
+            if(collection.hasOwnProperty(prop)) {
+                if(callback.call(thisArg, collection[prop], prop, collection) === false) {
                     return;
                 }
             }
@@ -175,9 +175,9 @@ var xm;
     xm.reduceArray = reduceArray;
     function reduceHash(collection, memo, callback, thisArg) {
         if (typeof thisArg === "undefined") { thisArg = null; }
-        for(var key in collection) {
-            if(collection.hasOwnProperty(key)) {
-                memo = callback.call(thisArg, memo, collection[key], key, collection);
+        for(var prop in collection) {
+            if(collection.hasOwnProperty(prop)) {
+                memo = callback.call(thisArg, memo, collection[prop], prop, collection);
             }
         }
         return memo;
@@ -187,7 +187,7 @@ var xm;
         if (typeof thisArg === "undefined") { thisArg = null; }
         var map = [];
         for(var i = 0, ii = collection.length; i < ii; i++) {
-            map[i] = callback.call(thisArg, map[i], i, collection);
+            map[i] = callback.call(thisArg, collection[i], i, collection);
         }
         return map;
     }
@@ -196,14 +196,37 @@ var xm;
         if (typeof thisArg === "undefined") { thisArg = null; }
         var map = {
         };
-        for(var key in collection) {
-            if(collection.hasOwnProperty(key)) {
-                map[key] = callback.call(thisArg, collection[key], key, collection);
+        for(var prop in collection) {
+            if(collection.hasOwnProperty(prop)) {
+                map[prop] = callback.call(thisArg, collection[prop], prop, collection);
             }
         }
         return map;
     }
     xm.mapHash = mapHash;
+    function filterArray(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var map = [];
+        for(var i = 0, ii = collection.length; i < ii; i++) {
+            if(callback.call(thisArg, collection[i], i, collection)) {
+                map.push(collection[i]);
+            }
+        }
+        return map;
+    }
+    xm.filterArray = filterArray;
+    function filterHash(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var res = {
+        };
+        for(var prop in collection) {
+            if(collection.hasOwnProperty(prop) && callback.call(thisArg, collection[prop], prop, collection)) {
+                res[prop] = collection[prop];
+            }
+        }
+        return res;
+    }
+    xm.filterHash = filterHash;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -297,6 +320,272 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    var natives = {
+        '[object Arguments]': 'arguments',
+        '[object Array]': 'array',
+        '[object Date]': 'date',
+        '[object Function]': 'function',
+        '[object Number]': 'number',
+        '[object RegExp]': 'regexp',
+        '[object String]': 'string'
+    };
+    function typeOf(obj) {
+        var str = Object.prototype.toString.call(obj);
+        if(natives[str]) {
+            return natives[str];
+        }
+        if(obj === null) {
+            return 'null';
+        }
+        if(obj === undefined) {
+            return 'undefined';
+        }
+        if(obj === Object(obj)) {
+            return 'object';
+        }
+        return typeof obj;
+    }
+    xm.typeOf = typeOf;
+    var typeMap = {
+        arguments: isArguments,
+        array: isArray,
+        date: isDate,
+        function: isFunction,
+        number: isNumber,
+        regexp: isRegExp,
+        string: isString,
+        null: isNull,
+        undefined: isUndefined,
+        object: isObject,
+        boolean: isBoolean
+    };
+    function hasOwnProp(obj, prop) {
+        return Object.prototype.hasOwnProperty.call(obj, prop);
+    }
+    function isType(obj, type) {
+        if(hasOwnProp(typeMap, type)) {
+            return typeMap[type].call(null, obj);
+        }
+        return false;
+    }
+    xm.isType = isType;
+    function isArguments(obj) {
+        return (typeOf(obj) === 'arguments');
+    }
+    xm.isArguments = isArguments;
+    function isArray(obj) {
+        return (typeOf(obj) === 'array');
+    }
+    xm.isArray = isArray;
+    function isDate(obj) {
+        return (typeOf(obj) === 'date');
+    }
+    xm.isDate = isDate;
+    function isFunction(obj) {
+        return (typeOf(obj) === 'function');
+    }
+    xm.isFunction = isFunction;
+    function isNumber(obj) {
+        return (typeOf(obj) === 'number');
+    }
+    xm.isNumber = isNumber;
+    function isRegExp(obj) {
+        return (typeOf(obj) === 'regexp');
+    }
+    xm.isRegExp = isRegExp;
+    function isString(obj) {
+        return (typeOf(obj) === 'string');
+    }
+    xm.isString = isString;
+    function isNull(obj) {
+        return (typeOf(obj) === 'null');
+    }
+    xm.isNull = isNull;
+    function isUndefined(obj) {
+        return (typeOf(obj) === 'undefined');
+    }
+    xm.isUndefined = isUndefined;
+    function isObject(obj) {
+        return (typeOf(obj) === 'object');
+    }
+    xm.isObject = isObject;
+    function isBoolean(obj) {
+        return (typeOf(obj) === 'boolean');
+    }
+    xm.isBoolean = isBoolean;
+    function getTypeOfMap(add) {
+        var obj = {
+        };
+        for(var name in typeMap) {
+            if(hasOwnProp(typeMap, name)) {
+                obj[name] = typeMap[name];
+            }
+        }
+        if(add) {
+            for(var name in add) {
+                if(hasOwnProp(add, name) && isFunction(add[name])) {
+                    obj[name] = add[name];
+                }
+            }
+        }
+        return obj;
+    }
+    xm.getTypeOfMap = getTypeOfMap;
+    function getTypeOfWrap(add) {
+        var typeMap = getTypeOfMap(add);
+        return function isType(obj, type) {
+            if(hasOwnProp(typeMap, type)) {
+                return typeMap[type].call(null, obj);
+            }
+            return false;
+        };
+    }
+    xm.getTypeOfWrap = getTypeOfWrap;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    function getFuncLabel(func) {
+        var match = /^\s?function ([^( ]*) *\( *([^(]*?) *\)/.exec(func);
+        if(match && match.length >= 3) {
+            return match[1] + '(' + match[2] + ')';
+        }
+        if(func.name) {
+            return func.name;
+        }
+        return '<anonymous>';
+    }
+    xm.getFuncLabel = getFuncLabel;
+    function toValueStrim(obj, depth) {
+        if (typeof depth === "undefined") { depth = 2; }
+        var type = xm.typeOf(obj);
+        var strCut = 20;
+        var objCut = 30;
+        depth--;
+        switch(type) {
+            case 'boolean':
+            case 'regexp':
+                return obj.toString();
+            case 'null':
+            case 'undefined':
+                return type;
+            case 'number':
+                return obj.toString(10);
+            case 'string':
+                return trimLine(obj, strCut);
+            case 'date':
+                return obj.toISOString();
+            case 'function':
+                return xm.getFuncLabel(obj);
+            case 'arguments':
+            case 'array': {
+                if(depth <= 0) {
+                    return '<maximum recursion>';
+                }
+                return '[' + trimLine(obj.map(function (value) {
+                    return toValueStrim(value, depth);
+                }).join(','), objCut, false) + ']';
+            }
+            case 'object': {
+                if(depth <= 0) {
+                    return '<maximum recursion>';
+                }
+                return '{' + trimLine(Object.keys(obj).sort().map(function (key) {
+                    return trimLine(key) + ':' + toValueStrim(obj[key], depth);
+                }).join(','), objCut, false) + '}';
+            }
+            default:
+                throw (new Error('toValueStrim: cannot serialise type: ' + type));
+        }
+    }
+    xm.toValueStrim = toValueStrim;
+    function trimLine(value, cutoff, quotes) {
+        if (typeof cutoff === "undefined") { cutoff = 30; }
+        if (typeof quotes === "undefined") { quotes = true; }
+        value = String(value).replace('\r', '\\r').replace('\n', '\\n').replace('\t', '\\t');
+        if(value.length > cutoff - 2) {
+            value = value.substr(0, cutoff - 5) + '...';
+        }
+        return quotes ? '"' + value + '"' : value;
+    }
+    xm.trimLine = trimLine;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    function isSha(value) {
+        if(typeof value !== 'string') {
+            return false;
+        }
+        return /^[0-9a-f]{40}$/.test(value);
+    }
+    function isMd5(value) {
+        if(typeof value !== 'string') {
+            return false;
+        }
+        return /^[0-9a-f]{32}$/.test(value);
+    }
+    var typeOfAssert = xm.getTypeOfMap({
+        sha1: isSha,
+        md5: isMd5
+    });
+    function assertVar(label, value, type, opt) {
+        if (typeof opt === "undefined") { opt = false; }
+        if(arguments.length < 3) {
+            throw new Error('assertVar() expected at least 3 arguments but got "' + arguments.length + '"');
+        }
+        var valueKind = xm.typeOf(value);
+        var typeKind = xm.typeOf(type);
+        var typeStrim = xm.toValueStrim(type);
+        if(valueKind === 'undefined' || valueKind === 'null') {
+            if(!opt) {
+                throw new Error('expected "' + label + '" to be defined but got "' + value + '"');
+            }
+        } else if(typeKind === 'function') {
+            if(!(value instanceof type)) {
+                throw new Error('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+            }
+        } else if(typeKind === 'string') {
+            if(typeOfAssert.hasOwnProperty(type)) {
+                var check = typeOfAssert[type];
+                if(!check(value)) {
+                    throw new Error('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                }
+            } else {
+                throw new Error('unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
+            }
+        } else {
+            throw new Error('bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
+        }
+    }
+    xm.assertVar = assertVar;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var ObjectUtil = (function () {
+        function ObjectUtil() { }
+        ObjectUtil.defineProp = function defineProp(object, property, settings) {
+            Object.defineProperty(object, property, settings);
+        };
+        ObjectUtil.defineProps = function defineProps(object, propertyNames, settings) {
+            propertyNames.forEach(function (property) {
+                ObjectUtil.defineProp(object, property, settings);
+            });
+        };
+        ObjectUtil.hidePrefixed = function hidePrefixed(object, ownOnly) {
+            if (typeof ownOnly === "undefined") { ownOnly = true; }
+            for(var property in object) {
+                if(property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
+                    ObjectUtil.defineProp(object, property, {
+                        enumerable: false
+                    });
+                }
+            }
+        };
+        return ObjectUtil;
+    })();
+    xm.ObjectUtil = ObjectUtil;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
     var pkginfo = require('pkginfo');
     var PackageJSON = (function () {
         function PackageJSON(pkg, path) {
@@ -357,32 +646,146 @@ var xm;
     })();
     xm.PackageJSON = PackageJSON;    
 })(xm || (xm = {}));
-var xm;
-(function (xm) {
-    var ObjectUtil = (function () {
-        function ObjectUtil() { }
-        ObjectUtil.defineProp = function defineProp(object, property, settings) {
-            Object.defineProperty(object, property, settings);
+var tsd;
+(function (tsd) {
+    var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
+    var Def = (function () {
+        function Def(path) {
+            this.history = [];
+            xm.assertVar('path', path, 'string');
+            this.path = path;
+        }
+        Object.defineProperty(Def.prototype, "pathTerm", {
+            get: function () {
+                return this.path.replace(/\.d\.ts$/, '');
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Def.prototype.toString = function () {
+            return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
         };
-        ObjectUtil.defineProps = function defineProps(object, propertyNames, settings) {
-            propertyNames.forEach(function (property) {
-                ObjectUtil.defineProp(object, property, settings);
-            });
+        Def.isDefPath = function isDefPath(path) {
+            return nameExp.test(path);
         };
-        ObjectUtil.hidePrefixed = function hidePrefixed(object, ownOnly) {
-            if (typeof ownOnly === "undefined") { ownOnly = true; }
-            for(var property in object) {
-                if(property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
-                    ObjectUtil.defineProp(object, property, {
-                        enumerable: false
-                    });
-                }
+        Def.getPath = function getPath(path) {
+            return nameExp.test(path);
+        };
+        Def.getFrom = function getFrom(path) {
+            var match = nameExp.exec(path);
+            if(!match) {
+                return null;
             }
+            if(match.length < 1) {
+                return null;
+            }
+            if(match[1].length < 1 || match[2].length < 1) {
+                return null;
+            }
+            var file = new tsd.Def(path);
+            file.project = match[1];
+            file.name = match[2];
+            return file;
         };
-        return ObjectUtil;
+        return Def;
     })();
-    xm.ObjectUtil = ObjectUtil;    
-})(xm || (xm = {}));
+    tsd.Def = Def;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var endSlashTrim = /\/?$/;
+    var DefInfo = (function () {
+        function DefInfo() {
+            this.references = [];
+            this.resetAll();
+        }
+        DefInfo.prototype.resetFields = function () {
+            this.name = '';
+            this.version = '';
+            this.submodule = '';
+            this.description = '';
+            this.projectUrl = '';
+            this.authors = [];
+            this.reposUrl = '';
+        };
+        DefInfo.prototype.resetAll = function () {
+            this.resetFields();
+            this.references = [];
+        };
+        DefInfo.prototype.toString = function () {
+            var ret = this.name;
+            if(this.submodule) {
+                ret += ' ' + this.submodule;
+            }
+            if(this.version) {
+                ret += ' ' + this.version;
+            }
+            if(this.description) {
+                ret += ' ' + JSON.stringify(this.description);
+            }
+            return ret;
+        };
+        DefInfo.prototype.isValid = function () {
+            if(!this.name) {
+                return false;
+            }
+            if(this.authors.length === 0) {
+                return false;
+            }
+            if(!this.reposUrl) {
+                return false;
+            }
+            return true;
+        };
+        return DefInfo;
+    })();
+    tsd.DefInfo = DefInfo;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var DefVersion = (function () {
+        function DefVersion(def, commit) {
+            this.dependencies = [];
+            this.solved = false;
+            xm.assertVar('def', def, tsd.Def);
+            xm.assertVar('commit', commit, tsd.DefCommit);
+            this._def = def;
+            this._commit = commit;
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        Object.defineProperty(DefVersion.prototype, "key", {
+            get: function () {
+                if(!this._def || !this._commit) {
+                    return null;
+                }
+                return this._def.path + '-' + this._commit.commitSha;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DefVersion.prototype, "def", {
+            get: function () {
+                return this._def;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DefVersion.prototype, "commit", {
+            get: function () {
+                return this._commit;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DefVersion.prototype.toString = function () {
+            var str = (this._def ? this._def.path : '<no def>');
+            str += ' : ' + (this._commit ? this._commit.commitShort : '<no blob-sha>');
+            return str;
+        };
+        return DefVersion;
+    })();
+    tsd.DefVersion = DefVersion;    
+})(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
     var fs = require('fs');
@@ -721,6 +1124,14 @@ var xm;
                 _this.stats.set(id, 0);
             });
         };
+        StatCounter.prototype.total = function () {
+            return this.stats.values().reduce(function (memo, value) {
+                return memo + value;
+            }, 0);
+        };
+        StatCounter.prototype.counterNames = function () {
+            return this.stats.keys();
+        };
         StatCounter.prototype.hasAllZero = function () {
             return !this.stats.values().some(function (value) {
                 return value !== 0;
@@ -745,68 +1156,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
-    function isArray(value) {
-        return Array.isArray(value);
-    }
-    function isObject(value) {
-        return typeof value === 'object' && value && !isArray(value);
-    }
-    function isNumber(value) {
-        return typeof value === 'number' && !isNaN(value);
-    }
-    function isSha(value) {
-        if(typeof value !== 'string') {
-            return false;
-        }
-        return /^[0-9a-f]{40}$/.test(value);
-    }
-    function isMd5(value) {
-        if(typeof value !== 'string') {
-            return false;
-        }
-        return /^[0-9a-f]{32}$/.test(value);
-    }
-    var typeAssert = {
-        sha1: isSha,
-        md5: isMd5,
-        object: isObject,
-        array: isArray,
-        number: isNumber
-    };
-    function assertVar(label, value, type, opt) {
-        if (typeof opt === "undefined") { opt = false; }
-        if(arguments.length < 3) {
-            throw (new Error('assertVar() expected at least 3 arguments but got "' + value + '"'));
-        }
-        var valueType = typeof value;
-        var typeKind = typeof type;
-        if(valueType === 'undefined' || (!value && valueType === 'object')) {
-            if(!opt) {
-                throw (new Error('expected "' + label + '" to be defined but got "' + value + '"'));
-            }
-        } else if(typeKind === 'function') {
-            if(value.constructor instanceof type) {
-                throw (new Error('expected "' + label + '" to be instanceof "' + type + '" but got "' + value.constructor + '": ' + value));
-            }
-        } else if(typeKind === 'string') {
-            if(typeAssert.hasOwnProperty(type)) {
-                var check = typeAssert[type];
-                if(!check(value)) {
-                    throw (new Error('expected "' + label + '" to be a "' + type + '": ' + value));
-                }
-            } else if(valueType !== type) {
-                throw (new Error('expected "' + label + '" to be typeof "' + type + '" but got "' + valueType + '": ' + value));
-            }
-        } else {
-            throw (new Error('bad type assertion parameter "' + type + '" for "' + label + '"'));
-        }
-    }
-    xm.assertVar = assertVar;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
     var crypto = require('crypto');
-    var _ = require('underscore');
     function md5(data) {
         return crypto.createHash('md5').update(data).digest('hex');
     }
@@ -815,42 +1165,37 @@ var xm;
         return crypto.createHash('sha1').update(data).digest('hex');
     }
     xm.sha1 = sha1;
-    function sha1Short(data) {
-        return crypto.createHash('sha1').update(data).digest('hex').substring(0, 8);
+    function sha1Short(data, length) {
+        if (typeof length === "undefined") { length = 8; }
+        return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
     }
     xm.sha1Short = sha1Short;
     function jsonToIdent(obj) {
         var ret = '';
         var sep = ';';
-        var type = typeof obj;
-        if(type === 'string') {
+        var type = xm.typeOf(obj);
+        if(type === 'string' || type === 'number' || type === 'boolean') {
             ret += JSON.stringify(obj) + sep;
-        } else if(type === 'number') {
-            ret += JSON.stringify(obj) + sep;
-        } else if(type === 'boolean') {
-            ret += String(obj) + sep;
-        } else if(_.isDate(obj)) {
+        } else if(type === 'regexp' || type === 'function') {
+            throw (new Error('jsonToIdent: cannot serialise: ' + type));
+        } else if(type === 'date') {
             ret += '<Date>' + obj.getTime() + sep;
-        } else if(_.isArray(obj)) {
+        } else if(type === 'array') {
             ret += '[';
-            _.forEach(obj, function (value) {
+            obj.forEach(function (value) {
                 ret += jsonToIdent(value);
             });
             ret += ']' + sep;
-        } else if(type === 'function') {
-            throw (new Error('jsonToIdent: cannot serialise Function'));
-        } else if(_.isRegExp(obj)) {
-            throw (new Error('jsonToIdent: cannot serialise RegExp'));
-        } else if(_.isObject(obj)) {
-            var keys = _.keys(obj);
+        } else if(type === 'object') {
+            var keys = Object.keys(obj);
             keys.sort();
             ret += '{';
-            _.forEach(keys, function (key) {
+            keys.forEach(function (key) {
                 ret += JSON.stringify(key) + ':' + jsonToIdent(obj[key]);
             });
             ret += '}' + sep;
         } else {
-            throw (new Error('jsonToIdent: cannot serialise value: ' + obj));
+            throw (new Error('jsonToIdent: cannot serialise value: ' + type + ':' + obj));
         }
         return ret;
     }
@@ -1625,146 +1970,6 @@ for(var i = 0, ii = list.length; i < ii; i++) {
         return DefUtil;
     })();
     tsd.DefUtil = DefUtil;    
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
-    var Def = (function () {
-        function Def(path) {
-            this.history = [];
-            xm.assertVar('path', path, 'string');
-            this.path = path;
-        }
-        Object.defineProperty(Def.prototype, "pathTerm", {
-            get: function () {
-                return this.path.replace(/\.d\.ts$/, '');
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Def.prototype.toString = function () {
-            return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
-        };
-        Def.isDefPath = function isDefPath(path) {
-            return nameExp.test(path);
-        };
-        Def.getPath = function getPath(path) {
-            return nameExp.test(path);
-        };
-        Def.getFrom = function getFrom(path) {
-            var match = nameExp.exec(path);
-            if(!match) {
-                return null;
-            }
-            if(match.length < 1) {
-                return null;
-            }
-            if(match[1].length < 1 || match[2].length < 1) {
-                return null;
-            }
-            var file = new tsd.Def(path);
-            file.project = match[1];
-            file.name = match[2];
-            return file;
-        };
-        return Def;
-    })();
-    tsd.Def = Def;    
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    var endSlashTrim = /\/?$/;
-    var DefInfo = (function () {
-        function DefInfo() {
-            this.references = [];
-            this.resetAll();
-        }
-        DefInfo.prototype.resetFields = function () {
-            this.name = '';
-            this.version = '';
-            this.submodule = '';
-            this.description = '';
-            this.projectUrl = '';
-            this.authors = [];
-            this.reposUrl = '';
-        };
-        DefInfo.prototype.resetAll = function () {
-            this.resetFields();
-            this.references = [];
-        };
-        DefInfo.prototype.toString = function () {
-            var ret = this.name;
-            if(this.submodule) {
-                ret += ' ' + this.submodule;
-            }
-            if(this.version) {
-                ret += ' ' + this.version;
-            }
-            if(this.description) {
-                ret += ' ' + JSON.stringify(this.description);
-            }
-            return ret;
-        };
-        DefInfo.prototype.isValid = function () {
-            if(!this.name) {
-                return false;
-            }
-            if(this.authors.length === 0) {
-                return false;
-            }
-            if(!this.reposUrl) {
-                return false;
-            }
-            return true;
-        };
-        return DefInfo;
-    })();
-    tsd.DefInfo = DefInfo;    
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    var DefVersion = (function () {
-        function DefVersion(def, commit) {
-            this.dependencies = [];
-            this.solved = false;
-            xm.assertVar('def', def, tsd.Def);
-            xm.assertVar('commit', commit, tsd.DefCommit);
-            this._def = def;
-            this._commit = commit;
-            xm.ObjectUtil.hidePrefixed(this);
-        }
-        Object.defineProperty(DefVersion.prototype, "key", {
-            get: function () {
-                if(!this._def || !this._commit) {
-                    return null;
-                }
-                return this._def.path + '-' + this._commit.commitSha;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DefVersion.prototype, "def", {
-            get: function () {
-                return this._def;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DefVersion.prototype, "commit", {
-            get: function () {
-                return this._commit;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        DefVersion.prototype.toString = function () {
-            var str = (this._def ? this._def.path : '<no def>');
-            str += ' : ' + (this._commit ? this._commit.commitShort : '<no blob-sha>');
-            return str;
-        };
-        return DefVersion;
-    })();
-    tsd.DefVersion = DefVersion;    
 })(tsd || (tsd = {}));
 var git;
 (function (git) {
@@ -3203,8 +3408,11 @@ var tsd;
 var xm;
 (function (xm) {
     var Set = (function () {
-        function Set() {
+        function Set(values) {
             this._content = [];
+            if(values) {
+                this.import(values);
+            }
         }
         Set.prototype.has = function (value) {
             return this._content.indexOf(value) > -1;

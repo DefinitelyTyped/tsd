@@ -27,8 +27,10 @@ module xm {
 
 		private _content:any[] = [];
 
-		constructor() {
-
+		constructor(values?:any[]) {
+			if (values) {
+				this.import(values);
+			}
 		}
 
 		has(value:any):bool {

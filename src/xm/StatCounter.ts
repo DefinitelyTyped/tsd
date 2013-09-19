@@ -32,10 +32,20 @@ module xm {
 			return this.stats.get(id, 0);
 		}
 
-		zero() {
+		zero():void {
 			this.stats.keys().forEach((id:string) => {
 				this.stats.set(id, 0);
 			});
+		}
+
+		total():number {
+			return this.stats.values().reduce((memo:number, value:number) => {
+				return memo + value;
+			}, 0);
+		}
+
+		counterNames():string[] {
+			return this.stats.keys();
 		}
 
 		hasAllZero():bool {
@@ -44,7 +54,7 @@ module xm {
 			});
 		}
 
-		clear() {
+		clear():void {
 			this.stats.clear();
 		}
 

@@ -6,13 +6,12 @@
  * License: MIT - 2013
  * */
 
- module xm {
-	 //TODO decide what to do with this file: seems modern JS + TypeScript 0.9 is good enough with arrays? only keep Object iterators?
-	 //TODO unit test these
-
+module xm {
 	/*
 	 various simple helpers to iterate stuff, saves including underscore for every use-case
 	 */
+	//TODO decide what to do with this file: seems modern JS + TypeScript 0.9 is good enough with arrays? only keep Object iterators?
+
 	export function eachElem(collection:any[], callback:(value:any, index:number, collection:any[]) => void, thisArg?:any = null) {
 		for (var i = 0, ii = collection.length; i < ii; i++) {
 			if (callback.call(thisArg, collection[i], i, collection) === false) {
@@ -21,10 +20,10 @@
 		}
 	}
 
-	export function eachProp(collection:any, callback:(value:any, key:string, collection:Object) => void, thisArg?:any = null) {
-		for (var key in collection) {
-			if (collection.hasOwnProperty(key)) {
-				if (callback.call(thisArg, collection[key], key, collection) === false) {
+	export function eachProp(collection:any, callback:(value:any, prop:string, collection:Object) => void, thisArg?:any = null) {
+		for (var prop in collection) {
+			if (collection.hasOwnProperty(prop)) {
+				if (callback.call(thisArg, collection[prop], prop, collection) === false) {
 					return;
 				}
 			}
@@ -38,31 +37,51 @@
 		return memo;
 	}
 
-	export function reduceHash(collection:any, memo:any, callback:(memo:any, value:any, index:number, collection:Object) => void, thisArg?:any = null):any {
-		for (var key in collection) {
-			if (collection.hasOwnProperty(key)) {
-				memo = callback.call(thisArg, memo, collection[key], key, collection);
+	export function reduceHash(collection:any, memo:any, callback:(memo:any, value:any, prop:string, collection:Object) => void, thisArg?:any = null):any {
+		for (var prop in collection) {
+			if (collection.hasOwnProperty(prop)) {
+				memo = callback.call(thisArg, memo, collection[prop], prop, collection);
 			}
 		}
 		return memo;
 	}
 
-	export function mapArray(collection:any[], callback:(memo:any, value:any, index:number, collection:any[]) => void, thisArg?:any = null):any[] {
+	export function mapArray(collection:any[], callback:(value:any, index:number, collection:any[]) => void, thisArg?:any = null):any[] {
 		var map:any[] = [];
 		for (var i = 0, ii = collection.length; i < ii; i++) {
-			map[i] = callback.call(thisArg, map[i], i, collection);
+			map[i] = callback.call(thisArg, collection[i], i, collection);
 		}
 		return map;
 	}
 
-	export function mapHash(collection:any, callback:(memo:any, value:any, index:number, collection:Object) => void, thisArg?:any = null):any {
+	export function mapHash(collection:any, callback:(value:any, prop:string, collection:Object) => void, thisArg?:any = null):any {
 		var map:any = {};
-		for (var key in collection) {
-			if (collection.hasOwnProperty(key)) {
-				map[key] = callback.call(thisArg, collection[key], key, collection);
+		for (var prop in collection) {
+			if (collection.hasOwnProperty(prop)) {
+				map[prop] = callback.call(thisArg, collection[prop], prop, collection);
 			}
 		}
 		return map;
+	}
+
+	export function filterArray(collection:any[], callback:(value:any, index:number, collection:any[]) => bool, thisArg?:any = null):any[] {
+		var map:any[] = [];
+		for (var i = 0, ii = collection.length; i < ii; i++) {
+			if (callback.call(thisArg, collection[i], i, collection)) {
+				map.push(collection[i]);
+			}
+		}
+		return map;
+	}
+
+	export function filterHash(collection:any, callback:(value:any, prop:string, collection:Object) => bool, thisArg?:any = null):any {
+		var res:any = {};
+		for (var prop in collection) {
+			if (collection.hasOwnProperty(prop) && callback.call(thisArg, collection[prop], prop, collection)) {
+				res[prop] = collection[prop];
+			}
+		}
+		return res;
 	}
 }
 

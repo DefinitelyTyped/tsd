@@ -1,5 +1,15 @@
-///<reference path="../../tsd/_ref.ts" />
-///<reference path="../../xm/io/FileUtil.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ ///<reference path="../../_ref.ts" />
+///<reference path="../io/FileUtil.ts" />
+///<reference path="../assertVar.ts" />
+///<reference path="../ObjectUtil.ts" />
 
 module xm {
 

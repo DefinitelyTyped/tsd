@@ -3,6 +3,7 @@
 ///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="../../xm/io/Logger.ts" />
 ///<reference path="../../xm/data/PackageJSON.ts" />
+///<reference path="../data/DefVersion.ts" />
 
 module tsd {
 
