@@ -36,6 +36,12 @@ describe('Selector', () => {
 				list.push(tsd.Def.getFrom(path));
 			});
 		});
+		after(() => {
+			list = null;
+			pattern = null;
+			files = null;
+			select = null;
+		});
 		select.data.forEach((data) => {
 			it('match "' + String(data.pattern) + '"', () => {
 				pattern = new tsd.NameMatcher(data.pattern);

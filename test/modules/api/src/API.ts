@@ -20,6 +20,10 @@ describe('API', () => {
 		context.log.mute = true;
 		context.config.log.mute = true;
 	});
+	afterEach(() => {
+		context = null;
+		api = null;
+	});
 
 	it('should be defined', () => {
 		assert.isFunction(tsd.API, 'constructor');
@@ -36,29 +40,41 @@ describe('API', () => {
 		//api.gitAPI.debug = true;
 	});
 
+	function applyMute(mute:bool) {
+		api.core.log.mute = mute;
+		api.context.log.mute = mute;
+		api.context.config.log.mute = mute;
+	}
+
+	function applyTempInfo(label:string, index:number, data:any, selector:tsd.Selector):helper.TempInfo {
+		var tmp = helper.getTempInfo(label, index, true);
+		api.context.paths.configFile = tmp.configFile;
+		api.context.config.typingsPath = tmp.typingsDir;
+
+		xm.FileUtil.writeJSONSync(tmp.selectorDumpFile, selector);
+		xm.FileUtil.writeJSONSync(tmp.dataCopyFile, data);
+
+		applyMute(!data.debug);
+
+		return tmp;
+	}
+
 	describe('search', () => {
 		var select = require(path.resolve(__dirname, '../fixtures/select'));
 		var i = 0;
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
-			it('selector "' + String(selector) + '"', () => {
-				context.log.mute = !data.debug;
-				context.config.log.mute = !data.debug;
-
-				var tmp = helper.getTempInfo('search', (i++), true);
-				context.paths.configFile = tmp.configFile;
-
-				xm.FileUtil.writeJSONSync(tmp.selectorDumpFile, selector);
-				xm.FileUtil.writeJSONSync(tmp.dataCopyFile, data);
-
+			it('selector "' + String(selector) + '"', (done) => {
 				api = new tsd.API(context);
-				api.core.log.mute = !data.debug;
-				api.context.config.typingsPath = tmp.typingsDir;
 
-				return api.search(selector).then((result:tsd.APIResult) => {
+				var tmp = applyTempInfo('search', (i++), api, data, selector);
+
+				api.search(selector).then((result:tsd.APIResult) => {
 					helper.assertAPIResult(result, data.result, 'result');
-				});
+
+					done();
+				}).done(null, done);
 			});
 		});
 	});
@@ -69,35 +85,36 @@ describe('API', () => {
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
-			it('selector "' + String(selector) + '"', () => {
-				context.log.mute = !data.debug;
-				context.config.log.mute = !data.debug;
-
-				var tmp = helper.getTempInfo('install', (i++), true);
-				context.paths.configFile = tmp.configFile;
-
-				xm.FileUtil.writeJSONSync(tmp.selectorDumpFile, selector);
-				xm.FileUtil.writeJSONSync(tmp.dataCopyFile, data);
-
+			it('selector "' + String(selector) + '"', (done) => {
 				api = new tsd.API(context);
-				api.core.log.mute = !data.debug;
-				api.context.config.typingsPath = tmp.typingsDir;
 
-				return api.install(selector).then((result:tsd.APIResult) => {
+				var tmp = applyTempInfo('install', (i++), data, selector);
+
+				api.install(selector).then((result:tsd.APIResult) => {
 					helper.assertAPIResult(result, data.result, 'result');
 					assert.isFile(api.context.paths.configFile);
-
-					//return FS.listDirectoryTree(typings)
 
 					if (!data.config) {
 						return null;
 					}
+
+					//set for correct comparison
 					data.config.typingsPath = tmp.typingsDir;
 
+					//read json as promise to voodoo-bugfix for weird "SyntaxError: Unexpected end of input" issue
 					return xm.FileUtil.readJSONPromise(api.context.paths.configFile).then((json) => {
-						assert.jsonOf(json, data.config, 'config');
+						assert.deepEqual(json, data.config, 'config');
+					}).then(() => {
+						return helper.listDefPaths(tmp.typingsDir);
+					}).then((typings) => {
+						helper.assertUnorderedStrict(typings, Object.keys(data.config.installed), 'installed file');
+						typings.forEach((ref:string) => {
+							assert.notIsEmptyFile(path.join(tmp.typingsDir, ref), 'typing');
+						});
 					});
-				});
+				}).then(() => {
+					done();
+				}).done(null, done);
 			});
 		});
 	});

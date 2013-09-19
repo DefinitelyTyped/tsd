@@ -11,7 +11,7 @@ interface Qfs {
 	copy(source:string, target:string):Qpromise;
 	copyTree(source:string, target:string):Qpromise;
 	list(path:string):Qpromise;
-	listTree(path:string, guard:(path:string, stat) => bool):Qpromise;
+	listTree(path:string, guard?:(path:string, stat) => bool):Qpromise;
 	listDirectoryTree(path:string):Qpromise;
 
 	makeDirectory(path:string, mode?:string):Qpromise;

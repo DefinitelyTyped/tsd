@@ -23,6 +23,11 @@ describe('git.GithubRawCached', () => {
 
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 	});
+	after(() => {
+		context = null;
+		repo = null;
+		raw = null;
+	});
 
 	it('should be defined', () => {
 		assert.isFunction(git.GithubRawCached, 'constructor');

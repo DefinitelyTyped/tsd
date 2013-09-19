@@ -23,6 +23,11 @@ describe('git.GithubAPICached', () => {
 
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
 	});
+	after(() => {
+		context = null;
+		repo = null;
+		api = null;
+	});
 
 	it('should be defined', () => {
 		assert.isFunction(git.GithubAPICached, 'constructor');

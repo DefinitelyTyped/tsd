@@ -81,8 +81,6 @@ module tsd {
 		addFile(file:tsd.DefVersion) {
 			xm.assertVar('file', file, tsd.DefVersion);
 
-			xm.log(file.toString());
-
 			var def:tsd.InstalledDef;
 			if (this._installed.has(file.def.path)) {
 				def = this._installed.get(file.def.path);

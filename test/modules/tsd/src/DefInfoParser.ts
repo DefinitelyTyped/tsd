@@ -34,6 +34,11 @@ describe('DefInfoParser', () => {
 		});
 	});
 
+	after(() => {
+		data = null;
+		filter = null;
+	});
+
 	describe('loop', () => {
 		it('data ok', () => {
 			assert.operator(data.length, '>', 0, 'data.length');

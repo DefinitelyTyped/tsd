@@ -77,8 +77,23 @@ var xm;
     var path = require('path');
     var util = require('util');
     (function (FileUtil) {
+        function parseJson(text) {
+            var json;
+            try  {
+                json = JSON.parse(text);
+            } catch (err) {
+                if(err.name === 'SyntaxError') {
+                    xm.log.error(err);
+                    xm.log('---');
+                    xm.log(text);
+                    xm.log('---');
+                }
+                throw (err);
+            }
+            return json;
+        }
         function readJSONSync(src) {
-            return JSON.parse(fs.readFileSync(src, {
+            return parseJson(fs.readFileSync(src, {
                 encoding: 'utf8'
             }));
         }
@@ -86,13 +101,13 @@ var xm;
         function readJSON(src, callback) {
             fs.readFile(path.resolve(src), {
                 encoding: 'utf8'
-            }, function (err, file) {
-                if(err || !file) {
+            }, function (err, text) {
+                if(err || typeof text !== 'string') {
                     return callback(err, null);
                 }
                 var json = null;
                 try  {
-                    json = JSON.parse(file);
+                    json = parseJson(text);
                 } catch (err) {
                     return callback(err, null);
                 }
@@ -104,7 +119,7 @@ var xm;
             return FS.read(src, {
                 encoding: 'utf8'
             }).then(function (text) {
-                return JSON.parse(text);
+                return parseJson(text);
             });
         }
         FileUtil.readJSONPromise = readJSONPromise;
@@ -429,7 +444,6 @@ var tsd;
         });
         Config.prototype.addFile = function (file) {
             xm.assertVar('file', file, tsd.DefVersion);
-            xm.log(file.toString());
             var def;
             if(this._installed.has(file.def.path)) {
                 def = this._installed.get(file.def.path);

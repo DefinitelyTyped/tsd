@@ -12,7 +12,6 @@ describe('Context', () => {
 
 	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
-
 	describe('Paths', () => {
 		var paths:tsd.Paths;
 		it('is defined as function', () => {

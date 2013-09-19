@@ -23,18 +23,36 @@ module xm {
 	// TODO refactor to functions (xm.fs)
 	export module FileUtil {
 
+		function parseJson(text:string) {
+			var json;
+			try {
+				json = JSON.parse(text);
+			}
+			catch (err) {
+				if (err.name === 'SyntaxError') {
+					xm.log.error(err);
+					xm.log('---');
+					xm.log(text);
+					xm.log('---');
+				}
+				//rethrow
+				throw(err);
+			}
+			return json;
+		}
+
 		export function readJSONSync(src:string):any {
-			return JSON.parse(fs.readFileSync(src, {encoding: 'utf8'}));
+			return parseJson(fs.readFileSync(src, {encoding: 'utf8'}));
 		}
 
 		export function readJSON(src:string, callback:(err, res:any) => void) {
-			fs.readFile(path.resolve(src), {encoding: 'utf8'}, (err, file) => {
-				if (err || !file) {
+			fs.readFile(path.resolve(src), {encoding: 'utf8'}, (err, text) => {
+				if (err || typeof text !== 'string') {
 					return callback(err, null);
 				}
 				var json = null;
 				try {
-					json = JSON.parse(file);
+					json = parseJson(text);
 				}
 				catch (err) {
 					return callback(err, null);
@@ -45,7 +63,7 @@ module xm {
 
 		export function readJSONPromise(src:string):Qpromise {
 			return FS.read(src, {encoding: 'utf8'}).then((text:string) => {
-				return JSON.parse(text);
+				return parseJson(text);
 			});
 		}
 

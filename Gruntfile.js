@@ -37,7 +37,8 @@ module.exports = function (grunt) {
 			options: {
 				configuration: grunt.file.readJSON('tslint.json')
 			},
-			source: ['src/**/*.ts']
+			source: ['src/**/*.ts'],
+			helper: ['test/*.ts']
 		},
 		todos: {
 			all: {
@@ -115,6 +116,8 @@ module.exports = function (grunt) {
 
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
 
+		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
+
 		macro.newTask('tslint', {
 			src: [testPath + 'src/**/*.ts']
 		});
@@ -136,7 +139,6 @@ module.exports = function (grunt) {
 	});
 
 	// assemble!
-
 	gtx.alias('prep', ['clean:tmp', 'jshint:support', 'jshint:fixtures']);
 
 	// cli commands
