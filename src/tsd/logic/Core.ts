@@ -28,6 +28,7 @@ module tsd {
 	 Core: operational core logics
 	 */
 	//TODO split over files? why bother?
+	//TODO add more evnt logs, like in xm.CachedLoader
 	export class Core {
 
 		gitRepo:git.GithubRepo;
@@ -36,27 +37,25 @@ module tsd {
 
 		index:tsd.DefIndex;
 		resolver:tsd.Resolver;
-		stats = new xm.StatCounter();
 
+		stats = new xm.StatCounter();
 		log = xm.getLogger('Core');
+		_debug:bool = false;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
 
 			this.resolver = new tsd.Resolver(this);
-
 			this.index = new tsd.DefIndex();
 
-			//TODO bundle these into one? meh?
 			this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
 			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
 			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
 
-			this.gitAPI.debug = this.context.verbose;
-			this.gitRaw.debug = this.context.verbose;
-
-			this.stats.log = this.context.verbose;
 			this.stats.logger = xm.getLogger('Core.stats');
+
+			//setter
+			this.debug = context.verbose;
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
@@ -66,7 +65,7 @@ module tsd {
 		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
 		 */
 		getIndex():Qpromise {
-			this.stats.count('index-called');
+			this.stats.count('index-start');
 			if (this.index.hasIndex()) {
 				this.stats.count('index-hit');
 				return Q(this.index);
@@ -90,7 +89,6 @@ module tsd {
 				return this.gitAPI.getTree(sha, true);
 			},(err) => {
 				this.stats.count('index-branch-get-error');
-				this.log.error(err);
 				throw err;
 			}).then((data:any) => {
 				//this.log(data);
@@ -100,7 +98,6 @@ module tsd {
 				return this.index;
 			}, (err) => {
 				this.stats.count('index-tree-get-error');
-				this.log.error(err);
 				throw err;
 			});
 		}
@@ -113,7 +110,6 @@ module tsd {
 			var result = new APIResult(this.index, selector);
 
 			return this.getIndex().then(() => {
-
 				result.nameMatches = selector.pattern.filter(this.index.list);
 				// default to all heads
 				result.selection = tsd.DefUtil.getHeads(result.nameMatches);
@@ -241,7 +237,6 @@ module tsd {
 			return xm.mkdirCheckQ(dir, true).then(() => {
 				return FS.write(this.context.paths.configFile, json);
 			}).then(() => {
-				this.log('config written to: ' + this.context.paths.configFile);
 				return this.context.paths.configFile;
 			});
 		}
@@ -431,6 +426,19 @@ module tsd {
 					written.set(targetPath, file);
 				});
 			})).thenResolve(written);
+		}
+
+		get debug():bool {
+			return this._debug;
+		}
+
+		set debug(value:bool) {
+			this._debug = value;
+			this.gitAPI.debug = this._debug;
+			this.gitRaw.debug = this._debug;
+
+			this.stats.log = this._debug;
+			this.resolver.stats.log = this._debug;
 		}
 	}
 }

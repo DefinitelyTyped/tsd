@@ -630,7 +630,10 @@ var xm;
             return this.name + '-' + this.version;
         };
         PackageJSON.find = function find() {
-            return pkginfo.find((module));
+            if(!PackageJSON._localPath) {
+                PackageJSON._localPath = pkginfo.find((module));
+            }
+            return PackageJSON._localPath;
         };
         PackageJSON.getLocal = function getLocal() {
             if(!PackageJSON._local) {
@@ -1118,6 +1121,9 @@ var xm;
         StatCounter.prototype.get = function (id) {
             return this.stats.get(id, 0);
         };
+        StatCounter.prototype.has = function (id) {
+            return this.stats.has(id);
+        };
         StatCounter.prototype.zero = function () {
             var _this = this;
             this.stats.keys().forEach(function (id) {
@@ -1210,21 +1216,26 @@ var xm;
     }
     xm.jsonToIdentHash = jsonToIdentHash;
 })(xm || (xm = {}));
-var git;
-(function (git) {
-    var GithubAPICachedResult = (function () {
-        function GithubAPICachedResult(label, key, data) {
+var xm;
+(function (xm) {
+    var CachedJSONValue = (function () {
+        function CachedJSONValue(label, key, data) {
+            this._key = null;
+            this._label = null;
+            this._data = null;
+            this._lastSet = null;
             xm.assertVar('label', label, 'string');
             xm.assertVar('key', key, 'string');
             this._label = label;
             this._key = key;
             this.setData(data);
+            xm.ObjectUtil.hidePrefixed(this);
         }
-        GithubAPICachedResult.prototype.setData = function (data) {
-            this._data = data;
+        CachedJSONValue.prototype.setData = function (data) {
+            this._data = xm.isUndefined(data) ? null : data;
             this._lastSet = new Date();
         };
-        GithubAPICachedResult.prototype.toJSON = function () {
+        CachedJSONValue.prototype.toJSON = function () {
             return {
                 key: this.key,
                 hash: this.getHash(),
@@ -1233,84 +1244,84 @@ var git;
                 lastSet: this.lastSet.getTime()
             };
         };
-        GithubAPICachedResult.fromJSON = function fromJSON(json) {
+        CachedJSONValue.fromJSON = function fromJSON(json) {
             xm.assertVar('label', json.label, 'string');
             xm.assertVar('key', json.key, 'string');
             xm.assertVar('lastSet', json.lastSet, 'number');
-            var call = new git.GithubAPICachedResult(json.label, json.key, json.data);
+            var call = new xm.CachedJSONValue(json.label, json.key, json.data);
             call._lastSet = new Date(json.lastSet);
             return call;
         };
-        GithubAPICachedResult.getHash = function getHash(key) {
+        CachedJSONValue.getHash = function getHash(key) {
             return xm.sha1(key);
         };
-        GithubAPICachedResult.prototype.getHash = function () {
-            return GithubAPICachedResult.getHash(this._key);
+        CachedJSONValue.prototype.getHash = function () {
+            return xm.CachedJSONValue.getHash(this._key);
         };
-        Object.defineProperty(GithubAPICachedResult.prototype, "label", {
+        Object.defineProperty(CachedJSONValue.prototype, "label", {
             get: function () {
                 return this._label;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GithubAPICachedResult.prototype, "key", {
+        Object.defineProperty(CachedJSONValue.prototype, "key", {
             get: function () {
                 return this._key;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GithubAPICachedResult.prototype, "data", {
+        Object.defineProperty(CachedJSONValue.prototype, "data", {
             get: function () {
                 return this._data;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GithubAPICachedResult.prototype, "lastSet", {
+        Object.defineProperty(CachedJSONValue.prototype, "lastSet", {
             get: function () {
                 return this._lastSet;
             },
             enumerable: true,
             configurable: true
         });
-        return GithubAPICachedResult;
+        return CachedJSONValue;
     })();
-    git.GithubAPICachedResult = GithubAPICachedResult;    
-})(git || (git = {}));
-var git;
-(function (git) {
+    xm.CachedJSONValue = CachedJSONValue;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
     var Q = require('q');
     var assert = require('assert');
     var fs = require('fs');
     var path = require('path');
     var FS = require('q-io/fs');
-    var GithubAPICachedJSONStore = (function () {
-        function GithubAPICachedJSONStore(api, dir) {
-            this.api = api;
+    var CachedJSONStore = (function () {
+        function CachedJSONStore(storeFolder) {
             this.stats = new xm.StatCounter();
             this._formatVersion = '0.0.3';
-            xm.assertVar('api', api, git.GithubAPICached);
-            xm.assertVar('dir', dir, 'string');
-            this.dir = path.join(dir, api.getCacheKey() + '-fmt' + this._formatVersion);
-            this.stats.log = this.api.debug;
-            this.stats.logger = xm.getLogger('GithubAPICachedJSONStore');
+            xm.assertVar('storeFolder', storeFolder, 'string');
+            storeFolder = storeFolder.replace(/[\\\/]+$/, '') + '-fmt' + this._formatVersion;
+            this._dir = path.resolve(storeFolder);
+            this.stats.logger = xm.getLogger('CachedJSONStore');
             xm.ObjectUtil.hidePrefixed(this);
         }
-        GithubAPICachedJSONStore.prototype.init = function () {
+        CachedJSONStore.prototype.init = function () {
             var _this = this;
-            this.stats.count('init-called');
-            return FS.exists(this.dir).then(function (exists) {
+            this.stats.count('init');
+            return FS.exists(this._dir).then(function (exists) {
                 if(!exists) {
-                    _this.stats.count('init-create-dir', _this.dir);
-                    return xm.mkdirCheckQ(_this.dir, true);
+                    _this.stats.count('init-dir-create', _this._dir);
+                    return xm.mkdirCheckQ(_this._dir, true);
                 }
-                return FS.isDirectory(_this.dir).then(function (isDir) {
+                return FS.isDirectory(_this._dir).then(function (isDir) {
                     if(isDir) {
+                        _this.stats.count('init-dir-exists', _this._dir);
                         return null;
                     } else {
-                        throw new Error('is not a directory: ' + _this.dir);
+                        _this.stats.count('init-dir-error', _this._dir);
+                        throw new Error('is not a directory: ' + _this._dir);
                     }
                 });
             }).fail(function (err) {
@@ -1318,10 +1329,10 @@ var git;
                 throw err;
             });
         };
-        GithubAPICachedJSONStore.prototype.getResult = function (key) {
+        CachedJSONStore.prototype.getValue = function (key) {
             var _this = this;
-            var src = path.join(this.dir, git.GithubAPICachedResult.getHash(key) + '.json');
-            this.stats.count('get-called');
+            var src = path.join(this._dir, xm.CachedJSONValue.getHash(key) + '.json');
+            this.stats.count('get');
             return this.init().then(function () {
                 return FS.exists(src);
             }).then(function (exists) {
@@ -1330,7 +1341,7 @@ var git;
                     return xm.FileUtil.readJSONPromise(src).then(function (json) {
                         var cached;
                         try  {
-                            cached = git.GithubAPICachedResult.fromJSON(json);
+                            cached = xm.CachedJSONValue.fromJSON(json);
                         } catch (e) {
                             _this.stats.count('get-read-error');
                             throw (new Error(src + ':' + e));
@@ -1346,36 +1357,263 @@ var git;
                 throw err;
             });
         };
-        GithubAPICachedJSONStore.prototype.storeResult = function (res) {
+        CachedJSONStore.prototype.storeValue = function (res) {
             var _this = this;
-            var dest = path.join(this.dir, res.getHash() + '.json');
-            this.stats.count('store-called');
+            var dest = path.join(this._dir, res.getHash() + '.json');
+            this.stats.count('store');
             return this.init().then(function () {
                 return FS.exists(dest);
             }).then(function (exists) {
                 if(exists) {
-                    _this.stats.count('store-overwrite');
+                    _this.stats.count('store-exists');
                     return FS.remove(dest);
                 }
                 _this.stats.count('store-new');
-                return null;
+                return xm.mkdirCheckQ(path.dirname(dest), true);
             }).then(function () {
+                _this.stats.count('store-write');
                 var data = JSON.stringify(res.toJSON(), null, 2);
                 return FS.write(dest, data);
             }).then(function () {
-                _this.stats.count('store-written');
-                return {
-                    dest: dest
-                };
+                _this.stats.count('store-write-success');
+                return res;
             }, function (err) {
                 _this.stats.count('store-write-error');
                 throw err;
             });
         };
-        return GithubAPICachedJSONStore;
+        return CachedJSONStore;
     })();
-    git.GithubAPICachedJSONStore = GithubAPICachedJSONStore;    
-})(git || (git = {}));
+    xm.CachedJSONStore = CachedJSONStore;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var _ = require('underscore');
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var CachedLoaderOptions = (function () {
+        function CachedLoaderOptions() {
+            this.cacheRead = true;
+            this.cacheWrite = true;
+            this.remoteRead = true;
+        }
+        CachedLoaderOptions.prototype.modeUpdate = function () {
+            this.cacheRead = false;
+            this.remoteRead = true;
+            this.cacheWrite = true;
+        };
+        CachedLoaderOptions.prototype.modeCached = function () {
+            this.cacheRead = true;
+            this.remoteRead = false;
+            this.cacheWrite = false;
+        };
+        CachedLoaderOptions.prototype.modeRemote = function () {
+            this.cacheRead = false;
+            this.remoteRead = true;
+            this.cacheWrite = false;
+        };
+        CachedLoaderOptions.prototype.modeAll = function () {
+            this.cacheRead = true;
+            this.remoteRead = true;
+            this.cacheWrite = true;
+        };
+        CachedLoaderOptions.prototype.modeBlock = function () {
+            this.cacheRead = false;
+            this.remoteRead = false;
+            this.cacheWrite = false;
+        };
+        return CachedLoaderOptions;
+    })();
+    xm.CachedLoaderOptions = CachedLoaderOptions;    
+    var CachedLoader = (function () {
+        function CachedLoader(name, service) {
+            this._debug = false;
+            this._options = new xm.CachedLoaderOptions();
+            this._active = new xm.KeyValueMap();
+            this._service = null;
+            this.stats = new xm.StatCounter();
+            xm.assertVar('label', name, 'string');
+            xm.assertVar('service', service, 'object');
+            this._service = service;
+            this.stats.logger = xm.getLogger(name + '.CachedLoader');
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        CachedLoader.prototype.getKey = function (label, keyTerms) {
+            return xm.jsonToIdent([
+                label, 
+                keyTerms ? keyTerms : {
+                }
+            ]);
+        };
+        CachedLoader.prototype.doCachedCall = function (label, keyTerms, opts, cachedCall) {
+            var _this = this;
+            var key = xm.isString(keyTerms) ? keyTerms : this.getKey(label, keyTerms);
+            opts = _.defaults(opts || {
+            }, this._options);
+            this.stats.count('start', label);
+            if(this._debug) {
+                xm.log(opts);
+                xm.log(key);
+            }
+            if(this._active.has(key)) {
+                this.stats.count('active-hit');
+                return this._active.get(key).then(function (content) {
+                    _this.stats.count('active-resolve');
+                    return content;
+                }, function (err) {
+                    _this.stats.count('active-error');
+                    throw err;
+                });
+            }
+            var cleanup = function () {
+                _this.stats.count('active-remove');
+                _this._active.remove(key);
+            };
+            var promise = this.cacheRead(opts, label, key).then(function (res) {
+                if(!xm.isNull(res) && !xm.isUndefined(res)) {
+                    _this.stats.count('cache-hit');
+                    return res;
+                }
+                return _this.callLoad(opts, label, cachedCall).then(function (res) {
+                    if(xm.isNull(res) || xm.isUndefined(res)) {
+                        _this.stats.count('call-empty');
+                        throw new Error('no result for: ' + label);
+                    }
+                    return _this.cacheWrite(opts, label, key, res).thenResolve(res);
+                });
+            }).then(function (res) {
+                cleanup();
+                _this.stats.count('complete', label);
+                return res;
+            }, function (err) {
+                cleanup();
+                _this.stats.count('error', label);
+                xm.log.error(err);
+                throw (err);
+            });
+            this.stats.count('active-set');
+            this._active.set(key, promise);
+            return promise;
+        };
+        CachedLoader.prototype.cacheRead = function (opts, label, key) {
+            var _this = this;
+            if(opts.cacheRead) {
+                this.stats.count('read-start', label);
+                return this._service.getValue(key).then(function (res) {
+                    if(xm.isNull(res) || xm.isUndefined(res)) {
+                        _this.stats.count('read-miss', label);
+                        return null;
+                    } else {
+                        _this.stats.count('read-hit', label);
+                        return res;
+                    }
+                }, function (err) {
+                    _this.stats.count('read-error', label);
+                    xm.log.error(err);
+                    throw (err);
+                });
+            }
+            this.stats.count('read-skip', label);
+            return Q(null);
+        };
+        CachedLoader.prototype.callLoad = function (opts, label, cachedCall) {
+            var _this = this;
+            if(opts.remoteRead) {
+                this.stats.count('load-start', label);
+                return Q(cachedCall()).then(function (res) {
+                    _this.stats.count('load-success', label);
+                    return res;
+                }, function (err) {
+                    _this.stats.count('load-error', label);
+                    xm.log.error(err);
+                    throw (err);
+                });
+            }
+            this.stats.count('load-skip', label);
+            return Q(null);
+        };
+        CachedLoader.prototype.cacheWrite = function (opts, label, key, value) {
+            var _this = this;
+            if(opts.cacheWrite) {
+                this.stats.count('write-start', label);
+                return this._service.writeValue(key, label, value).then(function (info) {
+                    _this.stats.count('write-success', label);
+                    return value;
+                }, function (err) {
+                    _this.stats.count('write-error', label);
+                    xm.log.error(err);
+                    throw (err);
+                });
+            }
+            this.stats.count('write-skip', label);
+            return Q(value);
+        };
+        Object.defineProperty(CachedLoader.prototype, "options", {
+            get: function () {
+                return this._options;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(CachedLoader.prototype, "debug", {
+            get: function () {
+                return this._debug;
+            },
+            set: function (value) {
+                this._debug = value;
+                this.stats.log = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return CachedLoader;
+    })();
+    xm.CachedLoader = CachedLoader;    
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var FS = require('q-io/fs');
+    var CachedJSONService = (function () {
+        function CachedJSONService(dir) {
+            xm.assertVar('dir', dir, 'string');
+            this._store = new xm.CachedJSONStore(dir);
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        CachedJSONService.prototype.getCachedRaw = function (key) {
+            return this._store.getValue(key);
+        };
+        CachedJSONService.prototype.getValue = function (key, opts) {
+            return this._store.getValue(key).then(function (res) {
+                if(res) {
+                    return res.data;
+                }
+                return null;
+            });
+        };
+        CachedJSONService.prototype.writeValue = function (key, label, value, opts) {
+            var cached = new xm.CachedJSONValue(label, key, value);
+            return this._store.storeValue(cached).then(function (info) {
+                return value;
+            });
+        };
+        CachedJSONService.prototype.getKeys = function (opts) {
+            return Q([]);
+        };
+        Object.defineProperty(CachedJSONService.prototype, "store", {
+            get: function () {
+                return this._store;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return CachedJSONService;
+    })();
+    xm.CachedJSONService = CachedJSONService;    
+})(xm || (xm = {}));
 var xm;
 (function (xm) {
     var uriTemplates = require('uri-templates');
@@ -1507,186 +1745,6 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
-    var async = require('async');
-    var _ = require('underscore');
-    var Q = require('q');
-    var assert = require('assert');
-    var fs = require('fs');
-    var path = require('path');
-    var Github = require('github');
-    var GithubAPICached = (function () {
-        function GithubAPICached(repo, storeFolder) {
-            this._apiVersion = '3.0.0';
-            this._defaultOpts = {
-            };
-            this._debug = false;
-            this.stats = new xm.StatCounter();
-            xm.assertVar('repo', repo, git.GithubRepo);
-            xm.assertVar('storeFolder', storeFolder, 'string');
-            this._repo = repo;
-            this._api = new Github({
-                version: this._apiVersion
-            });
-            this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
-            this.rate = new GitRateLimitInfo();
-            this.stats.logger = xm.getLogger('GithubAPICached');
-            xm.ObjectUtil.hidePrefixed(this);
-        }
-        GithubAPICached.prototype.getRepoParams = function (vars) {
-            return _.defaults(vars, {
-                user: this._repo.ownerName,
-                repo: this._repo.projectName
-            });
-        };
-        GithubAPICached.prototype.getCachedRaw = function (key) {
-            return this._store.getResult(key);
-        };
-        GithubAPICached.prototype.getKey = function (label, keyTerms) {
-            return xm.jsonToIdent([
-                label, 
-                keyTerms ? keyTerms : {
-                }
-            ]);
-        };
-        GithubAPICached.prototype.getBranches = function () {
-            var _this = this;
-            var params = this.getRepoParams({
-            });
-            return this.doCachedCall('getBranches', params, {
-            }, function (cb) {
-                _this._api.repos.getBranches(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getBranch = function (branch) {
-            var _this = this;
-            var params = this.getRepoParams({
-                branch: branch
-            });
-            return this.doCachedCall('getBranch', params, {
-            }, function (cb) {
-                _this._api.repos.getBranch(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getTree = function (sha, recursive) {
-            var _this = this;
-            var params = this.getRepoParams({
-                sha: sha,
-                recursive: recursive
-            });
-            return this.doCachedCall('getTree', params, {
-            }, function (cb) {
-                _this._api.gitdata.getTree(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getCommit = function (sha) {
-            var _this = this;
-            var params = this.getRepoParams({
-                sha: sha
-            });
-            return this.doCachedCall('getCommit', params, {
-            }, function (cb) {
-                _this._api.gitdata.getCommit(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getBlob = function (sha) {
-            var _this = this;
-            var params = this.getRepoParams({
-                sha: sha,
-                per_page: 100
-            });
-            return this.doCachedCall('getBlob', params, {
-            }, function (cb) {
-                _this._api.gitdata.getBlob(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getCommits = function (sha) {
-            var _this = this;
-            var params = this.getRepoParams({
-                per_page: 100,
-                sha: sha
-            });
-            return this.doCachedCall('getCommits', params, {
-            }, function (cb) {
-                _this._api.repos.getCommits(params, cb);
-            });
-        };
-        GithubAPICached.prototype.getPathCommits = function (sha, path) {
-            var _this = this;
-            var params = this.getRepoParams({
-                per_page: 100,
-                sha: sha,
-                path: path
-            });
-            return this.doCachedCall('getCommits', params, {
-            }, function (cb) {
-                _this._api.repos.getCommits(params, cb);
-            });
-        };
-        GithubAPICached.prototype.doCachedCall = function (label, keyTerms, opts, call) {
-            var _this = this;
-            var key = this.getKey(label, keyTerms);
-            opts = _.defaults(opts || {
-            }, this._defaultOpts);
-            this.stats.count('invoked', label);
-            if(this._debug) {
-                xm.log(opts);
-                xm.log(keyTerms);
-            }
-            var defer = Q.defer();
-            var execCall = function () {
-                _this.stats.count('call-api', label);
-                Q.nfcall(call).then(function (res) {
-                    _this.rate.readFromRes(res);
-                    if(_this._debug) {
-                        xm.log(_this.rate.toStatus());
-                    }
-                    _this.stats.count('call-success', label);
-                    var cached = new git.GithubAPICachedResult(label, key, res);
-                    _this._store.storeResult(cached).then(function (info) {
-                        _this.stats.count('store-set', label);
-                        defer.resolve(res);
-                    }, function (err) {
-                        _this.stats.count('store-set-error', label);
-                        defer.reject(err);
-                    });
-                }, function (err) {
-                    _this.stats.count('call-error', label);
-                    xm.log.error(err);
-                    defer.reject(err);
-                });
-            };
-            this._store.getResult(key).then(function (res) {
-                if(res) {
-                    _this.stats.count('store-hit', label);
-                    defer.resolve(res.data);
-                } else {
-                    _this.stats.count('store-miss', label);
-                    execCall();
-                }
-            }, function (err) {
-                _this.stats.count('store-get-error', label);
-                defer.reject(err);
-            });
-            return defer.promise;
-        };
-        Object.defineProperty(GithubAPICached.prototype, "debug", {
-            get: function () {
-                return this._debug;
-            },
-            set: function (value) {
-                this._debug = value;
-                this.stats.log = value;
-                this._store.stats.log = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        GithubAPICached.prototype.getCacheKey = function () {
-            return this._repo.getCacheKey() + '-api' + this._apiVersion;
-        };
-        return GithubAPICached;
-    })();
-    git.GithubAPICached = GithubAPICached;    
     var GitRateLimitInfo = (function () {
         function GitRateLimitInfo() {
             this.limit = 0;
@@ -1694,7 +1752,7 @@ var git;
             this.lastUpdate = new Date();
         }
         GitRateLimitInfo.prototype.readFromRes = function (response) {
-            if(response && _.isObject(response.meta)) {
+            if(response && xm.isObject(response.meta)) {
                 if(response.meta.hasOwnProperty('x-ratelimit-limit')) {
                     this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
                 }
@@ -1716,6 +1774,191 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    var _ = require('underscore');
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var Github = require('github');
+    var GithubAPICached = (function () {
+        function GithubAPICached(repo, storeFolder) {
+            this._apiVersion = '3.0.0';
+            this._debug = false;
+            xm.assertVar('repo', repo, git.GithubRepo);
+            xm.assertVar('storeFolder', storeFolder, 'string');
+            this._repo = repo;
+            this._api = new Github({
+                version: this._apiVersion
+            });
+            this._service = new xm.CachedJSONService(path.resolve(storeFolder, this.getCacheKey()));
+            this._loader = new xm.CachedLoader('GithubAPICached', this._service);
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        GithubAPICached.prototype.mergeParams = function (vars) {
+            return _.defaults(vars || {
+            }, {
+                user: this._repo.ownerName,
+                repo: this._repo.projectName
+            });
+        };
+        GithubAPICached.prototype.getBranches = function () {
+            var _this = this;
+            var params = this.mergeParams({
+            });
+            return this._loader.doCachedCall('getBranches', params, {
+            }, function () {
+                return Q.nfcall(_this._api.repos.getBranches, params);
+            });
+        };
+        GithubAPICached.prototype.getBranch = function (branch) {
+            var _this = this;
+            var params = this.mergeParams({
+                branch: branch
+            });
+            return this._loader.doCachedCall('getBranch', params, {
+            }, function () {
+                return Q.nfcall(_this._api.repos.getBranch, params);
+            });
+        };
+        GithubAPICached.prototype.getTree = function (sha, recursive) {
+            var _this = this;
+            var params = this.mergeParams({
+                sha: sha,
+                recursive: recursive
+            });
+            return this._loader.doCachedCall('getTree', params, {
+            }, function () {
+                return Q.nfcall(_this._api.gitdata.getTree, params);
+            });
+        };
+        GithubAPICached.prototype.getCommit = function (sha) {
+            var _this = this;
+            var params = this.mergeParams({
+                sha: sha
+            });
+            return this._loader.doCachedCall('getCommit', params, {
+            }, function () {
+                return Q.nfcall(_this._api.gitdata.getCommit, params);
+            });
+        };
+        GithubAPICached.prototype.getBlob = function (sha) {
+            var _this = this;
+            var params = this.mergeParams({
+                sha: sha,
+                per_page: 100
+            });
+            return this._loader.doCachedCall('getBlob', params, {
+            }, function () {
+                return Q.nfcall(_this._api.gitdata.getBlob, params);
+            });
+        };
+        GithubAPICached.prototype.getCommits = function (sha) {
+            var _this = this;
+            var params = this.mergeParams({
+                per_page: 100,
+                sha: sha
+            });
+            return this._loader.doCachedCall('getCommits', params, {
+            }, function () {
+                return Q.nfcall(_this._api.repos.getCommits, params);
+            });
+        };
+        GithubAPICached.prototype.getPathCommits = function (sha, path) {
+            var _this = this;
+            var params = this.mergeParams({
+                per_page: 100,
+                sha: sha,
+                path: path
+            });
+            return this._loader.doCachedCall('getCommits', params, {
+            }, function () {
+                return Q.nfcall(_this._api.repos.getCommits, params);
+            });
+        };
+        Object.defineProperty(GithubAPICached.prototype, "service", {
+            get: function () {
+                return this._service;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GithubAPICached.prototype, "loader", {
+            get: function () {
+                return this._loader;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GithubAPICached.prototype, "debug", {
+            get: function () {
+                return this._debug;
+            },
+            set: function (value) {
+                this._debug = value;
+                this._service.store.stats.log = value;
+                this._loader.debug = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GithubAPICached.prototype.getCacheKey = function () {
+            return this._repo.getCacheKey() + '-api' + this._apiVersion;
+        };
+        return GithubAPICached;
+    })();
+    git.GithubAPICached = GithubAPICached;    
+})(git || (git = {}));
+var xm;
+(function (xm) {
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var FS = require('q-io/fs');
+    var CachedFileService = (function () {
+        function CachedFileService(dir) {
+            xm.assertVar('dir', dir, 'string');
+            this._dir = dir;
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        CachedFileService.prototype.getValue = function (file, opts) {
+            var storeFile = path.join(this._dir, file);
+            return FS.exists(storeFile).then(function (exists) {
+                if(exists) {
+                    return FS.isFile(storeFile).then(function (isFile) {
+                        if(!isFile) {
+                            throw (new Error('path exists but is not a file: ' + storeFile));
+                        }
+                        return FS.read(storeFile);
+                    });
+                }
+                return null;
+            });
+        };
+        CachedFileService.prototype.writeValue = function (file, label, value, opts) {
+            var storeFile = path.join(this._dir, file);
+            return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
+                return FS.write(storeFile, value);
+            }).then(function () {
+                return value;
+            }, function (err) {
+                return value;
+            });
+        };
+        CachedFileService.prototype.getKeys = function (opts) {
+            return Q([]);
+        };
+        Object.defineProperty(CachedFileService.prototype, "dir", {
+            get: function () {
+                return this._dir;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return CachedFileService;
+    })();
+    xm.CachedFileService = CachedFileService;    
+})(xm || (xm = {}));
+var git;
+(function (git) {
     var request = require('request');
     var path = require('path');
     var Q = require('q');
@@ -1724,83 +1967,59 @@ var git;
         function GithubRawCached(repo, storeFolder) {
             this._debug = false;
             this._formatVersion = '0.0.2';
-            this._active = new xm.KeyValueMap();
             this.stats = new xm.StatCounter(false);
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
             this._repo = repo;
-            this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
-            xm.ObjectUtil.hidePrefixed(this);
+            var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
+            this._service = new xm.CachedFileService(dir);
+            this._loader = new xm.CachedLoader('GithubRawCached', this._service);
             this.stats.logger = xm.getLogger('GithubRawCached');
+            xm.ObjectUtil.hidePrefixed(this);
         }
         GithubRawCached.prototype.getFile = function (commitSha, filePath) {
             var _this = this;
-            this.stats.count('invoked');
+            this.stats.count('start');
             var tmp = filePath.split(/\/|\\\//g);
             tmp.unshift(commitSha);
-            tmp.unshift(this._dir);
-            var key = commitSha + '|' + filePath;
             var storeFile = path.join.apply(null, tmp);
             if(this._debug) {
                 xm.log(storeFile);
             }
-            if(this._active.has(key)) {
-                this.stats.count('active-hit');
-                return this._active.get(key).then(function (content) {
-                    _this.stats.count('active-resolve');
-                    return content;
-                }, function (err) {
-                    _this.stats.count('active-error');
-                    throw err;
-                });
-            }
-            var promise = FS.exists(storeFile).then(function (exists) {
-                if(exists) {
-                    return FS.isFile(storeFile).then(function (isFile) {
-                        if(!isFile) {
-                            throw (new Error('path exists but is not a file: ' + storeFile));
-                        }
-                        _this.stats.count('store-hit');
-                        return FS.read(storeFile);
-                    });
-                } else {
-                    _this.stats.count('store-miss');
-                    var opts = {
-                        url: _this._repo.urls.rawFile(commitSha, filePath)
-                    };
-                    _this.stats.count('request-call');
-                    if(_this._debug) {
-                        xm.log(opts);
-                    }
-                    return Q.nfcall(request.get, opts).spread(function (res) {
-                        if(!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
-                            _this.stats.count('request-error');
-                            throw new Error('unexpected status code: ' + res.statusCode);
-                        }
-                        _this.stats.count('request-complete');
-                        var content = String(res.body);
-                        return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
-                            return FS.write(storeFile, content);
-                        }).then(function () {
-                            _this.stats.count('store-set');
-                            return content;
-                        }, function (err) {
-                            _this.stats.count('store-error');
-                            return content;
-                        });
-                    }, function (err) {
-                        _this.stats.count('request-error');
-                        xm.log.error(err);
-                        throw err;
-                    });
+            return this._loader.doCachedCall('getFile', storeFile, {
+            }, function () {
+                var reqOpts = {
+                    url: _this._repo.urls.rawFile(commitSha, filePath)
+                };
+                if(_this._debug) {
+                    xm.log(reqOpts.url);
                 }
-            }).then(function (content) {
-                _this._active.remove(key);
-                return content;
+                _this.stats.count('request-start');
+                return Q.nfcall(request.get, reqOpts).spread(function (res) {
+                    if(!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
+                        _this.stats.count('request-error');
+                        throw new Error('unexpected status code: ' + res.statusCode);
+                    }
+                    _this.stats.count('request-complete');
+                    var content = String(res.body);
+                    return content;
+                });
             });
-            this._active.set(key, promise);
-            return promise;
         };
+        Object.defineProperty(GithubRawCached.prototype, "service", {
+            get: function () {
+                return this._service;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GithubRawCached.prototype, "loader", {
+            get: function () {
+                return this._loader;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(GithubRawCached.prototype, "debug", {
             get: function () {
                 return this._debug;
@@ -1808,6 +2027,7 @@ var git;
             set: function (value) {
                 this._debug = value;
                 this.stats.log = value;
+                this._loader.debug = value;
             },
             enumerable: true,
             configurable: true
@@ -2780,6 +3000,7 @@ var tsd;
             this._core = core;
             this.stats.log = this._core.context.verbose;
             this.stats.logger = xm.getLogger('Resolver');
+            xm.ObjectUtil.hidePrefixed(this);
         }
         Resolver.prototype.resolveBulk = function (list) {
             var _this = this;
@@ -2860,21 +3081,20 @@ var tsd;
             this.context = context;
             this.stats = new xm.StatCounter();
             this.log = xm.getLogger('Core');
+            this._debug = false;
             xm.assertVar('context', context, tsd.Context);
             this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
             this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
             this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
             this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
-            this.gitAPI.debug = this.context.verbose;
-            this.gitRaw.debug = this.context.verbose;
-            this.stats.log = this.context.verbose;
             this.stats.logger = xm.getLogger('Core.stats');
+            this.debug = context.verbose;
             xm.ObjectUtil.hidePrefixed(this);
         }
         Core.prototype.getIndex = function () {
             var _this = this;
-            this.stats.count('index-called');
+            this.stats.count('index-start');
             if(this.index.hasIndex()) {
                 this.stats.count('index-hit');
                 return Q(this.index);
@@ -2894,7 +3114,6 @@ var tsd;
                 return _this.gitAPI.getTree(sha, true);
             }, function (err) {
                 _this.stats.count('index-branch-get-error');
-                _this.log.error(err);
                 throw err;
             }).then(function (data) {
                 _this.stats.count('index-tree-get-success');
@@ -2902,7 +3121,6 @@ var tsd;
                 return _this.index;
             }, function (err) {
                 _this.stats.count('index-tree-get-error');
-                _this.log.error(err);
                 throw err;
             });
         };
@@ -2996,7 +3214,6 @@ var tsd;
             return xm.mkdirCheckQ(dir, true).then(function () {
                 return FS.write(_this.context.paths.configFile, json);
             }).then(function () {
-                _this.log('config written to: ' + _this.context.paths.configFile);
                 return _this.context.paths.configFile;
             });
         };
@@ -3116,6 +3333,20 @@ var tsd;
                 });
             })).thenResolve(written);
         };
+        Object.defineProperty(Core.prototype, "debug", {
+            get: function () {
+                return this._debug;
+            },
+            set: function (value) {
+                this._debug = value;
+                this.gitAPI.debug = this._debug;
+                this.gitRaw.debug = this._debug;
+                this.stats.log = this._debug;
+                this.resolver.stats.log = this._debug;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Core;
     })();
     tsd.Core = Core;    

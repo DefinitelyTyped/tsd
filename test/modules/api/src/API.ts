@@ -14,7 +14,7 @@ describe('API', () => {
 	var context:tsd.Context;
 
 	before(() => {
-		//copy temp for saving
+		
 	});
 	beforeEach(() => {
 		context = helper.getContext();
@@ -34,15 +34,18 @@ describe('API', () => {
 			api = new tsd.API(null);
 		});
 	});
-	it('should be constructor', () => {
-		api = new tsd.API(context);
-		assert.isObject(api, 'constructor');
 
-		//api.gitAPI.debug = true;
-	});
+	function getAPI(context:tsd.Context):tsd.API {
+		var api = new tsd.API(context);
+
+		//enable this temporary to update fixtures
+		api.core.gitAPI.loader.options.modeCached();
+		api.core.gitRaw.loader.options.modeCached();
+		return api;
+	}
 
 	function applyMute(mute:bool) {
-		api.core.log.mute = mute;
+		api.core.debug = !mute;
 		api.context.log.mute = mute;
 		api.context.config.log.mute = mute;
 	}
@@ -61,15 +64,15 @@ describe('API', () => {
 	}
 
 	describe('search', () => {
-		var select = require(path.resolve(__dirname, '../fixtures/select'));
+		var select = require(path.join(helper.getProjectRoot(), 'test/fixtures/select'));
 		var i = 0;
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
 			it('selector "' + String(selector) + '"', (done) => {
-				api = new tsd.API(context);
+				api = getAPI(context);
 
-				var tmp = applyTempInfo('search', (i++), api, data, selector);
+				var tmp = applyTempInfo('search', (i++), data, selector);
 
 				api.search(selector).then((result:tsd.APIResult) => {
 					helper.assertAPIResult(result, data.result, 'result');
@@ -81,13 +84,13 @@ describe('API', () => {
 	});
 
 	describe('install', () => {
-		var select =  require(path.resolve(__dirname, '../fixtures/install'));
+		var select = require(path.join(helper.getProjectRoot(), 'test/fixtures/install'));
 		var i = 0;
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
 			it('selector "' + String(selector) + '"', (done) => {
-				api = new tsd.API(context);
+				api = getAPI(context);
 
 				var tmp = applyTempInfo('install', (i++), data, selector);
 
@@ -102,7 +105,6 @@ describe('API', () => {
 					//set for correct comparison
 					data.config.typingsPath = tmp.typingsDir;
 
-					//read json as promise to voodoo-bugfix for weird "SyntaxError: Unexpected end of input" issue
 					return xm.FileUtil.readJSONPromise(api.context.paths.configFile).then((json) => {
 						assert.deepEqual(json, data.config, 'config');
 					}).then(() => {

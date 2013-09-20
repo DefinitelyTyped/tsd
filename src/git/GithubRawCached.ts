@@ -4,6 +4,8 @@
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/mkdirCheck.ts" />
 ///<reference path="../xm/StatCounter.ts" />
+///<reference path="../xm/io/CachedLoader.ts" />
+///<reference path="../xm/io/CachedFileService.ts" />
 ///<reference path="GithubURLManager.ts" />
 
 module git {
@@ -21,10 +23,11 @@ module git {
 	export class GithubRawCached {
 
 		private _repo:git.GithubRepo;
-		private _dir:string;
 		private _debug:bool = false;
 		private _formatVersion:string = '0.0.2';
-		private _active:xm.KeyValueMap = new xm.KeyValueMap();
+
+		private _service:xm.CachedFileService;
+		private _loader:xm.CachedLoader;
 
 		stats = new xm.StatCounter(false);
 
@@ -33,104 +36,57 @@ module git {
 			xm.assertVar('storeFolder', storeFolder, 'string');
 
 			this._repo = repo;
-			this._dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
 
-			xm.ObjectUtil.hidePrefixed(this);
+			var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
+			this._service = new xm.CachedFileService(dir);
+			this._loader = new xm.CachedLoader('GithubRawCached', this._service);
 
 			this.stats.logger = xm.getLogger('GithubRawCached');
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		getFile(commitSha:string, filePath:string):Qpromise {
-			this.stats.count('invoked');
+			this.stats.count('start');
 
 			var tmp = filePath.split(/\/|\\\//g);
 			tmp.unshift(commitSha);
-			tmp.unshift(this._dir);
-
-			var key = commitSha + '|' + filePath;
 
 			var storeFile = path.join.apply(null, tmp);
+
 			if (this._debug) {
 				xm.log(storeFile);
 			}
 
-			//reuse promise if we are not already getting this file
-			if (this._active.has(key)) {
-				this.stats.count('active-hit');
-				return this._active.get(key).then((content) => {
-					this.stats.count('active-resolve');
-					return content;
-				}, (err) => {
-					this.stats.count('active-error');
-					//rethrow
-					throw err;
-				});
-			}
-
-			//keep the promise; first check the cache
-			var promise = FS.exists(storeFile).then((exists:bool) => {
-				if (exists) {
-					return FS.isFile(storeFile).then((isFile:bool) => {
-						if (!isFile) {
-							throw(new Error('path exists but is not a file: ' + storeFile));
-						}
-						this.stats.count('store-hit');
-
-						//read from cache
-						return FS.read(storeFile);
-					});
+			//TODO extract call-closure to method? beh?
+			return this._loader.doCachedCall('getFile', storeFile, {}, () => {
+				var reqOpts = {
+					url: this._repo.urls.rawFile(commitSha, filePath)
+				};
+				if (this._debug) {
+					xm.log(reqOpts.url);
 				}
-				else {
-					//not in cache
-					this.stats.count('store-miss');
-
-					var opts = {
-						url: this._repo.urls.rawFile(commitSha, filePath)
-					};
-
-					this.stats.count('request-call');
-					if (this._debug) {
-						xm.log(opts);
-					}
-
-					//do the actual download
-					return Q.nfcall(request.get, opts).spread((res) => {
-						if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
-							this.stats.count('request-error');
-							throw new Error('unexpected status code: ' + res.statusCode);
-						}
-						this.stats.count('request-complete');
-						// according to the headers raw github is binary encoded, but from what? utf8?
-						//TODO find correct way to handle binary encoding type (low prio)
-						var content = String(res.body);
-
-						//write it to cache
-						return xm.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
-							return FS.write(storeFile, content);
-						}).then(() => {
-							this.stats.count('store-set');
-							return content;
-						}, (err) => {
-							this.stats.count('store-error');
-							//TODO whut2do?
-							//throw(err);
-							//still return data?
-							return content;
-						});
-					}, (err) => {
+				this.stats.count('request-start');
+				return Q.nfcall(request.get, reqOpts).spread((res) => {
+					if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
 						this.stats.count('request-error');
-						xm.log.error(err);
-						throw err;
-					});
-				}
-			}).then((content) => {
-				// drop the promise from active list
-				this._active.remove(key);
-				return content;
+						throw new Error('unexpected status code: ' + res.statusCode);
+					}
+					this.stats.count('request-complete');
+					// according to the headers raw github is binary encoded, but from what? utf8?
+					//TODO find correct way to handle encoding type (low prio)
+					var content = String(res.body);
+					return content;
+				});
 			});
-			//keep promise while we are loading
-			this._active.set(key, promise);
-			return promise;
+		}
+
+		get service():xm.CachedFileService {
+			return this._service;
+		}
+
+		get loader():xm.CachedLoader {
+			return this._loader;
 		}
 
 		get debug():bool {
@@ -140,6 +96,7 @@ module git {
 		set debug(value:bool) {
 			this._debug = value;
 			this.stats.log = value;
+			this._loader.debug = value;
 		}
 	}
 }

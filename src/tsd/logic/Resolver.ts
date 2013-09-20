@@ -26,6 +26,8 @@ module tsd {
 
 			this.stats.log = this._core.context.verbose;
 			this.stats.logger = xm.getLogger('Resolver');
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		resolveBulk(list:tsd.DefVersion[]):Qpromise {

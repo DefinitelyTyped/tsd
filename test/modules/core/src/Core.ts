@@ -18,51 +18,58 @@ describe('Core', () => {
 	beforeEach(() => {
 		context = helper.getContext();
 		context.config.log.mute = true;
-		context.paths.configFile = './test/fixtures/config/valid.json';
+		context.paths.configFile = './test/fixtures/config/default.json';
 	});
 	afterEach(() => {
 		context = null;
 		core = null;
 	});
 
+	function getCore(context:tsd.Context):tsd.Core {
+		var core = new tsd.Core(context);
+
+		//enable this temporary to update fixtures
+		core.gitAPI.loader.options.modeCached();
+		core.gitRaw.loader.options.modeCached();
+
+		return core;
+	}
+
 	it('should be defined', () => {
 		assert.isFunction(tsd.Core, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			core = new tsd.Core(null);
+			core = getCore(null);
 		});
 	});
-	it('should be constructor', () => {
-		core = new tsd.Core(context);
-		assert.isObject(core, 'constructor');
-	});
+	
 	describe('readConfig', () => {
 		it('should pass on missing optional data', () => {
 			context.paths.configFile = './non-existing/tsd-config.json';
-			core = new tsd.Core(context);
+			core = getCore(context);
 			return assert.isFulfilled(core.readConfig(true));
 		});
 		it('should fail on missing required data', () => {
 			context.paths.configFile = './non-existing/tsd-config.json';
-			core = new tsd.Core(context);
+			core = getCore(context);
 			return assert.isRejected(core.readConfig(false), /^cannot locate file:/);
 		});
 		it('should fail on missing typingsPath value', () => {
 			context.paths.configFile = './test/fixtures/config/missing-typingsPath.json';
-			core = new tsd.Core(context);
+			core = getCore(context);
 			return assert.isRejected(core.readConfig(false), /^malformed config:/);
 		});
 		it('should fail on bad version value', () => {
 			context.paths.configFile = './test/fixtures/config/invalid-version.json';
-			core = new tsd.Core(context);
+			core = getCore(context);
 			return assert.isRejected(core.readConfig(false), /^malformed config:/);
 		});
 		it('should load config data', (done) => {
 			context.paths.configFile = './test/fixtures/config/valid-alt.json';
 			var source = xm.FileUtil.readJSONSync(context.paths.configFile);
 
-			core = new tsd.Core(context);
+			core = getCore(context);
 			core.readConfig(false).then(() => {
 				helper.assertConfig(core.context.config, source, 'source data');
 				done();
@@ -76,7 +83,7 @@ describe('Core', () => {
 			fs.writeFileSync(saveFile, fs.readFileSync('./test/fixtures/config/valid.json', {encoding: 'utf8'}), {encoding: 'utf8'});
 
 			context.paths.configFile = saveFile;
-			core = new tsd.Core(context);
+			core = getCore(context);
 			core.log.mute = true;
 
 			//modify test data
@@ -105,7 +112,7 @@ describe('Core', () => {
 
 	describe('getIndex', () => {
 		it('should return data', (done) => {
-			core = new tsd.Core(context);
+			core = getCore(context);
 			core.getIndex().then(() => {
 				assert.operator(core.index.list.length, '>', 200, 'definitions.list');
 				//xm.log(core.index.toDump());

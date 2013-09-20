@@ -1,4 +1,5 @@
 ///<reference path="../../../_ref.ts" />
+///<reference path="../../../tsdHelper.ts" />
 
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 ///<reference path="../../../../src/tsd/context/Paths.ts" />
@@ -89,8 +90,9 @@ describe('Context', () => {
 				assert.isString(ctx.config.ref, 'ref');
 				//assert.isObject(ctx.config.installed, 'installed');
 			});
-			it('exports valid formed config json', () => {
-				assert.jsonSchema(ctx.config.toJSON(), configSchema, 'toJSON');
+			it('is valid', () => {
+				var base = xm.FileUtil.readJSONSync('./test/fixtures/config/default.json');
+				helper.assertConfig(ctx.config, base, 'default');
 			});
 		});
 	});

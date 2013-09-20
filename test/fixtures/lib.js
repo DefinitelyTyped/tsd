@@ -28,7 +28,7 @@ function extend(source) {
 }
 
 var hash = {
-	headCommit: '6c7c46480d7f10cde4bc42b50e61da89373d1a10'
+	headCommit: 'a8d8c2ac668fbb99cb60fb5d25c663e9356fee14'
 };
 
 var versions = {
@@ -36,14 +36,16 @@ var versions = {
 		head: {
 			solved: false,
 			dependencies: [],
-			commitSha: hash.headCommit
+			commitSha: hash.headCommit,
+			blobHash: hash.headCommit
 		}
 	},
 	async: {
 		head: {
 			solved: false,
 			dependencies: [],
-			commitSha: hash.headCommit
+			commitSha: hash.headCommit,
+			blobHash: hash.headCommit
 		}
 	}
 };

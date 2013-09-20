@@ -6,16 +6,16 @@
 ///<reference path="../xm/io/hash.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
-///<reference path="GithubAPICachedJSONStore.ts" />
-///<reference path="GithubAPICachedResult.ts" />
+///<reference path="../xm/io/CachedJSONValue.ts" />
+///<reference path="../xm/io/CachedLoader.ts" />
+///<reference path="../xm/io/CachedJSONService.ts" />
 ///<reference path="GithubRepo.ts" />
+///<reference path="GithubRateLimitInfo.ts" />
 
 module git {
 
-	var async:Async = require('async');
 	var _:UnderscoreStatic = require('underscore');
 	var Q:QStatic = require('q');
-	var assert = require('assert');
 	var fs = require('fs');
 	var path = require('path');
 
@@ -27,21 +27,17 @@ module git {
 		gitdata:git.GithubJSData;
 	}
 	export interface GithubJSRepos {
-		getBranches(params:any, calback:git.GithubJSCallback);
-		getBranch(params:any, calback:git.GithubJSCallback);
-		getCommits(params:any, calback:git.GithubJSCallback);
+		getBranches(params:any, calback:git.Callback);
+		getBranch(params:any, calback:git.Callback);
+		getCommits(params:any, calback:git.Callback);
 	}
 	export interface GithubJSData {
-		getCommit(params:any, calback:git.GithubJSCallback);
-		getTree(params:any, calback:git.GithubJSCallback);
-		getBlob(params:any, calback:git.GithubJSCallback);
+		getCommit(params:any, calback:git.Callback);
+		getTree(params:any, calback:git.Callback);
+		getBlob(params:any, calback:git.Callback);
 	}
-	export interface GithubJSCallback {
+	export interface Callback {
 		(err?:any, res?:any):void;
-	}
-
-	export interface GithubAPICallWrapper {
-		(cb:GithubJSCallback):void;
 	}
 
 	/*
@@ -52,15 +48,14 @@ module git {
 	export class GithubAPICached {
 
 		private _api:git.GithubJS;
-		private _repo:GithubRepo;
-		private _store:GithubAPICachedJSONStore;
+		private _repo:git.GithubRepo;
+
+		private _service:xm.CachedJSONService;
+		private _loader:xm.CachedLoader;
+
 		private _apiVersion:string = '3.0.0';
-		private _defaultOpts:any = {};
 
 		private _debug:bool = false;
-
-		stats = new xm.StatCounter();
-		rate:GitRateLimitInfo;
 
 		constructor(repo:GithubRepo, storeFolder:string) {
 			xm.assertVar('repo', repo, GithubRepo);
@@ -71,155 +66,93 @@ module git {
 				version: this._apiVersion
 			});
 
-			this._store = new git.GithubAPICachedJSONStore(this, storeFolder);
-			this.rate = new GitRateLimitInfo();
-
-			this.stats.logger = xm.getLogger('GithubAPICached');
+			this._service = new xm.CachedJSONService(path.resolve(storeFolder, this.getCacheKey()));
+			this._loader = new xm.CachedLoader('GithubAPICached', this._service);
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		getRepoParams(vars:any):any {
-			return _.defaults(vars, {
+		mergeParams(vars?:any):any {
+			return _.defaults(vars || {}, {
 				user: this._repo.ownerName,
 				repo: this._repo.projectName
 			});
 		}
 
-		getCachedRaw(key:string):Qpromise {
-			return this._store.getResult(key);
-		}
-
-		getKey(label:string, keyTerms?:any):string {
-			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
-		}
-
 		getBranches():Qpromise {
-			var params = this.getRepoParams({});
-			return this.doCachedCall('getBranches', params, {}, (cb) => {
-				this._api.repos.getBranches(params, cb);
+			var params = this.mergeParams({});
+			return this._loader.doCachedCall('getBranches', params, {}, () => {
+				return Q.nfcall(this._api.repos.getBranches, params);
 			});
 		}
 
 		getBranch(branch:string):Qpromise {
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				branch: branch
 			});
-			return this.doCachedCall('getBranch', params, {}, (cb) => {
-				this._api.repos.getBranch(params, cb);
+			return this._loader.doCachedCall('getBranch', params, {}, () => {
+				return Q.nfcall(this._api.repos.getBranch, params);
 			});
 		}
 
 		getTree(sha:string, recursive:bool):Qpromise {
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				sha: sha,
 				recursive: recursive
 			});
-			return this.doCachedCall('getTree', params, {}, (cb) => {
-				this._api.gitdata.getTree(params, cb);
+			return this._loader.doCachedCall('getTree', params, {}, () => {
+				return Q.nfcall(this._api.gitdata.getTree, params);
 			});
 		}
 
 		getCommit(sha:string):Qpromise {
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				sha: sha
 			});
-			return this.doCachedCall('getCommit', params, {}, (cb) => {
-				this._api.gitdata.getCommit(params, cb);
+			return this._loader.doCachedCall('getCommit', params, {}, () => {
+				return Q.nfcall(this._api.gitdata.getCommit, params);
 			});
 		}
 
 		getBlob(sha:string):Qpromise {
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				sha: sha,
 				per_page: 100
 			});
-			return this.doCachedCall('getBlob', params, {}, (cb) => {
-				this._api.gitdata.getBlob(params, cb);
+			return this._loader.doCachedCall('getBlob', params, {}, () => {
+				return Q.nfcall(this._api.gitdata.getBlob, params);
 			});
 		}
 
 		getCommits(sha:string):Qpromise {
 			//TODO support auto pagination
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				per_page: 100,
 				sha: sha
 			});
-			return this.doCachedCall('getCommits', params, {}, (cb) => {
-				this._api.repos.getCommits(params, cb);
+			return this._loader.doCachedCall('getCommits', params, {}, () => {
+				return Q.nfcall(this._api.repos.getCommits, params);
 			});
 		}
 
 		getPathCommits(sha:string, path:String):Qpromise {
 			//TODO support auto pagination
-			var params = this.getRepoParams({
+			var params = this.mergeParams({
 				per_page: 100,
 				sha: sha,
 				path: path
 			});
-			return this.doCachedCall('getCommits', params, {}, (cb) => {
-				this._api.repos.getCommits(params, cb);
+			return this._loader.doCachedCall('getCommits', params, {}, () => {
+				return Q.nfcall(this._api.repos.getCommits, params);
 			});
 		}
 
-		//TODO harden against race conditions? (use key to id request?)
-		private doCachedCall(label:string, keyTerms:any, opts:any, call:GithubAPICallWrapper):Qpromise {
-			var key = this.getKey(label, keyTerms);
+		get service():xm.CachedJSONService {
+			return this._service;
+		}
 
-			opts = _.defaults(opts || {}, this._defaultOpts);
-
-			this.stats.count('invoked', label);
-
-			if (this._debug) {
-				xm.log(opts);
-				xm.log(keyTerms);
-			}
-
-			var defer = Q.defer();
-
-			// subroutine
-			var execCall = () => {
-				this.stats.count('call-api', label);
-
-				Q.nfcall(call).then((res) => {
-					this.rate.readFromRes(res);
-					if (this._debug) {
-						xm.log(this.rate.toStatus());
-					}
-					this.stats.count('call-success', label);
-
-					var cached = new git.GithubAPICachedResult(label, key, res);
-
-					// permanent storage?
-					this._store.storeResult(cached).then((info) => {
-						this.stats.count('store-set', label);
-						defer.resolve(res);
-					}, (err) => {
-						this.stats.count('store-set-error', label);
-						defer.reject(err);
-					});
-				}, (err) => {
-					this.stats.count('call-error', label);
-					xm.log.error(err);
-					defer.reject(err);
-				});
-			};
-
-			// in permanent store?
-			this._store.getResult(key).then((res:GithubAPICachedResult) => {
-				if (res) {
-					this.stats.count('store-hit', label);
-					defer.resolve(res.data);
-				}
-				else {
-					this.stats.count('store-miss', label);
-					execCall();
-				}
-			}, (err) => {
-				this.stats.count('store-get-error', label);
-				defer.reject(err);
-			});
-			return defer.promise;
+		get loader():xm.CachedLoader {
+			return this._loader;
 		}
 
 		get debug():bool {
@@ -228,43 +161,12 @@ module git {
 
 		set debug(value:bool) {
 			this._debug = value;
-			this.stats.log = value;
-			this._store.stats.log = value;
+			this._service.store.stats.log = value;
+			this._loader.debug = value;
 		}
 
 		getCacheKey():string {
 			return this._repo.getCacheKey() + '-api' + this._apiVersion;
-		}
-	}
-
-	export class GitRateLimitInfo {
-
-		limit:number = 0;
-		remaining:number = 0;
-		lastUpdate:Date = new Date();
-
-		constructor() {
-
-		}
-
-		readFromRes(response:any) {
-			if (response && _.isObject(response.meta)) {
-				if (response.meta.hasOwnProperty('x-ratelimit-limit')) {
-					this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
-				}
-				if (response.meta.hasOwnProperty('x-ratelimit-remaining')) {
-					this.remaining = parseInt(response.meta['x-ratelimit-remaining'], 10);
-				}
-				this.lastUpdate = new Date();
-			}
-		}
-
-		toStatus():string {
-			return 'rate limit: ' + this.remaining + ' of ' + this.limit + ' @ ' + this.lastUpdate.toLocaleString();
-		}
-
-		hasRemaining():bool {
-			return this.remaining > 0;
 		}
 	}
 }

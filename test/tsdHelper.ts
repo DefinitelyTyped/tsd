@@ -4,6 +4,7 @@
 ///<reference path="../src/xm/data/PackageJSON.ts" />
 ///<reference path="../src/tsd/context/Const.ts" />
 ///<reference path="../src/tsd/data/Def.ts" />
+///<reference path="helper.ts" />
 
 module helper {
 
@@ -14,7 +15,7 @@ module helper {
 	var q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
 
-	export var configSchema = xm.FileUtil.readJSONSync('./schema/tsd-config_v4.json');
+	export var configSchema = xm.FileUtil.readJSONSync(path.join(helper.getProjectRoot(), 'schema/tsd-config_v4.json'));
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -27,7 +28,7 @@ module helper {
 	}
 
 	export function getCacheDir():string {
-		return path.join(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+		return path.join(helper.getProjectRoot(), 'test', 'fixtures', tsd.Const.cacheDir);
 	}
 
 	export function getContext() {
@@ -35,6 +36,12 @@ module helper {
 		context = new tsd.Context();
 		context.paths.cacheDir = getCacheDir();
 		return context;
+	}
+
+	export function setFixtureUpdate(loader:xm.CachedLoader, updateFixtures:bool) {
+		loader.options.cacheRead = !updateFixtures;
+		loader.options.remoteRead = updateFixtures;
+		loader.options.cacheWrite = updateFixtures;
 	}
 
 	export interface TempInfo {
@@ -70,9 +77,9 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertConfig(config:tsd.Config, values:any, message:string) {
-		assert.ok(config, message + ' config');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(config, tsd.Config, message + ' config');
+		assert.ok(config, message + ': config');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(config, tsd.Config, message + ': config');
 
 		propStrictEqual(config, values, 'typingsPath', message);
 		propStrictEqual(config, values, 'version', message);
@@ -87,20 +94,20 @@ module helper {
 		}
 
 		var json = config.toJSON();
-		assert.jsonSchema(json, configSchema, message + ' schema');
-		propStrictEqual(json, values, 'typingsPath', message + ' json');
-		propStrictEqual(json, values, 'version', message + ' json');
-		propStrictEqual(json, values, 'repo', message + ' json');
-		propStrictEqual(json, values, 'ref', message + ' json');
+		assert.jsonSchema(json, configSchema, message + ': schema');
+		propStrictEqual(json, values, 'typingsPath', message + ': json');
+		propStrictEqual(json, values, 'version', message + ': json');
+		propStrictEqual(json, values, 'repo', message + ': json');
+		propStrictEqual(json, values, 'ref', message + ': json');
 		assert.like(json.installed, values.installed);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertDef(def:tsd.Def, values:any, message:string) {
-		assert.ok(def, message + ' def');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(def, tsd.Def, message + ' def');
+		assert.ok(def, message + ': def');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(def, tsd.Def, message + ': def');
 
 		propStrictEqual(def, values, 'path', message);
 		propStrictEqual(def, values, 'name', message);
@@ -137,25 +144,25 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertDefVersion(file:tsd.DefVersion, values:any, message:string) {
-		assert.ok(file, message + ' file');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(file, tsd.DefVersion, message + ' file');
+		assert.ok(file, message + ': file');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(file, tsd.DefVersion, message + ': file');
 
 		if (values.commitSha) {
-			formatSHA1(file.commit.commitSha, message + ' file.commit.commitSha');
-			formatSHA1(values.commitSha, message + ' values.commitSha');
-			assert.strictEqual(file.commit.commitSha, values.commitSha, message + ' file.commit.commitSha');
+			formatSHA1(file.commit.commitSha, message + ': file.commit.commitSha');
+			formatSHA1(values.commitSha, message + ': values.commitSha');
+			assert.strictEqual(file.commit.commitSha, values.commitSha, message + ': file.commit.commitSha');
 		}
 		if (values.content) {
-			assert.isString(file.content, message + ' file.content');
-			propStrictEqual(file, values, 'content', message + ' file');
+			assert.isString(file.content, message + ': file.content');
+			propStrictEqual(file, values, 'content', message + ': file');
 		}
 		if (typeof values.solved !== 'undefined') {
-			assert.isBoolean(values.solved, message + ' values.solved');
-			propStrictEqual(file, values, 'email', message + ' file');
+			assert.isBoolean(values.solved, message + ': values.solved');
+			propStrictEqual(file, values, 'email', message + ': file');
 		}
 		if (values.info) {
-			assertDefInfo(file.info, values.info, message + ' file.info');
+			assertDefInfo(file.info, values.info, message + ': file.info');
 		}
 		if (values.dependencies) {
 			assertDefVersionArray(file.dependencies, values.dependencies, 'dependencies');
@@ -169,15 +176,15 @@ module helper {
 	}, 'DefVersion');
 
 	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string) {
-		assertDefVersionArrayUnordered(files, values, message + ' files');
+		assertDefVersionArrayUnordered(files, values, message + ': files');
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertAuthor(author:xm.AuthorInfo, values:any, message:string) {
-		assert.ok(author, message + ' author');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(author, xm.AuthorInfo, message + ' author');
+		assert.ok(author, message + ': author');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(author, xm.AuthorInfo, message + ': author');
 
 		propStrictEqual(author, values, 'name', message);
 		propStrictEqual(author, values, 'url', message);
@@ -187,50 +194,50 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertDefInfo(info:tsd.DefInfo, values:any, message:string) {
-		assert.ok(info, message + ' info');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(info, tsd.DefInfo, message + ' info');
+		assert.ok(info, message + ': info');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(info, tsd.DefInfo, message + ': info');
 
 		propStrictEqual(info, values, 'name', message);
 		if (values.version) {
-			propStrictEqual(info, values, 'version', message + ' info');
+			propStrictEqual(info, values, 'version', message + ': info');
 		}
 		if (values.submodule) {
-			propStrictEqual(info, values, 'submodule', message + ' info');
+			propStrictEqual(info, values, 'submodule', message + ': info');
 		}
 		if (values.description) {
-			assert.strictEqual(info.description, values.description, message + ' info.description');
+			assert.strictEqual(info.description, values.description, message + ': info.description');
 		}
 		propStrictEqual(info, values, 'projectUrl', message);
 		propStrictEqual(info, values, 'reposUrl', message);
 
 		var i, ii;
 		if (values.authors) {
-			assertUnorderedNaive(info.authors, values.authors, assertAuthor, message + ' authors');
+			assertUnorderedNaive(info.authors, values.authors, assertAuthor, message + ': authors');
 		}
 		if (values.references) {
-			assertUnorderedNaive(info.authors, values.authors, assert.strictEqual, message + ' authors');
+			assertUnorderedNaive(info.authors, values.authors, assert.strictEqual, message + ': authors');
 		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertAPIResult(result:tsd.APIResult, values:any, message:string) {
-		assert.ok(result, message + ' result');
-		assert.ok(values, message + ' values');
-		assert.instanceOf(result, tsd.APIResult, message + ' result');
+		assert.ok(result, message + ': result');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(result, tsd.APIResult, message + ': result');
 
 		if (values.nameMatches) {
-			assertDefArray(result.nameMatches, values.nameMatches, message + ' nameMatches');
+			assertDefArray(result.nameMatches, values.nameMatches, message + ': nameMatches');
 		}
 		if (values.selection) {
-			assertDefVersionArray(result.selection, values.selection, message + ' selection');
+			assertDefVersionArray(result.selection, values.selection, message + ': selection');
 		}
 		if (values.definitions) {
-			assertDefArray(result.definitions, values.definitions, message + ' definitions');
+			assertDefArray(result.definitions, values.definitions, message + ': definitions');
 		}
 		if (values.written) {
-			assertKeyValue(result.written, values.written, assertDefVersion, message + ' written');
+			assertKeyValue(result.written, values.written, assertDefVersion, message + ': written');
 		}
 	}
 

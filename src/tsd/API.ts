@@ -65,7 +65,7 @@ module tsd {
 
 		/*
 		 list files matching selector
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		search(selector:tsd.Selector):Qpromise {
 			xm.assertVar('selector', selector, tsd.Selector);
@@ -75,7 +75,7 @@ module tsd {
 
 		/*
 		 install all files matching selector
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		install(selector:tsd.Selector):Qpromise {
 			xm.assertVar('selector', selector, tsd.Selector);
@@ -108,7 +108,7 @@ module tsd {
 
 		/*
 		 direct install attempt
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		directInstall(path:string, commitSha:string):Qpromise {
 			xm.assertVar('path', path, 'string');
@@ -126,7 +126,7 @@ module tsd {
 
 		/*
 		 direct install from partial commitSha
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		//TODO move into selector? meh?
 		installFragment(path:string, commitShaFragment:string):Qpromise {
@@ -144,7 +144,7 @@ module tsd {
 
 		/*
 		 download selection and parse and display header info
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		info(selector:tsd.Selector):Qpromise {
 			xm.assertVar('selector', selector, tsd.Selector);
@@ -157,7 +157,7 @@ module tsd {
 
 		/*
 		 load commit history
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		history(selector:tsd.Selector):Qpromise {
 			xm.assertVar('selector', selector, tsd.Selector);
@@ -172,7 +172,7 @@ module tsd {
 
 		/*
 		 download files matching selector and solve dependencies
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		deps(selector:tsd.Selector):Qpromise {
 			xm.assertVar('selector', selector, tsd.Selector);
@@ -184,7 +184,7 @@ module tsd {
 
 		/*
 		 re-install from config
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		reinstall():Qpromise {
 			var res = new tsd.APIResult(this._core.index, null);
@@ -197,7 +197,7 @@ module tsd {
 
 		/*
 		 compare repo data with local installed file and check for changes.
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		//TODO implement compare() command
 		compare(selector:tsd.Selector):Qpromise {
@@ -208,7 +208,7 @@ module tsd {
 
 		/*
 		 run compare and get latest files.
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		//TODO implement update() command
 		update(selector:tsd.Selector):Qpromise {
@@ -219,7 +219,7 @@ module tsd {
 
 		/*
 		 clear caches and temporary files
-		 promise: ApiResult
+		 promise: APIResult
 		 */
 		//TODO implement: purge() command
 		purge():Qpromise {

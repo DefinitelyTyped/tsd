@@ -2,6 +2,8 @@
 ///<reference path="../src/xm/io/FileUtil.ts" />
 ///<reference path="../src/xm/io/Logger.ts" />
 ///<reference path="../src/xm/data/PackageJSON.ts" />
+///<reference path="../src/xm/StatCounter.ts" />
+///<reference path="../src/xm/KeyValueMap.ts" />
 
 module helper {
 
@@ -27,18 +29,20 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	export function getProjectRoot():string {
+		return path.dirname(xm.PackageJSON.find());
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	export function dump(object:any, message?:string, depth?:number = 6, showHidden?:bool = false):any {
-		if (typeof message !== 'undefined') {
-			xm.log(message + ':');
-		}
-		xm.log(util.inspect(object, showHidden, depth, true));
+		message = xm.isUndefined(message) ? '' : message + ': ';
+		xm.log(message + util.inspect(object, showHidden, depth, true));
 	}
 
 	export function dumpJSON(object:any, message?:string):any {
-		if (typeof message !== 'undefined') {
-			console.log(message + ':');
-		}
-		xm.log(JSON.stringify(object, null, 4));
+		message = xm.isUndefined(message) ? '' : message + ': ';
+		xm.log(message + JSON.stringify(object, null, 4));
 	}
 
 	export function formatSHA1(value:any, msg?:string) {
@@ -159,19 +163,34 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function assertKeyValue(map:xm.IKeyValueMap, values:any, assertion:AssertCB, message:string) {
-		assert.isObject(map, message + ' map');
-		assert.isObject(values, message + ' values');
-		assert.isFunction(values, message + ' assertion');
+		assert.isObject(map, message + ': map');
+		assert.isObject(values, message + ': values');
+		assert.isFunction(values, message + ': assertion');
 
 		var keys:string[] = map.keys();
 		values.keys().forEach((key:string) => {
 			var i = keys.indexOf(key);
-			assert(i > -1, message + ' expected key "' + key + '"');
+			assert(i > -1, message + ': expected key "' + key + '"');
 			keys.splice(i, 1);
-			assert(map.has(key), message + ' missing key "' + key + '"');
-			assertion(map.get(key), values[key], message + ' key "' + key + '"');
+			assert(map.has(key), message + ': missing key "' + key + '"');
+			assertion(map.get(key), values[key], message + ': key "' + key + '"');
 		});
-		assert(keys.length === 0, message + ' unexpected keys remaining: ' + keys + '');
+		assert(keys.length === 0, message + ': unexpected keys remaining: ' + keys + '');
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	export function assertStatCounter(stat:xm.StatCounter, values:any, message:string) {
+		assert.isObject(stat, message + ': stat');
+		assert.isObject(values, message + ': values');
+		assert.instanceOf(stat, xm.StatCounter, message + ': stat');
+
+		var obj = {};
+		Object.keys(values).forEach((key:string) => {
+			//if (stat.has(key)) {
+			obj[key] = stat.get(key);
+			//}
+		});
+		assert.deepEqual(obj, values, message + ': stat');
+	}
 }

@@ -76,6 +76,7 @@ module tsd {
 				throw new Error('pass one selector pattern');
 			}
 
+			// TODO parse selector options from args
 			// TODO multiple selectors
 
 			job.selector = new Selector(args._[0]);
@@ -289,7 +290,6 @@ module tsd {
 				});
 			}, reportError);
 		}, 'Re-install definitions from config', jobOptions(), ['selector']);
-
 
 		expose.command('info', (args:any) => {
 			getSelectorJob(args).then((job:Job) => {

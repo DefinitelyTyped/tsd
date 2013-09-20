@@ -1,20 +1,22 @@
-///<reference path="../_ref.ts" />
-///<reference path="../xm/assertVar.ts" />
-///<reference path="../xm/io/Logger.ts" />
-///<reference path="../xm/io/hash.ts" />
+///<reference path="../../_ref.ts" />
+///<reference path="../assertVar.ts" />
+///<reference path="Logger.ts" />
+///<reference path="hash.ts" />
+///<reference path="../typeOf.ts" />
+///<reference path="../ObjectUtil.ts" />
 
-module git {
+module xm {
 
 	/*
-	 GithubAPICachedResult: single cached result object for github api
+	 CachedJSONValue: single cached result object holds data and meta-data
 	*/
 	//TODO add more hardening / verification
-	export class GithubAPICachedResult {
+	export class CachedJSONValue {
 
-		private _key:string;
-		private _label:any;
-		private _data:any;
-		private _lastSet:Date;
+		private _key:string = null;
+		private _label:any = null;
+		private _data:any = null;
+		private _lastSet:Date = null;
 
 		constructor(label:String, key:string, data:any) {
 			xm.assertVar('label', label, 'string');
@@ -23,15 +25,18 @@ module git {
 			this._label = label;
 			this._key = key;
 			this.setData(data);
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		setData(data:any):void {
 			//TODO add data check?
-			this._data = data;
+			this._data = xm.isUndefined(data) ? null : data;
 			this._lastSet = new Date();
 		}
 
 		toJSON():any {
+			//TODO flatter content to string?
 			return {
 				key: this.key,
 				hash: this.getHash(),
@@ -40,10 +45,10 @@ module git {
 				lastSet: this.lastSet.getTime()
 			};
 		}
-
 		//TODO unit-test this against toJSON()
+
 		//TODO maybe JSON Schema? overkill?
-		static fromJSON(json:any):GithubAPICachedResult {
+		static fromJSON(json:any):xm.CachedJSONValue {
 			xm.assertVar('label', json.label, 'string');
 			xm.assertVar('key', json.key, 'string');
 
@@ -52,7 +57,7 @@ module git {
 
 			xm.assertVar('lastSet', json.lastSet, 'number');
 
-			var call = new git.GithubAPICachedResult(json.label, json.key, json.data);
+			var call = new xm.CachedJSONValue(json.label, json.key, json.data);
 			call._lastSet = new Date(json.lastSet);
 			return call;
 		}
@@ -62,7 +67,7 @@ module git {
 		}
 
 		getHash():string {
-			return GithubAPICachedResult.getHash(this._key);
+			return xm.CachedJSONValue.getHash(this._key);
 		}
 
 		get label():string {

@@ -13,6 +13,7 @@
 
 module xm {
 
+	//TODO co-implement and ditch pkginfo dependency
 	var pkginfo = require('pkginfo');
 
 	/*
@@ -22,6 +23,7 @@ module xm {
 	export class PackageJSON {
 
 		private _pkg:any;
+		private static _localPath:string;
 		private static _local:PackageJSON;
 
 		constructor(pkg:any, public path?:string = null) {
@@ -57,7 +59,10 @@ module xm {
 		}
 
 		static find():string {
-			return pkginfo.find((module));
+			if (!PackageJSON._localPath) {
+				PackageJSON._localPath = pkginfo.find((module));
+			}
+			return PackageJSON._localPath;
 		}
 
 		static getLocal():PackageJSON {

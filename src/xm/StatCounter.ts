@@ -32,6 +32,10 @@ module xm {
 			return this.stats.get(id, 0);
 		}
 
+		has(id:string):bool {
+			return this.stats.has(id);
+		}
+
 		zero():void {
 			this.stats.keys().forEach((id:string) => {
 				this.stats.set(id, 0);

@@ -12,18 +12,16 @@ describe('git.GithubAPICached', () => {
 	var path = require('path');
 	var cacheDir;
 
-	var testStat = (api:git.GithubAPICached, id:string, num:number, label?:string) => {
-		assert.strictEqual(api.stats.get(id), num, label ? label + ':' + id : id);
-	};
-
-	before(() => {
+	beforeEach(() => {
 		context = new tsd.Context();
-		context.paths.cacheDir = path.resolve(__dirname, tsd.Const.cacheDir);
+		//use clean tmp folder in this test module
+		context.paths.cacheDir = path.join(__dirname, tsd.Const.cacheDir);
 		cacheDir = path.join(context.paths.cacheDir, 'git_api');
 
 		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
+		api = new git.GithubAPICached(repo, cacheDir);
 	});
-	after(() => {
+	afterEach(() => {
 		context = null;
 		repo = null;
 		api = null;
@@ -37,16 +35,15 @@ describe('git.GithubAPICached', () => {
 			api = new git.GithubAPICached(null, null);
 		});
 	});
-	it('should be constructor', () => {
-		api = new git.GithubAPICached(repo, cacheDir);
-		assert.isObject(api, 'instance');
+	it('should have default options', () => {
+		assert.isTrue(api.loader.options.cacheRead, 'options.cacheRead');
+		assert.isTrue(api.loader.options.cacheWrite, 'options.cacheWrite');
+		assert.isTrue(api.loader.options.remoteRead, 'options.remoteRead');
 	});
 
-	describe('getRepoParams', () => {
+	describe('mergeParams', () => {
 		it('should return user data', () => {
-			assert.isObject(api, 'instance');
-
-			var params = api.getRepoParams({extra: 123});
+			var params = api.mergeParams({extra: 123});
 			assert.propertyVal(params, 'user', context.config.repoOwner);
 			assert.propertyVal(params, 'repo', context.config.repoProject);
 			assert.propertyVal(params, 'extra', 123, 'additional data');
@@ -54,56 +51,74 @@ describe('git.GithubAPICached', () => {
 	});
 	describe('getKey', () => {
 		it('should return same key for same values', () => {
-			assert.isObject(api, 'instance');
-
 			var keys = ['aa', 'bb', 'cc'];
-			assert.strictEqual(api.getKey('lbl', keys), api.getKey('lbl', keys), 'basic');
+			assert.strictEqual(api.loader.getKey('lbl', keys), api.loader.getKey('lbl', keys), 'basic');
 		});
 	});
 	describe('getBranches', () => {
 
-		it('should not return data for bogus key', (done:() => void) => {
-			api = new git.GithubAPICached(repo, cacheDir);
+		it('should not return data for bogus key', () => {
 			//api.debug = true;
 
-			api.getCachedRaw(api.getKey('bleh blah')).then((data) => {
+			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
+
+			return api.service.getCachedRaw(api.loader.getKey('bleh blah')).then((data) => {
 				assert.notOk(data, 'callback data');
-				done();
-			}).done(null, done);
+
+				//xm.log(api.loader.stats.stats.export());
+				assert.isTrue(api.loader.stats.hasAllZero(), 'stats');
+			});
 		});
 
-		it('should cache and return data from store', (done:() => void) => {
+		it('should cache and return data from store', () => {
 
 			api = new git.GithubAPICached(repo, cacheDir);
 			//api.debug = true;
 
-			assert.isTrue(api.stats.hasAllZero(), 'pretest stats');
+			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
-			api.getBranches().then((data) => {
-				//xm.log('getBranches 1');
-
+			return api.getBranches().then((data) => {
 				assert.ok(data, 'callback data');
 
-				testStat(api, 'invoked', 1, 'first');
+				//xm.log(api.loader.stats.stats.export());
+				helper.assertStatCounter(api.loader.stats, {
+					start: 1,
+					'read-start': 1,
+					'active-set': 1,
+					'read-miss': 1,
+					'load-start': 1,
+					'load-success': 1,
+					'write-start': 1,
+					'write-success': 1,
+					'active-remove': 1,
+					complete: 1
+				}, 'first');
 
-				testStat(api, 'store-hit', 0, 'first');
-				testStat(api, 'store-miss', 1, 'first');
-				testStat(api, 'store-set', 1, 'first');
+				assert.isArray(data, 'data');
 
 				// get again, should be cached
 				return api.getBranches();
 			}).then((data) => {
-				//xm.log('getBranches 2');
-
 				assert.ok(data, 'second callback data');
 
-				testStat(api, 'invoked', 2, 'second');
+				//xm.log(api.loader.stats.stats.export());
+				helper.assertStatCounter(api.loader.stats, {
+					start: 2,
+					'read-start': 2,
+					'active-set': 2,
+					'read-miss': 1,
+					'load-start': 1,
+					'load-success': 1,
+					'write-start': 1,
+					'write-success': 1,
+					'active-remove': 2,
+					complete: 2,
+					'read-hit': 1,
+					'cache-hit': 1
+				}, 'second');
 
-				testStat(api, 'store-hit', 1, 'second');
-				testStat(api, 'store-miss', 1, 'second');
-				testStat(api, 'store-set', 1, 'second');
-				done();
-			}).done(null, done);
+				assert.isArray(data, 'data');
+			});
 		});
 	});
 });

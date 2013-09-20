@@ -21,7 +21,7 @@ chai.use(require('chai-fs'));
 chai.use(require('chai-as-promised'));
 chai.Assertion.includeStack = true;
 var assert:chai.Assert = chai.assert;
-
+declare var helper:helper;
 require('mocha-as-promised')();
 require('source-map-support').install();
 
