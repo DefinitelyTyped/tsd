@@ -4,6 +4,8 @@
 ///<reference path="../src/xm/data/PackageJSON.ts" />
 ///<reference path="../src/xm/StatCounter.ts" />
 ///<reference path="../src/xm/KeyValueMap.ts" />
+///<reference path="../src/xm/inspect.ts" />
+///<reference path="settings.ts" />
 
 module helper {
 
@@ -93,7 +95,7 @@ module helper {
 				}
 			}
 			//use assert.deepEqual for diff report
-			assert.deepEqual({}, act, message + ': no matching element for actual: ' + act);
+			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
 		if (expected.length > 0) {
@@ -139,8 +141,7 @@ module helper {
 					//maybe next one
 				}
 			}
-			//use assert.deepEqual for diff report
-			assert(false, message + ': no matching element for actual: ' + act);
+			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
 		if (expected.length > 0) {
@@ -156,6 +157,7 @@ module helper {
 		};
 	}
 
+	//abominables
 	export function assertUnorderedStrict(actual:any[], expected:any[], message?:string) {
 		assertUnorderedNaive(actual, expected, assert.strictEqual, message);
 	}

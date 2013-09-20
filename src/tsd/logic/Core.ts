@@ -231,14 +231,30 @@ module tsd {
 		 promise: string: absolute path of written file
 		 */
 		saveConfig():Qpromise {
+			var file = this.context.paths.configFile;
 			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
-			var dir = path.dirname(this.context.paths.configFile);
+			var dir = path.dirname(file);
+
+			if (!json || json.length === 0) {
+				return Q.reject(new Error('saveConfig retrieved empty json'));
+			}
 
 			return xm.mkdirCheckQ(dir, true).then(() => {
-				return FS.write(this.context.paths.configFile, json);
-			}).then(() => {
-				return this.context.paths.configFile;
-			});
+				return FS.write(file, json).then(() => {
+					//TODO solve and remove this wizardy: also see my ticket @ https://github.com/kriskowal/q-io/issues/52
+					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not)
+					return FS.stat(file);
+				}).then(() => {
+					return Q.delay(100);
+				}).then(() => {
+					//now do the real check
+					return FS.stat(file).then((stat) => {
+						if (stat.size === 0) {
+							throw new Error('saveConfig write zero bytes to: ' + file);
+						}
+					});
+				});
+			}).thenResolve(file);
 		}
 
 		/*

@@ -137,7 +137,7 @@ module helper {
 		assertDef(act, exp, message);
 	}, 'Def');
 
-	export function  assertDefArray(defs:tsd.Def[], values:any[], message:string) {
+	export function assertDefArray(defs:tsd.Def[], values:any[], message:string) {
 		assertDefArrayUnordered(defs, values, message);
 	}
 
@@ -243,6 +243,47 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	export function applyCoreUpdate(core:tsd.Core) {
+		applyCoreUpdateLoader(core.gitAPI.loader);
+		applyCoreUpdateLoader(core.gitRaw.loader);
+	}
+	//set modes for fixture updates
+	function applyCoreUpdateLoader(loader:xm.CachedLoader) {
+		if (settings.cache.forceUpdate) {
+			loader.options.modeAll();
+		}
+		else if (settings.cache.allowUpdate) {
+			loader.options.modeAll();
+		}
+		else {
+			loader.options.modeCached();
+		}
+	}
+
+	export function assertUpdateStat(loader:xm.CachedLoader, message:string) {
+		var stats = loader.stats;
+		if (helper.settings.cache.forceUpdate) {
+			assert.operator(stats.get('load-start'), '>=', 0, message + ': forceUpdate: load-start');
+			assert.operator(stats.get('write-succes'), '>=', 0, message + ': forceUpdate: write-succes');
+			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
+		}
+		else if (helper.settings.cache.allowUpdate) {
+			assert.operator(stats.get('load-start'), '>=', 0, message + ': allowUpdate: load-start');
+			assert.operator(stats.get('write-succes'), '>=', 0, message + ': allowUpdate: write-succes');
+			assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
+
+			var sum = stats.get('load-start') + stats.get('write-succes') + stats.get('cache-hit');
+			assert.operator(sum, '>', 0, message + ': noUpdate: sum');
+		}
+		else {
+			assert.operator(stats.get('load-start'), '===', 0, message + ': noUpdate: load-start');
+			assert.operator(stats.get('write-succes'), '===', 0, message + ': noUpdate: write-succes');
+			assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
+		}
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	export function listDefPaths(dir:string):Qpromise {
 		return FS.listTree(dir,(full:string, stat):bool => {
 			return (stat.isFile() && /\.d\.ts$/.test(full));
@@ -254,4 +295,7 @@ module helper {
 			});
 		});
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }

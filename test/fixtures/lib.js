@@ -26,6 +26,19 @@ function extend(source) {
 	}
 	return ret;
 }
+/*
+var apiFolder = 'git_api/borisyankov-DefinitelyTyped-api3.0.0-fmt0.0.3';
+var rawFolder = 'git_raw/borisyankov-DefinitelyTyped-fmt0.0.2';
+
+var pointers = {
+	headCommit: {
+		file:apiFolder
+	}
+};
+
+function update() {
+
+}*/
 
 var hash = {
 	headCommit: 'a8d8c2ac668fbb99cb60fb5d25c663e9356fee14'
@@ -36,16 +49,14 @@ var versions = {
 		head: {
 			solved: false,
 			dependencies: [],
-			commitSha: hash.headCommit,
-			blobHash: hash.headCommit
+			commitSha: hash.headCommit
 		}
 	},
 	async: {
 		head: {
 			solved: false,
 			dependencies: [],
-			commitSha: hash.headCommit,
-			blobHash: hash.headCommit
+			commitSha: hash.headCommit
 		}
 	}
 };

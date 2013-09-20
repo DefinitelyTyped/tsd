@@ -30,7 +30,7 @@
       "author": {
         "login": "Diullei",
         "id": 373936,
-        "avatar_url": "https://0.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
+        "avatar_url": "https://2.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
         "gravatar_id": "5e93890c5b54d18dd454f14789c2b225",
         "url": "https://api.github.com/users/Diullei",
         "html_url": "https://github.com/Diullei",
@@ -48,7 +48,7 @@
       "committer": {
         "login": "Diullei",
         "id": 373936,
-        "avatar_url": "https://0.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
+        "avatar_url": "https://2.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
         "gravatar_id": "5e93890c5b54d18dd454f14789c2b225",
         "url": "https://api.github.com/users/Diullei",
         "html_url": "https://github.com/Diullei",
@@ -82,9 +82,9 @@
     },
     "meta": {
       "x-ratelimit-limit": "60",
-      "x-ratelimit-remaining": "59"
+      "x-ratelimit-remaining": "57"
     }
   },
   "label": "getBranch",
-  "lastSet": 1379699861327
+  "lastSet": 1379710044495
 }

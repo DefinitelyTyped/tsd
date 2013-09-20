@@ -147,7 +147,7 @@ module.exports = function (grunt) {
 	gtx.alias('test', ['build', 'gtx-group:test']);
 	gtx.alias('default', 'test');
 
-	var longTimer = (isVagrant ? 20000 : 5000);
+	var longTimer = (isVagrant ? 250000 : 5000);
 
 	// modules
 	gtx.create('api,cli,core', 'moduleTest', {timeout: longTimer}, 'core');

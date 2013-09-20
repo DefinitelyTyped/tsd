@@ -21,6 +21,10 @@ module xm {
 		cacheWrite = true;
 		remoteRead = true;
 
+		constructor(){
+			xm.ObjectUtil.hideFunctions(this);
+		}
+
 		modeUpdate() {
 			this.cacheRead = false;
 			this.remoteRead = true;

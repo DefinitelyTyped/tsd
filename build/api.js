@@ -580,6 +580,15 @@ var xm;
                 }
             }
         };
+        ObjectUtil.hideFunctions = function hideFunctions(object) {
+            for(var property in object) {
+                if(xm.isFunction(object)) {
+                    ObjectUtil.defineProp(object, property, {
+                        enumerable: false
+                    });
+                }
+            }
+        };
         return ObjectUtil;
     })();
     xm.ObjectUtil = ObjectUtil;    
@@ -1397,6 +1406,7 @@ var xm;
             this.cacheRead = true;
             this.cacheWrite = true;
             this.remoteRead = true;
+            xm.ObjectUtil.hideFunctions(this);
         }
         CachedLoaderOptions.prototype.modeUpdate = function () {
             this.cacheRead = false;
@@ -3072,6 +3082,7 @@ var tsd;
 (function (tsd) {
     var Q = require('q');
     var FS = require('q-io/fs');
+    var fs = require('fs');
     var path = require('path');
     var pointer = require('jsonpointer.js');
     var branch_tree = '/commit/commit/tree/sha';
@@ -3208,14 +3219,25 @@ var tsd;
             });
         };
         Core.prototype.saveConfig = function () {
-            var _this = this;
+            var file = this.context.paths.configFile;
             var json = JSON.stringify(this.context.config.toJSON(), null, 2);
-            var dir = path.dirname(this.context.paths.configFile);
+            var dir = path.dirname(file);
+            if(!json || json.length === 0) {
+                return Q.reject(new Error('saveConfig retrieved empty json'));
+            }
             return xm.mkdirCheckQ(dir, true).then(function () {
-                return FS.write(_this.context.paths.configFile, json);
-            }).then(function () {
-                return _this.context.paths.configFile;
-            });
+                return FS.write(file, json).then(function () {
+                    return FS.stat(file);
+                }).then(function () {
+                    return Q.delay(100);
+                }).then(function () {
+                    return FS.stat(file).then(function (stat) {
+                        if(stat.size === 0) {
+                            throw new Error('saveConfig write zero bytes to: ' + file);
+                        }
+                    });
+                });
+            }).thenResolve(file);
         };
         Core.prototype.reinstallBulk = function (list) {
             var _this = this;

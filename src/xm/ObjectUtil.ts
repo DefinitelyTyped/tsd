@@ -1,4 +1,5 @@
 ///<reference path="_ref.ts" />
+///<reference path="typeOf.ts" />
 
 module xm {
 
@@ -17,6 +18,14 @@ module xm {
 		static hidePrefixed(object:Object, ownOnly:bool = true):void {
 			for (var property in object) {
 				if (property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
+					ObjectUtil.defineProp(object, property, {enumerable: false});
+				}
+			}
+		}
+
+		static hideFunctions(object:Object):void {
+			for (var property in object) {
+				if (xm.isFunction(object)) {
 					ObjectUtil.defineProp(object, property, {enumerable: false});
 				}
 			}

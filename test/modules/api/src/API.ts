@@ -14,7 +14,7 @@ describe('API', () => {
 	var context:tsd.Context;
 
 	before(() => {
-		
+
 	});
 	beforeEach(() => {
 		context = helper.getContext();
@@ -35,12 +35,14 @@ describe('API', () => {
 		});
 	});
 
+	//enable this temporary to update fixtures
+	var allowUpdate = true;
+	var forceUpdate = true;
+
 	function getAPI(context:tsd.Context):tsd.API {
 		var api = new tsd.API(context);
 
-		//enable this temporary to update fixtures
-		api.core.gitAPI.loader.options.modeCached();
-		api.core.gitRaw.loader.options.modeCached();
+		helper.applyCoreUpdate(api.core);
 		return api;
 	}
 
@@ -69,16 +71,15 @@ describe('API', () => {
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
-			it('selector "' + String(selector) + '"', (done) => {
+			it('selector "' + String(selector) + '"', () => {
 				api = getAPI(context);
 
 				var tmp = applyTempInfo('search', (i++), data, selector);
 
-				api.search(selector).then((result:tsd.APIResult) => {
+				return api.search(selector).then((result:tsd.APIResult) => {
 					helper.assertAPIResult(result, data.result, 'result');
-
-					done();
-				}).done(null, done);
+					helper.assertUpdateStat(api.core.gitAPI.loader, 'core');
+				});
 			});
 		});
 	});
@@ -89,14 +90,15 @@ describe('API', () => {
 		select.forEach((data) => {
 			var selector = new tsd.Selector(data.selector.pattern);
 
-			it('selector "' + String(selector) + '"', (done) => {
+			it('selector "' + String(selector) + '"', () => {
 				api = getAPI(context);
 
 				var tmp = applyTempInfo('install', (i++), data, selector);
 
-				api.install(selector).then((result:tsd.APIResult) => {
+				return api.install(selector).then((result:tsd.APIResult) => {
 					helper.assertAPIResult(result, data.result, 'result');
-					assert.isFile(api.context.paths.configFile);
+					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
+					helper.assertUpdateStat(api.core.gitRaw.loader, 'raw');
 
 					if (!data.config) {
 						return null;
@@ -115,9 +117,7 @@ describe('API', () => {
 							assert.notIsEmptyFile(path.join(tmp.typingsDir, ref), 'typing');
 						});
 					});
-				}).then(() => {
-					done();
-				}).done(null, done);
+				});
 			});
 		});
 	});

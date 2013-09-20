@@ -25,13 +25,13 @@ describe('Core', () => {
 		core = null;
 	});
 
+	var forceUpdate = false;
+	var allowUpdate = false;
+
 	function getCore(context:tsd.Context):tsd.Core {
 		var core = new tsd.Core(context);
 
-		//enable this temporary to update fixtures
-		core.gitAPI.loader.options.modeCached();
-		core.gitRaw.loader.options.modeCached();
-
+		helper.applyCoreUpdate(core);
 		return core;
 	}
 
@@ -77,14 +77,14 @@ describe('Core', () => {
 		});
 	});
 	describe('saveConfig', () => {
-		it('should save modified data', (done) => {
+		it('should save modified data', () => {
 			//copy temp for saving
 			var saveFile = path.resolve(__dirname, 'save-config.json');
 			fs.writeFileSync(saveFile, fs.readFileSync('./test/fixtures/config/valid.json', {encoding: 'utf8'}), {encoding: 'utf8'});
-
 			context.paths.configFile = saveFile;
+
 			core = getCore(context);
-			core.log.mute = true;
+			//core.debug = true;
 
 			//modify test data
 			var source = xm.FileUtil.readJSONSync(saveFile);
@@ -93,7 +93,7 @@ describe('Core', () => {
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
 			delete changed.installed['async/async.d.ts'];
 
-			core.readConfig(false).then(() => {
+			return core.readConfig(false).then(() => {
 				helper.assertConfig(core.context.config, source, 'core.context.config');
 
 				//modify data
@@ -102,23 +102,28 @@ describe('Core', () => {
 
 				return core.saveConfig();
 			}).then(() => {
+				assert.notIsEmptyFile(context.paths.configFile);
 				return xm.FileUtil.readJSONPromise(context.paths.configFile);
 			}).then((json) => {
 				assert.like(json, changed, 'saved data json');
-				done();
-			}).done(null, done);
+				return null;
+			});
 		});
 	});
 
 	describe('getIndex', () => {
-		it('should return data', (done) => {
+		it('should return data', () => {
 			core = getCore(context);
-			core.getIndex().then(() => {
+			//core.debug = true;
+
+			return core.getIndex().then(() => {
+				helper.assertUpdateStat(core.gitAPI.loader, 'core');
+
 				assert.operator(core.index.list.length, '>', 200, 'definitions.list');
 				//xm.log(core.index.toDump());
 				//TODO validate index data
-				done();
-			}).done(null, done);
+				return null;
+			});
 		});
 	});
 });
