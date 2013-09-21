@@ -1,6 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema",
-	"id": "tsd_config_v4",
+	"id": "tsd_config_v4-dev-0",
+	"description": "TSD - TypeScript Definition Package Manager: config file",
 	"type": "object",
 	"required": ["version", "repo", "ref", "typingsPath"],
 	"properties": {
@@ -9,29 +10,32 @@
 			"enum": ["v4"]
 		},
 		"repo": {
-			"type": "string"
+			"type": "string",
+			"pattern": "^\\w[\\w_-]+?\\w/\\w[\\w_-]+?\\w$"
 		},
 		"ref": {
-			"type": "string"
+			"type": "string",
+			"pattern": "^\\w[\\w_\\.-]+?\\w$"
 		},
 		"typingsPath": {
-			"type": "string"
+			"type": "string",
+			"minLength": "1"
 		},
 		"installed": {
 			"type": "object",
-			"_______________patternProperties": {
-				"^[\\S ]+$": {
+			"additionalProperties": false,
+			"patternProperties": {
+				"^\\w[\\w_\\.-]+?\\w/\\w[\\w_\\.-]+?\\w\\.d\\.ts$": {
 					"type": "object",
-					"required": ["repo", "key", "uri"],
+					"required": ["commit", "hash"],
 					"properties": {
-						"repo": {
-							"type": "string"
+						"commit": {
+							"type": "string",
+							"pattern": "^[0-9a-f]{40}$"
 						},
-						"key": {
-							"type": "string"
-						},
-						"uri": {
-							"type": "string"
+						"hash": {
+							"type": "string",
+							"pattern": "^[0-9a-f]{32}$"
 						}
 					}
 				}
