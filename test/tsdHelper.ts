@@ -268,12 +268,12 @@ module helper {
 			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
 		}
 		else if (helper.settings.cache.allowUpdate) {
-			assert.operator(stats.get('load-start'), '>=', 0, message + ': allowUpdate: load-start');
-			assert.operator(stats.get('write-succes'), '>=', 0, message + ': allowUpdate: write-succes');
-			assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
+			//assert.operator(stats.get('load-start'), '>=', 0, message + ': allowUpdate: load-start');
+			//assert.operator(stats.get('write-succes'), '>=', 0, message + ': allowUpdate: write-succes');
+			//assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
 
 			var sum = stats.get('load-start') + stats.get('write-succes') + stats.get('cache-hit');
-			assert.operator(sum, '>', 0, message + ': noUpdate: sum');
+			assert.operator(sum, '>', 0, message + ': allowUpdate: sum');
 		}
 		else {
 			assert.operator(stats.get('load-start'), '===', 0, message + ': noUpdate: load-start');
