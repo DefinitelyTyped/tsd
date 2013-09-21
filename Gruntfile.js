@@ -41,15 +41,18 @@ module.exports = function (grunt) {
 			helper: ['test/*.ts']
 		},
 		todos: {
-			all: {
-				options: {
-					verbose: false,
-					priorities: {
-						low: null,
-						med: /(TODO|FIXME)/
-					}
+			options: {
+				verbose: false,
+				priorities: {
+					low: null,
+					med: /(TODO|FIXME)/
 				},
-				src: ['src/**/*.ts', 'test/**/*.ts']
+				reporter: require('./lib/grunt/todos-reporter').make(grunt)
+
+			},
+			all: {
+				options: {},
+				src: ['src/**/*.ts', 'test/**/src/**/*.ts']
 			}
 		},
 		clean: {

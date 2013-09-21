@@ -3,7 +3,7 @@ module git {
 	/*
 	 GitCommitUser: basic git committer
 	  */
-	//TODO rename? but to what?
+	//TODO rename class? but to what?
 	export class GitUserCommit {
 		name:string;
 		email:string;
@@ -17,10 +17,10 @@ module git {
 			if (!json) {
 				return null;
 			}
+			//TODO verify json data
 			var ret = new git.GitUserCommit();
 			ret.name = json.name;
 			ret.email = json.email;
-			//TODO verifiy
 			ret.date = new Date(Date.parse(json.date));
 			return ret;
 		}

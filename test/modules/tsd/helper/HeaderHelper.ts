@@ -18,6 +18,9 @@ module helper {
 		}
 	}
 
+	//old tsd-deftools fixture loader
+
+	//TODO when bored: rewrite using promises (not important)
 	export function loadHeaderFixtures(src:string, finish:(err, res:HeaderAssert[]) => void) {
 		src = path.resolve(src);
 

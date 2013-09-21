@@ -804,7 +804,7 @@ var tsd;
     var path = require('path');
     var util = require('util');
     var assert = require('assert');
-    var tv4 = require('tv4').tv4;
+    var tv4 = require('tv4').tv4.freshApi();
     var InstalledDef = (function () {
         function InstalledDef(path) {
             this.path = path;
@@ -910,18 +910,20 @@ var tsd;
                 if(res.error.dataPath) {
                     this.log.error(res.error.dataPath);
                 }
-                throw (new Error('malformed config: doesn\'t comply with json-schema'));
+                throw (new Error('malformed config: doesn\'t comply with json-schema: ' + res.error.message + (res.error.dataPath ? ': ' + res.error.dataPath : '')));
             }
             this.typingsPath = json.typingsPath;
             this.version = json.version;
             this.repo = json.repo;
             this.ref = json.ref;
-            xm.eachProp(json.installed, function (data, path) {
-                var installed = new tsd.InstalledDef(path);
-                installed.commitSha = data.commit;
-                installed.contentHash = data.hash;
-                _this._installed.set(path, installed);
-            });
+            if(json.installed) {
+                xm.eachProp(json.installed, function (data, path) {
+                    var installed = new tsd.InstalledDef(path);
+                    installed.commitSha = data.commit;
+                    installed.contentHash = data.hash;
+                    _this._installed.set(path, installed);
+                });
+            }
         };
         return Config;
     })();
@@ -3082,7 +3084,6 @@ var tsd;
 (function (tsd) {
     var Q = require('q');
     var FS = require('q-io/fs');
-    var fs = require('fs');
     var path = require('path');
     var pointer = require('jsonpointer.js');
     var branch_tree = '/commit/commit/tree/sha';

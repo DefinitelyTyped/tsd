@@ -125,7 +125,7 @@ module git {
 		}
 
 		getCommits(sha:string):Qpromise {
-			//TODO support auto pagination
+			//TODO implement result pagination
 			var params = this.mergeParams({
 				per_page: 100,
 				sha: sha
@@ -136,7 +136,7 @@ module git {
 		}
 
 		getPathCommits(sha:string, path:String):Qpromise {
-			//TODO support auto pagination
+			//TODO implement result pagination
 			var params = this.mergeParams({
 				per_page: 100,
 				sha: sha,

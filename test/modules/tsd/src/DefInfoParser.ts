@@ -13,6 +13,7 @@ describe('DefInfoParser', () => {
 	var filter;// = ['async', 'expect.js'];
 
 	before((done:(err?) => void) => {
+		//use old tsd-deftools loader
 		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers'), (err, res:helper.HeaderAssert[]) => {
 			if (err) {
 				return done(err);

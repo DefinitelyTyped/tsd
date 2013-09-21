@@ -1,0 +1,12 @@
+{
+  "typingsPath": "typings",
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "installed": {
+    "project/module": {
+      "commit": "6c7c46480d7f10cde4bc42b50e61da89373d1a10",
+      "hash": "fb3987f1fae34dd648c82319b8cf983b"
+    }
+  }
+}

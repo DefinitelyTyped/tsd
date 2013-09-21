@@ -11,7 +11,7 @@ module tsd {
 	var path = require('path');
 	var util = require('util');
 	var assert = require('assert');
-	var tv4:TV4 = require('tv4').tv4;
+	var tv4:TV4 = require('tv4').tv4.freshApi();
 
 	/*
 	 InstalledDef: single installed file in Config
@@ -31,6 +31,8 @@ module tsd {
 			}
 			this.path = source.def.path;
 			this.commitSha = source.commit.commitSha;
+
+			//TODO consider normalising line ends before hashing
 			this.contentHash = xm.md5(source.content);
 		}
 
@@ -149,9 +151,9 @@ module tsd {
 					this.log.error(res.error.dataPath);
 				}
 				/*if (res.error.schemaPath) {
-					xm.log.error(res.error.schemaPath);
-				}*/
-				throw (new Error('malformed config: doesn\'t comply with json-schema'));
+				 xm.log.error(res.error.schemaPath);
+				 }*/
+				throw (new Error('malformed config: doesn\'t comply with json-schema: ' + res.error.message + (res.error.dataPath ? ': ' + res.error.dataPath : '')));
 			}
 
 			//TODO harden validation besides schema
@@ -160,15 +162,17 @@ module tsd {
 			this.repo = json.repo;
 			this.ref = json.ref;
 
-			xm.eachProp(json.installed, (data:any, path:string) => {
-				var installed = new tsd.InstalledDef(path);
-				installed.commitSha = data.commit;
-				installed.contentHash = data.hash;
+			if (json.installed) {
+				xm.eachProp(json.installed, (data:any, path:string) => {
+					var installed = new tsd.InstalledDef(path);
+					installed.commitSha = data.commit;
+					installed.contentHash = data.hash;
 
-				//TODO validate some more?
+					//TODO validate some more?
 
-				this._installed.set(path, installed);
-			});
+					this._installed.set(path, installed);
+				});
+			}
 		}
 	}
 }

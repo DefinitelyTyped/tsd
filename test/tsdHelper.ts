@@ -99,7 +99,12 @@ module helper {
 		propStrictEqual(json, values, 'version', message + ': json');
 		propStrictEqual(json, values, 'repo', message + ': json');
 		propStrictEqual(json, values, 'ref', message + ': json');
-		assert.like(json.installed, values.installed);
+		if (values.installed) {
+			assert.like(json.installed, values.installed);
+		}
+		else {
+			assert.like(json.installed, {});
+		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -247,6 +252,7 @@ module helper {
 		applyCoreUpdateLoader(core.gitAPI.loader);
 		applyCoreUpdateLoader(core.gitRaw.loader);
 	}
+
 	//set modes for fixture updates
 	function applyCoreUpdateLoader(loader:xm.CachedLoader) {
 		if (settings.cache.forceUpdate) {

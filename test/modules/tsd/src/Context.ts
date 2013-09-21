@@ -2,16 +2,11 @@
 ///<reference path="../../../tsdHelper.ts" />
 
 ///<reference path="../../../../src/tsd/context/Context.ts" />
-///<reference path="../../../../src/tsd/context/Paths.ts" />
-///<reference path="../../../../src/tsd/context/Config.ts" />
-///<reference path="../../../../src/xm/data/PackageJSON.ts" />
 
 describe('Context', () => {
 
 	var fs = require('fs');
 	var path = require('path');
-
-	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
 
 	describe('Paths', () => {
 		var paths:tsd.Paths;
@@ -21,79 +16,49 @@ describe('Context', () => {
 		//more in Context
 	});
 
-	describe('Config', () => {
-		var cfg:tsd.Config;
-		it('is defined as function', () => {
-			assert.isFunction(tsd.Config);
-		});
-		//more in Context
-	});
-
-	describe('PackageJSON', () => {
-		var info:xm.PackageJSON;
-		it('is defined as function', () => {
-			assert.isFunction(xm.PackageJSON);
-		});
-		describe('local', () => {
-			it('should return instance', () => {
-				info = xm.PackageJSON.getLocal();
-				assert.isObject(info, 'info');
-			});
-			it('should have properties', () => {
-				assert.isString(info.name, 'name');
-				assert.isString(info.version, 'version');
-				assert.isObject(info.raw, 'pkg');
-			});
-		});
-		//more in Context
-	});
-
 	describe('Context', () => {
 
-		it('is defined as function', () => {
-			assert.isFunction(tsd.Context);
+		var ctx:tsd.Context;
+		beforeEach(() => {
+			ctx = new tsd.Context();
+		});
+		afterEach(() => {
+			ctx = null;
 		});
 
-		describe('default', () => {
+		it('is instance', () => {
+			assert.isObject(ctx);
+		});
 
-			var ctx:tsd.Context;
-			var configSchema:any;
+		it('exports packageInfo', () => {
+			assert.isObject(ctx.packageInfo, 'packageInfo');
+			assert.instanceOf(ctx.packageInfo, xm.PackageJSON, 'config');
+			assert.isString(ctx.packageInfo.name, 'name');
+			assert.isString(ctx.packageInfo.version, 'version');
+			assert.isObject(ctx.packageInfo.raw, 'pkg');
+		});
+		it('exports valid paths', () => {
+			assert.isObject(ctx.paths, 'paths,');
+			assert.isDirectory(ctx.paths.startCwd, 'startCwd');
 
-			before(() => {
-				configSchema = xm.FileUtil.readJSONSync('schema/tsd-config_v4.json');
-				ctx = new tsd.Context();
-			});
-			it('is instance', () => {
-				assert.ok(ctx);
-			});
-			it('exports packageInfo', () => {
-				assert.isObject(ctx.packageInfo, 'packageInfo');
-				assert.isString(ctx.packageInfo.name, 'name');
-				assert.isString(ctx.packageInfo.version, 'version');
-				assert.isObject(ctx.packageInfo.raw, 'pkg');
-			});
-			it('exports valid paths', () => {
-				assert.isObject(ctx.paths, 'paths,');
-				assert.isDirectory(ctx.paths.startCwd, 'startCwd');
+			/*if (fs.existsSync(ctx.paths.config)) {
+			 assert.jsonSchemaFile(ctx.paths.config, configSchema, 'config');
+			 }*/
 
-				/*if (fs.existsSync(ctx.paths.config)) {
-					assert.jsonSchemaFile(ctx.paths.config, configSchema, 'config');
-				}*/
-
-				// TODO assert writability when assertion is implemented in chai-fs
-			});
-			it('exports config', () => {
-				assert.isObject(ctx.config, 'config');
-				assert.isString(ctx.config.typingsPath, 'typingsPath');
-				assert.isString(ctx.config.version, 'version');
-				assert.isString(ctx.config.repo, 'repo');
-				assert.isString(ctx.config.ref, 'ref');
-				//assert.isObject(ctx.config.installed, 'installed');
-			});
-			it('is valid', () => {
-				var base = xm.FileUtil.readJSONSync('./test/fixtures/config/default.json');
-				helper.assertConfig(ctx.config, base, 'default');
-			});
+			// TODO assert writability when assertion is implemented in chai-fs
+		});
+		it('exports config', () => {
+			assert.isObject(ctx.config, 'config');
+			assert.instanceOf(ctx.config, tsd.Config, 'config');
+			assert.isString(ctx.config.typingsPath, 'typingsPath');
+			assert.isString(ctx.config.version, 'version');
+			assert.isString(ctx.config.repo, 'repo');
+			assert.isString(ctx.config.ref, 'ref');
+			//assert.isObject(ctx.config.installed, 'installed');
+		});
+		it('has valid default', () => {
+			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/default.json');
+			helper.assertConfig(ctx.config, json, 'default');
 		});
 	});
 });

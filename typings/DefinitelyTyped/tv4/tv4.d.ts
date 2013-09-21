@@ -12,6 +12,9 @@ interface TV4Error {
 interface TV4ErrorCodes {
     [key:string]:number;
 }
+interface TV4SchemaMap {
+	[uri:string]:any;
+}
 interface TV4BaseResult {
     missing:string[];
     valid:bool;
@@ -27,10 +30,17 @@ interface TV4 {
     validateResult(data:any, schema:any):TV4SingleResult;
     validateMultiple(data:any, schema:any):TV4MultiResult;
 
-    addSchema(url, schema):bool;
-    getSchema(url):any;
-    normSchema(schema, baseUri):any;
-    resolveUrl(base, href):string;
+    addSchema(uri:string, schema:any):bool;
+    getSchema(uri:string):any;
+    normSchema(schema:any, baseUri):any;
+    resolveUrl(base:string, href:string):string;
+	freshApi():TV4;
+	dropSchemas():void;
+	reset():void;
+
+	getMissingUris(exp?:RegExp):string[];
+	getSchemaUris(exp?:RegExp):string[];
+	getSchemaMap():TV4SchemaMap;
 
     errorCodes:TV4ErrorCodes;
 

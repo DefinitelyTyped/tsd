@@ -1,6 +1,6 @@
 # TSD 0.5.x TODO
 
-> Tracking work that needs to be done
+> Big list of things that should be done.
 
 See the [INFO.md](INFO.md) for project development info.
 
@@ -14,64 +14,146 @@ Browse the code in `/src` and `/test` for `//TODO` comments,
 
 Or use `$ grunt todos` for an overview. :point_left::+1:
 
-:warning: Most (but not all) of these are file/class/block 'local' changes so easy to fix without conflicts (filling out prototype stuff, hardening, re-implement etc), note: some are more important then others.
+:warning: Most (but not all) of these are file/class/block 'local' changes so easy to fix without conflicts (hardening, re-implement etc). note: some are more important then others.
 
 ## Global / multi-file changes:
 
-Must fix:
+### Commands
 
-* [ ] Improve tests for API
-* [ ] Improve tests for CLI
-* [ ] Improve tests for modules, parts and utils
-* -
-* [x] Decide on caching directory: home / AppData like npm
-* [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
-* [x] Change Context objects to use Q/Q-io and not auto-create folders at init until properly configured.
-* [ ] Add skip features to raw.github; enforced for testing from local fixtures. 
-* [x] Fix tsd global bin/cli, test using `$ npm install . -g`
-* -
-* [ ] Add some options and unify their names (both for CLI as API)
-* [ ] Add selection-match-count limiter so user don't accidentally bust their rate limit using `tsd history  *` etc.
-* [ ] Build solution to update TSDPM.com: use tsd's module api and authenticated github and a DefinitelyTyped github hook to the heroku app.
-* [ ] Verify correct promise error handling (in mid-flow, at end of api & cli ~~and in tests~~)
-* [ ] Add option for file overwrite (always on now)
+Basics commands
 
-Should fix:
+* [x] Add help (show commands) 
+* [x] Add version (show version)
+* [ ] Add init (new json with repo/branch)
+* [x] Add settings (show config info)
+* [ ] Consider unifying local/remote selectors (tricky)
 
-* [ ] Add support for multiple Selectors 
-* [ ] Add option for dependency install (always on now)
-* [ ] Add InfoMatcher to Selector / select()
-* [ ] Add search-by-date to history-command, add as DateMatcher to Selector / select()
-* [ ] Add remove/uninstall command
-* [ ] Add list command / option (display compact result listing for repo overview)
-* [ ] Add manual purge/flush-command
-* [ ] Add periodic automated purge/flush
-* [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* [ ] Add command for (re) initialisation of config (when you want to start in non-default branch etc)  
-* [x] Import tests for header parser from tsd-deftools @bartvds
-* [ ] Improve / harden DefInfo/Parser to extract more info, from more files
-* [ ] Add a global store for JSON pointers and RegExps etc
-* [ ] Decide if API and/or Core etc need a queue-sytem hardening (module use might (partially) be race condition unsafe)
-* [x] Improve Expose for crisper CLI help screen layout (table/columns)
-* [ ] Add npm pre-publish tests
-* [ ] Update config's JSON-Schema and improve validation reporting
-* [ ] Sweep used modules: require() and package.json
-* [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
-* [ ] Sweep and optimise reference-paths, but how?
-* [ ] Verify "use strict" (needed in node?)
-* [ ] Consider adding timeouts?
-* [ ] Clean package.json: fix ~tildes before release, dev vs runtime, npm prune
-* [ ] Add TSD release/updates news to CLI console (periodically pull package.json from github)
+Remote selector commands
 
-Could fix:
+* [x] Add search (search definitions)
+* [x] Add install (install definitions)
+* [x] Add info (parse file content)
+* [x] Add history (list commit history)
+* [ ] Add details (detailed commit history), needed?
+* [ ] Enhance deps (list dependencies), make recursive and display
 
-* [ ] Consider g-zip for caches
-* [ ] Consider splitting Core.ts: index/select stuff vs helper methods/objects
-* [ ] Check for missing extra commands (compare etc)
-* [ ] Add property locking: Object.freeze() etc to data objects; ditch getters-only private vars for freeze/read-only. (partially implemented using `xm.ObjectUtils`)
+Local selector commands
+
+* [ ] Add local (search local files)
+* [ ] Add uninstall (remove local files)
+* [ ] Add compare (check for updates)
+* [ ] Add update (apply updates)
+
+Browser commands
+
 * [ ] Add feature to open a browser to see the pages on github? (diffs, comments etc)
 * [ ] Add feature to open a browser at a project's url (from info)
+
+Cache commands
+
+* [ ] Add purge (or flush)
+
+Selector
+
+* [ ] Add support for semver
+* [ ] Add support for multiple Selectors (blend results in select())
+* [ ] Add InfoMatcher to Selector / select()
+* [ ] Add search-by-date to history-command, add as DateMatcher to Selector / select()
+
+Command options
+
+* [ ] Design / document options and unify the names (both for CLI as API)
+* [ ] Add option for file overwrite (always on now)
+* [ ] Add a compact vs detailed option (for search listings or history)
+* [ ] Add option for dependency install (always on now)
+* [ ] Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `tsd history  *` etc
+* [ ] .... more
+
+Functionality
+
+* [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * [ ] Add fancy promise progress events + cli display (install etc)
-* [ ] Improve blob cache by always resolving commit sha to blob in history and cache the blob/commit mappings. 
+
+CLI
+
+* [x] Improve Expose for crisper CLI help screen layout (table/columns)
+* [ ] Improve Expose to order/group commands
+* [ ] Optimise and unify CLI output (indenting/seperator/headers etc) 
+* [ ] Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/)
+* [ ] Add TSD release/updates news to CLI console (periodically pull json from github)
+
+API
+
+* [ ] Export docs during build
+* [ ] Export TypeScript definitions
+* [ ] Consider optimising JavaScript API (less OO-ish)
+* [ ] Add options to authenticate to github API for higher rate-limit
+
+Data model
+
+* [ ] Add some stand-alone tests for the basics
+
+Info
+
+* [x] Import tests for header parser from tsd-deftools @bartvds
+* [ ] Improve DefInfo/Parser to extract more info from more files
+
+Config
+
+* [ ] Rename 'ref' to 'branch' (everywhere..)
+* [x] Improve config JSON-Schema
+* [ ] Improve config validation reporting (see tv4, chai-json-schema)
+
+Cache
+
+* [x] Decide on caching directory: home / AppData like npm
+* [ ] Decide on cache folder version naming scheme
+* [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
+* [ ] Add periodic automated cache purge/flush
+* [x] Add skip features to loaders; enforce for testing from local fixtures. 
+* [ ] Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
+* [ ] Consider g-zip for caches
+
+Internals
+
+* [ ] Try recalculating sha1 hash from content
+* [ ] Add local-changes detector using the hash / sha
+* [ ] Consider adding timeouts
+* [x] Change Context objects to use Q/Q-io and not auto-create folders at init
+* [ ] Decide if API, Core etc need(more) race condition hardening
+* [ ] Consider global store for JSON pointers and RegExps etc
+* [ ] Consider splitting Core.ts: index/select stuff vs helper methods/objects
+
+Technical
+
+* [ ] Decide on property immutability: Object.freeze()
+* [ ] Ditch getters + private vars for freeze (`xm.ObjectUtils`)
+* [ ] Unify `xm.StatCounter` & `xm.Logger` into event tracker
+* [ ] Add xm interface for debug/log/event tracking
+* [ ] Verify "use strict" (needed in node?)
+
+Cleanup
+
+* [ ] Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune
+* [ ] Sweep used modules: require() and `package.json`
+* [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
+* [ ] Sweep and optimise reference-paths (but how?)
+
+Publishing
+
+* [ ] Add npm pre-publish tests
+* [ ] Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
+* [ ] Decide & sweep title/description text (package.json, cli/api, github etc)
+* [ ] Find solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
+* [x] Fix bin/cli `$ npm install . -g` 
+* [x] Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
+* [ ] Compile a build number + date into application
+
+Dependencies
+
+* [ ] Drop underscore?
+* [ ] Add tests for any recent xm `package changes
+
+More.. always more.
 
 

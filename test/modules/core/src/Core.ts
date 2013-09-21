@@ -8,8 +8,6 @@ describe('Core', () => {
 	var fs = require('fs');
 	var path = require('path');
 
-	var _:UnderscoreStatic = <UnderscoreStatic>require('underscore');
-
 	var core:tsd.Core;
 	var context:tsd.Context;
 
@@ -24,9 +22,6 @@ describe('Core', () => {
 		context = null;
 		core = null;
 	});
-
-	var forceUpdate = false;
-	var allowUpdate = false;
 
 	function getCore(context:tsd.Context):tsd.Core {
 		var core = new tsd.Core(context);
@@ -43,37 +38,42 @@ describe('Core', () => {
 			core = getCore(null);
 		});
 	});
-	
+
 	describe('readConfig', () => {
+
+		function testConfig(path:string):Qpromise {
+			context.paths.configFile = path;
+			var source = xm.FileUtil.readJSONSync(path);
+
+			core = getCore(context);
+			return core.readConfig(false).then(() => {
+				helper.assertConfig(core.context.config, source, 'source data');
+			});
+		}
+
+		function testInvalidConfig(path:string, exp:RegExp):Qpromise {
+			context.paths.configFile = path;
+			core = getCore(context);
+			return assert.isRejected(core.readConfig(false), exp);
+		}
+		it('should load minimal config data', () => {
+			return testConfig('./test/fixtures/config/default.json');
+		});
+		it('should load minimal config data', () => {
+			return testConfig('./test/fixtures/config/valid-minimal.json');
+		});
+
+		it('should fail on missing required data', () => {
+			return testInvalidConfig('./non-existing/tsd-config.json', /^cannot locate file:/);
+		});
+		it('should fail on bad version value', () => {
+			return testInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config:/);
+		});
+
 		it('should pass on missing optional data', () => {
 			context.paths.configFile = './non-existing/tsd-config.json';
 			core = getCore(context);
 			return assert.isFulfilled(core.readConfig(true));
-		});
-		it('should fail on missing required data', () => {
-			context.paths.configFile = './non-existing/tsd-config.json';
-			core = getCore(context);
-			return assert.isRejected(core.readConfig(false), /^cannot locate file:/);
-		});
-		it('should fail on missing typingsPath value', () => {
-			context.paths.configFile = './test/fixtures/config/missing-typingsPath.json';
-			core = getCore(context);
-			return assert.isRejected(core.readConfig(false), /^malformed config:/);
-		});
-		it('should fail on bad version value', () => {
-			context.paths.configFile = './test/fixtures/config/invalid-version.json';
-			core = getCore(context);
-			return assert.isRejected(core.readConfig(false), /^malformed config:/);
-		});
-		it('should load config data', (done) => {
-			context.paths.configFile = './test/fixtures/config/valid-alt.json';
-			var source = xm.FileUtil.readJSONSync(context.paths.configFile);
-
-			core = getCore(context);
-			core.readConfig(false).then(() => {
-				helper.assertConfig(core.context.config, source, 'source data');
-				done();
-			}).done(null, done);
 		});
 	});
 	describe('saveConfig', () => {
@@ -106,6 +106,7 @@ describe('Core', () => {
 				return xm.FileUtil.readJSONPromise(context.paths.configFile);
 			}).then((json) => {
 				assert.like(json, changed, 'saved data json');
+				assert.jsonSchema(json, helper.configSchema, 'saved valid json');
 				return null;
 			});
 		});

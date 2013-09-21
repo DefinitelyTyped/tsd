@@ -2,57 +2,35 @@
 
 > Some development notes that will help understanding how TDS 0.5.x is rebuild
 
-## Run it
-
-Currently TSD 0.5.x is heavy under development. Use a git checkout to run it:
-
-Pull dependencies:
-
-	$ npm install
-
-Build and test using grunt:
-
-	$ grunt test
-
-Build without running tests:
-
-	$ grunt build
-
-Use the test suite and/or a local checkout to develop. 
-
-To run the CLI use:
-
-	$ node ./build/cli.js <command>
-
-For a preview install the global `tsd` cli command from a git-checkout:
-
-	$ grunt build
-    $ npm install . -g
-	$ tsd -h
-    $ tsd <command>
-
-See the [TODO.md](TODO.md) document for info on where to find stuff to work on.
-
-See grunt help and for gtx commands:
-
-	$ grunt -h
-	$ grunt gtx:tsd
-	$ grunt gtx:git
-
 ## Main considerations:
 
-Use DefinitelyTyped's Github repos directly as data source
+### Problem with previous TSD (< 0.5)
 
-* Use the Github REST apis
-* Github API offers full access to Git and Repos data
-* Github API is rate limited to 60 request per hour unless authenticated
-* Github RAW gets file content and is not rate limited
+The separated data structure added complexity:
 
-Solution: 
+*	Maintaining a version history is problematic as sources change.
+*	Merging DefinitelyTyped data is not reliable when files are renamed improperly (untrackable).
+*	Offering support for other endpoints is adds complexity cost with low return.
+*	(Re-)install from local data-file information is unreliable as multiple layers of repository data change over time.
 
-* Use Github API only where necessary (index, history etc)
-* Get definition files from Github RAW
-* Cache Github API calls in a transparent, system wide cache
+### Observation
+
+*	Not many users are adding items to TSD
+*	Automatically updating is troublesome and unreliable. 
+*	DefinitelyTyped is the de-facto community repository for TypeScript type definitions.
+
+### Solution
+
+Drop complications from technical and conceptual debt:
+
+*	Let go of separate data structure.
+*	Let go of multi source repository support.
+*	Simplify versioning responsibility.
+
+Use DefinitelyTyped's Github repos directly as data source:
+
+* Github **API** gets all repo data but is rate limited to **60 request per hour** unless authenticated.
+* Github **RAW** gets file content only (by commit+path) and is **not rate limited**.
 
 Complications:
 
@@ -62,11 +40,18 @@ Complications:
 * Using full commit-trees is undesirable as DefinitelyTyped has many commits and many files.
 * A commit + tree listing files is not necessary the commit that changed that specific file (it requires a more specific query).
 
-This sub-optimal but workable as the RAW api is not rate-limited: cache misses on identical blobs due to file name addressing on fast changing commit-sha's will only hurt bandwidth.
+Solution: 
+
+* Use Github API only where necessary (index, history etc)
+* Get definition files from Github RAW
+* Cache Github API calls in a transparent, system wide cache
+* It is possible to calculate a blob's sha1 hash from the [file content](http://stackoverflow.com/questions/552659/assigning-git-sha1s-without-git)
+
+This commit-sha based approach is sub-optimal but workable as the RAW api is not rate-limited: cache misses on identical blobs due to file name addressing on fast changing commit-sha's will only hurt bandwidth.
 
 ## Model
 
-Most classes and methods have a small comment hinting their use. 
+Most classes and methods have a small comment at the start of the declaration hinting their use. 
 
 Depends heavily on Promise's for async operation (using the excellent [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io).
  
@@ -109,7 +94,7 @@ Context and config model in `/tsd/context`
 Logical building blocks in `/tsd/logic`
 
 * `Core` has the reusable functionality used to compose main features (used by itself and `API` etc)
-	*  :point_right: Most of the interesting functionality happens here :point_left:
+	*  :point_right: Most of the interesting functionality is created here :point_left:
 	* Also holds the central `DefIndex`
 * Other files are split-of from `Core` for clarity 
 
@@ -118,8 +103,3 @@ Selector stuff `/tsd/select`
 * `Selector` and related data objects:
 	* `NameMatcher` matches the proejct/name-glob (needs expansion, see note in class)  
 
-## Tests
-
-The test suite is setup and has tests for some basics, but due to the rush to get the prototype it hasn't been updated as much as it should (as usual :).
-
-This is a big flaw, so is high on the priority list to fix (but should be easy know the main app structure is workable).
