@@ -3,7 +3,7 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-interface EasyTableStatic {
+declare interface EasyTableStatic {
 	new():EasyTable;
 	printArray(array:any[], cellPrinter?:EasyTableCellPrinter, tablePrinter?:EasyTablePrinter):string;
 	printObject(object:any, cellPrinter?:EasyTableCellPrinter, tablePrinter?:EasyTablePrinter):string;
@@ -14,7 +14,7 @@ interface EasyTableStatic {
 	LeftPadder(char:string):EasyTableCellPrinter;
 }
 
-interface EasyTable {
+declare interface EasyTable {
 	cell:EasyTableCell;
 	newRow():void;
 	toString():string;
@@ -26,15 +26,15 @@ interface EasyTable {
 
 	total(label:string, accumulator:EasyTableAccumulator, totalPrinter:EasyTableCellPrinter):void;
 }
-interface EasyTableCell extends Function {
+declare interface EasyTableCell extends Function {
 	(label:string, value:any, printer?:EasyTableCellPrinter, width?:number):void;
 }
-interface EasyTableCellPrinter extends Function{
+declare interface EasyTableCellPrinter extends Function{
 	(obj:any, cell:EasyTableCell):string;
 }
-interface EasyTablePrinter extends Function{
+declare interface EasyTablePrinter extends Function{
 	(table:EasyTable):string;
 }
-interface EasyTableAccumulator extends Function{
+declare interface EasyTableAccumulator extends Function{
 	(sum:number, val:number, index:number, length:number):number;
 }

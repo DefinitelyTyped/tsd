@@ -8,7 +8,6 @@ describe('Config', () => {
 	var fs = require('fs');
 	var path = require('path');
 
-	var configSchema:any;
 	var config:tsd.Config;
 
 	beforeEach(() => {
@@ -45,10 +44,11 @@ describe('Config', () => {
 	});
 	invalid.forEach((tuple) => {
 		it('rejects ' + tuple[0], () => {
-			xm.log(tuple[0]);
+			assert.lengthOf(tuple, 2, 'tuple');
+
 			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 			assert.throws(() => {
-				xm.log(json);
+				//xm.log(json);
 				config.parseJSON(json);
 			}, tuple[1]);
 		});

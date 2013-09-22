@@ -2,6 +2,7 @@
 ///<reference path="tsd/_ref.ts" />
 ///<reference path="tsd/API.ts" />
 ///<reference path="tsd/CLI.ts" />
+///<reference path="bootstrap.ts" />
 
 (module).exports = {
 	tsd: tsd,

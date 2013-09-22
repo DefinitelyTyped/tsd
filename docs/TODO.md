@@ -1,12 +1,16 @@
 # TSD 0.5.x TODO
 
-> Big list of things that should be done.
+> Big list of things that should/could be done.
 
-See the [INFO.md](INFO.md) for project development info.
+See the [INFO.md](INFO.md) for project info and the [README.md](../README.md) for usage and installation.
 
 ## Issues
 
 This info might later migrate to the Github Issue tracker.
+
+## Update docs
+
+Always text to edit in the README or docs.
 
 ## Local changes
 
@@ -14,7 +18,21 @@ Browse the code in `/src` and `/test` for `//TODO` comments,
 
 Or use `$ grunt todos` for an overview. :point_left::+1:
 
-:warning: Most (but not all) of these are file/class/block 'local' changes so easy to fix without conflicts (hardening, re-implement etc). note: some are more important then others.
+Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Note: some are more important then others (but which?).
+
+## Tests
+
+Never enough.
+
+* [ ] Expand API command testing; besides search/install (once update fixtures land)
+* [ ] Add CLI tests
+* [ ] Add node.js module tests
+* [ ] Consider testing JavaScript output instead of TypeScript source.
+
+Working on a way run data tests from fixtures that can be updated easily (otherwise decent coverage is insane to manage) 
+
+* [x] Run github api+raw caches from fixtures (with easy updates/expansion)
+* [ ] Run API tests from fixtures and stored comparison output (with easy updates/expansion)
 
 ## Global / multi-file changes:
 
@@ -55,6 +73,7 @@ Cache commands
 
 Selector
 
+* [ ] Improve globbing/RegExp
 * [ ] Add support for semver
 * [ ] Add support for multiple Selectors (blend results in select())
 * [ ] Add InfoMatcher to Selector / select()
@@ -91,7 +110,8 @@ API
 
 Data model
 
-* [ ] Add some stand-alone tests for the basics
+* [ ] Harden JSON import
+* [ ] Consider decoupling from Github json format?
 
 Info
 
@@ -103,6 +123,7 @@ Config
 * [ ] Rename 'ref' to 'branch' (everywhere..)
 * [x] Improve config JSON-Schema
 * [ ] Improve config validation reporting (see tv4, chai-json-schema)
+* [ ] Consider renaming 'tsd-config.json'
 
 Cache
 
@@ -154,6 +175,5 @@ Dependencies
 * [ ] Drop underscore?
 * [ ] Add tests for any recent xm `package changes
 
-More.. always more.
-
+More.. always more :rocket:
 

@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema",
-	"id": "tsd_config_v4-dev-0",
+	"id": "tsd_config_v4-dev-1",
 	"description": "TSD - TypeScript Definition Package Manager: config file",
 	"type": "object",
 	"required": ["version", "repo", "ref", "typingsPath"],
@@ -11,11 +11,11 @@
 		},
 		"repo": {
 			"type": "string",
-			"pattern": "^\\w[\\w_-]+?\\w/\\w[\\w_-]+?\\w$"
+			"pattern": "^\\w[\\w_-]*?\\w/\\w[\\w_-]*?\\w$"
 		},
 		"ref": {
 			"type": "string",
-			"pattern": "^\\w[\\w_\\.-]+?\\w$"
+			"pattern": "^\\w[\\w_\\.-]*?\\w$"
 		},
 		"typingsPath": {
 			"type": "string",
@@ -25,7 +25,7 @@
 			"type": "object",
 			"additionalProperties": false,
 			"patternProperties": {
-				"^\\w[\\w_\\.-]+?\\w/\\w[\\w_\\.-]+?\\w\\.d\\.ts$": {
+				"^\\w[\\w_\\.-]*?\\w/\\w[\\w_\\.-]*?\\w\\.d\\.ts$": {
 					"type": "object",
 					"required": ["commit", "hash"],
 					"properties": {

@@ -19,7 +19,6 @@ module git {
 	 GithubRawCached: get files from raw.github.com and cache on disk
 	 */
 	//TODO add pruning/clear feature
-	//TODO add skip-cache feature
 	export class GithubRawCached {
 
 		private _repo:git.GithubRepo;
@@ -74,7 +73,7 @@ module git {
 					}
 					this.stats.count('request-complete');
 					// according to the headers raw github is binary encoded, but from what? utf8?
-					//TODO find correct way to handle encoding type (low prio)
+					//TODO find correct way to handle encoding type
 					var content = String(res.body);
 					return content;
 				});

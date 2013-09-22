@@ -60,7 +60,7 @@ module tsd {
 			job.context = getContext(args);
 			job.api = new tsd.API(job.context);
 
-			// TODO parse more options
+			// TODO parse more options from args
 
 			var required:bool = (typeof args.config !== undefined ? true : false);
 			return job.api.readConfig(required).then(() => {
@@ -77,7 +77,7 @@ module tsd {
 			}
 
 			// TODO parse selector options from args
-			// TODO multiple selectors
+			// TODO support multiple selectors
 
 			job.selector = new Selector(args._[0]);
 			return job;

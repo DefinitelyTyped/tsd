@@ -171,7 +171,7 @@ module tsd {
 		 promise: DefVersion
 		 */
 		findFile(path:string, commitShaFragment:string):Qpromise {
-			//TODO implement partial commitSha lookup, tricky as it could be a random commit and not just an actual change)
+			//TODO implement partial commitSha lookup (github api does thi btu how do we track it?)
 			return Q.reject('implement me!');
 		}
 

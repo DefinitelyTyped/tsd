@@ -16,11 +16,6 @@ module tsd {
 	var Q:QStatic = require('q');
 	var tv4:TV4 = require('tv4').tv4;
 
-	//TODO mode this into more central spot, always-run?
-	require('source-map-support').install();
-	process.setMaxListeners(20);
-	Q.longStackSupport = true;
-
 	/*
 	 Context: bundles the configuration and core functionality
 	 */

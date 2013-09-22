@@ -35,10 +35,6 @@ describe('API', () => {
 		});
 	});
 
-	//enable this temporary to update fixtures
-	var allowUpdate = true;
-	var forceUpdate = true;
-
 	function getAPI(context:tsd.Context):tsd.API {
 		var api = new tsd.API(context);
 

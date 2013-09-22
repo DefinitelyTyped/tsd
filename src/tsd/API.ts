@@ -81,7 +81,7 @@ module tsd {
 			xm.assertVar('selector', selector, tsd.Selector);
 
 			//hardcode for now
-			//TODO make proper cli option
+			//TODO make resolveDependencies a proper cli option
 			selector.resolveDependencies = true;
 
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
@@ -90,7 +90,7 @@ module tsd {
 
 				var files:tsd.DefVersion[] = res.selection;
 
-				//TODO dependency merge should be optionals
+				//TODO dependency merge should be optional
 				files = tsd.DefUtil.mergeDependencies(files);
 
 				return this._core.installFileBulk(files).then((written:xm.IKeyValueMap) => {
@@ -99,7 +99,7 @@ module tsd {
 					}
 					res.written = written;
 
-					//TODO make saving optional
+					//TODO saving config should be optional
 					return this._core.saveConfig();
 
 				}).thenResolve(res);
@@ -165,7 +165,7 @@ module tsd {
 			return this._core.select(selector).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
 				res.definitions = tsd.DefUtil.getDefs(res.selection);
-				//TODO limit history to Selector's date filter?
+				//TODO limit history to Selector date filter?
 				return this._core.loadHistoryBulk(res.definitions).thenResolve(res);
 			});
 		}

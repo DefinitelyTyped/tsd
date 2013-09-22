@@ -2,6 +2,8 @@
 
 > Some development notes that will help understanding how TDS 0.5.x is rebuild
 
+See the [TODO.md](TODO.md) for things to do and the [README.md](../README.md) for usage and installation.
+
 ## Main considerations:
 
 ### Problem with previous TSD (< 0.5)

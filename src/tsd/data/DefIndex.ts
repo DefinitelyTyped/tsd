@@ -15,7 +15,7 @@ module tsd {
 
 	 for now loosely coupled to the github api version, might be possible to de-couple, at least from the format version (but not really worth it?)
 	 */
-	//TODO consider cutting coupling with github api fomat or at least verifying more (low prio)
+	//TODO consider cutting coupling with github api fomat or at least verify more
 	export class DefIndex {
 
 		private _branchName:string = null;
@@ -207,7 +207,7 @@ module tsd {
 				throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
 			}
 			if (!commit.hasMetaData()) {
-				//TODO always load meta data? meh?
+				//TODO always load meta data? meh? waste of requests?
 			}
 			var file:tsd.DefVersion = this.procureVersion(def, commit);
 			if (!file) {

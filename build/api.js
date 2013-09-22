@@ -977,9 +977,6 @@ var tsd;
     var assert = require('assert');
     var Q = require('q');
     var tv4 = require('tv4').tv4;
-    require('source-map-support').install();
-    process.setMaxListeners(20);
-    Q.longStackSupport = true;
     var Context = (function () {
         function Context(configFile, verbose) {
             if (typeof configFile === "undefined") { configFile = null; }
@@ -4237,6 +4234,11 @@ var tsd;
     }
     tsd.runARGV = runARGV;
 })(tsd || (tsd = {}));
+'use strict';
+var Q = require('q');
+Q.longStackSupport = true;
+require('source-map-support').install();
+process.setMaxListeners(20);
 (module).exports = {
     tsd: tsd,
     xm: xm,

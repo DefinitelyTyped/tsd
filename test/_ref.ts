@@ -10,6 +10,8 @@
 ///<reference path="helper.ts" />
 ///<reference path="../src/xm/io/Logger.ts" />
 
+///<reference path="../src/bootstrap.ts" />
+
 //declare var assert:chai.Assert;
 
 var mkdirp = require('mkdirp');
@@ -23,7 +25,6 @@ chai.Assertion.includeStack = true;
 var assert:chai.Assert = chai.assert;
 declare var helper:helper;
 require('mocha-as-promised')();
-require('source-map-support').install();
 
 before(() => {
 	// create some empty dirs (cannot check-in empty dirs to git)

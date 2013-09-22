@@ -1,6 +1,6 @@
 // Type definitions for Q-io filesystem
-// Project: https://github.com/kriskowal/q
-// Definitions by: Bart van der Schoor
+// Project: https://github.com/kriskowal/q-io
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 interface Qfs {

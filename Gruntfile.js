@@ -30,7 +30,7 @@ module.exports = function (grunt) {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
 				reporter: './node_modules/jshint-path-reporter'
 			}),
-			support: ['Gruntfile.js', 'tasks/*.js', 'test/*.js'],
+			support: ['Gruntfile.js', 'tasks/**/*.js', 'test/*.js', 'lib/**/*.js'],
 			fixtures: ['test/**/fixtures/**/*.js']
 		},
 		tslint: {
@@ -137,8 +137,9 @@ module.exports = function (grunt) {
 			},
 			src: [testPath + 'tmp/**/*.test.js']
 		});
-		macro.tag('test');
 		macro.tag('module');
+	}, {
+		concurrent: 3
 	});
 
 	// assemble!
@@ -147,8 +148,8 @@ module.exports = function (grunt) {
 	// cli commands
 	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'typescript:cli', 'copy:cli', 'tslint:source', 'mochaTest:integrity']);
 
-	gtx.alias('test', ['build', 'gtx-group:test']);
-	gtx.alias('default', 'test');
+	gtx.alias('test', ['build', 'gtx-type:moduleTest']);
+	gtx.alias('default', ['build', 'test']);
 
 	var longTimer = (isVagrant ? 250000 : 5000);
 
