@@ -1,6 +1,9 @@
 ///<reference path="../../../_ref.ts" />
 ///<reference path="../../../../src/git/GithubRawCached.ts" />
 ///<reference path="../../../../src/tsd/context/Context.ts" />
+///<reference path="helper.ts" />
+
+declare var gitTest;
 
 describe('git.GithubRawCached', () => {
 
@@ -10,15 +13,13 @@ describe('git.GithubRawCached', () => {
 	var repo:git.GithubRepo;
 
 	var path = require('path');
-	var cacheDir;
+	var cacheDir:string;
 
 	beforeEach(() => {
-		context = new tsd.Context();
-		context.paths.cacheDir = path.resolve(__dirname, tsd.Const.cacheDir);
+		//use clean tmp folder in this test module
+		cacheDir = path.join(gitTest.cacheDir, 'git_raw');
 
-		cacheDir = path.join(context.paths.cacheDir, 'git_raw');
-		repo = new git.GithubRepo(context.config.repoOwner, context.config.repoProject);
-
+		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		raw = new git.GithubRawCached(repo, cacheDir);
 	});
 	afterEach(() => {
@@ -44,8 +45,8 @@ describe('git.GithubRawCached', () => {
 
 	describe('getFile', () => {
 
-		var filePath = 'async/async.d.ts';
-		var commitSha = '1eab71a53a7df593305bd9b8b27cb752cc045417';
+		var filePath = gitTest.config.api.getFile.filePath;
+		var commitSha = gitTest.config.api.getFile.blobSha;
 
 		it('should cache and return data', () => {
 			//raw.debug = true;

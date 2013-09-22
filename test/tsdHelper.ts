@@ -154,8 +154,8 @@ module helper {
 		assert.instanceOf(file, tsd.DefVersion, message + ': file');
 
 		if (values.commitSha) {
-			formatSHA1(file.commit.commitSha, message + ': file.commit.commitSha');
-			formatSHA1(values.commitSha, message + ': values.commitSha');
+			helper.isStringSHA1(file.commit.commitSha, message + ': file.commit.commitSha');
+			helper.isStringSHA1(values.commitSha, message + ': values.commitSha');
 			assert.strictEqual(file.commit.commitSha, values.commitSha, message + ': file.commit.commitSha');
 		}
 		if (values.content) {

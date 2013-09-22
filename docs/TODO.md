@@ -18,7 +18,7 @@ Browse the code in `/src` and `/test` for `//TODO` comments,
 
 Or use `$ grunt todos` for an overview. :point_left::+1:
 
-Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Note: some are more important then others (but which?).
+Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Note: some are more important then others (but which ones? :smiley_cat:)
 
 ## Tests
 
@@ -149,7 +149,7 @@ Technical
 
 * [ ] Decide on property immutability: Object.freeze()
 * [ ] Ditch getters + private vars for freeze (`xm.ObjectUtils`)
-* [ ] Unify `xm.StatCounter` & `xm.Logger` into event tracker
+* [ ] Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects)
 * [ ] Add xm interface for debug/log/event tracking
 * [ ] Verify "use strict" (needed in node?)
 
@@ -163,6 +163,7 @@ Cleanup
 Publishing
 
 * [ ] Add npm pre-publish tests
+* [ ] Add git pre-publish tests
 * [ ] Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
 * [ ] Decide & sweep title/description text (package.json, cli/api, github etc)
 * [ ] Find solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.

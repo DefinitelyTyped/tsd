@@ -1,0 +1,13 @@
+{
+	"repo": {
+		"owner": "borisyankov",
+		"project": "DefinitelyTyped",
+		"ref": "master"
+	},
+	"api": {
+		"getFile": {
+			"filePath": "async/async.d.ts",
+			"blobSha": "1eab71a53a7df593305bd9b8b27cb752cc045417"
+		}
+	}
+}

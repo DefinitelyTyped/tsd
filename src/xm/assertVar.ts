@@ -42,12 +42,13 @@ module xm {
 		var valueKind = xm.typeOf(value);
 		var typeKind = xm.typeOf(type);
 
+		var opts = [];
 		var typeStrim = xm.toValueStrim(type);
 
 		// undefined or null
 		if (valueKind === 'undefined' || valueKind === 'null') {
 			if (!opt) {
-				throw new Error('expected "' + label + '" to be defined but got "' + value + '"');
+				throw new Error('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
 			}
 		}
 		else if (typeKind === 'function') {

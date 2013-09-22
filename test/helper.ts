@@ -47,12 +47,12 @@ module helper {
 		xm.log(message + JSON.stringify(object, null, 4));
 	}
 
-	export function formatSHA1(value:any, msg?:string) {
+	export function isStringSHA1(value:any, msg?:string) {
 		assert.isString(value, msg);
 		assert.match(String(value), shaRegExp, msg);
 	}
 
-	export function formatMD5(value:any, msg?:string) {
+	export function isStringMD5(value:any, msg?:string) {
 		assert.isString(value, msg);
 		assert.match(String(value), md5RegExp, msg);
 	}
