@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/xm/io/URLManager.ts" />
 
 describe('xm.URLManager', () => {
+	'use strict';
 
 	var urls:xm.URLManager;
 	var expected:string;
@@ -18,18 +19,14 @@ describe('xm.URLManager', () => {
 
 	describe('setVar()', () => {
 		it('should be defined', () => {
-			assert.doesNotThrow(()=> {
-				urls.setVar('sub', 'some');
-			});
+			urls.setVar('sub', 'some');
 			assert.strictEqual(urls.getVar('sub'), 'some');
 		});
 	});
 
 	describe('addTemplate()', () => {
 		it('should add template', () => {
-			assert.doesNotThrow(()=> {
-				urls.addTemplate('main', 'https://example.com/{name}/{value}/{sub}');
-			});
+			urls.addTemplate('main', 'https://example.com/{name}/{value}/{sub}');
 			assert.ok(urls.getTemplate('main'));
 		});
 	});

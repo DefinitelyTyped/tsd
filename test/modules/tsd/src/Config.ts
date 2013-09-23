@@ -4,6 +4,7 @@
 ///<reference path="../../../../src/tsd/context/Config.ts" />
 
 describe('Config', () => {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -34,16 +35,15 @@ describe('Config', () => {
 		['path-no-type', /^malformed config:/]
 	];
 	valid.forEach((name) => {
-		it('parses ' + name, () => {
+		it('parses "' + name + '"', () => {
 			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + name + '.json');
-			assert.doesNotThrow(() => {
-				config.parseJSON(json);
-			}, 'parse');
+
+			config.parseJSON(json);
 			helper.assertConfig(config, json, name);
 		});
 	});
 	invalid.forEach((tuple) => {
-		it('rejects ' + tuple[0], () => {
+		it('rejects "' + tuple[0] + '"', () => {
 			assert.lengthOf(tuple, 2, 'tuple');
 
 			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');

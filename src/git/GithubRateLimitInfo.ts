@@ -1,9 +1,8 @@
-
 ///<reference path="../xm/typeOf.ts" />
-
+///<reference path="../xm/ObjectUtil.ts" />
 
 module git {
-
+	'use strict';
 
 	export class GitRateLimitInfo {
 
@@ -17,10 +16,10 @@ module git {
 
 		readFromRes(response:any) {
 			if (response && xm.isObject(response.meta)) {
-				if (response.meta.hasOwnProperty('x-ratelimit-limit')) {
+				if (xm.ObjectUtil.hasOwnProp(response.meta, 'x-ratelimit-limit')) {
 					this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
 				}
-				if (response.meta.hasOwnProperty('x-ratelimit-remaining')) {
+				if (xm.ObjectUtil.hasOwnProp(response.meta, 'x-ratelimit-remaining')) {
 					this.remaining = parseInt(response.meta['x-ratelimit-remaining'], 10);
 				}
 				this.lastUpdate = new Date();

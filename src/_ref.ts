@@ -5,4 +5,3 @@
 ///<reference path="../typings/DefinitelyTyped/tv4/tv4.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/underscore/underscore.d.ts" />
 ///<reference path="../typings/DefinitelyTyped/colors/colors.d.ts" />
-

@@ -5,26 +5,46 @@
 		"curly": true,
 		"debug": true,
 		"dupkey": true,
-		"eofline": false,
-		"eqeqeq": true,
+		"duplicate-variable": false,
+		"eofline": true,
+		"eqeqeq": [true, "allow-null-check"],
 		"evil": true,
-		"forin": true,
-		"___indent": [false, 4],
+		"forin": false,
+		"indent": [true, 4],
 		"labelpos": true,
-		"labelundef": true,
-		"__maxlen should be lower__": "but legacy code",
-		"maxlen": [true, 280],
+		"label-undefined": true,
+		"maxlen": [true, 240],
 		"noarg": true,
-		"noconsole": [true, "debug, info, time, timeEnd, trace"],
+		"noconsole": [true,
+			"debug",
+			"info",
+			"time",
+			"timeEnd",
+			"trace"
+		],
 		"noconstruct": true,
+		"nounreachable": true,
 		"noempty": false,
-		"oneline": [false, "check-whitespace"],
+		"oneline": [true,
+			"check-open-brace",
+			"check-whitespace"
+		],
 		"quotemark": [true, "single"],
 		"radix": true,
 		"semicolon": true,
-		"sub": false,
+		"sub": true,
 		"trailing": true,
 		"varname": false,
-		"whitespace": false
+		"_____________________": {
+			"whitespace": [
+				"check-separator",
+				"check-type"
+			]
+		},
+		"whitespace": [true,
+			"check-branch",
+			"check-decl",
+			"check-operator"
+		]
 	}
 }

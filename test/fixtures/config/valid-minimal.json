@@ -1,6 +1,6 @@
 {
-  "typingsPath": "aaa/bbb/ccc",
+  "typingsPath": "a/b/c",
   "version": "v4",
-  "repo": "abc/xyz",
-  "ref": "uwv"
+  "repo": "a/x",
+  "ref": "u"
 }

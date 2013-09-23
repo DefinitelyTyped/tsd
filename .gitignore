@@ -16,5 +16,6 @@ tsd.sln
 _tmp.*
 
 tmp/
+dump/
 
 /*.tgz

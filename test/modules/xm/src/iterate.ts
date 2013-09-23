@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/xm/iterate.ts" />
 
 describe('xm.iterate', () => {
+	'use strict';
 
 	describe('eachElem()', () => {
 		it('should iterate all elements', () => {

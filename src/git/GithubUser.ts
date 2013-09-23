@@ -1,6 +1,7 @@
 ///<reference path="GitCommitUser.ts" />
 
 module git {
+	'use strict';
 
 	//single user on Github (with profilem gravatar etc)
 	export class GithubUser {

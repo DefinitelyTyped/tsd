@@ -15,6 +15,7 @@
 ///<reference path="Resolver.ts" />
 
 module tsd {
+	'use strict';
 
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
@@ -290,14 +291,23 @@ module tsd {
 
 		/*
 		 lazy load a single DefVersion file content
-		 promise: DefVersion; with raw .content loaded
+		 promise: DefVersion; with raw .blob loaded
 		 */
 		loadContent(file:tsd.DefVersion):Qpromise {
-			if (file.content) {
-				return Q(file.content);
+			if (file.hasContent()) {
+				return Q(file.blob.content);
 			}
 			return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then((content) => {
-				file.content = String(content);
+				var sha = git.GitUtil.blobSHAHex(content);
+				if (file.blob) {
+					// race
+					if (!file.blob.hasContent()) {
+						file.blob.setContent(content);
+					}
+				}
+				else {
+					file.setContent(this.index.procureBlobFor(content));
+				}
 				return file;
 			});
 		}
@@ -372,14 +382,14 @@ module tsd {
 					file.info = new tsd.DefInfo();
 				}
 
-				parser.parse(file.info, file.content);
+				parser.parse(file.info, file.blob.content.toString('utf8'));
 
 				if (!file.info.isValid()) {
 					this.log.warn('bad parse in: ' + file);
 					//TODO print more debug info
 				}
 				return file;
-			});//.thenResolve(file);
+			}); //.thenResolve(file);
 		}
 
 		/*
@@ -418,7 +428,7 @@ module tsd {
 					}
 					return xm.mkdirCheckQ(dir, true);
 				}).then(() => {
-					return FS.write(targetPath, file.content);
+					return FS.write(targetPath, file.blob.content);
 				}).then(() => {
 					//return the target path
 					return targetPath;

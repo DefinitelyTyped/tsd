@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/xm/RegExpGlue.ts" />
 
 describe('xm.RexExpGlue', () => {
+	'use strict';
 
 	var exp:xm.RegExpGlue;
 	var e:RegExp;

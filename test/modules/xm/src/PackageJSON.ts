@@ -1,7 +1,9 @@
 ///<reference path="../../../_ref.ts" />
 ///<reference path="../../../../src/xm/data/PackageJSON.ts" />
 
-describe('PackageJSON', () => {
+describe('xm.PackageJSON', () => {
+	'use strict';
+
 	var info:xm.PackageJSON;
 	it('is defined as function', () => {
 		assert.isFunction(xm.PackageJSON);

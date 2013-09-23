@@ -8,7 +8,9 @@
 
 ///<reference path="../../_ref.ts" />
 ///<reference path="../KeyValueMap.ts" />
+///<reference path="../ObjectUtil.ts" />
 module xm {
+	'use strict';
 
 	var uriTemplates:URLTemplateParser = require('uri-templates');
 
@@ -26,7 +28,7 @@ module xm {
 	export class URLManager {
 
 		private _templates:xm.KeyValueMap = new xm.KeyValueMap();
-		private _vars:any = {};
+		private _vars:xm.KeyValueMap = new xm.KeyValueMap();
 
 		constructor(common?:any) {
 			if (common) {
@@ -42,14 +44,11 @@ module xm {
 		}
 
 		public setVar(id:string, value:any):void {
-			this._vars[id] = '' + value;
+			this._vars.set(id, value);
 		}
 
 		public getVar(id:string):string {
-			if (this._vars.hasOwnProperty(id)) {
-				return this._vars[id];
-			}
-			return null;
+			return this._vars.get(id, null);
 		}
 
 		public setVars(map:any):void {
@@ -69,21 +68,16 @@ module xm {
 
 		public getURL(id:string, vars?:any):string {
 			if (vars) {
-				var obj = {};
 				var name;
-				for (name in this._vars) {
-					if (this._vars.hasOwnProperty(name)) {
-						obj[name] = this._vars[name];
-					}
-				}
+				var obj = this._vars.export();
 				for (name in vars) {
-					if (vars.hasOwnProperty(name)) {
+					if (xm.ObjectUtil.hasOwnProp(vars, name)) {
 						obj[name] = vars[name];
 					}
 				}
 				return this.getTemplate(id).fillFromObject(obj);
 			}
-			return this.getTemplate(id).fillFromObject(this._vars);
+			return this.getTemplate(id).fillFromObject(this._vars.export());
 		}
 	}
 }

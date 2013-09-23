@@ -6,6 +6,7 @@
  * License: MIT - 2013
  * */
 module xm {
+	'use strict';
 
 	var endSlashTrim = /\/?$/;
 

@@ -1,4 +1,6 @@
 module xm {
+	'use strict';
+
 	function pad(number) {
 		var r = String(number);
 		if (r.length === 1) {

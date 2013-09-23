@@ -6,6 +6,7 @@
  * License: MIT - 2013
  * */
 module xm {
+	'use strict';
 	/*
 	 StatCounter: manages named numeric counters, handy for minimalistic stats
 	 */

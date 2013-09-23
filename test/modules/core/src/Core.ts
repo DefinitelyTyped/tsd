@@ -4,6 +4,7 @@
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
 
 describe('Core', () => {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -64,14 +65,14 @@ describe('Core', () => {
 		});
 
 		it('should fail on missing required data', () => {
-			return testInvalidConfig('./non-existing/tsd-config.json', /^cannot locate file:/);
+			return testInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file:/);
 		});
 		it('should fail on bad version value', () => {
 			return testInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config:/);
 		});
 
 		it('should pass on missing optional data', () => {
-			context.paths.configFile = './non-existing/tsd-config.json';
+			context.paths.configFile = './non-existing_____/tsd.json';
 			core = getCore(context);
 			return assert.isFulfilled(core.readConfig(true));
 		});

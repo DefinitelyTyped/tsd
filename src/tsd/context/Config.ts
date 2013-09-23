@@ -6,6 +6,7 @@
 ///<reference path="../data/DefVersion.ts" />
 
 module tsd {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -18,22 +19,30 @@ module tsd {
 	 */
 	export class InstalledDef {
 
+		path:string;
 		commitSha:string;
-		contentHash:string;
+		blobSha:string;
 
-		constructor(public path?:string) {
+		constructor(path:string) {
+			if (path) {
+				xm.assertVar('path', path, 'string');
+				this.path = path;
+			}
 		}
 
-		update(source:tsd.DefVersion) {
-			xm.assertVar('file', source, tsd.DefVersion);
-			if (typeof source.content !== 'string' || source.content.length === 0) {
-				throw new Error('expected file to have .content: ' + source.def.path);
-			}
-			this.path = source.def.path;
-			this.commitSha = source.commit.commitSha;
+		update(file:tsd.DefVersion) {
+			//TODO maybe too much testing? :D
+			xm.assertVar('file', file, tsd.DefVersion);
 
-			//TODO consider normalising line ends before hashing
-			this.contentHash = xm.md5(source.content);
+			xm.assertVar('commit', file.commit, tsd.DefCommit);
+			xm.assertVar('commit.sha', file.commit.commitSha, 'sha1');
+
+			xm.assertVar('blob', file.blob, tsd.DefBlob);
+			xm.assertVar('blob.sha', file.blob.sha, 'sha1');
+
+			this.path = file.def.path;
+			this.commitSha = file.commit.commitSha;
+			this.blobSha = file.blob.sha;
 		}
 
 		toString():string {
@@ -89,7 +98,7 @@ module tsd {
 				def = this._installed.get(file.def.path);
 			}
 			else {
-				def = new tsd.InstalledDef();
+				def = new tsd.InstalledDef(file.def.path);
 			}
 			def.update(file);
 
@@ -129,7 +138,7 @@ module tsd {
 				//xm.log(file);
 				json.installed[file.path] = {
 					commit: file.commitSha,
-					hash: file.contentHash
+					blob: file.blobSha
 					//what more?
 				};
 			});
@@ -165,10 +174,11 @@ module tsd {
 			if (json.installed) {
 				xm.eachProp(json.installed, (data:any, path:string) => {
 					var installed = new tsd.InstalledDef(path);
+					//TODO move to class
+					//TODO validate some more
 					installed.commitSha = data.commit;
-					installed.contentHash = data.hash;
+					installed.blobSha = data.blob;
 
-					//TODO validate some more?
 
 					this._installed.set(path, installed);
 				});

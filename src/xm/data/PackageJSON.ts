@@ -12,6 +12,7 @@
 ///<reference path="../ObjectUtil.ts" />
 
 module xm {
+	'use strict';
 
 	//TODO co-implement and ditch pkginfo dependency
 	var pkginfo = require('pkginfo');

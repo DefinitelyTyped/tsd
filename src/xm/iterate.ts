@@ -7,6 +7,7 @@
  * */
 
 module xm {
+	'use strict';
 	/*
 	 various simple helpers to iterate stuff, saves including underscore for every use-case
 	 */
@@ -84,4 +85,3 @@ module xm {
 		return res;
 	}
 }
-

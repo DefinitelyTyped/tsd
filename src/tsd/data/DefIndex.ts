@@ -4,6 +4,7 @@
 ///<reference path="DefCommit.ts" />
 
 module tsd {
+	'use strict';
 
 	var pointer = require('jsonpointer.js');
 	var commit_sha:string = '/commit/sha';
@@ -25,6 +26,7 @@ module tsd {
 		//TODO add generics when moved to TS 0.9
 		private _definitions:xm.IKeyValueMap = new xm.KeyValueMap();
 		private _commits:xm.IKeyValueMap = new xm.KeyValueMap();
+		private _blobs:xm.IKeyValueMap = new xm.KeyValueMap();
 		private _versions:xm.IKeyValueMap = new xm.KeyValueMap();
 
 		constructor() {
@@ -50,6 +52,7 @@ module tsd {
 				return;
 			}
 
+			this._blobs.clear();
 			this._commits.clear();
 			this._versions.clear();
 			this._definitions.clear();
@@ -78,7 +81,8 @@ module tsd {
 			var def:tsd.Def;
 			var file:tsd.DefVersion;
 
-			tree.tree.forEach((elem:git.GithubJSONTreeElem) => {
+			//TODO parse blob sha from tree
+			xm.eachElem(tree.tree, (elem:git.GithubJSONTreeElem) => {
 				var char = elem.path.charAt(0);
 				if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDefPath(elem.path)) {
 					def = this.procureDef(elem.path);
@@ -89,6 +93,9 @@ module tsd {
 					if (!file) {
 						return;
 					}
+					if (!file.blob) {
+						file.setContent(this.procureBlob(elem.sha));
+					}
 					def.head = file;
 				}
 			});
@@ -96,7 +103,7 @@ module tsd {
 		}
 
 		/*
-		 set the history of a single file from from json data
+		 set the history of a single Def from json data
 		 */
 		setHistory(def:tsd.Def, commitJsonArray:any[]):void {
 			xm.assertVar('def', def, tsd.Def);
@@ -132,10 +139,39 @@ module tsd {
 				commit = this._commits.get(commitSha);
 			}
 			else {
-				commit = new DefCommit(commitSha);
+				commit = new tsd.DefCommit(commitSha);
 				this._commits.set(commitSha, commit);
 			}
 			return commit;
+		}
+
+		/*
+		 get a DefBlob for a sha (enforces single instances)
+		 */
+		procureBlob(blobSha:string):tsd.DefBlob {
+			xm.assertVar('blobSha', blobSha, 'sha1');
+
+			var blob:tsd.DefBlob;
+			if (this._blobs.has(blobSha)) {
+				blob = this._blobs.get(blobSha);
+			}
+			else {
+				blob = new tsd.DefBlob(blobSha);
+				this._blobs.set(blobSha, blob);
+			}
+			return blob;
+		}
+
+		/*
+		 get a DefBlob for a sha (enforces single instances)
+		 */
+		procureBlobFor(content):tsd.DefBlob {
+			var sha = git.GitUtil.blobSHAHex(content);
+			var blob:tsd.DefBlob = this.procureBlob(sha);
+			if (!blob.hasContent()) {
+				blob.setContent(content);
+			}
+			return blob;
 		}
 
 		/*
@@ -224,6 +260,22 @@ module tsd {
 
 		hasDef(path:string):bool {
 			return this._definitions.has(path);
+		}
+
+		getBlob(sha:string):tsd.DefBlob {
+			return this._blobs.get(sha, null);
+		}
+
+		hasBlob(sha:string):bool {
+			return this._blobs.has(sha);
+		}
+
+		getCommit(sha:string):tsd.DefCommit {
+			return this._commits.get(sha, null);
+		}
+
+		hasCommit(sha:string):bool {
+			return this._commits.has(sha);
 		}
 
 		getPaths():string[] {

@@ -1,8 +1,11 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="Def.ts" />
 ///<reference path="DefInfo.ts" />
+///<reference path="DefBlob.ts" />
+///<reference path="../../git/GitUtil.ts" />
 
 module tsd {
+	'use strict';
 
 	/*
 	 DefVersion: version of a definition (the file content in the repo)
@@ -10,18 +13,15 @@ module tsd {
 	 NOTE: for practical reasons linked to a commit (tree) instead of a blob
 	 */
 	export class DefVersion {
+		//TODO swap for non-wriable properties?
+		private _def:tsd.Def = null;
+		private _commit:tsd.DefCommit = null;
 
-		private _def:tsd.Def;
-		private _commit:tsd.DefCommit;
-
-		//NOTE blobs are not workable with raw.github and api rate-limits
-		//blobSha:string;
-
-		//raw text content
-		content:string;
+		//NOTE blobs are impractical to work with: api rate-limits and no access over raw.github
+		private _blob:tsd.DefBlob = null;
 
 		//parse from tags
-		dependencies:tsd.DefVersion[] = [];
+		dependencies:tsd.Def[] = [];
 		solved:bool = false;
 
 		//parsed from header
@@ -35,6 +35,18 @@ module tsd {
 			this._commit = commit;
 
 			xm.ObjectUtil.hidePrefixed(this);
+		}
+
+		setContent(blob:tsd.DefBlob):void {
+			xm.assertVar('blob', blob, tsd.DefBlob);
+			if (this._blob) {
+				throw new Error('already got a blob: ' + this._blob.sha + ' != ' + blob.sha);
+			}
+			this._blob = blob;
+		}
+
+		hasContent():bool {
+			return (this._blob && this._blob.hasContent());
 		}
 
 		get key():string {
@@ -52,9 +64,14 @@ module tsd {
 			return this._commit;
 		}
 
+		get blob():tsd.DefBlob {
+			return this._blob;
+		}
+
 		toString():string {
 			var str = (this._def ? this._def.path : '<no def>');
-			str += ' : ' + (this._commit ? this._commit.commitShort : '<no blob-sha>');
+			str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
+			str += ' : ' + (this._blob ? this._blob.shaShort : '<no blob>');
 			return str;
 		}
 	}

@@ -4,6 +4,7 @@
 ///<reference path="../ObjectUtil.ts" />
 
 module xm {
+	'use strict';
 
 	var Q:QStatic = require('q');
 	var fs = require('fs');
@@ -13,6 +14,7 @@ module xm {
 	 CachedFileService: a simple flat file implementation of CachedLoaderService
 	 */
 	//TODO add gzip compression?
+	//TODO add encoding opts
 	export class CachedFileService implements xm.CachedLoaderService {
 
 		_dir:string;
@@ -24,7 +26,7 @@ module xm {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		getValue(file:string, opts?):Qpromise {
+		getValue(file, opts?):Qpromise {
 			var storeFile = path.join(this._dir, file);
 			return FS.exists(storeFile).then((exists:bool) => {
 				if (exists) {
@@ -40,8 +42,7 @@ module xm {
 			});
 		}
 
-		//TODO add encoding opts
-		writeValue(file:string, label:string, value:any, opts?):Qpromise {
+		writeValue(file, label:string, value:any, opts?):Qpromise {
 			var storeFile = path.join(this._dir, file);
 			return xm.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
 				return FS.write(storeFile, value);

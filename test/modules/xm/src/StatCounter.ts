@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/xm/StatCounter.ts" />
 
 describe('xm.StatCounter', () => {
+	'use strict';
 
 	var counter:xm.StatCounter;
 

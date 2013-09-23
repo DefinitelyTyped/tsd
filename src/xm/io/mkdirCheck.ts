@@ -7,6 +7,8 @@
  * */
 
 module xm {
+	'use strict';
+
 	//TODO move to FileUtil
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
@@ -57,9 +59,9 @@ module xm {
 		dir = path.resolve(dir);
 
 		return FS.exists(dir).then((exists:bool) => {
-			if(exists) {
+			if (exists) {
 				return FS.isDirectory(dir).then((isDir:bool) => {
-					if(!isDir) {
+					if (!isDir) {
 						throw (new Error('path exists but is not a directory: ' + dir));
 					}
 					if (writable) {

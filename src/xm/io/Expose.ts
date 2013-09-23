@@ -14,11 +14,12 @@
 ///<reference path="../../../typings/DefinitelyTyped/easy-table/easy-table.d.ts" />
 
 module xm {
+	'use strict';
 
 	var optimist = require('optimist');
 	var Table:EasyTableStatic = require('easy-table');
 
-	export interface ExposeAction extends Function{
+	export interface ExposeAction extends Function {
 		(args:any, done:(err) => void):void;
 	}
 
@@ -108,7 +109,7 @@ module xm {
 				else if (option.type === 'string') {
 					optimist.string(option.name);
 				}
-				if (option.hasOwnProperty('default')) {
+				if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
 					optimist.default(option.name, option.default);
 				}
 			});

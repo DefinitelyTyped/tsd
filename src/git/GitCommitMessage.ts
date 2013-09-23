@@ -1,4 +1,5 @@
 module git {
+	'use strict';
 
 	var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
 

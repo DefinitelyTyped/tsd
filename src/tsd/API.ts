@@ -2,8 +2,10 @@
 ///<reference path="logic/Core.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="select/Selector.ts" />
+///<reference path="../xm/KeyValueMap.ts" />
 
 module tsd {
+	'use strict';
 
 	var path = require('path');
 	var util = require('util');

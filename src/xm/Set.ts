@@ -7,6 +7,7 @@
  * */
 
 module xm {
+	'use strict';
 
 	/*
 	 ISet: yer basic set interface

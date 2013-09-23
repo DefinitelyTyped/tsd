@@ -1,0 +1,31 @@
+{
+  "nameMatches": [
+    {
+      "path": "angularjs/angular.d.ts",
+      "project": "angularjs",
+      "name": "angular",
+      "def": {
+        "path": "angularjs/angular.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    }
+  ],
+  "selection": [
+    {
+      "path": "angularjs/angular.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    }
+  ],
+  "written": {}
+}

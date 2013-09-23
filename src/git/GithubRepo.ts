@@ -2,6 +2,7 @@
 ///<reference path="GithubURLManager.ts" />
 
 module git {
+	'use strict';
 
 	/*
 	 GithubRepo: basic github repo info

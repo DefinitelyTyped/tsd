@@ -1,4 +1,5 @@
 module git {
+	'use strict';
 
 	/*
 	 interfaces for githuv json responses

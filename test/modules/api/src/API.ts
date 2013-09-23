@@ -5,6 +5,7 @@
 ///<reference path="../../../../src/xm/io/hash.ts" />
 
 describe('API', () => {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -48,70 +49,84 @@ describe('API', () => {
 		api.context.config.log.mute = mute;
 	}
 
-	function applyTempInfo(label:string, index:number, data:any, selector:tsd.Selector):helper.TempInfo {
-		var tmp = helper.getTempInfo(label, index, true);
+	function applyTempInfo(group:string, name:string, test:any, selector:tsd.Selector):helper.TestInfo {
+		var tmp = helper.getTestInfo(group, name, true);
+
 		api.context.paths.configFile = tmp.configFile;
 		api.context.config.typingsPath = tmp.typingsDir;
 
-		xm.FileUtil.writeJSONSync(tmp.selectorDumpFile, selector);
-		xm.FileUtil.writeJSONSync(tmp.dataCopyFile, data);
+		xm.FileUtil.writeJSONSync(tmp.testDump, test);
+		xm.FileUtil.writeJSONSync(tmp.selectorDump, selector);
 
-		applyMute(!data.debug);
+		applyMute(!test.debug);
 
 		return tmp;
 	}
 
-	describe('search', () => {
-		var select = require(path.join(helper.getProjectRoot(), 'test/fixtures/select'));
-		var i = 0;
-		select.forEach((data) => {
-			var selector = new tsd.Selector(data.selector.pattern);
+	function getSelector(json) {
+		assert.property(json, 'pattern');
+		var selector = new tsd.Selector(json.pattern);
+		return selector;
+	}
 
-			it('selector "' + String(selector) + '"', () => {
+	describe('search', () => {
+		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
+		xm.eachProp(data.tests, (test, name) => {
+			var selector = getSelector(test.selector);
+
+			it('selector "' + name + '"', () => {
 				api = getAPI(context);
 
-				var tmp = applyTempInfo('search', (i++), data, selector);
+				var info = applyTempInfo('search', name, data, selector);
 
 				return api.search(selector).then((result:tsd.APIResult) => {
-					helper.assertAPIResult(result, data.result, 'result');
-					helper.assertUpdateStat(api.core.gitAPI.loader, 'core');
+					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
+
+					xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
+
+					var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
+					helper.assertAPIResult(result, resultExpect, 'resultActual');
 				});
 			});
 		});
 	});
 
 	describe('install', () => {
-		var select = require(path.join(helper.getProjectRoot(), 'test/fixtures/install'));
-		var i = 0;
-		select.forEach((data) => {
-			var selector = new tsd.Selector(data.selector.pattern);
+		var data = require(path.join(helper.getDirNameFixtures(), 'install'));
+		xm.eachProp(data.tests, (test, name) => {
+			var selector = getSelector(test.selector);
 
-			it('selector "' + String(selector) + '"', () => {
+			it('selector "' + name + '"', () => {
 				api = getAPI(context);
 
-				var tmp = applyTempInfo('install', (i++), data, selector);
+				var info = applyTempInfo('install', name, test, selector);
 
 				return api.install(selector).then((result:tsd.APIResult) => {
-					helper.assertAPIResult(result, data.result, 'result');
 					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
 					helper.assertUpdateStat(api.core.gitRaw.loader, 'raw');
 
-					if (!data.config) {
-						return null;
-					}
+					xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
+
+					var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
+					helper.assertAPIResult(result, resultExpect, 'result');
+
+					var configExpect = xm.FileUtil.readJSONSync(info.configExpect);
+					var configActual = xm.FileUtil.readJSONSync(info.configFile);
+					configExpect.typingsPath = info.typingsDir;
+					assert.deepEqual(configActual, configExpect, 'configActual');
+
+					helper.assertConfig(api.context.config, configExpect, 'api.context.config');
 
 					//set for correct comparison
-					data.config.typingsPath = tmp.typingsDir;
+					return helper.listDefPaths(info.typingsDir).then((typings) => {
+						assert.sameMembers(typings, Object.keys(configExpect.installed), 'installed file');
 
-					return xm.FileUtil.readJSONPromise(api.context.paths.configFile).then((json) => {
-						assert.deepEqual(json, data.config, 'config');
-					}).then(() => {
-						return helper.listDefPaths(tmp.typingsDir);
-					}).then((typings) => {
-						helper.assertUnorderedStrict(typings, Object.keys(data.config.installed), 'installed file');
-						typings.forEach((ref:string) => {
-							assert.notIsEmptyFile(path.join(tmp.typingsDir, ref), 'typing');
-						});
+						return Q.all(typings.map((ref:string) => {
+							assert.notIsEmptyFile(path.join(info.typingsDir, ref), 'typing');
+							/*return FS.read(path.join(info.typingsDir, ref)).then((content) => {
+								delete written[path.join(info.typingsDir, ref)];
+							});*/
+						}));
 					});
 				});
 			});

@@ -1,5 +1,7 @@
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 module gitTest {
+	'use strict';
+
 	var path = require('path');
 
 	export var cacheDir = path.join(__dirname, 'git-cache');

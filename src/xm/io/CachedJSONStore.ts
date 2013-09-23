@@ -10,6 +10,7 @@
 ///<reference path="CachedJSONValue.ts" />
 
 module xm {
+	'use strict';
 
 	var Q:QStatic = require('q');
 	var assert = require('assert');

@@ -11,6 +11,7 @@
 ///<reference path="../iterate.ts" />
 
 module xm {
+	'use strict';
 
 	var util = require('util');
 	var trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
@@ -294,3 +295,4 @@ module xm {
 		}
 	}
 }
+

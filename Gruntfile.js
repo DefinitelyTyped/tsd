@@ -38,7 +38,8 @@ module.exports = function (grunt) {
 				configuration: grunt.file.readJSON('tslint.json')
 			},
 			source: ['src/**/*.ts'],
-			helper: ['test/*.ts']
+			helper: ['test/*.ts'],
+			tests: ['test/*.ts', 'test/*/.ts', 'test/**/src/**/*.ts']
 		},
 		todos: {
 			options: {
@@ -118,9 +119,6 @@ module.exports = function (grunt) {
 		var testPath = 'test/modules/' + id + '/';
 
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
-
-		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
-
 		macro.newTask('tslint', {
 			src: [testPath + 'src/**/*.ts']
 		});
@@ -138,6 +136,7 @@ module.exports = function (grunt) {
 			src: [testPath + 'tmp/**/*.test.js']
 		});
 		macro.tag('module');
+		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
 	}, {
 		concurrent: 3
 	});
@@ -154,10 +153,10 @@ module.exports = function (grunt) {
 	var longTimer = (isVagrant ? 250000 : 5000);
 
 	// modules
-	gtx.create('api,cli,core', 'moduleTest', {timeout: longTimer}, 'core');
-	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib');
-	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('xm', 'moduleTest', null, 'lib');
+	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib');
+	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 
 	gtx.alias('run', ['build', 'shell:cli']);
 	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);

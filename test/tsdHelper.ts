@@ -7,6 +7,7 @@
 ///<reference path="helper.ts" />
 
 module helper {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -15,7 +16,7 @@ module helper {
 	var q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
 
-	export var configSchema = xm.FileUtil.readJSONSync(path.join(helper.getProjectRoot(), 'schema/tsd-config_v4.json'));
+	export var configSchema = xm.FileUtil.readJSONSync(path.join(helper.getProjectRoot(), 'schema', tsd.Const.configSchemaFile));
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -38,37 +39,50 @@ module helper {
 		return context;
 	}
 
-	export function setFixtureUpdate(loader:xm.CachedLoader, updateFixtures:bool) {
-		loader.options.cacheRead = !updateFixtures;
-		loader.options.remoteRead = updateFixtures;
-		loader.options.cacheWrite = updateFixtures;
+	export class TestInfo {
+		name:string;
+		group:string;
+
+		tmpDir:string;
+		fixturesDir:string;
+		typingsDir:string;
+
+		configFile:string;
+		resultFile:string;
+
+		testDump:string;
+		selectorDump:string;
+
+		resultExpect:string;
+		configExpect:string;
 	}
 
-	export interface TempInfo {
-		name: string;
-		tmpDir: string;
-		configFile: string;
-		typingsDir: string;
-		dataCopyFile: string;
-		selectorDumpFile: string;
-	}
+	export function getTestInfo(group:string, name:string, createConfigFile?:bool = true):TestInfo {
 
-	export function getTempInfo(message:string, index:number, createFile:bool):TempInfo {
+		var tmpDir = path.join(__dirname, 'command', group, name);
+		var dumpDir = path.resolve(tmpDir, 'dump');
+		var fixturesDir = path.resolve(__dirname, '..', 'fixtures', 'command', group, name);
 
-		var name = pad(index, 3);
-		var tmpDir = path.resolve(__dirname, message, name);
 		xm.mkdirCheckSync(tmpDir, true);
 
-		var info:TempInfo = {
-			name: name,
-			tmpDir: tmpDir,
-			configFile: path.resolve(tmpDir, 'tsd-config.json'),
-			typingsDir: path.resolve(tmpDir, 'typings'),
-			dataCopyFile: path.resolve(tmpDir, 'data-dump.json'),
-			selectorDumpFile: path.resolve(tmpDir, 'selector-dump.json')
-		};
+		var info = new TestInfo();
+		info.name = name;
+		info.group = group;
 
-		if (createFile) {
+		info.tmpDir = tmpDir;
+		info.fixturesDir = fixturesDir;
+		info.typingsDir = path.join(tmpDir, 'typings');
+
+		info.configFile = path.join(tmpDir, tsd.Const.configFile);
+		info.resultFile = path.join(tmpDir, 'result.json');
+
+		info.testDump = path.join(dumpDir, 'test.json');
+		info.selectorDump = path.join(dumpDir, 'selector.json');
+
+		info.configExpect = path.join(fixturesDir,  tsd.Const.configFile);
+		info.resultExpect = path.join(fixturesDir, 'result.json');
+
+		if (createConfigFile) {
 			fs.writeFileSync(info.configFile, fs.readFileSync('./test/fixtures/config/default.json', {encoding: 'utf8'}), {encoding: 'utf8'});
 		}
 		return info;
@@ -153,14 +167,16 @@ module helper {
 		assert.ok(values, message + ': values');
 		assert.instanceOf(file, tsd.DefVersion, message + ': file');
 
+		if (values.blob) {
+			assert.strictEqual(file.def.path, values.path, message + ': file.path');
+		}
 		if (values.commitSha) {
 			helper.isStringSHA1(file.commit.commitSha, message + ': file.commit.commitSha');
 			helper.isStringSHA1(values.commitSha, message + ': values.commitSha');
 			assert.strictEqual(file.commit.commitSha, values.commitSha, message + ': file.commit.commitSha');
 		}
-		if (values.content) {
-			assert.isString(file.content, message + ': file.content');
-			propStrictEqual(file, values, 'content', message + ': file');
+		if (values.blob) {
+			assertDefBlob(file.blob, values.blob, message + ': file.blob');
 		}
 		if (typeof values.solved !== 'undefined') {
 			assert.isBoolean(values.solved, message + ': values.solved');
@@ -170,14 +186,17 @@ module helper {
 			assertDefInfo(file.info, values.info, message + ': file.info');
 		}
 		if (values.dependencies) {
-			assertDefVersionArray(file.dependencies, values.dependencies, 'dependencies');
+			assertDefArray(file.dependencies, values.dependencies, 'dependencies');
 		}
 	}
 
 	var assertDefVersionArrayUnordered:AssertCB = getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
-		return (act.commit.commitSha === exp.commitSha);
+		if (!exp.commit) {
+			return false;
+		}
+		return (act.commit.commitSha === exp.commit.commitSha);
 	}, (act:tsd.DefVersion, exp:any, message?:string) => {
-		assertDefVersion(act, exp, message + ': ' + tsd.shaShort(exp.commitSha));
+		assertDefVersion(act, exp, message + ': ' + tsd.shaShort(exp.commit.commitSha));
 	}, 'DefVersion');
 
 	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string) {
@@ -194,6 +213,21 @@ module helper {
 		propStrictEqual(author, values, 'name', message);
 		propStrictEqual(author, values, 'url', message);
 		propStrictEqual(author, values, 'email', message);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	export function assertDefBlob(blob:tsd.DefBlob, values:any, message:string) {
+		assert.ok(blob, message + ': blob');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(blob, tsd.DefBlob, message + ': author');
+
+		propStrictEqual(blob, values, 'sha', message);
+
+		if (values.content) {
+			//TODO add reliable decoder
+			assert.strictEqual(blob.content.toString('base64'), values.content, message + ': content');
+		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -216,7 +250,6 @@ module helper {
 		propStrictEqual(info, values, 'projectUrl', message);
 		propStrictEqual(info, values, 'reposUrl', message);
 
-		var i, ii;
 		if (values.authors) {
 			assertUnorderedNaive(info.authors, values.authors, assertAuthor, message + ': authors');
 		}
@@ -304,4 +337,120 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	export function serialiseAPIResult(result:tsd.APIResult):any {
+		xm.assertVar('result', result, tsd.APIResult);
+
+		var json:any = {};
+		if (result.error) {
+			json.error = result.error;
+		}
+
+		if (result.nameMatches) {
+			json.nameMatches = result.nameMatches.map((def:tsd.Def) => {
+				return serialiseDef(def, false);
+			});
+		}
+		if (result.selection) {
+			json.selection = result.selection.map((file:tsd.DefVersion) => {
+				return serialiseDefVersion(file, false);
+			});
+		}
+		if (result.definitions) {
+			json.definitions = result.definitions.map((def:tsd.Def) => {
+				return serialiseDef(def, false);
+			});
+		}
+		if (result.written) {
+			json.written = {};
+			result.written.keys().forEach((key) => {
+				json.written[key] = serialiseDefVersion(result.written.get(key), false);
+			});
+		}
+		return json;
+	}
+
+	export function serialiseDef(def:tsd.Def, recursive:bool):any {
+		xm.assertVar('def', def, tsd.Def);
+
+		var json:any = {};
+		json.path = def.path;
+		json.project = def.project;
+		json.name = def.name;
+		json.semver = def.semver;
+
+		json.def = serialiseDefVersion(def.head, false);
+		json.history = [];
+		//version from the DefIndex commit +tree (may be not our edit)
+		if (def.history && recursive) {
+			def.history.forEach((file:tsd.DefVersion) => {
+				json.history.push(serialiseDefVersion(file, false));
+			});
+		}
+		return json;
+	}
+
+	export function serialiseDefVersion(file:tsd.DefVersion, recursive:bool):any {
+		xm.assertVar('file', file, tsd.DefVersion);
+
+		var json:any = {};
+		json.path = file.def.path;
+		json.commit = serialiseDefCommit(file.commit, false);
+		if (file.blob) {
+			json.blob = serialiseDefBlob(file.blob, false);
+		}
+		json.key = file.key;
+		json.solved = file.solved;
+		if (file.dependencies) {
+			json.dependencies = [];
+			file.dependencies.forEach((def:tsd.Def) => {
+				json.dependencies.push(serialiseDef(def, false));
+			});
+		}
+		return json;
+	}
+
+	export function serialiseDefBlob(blob:tsd.DefBlob, recursive:bool):any {
+		xm.assertVar('blob', blob, tsd.DefBlob);
+
+		var json:any = {};
+		json.sha = blob.sha;
+		if (blob.content && recursive) {
+			json.content = blob.content.toString('base64');
+		}
+		return json;
+	}
+
+	export function serialiseDefCommit(commit:tsd.DefCommit, recursive:bool):any {
+		xm.assertVar('commit', commit, tsd.DefCommit);
+
+		var json:any = {};
+		json.commitSha = commit.commitSha;
+		//TODO serialise more DefCommit
+		return json;
+	}
+
+	export function serialiseDefInfo(info:tsd.DefInfo, recursive:bool):any {
+		xm.assertVar('info', info, tsd.DefInfo);
+
+		var json:any = {};
+		json.name = info.name;
+		json.version = info.version;
+		json.submodule = info.submodule;
+		json.description = info.description;
+		json.projectUrl = info.projectUrl;
+		json.reposUrl = info.reposUrl;
+		json.references = info.references.slice(0);
+		json.authors = [];
+		if (info.authors && recursive) {
+			info.authors.forEach((author:xm.AuthorInfo) => {
+				json.authors.push(serialiseAuthor(author));
+			});
+		}
+		return json;
+	}
+
+	export function serialiseAuthor(author:xm.AuthorInfo):any {
+		xm.assertVar('author', author, xm.AuthorInfo);
+		return author.toJSON();
+	}
 }

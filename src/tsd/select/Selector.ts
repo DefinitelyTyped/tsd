@@ -4,6 +4,7 @@
 ///<reference path="InfoMatcher.ts" />
 
 module tsd {
+	'use strict';
 	/*
 	 Selector: bundles the various selector options
 	 */

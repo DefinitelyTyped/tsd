@@ -3,13 +3,22 @@
 ///<reference path="../xm/io/Expose.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/DateUtil.ts" />
+///<reference path="../xm/callAsync.ts" />
 ///<reference path="context/Context.ts" />
 
 module tsd {
+	'use strict';
 
 	var path = require('path');
 	var Q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
+
+	var pleonasm;
+
+	function pleo(input) {
+		input = input.substring(0, 6);
+		return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
+	}
 
 	function getContext(args?:any):tsd.Context {
 		xm.assertVar('args', args, 'object');
@@ -24,6 +33,8 @@ module tsd {
 		}
 		return context;
 	}
+
+	//TODO further unify reporting format (consistent details and don't rely on toString()'s) (See TODO.md)
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -42,9 +53,25 @@ module tsd {
 		//TODO add options object?
 	}
 
+	function loadData(args:any):Qpromise {
+		return Q.nfcall((callback) => {
+			if (!pleonasm) {
+				pleonasm = require('pleonasm');
+				pleonasm.onload = () => {
+					xm.callAsync(callback);
+				};
+			}
+			xm.callAsync(callback);
+		});
+		/*.then(() => {
+		 var encoded = pleonasm.encode('aabbaa').code;
+		 xm.log(encoded);
+		 });*/
+	}
+
 	function getAPIJob(args:any):Qpromise {
 		// callback for easy error reporting
-		return Q.fcall(() => {
+		return loadData(args).then(() => {
 			//verify valid path
 			if (args.config) {
 				return FS.isFile(<string>args.config).then((isFile:bool) => {
@@ -149,7 +176,6 @@ module tsd {
 			else {
 				xm.log(String(err));
 			}
-
 		}
 
 		function reportSucces(result:tsd.APIResult) {
@@ -169,19 +195,19 @@ module tsd {
 		}
 
 		function printSubHead(text:string) {
-			xm.log(' ' +text);
+			xm.log(' ' + text);
 			xm.log('----');
 		}
 
 		function printDefHead(def:tsd.Def) {
 			xm.log('');
-			xm.log(def.toString());
+			xm.log(def.toString() + ' ' + pleo(def.head.blob.shaShort));
 			xm.log('----');
 		}
 
 		function printFileHead(file:tsd.DefVersion) {
 			xm.log('');
-			xm.log(file.toString());
+			xm.log(file.toString()) + ' ' + pleo(file.blob.shaShort);
 			xm.log('----');
 		}
 
@@ -342,10 +368,10 @@ module tsd {
 
 					//move ot method
 					if (def.dependencies.length > 0) {
-						def.dependencies.sort(tsd.DefUtil.fileCompare).forEach((def:tsd.DefVersion) => {
+						def.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
 							xm.log(' - ' + def.toString());
-							if (def.dependencies.length > 0) {
-								def.dependencies.sort(tsd.DefUtil.fileCompare).forEach((def:tsd.DefVersion) => {
+							if (def.head.dependencies.length > 0) {
+								def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
 									xm.log('    - ' + def.toString());
 								});
 							}

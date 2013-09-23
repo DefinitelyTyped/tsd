@@ -2,6 +2,7 @@
 ///<reference path="Def.ts" />
 
 module tsd {
+	'use strict';
 
 	var endSlashTrim = /\/?$/;
 

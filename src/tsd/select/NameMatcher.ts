@@ -3,6 +3,7 @@
 ///<reference path="../data/Def.ts" />
 
 module tsd {
+	'use strict';
 
 	// beh
 	var wordParts = /[\w_\.-]/;

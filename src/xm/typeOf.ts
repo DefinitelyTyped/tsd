@@ -6,6 +6,7 @@
  * License: MIT - 2013
  * */
 module xm {
+	'use strict';
 	/*!
 	 * some original code copied and then modified from: Chai - type utility
 	 * Copyright(c) 2012-2013 Jake Luer <jake@alogicalparadox.com>
@@ -38,6 +39,12 @@ module xm {
 		return typeof obj;
 	}
 
+	var objectNameExp = /(^\[object )|(\]$)/gi;
+
+	export function toProtoString(obj:any):string {
+		return Object.prototype.toString.call(obj).replace(objectNameExp, '');
+	}
+
 	var typeMap:any = {
 		arguments: isArguments,
 		array: isArray,
@@ -49,10 +56,12 @@ module xm {
 		null: isNull,
 		undefined: isUndefined,
 		object: isObject,
-		boolean: isBoolean
+		boolean: isBoolean,
+		ok: isOk,
+		valid: isValid
 	};
 
-	function hasOwnProp(obj:any, prop:string):bool {
+	export function hasOwnProp(obj:any, prop:string):bool {
 		return Object.prototype.hasOwnProperty.call(obj, prop);
 	}
 
@@ -106,17 +115,31 @@ module xm {
 	export function isBoolean(obj:any):bool {
 		return (typeOf(obj) === 'boolean');
 	}
+	// error?
+
+	// - - - - meta types
+
+	//TODO test
+	export function isOk(obj:any):bool {
+		return !!obj;
+	}
+
+	export function isValid(obj:any):bool {
+		var type = typeOf(obj);
+		return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
+	}
 
 	//clone/extend the map
 	export function getTypeOfMap(add?:any) {
+		var name;
 		var obj = {};
-		for (var name in typeMap) {
+		for (name in typeMap) {
 			if (hasOwnProp(typeMap, name)) {
 				obj[name] = typeMap[name];
 			}
 		}
 		if (add) {
-			for (var name in add) {
+			for (name in add) {
 				if (hasOwnProp(add, name) && isFunction(add[name])) {
 					obj[name] = add[name];
 				}

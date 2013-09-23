@@ -9,6 +9,7 @@
 ///<reference path="_ref.ts" />
 
 module xm {
+	'use strict';
 
 	var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
 	var flagFilter = /[gim]/;

@@ -2,9 +2,28 @@
 ///<reference path="typeOf.ts" />
 
 module xm {
+	'use strict';
+
+	function deepFreezeRecursive(object, active:any[]) {
+		var value, prop;
+		active.push(object);
+		Object.freeze(object);
+		for (prop in object) {
+			value = object[prop];
+			if (object.hasOwnProperty(prop) && xm.isObject(object) || xm.isArray(object)) {
+				if (active.indexOf(object) < 0) {
+					deepFreezeRecursive(value, active);
+				}
+			}
+		}
+	}
 
 	export class ObjectUtil {
 		//lazy alias for consistency
+		static hasOwnProp(obj:any, prop:string):bool {
+			return Object.prototype.hasOwnProperty.call(obj, prop);
+		}
+
 		static defineProp(object:Object, property:string, settings:any):void {
 			Object.defineProperty(object, property, settings);
 		}
@@ -17,17 +36,21 @@ module xm {
 
 		static hidePrefixed(object:Object, ownOnly:bool = true):void {
 			for (var property in object) {
-				if (property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
+				if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
 					ObjectUtil.defineProp(object, property, {enumerable: false});
 				}
 			}
 		}
 
-		static hideFunctions(object:Object):void {
-			for (var property in object) {
-				if (xm.isFunction(object)) {
-					ObjectUtil.defineProp(object, property, {enumerable: false});
-				}
+		static freezeProps(object, props) {
+			props.forEach((property:string) => {
+				Object.defineProperty(object, property, {writable: false});
+			});
+		}
+
+		static deepFreeze(object) {
+			if (xm.isObject(object) || xm.isArray(object)) {
+				deepFreezeRecursive(object, []);
 			}
 		}
 	}

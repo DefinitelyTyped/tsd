@@ -9,16 +9,39 @@ class ObjectUtilTestClass {
 }
 
 describe('xm.ObjectUtil', () => {
-	it('hidePrefixed() should return formatted string', () => {
-		var keys;
-		var inst = new ObjectUtilTestClass();
+	'use strict';
 
-		keys = Object.keys(inst);
-		assert.sameMembers(keys, ['_propA', '_propB', 'propC', 'propD'], 'before hide');
+	describe('xm.hidePrefixed()', () => {
+		it('should return formatted string', () => {
+			var keys;
+			var inst = new ObjectUtilTestClass();
 
-		xm.ObjectUtil.hidePrefixed(inst);
+			keys = Object.keys(inst);
+			assert.sameMembers(keys, ['_propA', '_propB', 'propC', 'propD'], 'before hide');
 
-		keys = Object.keys(inst);
-		assert.sameMembers(keys, ['propC', 'propD'], 'after hide');
+			xm.ObjectUtil.hidePrefixed(inst);
+
+			keys = Object.keys(inst);
+			assert.sameMembers(keys, ['propC', 'propD'], 'after hide');
+		});
+	});
+	describe('xm.hidePrefixed()', () => {
+		it('should throw when accessing frozen property', () => {
+			var fixed = {aa: 1, bb: 2};
+
+			fixed.aa = 10;
+			fixed.bb = 20;
+			assert.strictEqual(fixed.aa, 10, 'before fixed.aa');
+			assert.strictEqual(fixed.bb, 20, 'before fixed.bb');
+
+			xm.ObjectUtil.freezeProps(fixed, ['aa']);
+
+			assert.throws(() => {
+				fixed.aa = 100;
+			}, /^Cannot assign to read only property 'aa' of /);
+			fixed.bb = 200;
+			assert.strictEqual(fixed.aa, 10, 'after fixed.aa');
+			assert.strictEqual(fixed.bb, 200, 'after fixed.bb');
+		});
 	});
 });

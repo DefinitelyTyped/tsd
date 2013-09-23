@@ -7,6 +7,7 @@
  * */
 
 module xm {
+	'use strict';
 
 	var util = require('util');
 	require('colors');

@@ -161,6 +161,7 @@ Technical
 
 Cleanup
 
+* :cl:	Sweep and enable tslint.json rules, like: eofline rule
 * :cl:	Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune 
 * :cl:	Sweep used modules: require() and `package.json`
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:

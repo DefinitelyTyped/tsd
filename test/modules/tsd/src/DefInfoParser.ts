@@ -5,12 +5,14 @@
 
 
 describe('DefInfoParser', () => {
+	'use strict';
+
 	var _ = require('underscore');
 	var fs = require('fs');
 	var path = require('path');
 
 	var data:helper.HeaderAssert[];
-	var filter;// = ['async', 'expect.js'];
+	var filter; // = ['async', 'expect.js'];
 
 	before((done:(err?) => void) => {
 		//use old tsd-deftools loader
@@ -72,10 +74,9 @@ describe('DefInfoParser', () => {
 
 					assert.like(_.map(data.authors, (author) => {
 						return author.toJSON();
-					}), parsed['authors'], def.key + ' .' + 'authors');
+					}), parsed.authors, def.key + ' .' + 'authors');
 				}
 			});
 		});
 	});
-
 });

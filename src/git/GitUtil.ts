@@ -1,28 +1,25 @@
 ///<reference path="../../typings/DefinitelyTyped/node/node.d.ts" />
+///<reference path="../xm/typeOf.ts" />
 
 
 module git {
-	var crypto = require('crypto');
+	'use strict';
 
-	var decoders = new xm.KeyValueMap({
-		'base64': function (value:string):NodeBuffer {
-			return <NodeBuffer>new Buffer(value, 'base64');
-		},
-		'utf-8': function (value:string):NodeBuffer {
-			return <NodeBuffer>new Buffer(value, 'utf8');
-		}
-	});
+	var crypto = require('crypto');
 
 	export module GitUtil {
 		/*
 		 getDecodedBlob: decoders for github blob-api
 		 */
 		export function decodeBlob(blobJSON:any):NodeBuffer {
-			var encoding = 'utf-8';
-			if (xm.isString(blobJSON.encoding) && decoders.has(blobJSON.encoding)) {
-				encoding = blobJSON.encoding;
+			switch (blobJSON.encoding) {
+				case 'base64':
+					return <NodeBuffer>new Buffer(blobJSON.content, 'base64');
+				case 'utf-8':
+				case 'utf8':
+				default:
+					return <NodeBuffer>new Buffer(blobJSON.content, 'utf8');
 			}
-			return decoders.get(encoding).call(null, blobJSON.content);
 		}
 
 		export function blobSHAHex(data:NodeBuffer):string {

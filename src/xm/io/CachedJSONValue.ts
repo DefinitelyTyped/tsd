@@ -6,6 +6,7 @@
 ///<reference path="../ObjectUtil.ts" />
 
 module xm {
+	'use strict';
 
 	/*
 	 CachedJSONValue: single cached result object holds data and meta-data

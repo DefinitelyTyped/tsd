@@ -4,6 +4,7 @@
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 
 describe('Context', () => {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');

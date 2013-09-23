@@ -8,6 +8,7 @@
 ///<reference path="Const.ts" />
 
 module tsd {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -53,3 +54,4 @@ module tsd {
 		}
 	}
 }
+

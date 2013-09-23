@@ -1,5 +1,6 @@
 var xm;
 (function (xm) {
+    'use strict';
     var Q = require('q');
     var FS = require('q-io/fs');
     var mkdirp = require('mkdirp');
@@ -71,6 +72,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var fs = require('fs');
     var Q = require('q');
     var FS = require('q-io/fs');
@@ -145,6 +147,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     function eachElem(collection, callback, thisArg) {
         if (typeof thisArg === "undefined") { thisArg = null; }
         for(var i = 0, ii = collection.length; i < ii; i++) {
@@ -230,6 +233,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var util = require('util');
     require('colors');
     var ConsoleLineWriter = (function () {
@@ -320,6 +324,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var natives = {
         '[object Arguments]': 'arguments',
         '[object Array]': 'array',
@@ -346,6 +351,11 @@ var xm;
         return typeof obj;
     }
     xm.typeOf = typeOf;
+    var objectNameExp = /(^\[object )|(\]$)/gi;
+    function toProtoString(obj) {
+        return Object.prototype.toString.call(obj).replace(objectNameExp, '');
+    }
+    xm.toProtoString = toProtoString;
     var typeMap = {
         arguments: isArguments,
         array: isArray,
@@ -357,11 +367,14 @@ var xm;
         null: isNull,
         undefined: isUndefined,
         object: isObject,
-        boolean: isBoolean
+        boolean: isBoolean,
+        ok: isOk,
+        valid: isValid
     };
     function hasOwnProp(obj, prop) {
         return Object.prototype.hasOwnProperty.call(obj, prop);
     }
+    xm.hasOwnProp = hasOwnProp;
     function isType(obj, type) {
         if(hasOwnProp(typeMap, type)) {
             return typeMap[type].call(null, obj);
@@ -413,16 +426,26 @@ var xm;
         return (typeOf(obj) === 'boolean');
     }
     xm.isBoolean = isBoolean;
+    function isOk(obj) {
+        return !!obj;
+    }
+    xm.isOk = isOk;
+    function isValid(obj) {
+        var type = typeOf(obj);
+        return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
+    }
+    xm.isValid = isValid;
     function getTypeOfMap(add) {
+        var name;
         var obj = {
         };
-        for(var name in typeMap) {
+        for(name in typeMap) {
             if(hasOwnProp(typeMap, name)) {
                 obj[name] = typeMap[name];
             }
         }
         if(add) {
-            for(var name in add) {
+            for(name in add) {
                 if(hasOwnProp(add, name) && isFunction(add[name])) {
                     obj[name] = add[name];
                 }
@@ -444,6 +467,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     function getFuncLabel(func) {
         var match = /^\s?function ([^( ]*) *\( *([^(]*?) *\)/.exec(func);
         if(match && match.length >= 3) {
@@ -456,10 +480,10 @@ var xm;
     }
     xm.getFuncLabel = getFuncLabel;
     function toValueStrim(obj, depth) {
-        if (typeof depth === "undefined") { depth = 2; }
+        if (typeof depth === "undefined") { depth = 4; }
         var type = xm.typeOf(obj);
-        var strCut = 20;
-        var objCut = 30;
+        var strCut = 40;
+        var objCut = 50;
         depth--;
         switch(type) {
             case 'boolean':
@@ -489,7 +513,7 @@ var xm;
                 if(depth <= 0) {
                     return '<maximum recursion>';
                 }
-                return '{' + trimLine(Object.keys(obj).sort().map(function (key) {
+                return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
                     return trimLine(key) + ':' + toValueStrim(obj[key], depth);
                 }).join(','), objCut, false) + '}';
             }
@@ -511,6 +535,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     function isSha(value) {
         if(typeof value !== 'string') {
             return false;
@@ -538,31 +563,48 @@ var xm;
         var typeStrim = xm.toValueStrim(type);
         if(valueKind === 'undefined' || valueKind === 'null') {
             if(!opt) {
-                throw new Error('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
+                throw new Error('assertVar() expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
             }
         } else if(typeKind === 'function') {
             if(!(value instanceof type)) {
-                throw new Error('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new Error('assertVar() expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if(typeKind === 'string') {
             if(typeOfAssert.hasOwnProperty(type)) {
                 var check = typeOfAssert[type];
                 if(!check(value)) {
-                    throw new Error('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                    throw new Error('assertVar() expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new Error('unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
+                throw new Error('assertVar() unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
             }
         } else {
-            throw new Error('bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
+            throw new Error('assertVar() bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
         }
     }
     xm.assertVar = assertVar;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+    function deepFreezeRecursive(object, active) {
+        var value, prop;
+        active.push(object);
+        Object.freeze(object);
+        for(prop in object) {
+            value = object[prop];
+            if(object.hasOwnProperty(prop) && xm.isObject(object) || xm.isArray(object)) {
+                if(active.indexOf(object) < 0) {
+                    deepFreezeRecursive(value, active);
+                }
+            }
+        }
+    }
     var ObjectUtil = (function () {
         function ObjectUtil() { }
+        ObjectUtil.hasOwnProp = function hasOwnProp(obj, prop) {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+        };
         ObjectUtil.defineProp = function defineProp(object, property, settings) {
             Object.defineProperty(object, property, settings);
         };
@@ -574,20 +616,23 @@ var xm;
         ObjectUtil.hidePrefixed = function hidePrefixed(object, ownOnly) {
             if (typeof ownOnly === "undefined") { ownOnly = true; }
             for(var property in object) {
-                if(property.charAt(0) === '_' && (!ownOnly || object.hasOwnProperty(property))) {
+                if(property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
                     ObjectUtil.defineProp(object, property, {
                         enumerable: false
                     });
                 }
             }
         };
-        ObjectUtil.hideFunctions = function hideFunctions(object) {
-            for(var property in object) {
-                if(xm.isFunction(object)) {
-                    ObjectUtil.defineProp(object, property, {
-                        enumerable: false
-                    });
-                }
+        ObjectUtil.freezeProps = function freezeProps(object, props) {
+            props.forEach(function (property) {
+                Object.defineProperty(object, property, {
+                    writable: false
+                });
+            });
+        };
+        ObjectUtil.deepFreeze = function deepFreeze(object) {
+            if(xm.isObject(object) || xm.isArray(object)) {
+                deepFreezeRecursive(object, []);
             }
         };
         return ObjectUtil;
@@ -596,6 +641,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var pkginfo = require('pkginfo');
     var PackageJSON = (function () {
         function PackageJSON(pkg, path) {
@@ -661,6 +707,7 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
     var Def = (function () {
         function Def(path) {
@@ -698,6 +745,11 @@ var tsd;
             var file = new tsd.Def(path);
             file.project = match[1];
             file.name = match[2];
+            xm.ObjectUtil.freezeProps(file, [
+                'path', 
+                'project', 
+                'name'
+            ]);
             return file;
         };
         return Def;
@@ -706,6 +758,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var endSlashTrim = /\/?$/;
     var DefInfo = (function () {
         function DefInfo() {
@@ -754,10 +807,94 @@ var tsd;
     })();
     tsd.DefInfo = DefInfo;    
 })(tsd || (tsd = {}));
+var git;
+(function (git) {
+    'use strict';
+    var crypto = require('crypto');
+    (function (GitUtil) {
+        function decodeBlob(blobJSON) {
+            switch(blobJSON.encoding) {
+                case 'base64':
+                    return new Buffer(blobJSON.content, 'base64');
+                case 'utf-8':
+                case 'utf8':
+                default:
+                    return new Buffer(blobJSON.content, 'utf8');
+            }
+        }
+        GitUtil.decodeBlob = decodeBlob;
+        function blobSHAHex(data) {
+            return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data).digest('hex');
+        }
+        GitUtil.blobSHAHex = blobSHAHex;
+    })(git.GitUtil || (git.GitUtil = {}));
+    var GitUtil = git.GitUtil;
+})(git || (git = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+    var DefBlob = (function () {
+        function DefBlob(sha, content) {
+            if (typeof content === "undefined") { content = null; }
+            this.sha = null;
+            this.content = null;
+            xm.assertVar('sha', sha, 'sha1');
+            this.sha = sha;
+            xm.ObjectUtil.defineProp(this, 'content', {
+                enumerable: false
+            });
+            if(content) {
+                this.setContent(content);
+            } else {
+                xm.ObjectUtil.defineProps(this, [
+                    'sha', 
+                    'content'
+                ], {
+                    writable: false
+                });
+            }
+        }
+        DefBlob.prototype.hasContent = function () {
+            return xm.isValid(this.content);
+        };
+        DefBlob.prototype.setContent = function (content) {
+            if(xm.isValid(this.content)) {
+                throw new Error('content already set: ' + this.sha);
+            }
+            var sha = git.GitUtil.blobSHAHex(content);
+            if(sha !== this.sha) {
+                throw new Error('blob sha mismatch: ' + sha + ' != ' + this.sha);
+            }
+            xm.ObjectUtil.defineProp(this, 'content', {
+                writable: true
+            });
+            this.content = content;
+            xm.ObjectUtil.defineProp(this, 'content', {
+                writable: false
+            });
+        };
+        Object.defineProperty(DefBlob.prototype, "shaShort", {
+            get: function () {
+                return this.sha ? tsd.shaShort(this.sha) : '<no sha>';
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DefBlob.prototype.toString = function () {
+            return this.shaShort;
+        };
+        return DefBlob;
+    })();
+    tsd.DefBlob = DefBlob;    
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
     var DefVersion = (function () {
         function DefVersion(def, commit) {
+            this._def = null;
+            this._commit = null;
+            this._blob = null;
             this.dependencies = [];
             this.solved = false;
             xm.assertVar('def', def, tsd.Def);
@@ -766,6 +903,16 @@ var tsd;
             this._commit = commit;
             xm.ObjectUtil.hidePrefixed(this);
         }
+        DefVersion.prototype.setContent = function (blob) {
+            xm.assertVar('blob', blob, tsd.DefBlob);
+            if(this._blob) {
+                throw new Error('already got a blob: ' + this._blob.sha + ' != ' + blob.sha);
+            }
+            this._blob = blob;
+        };
+        DefVersion.prototype.hasContent = function () {
+            return (this._blob && this._blob.hasContent());
+        };
         Object.defineProperty(DefVersion.prototype, "key", {
             get: function () {
                 if(!this._def || !this._commit) {
@@ -790,9 +937,17 @@ var tsd;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(DefVersion.prototype, "blob", {
+            get: function () {
+                return this._blob;
+            },
+            enumerable: true,
+            configurable: true
+        });
         DefVersion.prototype.toString = function () {
             var str = (this._def ? this._def.path : '<no def>');
-            str += ' : ' + (this._commit ? this._commit.commitShort : '<no blob-sha>');
+            str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
+            str += ' : ' + (this._blob ? this._blob.shaShort : '<no blob>');
             return str;
         };
         return DefVersion;
@@ -801,6 +956,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
@@ -808,16 +964,20 @@ var tsd;
     var tv4 = require('tv4').tv4.freshApi();
     var InstalledDef = (function () {
         function InstalledDef(path) {
-            this.path = path;
-        }
-        InstalledDef.prototype.update = function (source) {
-            xm.assertVar('file', source, tsd.DefVersion);
-            if(typeof source.content !== 'string' || source.content.length === 0) {
-                throw new Error('expected file to have .content: ' + source.def.path);
+            if(path) {
+                xm.assertVar('path', path, 'string');
+                this.path = path;
             }
-            this.path = source.def.path;
-            this.commitSha = source.commit.commitSha;
-            this.contentHash = xm.md5(source.content);
+        }
+        InstalledDef.prototype.update = function (file) {
+            xm.assertVar('file', file, tsd.DefVersion);
+            xm.assertVar('commit', file.commit, tsd.DefCommit);
+            xm.assertVar('commit.sha', file.commit.commitSha, 'sha1');
+            xm.assertVar('blob', file.blob, tsd.DefBlob);
+            xm.assertVar('blob.sha', file.blob.sha, 'sha1');
+            this.path = file.def.path;
+            this.commitSha = file.commit.commitSha;
+            this.blobSha = file.blob.sha;
         };
         InstalledDef.prototype.toString = function () {
             return this.path;
@@ -864,7 +1024,7 @@ var tsd;
             if(this._installed.has(file.def.path)) {
                 def = this._installed.get(file.def.path);
             } else {
-                def = new tsd.InstalledDef();
+                def = new tsd.InstalledDef(file.def.path);
             }
             def.update(file);
             this._installed.set(file.def.path, def);
@@ -896,7 +1056,7 @@ var tsd;
             this._installed.values().forEach(function (file) {
                 json.installed[file.path] = {
                     commit: file.commitSha,
-                    hash: file.contentHash
+                    blob: file.blobSha
                 };
             });
             return json;
@@ -921,7 +1081,7 @@ var tsd;
                 xm.eachProp(json.installed, function (data, path) {
                     var installed = new tsd.InstalledDef(path);
                     installed.commitSha = data.commit;
-                    installed.contentHash = data.hash;
+                    installed.blobSha = data.blob;
                     _this._installed.set(path, installed);
                 });
             }
@@ -932,11 +1092,12 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     tsd.Const = {
         ident: 'tsd',
-        configFile: 'tsd-config.json',
+        configFile: 'tsd.json',
         cacheDir: 'tsd-cache',
-        configSchemaFile: 'tsd-config_v4.json',
+        configSchemaFile: 'tsd-v4.json',
         typingsFolder: 'typings',
         configVersion: 'v4',
         definitelyRepo: 'borisyankov/DefinitelyTyped',
@@ -947,6 +1108,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var path = require('path');
     var Paths = (function () {
         function Paths() {
@@ -972,6 +1134,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
@@ -1009,78 +1172,63 @@ var tsd;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
-    var hasOwnProp = Object.prototype.hasOwnProperty;
+    'use strict';
+    var hasOwnProp = Object.prototype.hasOwnProperty.call;
     var KeyValueMap = (function () {
         function KeyValueMap(data) {
-            this._prefix = '#';
             this._store = {
             };
             if(data) {
                 this.import(data);
             }
-            xm.ObjectUtil.hidePrefixed(this);
+            Object.defineProperty(this, '_store', {
+                enumerable: false
+            });
         }
         KeyValueMap.prototype.has = function (key) {
-            if(typeof key === 'undefined') {
-                return false;
-            }
-            key = this._prefix + key;
-            return hasOwnProp.call(this._store, key);
+            key = '' + key;
+            return xm.hasOwnProp(this._store, key);
         };
         KeyValueMap.prototype.get = function (key, alt) {
-            if (typeof alt === "undefined") { alt = undefined; }
-            if(typeof key === 'undefined') {
-                return alt;
-            }
-            key = this._prefix + key;
-            if(hasOwnProp.call(this._store, key)) {
+            if (typeof alt === "undefined") { alt = null; }
+            key = '' + key;
+            if(xm.hasOwnProp(this._store, key)) {
                 return this._store[key];
             }
             return alt;
         };
         KeyValueMap.prototype.set = function (key, value) {
-            if(typeof key === 'undefined') {
-                return;
-            }
-            key = this._prefix + key;
+            key = '' + key;
             this._store[key] = value;
         };
         KeyValueMap.prototype.remove = function (key) {
-            if(typeof key === 'undefined') {
-                return;
-            }
-            key = this._prefix + key;
-            if(hasOwnProp.call(this._store, key)) {
+            key = '' + key;
+            if(xm.hasOwnProp(this._store, key)) {
                 delete this._store[key];
             }
         };
         KeyValueMap.prototype.keys = function () {
-            var len = this._prefix.length;
             var ret = [];
             for(var key in this._store) {
-                if(hasOwnProp.call(this._store, key)) {
-                    ret.push(key.substr(len));
+                if(xm.hasOwnProp(this._store, key)) {
+                    ret.push(key);
                 }
             }
             return ret;
         };
-        KeyValueMap.prototype.values = function (allow) {
-            var keys = this.keys();
+        KeyValueMap.prototype.values = function () {
             var ret = [];
-            for(var i = 0, ii = keys.length; i < ii; i++) {
-                var key = keys[i];
-                if(!allow || allow.indexOf(key) > -1) {
-                    ret.push(this.get(key));
+            for(var key in this._store) {
+                if(xm.hasOwnProp(this._store, key)) {
+                    ret.push(this._store[key]);
                 }
             }
             return ret;
         };
-        KeyValueMap.prototype.clear = function (keep) {
-            var keys = this.keys();
-            for(var i = 0, ii = keys.length; i < ii; i++) {
-                var key = keys[i];
-                if(!keep || keep.indexOf(key) > -1) {
-                    this.remove(key);
+        KeyValueMap.prototype.clear = function () {
+            for(var key in this._store) {
+                if(xm.hasOwnProp(this._store, key)) {
+                    delete this._store[key];
                 }
             }
         };
@@ -1089,19 +1237,17 @@ var xm;
                 return;
             }
             for(var key in data) {
-                if(hasOwnProp.call(data, key) && (!allow || allow.indexOf(key) > -1)) {
-                    this.set(key, data[key]);
+                if(xm.hasOwnProp(data, key)) {
+                    this._store[key] = data[key];
                 }
             }
         };
         KeyValueMap.prototype.export = function (allow) {
             var ret = {
             };
-            var keys = this.keys();
-            for(var i = 0, ii = keys.length; i < ii; i++) {
-                var key = keys[i];
-                if(!allow || allow.indexOf(key) > -1) {
-                    ret[key] = this.get(key);
+            for(var key in this._store) {
+                if(xm.hasOwnProp(this._store, key)) {
+                    ret[key] = this._store[key];
                 }
             }
             return ret;
@@ -1112,6 +1258,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var StatCounter = (function () {
         function StatCounter(log) {
             if (typeof log === "undefined") { log = false; }
@@ -1171,6 +1318,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var crypto = require('crypto');
     function md5(data) {
         return crypto.createHash('md5').update(data).digest('hex');
@@ -1227,6 +1375,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var CachedJSONValue = (function () {
         function CachedJSONValue(label, key, data) {
             this._key = null;
@@ -1301,6 +1450,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var Q = require('q');
     var assert = require('assert');
     var fs = require('fs');
@@ -1397,6 +1547,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var _ = require('underscore');
     var Q = require('q');
     var fs = require('fs');
@@ -1406,7 +1557,6 @@ var xm;
             this.cacheRead = true;
             this.cacheWrite = true;
             this.remoteRead = true;
-            xm.ObjectUtil.hideFunctions(this);
         }
         CachedLoaderOptions.prototype.modeUpdate = function () {
             this.cacheRead = false;
@@ -1437,16 +1587,16 @@ var xm;
     })();
     xm.CachedLoaderOptions = CachedLoaderOptions;    
     var CachedLoader = (function () {
-        function CachedLoader(name, service) {
+        function CachedLoader(label, service) {
             this._debug = false;
             this._options = new xm.CachedLoaderOptions();
             this._active = new xm.KeyValueMap();
             this._service = null;
             this.stats = new xm.StatCounter();
-            xm.assertVar('label', name, 'string');
+            xm.assertVar('label', label, 'string');
             xm.assertVar('service', service, 'object');
             this._service = service;
-            this.stats.logger = xm.getLogger(name + '.CachedLoader');
+            this.stats.logger = xm.getLogger(label + '.CachedLoader');
             xm.ObjectUtil.hidePrefixed(this);
         }
         CachedLoader.prototype.getKey = function (label, keyTerms) {
@@ -1467,22 +1617,22 @@ var xm;
                 xm.log(key);
             }
             if(this._active.has(key)) {
-                this.stats.count('active-hit');
+                this.stats.count('active-hit', label);
                 return this._active.get(key).then(function (content) {
-                    _this.stats.count('active-resolve');
+                    _this.stats.count('active-resolve', label);
                     return content;
                 }, function (err) {
-                    _this.stats.count('active-error');
+                    _this.stats.count('active-error', label);
                     throw err;
                 });
             }
             var cleanup = function () {
-                _this.stats.count('active-remove');
+                _this.stats.count('active-remove', label);
                 _this._active.remove(key);
             };
             var promise = this.cacheRead(opts, label, key).then(function (res) {
                 if(!xm.isNull(res) && !xm.isUndefined(res)) {
-                    _this.stats.count('cache-hit');
+                    _this.stats.count('cache-hit', label);
                     return res;
                 }
                 return _this.callLoad(opts, label, cachedCall).then(function (res) {
@@ -1502,7 +1652,7 @@ var xm;
                 xm.log.error(err);
                 throw (err);
             });
-            this.stats.count('active-set');
+            this.stats.count('active-set', label);
             this._active.set(key, promise);
             return promise;
         };
@@ -1583,6 +1733,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var Q = require('q');
     var fs = require('fs');
     var path = require('path');
@@ -1626,12 +1777,12 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var uriTemplates = require('uri-templates');
     var URLManager = (function () {
         function URLManager(common) {
             this._templates = new xm.KeyValueMap();
-            this._vars = {
-            };
+            this._vars = new xm.KeyValueMap();
             if(common) {
                 this.setVars(common);
             }
@@ -1643,13 +1794,10 @@ var xm;
             this._templates.set(id, uriTemplates(url));
         };
         URLManager.prototype.setVar = function (id, value) {
-            this._vars[id] = '' + value;
+            this._vars.set(id, value);
         };
         URLManager.prototype.getVar = function (id) {
-            if(this._vars.hasOwnProperty(id)) {
-                return this._vars[id];
-            }
-            return null;
+            return this._vars.get(id, null);
         };
         URLManager.prototype.setVars = function (map) {
             for(var id in map) {
@@ -1666,22 +1814,16 @@ var xm;
         };
         URLManager.prototype.getURL = function (id, vars) {
             if(vars) {
-                var obj = {
-                };
                 var name;
-                for(name in this._vars) {
-                    if(this._vars.hasOwnProperty(name)) {
-                        obj[name] = this._vars[name];
-                    }
-                }
+                var obj = this._vars.export();
                 for(name in vars) {
-                    if(vars.hasOwnProperty(name)) {
+                    if(xm.ObjectUtil.hasOwnProp(vars, name)) {
                         obj[name] = vars[name];
                     }
                 }
                 return this.getTemplate(id).fillFromObject(obj);
             }
-            return this.getTemplate(id).fillFromObject(this._vars);
+            return this.getTemplate(id).fillFromObject(this._vars.export());
         };
         return URLManager;
     })();
@@ -1694,6 +1836,7 @@ var __extends = this.__extends || function (d, b) {
 };
 var git;
 (function (git) {
+    'use strict';
     var assert = require('assert');
     var _ = require('underscore');
     var GithubURLManager = (function (_super) {
@@ -1724,6 +1867,8 @@ var git;
             return this.getURL('raw');
         };
         GithubURLManager.prototype.rawFile = function (commit, path) {
+            xm.assertVar('commit', commit, 'string');
+            xm.assertVar('path', path, 'string');
             return this.getURL('rawFile', {
                 commit: commit,
                 path: path
@@ -1735,6 +1880,7 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
     var GithubRepo = (function () {
         function GithubRepo(ownerName, projectName) {
             this.ownerName = ownerName;
@@ -1755,6 +1901,7 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
     var GitRateLimitInfo = (function () {
         function GitRateLimitInfo() {
             this.limit = 0;
@@ -1763,10 +1910,10 @@ var git;
         }
         GitRateLimitInfo.prototype.readFromRes = function (response) {
             if(response && xm.isObject(response.meta)) {
-                if(response.meta.hasOwnProperty('x-ratelimit-limit')) {
+                if(xm.ObjectUtil.hasOwnProp(response.meta, 'x-ratelimit-limit')) {
                     this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);
                 }
-                if(response.meta.hasOwnProperty('x-ratelimit-remaining')) {
+                if(xm.ObjectUtil.hasOwnProp(response.meta, 'x-ratelimit-remaining')) {
                     this.remaining = parseInt(response.meta['x-ratelimit-remaining'], 10);
                 }
                 this.lastUpdate = new Date();
@@ -1784,6 +1931,7 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
     var _ = require('underscore');
     var Q = require('q');
     var fs = require('fs');
@@ -1919,6 +2067,7 @@ var git;
 })(git || (git = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var Q = require('q');
     var fs = require('fs');
     var path = require('path');
@@ -1992,7 +2141,7 @@ var git;
             this.stats.count('start');
             var tmp = filePath.split(/\/|\\\//g);
             tmp.unshift(commitSha);
-            var storeFile = path.join.apply(null, tmp);
+            var storeFile = (path.join).apply(null, tmp);
             if(this._debug) {
                 xm.log(storeFile);
             }
@@ -2011,8 +2160,8 @@ var git;
                         throw new Error('unexpected status code: ' + res.statusCode);
                     }
                     _this.stats.count('request-complete');
-                    var content = String(res.body);
-                    return content;
+                    _this.stats.logger(xm.toProtoString(res.body));
+                    return res.body;
                 });
             });
         };
@@ -2048,6 +2197,7 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
     var leadingExp = /^\.\.\//;
     var DefUtil = (function () {
@@ -2129,21 +2279,8 @@ for(var i = 0, ii = list.length; i < ii; i++) {
                 }
                 for(var j = 0, jj = file.dependencies.length; j < jj; j++) {
                     var tmp = file.dependencies[j];
-                    if(!DefUtil.contains(ret, tmp)) {
-                        ret.push(tmp);
-                    }
-                }
-            }
-            return ret;
-        };
-        DefUtil.extractDependencies = function extractDependencies(list) {
-            var ret = [];
-            for(var i = 0, ii = list.length; i < ii; i++) {
-                var file = list[i];
-                for(var j = 0, jj = file.dependencies.length; j < jj; j++) {
-                    var tmp = file.dependencies[j];
-                    if(!DefUtil.contains(ret, tmp) && !DefUtil.contains(list, tmp)) {
-                        ret.push(tmp);
+                    if(!DefUtil.contains(ret, tmp.head)) {
+                        ret.push(tmp.head);
                     }
                 }
             }
@@ -2163,7 +2300,7 @@ for(var i = 0, ii = list.length; i < ii; i++) {
             var ret = [];
             for(var i = 0, ii = list.length; i < ii; i++) {
                 var file = list[i];
-                if(typeof file.content === 'string' && file.content.length > 0) {
+                if(file.hasContent()) {
                     ret.push(file);
                 }
             }
@@ -2203,6 +2340,11 @@ for(var i = 0, ii = list.length; i < ii; i++) {
 })(tsd || (tsd = {}));
 var git;
 (function (git) {
+    'use strict';
+})(git || (git = {}));
+var git;
+(function (git) {
+    'use strict';
     var GitUserCommit = (function () {
         function GitUserCommit() { }
         GitUserCommit.prototype.toString = function () {
@@ -2224,6 +2366,7 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
     var GithubUser = (function () {
         function GithubUser() { }
         GithubUser.prototype.toString = function () {
@@ -2245,6 +2388,7 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
     var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
     var GitCommitMessage = (function () {
         function GitCommitMessage(text) {
@@ -2267,34 +2411,46 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var pointer = require('jsonpointer.js');
     var branch_tree_sha = '/commit/commit/tree/sha';
     var DefCommit = (function () {
         function DefCommit(commitSha) {
-            this._hasMeta = false;
+            this.hasMeta = false;
             this.message = new git.GitCommitMessage();
             xm.assertVar('commitSha', commitSha, 'string');
-            this._commitSha = commitSha;
+            this.commitSha = commitSha;
             xm.ObjectUtil.hidePrefixed(this);
+            xm.ObjectUtil.freezeProps(this, [
+                'commitSha'
+            ]);
         }
         DefCommit.prototype.parseJSON = function (commit) {
             xm.assertVar('commit', commit, 'object');
-            if(commit.sha !== this._commitSha) {
-                throw new Error('not my tree: ' + this._commitSha + ' -> ' + commit.sha);
+            if(commit.sha !== this.commitSha) {
+                throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
             }
-            this._treeSha = pointer.get(commit, branch_tree_sha);
+            if(this.treeSha) {
+                throw new Error('allready got tree: ' + this.treeSha + ' -> ' + commit.sha);
+            }
+            this.treeSha = pointer.get(commit, branch_tree_sha);
+            ;
             this.hubAuthor = git.GithubUser.fromJSON(commit.author);
             this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
             this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
             this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
             this.message.parse(commit.commit.message);
-            this._hasMeta = true;
+            this.hasMeta = true;
+            xm.ObjectUtil.freezeProps(this, [
+                'treeSha', 
+                'hasMeta'
+            ]);
         };
         DefCommit.prototype.hasMetaData = function () {
-            return this._hasMeta;
+            return this.hasMeta;
         };
         DefCommit.prototype.toString = function () {
-            return this._treeSha;
+            return this.treeSha;
         };
         Object.defineProperty(DefCommit.prototype, "changeDate", {
             get: function () {
@@ -2311,14 +2467,7 @@ var tsd;
         });
         Object.defineProperty(DefCommit.prototype, "commitShort", {
             get: function () {
-                return this._commitSha ? tsd.shaShort(this._commitSha) : '<no sha>';
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DefCommit.prototype, "commitSha", {
-            get: function () {
-                return this._commitSha;
+                return this.commitSha ? tsd.shaShort(this.commitSha) : '<no sha>';
             },
             enumerable: true,
             configurable: true
@@ -2329,6 +2478,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var pointer = require('jsonpointer.js');
     var commit_sha = '/commit/sha';
     var branch_tree_sha = '/commit/commit/tree/sha';
@@ -2339,6 +2489,7 @@ var tsd;
             this._indexCommit = null;
             this._definitions = new xm.KeyValueMap();
             this._commits = new xm.KeyValueMap();
+            this._blobs = new xm.KeyValueMap();
             this._versions = new xm.KeyValueMap();
             xm.ObjectUtil.hidePrefixed(this);
         }
@@ -2352,6 +2503,7 @@ var tsd;
             if(this._hasIndex) {
                 return;
             }
+            this._blobs.clear();
             this._commits.clear();
             this._versions.clear();
             this._definitions.clear();
@@ -2371,7 +2523,7 @@ var tsd;
             this._indexCommit.parseJSON(branch.commit);
             var def;
             var file;
-            tree.tree.forEach(function (elem) {
+            xm.eachElem(tree.tree, function (elem) {
                 var char = elem.path.charAt(0);
                 if(elem.type === 'blob' && char !== '.' && char !== '_' && tsd.Def.isDefPath(elem.path)) {
                     def = _this.procureDef(elem.path);
@@ -2381,6 +2533,9 @@ var tsd;
                     file = _this.procureVersion(def, _this._indexCommit);
                     if(!file) {
                         return;
+                    }
+                    if(!file.blob) {
+                        file.setContent(_this.procureBlob(elem.sha));
                     }
                     def.head = file;
                 }
@@ -2415,6 +2570,25 @@ var tsd;
                 this._commits.set(commitSha, commit);
             }
             return commit;
+        };
+        DefIndex.prototype.procureBlob = function (blobSha) {
+            xm.assertVar('blobSha', blobSha, 'sha1');
+            var blob;
+            if(this._blobs.has(blobSha)) {
+                blob = this._blobs.get(blobSha);
+            } else {
+                blob = new tsd.DefBlob(blobSha);
+                this._blobs.set(blobSha, blob);
+            }
+            return blob;
+        };
+        DefIndex.prototype.procureBlobFor = function (content) {
+            var sha = git.GitUtil.blobSHAHex(content);
+            var blob = this.procureBlob(sha);
+            if(!blob.hasContent()) {
+                blob.setContent(content);
+            }
+            return blob;
         };
         DefIndex.prototype.procureDef = function (path) {
             xm.assertVar('path', path, 'string');
@@ -2475,6 +2649,18 @@ var tsd;
         DefIndex.prototype.hasDef = function (path) {
             return this._definitions.has(path);
         };
+        DefIndex.prototype.getBlob = function (sha) {
+            return this._blobs.get(sha, null);
+        };
+        DefIndex.prototype.hasBlob = function (sha) {
+            return this._blobs.has(sha);
+        };
+        DefIndex.prototype.getCommit = function (sha) {
+            return this._commits.get(sha, null);
+        };
+        DefIndex.prototype.hasCommit = function (sha) {
+            return this._commits.has(sha);
+        };
         DefIndex.prototype.getPaths = function () {
             return this._definitions.values().map(function (file) {
                 return file.path;
@@ -2519,6 +2705,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
     var flagFilter = /[gim]/;
     var RegExpGlue = (function () {
@@ -2605,6 +2792,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var util = require('util');
     var trimmedLine = /([ \t]*)(.*?)([ \t]*)(\r\n|\n|\r|$)/g;
     var LineParserCore = (function () {
@@ -2835,6 +3023,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var endSlashTrim = /\/?$/;
     var AuthorInfo = (function () {
         function AuthorInfo(name, url, email) {
@@ -2869,6 +3058,7 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var endSlashTrim = /\/?$/;
     var glue = xm.RegExpGlue.get;
     var expStart = /^/;
@@ -3000,6 +3190,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var Q = require('q');
     var leadingExp = /^\.\.\//;
     var Resolver = (function () {
@@ -3033,8 +3224,8 @@ var tsd;
             }
             var promise = this._core.loadContent(file).then(function (file) {
                 _this.stats.count('file-parse');
-                file.dependencies = [];
-                var refs = tsd.DefUtil.extractReferenceTags(file.content);
+                file.dependencies.splice(0, file.dependencies.length);
+                var refs = tsd.DefUtil.extractReferenceTags(file.blob.content.toString('utf8'));
                 refs = refs.reduce(function (memo, refPath) {
                     refPath = refPath.replace(leadingExp, '');
                     if(refPath.indexOf('/') < 0) {
@@ -3043,18 +3234,18 @@ var tsd;
                     if(tsd.Def.isDefPath(refPath)) {
                         memo.push(refPath);
                     } else {
-                        xm.log.warn('not a reference: ' + refPath);
+                        xm.log.warn('not a usable reference: ' + refPath);
                     }
                     return memo;
                 }, []);
                 var queued = refs.reduce(function (memo, refPath) {
                     if(_this._core.index.hasDef(refPath)) {
-                        var dep = _this._core.index.getDef(refPath).head;
+                        var dep = _this._core.index.getDef(refPath);
                         file.dependencies.push(dep);
                         _this.stats.count('dep-added');
-                        if(!dep.solved && !_this._active.has(dep.key)) {
+                        if(!dep.head.solved && !_this._active.has(dep.head.key)) {
                             _this.stats.count('dep-recurse');
-                            memo.push(_this.resolve(dep));
+                            memo.push(_this.resolve(dep.head));
                         }
                     } else {
                         xm.log.warn('path reference not in index: ' + refPath);
@@ -3080,6 +3271,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var Q = require('q');
     var FS = require('q-io/fs');
     var path = require('path');
@@ -3260,11 +3452,19 @@ var tsd;
             });
         };
         Core.prototype.loadContent = function (file) {
-            if(file.content) {
-                return Q(file.content);
+            var _this = this;
+            if(file.hasContent()) {
+                return Q(file.blob.content);
             }
             return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then(function (content) {
-                file.content = String(content);
+                var sha = git.GitUtil.blobSHAHex(content);
+                if(file.blob) {
+                    if(!file.blob.hasContent()) {
+                        file.blob.setContent(content);
+                    }
+                } else {
+                    file.setContent(_this.index.procureBlobFor(content));
+                }
                 return file;
             });
         };
@@ -3306,7 +3506,7 @@ var tsd;
                 } else {
                     file.info = new tsd.DefInfo();
                 }
-                parser.parse(file.info, file.content);
+                parser.parse(file.info, file.blob.content.toString('utf8'));
                 if(!file.info.isValid()) {
                     _this.log.warn('bad parse in: ' + file);
                 }
@@ -3337,7 +3537,7 @@ var tsd;
                     }
                     return xm.mkdirCheckQ(dir, true);
                 }).then(function () {
-                    return FS.write(targetPath, file.content);
+                    return FS.write(targetPath, file.blob.content);
                 }).then(function () {
                     return targetPath;
                 });
@@ -3374,6 +3574,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var wordParts = /[\w_\.-]/;
     var wordGreedy = /[\w_\.-]+/;
     var wordLazy = /[\w_\.-]*?/;
@@ -3499,6 +3700,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var InfoMatcher = (function () {
         function InfoMatcher() { }
         InfoMatcher.prototype.test = function (info) {
@@ -3510,6 +3712,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var Selector = (function () {
         function Selector(pattern) {
             if (typeof pattern === "undefined") { pattern = '*'; }
@@ -3534,6 +3737,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var path = require('path');
     var util = require('util');
     var Q = require('q');
@@ -3659,6 +3863,7 @@ var tsd;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var Set = (function () {
         function Set(values) {
             this._content = [];
@@ -3700,6 +3905,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     function callAsync(callback) {
         var args = [];
         for (var _i = 0; _i < (arguments.length - 1); _i++) {
@@ -3713,13 +3919,18 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     function shaShort(sha) {
+        if(!sha) {
+            return '<no sha>';
+        }
         return sha.substr(0, tsd.Const.shaShorten);
     }
     tsd.shaShort = shaShort;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
+    'use strict';
     var optimist = require('optimist');
     var Table = require('easy-table');
     var ExposeCommand = (function () {
@@ -3789,7 +4000,7 @@ var xm;
                 } else if(option.type === 'string') {
                     optimist.string(option.name);
                 }
-                if(option.hasOwnProperty('default')) {
+                if(xm.ObjectUtil.hasOwnProp(option, 'default')) {
                     optimist.default(option.name, option.default);
                 }
             });
@@ -3937,6 +4148,7 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
     function pad(number) {
         var r = String(number);
         if(r.length === 1) {
@@ -3954,6 +4166,7 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
@@ -3978,8 +4191,23 @@ var tsd;
         function Job() { }
         return Job;
     })();    
+    var pleonasm;
+    function pleo(input) {
+        return '[' + pleonasm.encode(input, '_', '_').code + ']';
+    }
+    function loadData(args) {
+        return Q.nfcall(function (callback) {
+            if(!pleonasm) {
+                pleonasm = require('pleonasm');
+                pleonasm.onload = function () {
+                    xm.callAsync(callback);
+                };
+            }
+            xm.callAsync(callback);
+        });
+    }
     function getAPIJob(args) {
-        return Q.fcall(function () {
+        return loadData(args).then(function () {
             if(args.config) {
                 return FS.isFile(args.config).then(function (isFile) {
                     if(!isFile) {
@@ -4080,12 +4308,12 @@ var tsd;
         }
         function printDefHead(def) {
             xm.log('');
-            xm.log(def.toString());
+            xm.log(def.toString() + ' ' + pleo(def.head.blob.shaShort));
             xm.log('----');
         }
         function printFileHead(file) {
             xm.log('');
-            xm.log(file.toString());
+            xm.log(file.toString()) + ' ' + pleo(file.blob.shaShort);
             xm.log('----');
         }
         function printFileCommit(file, skipNull) {
@@ -4216,10 +4444,10 @@ var tsd;
                     printFileHead(def);
                     printFileInfo(def);
                     if(def.dependencies.length > 0) {
-                        def.dependencies.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
+                        def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
                             xm.log(' - ' + def.toString());
-                            if(def.dependencies.length > 0) {
-                                def.dependencies.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
+                            if(def.head.dependencies.length > 0) {
+                                def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
                                     xm.log('    - ' + def.toString());
                                 });
                             }

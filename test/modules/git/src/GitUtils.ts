@@ -3,6 +3,7 @@
 ///<reference path="helper.ts" />
 
 describe('git.GitUtils', () => {
+	'use strict';
 
 	var path = require('path');
 

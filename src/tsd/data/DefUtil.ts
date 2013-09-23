@@ -2,6 +2,7 @@
 
 
 module tsd {
+	'use strict';
 
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
@@ -89,7 +90,6 @@ module tsd {
 			}
 			return false;
 		}
-
 		static mergeDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
 			for (var i = 0, ii = list.length; i < ii; i++) {
@@ -99,15 +99,16 @@ module tsd {
 				}
 				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
 					var tmp = file.dependencies[j];
-					if (!DefUtil.contains(ret, tmp)) {
-						ret.push(tmp);
+					//TODO harden mergeDependencies
+					if (!DefUtil.contains(ret, tmp.head)) {
+						ret.push(tmp.head);
 					}
 				}
 			}
 			return ret;
 		}
 
-		static extractDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
+		/*static extractDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
 			for (var i = 0, ii = list.length; i < ii; i++) {
 				var file = list[i];
@@ -119,7 +120,7 @@ module tsd {
 				}
 			}
 			return ret;
-		}
+		}*/
 
 		static matchCommit(list:tsd.DefVersion[], commitSha:string):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
@@ -136,7 +137,7 @@ module tsd {
 			var ret:tsd.DefVersion[] = [];
 			for (var i = 0, ii = list.length; i < ii; i++) {
 				var file = list[i];
-				if (typeof file.content === 'string' && file.content.length > 0) {
+				if (file.hasContent()) {
 					ret.push(file);
 				}
 			}

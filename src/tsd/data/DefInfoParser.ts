@@ -5,6 +5,7 @@
 ///<reference path="DefInfo.ts" />
 
 module tsd {
+	'use strict';
 
 	//TODO replace vanilla RegExp with XRegExp? (low prio)
 

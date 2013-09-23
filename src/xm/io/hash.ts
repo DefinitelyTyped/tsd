@@ -9,6 +9,7 @@
 ///<reference path="../typeOf.ts" />
 
 module xm {
+	'use strict';
 
 	var crypto = require('crypto');
 

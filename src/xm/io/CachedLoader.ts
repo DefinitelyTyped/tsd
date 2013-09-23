@@ -10,6 +10,7 @@
 ///<reference path="CachedJSONStore.ts" />
 
 module xm {
+	'use strict';
 
 	var _:UnderscoreStatic = require('underscore');
 	var Q:QStatic = require('q');
@@ -21,8 +22,7 @@ module xm {
 		cacheWrite = true;
 		remoteRead = true;
 
-		constructor(){
-			xm.ObjectUtil.hideFunctions(this);
+		constructor() {
 		}
 
 		modeUpdate() {
@@ -75,16 +75,17 @@ module xm {
 
 		stats = new xm.StatCounter();
 
-		constructor(name:string, service:CachedLoaderService) {
-			xm.assertVar('label', name, 'string');
+		constructor(label:string, service:CachedLoaderService) {
+			xm.assertVar('label', label, 'string');
 			xm.assertVar('service', service, 'object');
 			this._service = service;
-			this.stats.logger = xm.getLogger(name + '.CachedLoader');
+			this.stats.logger = xm.getLogger(label + '.CachedLoader');
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		getKey(label:string, keyTerms?:any):string {
+			//TODO replace with: return xm.jsonToIdent(keyTerms ? [label, keyTerms] : [label]);
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
@@ -102,27 +103,27 @@ module xm {
 
 			//reuse promise if we are already getting this file
 			if (this._active.has(key)) {
-				this.stats.count('active-hit');
+				this.stats.count('active-hit', label);
 
 				return this._active.get(key).then((content) => {
-					this.stats.count('active-resolve');
+					this.stats.count('active-resolve', label);
 					return content;
 				}, (err) => {
-					this.stats.count('active-error');
+					this.stats.count('active-error', label);
 					//rethrow
 					throw err;
 				});
 			}
 
 			var cleanup = () => {
-				this.stats.count('active-remove');
+				this.stats.count('active-remove', label);
 				this._active.remove(key);
 			};
 
 			//main logic flow
 			var promise = this.cacheRead(opts, label, key).then((res) => {
 				if (!xm.isNull(res) && !xm.isUndefined(res)) {
-					this.stats.count('cache-hit');
+					this.stats.count('cache-hit', label);
 					return res;
 				}
 				return this.callLoad(opts, label, cachedCall).then((res) => {
@@ -146,7 +147,7 @@ module xm {
 			});
 
 			//cache promise while we are loading
-			this.stats.count('active-set');
+			this.stats.count('active-set', label);
 			this._active.set(key, promise);
 			return promise;
 		}

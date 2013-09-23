@@ -12,6 +12,7 @@ declare interface Function {
 	name:string;
 }
 module xm {
+	'use strict';
 
 	export function getFuncLabel(func):string {
 		var match = /^\s?function ([^( ]*) *\( *([^(]*?) *\)/.exec(func);
@@ -24,11 +25,11 @@ module xm {
 		return '<anonymous>';
 	}
 
-	export function toValueStrim(obj:any, depth?:number = 2):string {
+	export function toValueStrim(obj:any, depth?:number = 4):string {
 		var type = xm.typeOf(obj);
 
-		var strCut = 20;
-		var objCut = 30;
+		var strCut = 40;
+		var objCut = 50;
 
 		depth--;
 
@@ -62,7 +63,7 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
-				return '{' + trimLine(Object.keys(obj).sort().map((key) => {
+				return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map((key) => {
 					return trimLine(key) + ':' + toValueStrim(obj[key], depth);
 				}).join(','), objCut, false) + '}';
 			}
@@ -78,5 +79,4 @@ module xm {
 		}
 		return quotes ? '"' + value + '"' : value;
 	}
-
 }

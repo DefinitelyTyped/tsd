@@ -1,0 +1,151 @@
+{
+  "nameMatches": [
+    {
+      "path": "angularjs/angular-cookies.d.ts",
+      "project": "angularjs",
+      "name": "angular-cookies",
+      "def": {
+        "path": "angularjs/angular-cookies.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular-cookies.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-mocks.d.ts",
+      "project": "angularjs",
+      "name": "angular-mocks",
+      "def": {
+        "path": "angularjs/angular-mocks.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular-mocks.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-resource.d.ts",
+      "project": "angularjs",
+      "name": "angular-resource",
+      "def": {
+        "path": "angularjs/angular-resource.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular-resource.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-sanitize.d.ts",
+      "project": "angularjs",
+      "name": "angular-sanitize",
+      "def": {
+        "path": "angularjs/angular-sanitize.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular-sanitize.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-scenario.d.ts",
+      "project": "angularjs",
+      "name": "angular-scenario",
+      "def": {
+        "path": "angularjs/angular-scenario.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular-scenario.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular.d.ts",
+      "project": "angularjs",
+      "name": "angular",
+      "def": {
+        "path": "angularjs/angular.d.ts",
+        "commit": {
+          "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+        },
+        "key": "angularjs/angular.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+        "solved": false,
+        "dependencies": []
+      },
+      "history": []
+    }
+  ],
+  "selection": [
+    {
+      "path": "angularjs/angular-cookies.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular-cookies.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-mocks.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular-mocks.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-resource.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular-resource.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-sanitize.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular-sanitize.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-scenario.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular-scenario.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular.d.ts",
+      "commit": {
+        "commitSha": "a8d8c2ac668fbb99cb60fb5d25c663e9356fee14"
+      },
+      "key": "angularjs/angular.d.ts-a8d8c2ac668fbb99cb60fb5d25c663e9356fee14",
+      "solved": false,
+      "dependencies": []
+    }
+  ],
+  "written": {}
+}

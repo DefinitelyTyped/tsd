@@ -6,7 +6,7 @@
 	"installed": {
 		"async/async.d.ts": {
 			"commit": "35f964c6a40a3e11e5e56bbd519f14de3fdb66b5",
-			"hash": "24682b462b7c936c5f4a4ec87e21597c"
+			"blob": "835c10777e974f72cc341a101655012e20675c05"
 		}
 	}
 }

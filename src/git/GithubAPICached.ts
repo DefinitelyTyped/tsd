@@ -13,6 +13,7 @@
 ///<reference path="GithubRateLimitInfo.ts" />
 
 module git {
+	'use strict';
 
 	var _:UnderscoreStatic = require('underscore');
 	var Q:QStatic = require('q');
@@ -170,3 +171,4 @@ module git {
 		}
 	}
 }
+

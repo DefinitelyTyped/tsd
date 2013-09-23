@@ -7,6 +7,8 @@
  * */
 
  module xm {
+	 'use strict';
+
 	 //setImmediate helper
 	export function callAsync(callback, ...args:any[]) {
 		process.nextTick(() => {

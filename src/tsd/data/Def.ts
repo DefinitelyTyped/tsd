@@ -2,6 +2,7 @@
 ///<reference path="DefVersion.ts" />
 
 module tsd {
+	'use strict';
 
 	var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
 
@@ -61,6 +62,7 @@ module tsd {
 			var file = new tsd.Def(path);
 			file.project = match[1];
 			file.name = match[2];
+			xm.ObjectUtil.freezeProps(file, ['path', 'project', 'name']);
 			//TODO support semver postfix 'project/name-v0.1.3-alpha'
 			// path.semver = match[3];
 

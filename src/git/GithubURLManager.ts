@@ -7,13 +7,14 @@
 ///<reference path="../xm/io/URLManager.ts" />
 
 module git {
+	'use strict';
 
 	var assert = require('assert');
 	var _:UnderscoreStatic = require('underscore');
 
 	/*
 	 GithubURLManager: url-templates for common urls
-	*/
+	 */
 	export class GithubURLManager extends xm.URLManager {
 
 		private _base:string = 'https://github.com/{owner}/{project}';
@@ -38,19 +39,22 @@ module git {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		public api():string {
+		api():string {
 			return this.getURL('api');
 		}
 
-		public base():string {
+		base():string {
 			return this.getURL('base');
 		}
 
-		public raw():string {
+		raw():string {
 			return this.getURL('raw');
 		}
 
-		public rawFile(commit:string, path:string):string {
+		rawFile(commit:string, path:string):string {
+			xm.assertVar('commit', commit, 'string');
+			xm.assertVar('path', path, 'string');
+
 			return this.getURL('rawFile', {
 				commit: commit,
 				path: path

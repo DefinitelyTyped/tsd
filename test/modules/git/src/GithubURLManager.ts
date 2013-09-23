@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/git/GithubURLManager.ts" />
 
 describe('git.GithubRepo / git.GithubURLManager', () => {
+	'use strict';
 
 	var repo:git.GithubRepo;
 	var urls:git.GithubURLManager;

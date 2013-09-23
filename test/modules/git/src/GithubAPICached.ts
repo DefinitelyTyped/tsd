@@ -8,6 +8,7 @@
 declare var gitTest;
 
 describe('git.GithubAPICached', () => {
+	'use strict';
 
 	var api:git.GithubAPICached;
 	var repo:git.GithubRepo;
@@ -24,6 +25,10 @@ describe('git.GithubAPICached', () => {
 	afterEach(() => {
 		repo = null;
 		api = null;
+	});
+	it('pretest', () => {
+		assert.isString(gitTest.config.repo.owner, 'owner');
+		assert.isString(gitTest.config.repo.project, 'project');
 	});
 
 	it('should be defined', () => {

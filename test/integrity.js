@@ -1,4 +1,5 @@
 describe('tsd', function () {
+	'use strict';
 
 	var grunt = require('grunt');
 	var chai = require('chai');
@@ -9,7 +10,7 @@ describe('tsd', function () {
 	describe('package.json', function () {
 
 		var pkg;
-
+		//TODO move it to a json-schema
 		it('valid formed', function () {
 			assert.jsonFile('package.json');
 

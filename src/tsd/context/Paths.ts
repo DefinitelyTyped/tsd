@@ -4,6 +4,7 @@
 ///<reference path='Const.ts' />
 
 module tsd {
+	'use strict';
 
 	var path = require('path');
 

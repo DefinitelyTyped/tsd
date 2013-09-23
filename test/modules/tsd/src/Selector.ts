@@ -8,6 +8,7 @@
 ///<reference path="../../../../src/tsd/select/NameMatcher.ts" />
 
 describe('Selector', () => {
+	'use strict';
 
 	var path = require('path');
 

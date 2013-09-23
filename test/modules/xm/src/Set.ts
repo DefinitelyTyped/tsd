@@ -2,6 +2,7 @@
 ///<reference path="../../../../src/xm/Set.ts" />
 
 describe('xm.Set', () => {
+	'use strict';
 
 	var list:xm.Set;
 

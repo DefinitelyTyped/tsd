@@ -3,6 +3,7 @@
 ///<reference path="CachedJSONStore.ts" />
 
 module xm {
+	'use strict';
 
 	var Q:QStatic = require('q');
 	var fs = require('fs');

@@ -8,6 +8,7 @@
 ///<reference path="settings.ts" />
 
 module helper {
+	'use strict';
 
 	var fs = require('fs');
 	var path = require('path');
@@ -33,6 +34,14 @@ module helper {
 
 	export function getProjectRoot():string {
 		return path.dirname(xm.PackageJSON.find());
+	}
+
+	export function getDirNameFixtures():string {
+		return path.resolve(__dirname, '..', 'fixtures');
+	}
+
+	export function getDirNameTmp():string {
+		return path.resolve(__dirname, '..', 'tmp');
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -76,14 +85,16 @@ module helper {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 
-		//clones
-		actual = actual.slice(0);
-		expected = expected.slice(0);
+		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
 
-		outer : while (actual.length > 0) {
-			var act = actual.pop();
-			for (var i = 0, ii = expected.length; i < ii; i++) {
-				var exp = expected[i];
+		//clones
+		var actualQueue = actual.slice(0);
+		var expectedQueue = expected.slice(0);
+
+		outer : while (actualQueue.length > 0) {
+			var act = actualQueue.pop();
+			for (var i = 0, ii = expectedQueue.length; i < ii; i++) {
+				var exp = expectedQueue[i];
 
 				//check if this combination should be asserted
 				if (matcher(act, exp)) {
@@ -94,11 +105,14 @@ module helper {
 					continue outer;
 				}
 			}
+			if (expected.length > 0) {
+				xm.log(expected);
+			}
 			//use assert.deepEqual for diff report
 			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
-		if (expected.length > 0) {
+		if (expected.length > 0 && expectedQueue.length > 0) {
 			//use deepEqual for nice report
 			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
 		}
@@ -106,7 +120,7 @@ module helper {
 
 	//get lazy wrapper for re-use
 	export function getAssertUnorderedLike(matcher:IsLikeCB, assertion:AssertCB, preLabel:string):AssertCB {
-		return function (actual:any[], expected:any[], message?:string) {
+		return function assertUnorderedLikeWrap(actual:any[], expected:any[], message?:string) {
 			assertUnorderedLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
 		};
 	}
@@ -119,9 +133,11 @@ module helper {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 
+		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
+
 		//clones
-		actual = actual.slice(0);
-		expected = expected.slice(0);
+		var actualQueue = actual.slice(0);
+		var expectedQueue = expected.slice(0);
 
 		outer : while (actual.length > 0) {
 			var act = actual.pop();
@@ -144,7 +160,7 @@ module helper {
 			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
-		if (expected.length > 0) {
+		if (expected.length > 0 && expectedQueue.length > 0) {
 			//use assert.deepEqual for diff report
 			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
 		}
@@ -167,10 +183,10 @@ module helper {
 	export function assertKeyValue(map:xm.IKeyValueMap, values:any, assertion:AssertCB, message:string) {
 		assert.isObject(map, message + ': map');
 		assert.isObject(values, message + ': values');
-		assert.isFunction(values, message + ': assertion');
+		assert.isFunction(assertion, message + ': assertion');
 
 		var keys:string[] = map.keys();
-		values.keys().forEach((key:string) => {
+		Object.keys(values).forEach((key:string) => {
 			var i = keys.indexOf(key);
 			assert(i > -1, message + ': expected key "' + key + '"');
 			keys.splice(i, 1);

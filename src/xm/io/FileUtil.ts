@@ -10,6 +10,7 @@
 ///<reference path="mkdirCheck.ts" />
 
 module xm {
+	'use strict';
 
 	var fs = require('fs');
 	var Q:QStatic = require('q');

@@ -10,6 +10,7 @@
 ///<reference path="inspect.ts" />
 
 module xm {
+	'use strict';
 
 	function isSha(value:any):bool {
 		if (typeof value !== 'string') {
@@ -48,28 +49,27 @@ module xm {
 		// undefined or null
 		if (valueKind === 'undefined' || valueKind === 'null') {
 			if (!opt) {
-				throw new Error('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
+				throw new Error('assertVar() expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
 			}
 		}
 		else if (typeKind === 'function') {
 			if (!(value instanceof type)) {
-				throw new Error('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+				throw new Error('assertVar() expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
 			}
 		}
 		else if (typeKind === 'string') {
 			if (typeOfAssert.hasOwnProperty(type)) {
 				var check = typeOfAssert[type];
 				if (!check(value)) {
-					throw new Error('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+					throw new Error('assertVar() expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
 				}
 			}
 			else {
-				throw new Error('unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
+				throw new Error('assertVar() unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
 			}
 		}
 		else {
-			throw new Error('bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
+			throw new Error('assertVar() bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
 		}
 	}	//make a compact debug string from any object
-
 }

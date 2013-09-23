@@ -1,4 +1,5 @@
 module git {
+	'use strict';
 
 	/*
 	 GitCommitUser: basic git committer

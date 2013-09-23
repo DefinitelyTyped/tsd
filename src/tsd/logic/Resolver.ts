@@ -5,6 +5,7 @@
 ///<reference path="../data/DefVersion.ts" />
 
 module tsd {
+	'use strict';
 
 	var Q:QStatic = require('q');
 	var leadingExp = /^\.\.\//;
@@ -13,6 +14,7 @@ module tsd {
 	 Resolver: resolve dependencies for given def versions
 	 */
 	//TODO add unit test,  verify race condition solver works properly
+	//TODO 'resolve' not good choice (conflicts with promises)
 	export class Resolver {
 
 		private _core:Core;
@@ -61,9 +63,9 @@ module tsd {
 				this.stats.count('file-parse');
 
 				//force empty for robustness
-				file.dependencies = [];
+				file.dependencies.splice(0, file.dependencies.length);
 
-				var refs:string[] = tsd.DefUtil.extractReferenceTags(file.content);
+				var refs:string[] = tsd.DefUtil.extractReferenceTags(file.blob.content.toString('utf8'));
 
 				//filter reasonable formed paths
 				refs = <string[]>refs.reduce((memo:any[], refPath:string):any[] => {
@@ -77,7 +79,7 @@ module tsd {
 						memo.push(refPath);
 					}
 					else {
-						xm.log.warn('not a reference: ' + refPath);
+						xm.log.warn('not a usable reference: ' + refPath);
 					}
 					return memo;
 				}, []);
@@ -86,17 +88,18 @@ module tsd {
 				var queued = <Qpromise[]>refs.reduce((memo:any[], refPath) => {
 					if (this._core.index.hasDef(refPath)) {
 						//use .head (could use same commit but that would be version hell with interdependent definitions)
-						var dep:DefVersion = this._core.index.getDef(refPath).head;
+						var dep:Def = this._core.index.getDef(refPath);
 						file.dependencies.push(dep);
 						this.stats.count('dep-added');
 
+						//TODO decide if always to go with head or not
 						//maybe it need some resolving itself?
-						if (!dep.solved && !this._active.has(dep.key)) {
+						if (!dep.head.solved && !this._active.has(dep.head.key)) {
 							this.stats.count('dep-recurse');
 							//xm.log('recurse ' + dep.toString());
 
 							//lets go deeper
-							memo.push(this.resolve(dep));
+							memo.push(this.resolve(dep.head));
 						}
 					}
 					else {

@@ -2,6 +2,8 @@
 ///<reference path="../../../../src/xm/typeOf.ts" />
 
 describe('xm.typeOf', () => {
+	'use strict';
+
 	var func = function () {
 		//dummy
 	};

@@ -2,6 +2,7 @@
 ///<reference path="../data/DefInfo.ts" />
 
 module tsd {
+	'use strict';
 	/*
 	 DefInfoMatcher: test against DefInfo
 	 */
