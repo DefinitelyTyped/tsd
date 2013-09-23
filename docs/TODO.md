@@ -24,15 +24,15 @@ Most of these are file/class/block 'local' changes: easy to fix without conflict
 
 Never enough.
 
-* [ ] Expand API command testing; besides search/install (once update fixtures land)
-* [ ] Add CLI tests
-* [ ] Add node.js module tests
-* [ ] Consider testing JavaScript output instead of TypeScript source.
+* :a:   Expand API command testing; besides search/install (once update fixtures land)
+* :x:   Add CLI tests
+* :o:	Add node.js module tests
+* :id:	Consider testing JavaScript output instead of TypeScript source.
 
 Working on a way run data tests from fixtures that can be updated easily (otherwise decent coverage is insane to manage) 
 
-* [x] Run github api+raw caches from fixtures (with easy updates/expansion)
-* [ ] Run API tests from fixtures and stored comparison output (with easy updates/expansion)
+* :m:	Run github api+raw caches from fixtures (with easy updates/expansion)
+* :a:   Run API tests from fixtures and stored comparison output (with easy updates/expansion)
 
 ## Global / multi-file changes:
 
@@ -40,141 +40,149 @@ Working on a way run data tests from fixtures that can be updated easily (otherw
 
 Basics commands
 
-* [x] Add help (show commands) 
-* [x] Add version (show version)
-* [ ] Add init (new json with repo/branch)
-* [x] Add settings (show config info)
-* [ ] Consider unifying local/remote selectors (tricky)
+* :m:	Add help (show commands) 
+* :m:	Add version (show version)
+* :x:	Add init (new json with repo/branch)
+* :m:	Add settings (show config info)
+* :m:	Add reinstall (from config)
+* :vs:	Consider unifying local/remote selectors (tricky)
 
 Remote selector commands
 
-* [x] Add search (search definitions)
-* [x] Add install (install definitions)
-* [x] Add info (parse file content)
-* [x] Add history (list commit history)
-* [ ] Add details (detailed commit history), needed?
-* [ ] Enhance deps (list dependencies), make recursive and display
+* :m:	Add search (search definitions)
+* :m:	Add install (install definitions)
+* :o:	Add direct (install from commit sha, or blob)
+* :m:	Add info (parse file content)
+* :m:	Add history (list commit history)
+* :o:	Add details (detailed commit history), needed?
+* :x:	Enhance deps (list dependencies), make recursive and display
 
 Local selector commands
 
-* [ ] Add local (search local files)
-* [ ] Add uninstall (remove local files)
-* [ ] Add compare (check for updates)
-* [ ] Add update (apply updates)
+* :x:	Add local (search local files)
+* :x:	Add uninstall (remove local files)
+* :x:	Add compare (check for updates)
+* :x:	Add update (apply updates)
 
 Browser commands
 
-* [ ] Add feature to open a browser to see the pages on github? (diffs, comments etc)
-* [ ] Add feature to open a browser at a project's url (from info)
+* :o:	Add feature to open a browser to see the pages on github? (diffs, comments etc) :zap:
+* :o:	Add feature to open a browser at a project's url (from info) :zap:
+
+UIX commands
+
+* :id:	Consider adding reference/bundle command to generate typing collections (save in config)
 
 Cache commands
 
-* [ ] Add purge (or flush)
+* :b:	Add purge (or flush)
+* :b:	Add dump (see content)
 
 Selector
 
-* [ ] Improve globbing/RegExp
-* [ ] Add support for semver
-* [ ] Add support for multiple Selectors (blend results in select())
-* [ ] Add InfoMatcher to Selector / select()
-* [ ] Add search-by-date to history-command, add as DateMatcher to Selector / select()
+* :x:	Improve globbing/RegExp :zap:
+* :x:	Add support for semver :zap:
+* :x:	Add support for multiple Selectors (blend results in select()) :zap:
+* :x:	Add InfoMatcher to Selector / select() :zap:
+* :o:	Add search-by-date to history-command, add as DateMatcher to Selector / select()
 
 Command options
 
-* [ ] Design / document options and unify the names (both for CLI as API)
-* [ ] Add option for file overwrite (always on now)
-* [ ] Add a compact vs detailed option (for search listings or history)
-* [ ] Add option for dependency install (always on now)
-* [ ] Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `tsd history  *` etc
-* [ ] .... more
+* :a:   List / design options and unify the names (both for CLI as API)
+* :x:	Add option for file overwrite (always on now)
+* :x:	Add a compact vs detailed option (for search listings or history)
+* :x:	Add option for dependency install (always on now)
+* :x:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
+* :o:	.... more
 
 Functionality
 
-* [ ] Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* [ ] Add fancy promise progress events + cli display (install etc)
+* :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
+* :id:	Add fancy promise progress events + cli display (install etc)
 
 CLI
 
-* [x] Improve Expose for crisper CLI help screen layout (table/columns)
-* [ ] Improve Expose to order/group commands
-* [ ] Optimise and unify CLI output (indenting/seperator/headers etc) 
-* [ ] Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/)
-* [ ] Add TSD release/updates news to CLI console (periodically pull json from github)
+* :m:	Improve Expose for crisper CLI help screen layout (table/columns)
+* :x:   Improve Expose to order/group commands :zap:
+* :o:	Optimise and unify CLI output (indenting/seperator/headers etc) :zap:
+* :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
+* :x:	Add TSD release/updates news to CLI console (periodically pull json from github) :zap:
 
 API
 
-* [ ] Export docs during build
-* [ ] Export TypeScript definitions
-* [ ] Consider optimising JavaScript API (less OO-ish)
-* [ ] Add options to authenticate to github API for higher rate-limit
+* :o:	Export API docs during build :zap:
+* :o:	Export TypeScript definitions :zap:
+* :id:	Consider optimising JavaScript API (less OO-ish)
+* :id:	Add options to authenticate to github API for higher rate-limit
 
-Data model
+Data modelrepo
 
-* [ ] Harden JSON import
-* [ ] Consider decoupling from Github json format?
+* :o:	Harden JSON import
+* :id:	Consider decoupling from Github json format
 
 Info
 
-* [x] Import tests for header parser from tsd-deftools @bartvds
-* [ ] Improve DefInfo/Parser to extract more info from more files
+* :m:	Import tests for header parser from tsd-deftools @bartvds
+* :o:	Improve DefInfo/Parser to extract more info from more files :zap:
 
 Config
 
-* [ ] Rename 'ref' to 'branch' (everywhere..)
-* [x] Improve config JSON-Schema
-* [ ] Improve config validation reporting (see tv4, chai-json-schema)
-* [ ] Consider renaming 'tsd-config.json'
+* :o:	~~Rename 'ref' to 'branch' (everywhere..)~~ No, it is correct, might do tags later.
+* :m:	Improve config JSON-Schema (RegExp)
+* :o:	Improve config validation reporting (see tv4, chai-json-schema)
+* :vs:	Consider renaming 'tsd-config.json'
 
 Cache
 
-* [x] Decide on caching directory: home / AppData like npm
-* [ ] Decide on cache folder version naming scheme
-* [ ] Add cache auto-refresh; for the non-unique queries like `getBranch`
-* [ ] Add periodic automated cache purge/flush
-* [x] Add skip features to loaders; enforce for testing from local fixtures. 
-* [ ] Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
-* [ ] Consider g-zip for caches
+* :m:	Decide on user caching directory: home / AppData like npm
+* :b:	Decide on cache folder version naming scheme
+* :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
+* :b:	Add periodic automated cache purge/flush
+* :m:	Add skip features to loaders; enforce for testing from local fixtures. 
+* :o:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
+* :vs:	Consider g-zip for caches
 
 Internals
 
-* [ ] Try recalculating sha1 hash from content
-* [ ] Add local-changes detector using the hash / sha
-* [ ] Consider adding timeouts
-* [x] Change Context objects to use Q/Q-io and not auto-create folders at init
-* [ ] Decide if API, Core etc need(more) race condition hardening
-* [ ] Consider global store for JSON pointers and RegExps etc
-* [ ] Consider splitting Core.ts: index/select stuff vs helper methods/objects
+* :a:	Try recalculating sha1 hash from content
+* :b:	Add local-changes detector using the hash / sha
+* :m:	Change Context objects to use Q/Q-io and not auto-create folders at init
+* :vs:	Decide if API, Core etc need(more) race condition hardening
+* :vs:	Consider adding timeouts
+* :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
+* :o:	Consider global store for JSON pointers and RegExps etc
 
 Technical
 
-* [ ] Decide on property immutability: Object.freeze()
-* [ ] Ditch getters + private vars for freeze (`xm.ObjectUtils`)
-* [ ] Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects)
-* [ ] Add xm interface for debug/log/event tracking
-* [ ] Verify "use strict" (needed in node?)
+* :vs:	Consider property immutability: Object.freeze()
+* :vs:	Consider ditching getters + private vars for freeze (`xm.ObjectUtils`)
+* :o:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects)
+* :o:	Add xm interface for debug/log/event tracking
 
 Cleanup
 
-* [ ] Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune
-* [ ] Sweep used modules: require() and `package.json`
-* [ ] Sweep facing code for input parameter checking (`xm.assertVar`)
-* [ ] Sweep and optimise reference-paths (but how?)
+* :cl:	Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune 
+* :cl:	Sweep used modules: require() and `package.json`
+* :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
+* :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
+* :x:	Verify "use strict" (needed in node?)
 
 Publishing
 
-* [ ] Add npm pre-publish tests
-* [ ] Add git pre-publish tests
-* [ ] Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
-* [ ] Decide & sweep title/description text (package.json, cli/api, github etc)
-* [ ] Find solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
-* [x] Fix bin/cli `$ npm install . -g` 
-* [x] Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
-* [ ] Compile a build number + date into application
+* :o2:	Add npm pre-publish tests hook :zap:
+* :x:	Add git pre-commit test hook :zap:
+* :vs:	Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
+* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)  zap:
+* :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
+* :m:	Fix bin/cli `$ npm install . -g` 
+* :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
+* :x:	Compile a build number + date into application :zap:
+* :x:	Credits :smiley_cat:
 
 Dependencies
 
-* [ ] Drop underscore?
-* [ ] Add tests for any recent xm `package changes
+* :id:	Consider dropping underscore?
+* :o:	Sweep recent xm `package changes for tests 
 
 More.. always more :rocket:
 
