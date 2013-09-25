@@ -1,5 +1,7 @@
 ///<reference path="globals.ts" />
 ///<reference path="assert/xm/_all.ts" />
+///<reference path="assert/xm/unordered.ts" />
+///<reference path="../src/xm/data/PackageJSON.ts" />
 
 module helper {
 	'use strict';
@@ -9,9 +11,7 @@ module helper {
 	var util = require('util');
 	var q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
-
-	export var assert:chai.Assert = require('chai').assert;
-
+	var assert:Chai.Assert = require('chai').assert;
 	var shaRegExp = /^[0-9a-f]{40}$/;
 	var md5RegExp = /^[0-9a-f]{32}$/;
 
@@ -41,7 +41,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function dump(object:any, message?:string, depth?:number = 6, showHidden?:bool = false):any {
+	export function dump(object:any, message?:string, depth:number = 6, showHidden:boolean = false):any {
 		message = xm.isUndefined(message) ? '' : message + ': ';
 		xm.log(message + util.inspect(object, showHidden, depth, true));
 	}
@@ -71,6 +71,6 @@ module helper {
 		(actual, expected, message:string):void;
 	}
 	export interface IsLikeCB {
-		(actual, expected):bool;
+		(actual, expected):boolean;
 	}
 }

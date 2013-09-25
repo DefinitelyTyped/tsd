@@ -4,6 +4,8 @@
 describe('xm.StatCounter', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var counter:xm.StatCounter;
 
 	beforeEach(() => {

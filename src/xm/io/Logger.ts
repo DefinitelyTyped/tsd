@@ -30,7 +30,7 @@ module xm {
 		error(...args:any[]):void;
 		debug(...args:any[]):void;
 		inspect(value:any, label?:string, depth?:number):void;
-		mute:bool;
+		mute:boolean;
 	}
 
 	export function getLogger(label?:string, writer?:xm.LineWriter):xm.Logger {
@@ -77,7 +77,7 @@ module xm {
 		logger.debug = (...args:any[]) => {
 			writeMulti('debug: '.cyan, '', args);
 		};
-		logger.inspect = (value:any, label?:string, depth?:number = 8) => {
+		logger.inspect = (value:any, label?:string, depth:number = 8) => {
 			label = label ? label + ':\n' : '';
 			writer.writeln(label + util.inspect(value, {showHidden: false, depth: depth }));
 		};

@@ -4,6 +4,8 @@
 describe('xm.Set', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var list:xm.Set;
 
 	it('is defined', () => {

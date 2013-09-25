@@ -20,7 +20,7 @@ module xm {
 
 	export class ObjectUtil {
 		//lazy alias for consistency
-		static hasOwnProp(obj:any, prop:string):bool {
+		static hasOwnProp(obj:any, prop:string):boolean {
 			return Object.prototype.hasOwnProperty.call(obj, prop);
 		}
 
@@ -34,7 +34,7 @@ module xm {
 			});
 		}
 
-		static hidePrefixed(object:Object, ownOnly:bool = true):void {
+		static hidePrefixed(object:Object, ownOnly:boolean = true):void {
 			for (var property in object) {
 				if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
 					ObjectUtil.defineProp(object, property, {enumerable: false});

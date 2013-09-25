@@ -4,6 +4,8 @@
 describe('xm.iterate', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	describe('eachElem()', () => {
 		it('should iterate all elements', () => {
 			var input = [2, 3, 4];

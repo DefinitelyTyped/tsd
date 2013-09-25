@@ -23,7 +23,7 @@ module xm {
 
 		parsers = new xm.KeyValueMap();
 
-		constructor(public verbose?:bool = false) {
+		constructor(public verbose:boolean = false) {
 
 		}
 
@@ -77,7 +77,7 @@ module xm {
 			});
 		}
 
-		parse(source:string, asType?:string[]) {
+		parse(source:string, asType:string[]) {
 
 			var log = this.verbose ? (...rest:any[]) => {
 				console.log.apply(console, rest);
@@ -264,7 +264,7 @@ module xm {
 			}
 		}
 
-		getGroup(num:number, alt?:string = ''):string {
+		getGroup(num:number, alt:string = ''):string {
 			//validate for sanity
 			if (num >= this.match.length - 1) {
 				throw(new Error(this.parser.getName() + ' group index ' + num + ' > ' + (this.match.length - 2)));
@@ -282,7 +282,7 @@ module xm {
 			return this.match[num];
 		}
 
-		getGroupFloat(num:number, alt?:number = 0):number {
+		getGroupFloat(num:number, alt:number = 0):number {
 			var value = parseFloat(this.getGroup(num));
 			if (isNaN(value)) {
 				return alt;

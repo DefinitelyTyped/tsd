@@ -4,6 +4,8 @@
 describe('xm.PackageJSON', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var info:xm.PackageJSON;
 	it('is defined as function', () => {
 		assert.isFunction(xm.PackageJSON);

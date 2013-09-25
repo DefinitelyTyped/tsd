@@ -4,6 +4,8 @@
 describe('xm.RexExpGlue', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var exp:xm.RegExpGlue;
 	var e:RegExp;
 

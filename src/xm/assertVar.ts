@@ -12,14 +12,14 @@
 module xm {
 	'use strict';
 
-	function isSha(value:any):bool {
+	function isSha(value:any):boolean {
 		if (typeof value !== 'string') {
 			return false;
 		}
 		return /^[0-9a-f]{40}$/.test(value);
 	}
 
-	function isMd5(value:any):bool {
+	function isMd5(value:any):boolean {
 		if (typeof value !== 'string') {
 			return false;
 		}
@@ -37,7 +37,7 @@ module xm {
 	//TODO expand validation options, add RegExp /string length (use extended xm.typeOf.ts)
 	//TODO use extended xm.typeOf
 	//TODO custom error?
-	export function assertVar(label:string, value:any, type:any, opt?:bool = false):void {
+	export function assertVar(label:string, value:any, type:any, opt:boolean = false):void {
 		if (arguments.length < 3) {
 			throw new Error('assertVar() expected at least 3 arguments but got "' + arguments.length + '"');
 		}

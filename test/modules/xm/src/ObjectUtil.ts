@@ -11,7 +11,9 @@ class ObjectUtilTestClass {
 describe('xm.ObjectUtil', () => {
 	'use strict';
 
-	describe('xm.hidePrefixed()', () => {
+	var assert:Chai.Assert = require('chai').assert;
+
+	describe('hidePrefixed()', () => {
 		it('should return formatted string', () => {
 			var keys;
 			var inst = new ObjectUtilTestClass();
@@ -25,7 +27,7 @@ describe('xm.ObjectUtil', () => {
 			assert.sameMembers(keys, ['propC', 'propD'], 'after hide');
 		});
 	});
-	describe('xm.hidePrefixed()', () => {
+	describe('lockProps()', () => {
 		it('should throw when accessing frozen property', () => {
 			var fixed = {aa: 1, bb: 2};
 

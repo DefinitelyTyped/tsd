@@ -3,7 +3,7 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	export function assertConfig(config:tsd.Config, values:any, message:string) {
 		assert.ok(config, message + ': config');

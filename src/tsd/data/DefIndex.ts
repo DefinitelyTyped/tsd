@@ -20,7 +20,7 @@ module tsd {
 	export class DefIndex {
 
 		private _branchName:string = null;
-		private _hasIndex:bool = false;
+		private _hasIndex:boolean = false;
 		private _indexCommit:tsd.DefCommit = null;
 
 		//TODO add generics when moved to TS 0.9
@@ -35,7 +35,7 @@ module tsd {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		hasIndex():bool {
+		hasIndex():boolean {
 			return this._hasIndex;
 		}
 
@@ -258,7 +258,7 @@ module tsd {
 			return this._definitions.get(path, null);
 		}
 
-		hasDef(path:string):bool {
+		hasDef(path:string):boolean {
 			return this._definitions.has(path);
 		}
 
@@ -266,7 +266,7 @@ module tsd {
 			return this._blobs.get(sha, null);
 		}
 
-		hasBlob(sha:string):bool {
+		hasBlob(sha:string):boolean {
 			return this._blobs.has(sha);
 		}
 
@@ -274,7 +274,7 @@ module tsd {
 			return this._commits.get(sha, null);
 		}
 
-		hasCommit(sha:string):bool {
+		hasCommit(sha:string):boolean {
 			return this._commits.has(sha);
 		}
 

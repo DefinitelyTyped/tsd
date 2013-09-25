@@ -10,6 +10,7 @@ describe('DefInfoParser', () => {
 	var _ = require('underscore');
 	var fs = require('fs');
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
 	var data:helper.HeaderAssert[];
 	var filter; // = ['async', 'expect.js'];

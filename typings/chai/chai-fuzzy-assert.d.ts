@@ -5,8 +5,8 @@
 
 ///<reference path="../chai/chai-assert.d.ts" />
 
-declare module chai {
-	interface Assert {
+declare module Chai {
+	export interface Assert {
 		like(act:any, exp:any, msg?:string);
 		notLike(act:any, exp:any, msg?:string);
 		containOneLike(act:any, exp:any, msg?:string);

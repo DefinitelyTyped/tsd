@@ -22,7 +22,7 @@ module tsd {
 
 		//parse from tags
 		dependencies:tsd.Def[] = [];
-		solved:bool = false;
+		solved:boolean = false;
 
 		//parsed from header
 		info:tsd.DefInfo;
@@ -45,7 +45,7 @@ module tsd {
 			this._blob = blob;
 		}
 
-		hasContent():bool {
+		hasContent():boolean {
 			return (this._blob && this._blob.hasContent());
 		}
 

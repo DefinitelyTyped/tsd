@@ -28,7 +28,7 @@ module tsd {
 		written:xm.IKeyValueMap = new xm.KeyValueMap();
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
-		constructor(public index:DefIndex, public selector?:tsd.Selector = null) {
+		constructor(public index:DefIndex, public selector:tsd.Selector = null) {
 			xm.assertVar('index', index, DefIndex);
 			xm.assertVar('selector', selector, tsd.Selector, true);
 		}
@@ -53,7 +53,7 @@ module tsd {
 		 read the config from Context.path.configFile
 		 promise: null
 		 */
-		readConfig(optional:bool):Qpromise {
+		readConfig(optional:boolean):Qpromise {
 			return this._core.readConfig(optional).thenResolve(null);
 		}
 

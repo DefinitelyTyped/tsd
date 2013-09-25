@@ -5,8 +5,8 @@
 
 ///<reference path="../chai/chai-assert.d.ts" />
 
-declare module chai {
-	interface Assert {
+declare module Chai {
+	export interface Assert {
 		isFulfilled(promise:any, msg?:string):any;
 
 		becomes(promise:any, value:any, msg?:string):any;

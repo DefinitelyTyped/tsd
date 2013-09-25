@@ -30,7 +30,7 @@ module git {
 			return 'rate limit: ' + this.remaining + ' of ' + this.limit + ' @ ' + this.lastUpdate.toLocaleString();
 		}
 
-		hasRemaining():bool {
+		hasRemaining():boolean {
 			return this.remaining > 0;
 		}
 	}

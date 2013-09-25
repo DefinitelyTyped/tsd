@@ -3,6 +3,8 @@
 
 describe('xm.hash', () => {
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	describe('sha1()', () => {
 		it('should return correct hash', () => {
 			var hash = xm.sha1('foo bar');

@@ -4,6 +4,8 @@
 describe('xm.URLManager', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var urls:xm.URLManager;
 	var expected:string;
 	var actual:xm.URLTemplate;

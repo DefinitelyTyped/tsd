@@ -10,7 +10,7 @@
 	git: git,
 	runARGV: tsd.runARGV,
 	// move to API?
-	getAPI: function (configPath:string, verbose?:bool = false):tsd.API {
+	getAPI: function (configPath:string, verbose:boolean = false):tsd.API {
 		xm.assertVar('configPath', configPath, 'string');
 		return new tsd.API(new tsd.Context(configPath, verbose));
 	}

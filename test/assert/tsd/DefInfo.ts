@@ -3,9 +3,9 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDefInfo(info:tsd.DefInfo, recursive:bool):any {
+	export function serialiseDefInfo(info:tsd.DefInfo, recursive:boolean):any {
 		xm.assertVar('info', info, tsd.DefInfo);
 
 		var json:any = {};

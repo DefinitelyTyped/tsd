@@ -27,7 +27,7 @@ module xm {
 		private static _localPath:string;
 		private static _local:PackageJSON;
 
-		constructor(pkg:any, public path?:string = null) {
+		constructor(pkg:any, public path:string = null) {
 			xm.assertVar('pkg', pkg, 'object');
 			this._pkg = pkg;
 

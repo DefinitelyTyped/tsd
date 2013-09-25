@@ -138,7 +138,7 @@ module tsd {
 		}
 
 		//TODO (auto) cache compile result
-		private getFilterFunc():(file:tsd.Def) => bool {
+		private getFilterFunc():(file:tsd.Def) => boolean {
 			this.compile();
 
 			// get an efficient filter function

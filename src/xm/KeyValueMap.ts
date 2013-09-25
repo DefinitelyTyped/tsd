@@ -9,7 +9,11 @@
 module xm {
 	'use strict';
 
-	var hasOwnProp:(obj:any, v:string) => bool = Object.prototype.hasOwnProperty.call;
+	//var hasProp = Object.prototype.hasProperty.call;
+	/*function hasProp(object:any, prop:string):boolean {
+		return Object.prototype.hasProperty.call(object, prop)
+	}*/
+	var hasProp = Object.prototype.hasOwnProperty;
 
 	//TODO: generics for TS 0.9
 
@@ -17,7 +21,7 @@ module xm {
 	 IKeyValueMap: key-value map
 	 */
 	export interface IKeyValueMap {
-		has (key:string):bool;
+		has (key:string):boolean;
 		get(key:string, alt?:any):any;
 		set (key:string, value:any);
 		remove (key:string);
@@ -39,17 +43,17 @@ module xm {
 			if (data) {
 				this.import(data);
 			}
-			Object.defineProperty(this, '_store', {enumerable: false, writable:false});
+			Object.defineProperty(this, '_store', {enumerable: false, writable: false});
 		}
 
-		has(key:string):bool {
+		has(key:string):boolean {
 			key = '' + key;
-			return hasOwnProp(this._store, key);
+			return hasProp.call(this._store, key);
 		}
 
-		get(key:string, alt?:any = null):any {
+		get(key:string, alt:any = null):any {
 			key = '' + key;
-			if (hasOwnProp(this._store, key)) {
+			if (hasProp.call(this._store, key)) {
 				return this._store[key];
 			}
 			return alt;
@@ -62,7 +66,7 @@ module xm {
 
 		remove(key:string) {
 			key = '' + key;
-			if (hasOwnProp(this._store, key)) {
+			if (hasProp.call(this._store, key)) {
 				delete this._store[key];
 			}
 		}
@@ -71,7 +75,7 @@ module xm {
 			//chop prefix
 			var ret:string[] = [];
 			for (var key in this._store) {
-				if (hasOwnProp(this._store, key)) {
+				if (hasProp.call(this._store, key)) {
 					ret.push(key);
 				}
 			}
@@ -81,7 +85,7 @@ module xm {
 		values():any[] {
 			var ret = [];
 			for (var key in this._store) {
-				if (hasOwnProp(this._store, key)) {
+				if (hasProp.call(this._store, key)) {
 					ret.push(this._store[key]);
 				}
 			}
@@ -90,7 +94,7 @@ module xm {
 
 		clear() {
 			for (var key in this._store) {
-				if (hasOwnProp(this._store, key)) {
+				if (hasProp.call(this._store, key)) {
 					delete this._store[key];
 				}
 			}
@@ -101,7 +105,7 @@ module xm {
 				return;
 			}
 			for (var key in data) {
-				if (hasOwnProp(data, key)) {
+				if (hasProp.call(data, key)) {
 					this._store[key] = data[key];
 				}
 			}
@@ -110,7 +114,7 @@ module xm {
 		export(allow?:string[]):any {
 			var ret:any = {};
 			for (var key in this._store) {
-				if (hasOwnProp(this._store, key)) {
+				if (hasProp.call(this._store, key)) {
 					ret[key] = this._store[key];
 				}
 			}

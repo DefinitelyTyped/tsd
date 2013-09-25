@@ -5,8 +5,8 @@
 
 ///<reference path="../chai/chai-assert.d.ts" />
 
-declare module chai {
-	interface Assert {
+declare module Chai {
+	export interface Assert {
 		basename(path:string, name:string, msg?:string);
 		notBasename(path:string, name:string, msg?:string);
 

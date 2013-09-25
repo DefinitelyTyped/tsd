@@ -8,6 +8,7 @@ describe('Config', () => {
 
 	var fs = require('fs');
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
 	var config:tsd.Config;
 
@@ -17,6 +18,8 @@ describe('Config', () => {
 	});
 	afterEach(() => {
 		config = null;
+
+		require('assert');
 	});
 
 	it('is instance', () => {
@@ -50,7 +53,7 @@ describe('Config', () => {
 			assert.throws(() => {
 				//xm.log(json);
 				config.parseJSON(json);
-			}, tuple[1]);
+			}, (<string>tuple[1]));
 		});
 	});
 });

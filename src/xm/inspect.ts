@@ -8,7 +8,7 @@
 
 ///<reference path="typeOf.ts" />
 
-declare interface Function {
+interface Function {
 	name:string;
 }
 module xm {
@@ -25,7 +25,7 @@ module xm {
 		return '<anonymous>';
 	}
 
-	export function toValueStrim(obj:any, depth?:number = 4):string {
+	export function toValueStrim(obj:any, depth:number = 4):string {
 		var type = xm.typeOf(obj);
 
 		var strCut = 40;
@@ -72,7 +72,7 @@ module xm {
 		}
 	}
 
-	export function trimLine(value, cutoff:number = 30, quotes:bool = true) {
+	export function trimLine(value, cutoff:number = 30, quotes:boolean = true) {
 		value = String(value).replace('\r', '\\r').replace('\n', '\\n').replace('\t', '\\t');
 		if (value.length > cutoff - 2) {
 			value = value.substr(0, cutoff - 5) + '...';

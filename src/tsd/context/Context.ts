@@ -10,12 +10,7 @@
 module tsd {
 	'use strict';
 
-	var fs = require('fs');
 	var path = require('path');
-	var util = require('util');
-	var assert = require('assert');
-	var Q:QStatic = require('q');
-	var tv4:TV4 = require('tv4').tv4;
 
 	/*
 	 Context: bundles the configuration and core functionality
@@ -29,7 +24,7 @@ module tsd {
 		//TODO use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
 
-		constructor(public configFile?:string = null, public verbose?:bool = false) {
+		constructor(public configFile:string = null, public verbose:boolean = false) {
 			//xm.assertVar('configPath', configPath, 'string', true);
 
 			this.packageInfo = xm.PackageJSON.getLocal();
@@ -43,7 +38,7 @@ module tsd {
 			this.config = new Config(schema);
 		}
 
-		logInfo(details:bool = false):void {
+		logInfo(details:boolean = false):void {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
 			if (details) {

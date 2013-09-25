@@ -8,6 +8,7 @@ describe('Core', () => {
 
 	var fs = require('fs');
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
 	var core:tsd.Core;
 	var context:tsd.Context;

@@ -5,7 +5,7 @@ module git {
 
 	/*
 	 GitCommitMessage: parse git commit message (for subject/body/footer convention etc)
-	  */
+	 */
 	export class GitCommitMessage {
 		//full test
 		text:string;
@@ -15,11 +15,14 @@ module git {
 		body:string;
 		footer:string;
 
-		constructor(text?:string) {
-			this.parse(this.text);
+		constructor(text:string = null) {
+			if (text) {
+				this.parse(this.text);
+			}
 		}
 
-		parse(text?:string):void {
+		//TODO fix this properly
+		parse(text:string):void {
 			this.text = String(text);
 
 			subjectExp.lastIndex = 0;

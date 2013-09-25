@@ -3,9 +3,9 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDefCommit(commit:tsd.DefCommit, recursive:bool):any {
+	export function serialiseDefCommit(commit:tsd.DefCommit, recursive:boolean):any {
 		xm.assertVar('commit', commit, tsd.DefCommit);
 
 		var json:any = {};

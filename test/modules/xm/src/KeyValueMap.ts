@@ -4,6 +4,7 @@
 describe('xm.KeyValueMap', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
 	var map:xm.KeyValueMap;
 
 	it('is defined', () => {

@@ -59,7 +59,7 @@ module tsd {
 		}
 
 		//harsh
-		isValid():bool {
+		isValid():boolean {
 			// || !this.description
 			if (!this.name) {
 				return false;

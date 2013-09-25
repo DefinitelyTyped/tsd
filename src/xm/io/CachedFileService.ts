@@ -28,9 +28,9 @@ module xm {
 
 		getValue(file, opts?):Qpromise {
 			var storeFile = path.join(this._dir, file);
-			return FS.exists(storeFile).then((exists:bool) => {
+			return FS.exists(storeFile).then((exists:boolean) => {
 				if (exists) {
-					return FS.isFile(storeFile).then((isFile:bool) => {
+					return FS.isFile(storeFile).then((isFile:boolean) => {
 						if (!isFile) {
 							throw(new Error('path exists but is not a file: ' + storeFile));
 						}

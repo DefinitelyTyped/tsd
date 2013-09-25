@@ -5,8 +5,6 @@
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 ///<reference path="helper.ts" />
 
-declare var gitTest;
-
 describe('git.GithubAPICached', () => {
 	'use strict';
 
@@ -14,6 +12,7 @@ describe('git.GithubAPICached', () => {
 	var repo:git.GithubRepo;
 
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 	var cacheDir:string;
 
 	beforeEach(() => {

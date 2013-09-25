@@ -15,7 +15,7 @@ module xm {
 		stats:KeyValueMap = new KeyValueMap();
 		logger:Logger = xm.log;
 
-		constructor(public log:bool = false) {
+		constructor(public log:boolean = false) {
 
 		}
 
@@ -33,7 +33,7 @@ module xm {
 			return this.stats.get(id, 0);
 		}
 
-		has(id:string):bool {
+		has(id:string):boolean {
 			return this.stats.has(id);
 		}
 
@@ -53,7 +53,7 @@ module xm {
 			return this.stats.keys();
 		}
 
-		hasAllZero():bool {
+		hasAllZero():boolean {
 			return !this.stats.values().some((value:number) => {
 				return value !== 0;
 			});

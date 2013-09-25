@@ -4,7 +4,7 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseAPIResult(result:tsd.APIResult):any {
 		xm.assertVar('result', result, tsd.APIResult);

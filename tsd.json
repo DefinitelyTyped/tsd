@@ -1,12 +1,28 @@
 {
-  "typingsPath": "typings_test",
+  "typingsPath": "typings",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
-  "ref": "0.8",
+  "ref": "master",
   "installed": {
+    "colors/colors.d.ts": {
+      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
+      "blob": "c87112d7c4a1e0d113093d78501529b1839aec21"
+    },
     "async/async.d.ts": {
-      "commit": "35f964c6a40a3e11e5e56bbd519f14de3fdb66b5",
-      "blob": "835c10777e974f72cc341a101655012e20675c05"
+      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
+      "blob": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
+      "blob": "8c1167def1f42112e0476902389dcac13809f7ec"
+    },
+    "node/node.d.ts": {
+      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
+      "blob": "9ae2d75aedcc82a0b53b3a37c442629d6da50575"
+    },
+    "underscore/underscore.d.ts": {
+      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
+      "blob": "cd7a2867e5a04b13f6d6143b87e519e8f28a6062"
     }
   }
 }

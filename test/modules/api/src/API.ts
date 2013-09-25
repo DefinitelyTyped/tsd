@@ -10,6 +10,7 @@ describe('API', () => {
 	var fs = require('fs');
 	var path = require('path');
 	var FS:Qfs = require('q-io/fs');
+	var assert:Chai.Assert = require('chai').assert;
 
 	var api:tsd.API;
 	var context:tsd.Context;
@@ -43,7 +44,7 @@ describe('API', () => {
 		return api;
 	}
 
-	function applyMute(mute:bool) {
+	function applyMute(mute:boolean) {
 		api.core.debug = !mute;
 		api.context.log.mute = mute;
 		api.context.config.log.mute = mute;

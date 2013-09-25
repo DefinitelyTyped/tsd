@@ -13,7 +13,7 @@ module xm {
 	 ISet: yer basic set interface
 	 */
 	export interface ISet {
-		has (value:any):bool;
+		has (value:any):boolean;
 		add (value:any):void;
 		remove (value:any):void;
 		values ():any[];
@@ -34,7 +34,7 @@ module xm {
 			}
 		}
 
-		has(value:any):bool {
+		has(value:any):boolean {
 			return this._content.indexOf(value) > -1;
 		}
 

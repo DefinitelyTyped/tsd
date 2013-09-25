@@ -41,7 +41,7 @@ module tsd {
 
 		stats = new xm.StatCounter();
 		log = xm.getLogger('Core');
-		_debug:bool = false;
+		_debug:boolean = false;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar('context', context, tsd.Context);
@@ -179,7 +179,7 @@ module tsd {
 		 install a DefVersion and add to config
 		 promise: string: absolute path of written file
 		 */
-		installFile(file:tsd.DefVersion, addToConfig:bool = true):Qpromise {
+		installFile(file:tsd.DefVersion, addToConfig:boolean = true):Qpromise {
 			return this.useFile(file).then((targetPath:string) => {
 				//this.log(paths.keys().join('\n'));
 
@@ -197,7 +197,7 @@ module tsd {
 		 bulk version of installFile()
 		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
 		 */
-		installFileBulk(list:tsd.DefVersion[], addToConfig:bool = true):Qpromise {
+		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true):Qpromise {
 			var written:xm.IKeyValueMap = new xm.KeyValueMap();
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
@@ -211,7 +211,7 @@ module tsd {
 		 load the current configFile, optional to not throw error on missing file
 		 promise: null
 		 */
-		readConfig(optional?:bool = false):Qpromise {
+		readConfig(optional:boolean = false):Qpromise {
 			return FS.exists(this.context.paths.configFile).then((exists) => {
 				if (!exists) {
 					if (!optional) {
@@ -408,11 +408,11 @@ module tsd {
 		 lazy load and save a single DefVersion to typings folder
 		 promise: absolute path of written file
 		 */
-		useFile(file:tsd.DefVersion, overwrite:bool = true):Qpromise {
+		useFile(file:tsd.DefVersion, overwrite:boolean = true):Qpromise {
 			var targetPath = path.resolve(this.context.config.typingsPath, file.def.path);
 			var dir = path.dirname(targetPath);
 
-			return FS.exists(targetPath).then((exists:bool) => {
+			return FS.exists(targetPath).then((exists:boolean) => {
 				if (exists && !overwrite) {
 					//bail
 					return null;
@@ -421,7 +421,7 @@ module tsd {
 				return this.loadContent(file).then(() => {
 					//check again? (race?)
 					return FS.exists(targetPath);
-				}).then((exists:bool) => {
+				}).then((exists:boolean) => {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
@@ -439,7 +439,7 @@ module tsd {
 		 bulk version of useFile()
 		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
 		 */
-		useFileBulk(list:tsd.DefVersion[], overwrite:bool = true):Qpromise {
+		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Qpromise {
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
@@ -453,11 +453,11 @@ module tsd {
 			})).thenResolve(written);
 		}
 
-		get debug():bool {
+		get debug():boolean {
 			return this._debug;
 		}
 
-		set debug(value:bool) {
+		set debug(value:boolean) {
 			this._debug = value;
 			this.gitAPI.debug = this._debug;
 			this.gitRaw.debug = this._debug;

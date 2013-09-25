@@ -2,8 +2,7 @@
 // Project: https://github.com/eldargab/easy-table
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
-
-declare interface EasyTableStatic {
+interface EasyTableStatic {
 	new():EasyTable;
 	printArray(array:any[], cellPrinter?:EasyTableCellPrinter, tablePrinter?:EasyTablePrinter):string;
 	printObject(object:any, cellPrinter?:EasyTableCellPrinter, tablePrinter?:EasyTablePrinter):string;
@@ -14,7 +13,7 @@ declare interface EasyTableStatic {
 	LeftPadder(char:string):EasyTableCellPrinter;
 }
 
-declare interface EasyTable {
+interface EasyTable {
 	cell:EasyTableCell;
 	newRow():void;
 	toString():string;
@@ -26,15 +25,19 @@ declare interface EasyTable {
 
 	total(label:string, accumulator:EasyTableAccumulator, totalPrinter:EasyTableCellPrinter):void;
 }
-declare interface EasyTableCell extends Function {
+interface EasyTableCell extends Function {
 	(label:string, value:any, printer?:EasyTableCellPrinter, width?:number):void;
 }
-declare interface EasyTableCellPrinter extends Function{
+interface EasyTableCellPrinter extends Function{
 	(obj:any, cell:EasyTableCell):string;
 }
-declare interface EasyTablePrinter extends Function{
+interface EasyTablePrinter extends Function{
 	(table:EasyTable):string;
 }
-declare interface EasyTableAccumulator extends Function{
+interface EasyTableAccumulator extends Function{
 	(sum:number, val:number, index:number, length:number):number;
+}
+
+declare module "easy-table" {
+export = EasyTable;
 }

@@ -22,7 +22,7 @@ module xm {
 		return crypto.createHash('sha1').update(data).digest('hex');
 	}
 
-	export function sha1Short(data:string, length?:number = 8):string {
+	export function sha1Short(data:string, length:number = 8):string {
 		return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
 	}
 

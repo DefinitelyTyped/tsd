@@ -1,11 +1,12 @@
 ///<reference path="../../tsdHelper.ts" />
+///<reference path="../xm/unordered.ts" />
 
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDef(def:tsd.Def, recursive:bool):any {
+	export function serialiseDef(def:tsd.Def, recursive:boolean):any {
 		xm.assertVar('def', def, tsd.Def);
 
 		var json:any = {};

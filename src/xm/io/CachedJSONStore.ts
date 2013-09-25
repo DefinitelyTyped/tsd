@@ -44,13 +44,13 @@ module xm {
 		private init():Qpromise {
 			this.stats.count('init');
 
-			return FS.exists(this._dir).then((exists:bool) => {
+			return FS.exists(this._dir).then((exists:boolean) => {
 				if (!exists) {
 					this.stats.count('init-dir-create', this._dir);
 					return xm.mkdirCheckQ(this._dir, true);
 				}
 
-				return FS.isDirectory(this._dir).then((isDir:bool) => {
+				return FS.isDirectory(this._dir).then((isDir:boolean) => {
 					if (isDir) {
 						this.stats.count('init-dir-exists', this._dir);
 						return null;
@@ -73,7 +73,7 @@ module xm {
 
 			return this.init().then(() => {
 				return FS.exists(src);
-			}).then((exists:bool) => {
+			}).then((exists:boolean) => {
 				if (exists) {
 					this.stats.count('get-exists');
 
@@ -105,7 +105,7 @@ module xm {
 
 			return this.init().then(() => {
 				return FS.exists(dest);
-			}).then((exists:bool) => {
+			}).then((exists:boolean) => {
 				if (exists) {
 					this.stats.count('store-exists');
 					return FS.remove(dest);

@@ -12,7 +12,7 @@
 module xm {
 	'use strict';
 
-	var _:UnderscoreStatic = require('underscore');
+	var _ = require('underscore');
 	var Q:QStatic = require('q');
 	var fs = require('fs');
 	var path = require('path');
@@ -35,7 +35,7 @@ module xm {
 	 */
 	//TODO consider adding a lingering active-list option to keep files in memory
 	export class CachedLoader {
-		private _debug:bool = false;
+		private _debug:boolean = false;
 		private _options:any = new xm.CachedLoaderOptions();
 		private _active:xm.KeyValueMap = new xm.KeyValueMap();
 		private _service:xm.CachedLoaderService = null;
@@ -45,6 +45,7 @@ module xm {
 		constructor(label:string, service:CachedLoaderService) {
 			xm.assertVar('label', label, 'string');
 			xm.assertVar('service', service, 'object');
+
 			this._service = service;
 			this.stats.logger = xm.getLogger(label + '.CachedLoader');
 
@@ -181,11 +182,11 @@ module xm {
 			return this._options;
 		}
 
-		get debug():bool {
+		get debug():boolean {
 			return this._debug;
 		}
 
-		set debug(value:bool) {
+		set debug(value:boolean) {
 			this._debug = value;
 			this.stats.log = value;
 		}

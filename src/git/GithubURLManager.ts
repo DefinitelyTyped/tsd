@@ -10,7 +10,7 @@ module git {
 	'use strict';
 
 	var assert = require('assert');
-	var _:UnderscoreStatic = require('underscore');
+	var _ = require('underscore');
 
 	/*
 	 GithubURLManager: url-templates for common urls

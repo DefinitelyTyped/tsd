@@ -22,7 +22,7 @@ module git {
 	export class GithubRawCached {
 
 		private _repo:git.GithubRepo;
-		private _debug:bool = false;
+		private _debug:boolean = false;
 		private _formatVersion:string = '0.2';
 
 		private _service:xm.CachedFileService;
@@ -88,11 +88,11 @@ module git {
 			return this._loader;
 		}
 
-		get debug():bool {
+		get debug():boolean {
 			return this._debug;
 		}
 
-		set debug(value:bool) {
+		set debug(value:boolean) {
 			this._debug = value;
 			this.stats.log = value;
 			this._loader.debug = value;

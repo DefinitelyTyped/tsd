@@ -4,6 +4,8 @@
 describe('git.GithubRepo / git.GithubURLManager', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var repo:git.GithubRepo;
 	var urls:git.GithubURLManager;
 

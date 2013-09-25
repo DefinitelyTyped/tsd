@@ -4,6 +4,8 @@
 describe('xm.typeOf', () => {
 	'use strict';
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	var func = function () {
 		//dummy
 	};

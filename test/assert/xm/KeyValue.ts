@@ -1,10 +1,11 @@
 ///<reference path="../../helper.ts" />
 ///<reference path="../../../src/xm/StatCounter.ts" />
+///<reference path="../../../src/xm/KeyValueMap.ts" />
 
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	export function assertKeyValue(map:xm.IKeyValueMap, values:any, assertion:AssertCB, message:string) {
 		assert.isObject(map, message + ': map');

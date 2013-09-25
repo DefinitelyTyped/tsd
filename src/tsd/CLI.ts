@@ -41,7 +41,7 @@ module tsd {
 
 	var defaultJobOptions = ['config'];
 
-	function jobOptions(merge?:string[] = []):string[] {
+	function jobOptions(merge:string[] = []):string[] {
 		return defaultJobOptions.concat(merge);
 	}
 
@@ -73,7 +73,7 @@ module tsd {
 		return loadData(args).then(() => {
 			//verify valid path
 			if (args.config) {
-				return FS.isFile(<string>args.config).then((isFile:bool) => {
+				return FS.isFile(<string>args.config).then((isFile:boolean) => {
 					if (!isFile) {
 						throw new Error('specified config is not a file: ' + args.config);
 					}
@@ -88,7 +88,7 @@ module tsd {
 
 			// TODO parse more options from args
 
-			var required:bool = (typeof args.config !== undefined ? true : false);
+			var required:boolean = (typeof args.config !== undefined ? true : false);
 			return job.api.readConfig(required).then(() => {
 				return job;
 			});
@@ -242,7 +242,7 @@ module tsd {
 			xm.log('----');
 		}
 
-		function printFileCommit(file:tsd.DefVersion, skipNull?:bool = false) {
+		function printFileCommit(file:tsd.DefVersion, skipNull:boolean = false) {
 			if (file.commit) {
 				var line = '   ' + file.commit.commitShort;
 
@@ -263,7 +263,7 @@ module tsd {
 			}
 		}
 
-		function printFileInfo(file:tsd.DefVersion, skipNull?:bool = false) {
+		function printFileInfo(file:tsd.DefVersion, skipNull:boolean = false) {
 			if (file.info) {
 				if (file.info.isValid()) {
 					xm.log('   ' + file.info.toString());

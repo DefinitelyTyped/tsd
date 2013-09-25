@@ -3,7 +3,7 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	//helper: assert lists of unordered items
 	//first finds an identity match, then applies real assertion

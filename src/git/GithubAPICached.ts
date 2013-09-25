@@ -15,7 +15,7 @@
 module git {
 	'use strict';
 
-	var _:UnderscoreStatic = require('underscore');
+	var _ = require('underscore');
 	var Q:QStatic = require('q');
 	var fs = require('fs');
 	var path = require('path');
@@ -57,7 +57,7 @@ module git {
 		//github's version
 		private _apiVersion:string = '3.0.0';
 
-		private _debug:bool = false;
+		private _debug:boolean = false;
 
 		constructor(repo:GithubRepo, storeFolder:string) {
 			xm.assertVar('repo', repo, GithubRepo);
@@ -97,7 +97,7 @@ module git {
 			});
 		}
 
-		getTree(sha:string, recursive:bool):Qpromise {
+		getTree(sha:string, recursive:boolean):Qpromise {
 			var params = this.mergeParams({
 				sha: sha,
 				recursive: recursive
@@ -157,11 +157,11 @@ module git {
 			return this._loader;
 		}
 
-		get debug():bool {
+		get debug():boolean {
 			return this._debug;
 		}
 
-		set debug(value:bool) {
+		set debug(value:boolean) {
 			this._debug = value;
 			this._service.store.stats.log = value;
 			this._loader.debug = value;

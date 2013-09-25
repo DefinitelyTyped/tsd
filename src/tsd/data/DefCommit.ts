@@ -18,7 +18,7 @@ module tsd {
 
 		commitSha:string;
 		treeSha:string;
-		hasMeta:bool = false;
+		hasMeta:boolean = false;
 
 		message:git.GitCommitMessage = new git.GitCommitMessage();
 
@@ -64,7 +64,7 @@ module tsd {
 			xm.ObjectUtil.lockProps(this, ['treeSha', 'hasMeta']);
 		}
 
-		hasMetaData():bool {
+		hasMetaData():boolean {
 			return this.hasMeta;
 		}
 

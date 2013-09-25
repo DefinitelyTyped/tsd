@@ -10,20 +10,20 @@ module tsd {
 		toString(encoding?:string, start?:number, end?:number): string;
 		length: number;
 		slice(start?:number, end?:number): NodeBuffer;
-		readUInt8(offset:number, noAsset?:bool): number;
-		readUInt16LE(offset:number, noAssert?:bool): number;
-		readUInt16BE(offset:number, noAssert?:bool): number;
-		readUInt32LE(offset:number, noAssert?:bool): number;
-		readUInt32BE(offset:number, noAssert?:bool): number;
-		readInt8(offset:number, noAssert?:bool): number;
-		readInt16LE(offset:number, noAssert?:bool): number;
-		readInt16BE(offset:number, noAssert?:bool): number;
-		readInt32LE(offset:number, noAssert?:bool): number;
-		readInt32BE(offset:number, noAssert?:bool): number;
-		readFloatLE(offset:number, noAssert?:bool): number;
-		readFloatBE(offset:number, noAssert?:bool): number;
-		readDoubleLE(offset:number, noAssert?:bool): number;
-		readDoubleBE(offset:number, noAssert?:bool): number;
+		readUInt8(offset:number, noAsset?:boolean): number;
+		readUInt16LE(offset:number, noAssert?:boolean): number;
+		readUInt16BE(offset:number, noAssert?:boolean): number;
+		readUInt32LE(offset:number, noAssert?:boolean): number;
+		readUInt32BE(offset:number, noAssert?:boolean): number;
+		readInt8(offset:number, noAssert?:boolean): number;
+		readInt16LE(offset:number, noAssert?:boolean): number;
+		readInt16BE(offset:number, noAssert?:boolean): number;
+		readInt32LE(offset:number, noAssert?:boolean): number;
+		readInt32BE(offset:number, noAssert?:boolean): number;
+		readFloatLE(offset:number, noAssert?:boolean): number;
+		readFloatBE(offset:number, noAssert?:boolean): number;
+		readDoubleLE(offset:number, noAssert?:boolean): number;
+		readDoubleBE(offset:number, noAssert?:boolean): number;
 	}
 
 	export class DefBlob {
@@ -31,7 +31,7 @@ module tsd {
 		content:ReadOnlyBuffer = null;
 		encoding:string = null;
 
-		constructor(sha:string, content?:NodeBuffer = null, encoding:string = null) {
+		constructor(sha:string, content:NodeBuffer = null, encoding:string = null) {
 			xm.assertVar('sha', sha, 'sha1');
 			this.sha = sha;
 			this.encoding = encoding;
@@ -45,7 +45,7 @@ module tsd {
 			}
 		}
 
-		hasContent():bool {
+		hasContent():boolean {
 			return xm.isValid(this.content);
 		}
 

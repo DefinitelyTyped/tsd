@@ -1,3 +1,4 @@
+///<reference path="../../_ref.d.ts" />
 ///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/ObjectUtil.ts" />
@@ -12,7 +13,7 @@ module tsd {
 	var path = require('path');
 	var util = require('util');
 	var assert = require('assert');
-	var tv4:TV4 = require('tv4').tv4.freshApi();
+	var tv4:TV4 = require('tv4');
 
 	/*
 	 InstalledDef: single installed file in Config
@@ -105,7 +106,7 @@ module tsd {
 			this._installed.set(file.def.path, def);
 		}
 
-		hasFile(path:string):bool {
+		hasFile(path:string):boolean {
 			xm.assertVar('path', path, 'string');
 			return this._installed.has(path);
 		}

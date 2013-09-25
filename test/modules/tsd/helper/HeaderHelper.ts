@@ -64,13 +64,13 @@ module helper {
 
 								//grab data files
 								async.parallel({
-									header: (callback:AsyncCallback) => {
+									header: (callback) => {
 										fs.readFile(path.join(pack, 'header.ts'), 'utf8', callback);
 									},
-									fields: (callback:AsyncCallback) => {
+									fields: (callback) => {
 										xm.FileUtil.readJSON(path.join(pack, 'fields.json'), callback);
 									}
-								}, (err, res) => {
+								}, (err, res:any) => {
 									if (err) {
 										return callback(err);
 									}
@@ -99,7 +99,7 @@ module helper {
 				});
 
 			}, (err, memo) => {
-				finish(err, memo || []);
+				(<Function> finish)(err, memo || []);
 			});
 		});
 	}

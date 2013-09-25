@@ -116,7 +116,7 @@ module tsd {
 	.join('i');
 
 	// dry helper
-	function mutate(base:string[], add:string[], remove:string[]) => {
+	function mutate(base:string[], add:string[], remove:string[]) {
 		var res = base ? base.slice(0) : [];
 		var i , ii, index;
 		if (add) {
@@ -141,7 +141,7 @@ module tsd {
 
 		parser:xm.LineParserCore;
 
-		constructor(public verbose?:bool = false) {
+		constructor(public verbose:boolean = false) {
 
 		}
 

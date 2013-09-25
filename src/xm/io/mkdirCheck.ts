@@ -19,7 +19,7 @@ module xm {
 	 mkdirCheck: like mkdirp but with writable rights and verification, synchronous
 	 */
 	//TODO unit test this
-	export function mkdirCheckSync(dir:string, writable?:bool = false, testWritable?:bool = false):string {
+	export function mkdirCheckSync(dir:string, writable:boolean = false, testWritable:boolean = false):string {
 		dir = path.resolve(dir);
 		if (fs.existsSync(dir)) {
 			if (!fs.statSync(dir).isDirectory()) {
@@ -55,12 +55,12 @@ module xm {
 	 mkdirCheckQ: like mkdirp but with writable rights and verification, returns a promise
 	 */
 	//TODO unit test this
-	export function mkdirCheckQ(dir:string, writable?:bool = false, testWritable?:bool = false):Qpromise {
+	export function mkdirCheckQ(dir:string, writable:boolean = false, testWritable:boolean = false):Qpromise {
 		dir = path.resolve(dir);
 
-		return FS.exists(dir).then((exists:bool) => {
+		return FS.exists(dir).then((exists:boolean) => {
 			if (exists) {
-				return FS.isDirectory(dir).then((isDir:bool) => {
+				return FS.isDirectory(dir).then((isDir:boolean) => {
 					if (!isDir) {
 						throw (new Error('path exists but is not a directory: ' + dir));
 					}

@@ -145,7 +145,7 @@ Cache
 
 Internals
 
-* :m:	Try recalculating sha1 hash from content
+* :a:	Try recalculating sha1 hash from content (fix: weird error in #master `$ tsd install chai`)
 * :b:	Add local-changes detector using the hash / sha
 * :m:	Change Context objects to use Q/Q-io and not auto-create folders at init
 * :vs:	Decide if API, Core etc need(more) race condition hardening
@@ -184,7 +184,14 @@ Publishing
 Dependencies
 
 * :id:	Consider dropping underscore?
+* :x:	Update Q with generics
 * :o:	Sweep recent xm `package changes for new tests 
+
+Bugs:
+
+* :o:	Installing `$ tsd install chai` gives content error
+* :o:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
+* :o:	Underscore.d.ts header has multiple authors
 
 More.. always more :rocket:
 

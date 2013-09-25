@@ -3,6 +3,9 @@
 ///<reference path="../../../../src/xm/assertVar.ts" />
 
 describe('xm.assertVar', () => {
+
+	var assert:Chai.Assert = require('chai').assert;
+
 	describe('optional', () => {
 		it('should pass null/undefined on optional', () => {
 			xm.assertVar('myVar', undefined, 'string', true);

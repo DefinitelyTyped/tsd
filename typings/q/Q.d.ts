@@ -32,9 +32,9 @@ interface Qpromise {
 	fcall(method: Function, ...args: any[]): Qpromise;
 	timeout(ms: number): Qpromise;
 	delay(ms: number): Qpromise;
-	isFulfilled(): bool;
-	isRejected(): bool;
-	isPending(): bool;
+	isFulfilled(): boolean;
+	isRejected(): boolean;
+	isPending(): boolean;
 	valueOf(): any;
 }
 
@@ -62,19 +62,19 @@ interface QStatic {
 	timeout(ms: number): Qpromise;
 	delay(ms: number): Qpromise;
 	delay(value: any, ms: number): Qpromise;
-	isFulfilled(): bool;
-	isRejected(): bool;
-	isPending(): bool;
+	isFulfilled(): boolean;
+	isRejected(): boolean;
+	isPending(): boolean;
 	valueOf(): any;
 	defer(): Qdeferred;
 	(value: any): Qpromise;
 	reject(reason :any): Qpromise;
 	promise(factory: { resolve: Function; reject: Function; notify: Function; }): Qpromise;
-	isPromise(value: any): bool;
+	isPromise(value: any): boolean;
 	async(generatorFunction: any): Qdeferred;
 	nextTick(callback: Function);
 	oneerror: any;
 	longStackJumpLimit: number;
-	longStackSupport: bool;
+	longStackSupport: boolean;
 }
 declare var Q: QStatic;

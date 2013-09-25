@@ -3,18 +3,20 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-declare module chai
+declare module Chai
 {
-	function use(plugin:any):void;
-
-
-	interface ChaiAssertion
+	export interface ChaiStatic
 	{
-		includeStack:bool;
+		use(plugin:any):void;
+		Assertion:ChaiAssertion;
+		assert:Assert;
 	}
-	var Assertion:chai.ChaiAssertion;
+	export interface ChaiAssertion
+	{
+		includeStack:boolean;
+	}
 
-	interface Assert
+	export interface Assert
 	{
 		(express:any, msg?:string);
 
@@ -86,7 +88,6 @@ declare module chai
 		deepPropertyNotVal(obj:Object, prop:string, val:any, msg?:string);
 
 		lengthOf(exp:any, len:number, msg?:string);
-
 		//alias frenzy
 		throw(fn:Function, msg?:string);
 		throw(fn:Function, regExp:RegExp);
@@ -116,8 +117,7 @@ declare module chai
 
 		ifError(val:any, msg?:string);
 	}
-	//node module
-	var assert:Assert;
 }
-//browser global
-declare var assert:chai.Assert;
+declare module "chai" {
+export = Chai;
+}

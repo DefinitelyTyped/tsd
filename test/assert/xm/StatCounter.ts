@@ -4,7 +4,7 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	export function assertStatCounter(stat:xm.StatCounter, values:any, message:string) {
 		assert.isObject(stat, message + ': stat');

@@ -12,7 +12,7 @@
 ///<reference path="../callAsync.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
-///<reference path="../../../typings/DefinitelyTyped/easy-table/easy-table.d.ts" />
+///<reference path="../../../typings/easy-table/easy-table.d.ts" />
 
 module xm {
 	'use strict';
@@ -131,7 +131,7 @@ module xm {
 		placeholder:string;
 		default:any;
 		command:string;
-		global:bool;
+		global:boolean;
 	}
 
 	/*
@@ -147,10 +147,9 @@ module xm {
 		private _isInit = false;
 		private _nodeBin = false;
 		private _index = 0;
-		;
 		private _mainGroup = new ExposeGroup();
 
-		constructor(public title?:string = '') {
+		constructor(public title:string = '') {
 			this.createCommand('help', (cmd:ExposeCommand) => {
 				cmd.label = 'Display usage help';
 				cmd.groups = ['help'];
@@ -296,7 +295,7 @@ module xm {
 			}
 		}
 
-		execute(id:string, args:any = null, head:bool = false) {
+		execute(id:string, args:any = null, head:boolean = false) {
 			this.init();
 
 			if (!this._commands.has(id)) {
@@ -320,7 +319,7 @@ module xm {
 				return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
 			};
 
-			var commands:EasyTable = new Table();
+			var commands = new Table();
 
 			var commandOptNames:string[] = [];
 			var globalOptNames:string[] = [];
@@ -439,7 +438,7 @@ module xm {
 			xm.log(commands.print().replace(/\s*$/, ''));
 		}
 
-		get nodeBin():bool {
+		get nodeBin():boolean {
 			return this._nodeBin;
 		}
 	}

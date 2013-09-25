@@ -11,6 +11,7 @@ describe('Selector', () => {
 	'use strict';
 
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
 	describe('basics', () => {
 		it('is defined', () => {

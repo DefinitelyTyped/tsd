@@ -4,7 +4,7 @@
 module helper {
 	'use strict';
 
-	var assert = helper.assert;
+	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseAuthor(author:xm.AuthorInfo):any {
 		xm.assertVar('author', author, xm.AuthorInfo);

@@ -10,7 +10,7 @@ module tsd {
 	export class InfoMatcher {
 
 		//return result object for uix report?
-		test(info:DefInfo):bool {
+		test(info:DefInfo):boolean {
 			return true;
 		}
 	}

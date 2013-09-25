@@ -3,6 +3,8 @@
 
 describe('xm.callAsync', () => {
 
+	var assert:Chai.Assert = require('chai').assert;
+
 	it('should call next event loop', (done) => {
 		var variable = 0;
 

@@ -82,7 +82,7 @@ module tsd {
 			return ret;
 		}
 
-		static contains(list:tsd.DefVersion[], file:tsd.DefVersion):bool {
+		static contains(list:tsd.DefVersion[], file:tsd.DefVersion):boolean {
 			for (var i = 0, ii = list.length; i < ii; i++) {
 				if (list[i].def.path === file.def.path) {
 					return true;

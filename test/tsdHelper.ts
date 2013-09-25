@@ -1,8 +1,9 @@
+///<reference path="_ref.d.ts" />
+///<reference path="helper.ts" />
 ///<reference path="../src/tsd/data/_all.ts" />
+
 ///<reference path="assert/tsd/_all.ts" />
 ///<reference path="assert/xm/_all.ts" />
-///<reference path="helper.ts" />
-///<reference path="_ref.d.ts" />
 
 ///<reference path="../src/xm/io/CachedLoader.ts" />
 
@@ -11,11 +12,12 @@ module helper {
 
 	var fs = require('fs');
 	var util = require('util');
-	var assert:chai.Assert = require('chai').assert;
+	var assert:Chai.Assert = require('chai').assert;
 	var q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
 
 	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
 	var configSchema;
 
@@ -65,7 +67,7 @@ module helper {
 		configExpect:string;
 	}
 
-	export function getTestInfo(group:string, name:string, createConfigFile?:bool = true):TestInfo {
+	export function getTestInfo(group:string, name:string, createConfigFile:boolean = true):TestInfo {
 
 		var tmpDir = path.join(__dirname, 'result', group, name);
 		var dumpDir = path.resolve(tmpDir, 'dump');
@@ -106,12 +108,12 @@ module helper {
 	//set modes for fixture updates
 	function applyCoreUpdateLoader(loader:xm.CachedLoader) {
 		var opts = loader.options;
-		if (settings.cache.forceUpdate) {
+		if (helper.settings.cache.forceUpdate) {
 			opts.cacheRead = false;
 			opts.remoteRead = true;
 			opts.cacheWrite = true;
 		}
-		else if (settings.cache.allowUpdate) {
+		else if (helper.settings.cache.allowUpdate) {
 			opts.cacheRead = true;
 			opts.remoteRead = true;
 			opts.cacheWrite = true;
@@ -126,33 +128,35 @@ module helper {
 	export function assertUpdateStat(loader:xm.CachedLoader, message:string) {
 		var stats = loader.stats;
 		if (helper.settings.cache.forceUpdate) {
+			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
 			assert.operator(stats.get('load-start'), '>=', 0, message + ': forceUpdate: load-start');
 			assert.operator(stats.get('write-succes'), '>=', 0, message + ': forceUpdate: write-succes');
-			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
 		}
 		else if (helper.settings.cache.allowUpdate) {
+			//assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
 			//assert.operator(stats.get('load-start'), '>=', 0, message + ': allowUpdate: load-start');
 			//assert.operator(stats.get('write-succes'), '>=', 0, message + ': allowUpdate: write-succes');
-			//assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
 
 			var sum = stats.get('load-start') + stats.get('write-succes') + stats.get('cache-hit');
 			assert.operator(sum, '>', 0, message + ': allowUpdate: sum');
 		}
 		else {
+			assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
 			assert.operator(stats.get('load-start'), '===', 0, message + ': noUpdate: load-start');
 			assert.operator(stats.get('write-succes'), '===', 0, message + ': noUpdate: write-succes');
-			assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
 		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function listDefPaths(dir:string):Qpromise {
-		return FS.listTree(dir,(full:string, stat):bool => {
+		return FS.listTree(dir,(full:string, stat):boolean => {
 			return (stat.isFile() && /\.d\.ts$/.test(full));
+
 		}).then((paths:string[]) => {
 			return paths.map((full:string) => {
 				return path.relative(dir, full).replace('\\', '/');
+
 			}).filter((short:string) => {
 				return tsd.Def.isDefPath(short);
 			});

@@ -39,11 +39,11 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		static isDefPath(path:string):bool {
+		static isDefPath(path:string):boolean {
 			return nameExp.test(path);
 		}
 
-		static getPath(path:string):bool {
+		static getPath(path:string):boolean {
 			return nameExp.test(path);
 		}
 

@@ -71,58 +71,58 @@ module xm {
 		jsonValue: isJSONValue
 	};
 
-	export function hasOwnProp(obj:any, prop:string):bool {
+	export function hasOwnProp(obj:any, prop:string):boolean {
 		return Object.prototype.hasOwnProperty.call(obj, prop);
 	}
 
-	export function isType(obj:any, type:string):bool {
+	export function isType(obj:any, type:string):boolean {
 		if (hasOwnProp(typeMap, type)) {
 			return typeMap[type].call(null, obj);
 		}
 		return false;
 	}
 
-	export function isArguments(obj:any):bool {
+	export function isArguments(obj:any):boolean {
 		return (typeOf(obj) === 'arguments');
 	}
 
-	export function isArray(obj:any):bool {
+	export function isArray(obj:any):boolean {
 		return (typeOf(obj) === 'array');
 	}
 
-	export function isDate(obj:any):bool {
+	export function isDate(obj:any):boolean {
 		return (typeOf(obj) === 'date');
 	}
 
-	export function isFunction(obj:any):bool {
+	export function isFunction(obj:any):boolean {
 		return (typeOf(obj) === 'function');
 	}
 
-	export function isNumber(obj:any):bool {
+	export function isNumber(obj:any):boolean {
 		return (typeOf(obj) === 'number');
 	}
 
-	export function isRegExp(obj:any):bool {
+	export function isRegExp(obj:any):boolean {
 		return (typeOf(obj) === 'regexp');
 	}
 
-	export function isString(obj:any):bool {
+	export function isString(obj:any):boolean {
 		return (typeOf(obj) === 'string');
 	}
 
-	export function isNull(obj:any):bool {
+	export function isNull(obj:any):boolean {
 		return (typeOf(obj) === 'null');
 	}
 
-	export function isUndefined(obj:any):bool {
+	export function isUndefined(obj:any):boolean {
 		return (typeOf(obj) === 'undefined');
 	}
 
-	export function isObject(obj:any):bool {
+	export function isObject(obj:any):boolean {
 		return (typeOf(obj) === 'object');
 	}
 
-	export function isBoolean(obj:any):bool {
+	export function isBoolean(obj:any):boolean {
 		return (typeOf(obj) === 'boolean');
 	}
 	// error?
@@ -130,16 +130,16 @@ module xm {
 	// - - - - meta types
 
 	//TODO test
-	export function isOk(obj:any):bool {
+	export function isOk(obj:any):boolean {
 		return !!obj;
 	}
 
-	export function isValid(obj:any):bool {
+	export function isValid(obj:any):boolean {
 		var type = typeOf(obj);
 		return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
 	}
 
-	export function isJSONValue(obj:any):bool {
+	export function isJSONValue(obj:any):boolean {
 		var type = typeOf(obj);
 		return jsonTypes.indexOf(type) > -1;
 	}
@@ -164,9 +164,9 @@ module xm {
 	}
 
 	//get a wrapper to check in the cloned/extended map
-	export function getTypeOfWrap(add?:any):(obj:any, type:string) => bool {
+	export function getTypeOfWrap(add?:any):(obj:any, type:string) => boolean {
 		var typeMap = getTypeOfMap(add);
-		return function isType(obj:any, type:string):bool {
+		return function isType(obj:any, type:string):boolean {
 			if (hasOwnProp(typeMap, type)) {
 				return typeMap[type].call(null, obj);
 			}
