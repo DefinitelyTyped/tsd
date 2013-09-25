@@ -1,5 +1,5 @@
-///<reference path="../../../_ref.ts" />
-///<reference path="../../../helper.ts" />
+///<reference path="../../../globals.ts" />
+///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 ///<reference path="../helper/HeaderHelper.ts" />
 

@@ -1,4 +1,4 @@
-///<reference path="../_ref.ts" />
+///<reference path="../_ref.d.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/assertVar.ts" />
@@ -54,6 +54,7 @@ module git {
 		private _service:xm.CachedJSONService;
 		private _loader:xm.CachedLoader;
 
+		//github's version
 		private _apiVersion:string = '3.0.0';
 
 		private _debug:bool = false;

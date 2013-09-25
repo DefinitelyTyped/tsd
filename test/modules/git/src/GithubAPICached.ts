@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/git/GithubAPICached.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
@@ -18,7 +18,7 @@ describe('git.GithubAPICached', () => {
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'git_api');
+		cacheDir = path.join(gitTest.cacheDir, 'git-api');
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		api = new git.GithubAPICached(repo, cacheDir);
 	});

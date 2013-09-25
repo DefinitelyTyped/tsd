@@ -1,4 +1,4 @@
-///<reference path="../_ref.ts" />
+///<reference path="../_ref.d.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="API.ts" />
 ///<reference path="select/Selector.ts" />

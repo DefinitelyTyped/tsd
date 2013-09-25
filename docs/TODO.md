@@ -103,8 +103,8 @@ Functionality
 CLI
 
 * :m:	Improve Expose for crisper CLI help screen layout (table/columns)
-* :x:   Improve Expose to order/group commands :zap:
-* :o:	Optimise and unify CLI output (indenting/seperator/headers etc) :zap:
+* :m:   Improve Expose to order/group commands :zap:
+* :x:	Optimise and unify CLI output (indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
 * :x:	Add TSD release/updates news to CLI console (periodically pull json from github) :zap:
 
@@ -119,6 +119,7 @@ Data modelrepo
 
 * :o:	Harden JSON import
 * :id:	Consider decoupling from Github json format
+* :id:	Consider adapting to work froma  git-checkout.
 
 Info
 
@@ -127,16 +128,16 @@ Info
 
 Config
 
-* :o:	~~Rename 'ref' to 'branch' (everywhere..)~~ No, it is correct, might do tags later.
 * :m:	Improve config JSON-Schema (RegExp)
 * :o:	Improve config validation reporting (see tv4, chai-json-schema)
-* :vs:	Consider renaming 'tsd-config.json'
+* :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
 
 Cache
 
 * :m:	Decide on user caching directory: home / AppData like npm
-* :b:	Decide on cache folder version naming scheme
+* :m:	Decide on cache folder version naming scheme
 * :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
+* :a:	Drop 'node-github' dependency and self re-implement github API to leverage http-cache-headers
 * :b:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :o:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
@@ -144,7 +145,7 @@ Cache
 
 Internals
 
-* :a:	Try recalculating sha1 hash from content
+* :m:	Try recalculating sha1 hash from content
 * :b:	Add local-changes detector using the hash / sha
 * :m:	Change Context objects to use Q/Q-io and not auto-create folders at init
 * :vs:	Decide if API, Core etc need(more) race condition hardening
@@ -161,12 +162,12 @@ Technical
 
 Cleanup
 
-* :cl:	Sweep and enable tslint.json rules, like: eofline rule
+* :cl:	Sweep and enable tslint.json rules
 * :cl:	Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune 
 * :cl:	Sweep used modules: require() and `package.json`
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
-* :x:	Verify "use strict" (needed in node?)
+* :m:	Verify "use strict" (needed in node?)
 
 Publishing
 
@@ -183,7 +184,7 @@ Publishing
 Dependencies
 
 * :id:	Consider dropping underscore?
-* :o:	Sweep recent xm `package changes for tests 
+* :o:	Sweep recent xm `package changes for new tests 
 
 More.. always more :rocket:
 

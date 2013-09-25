@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/xm/DateUtil.ts" />
 
 class ObjectUtilTestClass {
@@ -34,7 +34,7 @@ describe('xm.ObjectUtil', () => {
 			assert.strictEqual(fixed.aa, 10, 'before fixed.aa');
 			assert.strictEqual(fixed.bb, 20, 'before fixed.bb');
 
-			xm.ObjectUtil.freezeProps(fixed, ['aa']);
+			xm.ObjectUtil.lockProps(fixed, ['aa']);
 
 			assert.throws(() => {
 				fixed.aa = 100;

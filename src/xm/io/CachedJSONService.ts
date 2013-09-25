@@ -1,4 +1,4 @@
-///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.d.ts" />
 ///<reference path="CachedLoader.ts" />
 ///<reference path="CachedJSONStore.ts" />
 
@@ -31,14 +31,15 @@ module xm {
 		getValue(key:string, opts?):Qpromise {
 			return this._store.getValue(key).then((res:xm.CachedJSONValue) => {
 				if (res) {
-					return res.data;
+					return res.value;
 				}
 				return null;
 			});
 		}
 
 		writeValue(key:string, label:string, value:any, opts?):Qpromise {
-			var cached = new xm.CachedJSONValue(label, key, value);
+			var cached = new xm.CachedJSONValue(label, key);
+			cached.setValue(value);
 			return this._store.storeValue(cached).then((info) => {
 				return value;
 			});

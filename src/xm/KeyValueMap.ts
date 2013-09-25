@@ -22,10 +22,8 @@ module xm {
 		set (key:string, value:any);
 		remove (key:string);
 		keys ():string[];
-		//TODO ditch/reconsider values()'s allow[]
 		values ():any[];
 		import (data:any):void;
-		//TODO ditch/reconsider export()'s keys[]
 		export ():any;
 		clear ();
 	}
@@ -41,7 +39,7 @@ module xm {
 			if (data) {
 				this.import(data);
 			}
-			Object.defineProperty(this, '_store', {enumerable: false});
+			Object.defineProperty(this, '_store', {enumerable: false, writable:false});
 		}
 
 		has(key:string):bool {

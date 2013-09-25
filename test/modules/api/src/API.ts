@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/tsd/API.ts" />
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
@@ -93,6 +93,7 @@ describe('API', () => {
 
 	describe('install', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'install'));
+
 		xm.eachProp(data.tests, (test, name) => {
 			var selector = getSelector(test.selector);
 
@@ -124,8 +125,8 @@ describe('API', () => {
 						return Q.all(typings.map((ref:string) => {
 							assert.notIsEmptyFile(path.join(info.typingsDir, ref), 'typing');
 							/*return FS.read(path.join(info.typingsDir, ref)).then((content) => {
-								delete written[path.join(info.typingsDir, ref)];
-							});*/
+							 delete written[path.join(info.typingsDir, ref)];
+							 });*/
 						}));
 					});
 				});

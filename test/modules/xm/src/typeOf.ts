@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/xm/typeOf.ts" />
 
 describe('xm.typeOf', () => {

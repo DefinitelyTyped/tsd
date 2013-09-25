@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/xm/io/hash.ts" />
 
 describe('xm.hash', () => {

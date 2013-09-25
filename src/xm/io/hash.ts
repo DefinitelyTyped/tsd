@@ -7,6 +7,7 @@
  * */
 
 ///<reference path="../typeOf.ts" />
+///<reference path="../inspect.ts" />
 
 module xm {
 	'use strict';
@@ -62,8 +63,11 @@ module xm {
 			});
 			ret += '}' + sep;
 		}
+		else if (type === 'null') {
+			ret += 'null';
+		}
 		else {
-			throw (new Error('jsonToIdent: cannot serialise value: ' + type + ':' + obj));
+			throw (new Error('jsonToIdent: cannot serialise value: ' + xm.toValueStrim(obj)));
 		}
 		return ret;
 	}

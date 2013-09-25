@@ -351,6 +351,14 @@ var xm;
         return typeof obj;
     }
     xm.typeOf = typeOf;
+    var jsonTypes = [
+        'array', 
+        'object', 
+        'boolean', 
+        'number', 
+        'string', 
+        'null'
+    ];
     var objectNameExp = /(^\[object )|(\]$)/gi;
     function toProtoString(obj) {
         return Object.prototype.toString.call(obj).replace(objectNameExp, '');
@@ -369,7 +377,8 @@ var xm;
         object: isObject,
         boolean: isBoolean,
         ok: isOk,
-        valid: isValid
+        valid: isValid,
+        jsonValue: isJSONValue
     };
     function hasOwnProp(obj, prop) {
         return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -435,6 +444,11 @@ var xm;
         return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
     }
     xm.isValid = isValid;
+    function isJSONValue(obj) {
+        var type = typeOf(obj);
+        return jsonTypes.indexOf(type) > -1;
+    }
+    xm.isJSONValue = isJSONValue;
     function getTypeOfMap(add) {
         var name;
         var obj = {
@@ -623,11 +637,19 @@ var xm;
                 }
             }
         };
+        ObjectUtil.lockProps = function lockProps(object, props) {
+            props.forEach(function (property) {
+                Object.defineProperty(object, property, {
+                    writable: false
+                });
+            });
+        };
         ObjectUtil.freezeProps = function freezeProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, {
                     writable: false
                 });
+                Object.freeze(object[property]);
             });
         };
         ObjectUtil.deepFreeze = function deepFreeze(object) {
@@ -745,7 +767,7 @@ var tsd;
             var file = new tsd.Def(path);
             file.project = match[1];
             file.name = match[2];
-            xm.ObjectUtil.freezeProps(file, [
+            xm.ObjectUtil.lockProps(file, [
                 'path', 
                 'project', 
                 'name'
@@ -834,12 +856,15 @@ var tsd;
 (function (tsd) {
     'use strict';
     var DefBlob = (function () {
-        function DefBlob(sha, content) {
+        function DefBlob(sha, content, encoding) {
             if (typeof content === "undefined") { content = null; }
+            if (typeof encoding === "undefined") { encoding = null; }
             this.sha = null;
             this.content = null;
+            this.encoding = null;
             xm.assertVar('sha', sha, 'sha1');
             this.sha = sha;
+            this.encoding = encoding;
             xm.ObjectUtil.defineProp(this, 'content', {
                 enumerable: false
             });
@@ -1182,7 +1207,8 @@ var xm;
                 this.import(data);
             }
             Object.defineProperty(this, '_store', {
-                enumerable: false
+                enumerable: false,
+                writable: false
             });
         }
         KeyValueMap.prototype.has = function (key) {
@@ -1357,8 +1383,10 @@ var xm;
                 ret += JSON.stringify(key) + ':' + jsonToIdent(obj[key]);
             });
             ret += '}' + sep;
+        } else if(type === 'null') {
+            ret += 'null';
         } else {
-            throw (new Error('jsonToIdent: cannot serialise value: ' + type + ':' + obj));
+            throw (new Error('jsonToIdent: cannot serialise value: ' + xm.toValueStrim(obj)));
         }
         return ret;
     }
@@ -1377,73 +1405,78 @@ var xm;
 (function (xm) {
     'use strict';
     var CachedJSONValue = (function () {
-        function CachedJSONValue(label, key, data) {
-            this._key = null;
-            this._label = null;
-            this._data = null;
-            this._lastSet = null;
+        function CachedJSONValue(label, key, options) {
+            this.key = null;
+            this.label = null;
+            this.value = null;
+            this.changed = null;
+            this.options = null;
             xm.assertVar('label', label, 'string');
             xm.assertVar('key', key, 'string');
-            this._label = label;
-            this._key = key;
-            this.setData(data);
-            xm.ObjectUtil.hidePrefixed(this);
+            this.label = label;
+            this.key = key;
+            this.options = options || null;
+            xm.ObjectUtil.lockProps(this, [
+                'label', 
+                'key', 
+                'options'
+            ]);
+            Object.defineProperty(this, 'value', {
+                enumerable: false
+            });
         }
-        CachedJSONValue.prototype.setData = function (data) {
-            this._data = xm.isUndefined(data) ? null : data;
-            this._lastSet = new Date();
+        CachedJSONValue.prototype.setValue = function (value, changed) {
+            if(this.value) {
+                throw new Error('already have a value');
+            }
+            if(!xm.isJSONValue(value)) {
+                throw new Error('cannot store non-JSON values: ' + xm.typeOf(value));
+            }
+            xm.assertVar('changed', changed, Date, true);
+            this.value = value;
+            this.changed = changed || new Date();
+            Object.freeze(this.changed);
+            xm.ObjectUtil.lockProps(this, [
+                'value', 
+                'changed'
+            ]);
         };
         CachedJSONValue.prototype.toJSON = function () {
+            var hash = this.getKeyHash();
+            var checksum = xm.sha1(hash + xm.jsonToIdentHash(this.value));
             return {
                 key: this.key,
-                hash: this.getHash(),
-                data: this.data,
+                hash: hash,
+                checksum: checksum,
+                value: this.value,
                 label: this.label,
-                lastSet: this.lastSet.getTime()
+                changed: this.changed.toISOString()
             };
         };
         CachedJSONValue.fromJSON = function fromJSON(json) {
             xm.assertVar('label', json.label, 'string');
             xm.assertVar('key', json.key, 'string');
-            xm.assertVar('lastSet', json.lastSet, 'number');
-            var call = new xm.CachedJSONValue(json.label, json.key, json.data);
-            call._lastSet = new Date(json.lastSet);
+            xm.assertVar('hash', json.hash, 'sha1');
+            xm.assertVar('checksum', json.checksum, 'sha1');
+            xm.assertVar('changed', json.changed, 'string');
+            var changedDateNum = Date.parse(json.changed);
+            if(isNaN(changedDateNum)) {
+                throw new Error('bad date: changed: ' + json.date);
+            }
+            var call = new xm.CachedJSONValue(json.label, json.key, json.options);
+            call.setValue(json.value, new Date(changedDateNum));
+            var checksum = xm.sha1(call.getKeyHash() + xm.jsonToIdentHash(call.value));
+            if(checksum !== json.checksum) {
+                throw new Error('json checksum mismatch');
+            }
             return call;
         };
         CachedJSONValue.getHash = function getHash(key) {
             return xm.sha1(key);
         };
-        CachedJSONValue.prototype.getHash = function () {
-            return xm.CachedJSONValue.getHash(this._key);
+        CachedJSONValue.prototype.getKeyHash = function () {
+            return xm.sha1(this.key);
         };
-        Object.defineProperty(CachedJSONValue.prototype, "label", {
-            get: function () {
-                return this._label;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CachedJSONValue.prototype, "key", {
-            get: function () {
-                return this._key;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CachedJSONValue.prototype, "data", {
-            get: function () {
-                return this._data;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CachedJSONValue.prototype, "lastSet", {
-            get: function () {
-                return this._lastSet;
-            },
-            enumerable: true,
-            configurable: true
-        });
         return CachedJSONValue;
     })();
     xm.CachedJSONValue = CachedJSONValue;    
@@ -1459,7 +1492,7 @@ var xm;
     var CachedJSONStore = (function () {
         function CachedJSONStore(storeFolder) {
             this.stats = new xm.StatCounter();
-            this._formatVersion = '0.0.3';
+            this._formatVersion = '0.2';
             xm.assertVar('storeFolder', storeFolder, 'string');
             storeFolder = storeFolder.replace(/[\\\/]+$/, '') + '-fmt' + this._formatVersion;
             this._dir = path.resolve(storeFolder);
@@ -1503,7 +1536,7 @@ var xm;
                             cached = xm.CachedJSONValue.fromJSON(json);
                         } catch (e) {
                             _this.stats.count('get-read-error');
-                            throw (new Error(src + ':' + e));
+                            throw (new Error(e + ' -> ' + src));
                         }
                         _this.stats.count('get-read-success');
                         return cached;
@@ -1518,7 +1551,7 @@ var xm;
         };
         CachedJSONStore.prototype.storeValue = function (res) {
             var _this = this;
-            var dest = path.join(this._dir, res.getHash() + '.json');
+            var dest = path.join(this._dir, res.getKeyHash() + '.json');
             this.stats.count('store');
             return this.init().then(function () {
                 return FS.exists(dest);
@@ -1558,31 +1591,6 @@ var xm;
             this.cacheWrite = true;
             this.remoteRead = true;
         }
-        CachedLoaderOptions.prototype.modeUpdate = function () {
-            this.cacheRead = false;
-            this.remoteRead = true;
-            this.cacheWrite = true;
-        };
-        CachedLoaderOptions.prototype.modeCached = function () {
-            this.cacheRead = true;
-            this.remoteRead = false;
-            this.cacheWrite = false;
-        };
-        CachedLoaderOptions.prototype.modeRemote = function () {
-            this.cacheRead = false;
-            this.remoteRead = true;
-            this.cacheWrite = false;
-        };
-        CachedLoaderOptions.prototype.modeAll = function () {
-            this.cacheRead = true;
-            this.remoteRead = true;
-            this.cacheWrite = true;
-        };
-        CachedLoaderOptions.prototype.modeBlock = function () {
-            this.cacheRead = false;
-            this.remoteRead = false;
-            this.cacheWrite = false;
-        };
         return CachedLoaderOptions;
     })();
     xm.CachedLoaderOptions = CachedLoaderOptions;    
@@ -1750,13 +1758,14 @@ var xm;
         CachedJSONService.prototype.getValue = function (key, opts) {
             return this._store.getValue(key).then(function (res) {
                 if(res) {
-                    return res.data;
+                    return res.value;
                 }
                 return null;
             });
         };
         CachedJSONService.prototype.writeValue = function (key, label, value, opts) {
-            var cached = new xm.CachedJSONValue(label, key, value);
+            var cached = new xm.CachedJSONValue(label, key);
+            cached.setValue(value);
             return this._store.storeValue(cached).then(function (info) {
                 return value;
             });
@@ -2125,7 +2134,7 @@ var git;
     var GithubRawCached = (function () {
         function GithubRawCached(repo, storeFolder) {
             this._debug = false;
-            this._formatVersion = '0.0.2';
+            this._formatVersion = '0.2';
             this.stats = new xm.StatCounter(false);
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
@@ -2160,7 +2169,6 @@ var git;
                         throw new Error('unexpected status code: ' + res.statusCode);
                     }
                     _this.stats.count('request-complete');
-                    _this.stats.logger(xm.toProtoString(res.body));
                     return res.body;
                 });
             });
@@ -2421,7 +2429,7 @@ var tsd;
             xm.assertVar('commitSha', commitSha, 'string');
             this.commitSha = commitSha;
             xm.ObjectUtil.hidePrefixed(this);
-            xm.ObjectUtil.freezeProps(this, [
+            xm.ObjectUtil.lockProps(this, [
                 'commitSha'
             ]);
         }
@@ -2441,7 +2449,7 @@ var tsd;
             this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
             this.message.parse(commit.commit.message);
             this.hasMeta = true;
-            xm.ObjectUtil.freezeProps(this, [
+            xm.ObjectUtil.lockProps(this, [
                 'treeSha', 
                 'hasMeta'
             ]);
@@ -3288,8 +3296,8 @@ var tsd;
             this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
             this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
-            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
-            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
+            this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-api'));
+            this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-raw'));
             this.stats.logger = xm.getLogger('Core.stats');
             this.debug = context.verbose;
             xm.ObjectUtil.hidePrefixed(this);
@@ -3302,27 +3310,25 @@ var tsd;
                 return Q(this.index);
             }
             this.stats.count('index-miss');
-            var branchData;
             this.stats.count('index-branch-get');
-            return this.gitAPI.getBranch(this.context.config.ref).then(function (data) {
-                var sha = pointer.get(data, branch_tree);
+            return this.gitAPI.getBranch(this.context.config.ref).then(function (branchData) {
+                var sha = pointer.get(branchData, branch_tree);
                 if(!sha) {
                     _this.stats.count('index-branch-get-fail');
                     throw new Error('missing sha hash');
                 }
                 _this.stats.count('index-branch-get-success');
                 _this.stats.count('index-tree-get');
-                branchData = data;
-                return _this.gitAPI.getTree(sha, true);
+                return _this.gitAPI.getTree(sha, true).then(function (data) {
+                    _this.stats.count('index-tree-get-success');
+                    _this.index.init(branchData, data);
+                    return _this.index;
+                }, function (err) {
+                    _this.stats.count('index-tree-get-error');
+                    throw err;
+                });
             }, function (err) {
                 _this.stats.count('index-branch-get-error');
-                throw err;
-            }).then(function (data) {
-                _this.stats.count('index-tree-get-success');
-                _this.index.init(branchData, data);
-                return _this.index;
-            }, function (err) {
-                _this.stats.count('index-tree-get-error');
                 throw err;
             });
         };
@@ -3343,7 +3349,7 @@ var tsd;
             return this.getIndex().then(function () {
                 var def = _this.index.procureDef(path);
                 if(!def) {
-                    return Q.reject(new Error('cannot get def for path: ' + path));
+                    throw new Error('cannot get def for path: ' + path);
                 }
                 return Q(def);
             });
@@ -3353,7 +3359,7 @@ var tsd;
             return this.getIndex().then(function () {
                 var file = _this.index.procureVersionFromSha(path, commitSha);
                 if(!file) {
-                    return Q.reject(new Error('cannot get file for path: ' + path));
+                    throw new Error('cannot get file for path: ' + path);
                 }
                 return Q(file);
             });
@@ -3363,7 +3369,7 @@ var tsd;
             return this.getIndex().then(function () {
                 var commit = _this.index.procureCommit(commitSha);
                 if(!commit) {
-                    return Q.reject(new Error('cannot commit def for commitSha: ' + path));
+                    throw new Error('cannot commit def for commitSha: ' + path);
                 }
                 return Q(commit);
             });
@@ -3933,21 +3939,76 @@ var xm;
     'use strict';
     var optimist = require('optimist');
     var Table = require('easy-table');
-    var ExposeCommand = (function () {
-        function ExposeCommand(id, execute, label, options, variadic) {
-            if (typeof options === "undefined") { options = []; }
-            if (typeof variadic === "undefined") { variadic = []; }
-            this.id = id;
-            this.execute = execute;
-            this.label = label;
-            this.options = options;
-            this.variadic = variadic;
+    function exposeSortIndex(one, two) {
+        if(one.index < two.index) {
+            return -1;
+        } else if(one.index > two.index) {
+            return 1;
         }
-        ExposeCommand.prototype.init = function () {
-        };
+        if(one.id < two.id) {
+            return -1;
+        } else if(one.id > two.id) {
+            return 1;
+        }
+        return 0;
+    }
+    xm.exposeSortIndex = exposeSortIndex;
+    function exposeSortHasElem(one, two, elem) {
+        var oneI = one.indexOf(elem) > -1;
+        var twoI = two.indexOf(elem) > -1;
+        if(oneI && !twoI) {
+            return -1;
+        } else if(!oneI && twoI) {
+            return 1;
+        }
+        return 0;
+    }
+    xm.exposeSortHasElem = exposeSortHasElem;
+    function exposeSortId(one, two) {
+        if(one.id < two.id) {
+            return -1;
+        } else if(one.id > two.id) {
+            return 1;
+        }
+        if(one.index < two.index) {
+            return -1;
+        } else if(one.index > two.index) {
+            return 1;
+        }
+        return 0;
+    }
+    xm.exposeSortId = exposeSortId;
+    function exposeSortGroup(one, two) {
+        if(one.index < two.index) {
+            return -1;
+        } else if(one.index > two.index) {
+            return 1;
+        }
+        if(one.id < two.id) {
+            return -1;
+        } else if(one.id > two.id) {
+            return 1;
+        }
+        return 0;
+    }
+    xm.exposeSortGroup = exposeSortGroup;
+    var ExposeCommand = (function () {
+        function ExposeCommand() {
+            this.options = [];
+            this.variadic = [];
+            this.groups = [];
+        }
         return ExposeCommand;
     })();
     xm.ExposeCommand = ExposeCommand;    
+    var ExposeGroup = (function () {
+        function ExposeGroup() {
+            this.sorter = exposeSortIndex;
+            this.options = [];
+        }
+        return ExposeGroup;
+    })();
+    xm.ExposeGroup = ExposeGroup;    
     var Expose = (function () {
         function Expose(title) {
             if (typeof title === "undefined") { title = ''; }
@@ -3955,11 +4016,20 @@ var xm;
             var _this = this;
             this._commands = new xm.KeyValueMap();
             this._options = new xm.KeyValueMap();
+            this._groups = new xm.KeyValueMap();
             this._isInit = false;
             this._nodeBin = false;
-            this.command('help', function () {
-                _this.printCommands();
-            }, 'Display usage help');
+            this._index = 0;
+            this._mainGroup = new ExposeGroup();
+            this.createCommand('help', function (cmd) {
+                cmd.label = 'Display usage help';
+                cmd.groups = [
+                    'help'
+                ];
+                cmd.execute = function (args) {
+                    _this.printCommands();
+                };
+            });
             this.defineOption({
                 name: 'help',
                 short: 'h',
@@ -3978,11 +4048,27 @@ var xm;
             }
             this._options.set(data.name, data);
         };
-        Expose.prototype.command = function (id, def, label, options, variadic) {
+        Expose.prototype.createCommand = function (id, build) {
+            xm.assertVar('id', id, 'string');
             if(this._commands.has(id)) {
                 throw new Error('id collision on ' + id);
             }
-            this._commands.set(id, new ExposeCommand(id, def, label, options, variadic));
+            var cmd = new ExposeCommand();
+            cmd.id = id;
+            cmd.index = (++this._index);
+            build(cmd);
+            this._commands.set(id, cmd);
+        };
+        Expose.prototype.createGroup = function (id, build) {
+            xm.assertVar('id', id, 'string');
+            if(this._groups.has(id)) {
+                throw new Error('id collision on ' + id);
+            }
+            var group = new ExposeGroup();
+            group.id = id;
+            group.index = (++this._index);
+            build(group);
+            this._groups.set(id, group);
         };
         Expose.prototype.init = function () {
             var _this = this;
@@ -4003,9 +4089,6 @@ var xm;
                 if(xm.ObjectUtil.hasOwnProp(option, 'default')) {
                     optimist.default(option.name, option.default);
                 }
-            });
-            xm.eachProp(this._commands.keys(), function (id) {
-                _this._commands.get(id).init();
             });
         };
         Expose.prototype.executeArgv = function (argvRaw, alt) {
@@ -4076,36 +4159,25 @@ var xm;
                 var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
                 return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
             };
-            var globalOpts = new Table();
+            var commands = new Table();
             var commandOptNames = [];
             var globalOptNames = [];
             var commandPadding = '   ';
             var optPadding = '      ';
             var optKeys = this._options.keys().sort();
-            var options = this._options.values();
-            xm.eachElem(optKeys, function (name) {
-                var option = _this._options.get(name);
-                if(option.command) {
-                    globalOpts.cell('one', optPadding + optionString(option));
-                    globalOpts.cell('two', option.description);
-                    globalOpts.newRow();
-                    commandOptNames.push(option.name);
+            var addOption = function (name) {
+                var option = _this._options.get(name, null);
+                if(!option) {
+                    commands.cell('one', optPadding + '--' + name);
+                    commands.cell('two', '<undefined>');
+                } else {
+                    commands.cell('one', optPadding + optionString(option));
+                    commands.cell('two', option.description + ' (' + option.type + ')');
                 }
-            });
-            globalOpts.newRow();
-            xm.eachElem(optKeys, function (name) {
-                var option = _this._options.get(name);
-                if(option.global && !option.command) {
-                    globalOpts.cell('one', optPadding + optionString(option));
-                    globalOpts.cell('two', option.description);
-                    globalOpts.newRow();
-                    globalOptNames.push(option.name);
-                }
-            });
-            var commands = new Table();
-            xm.eachProp(this._commands.keys().sort(), function (id) {
-                var usage = id;
-                var cmd = _this._commands.get(id);
+                commands.newRow();
+            };
+            var addCommand = function (cmd, group) {
+                var usage = cmd.id;
                 if(cmd.variadic.length > 0) {
                     usage += ' <' + cmd.variadic.join(', ') + '>';
                 }
@@ -4114,26 +4186,75 @@ var xm;
                 commands.newRow();
                 xm.eachProp(cmd.options, function (name) {
                     var option = _this._options.get(name);
-                    if(commandOptNames.indexOf(name) < 0) {
-                        commands.cell('one', optPadding + optionString(option));
-                        commands.cell('two', option.description);
-                        commands.newRow();
+                    if(commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
+                        addOption(name);
                     }
                 });
-                commands.newRow();
+            };
+            var allCommands = this._commands.keys();
+            var allGroups = this._groups.values();
+            xm.eachElem(optKeys, function (name) {
+                var option = _this._options.get(name);
+                if(option.command) {
+                    commandOptNames.push(option.name);
+                }
             });
-            xm.log('commands:\n----');
-            xm.log(commands.print());
-            if(globalOptNames.length > 0) {
-                xm.log('global options:\n----');
-                xm.log(globalOpts.print());
+            xm.eachElem(optKeys, function (name) {
+                var option = _this._options.get(name);
+                if(option.global && !option.command) {
+                    globalOptNames.push(option.name);
+                }
+            });
+            if(allGroups.length > 0) {
+                xm.eachProp(this._groups.values().sort(exposeSortGroup), function (group) {
+                    commands.cell('one', group.label + '\n--------');
+                    commands.newRow();
+                    _this._commands.values().filter(function (cmd) {
+                        return cmd.groups.indexOf(group.id) > -1;
+                    }).sort(group.sorter).forEach(function (cmd) {
+                        addCommand(cmd, group);
+                        var i = allCommands.indexOf(cmd.id);
+                        if(i > -1) {
+                            allCommands.splice(i, 1);
+                        }
+                    });
+                    if(group.options.length > 0) {
+                        commands.cell('one', '--------');
+                        commands.newRow();
+                        xm.eachProp(group.options, function (name) {
+                            var option = _this._options.get(name);
+                            if(commandOptNames.indexOf(name) < 0) {
+                                addOption(name);
+                            }
+                        });
+                    }
+                    commands.newRow();
+                });
             }
-        };
-        Expose.prototype.hasCommand = function (id) {
-            return this._commands.has(id);
-        };
-        Expose.prototype.getCommand = function (id) {
-            return this._commands.get(id);
+            if(allCommands.length > 0) {
+                commands.cell('one', 'Other commands\n--------');
+                commands.newRow();
+                allCommands.forEach(function (id) {
+                    addCommand(_this._commands.get(id), _this._mainGroup);
+                });
+                commands.newRow();
+            }
+            if(commandOptNames.length > 0 && globalOptNames.length > 0) {
+                commands.cell('one', 'Global options\n--------');
+                commands.newRow();
+                if(commandOptNames.length > 0) {
+                    xm.eachElem(commandOptNames, function (name) {
+                        addOption(name);
+                    });
+                }
+                if(globalOptNames.length > 0) {
+                    xm.eachElem(globalOptNames, function (name) {
+                        addOption(name);
+                    });
+                }
+                commands.newRow();
+            }
+            xm.log(commands.print().replace(/\s*$/, ''));
         };
         Object.defineProperty(Expose.prototype, "nodeBin", {
             get: function () {
@@ -4170,6 +4291,11 @@ var tsd;
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
+    var pleonasm;
+    function pleo(input) {
+        input = input.substring(0, 6);
+        return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
+    }
     function getContext(args) {
         xm.assertVar('args', args, 'object');
         var context = new tsd.Context(args.config, args.verbose);
@@ -4191,10 +4317,6 @@ var tsd;
         function Job() { }
         return Job;
     })();    
-    var pleonasm;
-    function pleo(input) {
-        return '[' + pleonasm.encode(input, '_', '_').code + ']';
-    }
     function loadData(args) {
         return Q.nfcall(function (callback) {
             if(!pleonasm) {
@@ -4238,6 +4360,27 @@ var tsd;
     }
     function runARGV(argvRaw) {
         var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
+        expose.createGroup('command', function (group) {
+            group.label = 'Main commands';
+            group.options = [
+                'config'
+            ];
+            group.sorter = function (one, two) {
+                var sort;
+                sort = xm.exposeSortHasElem(one.groups, two.groups, 'primary');
+                if(sort !== 0) {
+                    return sort;
+                }
+                sort = xm.exposeSortHasElem(one.groups, two.groups, 'info');
+                if(sort !== 0) {
+                    return sort;
+                }
+                return xm.exposeSortIndex(one, two);
+            };
+        });
+        expose.createGroup('help', function (group) {
+            group.label = 'Help commands';
+        });
         expose.defineOption({
             name: 'version',
             short: 'V',
@@ -4277,6 +4420,16 @@ var tsd;
             placeholder: null,
             command: null,
             global: true
+        });
+        expose.defineOption({
+            name: 'dummy',
+            short: null,
+            description: 'Dummy mode',
+            type: 'flag',
+            default: null,
+            placeholder: null,
+            command: null,
+            global: false
         });
         function reportError(err) {
             xm.log('-> ' + 'an error occured!'.red);
@@ -4352,118 +4505,196 @@ var tsd;
                 xm.log('----');
             }
         }
-        expose.command('version', function (args) {
-            xm.log(xm.PackageJSON.getLocal().version);
-        }, 'Display version');
-        expose.command('settings', function (args) {
-            getContext(args).logInfo(true);
-        }, 'Display config settings');
-        expose.command('search', function (args) {
-            getSelectorJob(args).then(function (job) {
-                return job.api.search(job.selector);
-            }).done(function (result) {
-                reportSucces(null);
-                result.selection.forEach(function (file) {
-                    printFileHead(file);
-                    printFileInfo(file);
-                    printFileCommit(file);
-                });
-            }, reportError);
-        }, 'Search definitions', jobOptions(), [
-            'selector'
-        ]);
-        expose.command('install', function (args) {
-            getSelectorJob(args).then(function (job) {
-                return job.api.install(job.selector);
-            }).done(function (result) {
-                reportSucces(null);
-                xm.log('');
-                result.written.keys().sort().forEach(function (path) {
-                    var file = result.written.get(path);
-                    xm.log(file.toString());
-                    xm.log('');
-                });
-            }, reportError);
-        }, 'Install definitions', jobOptions(), [
-            'selector'
-        ]);
-        expose.command('reinstall', function (args) {
-            getAPIJob(args).then(function (job) {
-                return job.api.reinstall();
-            }).done(function (result) {
-                reportSucces(null);
-                xm.log('');
-                result.written.keys().sort().forEach(function (path) {
-                    var file = result.written.get(path);
-                    xm.log(file.toString());
-                    xm.log('');
-                });
-            }, reportError);
-        }, 'Re-install definitions from config', jobOptions(), [
-            'selector'
-        ]);
-        expose.command('info', function (args) {
-            getSelectorJob(args).then(function (job) {
-                return job.api.info(job.selector);
-            }).done(function (result) {
-                reportSucces(null);
-                result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
-                    printFileHead(file);
-                    printFileInfo(file);
-                    printFileCommit(file);
-                });
-            }, reportError);
-        }, 'Show definition details', jobOptions(), [
-            'selector'
-        ]);
-        expose.command('history', function (args) {
-            getSelectorJob(args).then(function (job) {
-                return job.api.history(job.selector);
-            }).done(function (result) {
-                reportSucces(null);
-                result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                    printDefHead(def);
-                    printSubHead('head:');
-                    printFileCommit(def.head);
-                    printSubHead('history:');
-                    def.history.slice(0).forEach(function (file) {
-                        printFileInfo(file, true);
+        expose.createCommand('version', function (cmd) {
+            cmd.label = 'Display version';
+            cmd.groups = [
+                'help'
+            ];
+            cmd.execute = function (args) {
+                xm.log(xm.PackageJSON.getLocal().version);
+            };
+        });
+        expose.createCommand('settings', function (cmd) {
+            cmd.label = 'Display config settings';
+            cmd.options = [
+                'config'
+            ];
+            cmd.groups = [
+                'support'
+            ];
+            cmd.execute = function (args) {
+                getContext(args).logInfo(true);
+            };
+        });
+        expose.createCommand('search', function (cmd) {
+            cmd.label = 'Search definitions';
+            cmd.options = [
+                'config'
+            ];
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'primary', 
+                'query'
+            ];
+            cmd.execute = function (args) {
+                getSelectorJob(args).then(function (job) {
+                    return job.api.search(job.selector);
+                }).done(function (result) {
+                    reportSucces(null);
+                    result.selection.forEach(function (file) {
+                        printFileHead(file);
+                        printFileInfo(file);
                         printFileCommit(file);
                     });
-                });
-            }, reportError);
-        }, 'Show definition history', jobOptions(), [
-            'selector'
-        ]);
-        expose.command('deps', function (args) {
-            getSelectorJob(args).then(function (job) {
-                return job.api.deps(job.selector);
-            }).done(function (result) {
-                reportSucces(null);
-                result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
-                    printFileHead(def);
-                    printFileInfo(def);
-                    if(def.dependencies.length > 0) {
-                        def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                            xm.log(' - ' + def.toString());
-                            if(def.head.dependencies.length > 0) {
-                                def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                    xm.log('    - ' + def.toString());
-                                });
-                            }
+                }, reportError);
+            };
+        });
+        expose.createCommand('install', function (cmd) {
+            cmd.label = 'Install definitions';
+            cmd.options = jobOptions([
+                'save'
+            ]);
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'primary', 
+                'write'
+            ];
+            cmd.execute = function (args) {
+                getSelectorJob(args).then(function (job) {
+                    return job.api.install(job.selector);
+                }).done(function (result) {
+                    reportSucces(null);
+                    xm.log('');
+                    result.written.keys().sort().forEach(function (path) {
+                        var file = result.written.get(path);
+                        xm.log(file.toString());
+                        xm.log('');
+                    });
+                }, reportError);
+            };
+        });
+        expose.createCommand('reinstall', function (cmd) {
+            cmd.label = 'Re-install definitions from config';
+            cmd.options = jobOptions();
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'primary', 
+                'write'
+            ];
+            cmd.execute = function (args) {
+                getAPIJob(args).then(function (job) {
+                    return job.api.reinstall();
+                }).done(function (result) {
+                    reportSucces(null);
+                    xm.log('');
+                    result.written.keys().sort().forEach(function (path) {
+                        var file = result.written.get(path);
+                        xm.log(file.toString());
+                        xm.log('');
+                    });
+                }, reportError);
+            };
+        });
+        expose.createCommand('info', function (cmd) {
+            cmd.label = 'Display definition info';
+            cmd.options = jobOptions();
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'primary', 
+                'query'
+            ];
+            cmd.execute = function (args) {
+                getSelectorJob(args).then(function (job) {
+                    return job.api.info(job.selector);
+                }).done(function (result) {
+                    reportSucces(null);
+                    result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
+                        printFileHead(file);
+                        printFileInfo(file);
+                        printFileCommit(file);
+                    });
+                }, reportError);
+            };
+        });
+        expose.createCommand('history', function (cmd) {
+            cmd.label = 'Display definition history';
+            cmd.options = jobOptions();
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'primary', 
+                'query'
+            ];
+            cmd.execute = function (args) {
+                getSelectorJob(args).then(function (job) {
+                    return job.api.history(job.selector);
+                }).done(function (result) {
+                    reportSucces(null);
+                    result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                        printDefHead(def);
+                        printSubHead('head:');
+                        printFileCommit(def.head);
+                        printSubHead('history:');
+                        def.history.slice(0).forEach(function (file) {
+                            printFileInfo(file, true);
+                            printFileCommit(file);
                         });
-                        xm.log('----');
-                    }
-                });
-            }, reportError);
-        }, 'List dependencies', jobOptions(), [
-            'selector'
-        ]);
+                    });
+                }, reportError);
+            };
+        });
+        expose.createCommand('deps', function (cmd) {
+            cmd.label = 'List dependencies';
+            cmd.options = jobOptions();
+            cmd.variadic = [
+                'selector'
+            ];
+            cmd.groups = [
+                'command', 
+                'info', 
+                'query'
+            ];
+            cmd.execute = function (args) {
+                getSelectorJob(args).then(function (job) {
+                    return job.api.deps(job.selector);
+                }).done(function (result) {
+                    reportSucces(null);
+                    result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
+                        printFileHead(def);
+                        printFileInfo(def);
+                        if(def.dependencies.length > 0) {
+                            def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                                xm.log(' - ' + def.toString());
+                                if(def.head.dependencies.length > 0) {
+                                    def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                                        xm.log('    - ' + def.toString());
+                                    });
+                                }
+                            });
+                            xm.log('----');
+                        }
+                    });
+                }, reportError);
+            };
+        });
         expose.executeArgv(argvRaw, 'help');
     }
     tsd.runARGV = runARGV;
 })(tsd || (tsd = {}));
-'use strict';
 var Q = require('q');
 Q.longStackSupport = true;
 require('source-map-support').install();

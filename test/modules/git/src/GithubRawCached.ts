@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/git/GithubRawCached.ts" />
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 ///<reference path="helper.ts" />
@@ -18,7 +18,7 @@ describe('git.GithubRawCached', () => {
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'git_raw');
+		cacheDir = path.join(gitTest.cacheDir, 'git-raw');
 
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		raw = new git.GithubRawCached(repo, cacheDir);

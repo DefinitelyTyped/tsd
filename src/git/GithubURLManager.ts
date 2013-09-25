@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="_ref.ts" />
+///<reference path="../_ref.d.ts" />
+///<reference path="_ref.d.ts" />
 ///<reference path="GithubRepo.ts" />
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />

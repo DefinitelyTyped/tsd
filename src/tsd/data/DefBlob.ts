@@ -29,10 +29,12 @@ module tsd {
 	export class DefBlob {
 		sha:string = null;
 		content:ReadOnlyBuffer = null;
+		encoding:string = null;
 
-		constructor(sha:string, content?:NodeBuffer = null) {
+		constructor(sha:string, content?:NodeBuffer = null, encoding:string = null) {
 			xm.assertVar('sha', sha, 'sha1');
 			this.sha = sha;
+			this.encoding = encoding;
 
 			xm.ObjectUtil.defineProp(this, 'content', {enumerable: false});
 			if (content) {

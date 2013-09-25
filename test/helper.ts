@@ -1,11 +1,5 @@
-///<reference path="_ref.ts" />
-///<reference path="../src/xm/io/FileUtil.ts" />
-///<reference path="../src/xm/io/Logger.ts" />
-///<reference path="../src/xm/data/PackageJSON.ts" />
-///<reference path="../src/xm/StatCounter.ts" />
-///<reference path="../src/xm/KeyValueMap.ts" />
-///<reference path="../src/xm/inspect.ts" />
-///<reference path="settings.ts" />
+///<reference path="globals.ts" />
+///<reference path="assert/xm/_all.ts" />
 
 module helper {
 	'use strict';
@@ -13,9 +7,10 @@ module helper {
 	var fs = require('fs');
 	var path = require('path');
 	var util = require('util');
-	var assert:chai.Assert = require('chai').assert;
 	var q:QStatic = require('q');
 	var FS:Qfs = require('q-io/fs');
+
+	export var assert:chai.Assert = require('chai').assert;
 
 	var shaRegExp = /^[0-9a-f]{40}$/;
 	var md5RegExp = /^[0-9a-f]{32}$/;
@@ -77,138 +72,5 @@ module helper {
 	}
 	export interface IsLikeCB {
 		(actual, expected):bool;
-	}
-
-	//helper: assert lists of unordered items
-	//first finds an identity match, then applies real assertion
-	export function assertUnorderedLike(actual:any[], expected:any[], matcher:IsLikeCB, assertion:AssertCB, message:string) {
-		assert.isArray(actual, 'actual');
-		assert.isArray(expected, 'expected');
-
-		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
-
-		//clones
-		var actualQueue = actual.slice(0);
-		var expectedQueue = expected.slice(0);
-
-		outer : while (actualQueue.length > 0) {
-			var act = actualQueue.pop();
-			for (var i = 0, ii = expectedQueue.length; i < ii; i++) {
-				var exp = expectedQueue[i];
-
-				//check if this combination should be asserted
-				if (matcher(act, exp)) {
-					//do assertion
-					assertion(act, exp, message);
-					expected.splice(i, 1);
-					//jump
-					continue outer;
-				}
-			}
-			if (expected.length > 0) {
-				xm.log(expected);
-			}
-			//use assert.deepEqual for diff report
-			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
-		}
-		//also bad
-		if (expected.length > 0 && expectedQueue.length > 0) {
-			//use deepEqual for nice report
-			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
-		}
-	}
-
-	//get lazy wrapper for re-use
-	export function getAssertUnorderedLike(matcher:IsLikeCB, assertion:AssertCB, preLabel:string):AssertCB {
-		return function assertUnorderedLikeWrap(actual:any[], expected:any[], message?:string) {
-			assertUnorderedLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
-		};
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	//helper: assert lists of unordered items
-	//naively hammers assertions: every element has to pass exactly one comparative assertion
-	export function assertUnorderedNaive(actual:any[], expected:any[], assertion:AssertCB, message:string) {
-		assert.isArray(actual, 'actual');
-		assert.isArray(expected, 'expected');
-
-		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
-
-		//clones
-		var actualQueue = actual.slice(0);
-		var expectedQueue = expected.slice(0);
-
-		outer : while (actual.length > 0) {
-			var act = actual.pop();
-			for (var i = 0, ii = expected.length; i < ii; i++) {
-				var exp = expected[i];
-
-				//try every assertion
-				try {
-					assertion(act, exp, message);
-
-					//passed, remove it
-					expected.splice(i, 1);
-					//jump
-					continue outer;
-				}
-				catch (err) {
-					//maybe next one
-				}
-			}
-			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
-		}
-		//also bad
-		if (expected.length > 0 && expectedQueue.length > 0) {
-			//use assert.deepEqual for diff report
-			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
-		}
-	}
-
-	//get lazy wrapper for re-use
-	export function getAssertUnorderedNaive(assertion:AssertCB, preLabel:string):AssertCB {
-		return function (actual:any[], expected:any[], message?:string) {
-			assertUnorderedNaive(actual, expected, assertion, preLabel + ': ' + message);
-		};
-	}
-
-	//abominables
-	export function assertUnorderedStrict(actual:any[], expected:any[], message?:string) {
-		assertUnorderedNaive(actual, expected, assert.strictEqual, message);
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	export function assertKeyValue(map:xm.IKeyValueMap, values:any, assertion:AssertCB, message:string) {
-		assert.isObject(map, message + ': map');
-		assert.isObject(values, message + ': values');
-		assert.isFunction(assertion, message + ': assertion');
-
-		var keys:string[] = map.keys();
-		Object.keys(values).forEach((key:string) => {
-			var i = keys.indexOf(key);
-			assert(i > -1, message + ': expected key "' + key + '"');
-			keys.splice(i, 1);
-			assert(map.has(key), message + ': missing key "' + key + '"');
-			assertion(map.get(key), values[key], message + ': key "' + key + '"');
-		});
-		assert(keys.length === 0, message + ': unexpected keys remaining: ' + keys + '');
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	export function assertStatCounter(stat:xm.StatCounter, values:any, message:string) {
-		assert.isObject(stat, message + ': stat');
-		assert.isObject(values, message + ': values');
-		assert.instanceOf(stat, xm.StatCounter, message + ': stat');
-
-		var obj = {};
-		Object.keys(values).forEach((key:string) => {
-			//if (stat.has(key)) {
-			obj[key] = stat.get(key);
-			//}
-		});
-		assert.deepEqual(obj, values, message + ': stat');
 	}
 }

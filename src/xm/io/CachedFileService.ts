@@ -1,4 +1,4 @@
-///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.d.ts" />
 ///<reference path="CachedLoader.ts" />
 ///<reference path="CachedJSONStore.ts" />
 ///<reference path="../ObjectUtil.ts" />

@@ -36,7 +36,7 @@ module tsd {
 			this.commitSha = commitSha;
 
 			xm.ObjectUtil.hidePrefixed(this);
-			xm.ObjectUtil.freezeProps(this, ['commitSha']);
+			xm.ObjectUtil.lockProps(this, ['commitSha']);
 		}
 
 		parseJSON(commit:any):void {
@@ -61,7 +61,7 @@ module tsd {
 			this.message.parse(commit.commit.message);
 			this.hasMeta = true;
 
-			xm.ObjectUtil.freezeProps(this, ['treeSha', 'hasMeta']);
+			xm.ObjectUtil.lockProps(this, ['treeSha', 'hasMeta']);
 		}
 
 		hasMetaData():bool {

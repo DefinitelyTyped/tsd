@@ -138,7 +138,7 @@ module.exports = function (grunt) {
 		macro.tag('module');
 		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
 	}, {
-		concurrent: 3
+		concurrent: 1
 	});
 
 	// assemble!
@@ -154,9 +154,9 @@ module.exports = function (grunt) {
 
 	// modules
 	gtx.create('xm', 'moduleTest', null, 'lib');
+	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
-	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 
 	gtx.alias('run', ['build', 'shell:cli']);
 	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);

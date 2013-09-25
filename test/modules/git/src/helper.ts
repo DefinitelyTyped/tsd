@@ -8,5 +8,3 @@ module gitTest {
 	export var fixtureDir = path.resolve(__dirname, '..', 'fixtures');
 	export var config = xm.FileUtil.readJSONSync(path.join(fixtureDir, 'config.json'));
 }
-//TODO find out why this is needed
-declare var gitTest;

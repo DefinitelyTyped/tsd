@@ -1,0 +1,12 @@
+{
+  "typingsPath": "D:\\_Editing\\github\\tsd\\tsd-origin\\test\\modules\\api\\tmp\\result\\install\\async-async\\typings",
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "installed": {
+    "async/async.d.ts": {
+      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "blob": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
+    }
+  }
+}

@@ -34,7 +34,8 @@ module xm {
 	/*
 	 assertVar: assert a variable (like a function argument) and throw informative error on assertion failure
 	 */
-	//TODO expand validation options, add RegExp /string length
+	//TODO expand validation options, add RegExp /string length (use extended xm.typeOf.ts)
+	//TODO use extended xm.typeOf
 	//TODO custom error?
 	export function assertVar(label:string, value:any, type:any, opt?:bool = false):void {
 		if (arguments.length < 3) {

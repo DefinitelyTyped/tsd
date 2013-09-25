@@ -1,4 +1,4 @@
-///<reference path="_ref.ts" />
+///<reference path="_ref.d.ts" />
 ///<reference path="typeOf.ts" />
 
 module xm {
@@ -42,9 +42,16 @@ module xm {
 			}
 		}
 
+		static lockProps(object, props) {
+			props.forEach((property:string) => {
+				Object.defineProperty(object, property, {writable: false});
+			});
+		}
+
 		static freezeProps(object, props) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
+				Object.freeze(object[property]);
 			});
 		}
 

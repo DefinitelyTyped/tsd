@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/git/GithubURLManager.ts" />
 
 describe('git.GithubRepo / git.GithubURLManager', () => {

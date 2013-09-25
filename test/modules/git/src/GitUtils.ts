@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="helper.ts" />
 

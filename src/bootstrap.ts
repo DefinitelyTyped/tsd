@@ -1,4 +1,4 @@
-'use strict';
+///<reference path="_ref.d.ts" />
 
 var Q = require('q');
 Q.longStackSupport = true;

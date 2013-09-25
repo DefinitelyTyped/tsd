@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../tsdHelper.ts" />
 
 ///<reference path="../../../../src/tsd/context/Config.ts" />
@@ -12,7 +12,7 @@ describe('Config', () => {
 	var config:tsd.Config;
 
 	beforeEach(() => {
-		config = new tsd.Config(helper.configSchema);
+		config = new tsd.Config(helper.getConfigSchema());
 		config.log.mute = true;
 	});
 	afterEach(() => {

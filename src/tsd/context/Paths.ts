@@ -1,6 +1,6 @@
 ///<reference path='../../xm/io/Logger.ts' />
 ///<reference path='../../xm/io/Logger.ts' />
-///<reference path='../../_ref.ts' />
+///<reference path='../../_ref.d.ts' />
 ///<reference path='Const.ts' />
 
 module tsd {

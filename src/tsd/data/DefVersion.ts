@@ -13,7 +13,7 @@ module tsd {
 	 NOTE: for practical reasons linked to a commit (tree) instead of a blob
 	 */
 	export class DefVersion {
-		//TODO swap for non-wriable properties?
+		//TODO swap for non-writable properties?
 		private _def:tsd.Def = null;
 		private _commit:tsd.DefCommit = null;
 

@@ -1,4 +1,4 @@
-///<reference path="_ref.ts" />
+///<reference path="_ref.d.ts" />
 ///<reference path="tsd/_ref.ts" />
 ///<reference path="tsd/API.ts" />
 ///<reference path="tsd/CLI.ts" />

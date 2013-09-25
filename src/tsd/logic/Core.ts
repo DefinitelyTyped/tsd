@@ -50,8 +50,8 @@ module tsd {
 			this.index = new tsd.DefIndex();
 
 			this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
-			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_api'));
-			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git_raw'));
+			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-api'));
+			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-raw'));
 
 			this.stats.logger = xm.getLogger('Core.stats');
 
@@ -73,32 +73,31 @@ module tsd {
 			}
 			this.stats.count('index-miss');
 
-			var branchData;
 
 			this.stats.count('index-branch-get');
 
-			return this.gitAPI.getBranch(this.context.config.ref).then((data:any) => {
-				var sha = pointer.get(data, branch_tree);
+			return this.gitAPI.getBranch(this.context.config.ref).then((branchData:any) => {
+				var sha = pointer.get(branchData, branch_tree);
 				if (!sha) {
 					this.stats.count('index-branch-get-fail');
 					throw new Error('missing sha hash');
 				}
 				this.stats.count('index-branch-get-success');
 				this.stats.count('index-tree-get');
+
 				//keep for later
-				branchData = data;
-				return this.gitAPI.getTree(sha, true);
+				return this.gitAPI.getTree(sha, true).then((data:any) => {
+					//this.log(data);
+					this.stats.count('index-tree-get-success');
+					this.index.init(branchData, data);
+
+					return this.index;
+				}, (err) => {
+					this.stats.count('index-tree-get-error');
+					throw err;
+				});
 			},(err) => {
 				this.stats.count('index-branch-get-error');
-				throw err;
-			}).then((data:any) => {
-				//this.log(data);
-				this.stats.count('index-tree-get-success');
-				this.index.init(branchData, data);
-
-				return this.index;
-			}, (err) => {
-				this.stats.count('index-tree-get-error');
 				throw err;
 			});
 		}
@@ -133,7 +132,7 @@ module tsd {
 			return this.getIndex().then(() => {
 				var def:tsd.Def = this.index.procureDef(path);
 				if (!def) {
-					return Q.reject(new Error('cannot get def for path: ' + path));
+					throw new Error('cannot get def for path: ' + path);
 				}
 				return Q(def);
 			});
@@ -147,7 +146,7 @@ module tsd {
 			return this.getIndex().then(() => {
 				var file:tsd.DefVersion = this.index.procureVersionFromSha(path, commitSha);
 				if (!file) {
-					return Q.reject(new Error('cannot get file for path: ' + path));
+					throw new Error('cannot get file for path: ' + path);
 				}
 				return Q(file);
 			});
@@ -161,7 +160,7 @@ module tsd {
 			return this.getIndex().then(() => {
 				var commit:tsd.DefCommit = this.index.procureCommit(commitSha);
 				if (!commit) {
-					return Q.reject(new Error('cannot commit def for commitSha: ' + path));
+					throw new Error('cannot commit def for commitSha: ' + path);
 				}
 				return Q(commit);
 			});

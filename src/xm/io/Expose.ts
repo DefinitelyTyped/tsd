@@ -6,10 +6,11 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../_ref.ts" />
+///<reference path="../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 ///<reference path="../callAsync.ts" />
+///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
 ///<reference path="../../../typings/DefinitelyTyped/easy-table/easy-table.d.ts" />
 
@@ -19,9 +20,108 @@ module xm {
 	var optimist = require('optimist');
 	var Table:EasyTableStatic = require('easy-table');
 
-	export interface ExposeAction extends Function {
-		(args:any, done:(err) => void):void;
+	export interface ExposeAction {
+		(args:any):void;
 	}
+
+	export interface ExposeBuild {
+		(cmd:ExposeCommand):void;
+	}
+
+	export interface ExposeBuildGroup {
+		(group:ExposeGroup):void;
+	}
+
+	export interface ExposeSorter {
+		(one:ExposeCommand, two:ExposeCommand):number;
+	}
+
+	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
+		if (one.index < two.index) {
+			return -1;
+		}
+		else if (one.index > two.index) {
+			return 1;
+		}
+		if (one.id < two.id) {
+			return -1;
+		}
+		else if (one.id > two.id) {
+			return 1;
+		}
+		return 0;
+	}
+
+	export function exposeSortHasElem(one:any[], two:any[], elem:any):number {
+		var oneI = one.indexOf(elem) > -1;
+		var twoI = two.indexOf(elem) > -1;
+		if (oneI && !twoI) {
+			return -1;
+		}
+		else if (!oneI && twoI) {
+			return 1;
+		}
+		return 0;
+	}
+
+	export function exposeSortId(one:ExposeCommand, two:ExposeCommand):number {
+		if (one.id < two.id) {
+			return -1;
+		}
+		else if (one.id > two.id) {
+			return 1;
+		}
+		if (one.index < two.index) {
+			return -1;
+		}
+		else if (one.index > two.index) {
+			return 1;
+		}
+		return 0;
+	}
+
+	export function exposeSortGroup(one:ExposeGroup, two:ExposeGroup):number {
+		if (one.index < two.index) {
+			return -1;
+		}
+		else if (one.index > two.index) {
+			return 1;
+		}
+		if (one.id < two.id) {
+			return -1;
+		}
+		else if (one.id > two.id) {
+			return 1;
+		}
+		return 0;
+	}
+
+	export class ExposeCommand {
+		id:string;
+		execute:ExposeAction;
+		index:number;
+
+		label:string;
+		options:string[] = [];
+		variadic:string[] = [];
+		groups:string[] = [];
+
+		constructor() {
+		}
+	}
+
+	export class ExposeGroup {
+		id:string;
+		label:string;
+		index:number;
+		sorter:ExposeSorter = exposeSortIndex;
+		options:string[] = [];
+
+		constructor() {
+		}
+	}
+
+	//TODO decide on object style..
 
 	export interface ExposeOption {
 		name:string;
@@ -34,17 +134,6 @@ module xm {
 		global:bool;
 	}
 
-	export class ExposeCommand {
-
-		constructor(public id:string, public execute:ExposeAction, public label?:string, public options?:string[] = [], public variadic:string[] = []) {
-
-		}
-
-		init():void {
-
-		}
-	}
-
 	/*
 	 Expose: cli command manager, wraps optimist with better usage generator and other utils
 	 */
@@ -54,15 +143,21 @@ module xm {
 
 		private _commands = new KeyValueMap();
 		private _options = new KeyValueMap();
+		private _groups = new KeyValueMap();
 		private _isInit = false;
 		private _nodeBin = false;
+		private _index = 0;
+		;
+		private _mainGroup = new ExposeGroup();
 
 		constructor(public title?:string = '') {
-			this.command('help', () => {
-
-				this.printCommands();
-
-			}, 'Display usage help');
+			this.createCommand('help', (cmd:ExposeCommand) => {
+				cmd.label = 'Display usage help';
+				cmd.groups = ['help'];
+				cmd.execute = (args:any) => {
+					this.printCommands();
+				};
+			});
 
 			this.defineOption({
 				name: 'help',
@@ -85,11 +180,34 @@ module xm {
 			this._options.set(data.name, data);
 		}
 
-		command(id:string, def:(args:any) => void, label?:string, options?:any, variadic?:any) {
+		/*command(id:string, def:(args:any) => void, label?:string, options?:any, variadic?:any) {
+		 if (this._commands.has(id)) {
+		 throw new Error('id collision on ' + id);
+		 }
+		 this._commands.set(id, new ExposeCommand(id, def, label, options, variadic));
+		 }*/
+		createCommand(id:string, build:ExposeBuild) {
+			xm.assertVar('id', id, 'string');
 			if (this._commands.has(id)) {
 				throw new Error('id collision on ' + id);
 			}
-			this._commands.set(id, new ExposeCommand(id, def, label, options, variadic));
+			var cmd = new ExposeCommand();
+			cmd.id = id;
+			cmd.index = (++this._index);
+			build(cmd);
+			this._commands.set(id, cmd);
+		}
+
+		createGroup(id:string, build:ExposeBuildGroup) {
+			xm.assertVar('id', id, 'string');
+			if (this._groups.has(id)) {
+				throw new Error('id collision on ' + id);
+			}
+			var group = new ExposeGroup();
+			group.id = id;
+			group.index = (++this._index);
+			build(group);
+			this._groups.set(id, group);
 		}
 
 		init():void {
@@ -112,10 +230,6 @@ module xm {
 				if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
 					optimist.default(option.name, option.default);
 				}
-			});
-
-			xm.eachProp(this._commands.keys(), (id) => {
-				this._commands.get(id).init();
 			});
 		}
 
@@ -196,7 +310,6 @@ module xm {
 			f.execute.call(f, args);
 		}
 
-		//TODO clean ugly method (after fixing global options)
 		printCommands():void {
 			if (this.title) {
 				xm.log(this.title + '\n');
@@ -207,75 +320,123 @@ module xm {
 				return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
 			};
 
-			var globalOpts:EasyTable = new Table();
+			var commands:EasyTable = new Table();
 
 			var commandOptNames:string[] = [];
 			var globalOptNames:string[] = [];
-
 			var commandPadding:string = '   ';
 			var optPadding:string = '      ';
 
 			var optKeys = this._options.keys().sort();
-			var options:ExposeOption[] = this._options.values();
-			xm.eachElem(optKeys, (name:string) => {
-				var option:ExposeOption = this._options.get(name);
-				if (option.command) {
-					globalOpts.cell('one', optPadding + optionString(option));
-					globalOpts.cell('two', option.description);
-					globalOpts.newRow();
-					commandOptNames.push(option.name);
-				}
-			});
-			globalOpts.newRow();
-			xm.eachElem(optKeys, (name:string) => {
-				var option:ExposeOption = this._options.get(name);
-				if (option.global && !option.command) {
-					globalOpts.cell('one', optPadding + optionString(option));
-					globalOpts.cell('two', option.description);
-					globalOpts.newRow();
-					globalOptNames.push(option.name);
-				}
-			});
 
-			var commands:EasyTable = new Table();
+			var addOption = (name:string) => {
+				var option = this._options.get(name, null);
+				if (!option) {
+					commands.cell('one', optPadding + '--' + name);
+					commands.cell('two', '<undefined>');
+				}
+				else {
+					commands.cell('one', optPadding + optionString(option));
+					commands.cell('two', option.description + ' (' + option.type + ')');
+				}
+				commands.newRow();
+			};
 
-			xm.eachProp(this._commands.keys().sort(), (id) => {
-				var usage = id;
-				var cmd = this._commands.get(id);
+			var addCommand = (cmd:ExposeCommand, group:ExposeGroup) => {
+				var usage = cmd.id;
 				if (cmd.variadic.length > 0) {
 					usage += ' <' + cmd.variadic.join(', ') + '>';
 				}
-
 				commands.cell('one', commandPadding + usage);
 				commands.cell('two', cmd.label);
 				commands.newRow();
 
 				xm.eachProp(cmd.options, (name:string) => {
 					var option:ExposeOption = this._options.get(name);
-					if (commandOptNames.indexOf(name) < 0) {
-						commands.cell('one', optPadding + optionString(option));
-						commands.cell('two', option.description);
-						commands.newRow();
+					if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
+						addOption(name);
 					}
 				});
-				commands.newRow();
+				//commands.newRow();
+			};
+
+			var allCommands = this._commands.keys();
+			var allGroups = this._groups.values();
+
+			xm.eachElem(optKeys, (name:string) => {
+				var option:ExposeOption = this._options.get(name);
+				if (option.command) {
+					//addOption(option);
+					commandOptNames.push(option.name);
+				}
+			});
+			//commands.newRow();
+			xm.eachElem(optKeys, (name:string) => {
+				var option:ExposeOption = this._options.get(name);
+				if (option.global && !option.command) {
+					//addOption(option);
+					globalOptNames.push(option.name);
+				}
 			});
 
-			xm.log('commands:\n----');
-			xm.log(commands.print());
+			if (allGroups.length > 0) {
+				xm.eachProp(this._groups.values().sort(exposeSortGroup), (group:ExposeGroup) => {
+					commands.cell('one', group.label + '\n--------');
+					commands.newRow();
 
-			if (globalOptNames.length > 0) {
-				xm.log('global options:\n----');
-				xm.log(globalOpts.print());
+					this._commands.values().filter((cmd:ExposeCommand) => {
+						return cmd.groups.indexOf(group.id) > -1;
+					}).sort(group.sorter).forEach((cmd:ExposeCommand) => {
+						addCommand(cmd, group);
+
+						var i = allCommands.indexOf(cmd.id);
+						if (i > -1) {
+							allCommands.splice(i, 1);
+						}
+					});
+
+					if (group.options.length > 0) {
+						commands.cell('one', '--------');
+						commands.newRow();
+						xm.eachProp(group.options, (name:string) => {
+							var option:ExposeOption = this._options.get(name);
+							if (commandOptNames.indexOf(name) < 0) {
+								addOption(name);
+							}
+						});
+					}
+					commands.newRow();
+					//xm.eachProp(this._commands.keys().sort(), (id) => {});
+				});
 			}
-		}
 
-		hasCommand(id:string):bool {
-			return this._commands.has(id);
-		}
+			if (allCommands.length > 0) {
+				commands.cell('one', 'Other commands\n--------');
+				commands.newRow();
+				allCommands.forEach((id) => {
+					addCommand(this._commands.get(id), this._mainGroup);
+				});
+				commands.newRow();
+			}
 
-		getCommand(id:string):xm.ExposeCommand {
-			return this._commands.get(id);
+			if (commandOptNames.length > 0 && globalOptNames.length > 0) {
+				commands.cell('one', 'Global options\n--------');
+				commands.newRow();
+				if (commandOptNames.length > 0) {
+					xm.eachElem(commandOptNames, (name:string) => {
+						addOption(name);
+					});
+				}
+
+				if (globalOptNames.length > 0) {
+					xm.eachElem(globalOptNames, (name:string) => {
+						addOption(name);
+					});
+				}
+				commands.newRow();
+			}
+			//now output
+			xm.log(commands.print().replace(/\s*$/, ''));
 		}
 
 		get nodeBin():bool {

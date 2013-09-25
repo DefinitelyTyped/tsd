@@ -1,4 +1,4 @@
-///<reference path="../_ref.ts" />
+///<reference path="../_ref.d.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/io/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
@@ -23,7 +23,7 @@ module git {
 
 		private _repo:git.GithubRepo;
 		private _debug:bool = false;
-		private _formatVersion:string = '0.0.2';
+		private _formatVersion:string = '0.2';
 
 		private _service:xm.CachedFileService;
 		private _loader:xm.CachedLoader;
@@ -75,7 +75,6 @@ module git {
 					this.stats.count('request-complete');
 					// according to the headers raw github is binary encoded, but from what? utf8?
 					//TODO find correct way to handle encoding type
-					this.stats.logger(xm.toProtoString(res.body));
 					return res.body;
 				});
 			});

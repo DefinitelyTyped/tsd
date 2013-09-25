@@ -1,4 +1,4 @@
-///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../StatCounter.ts" />
 ///<reference path="../assertVar.ts" />
@@ -21,45 +21,12 @@ module xm {
 		cacheRead = true;
 		cacheWrite = true;
 		remoteRead = true;
-
-		constructor() {
-		}
-
-		modeUpdate() {
-			this.cacheRead = false;
-			this.remoteRead = true;
-			this.cacheWrite = true;
-		}
-
-		modeCached() {
-			this.cacheRead = true;
-			this.remoteRead = false;
-			this.cacheWrite = false;
-		}
-
-		modeRemote() {
-			this.cacheRead = false;
-			this.remoteRead = true;
-			this.cacheWrite = false;
-		}
-
-		modeAll() {
-			this.cacheRead = true;
-			this.remoteRead = true;
-			this.cacheWrite = true;
-		}
-
-		modeBlock() {
-			this.cacheRead = false;
-			this.remoteRead = false;
-			this.cacheWrite = false;
-		}
 	}
 
 	export interface CachedLoaderService {
 		getValue(key:string, opts?):Qpromise;
 		writeValue(key:string, label:string, value, opts?):Qpromise;
-		getKeys(opts?):Qpromise;
+		//getKeys(opts?):Qpromise;
 	}
 	/*
 	 CachedLoader: abstraction to execute and cache results of remote calls

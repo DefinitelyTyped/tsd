@@ -1,4 +1,4 @@
-///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../StatCounter.ts" />
 ///<reference path="../assertVar.ts" />
@@ -26,7 +26,7 @@ module xm {
 		stats:xm.StatCounter = new xm.StatCounter();
 
 		private _dir:string;
-		private _formatVersion:string = '0.0.3';
+		private _formatVersion:string = '0.2';
 
 		constructor(storeFolder:string) {
 			xm.assertVar('storeFolder', storeFolder, 'string');
@@ -84,7 +84,7 @@ module xm {
 						}
 						catch (e) {
 							this.stats.count('get-read-error');
-							throw(new Error(src + ':' + e));
+							throw(new Error(e + ' -> ' + src));
 						}
 						this.stats.count('get-read-success');
 						return cached;
@@ -99,7 +99,7 @@ module xm {
 		}
 
 		storeValue(res:xm.CachedJSONValue):Qpromise {
-			var dest = path.join(this._dir, res.getHash() + '.json');
+			var dest = path.join(this._dir, res.getKeyHash() + '.json');
 
 			this.stats.count('store');
 

@@ -6,7 +6,7 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../../_ref.ts" />
+///<reference path="../../_ref.d.ts" />
 ///<reference path="mkdirCheck.ts" />
 
 module xm {

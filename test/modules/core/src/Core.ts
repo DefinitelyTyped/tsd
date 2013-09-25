@@ -1,4 +1,4 @@
-///<reference path="../../../_ref.ts" />
+///<reference path="../../../globals.ts" />
 ///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/tsd/logic/Core.ts" />
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
@@ -107,7 +107,7 @@ describe('Core', () => {
 				return xm.FileUtil.readJSONPromise(context.paths.configFile);
 			}).then((json) => {
 				assert.like(json, changed, 'saved data json');
-				assert.jsonSchema(json, helper.configSchema, 'saved valid json');
+				assert.jsonSchema(json, helper.getConfigSchema(), 'saved valid json');
 				return null;
 			});
 		});

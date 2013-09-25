@@ -39,6 +39,15 @@ module xm {
 		return typeof obj;
 	}
 
+	var jsonTypes:string[] = [
+		'array',
+		'object',
+		'boolean',
+		'number',
+		'string',
+		'null'
+	];
+
 	var objectNameExp = /(^\[object )|(\]$)/gi;
 
 	export function toProtoString(obj:any):string {
@@ -58,7 +67,8 @@ module xm {
 		object: isObject,
 		boolean: isBoolean,
 		ok: isOk,
-		valid: isValid
+		valid: isValid,
+		jsonValue: isJSONValue
 	};
 
 	export function hasOwnProp(obj:any, prop:string):bool {
@@ -127,6 +137,11 @@ module xm {
 	export function isValid(obj:any):bool {
 		var type = typeOf(obj);
 		return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
+	}
+
+	export function isJSONValue(obj:any):bool {
+		var type = typeOf(obj);
+		return jsonTypes.indexOf(type) > -1;
 	}
 
 	//clone/extend the map

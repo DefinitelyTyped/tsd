@@ -1,0 +1,91 @@
+{
+  "key": "[\"getBranch\";{\"branch\":\"master\";\"repo\":\"DefinitelyTyped\";\"user\":\"borisyankov\";};];",
+  "hash": "1d2a46454405f025c232dbd99296ed87de996bce",
+  "checksum": "8eedb1ab3c3b4de78dbebbde98da59169a0a0e2d",
+  "value": {
+    "name": "master",
+    "commit": {
+      "sha": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "commit": {
+        "author": {
+          "name": "Diullei Gomes",
+          "email": "diullei@gmail.com",
+          "date": "2013-09-24T20:54:45Z"
+        },
+        "committer": {
+          "name": "Diullei Gomes",
+          "email": "diullei@gmail.com",
+          "date": "2013-09-24T20:54:45Z"
+        },
+        "message": "Merge pull request #1074 from wiredprairie/patch-3\n\nUpdate winjs.d.ts to include a large number of missing functions from th...",
+        "tree": {
+          "sha": "bd8e8140cd8d599c0cdadd1308b4ae2becbb57c9",
+          "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/bd8e8140cd8d599c0cdadd1308b4ae2becbb57c9"
+        },
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/commits/3bc329f49a971b3dae92ca682cb81816dbe31a53",
+        "comment_count": 0
+      },
+      "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/commits/3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "html_url": "https://github.com/borisyankov/DefinitelyTyped/commit/3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "comments_url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/commits/3bc329f49a971b3dae92ca682cb81816dbe31a53/comments",
+      "author": {
+        "login": "Diullei",
+        "id": 373936,
+        "avatar_url": "https://0.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
+        "gravatar_id": "5e93890c5b54d18dd454f14789c2b225",
+        "url": "https://api.github.com/users/Diullei",
+        "html_url": "https://github.com/Diullei",
+        "followers_url": "https://api.github.com/users/Diullei/followers",
+        "following_url": "https://api.github.com/users/Diullei/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Diullei/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Diullei/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Diullei/subscriptions",
+        "organizations_url": "https://api.github.com/users/Diullei/orgs",
+        "repos_url": "https://api.github.com/users/Diullei/repos",
+        "events_url": "https://api.github.com/users/Diullei/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Diullei/received_events",
+        "type": "User"
+      },
+      "committer": {
+        "login": "Diullei",
+        "id": 373936,
+        "avatar_url": "https://0.gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?d=https%3A%2F%2Fidenticons.github.com%2F7c3eeb8483ba9406b45e63f794946cd3.png",
+        "gravatar_id": "5e93890c5b54d18dd454f14789c2b225",
+        "url": "https://api.github.com/users/Diullei",
+        "html_url": "https://github.com/Diullei",
+        "followers_url": "https://api.github.com/users/Diullei/followers",
+        "following_url": "https://api.github.com/users/Diullei/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Diullei/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Diullei/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Diullei/subscriptions",
+        "organizations_url": "https://api.github.com/users/Diullei/orgs",
+        "repos_url": "https://api.github.com/users/Diullei/repos",
+        "events_url": "https://api.github.com/users/Diullei/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Diullei/received_events",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "060269ee3905316839139f157e11ee75d52b97c4",
+          "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/commits/060269ee3905316839139f157e11ee75d52b97c4",
+          "html_url": "https://github.com/borisyankov/DefinitelyTyped/commit/060269ee3905316839139f157e11ee75d52b97c4"
+        },
+        {
+          "sha": "8c8629ffb7e01e85f2ee50566fa2ebbd5b3a865d",
+          "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/commits/8c8629ffb7e01e85f2ee50566fa2ebbd5b3a865d",
+          "html_url": "https://github.com/borisyankov/DefinitelyTyped/commit/8c8629ffb7e01e85f2ee50566fa2ebbd5b3a865d"
+        }
+      ]
+    },
+    "_links": {
+      "self": "https://api.github.com/repos/borisyankov/DefinitelyTyped/branches/master",
+      "html": "https://github.com/borisyankov/DefinitelyTyped/tree/master"
+    },
+    "meta": {
+      "x-ratelimit-limit": "60",
+      "x-ratelimit-remaining": "45"
+    }
+  },
+  "label": "getBranch",
+  "changed": "2013-09-24T21:01:08.881Z"
+}

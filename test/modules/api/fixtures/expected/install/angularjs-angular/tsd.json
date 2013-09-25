@@ -1,0 +1,16 @@
+{
+  "typingsPath": "D:\\_Editing\\github\\tsd\\tsd-origin\\test\\modules\\api\\tmp\\result\\install\\angularjs-angular\\typings",
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "installed": {
+    "angularjs/angular.d.ts": {
+      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "blob": "c44f3408e4b90c2572045d231a91f6042cf2e8da"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "blob": "99969f710e2dbcac67382988edc7224550d29b86"
+    }
+  }
+}
