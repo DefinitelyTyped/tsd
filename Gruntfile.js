@@ -5,6 +5,7 @@ module.exports = function (grunt) {
 	if (isVagrant) {
 		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
 	}
+	var cpuCores = require('os').cpus().length;
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 
@@ -137,7 +138,7 @@ module.exports = function (grunt) {
 		macro.tag('module');
 		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
 	}, {
-		concurrent: 3
+		concurrent: cpuCores
 	});
 
 	// assemble!
