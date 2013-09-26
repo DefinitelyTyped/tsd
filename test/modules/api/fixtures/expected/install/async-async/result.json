@@ -34,7 +34,7 @@
     }
   ],
   "written": {
-    "D:\\_Editing\\github\\tsd\\tsd-origin\\test\\modules\\api\\tmp\\result\\install\\async-async\\typings\\async\\async.d.ts": {
+    "async/async.d.ts": {
       "path": "async/async.d.ts",
       "commit": {
         "commitSha": "3bc329f49a971b3dae92ca682cb81816dbe31a53"

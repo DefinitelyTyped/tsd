@@ -1,18 +1,18 @@
-///<reference path="../../git/GithubAPICached.ts" />
-///<reference path="../../git/GithubRepo.ts" />
-///<reference path="../../git/GithubRawCached.ts" />
-///<reference path="../../xm/assertVar.ts" />
-///<reference path="../data/DefUtil.ts" />
-///<reference path="../data/DefVersion.ts" />
-///<reference path="../data/Def.ts" />
-///<reference path="../data/DefIndex.ts" />
-///<reference path="../data/DefInfoParser.ts" />
-///<reference path="../data/DefInfo.ts" />
-///<reference path="../data/DefIndex.ts" />
-///<reference path="../context/Config.ts" />
-///<reference path="../API.ts" />
+///<reference path="../git/GithubAPICached.ts" />
+///<reference path="../git/GithubRepo.ts" />
+///<reference path="../git/GithubRawCached.ts" />
+///<reference path="../xm/assertVar.ts" />
+///<reference path="data/DefUtil.ts" />
+///<reference path="data/DefVersion.ts" />
+///<reference path="data/Def.ts" />
+///<reference path="data/DefIndex.ts" />
+///<reference path="data/DefInfoParser.ts" />
+///<reference path="data/DefInfo.ts" />
+///<reference path="data/DefIndex.ts" />
+///<reference path="context/Config.ts" />
+///<reference path="API.ts" />
 
-///<reference path="Resolver.ts" />
+///<reference path="logic/Resolver.ts" />
 
 module tsd {
 	'use strict';
@@ -96,7 +96,7 @@ module tsd {
 					this.stats.count('index-tree-get-error');
 					throw err;
 				});
-			},(err) => {
+			}, (err) => {
 				this.stats.count('index-branch-get-error');
 				throw err;
 			});
@@ -180,8 +180,7 @@ module tsd {
 		 promise: string: absolute path of written file
 		 */
 		installFile(file:tsd.DefVersion, addToConfig:boolean = true):Qpromise {
-			return this.useFile(file).then((targetPath:string) => {
-				//this.log(paths.keys().join('\n'));
+			return this.useFile(file).then((file:tsd.DefVersion) => {
 
 				if (this.context.config.hasFile(file.def.path)) {
 					this.context.config.getFile(file.def.path).update(file);
@@ -189,7 +188,7 @@ module tsd {
 				else if (addToConfig) {
 					this.context.config.addFile(file);
 				}
-				return targetPath;
+				return file;
 			});
 		}
 
@@ -201,8 +200,8 @@ module tsd {
 			var written:xm.IKeyValueMap = new xm.KeyValueMap();
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.installFile(file, addToConfig).then((targetPath:string) => {
-					written.set(targetPath, file);
+				return this.installFile(file, addToConfig).then((file:tsd.DefVersion) => {
+					written.set(file.def.path, file);
 				});
 			})).thenResolve(written);
 		}
@@ -409,8 +408,8 @@ module tsd {
 		 promise: absolute path of written file
 		 */
 		useFile(file:tsd.DefVersion, overwrite:boolean = true):Qpromise {
-			var targetPath = path.resolve(this.context.config.typingsPath, file.def.path);
-			var dir = path.dirname(targetPath);
+			var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
+			var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
 
 			return FS.exists(targetPath).then((exists:boolean) => {
 				if (exists && !overwrite) {
@@ -425,12 +424,11 @@ module tsd {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
-					return xm.mkdirCheckQ(dir, true);
+					return xm.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);
 				}).then(() => {
-					//return the target path
-					return targetPath;
+					return file;
 				});
 			});
 		}
@@ -447,8 +445,8 @@ module tsd {
 			var written = new xm.KeyValueMap();
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.useFile(file, overwrite).then((targetPath:string) => {
-					written.set(targetPath, file);
+				return this.useFile(file, overwrite).then((file:tsd.DefVersion) => {
+					written.set(file.def.path, file);
 				});
 			})).thenResolve(written);
 		}

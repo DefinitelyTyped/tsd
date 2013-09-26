@@ -1,4 +1,4 @@
-///<reference path="Core.ts" />
+///<reference path="../Core.ts" />
 ///<reference path="../API.ts" />
 ///<reference path="../data/DefUtil.ts" />
 ///<reference path="../data/Def.ts" />

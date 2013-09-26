@@ -115,7 +115,6 @@ module.exports = function (grunt) {
 
 	// module tester
 	gtx.define('moduleTest', function (macro, id) {
-
 		var testPath = 'test/modules/' + id + '/';
 
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
@@ -138,7 +137,7 @@ module.exports = function (grunt) {
 		macro.tag('module');
 		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source)
 	}, {
-		concurrent: 1
+		concurrent: 3
 	});
 
 	// assemble!

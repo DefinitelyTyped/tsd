@@ -54,7 +54,6 @@ describe('API', () => {
 		var tmp = helper.getTestInfo(group, name, true);
 
 		api.context.paths.configFile = tmp.configFile;
-		api.context.config.typingsPath = tmp.typingsDir;
 
 		xm.FileUtil.writeJSONSync(tmp.testDump, test);
 		xm.FileUtil.writeJSONSync(tmp.selectorDump, selector);
@@ -114,7 +113,6 @@ describe('API', () => {
 
 					var configExpect = xm.FileUtil.readJSONSync(info.configExpect);
 					var configActual = xm.FileUtil.readJSONSync(info.configFile);
-					configExpect.typingsPath = info.typingsDir;
 					assert.deepEqual(configActual, configExpect, 'configActual');
 
 					helper.assertConfig(api.context.config, configExpect, 'api.context.config');

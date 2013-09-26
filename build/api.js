@@ -1111,7 +1111,19 @@ var tsd;
             this.ref = tsd.Const.mainBranch;
 
             xm.ObjectUtil.hidePrefixed(this);
+            Object.defineProperty(this, 'log', { enumerable: false });
         }
+        Config.prototype.resolveTypingsPath = function (relativeToDir) {
+            var cfgFull = path.resolve(relativeToDir);
+            var typings = this.typingsPath.replace(/[\\\/]/g, path.sep);
+
+            if (/^([\\\/]|\w:)/.test(this.typingsPath)) {
+                return typings;
+            }
+
+            return path.resolve(cfgFull, typings);
+        };
+
         Object.defineProperty(Config.prototype, "repoOwner", {
             get: function () {
                 return this.repo.split('/')[0];
@@ -1302,9 +1314,10 @@ var tsd;
             this.log(this.packageInfo.getNameVersion());
             this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
             if (details) {
-                this.log.inspect(this.paths, 'paths');
-                this.log.inspect(this.config, 'config');
-                this.log.inspect(this.config.getInstalled(), 'config');
+                this.log('paths', this.paths);
+                this.log('config', this.config);
+                this.log('resolved typings', this.config.resolveTypingsPath(path.dirname(this.paths.configFile)));
+                this.log('installed', this.config.getInstalled());
             }
         };
         return Context;
@@ -3812,13 +3825,13 @@ var tsd;
         Core.prototype.installFile = function (file, addToConfig) {
             if (typeof addToConfig === "undefined") { addToConfig = true; }
             var _this = this;
-            return this.useFile(file).then(function (targetPath) {
+            return this.useFile(file).then(function (file) {
                 if (_this.context.config.hasFile(file.def.path)) {
                     _this.context.config.getFile(file.def.path).update(file);
                 } else if (addToConfig) {
                     _this.context.config.addFile(file);
                 }
-                return targetPath;
+                return file;
             });
         };
 
@@ -3828,8 +3841,8 @@ var tsd;
             var written = new xm.KeyValueMap();
 
             return Q.all(list.map(function (file) {
-                return _this.installFile(file, addToConfig).then(function (targetPath) {
-                    written.set(targetPath, file);
+                return _this.installFile(file, addToConfig).then(function (file) {
+                    written.set(file.def.path, file);
                 });
             })).thenResolve(written);
         };
@@ -3983,8 +3996,8 @@ var tsd;
         Core.prototype.useFile = function (file, overwrite) {
             if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
-            var targetPath = path.resolve(this.context.config.typingsPath, file.def.path);
-            var dir = path.dirname(targetPath);
+            var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
+            var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
 
             return FS.exists(targetPath).then(function (exists) {
                 if (exists && !overwrite) {
@@ -3997,11 +4010,11 @@ var tsd;
                     if (exists) {
                         return FS.remove(targetPath);
                     }
-                    return xm.mkdirCheckQ(dir, true);
+                    return xm.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
                 }).then(function () {
-                    return targetPath;
+                    return file;
                 });
             });
         };
@@ -4014,8 +4027,8 @@ var tsd;
             var written = new xm.KeyValueMap();
 
             return Q.all(list.map(function (file) {
-                return _this.useFile(file, overwrite).then(function (targetPath) {
-                    written.set(targetPath, file);
+                return _this.useFile(file, overwrite).then(function (file) {
+                    written.set(file.def.path, file);
                 });
             })).thenResolve(written);
         };
@@ -5117,7 +5130,9 @@ var tsd;
             cmd.options = ['config'];
             cmd.groups = ['support'];
             cmd.execute = function (args) {
-                getContext(args).logInfo(true);
+                getAPIJob(args).then(function (job) {
+                    job.api.context.logInfo(true);
+                });
             };
         });
 

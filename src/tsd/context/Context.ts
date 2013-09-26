@@ -42,9 +42,10 @@ module tsd {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
 			if (details) {
-				this.log.inspect(this.paths, 'paths');
-				this.log.inspect(this.config, 'config');
-				this.log.inspect(this.config.getInstalled(), 'config');
+				this.log('paths', this.paths);
+				this.log('config', this.config);
+				this.log('resolved typings', this.config.resolveTypingsPath(path.dirname(this.paths.configFile)));
+				this.log('installed', this.config.getInstalled());
 			}
 		}
 	}

@@ -819,6 +819,7 @@ declare module "path" {
     export function basename(p: string, ext?: string): string;
     export function extname(p: string): string;
     export var sep: string;
+    export var delimiter: string;
 }
 
 declare module "string_decoder" {

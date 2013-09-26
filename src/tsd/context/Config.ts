@@ -77,6 +77,19 @@ module tsd {
 			this.ref = tsd.Const.mainBranch;
 
 			xm.ObjectUtil.hidePrefixed(this);
+			Object.defineProperty(this, 'log', {enumerable: false});
+		}
+
+		resolveTypingsPath(relativeToDir:string):string {
+			var cfgFull = path.resolve(relativeToDir);
+			var typings = this.typingsPath.replace(/[\\\/]/g, path.sep);
+
+			if (/^([\\\/]|\w:)/.test(this.typingsPath)) {
+				//absolute path
+				return typings;
+			}
+			//relative
+			return path.resolve(cfgFull, typings);
 		}
 
 		get repoOwner():string {

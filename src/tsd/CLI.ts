@@ -299,7 +299,9 @@ module tsd {
 			cmd.options = ['config'];
 			cmd.groups = ['support'];
 			cmd.execute = (args:any) =>  {
-				getContext(args).logInfo(true);
+				getAPIJob(args).then((job:Job) => {
+					job.api.context.logInfo(true);
+				});
 			};
 		});
 

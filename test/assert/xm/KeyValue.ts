@@ -12,8 +12,13 @@ module helper {
 		assert.isObject(values, message + ': values');
 		assert.isFunction(assertion, message + ': assertion');
 
+		var mapKeys:string[] = map.keys().sort();
+		var valueKeys:string[] = Object.keys(values).sort();
+
+		assert.sameMembers(mapKeys, valueKeys, message + ': same paths');
+
 		var keys:string[] = map.keys();
-		Object.keys(values).forEach((key:string) => {
+		valueKeys.forEach((key:string) => {
 			var i = keys.indexOf(key);
 			assert(i > -1, message + ': expected key "' + key + '"');
 			keys.splice(i, 1);
