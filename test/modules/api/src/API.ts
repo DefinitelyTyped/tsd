@@ -72,6 +72,9 @@ describe('API', () => {
 	describe('search', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
 		xm.eachProp(data.tests, (test, name) => {
+			if (data.skip) {
+				return;
+			}
 			var selector = getSelector(test.selector);
 
 			it('selector "' + name + '"', () => {
@@ -113,8 +116,8 @@ describe('API', () => {
 
 					var configExpect = xm.FileUtil.readJSONSync(info.configExpect);
 					var configActual = xm.FileUtil.readJSONSync(info.configFile);
-					assert.deepEqual(configActual, configExpect, 'configActual');
 
+					assert.deepEqual(configActual, configExpect, 'configActual');
 					helper.assertConfig(api.context.config, configExpect, 'api.context.config');
 
 					//set for correct comparison

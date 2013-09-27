@@ -2,6 +2,191 @@ var xm;
 (function (xm) {
     'use strict';
 
+    var hasProp = Object.prototype.hasOwnProperty;
+
+    var KeyValueMap = (function () {
+        function KeyValueMap(data) {
+            this._store = {};
+            if (data) {
+                this.import(data);
+            }
+            Object.defineProperty(this, '_store', { enumerable: false, writable: false });
+        }
+        KeyValueMap.prototype.has = function (key) {
+            return hasProp.call(this._store, key);
+        };
+
+        KeyValueMap.prototype.get = function (key, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            if (typeof key !== 'string') {
+                throw new Error('key must be a string');
+            }
+            if (hasProp.call(this._store, key)) {
+                return this._store[key];
+            }
+            return alt;
+        };
+
+        KeyValueMap.prototype.set = function (key, value) {
+            this._store[key] = value;
+        };
+
+        KeyValueMap.prototype.remove = function (key) {
+            if (hasProp.call(this._store, key)) {
+                delete this._store[key];
+            }
+        };
+
+        KeyValueMap.prototype.keys = function () {
+            var ret = [];
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    ret.push(key);
+                }
+            }
+            return ret;
+        };
+
+        KeyValueMap.prototype.values = function () {
+            var ret = [];
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    ret.push(this._store[key]);
+                }
+            }
+            return ret;
+        };
+
+        KeyValueMap.prototype.clear = function () {
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    delete this._store[key];
+                }
+            }
+        };
+
+        KeyValueMap.prototype.import = function (data) {
+            if (!data || typeof data !== 'object' || Object.prototype.toString.call(data) === '[object Array]') {
+                return;
+            }
+            for (var key in data) {
+                if (hasProp.call(data, key)) {
+                    this._store[key] = data[key];
+                }
+            }
+        };
+
+        KeyValueMap.prototype.export = function () {
+            var ret = {};
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    ret[key] = this._store[key];
+                }
+            }
+            return ret;
+        };
+        return KeyValueMap;
+    })();
+    xm.KeyValueMap = KeyValueMap;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var Set = (function () {
+        function Set(values) {
+            this._content = [];
+            if (values) {
+                this.import(values);
+            }
+        }
+        Set.prototype.has = function (value) {
+            return this._content.indexOf(value) > -1;
+        };
+
+        Set.prototype.add = function (value) {
+            if (this._content.indexOf(value) < 0) {
+                this._content.push(value);
+            }
+        };
+
+        Set.prototype.remove = function (value) {
+            var i = this._content.indexOf(value);
+            if (i > -1) {
+                this._content.splice(i, 1);
+            }
+        };
+
+        Set.prototype.values = function () {
+            return this._content.slice(0);
+        };
+
+        Set.prototype.import = function (values) {
+            for (var i = 0, ii = values.length; i < ii; i++) {
+                this.add(values[i]);
+            }
+        };
+
+        Set.prototype.clear = function () {
+            this._content = [];
+        };
+
+        Set.prototype.count = function () {
+            return this._content.length;
+        };
+        return Set;
+    })();
+    xm.Set = Set;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function callAsync(callback) {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            args[_i] = arguments[_i + 1];
+        }
+        process.nextTick(function () {
+            callback.apply(null, args);
+        });
+    }
+    xm.callAsync = callAsync;
+})(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    tsd.Const = {
+        ident: 'tsd',
+        configFile: 'tsd.json',
+        cacheDir: 'tsd-cache',
+        configSchemaFile: 'tsd-v4.json',
+        typingsFolder: 'typings',
+        configVersion: 'v4',
+        definitelyRepo: 'borisyankov/DefinitelyTyped',
+        mainBranch: 'master',
+        shaShorten: 6
+    };
+
+    Object.freeze(tsd.Const);
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    function shaShort(sha) {
+        if (!sha) {
+            return '<no sha>';
+        }
+        return sha.substr(0, tsd.Const.shaShorten);
+    }
+    tsd.shaShort = shaShort;
+})(tsd || (tsd = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
     var Q = require('q');
     var FS = require('q-io/fs');
     var mkdirp = require('mkdirp');
@@ -325,7 +510,7 @@ var xm;
             writeMulti('debug: '.cyan, '', args);
         };
         logger.inspect = function (value, label, depth) {
-            if (typeof depth === "undefined") { depth = 8; }
+            if (typeof depth === "undefined") { depth = 4; }
             label = label ? label + ':\n' : '';
             writer.writeln(label + util.inspect(value, { showHidden: false, depth: depth }));
         };
@@ -476,7 +661,7 @@ var xm;
 
     function isValid(obj) {
         var type = typeOf(obj);
-        return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
+        return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));
     }
     xm.isValid = isValid;
 
@@ -594,6 +779,8 @@ var xm;
 (function (xm) {
     'use strict';
 
+    var AssertionError = require('assertion-error');
+
     function isSha(value) {
         if (typeof value !== 'string') {
             return false;
@@ -613,10 +800,18 @@ var xm;
         md5: isMd5
     });
 
+    function throwAssert(message, actual, expected, showDiff) {
+        if (typeof showDiff === "undefined") { showDiff = true; }
+        message = message ? message + ': ' : '';
+        message += 'values not equal';
+        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff });
+    }
+    xm.throwAssert = throwAssert;
+
     function assertVar(label, value, type, opt) {
         if (typeof opt === "undefined") { opt = false; }
         if (arguments.length < 3) {
-            throw new Error('assertVar() expected at least 3 arguments but got "' + arguments.length + '"');
+            throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');
         }
         var valueKind = xm.typeOf(value);
         var typeKind = xm.typeOf(type);
@@ -626,23 +821,23 @@ var xm;
 
         if (valueKind === 'undefined' || valueKind === 'null') {
             if (!opt) {
-                throw new Error('assertVar() expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
+                throw new AssertionError('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
             }
         } else if (typeKind === 'function') {
             if (!(value instanceof type)) {
-                throw new Error('assertVar() expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new AssertionError('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if (typeKind === 'string') {
-            if (typeOfAssert.hasOwnProperty(type)) {
+            if (xm.hasOwnProp(typeOfAssert, type)) {
                 var check = typeOfAssert[type];
                 if (!check(value)) {
-                    throw new Error('assertVar() expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                    throw new AssertionError('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new Error('assertVar() unknown type assertion parameter ' + typeStrim + ' for "' + label + '"');
+                throw new AssertionError('unknown type-assertion parameter ' + typeStrim + ' for "' + label + '"');
             }
         } else {
-            throw new Error('assertVar() bad type assertion parameter ' + typeStrim + ' for "' + label + '"');
+            throw new AssertionError('bad type-assertion parameter ' + typeStrim + ' for "' + label + '"');
         }
     }
     xm.assertVar = assertVar;
@@ -910,7 +1105,10 @@ var git;
     var crypto = require('crypto');
 
     (function (GitUtil) {
-        function decodeBlob(blobJSON) {
+        function decodeBlobJson(blobJSON) {
+            if (!blobJSON || !blobJSON.encoding) {
+                return null;
+            }
             switch (blobJSON.encoding) {
                 case 'base64':
                     return new Buffer(blobJSON.content, 'base64');
@@ -920,12 +1118,13 @@ var git;
                     return new Buffer(blobJSON.content, 'utf8');
             }
         }
-        GitUtil.decodeBlob = decodeBlob;
+        GitUtil.decodeBlobJson = decodeBlobJson;
 
-        function blobSHAHex(data) {
-            return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data).digest('hex');
+        function blobShaHex(data, encoding) {
+            xm.assertVar('data', data, Buffer);
+            return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
         }
-        GitUtil.blobSHAHex = blobSHAHex;
+        GitUtil.blobShaHex = blobShaHex;
     })(git.GitUtil || (git.GitUtil = {}));
     var GitUtil = git.GitUtil;
 })(git || (git = {}));
@@ -939,34 +1138,37 @@ var tsd;
             if (typeof encoding === "undefined") { encoding = null; }
             this.sha = null;
             this.content = null;
-            this.encoding = null;
+            this.encoding = 'utf8';
             xm.assertVar('sha', sha, 'sha1');
             this.sha = sha;
             this.encoding = encoding;
 
-            xm.ObjectUtil.defineProp(this, 'content', { enumerable: false });
+            xm.ObjectUtil.defineProps(this, ['sha', 'encoding'], { writable: false });
+
             if (content) {
                 this.setContent(content);
             } else {
-                xm.ObjectUtil.defineProps(this, ['sha', 'content'], { writable: false });
+                Object.defineProperty(this, 'content', { enumerable: false });
             }
         }
         DefBlob.prototype.hasContent = function () {
             return xm.isValid(this.content);
         };
 
-        DefBlob.prototype.setContent = function (content) {
+        DefBlob.prototype.setContent = function (content, encoding) {
+            xm.assertVar('content', content, Buffer);
             if (xm.isValid(this.content)) {
                 throw new Error('content already set: ' + this.sha);
             }
-            var sha = git.GitUtil.blobSHAHex(content);
+
+            var sha = git.GitUtil.blobShaHex(content, encoding || this.encoding);
             if (sha !== this.sha) {
-                throw new Error('blob sha mismatch: ' + sha + ' != ' + this.sha);
+                xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
             }
 
             xm.ObjectUtil.defineProp(this, 'content', { writable: true });
             this.content = content;
-            xm.ObjectUtil.defineProp(this, 'content', { writable: false });
+            xm.ObjectUtil.defineProp(this, 'content', { writable: false, enumerable: false });
         };
 
         Object.defineProperty(DefBlob.prototype, "shaShort", {
@@ -1067,7 +1269,6 @@ var tsd;
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
-    var assert = require('assert');
     var tv4 = require('tv4');
 
     var InstalledDef = (function () {
@@ -1162,19 +1363,19 @@ var tsd;
             this._installed.set(file.def.path, def);
         };
 
-        Config.prototype.hasFile = function (path) {
-            xm.assertVar('path', path, 'string');
-            return this._installed.has(path);
+        Config.prototype.hasFile = function (filePath) {
+            xm.assertVar('filePath', filePath, 'string');
+            return this._installed.has(filePath);
         };
 
-        Config.prototype.getFile = function (path) {
-            xm.assertVar('path', path, 'string');
-            return this._installed.get(path, null);
+        Config.prototype.getFile = function (filePath) {
+            xm.assertVar('filePath', filePath, 'string');
+            return this._installed.get(filePath, null);
         };
 
-        Config.prototype.removeFile = function (path) {
-            xm.assertVar('path', path, 'string');
-            this._installed.remove(path);
+        Config.prototype.removeFile = function (filePath) {
+            xm.assertVar('filePath', filePath, 'string');
+            this._installed.remove(filePath);
         };
 
         Config.prototype.getInstalled = function () {
@@ -1223,37 +1424,19 @@ var tsd;
             this.ref = json.ref;
 
             if (json.installed) {
-                xm.eachProp(json.installed, function (data, path) {
-                    var installed = new tsd.InstalledDef(path);
+                xm.eachProp(json.installed, function (data, filePath) {
+                    var installed = new tsd.InstalledDef(filePath);
 
                     installed.commitSha = data.commit;
                     installed.blobSha = data.blob;
 
-                    _this._installed.set(path, installed);
+                    _this._installed.set(filePath, installed);
                 });
             }
         };
         return Config;
     })();
     tsd.Config = Config;
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    tsd.Const = {
-        ident: 'tsd',
-        configFile: 'tsd.json',
-        cacheDir: 'tsd-cache',
-        configSchemaFile: 'tsd-v4.json',
-        typingsFolder: 'typings',
-        configVersion: 'v4',
-        definitelyRepo: 'borisyankov/DefinitelyTyped',
-        mainBranch: 'master',
-        shaShorten: 6
-    };
-
-    Object.freeze(tsd.Const);
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
@@ -1328,94 +1511,283 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var hasProp = Object.prototype.hasOwnProperty;
+    var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
+    var flagFilter = /[gim]/;
 
-    var KeyValueMap = (function () {
-        function KeyValueMap(data) {
-            this._store = {};
-            if (data) {
-                this.import(data);
+    var RegExpGlue = (function () {
+        function RegExpGlue() {
+            var exp = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                exp[_i] = arguments[_i + 0];
             }
-            Object.defineProperty(this, '_store', { enumerable: false, writable: false });
+            this.parts = [];
+            if (exp.length > 0) {
+                this.append.apply(this, exp);
+            }
         }
-        KeyValueMap.prototype.has = function (key) {
-            key = '' + key;
-            return hasProp.call(this._store, key);
-        };
-
-        KeyValueMap.prototype.get = function (key, alt) {
-            if (typeof alt === "undefined") { alt = null; }
-            key = '' + key;
-            if (hasProp.call(this._store, key)) {
-                return this._store[key];
+        RegExpGlue.get = function () {
+            var exp = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                exp[_i] = arguments[_i + 0];
             }
-            return alt;
+            var e = new RegExpGlue();
+            return e.append.apply(e, exp);
         };
 
-        KeyValueMap.prototype.set = function (key, value) {
-            key = '' + key;
-            this._store[key] = value;
-        };
-
-        KeyValueMap.prototype.remove = function (key) {
-            key = '' + key;
-            if (hasProp.call(this._store, key)) {
-                delete this._store[key];
+        RegExpGlue.prototype.append = function () {
+            var exp = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                exp[_i] = arguments[_i + 0];
             }
+            var _this = this;
+            exp.forEach(function (value) {
+                _this.parts.push(value);
+            }, this);
+            return this;
         };
 
-        KeyValueMap.prototype.keys = function () {
-            var ret = [];
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret.push(key);
+        RegExpGlue.prototype.getBody = function (exp) {
+            expTrim.lastIndex = 0;
+            var trim = expTrim.exec('' + exp);
+            if (!trim) {
+                return '';
+            }
+            return typeof trim[1] !== 'undefined' ? trim[1] : '';
+        };
+
+        RegExpGlue.prototype.getFlags = function (exp) {
+            expTrim.lastIndex = 0;
+            var trim = expTrim.exec('' + exp);
+            if (!trim) {
+                return '';
+            }
+            return typeof trim[2] !== 'undefined' ? this.getCleanFlags(trim[2]) : '';
+        };
+
+        RegExpGlue.prototype.getCleanFlags = function (flags) {
+            var ret = '';
+            for (var i = 0; i < flags.length; i++) {
+                var char = flags.charAt(i);
+                if (flagFilter.test(char) && ret.indexOf(char) < 0) {
+                    ret += char;
                 }
             }
             return ret;
         };
 
-        KeyValueMap.prototype.values = function () {
-            var ret = [];
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret.push(this._store[key]);
-                }
-            }
-            return ret;
-        };
+        RegExpGlue.prototype.join = function (flags, seperator) {
+            var glueBody = seperator ? this.getBody(seperator) : '';
+            var chunks = [];
 
-        KeyValueMap.prototype.clear = function () {
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    delete this._store[key];
-                }
-            }
-        };
+            flags = typeof flags !== 'undefined' ? this.getCleanFlags(flags) : '';
 
-        KeyValueMap.prototype.import = function (data, allow) {
-            if (typeof data !== 'object') {
-                return;
-            }
-            for (var key in data) {
-                if (hasProp.call(data, key)) {
-                    this._store[key] = data[key];
+            this.parts.forEach(function (exp, index, arr) {
+                if (typeof exp === 'string') {
+                    chunks.push(exp);
+                    return;
                 }
-            }
-        };
+                expTrim.lastIndex = 0;
+                var trim = expTrim.exec('' + exp);
 
-        KeyValueMap.prototype.export = function (allow) {
-            var ret = {};
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret[key] = this._store[key];
+                if (!trim) {
+                    return exp;
                 }
-            }
-            return ret;
+                if (trim.length < 2) {
+                    console.log(trim);
+                    return;
+                }
+                chunks.push(trim[1]);
+            }, this);
+
+            return new RegExp(chunks.join(glueBody), flags);
         };
-        return KeyValueMap;
+        return RegExpGlue;
     })();
-    xm.KeyValueMap = KeyValueMap;
+    xm.RegExpGlue = RegExpGlue;
 })(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    var wordParts = /[\w_\.-]/;
+    var wordGreedy = /[\w_\.-]+/;
+    var wordLazy = /[\w_\.-]*?/;
+    var wordGlob = /(\**)([\w_\.-]*?)(\**)/;
+
+    var patternSplit = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
+    var patternSingle = xm.RegExpGlue.get('^', wordGlob, '$').join();
+
+    function escapeExp(str) {
+        return str.replace('.', '\\.');
+    }
+
+    var NameMatcher = (function () {
+        function NameMatcher(pattern) {
+            xm.assertVar('pattern', pattern, 'string');
+            this.pattern = pattern;
+        }
+        NameMatcher.prototype.filter = function (list) {
+            return list.filter(this.getFilterFunc(), this);
+        };
+
+        NameMatcher.prototype.toString = function () {
+            return this.pattern;
+        };
+
+        NameMatcher.prototype.compile = function () {
+            if (!this.pattern) {
+                throw (new Error('NameMatcher undefined pattern'));
+            }
+            this.projectExp = null;
+            this.nameExp = null;
+
+            if (this.pattern.indexOf('/') > -1) {
+                this.compileSplit();
+            } else {
+                this.compileSingle();
+            }
+        };
+
+        NameMatcher.prototype.compileSingle = function () {
+            patternSingle.lastIndex = 0;
+            var match = patternSingle.exec(this.pattern);
+
+            if (match.length < 4) {
+                throw (new Error('NameMatcher bad match: "' + match + '"'));
+            }
+            var glue;
+
+            var gotMatch = false;
+            glue = xm.RegExpGlue.get('^');
+            if (match[1].length > 0) {
+                glue.append(wordLazy);
+                gotMatch = true;
+            }
+            if (match[2].length > 0) {
+                glue.append(escapeExp(match[2]));
+                gotMatch = true;
+            }
+            if (match[3].length > 0) {
+                glue.append(wordLazy);
+                gotMatch = true;
+            }
+            if (gotMatch) {
+                glue.append('$');
+                this.nameExp = glue.join('i');
+            }
+        };
+
+        NameMatcher.prototype.compileSplit = function () {
+            patternSplit.lastIndex = 0;
+            var match = patternSplit.exec(this.pattern);
+
+            if (match.length < 7) {
+                throw (new Error('NameMatcher bad match: "' + match + '"'));
+            }
+            var glue;
+
+            var gotProject = false;
+            glue = xm.RegExpGlue.get('^');
+            if (match[1].length > 0) {
+                glue.append(wordLazy);
+            }
+            if (match[2].length > 0) {
+                glue.append(escapeExp(match[2]));
+                gotProject = true;
+            }
+            if (match[3].length > 0) {
+                glue.append(wordLazy);
+            }
+            if (gotProject) {
+                glue.append('$');
+                this.projectExp = glue.join('i');
+            }
+
+            var gotFile = false;
+            glue = xm.RegExpGlue.get('^');
+            if (match[4].length > 0) {
+                glue.append(wordLazy);
+            }
+            if (match[5].length > 0) {
+                glue.append(escapeExp(match[5]));
+                gotFile = true;
+            }
+            if (match[6].length > 0) {
+                glue.append(wordLazy);
+            }
+            if (gotFile) {
+                glue.append('$');
+                this.nameExp = glue.join('i');
+            }
+        };
+
+        NameMatcher.prototype.getFilterFunc = function () {
+            var _this = this;
+            this.compile();
+
+            if (this.nameExp) {
+                if (this.projectExp) {
+                    return function (file) {
+                        return _this.projectExp.test(file.project) && _this.nameExp.test(file.name);
+                    };
+                } else {
+                    return function (file) {
+                        return _this.nameExp.test(file.name);
+                    };
+                }
+            } else if (this.projectExp) {
+                return function (file) {
+                    return _this.projectExp.test(file.name);
+                };
+            } else {
+                throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
+            }
+        };
+        return NameMatcher;
+    })();
+    tsd.NameMatcher = NameMatcher;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    var InfoMatcher = (function () {
+        function InfoMatcher() {
+        }
+        InfoMatcher.prototype.test = function (info) {
+            return true;
+        };
+        return InfoMatcher;
+    })();
+    tsd.InfoMatcher = InfoMatcher;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    var Selector = (function () {
+        function Selector(pattern) {
+            if (typeof pattern === "undefined") { pattern = '*'; }
+            this.resolveDependencies = false;
+            this.limit = 10;
+            xm.assertVar('pattern', pattern, 'string');
+            this.pattern = new tsd.NameMatcher(pattern);
+        }
+        Object.defineProperty(Selector.prototype, "requiresHistory", {
+            get: function () {
+                return !!(this.beforeDate || this.afterDate);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Selector.prototype.toString = function () {
+            return this.pattern.pattern;
+        };
+        return Selector;
+    })();
+    tsd.Selector = Selector;
+})(tsd || (tsd = {}));
 var xm;
 (function (xm) {
     'use strict';
@@ -1637,7 +2009,6 @@ var xm;
     'use strict';
 
     var Q = require('q');
-    var assert = require('assert');
     var fs = require('fs');
     var path = require('path');
     var FS = require('q-io/fs');
@@ -2007,11 +2378,10 @@ var xm;
         };
 
         URLManager.prototype.setVars = function (map) {
-            for (var id in map) {
-                if (map.hasOwnProperty(id)) {
-                    this.setVar(id, map[id]);
-                }
-            }
+            var _this = this;
+            Object.keys(map).forEach(function (id) {
+                _this.setVar(id, map[id]);
+            });
         };
 
         URLManager.prototype.getTemplate = function (id) {
@@ -2023,13 +2393,10 @@ var xm;
 
         URLManager.prototype.getURL = function (id, vars) {
             if (vars) {
-                var name;
                 var obj = this._vars.export();
-                for (name in vars) {
-                    if (xm.ObjectUtil.hasOwnProp(vars, name)) {
-                        obj[name] = vars[name];
-                    }
-                }
+                Object.keys(vars).forEach(function (id) {
+                    obj[id] = vars[id];
+                });
                 return this.getTemplate(id).fillFromObject(obj);
             }
             return this.getTemplate(id).fillFromObject(this._vars.export());
@@ -2047,9 +2414,6 @@ var __extends = this.__extends || function (d, b) {
 var git;
 (function (git) {
     'use strict';
-
-    var assert = require('assert');
-    var _ = require('underscore');
 
     var GithubURLManager = (function (_super) {
         __extends(GithubURLManager, _super);
@@ -2311,12 +2675,13 @@ var xm;
     var CachedFileService = (function () {
         function CachedFileService(dir) {
             xm.assertVar('dir', dir, 'string');
-            this._dir = dir;
+            this.dir = dir;
 
-            xm.ObjectUtil.hidePrefixed(this);
+            Object.defineProperty(this, 'dir', { writable: false });
         }
         CachedFileService.prototype.getValue = function (file, opts) {
-            var storeFile = path.join(this._dir, file);
+            var storeFile = path.join(this.dir, file);
+
             return FS.exists(storeFile).then(function (exists) {
                 if (exists) {
                     return FS.isFile(storeFile).then(function (isFile) {
@@ -2324,7 +2689,7 @@ var xm;
                             throw (new Error('path exists but is not a file: ' + storeFile));
                         }
 
-                        return FS.read(storeFile);
+                        return FS.read(storeFile, { flags: 'rb' });
                     });
                 }
                 return null;
@@ -2332,27 +2697,21 @@ var xm;
         };
 
         CachedFileService.prototype.writeValue = function (file, label, value, opts) {
-            var storeFile = path.join(this._dir, file);
+            var storeFile = path.join(this.dir, file);
+
             return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
-                return FS.write(storeFile, value);
+                return FS.write(storeFile, value, { flags: 'wb' });
             }).then(function () {
                 return value;
             }, function (err) {
-                return value;
+                xm.log.error('CachedFileService.writeValue: failure');
+                throw (err);
             });
         };
 
         CachedFileService.prototype.getKeys = function (opts) {
             return Q([]);
         };
-
-        Object.defineProperty(CachedFileService.prototype, "dir", {
-            get: function () {
-                return this._dir;
-            },
-            enumerable: true,
-            configurable: true
-        });
         return CachedFileService;
     })();
     xm.CachedFileService = CachedFileService;
@@ -2363,22 +2722,28 @@ var git;
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
+    var HTTP = require('q-io/http');
 
     var GithubRawCached = (function () {
         function GithubRawCached(repo, storeFolder) {
             this._debug = false;
             this._formatVersion = '0.2';
             this.stats = new xm.StatCounter(false);
+            this.log = xm.getLogger('GithubRawCached');
+            this.headers = {
+                'User-Agent': 'xm.GithubRawCached'
+            };
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
 
             this._repo = repo;
 
             var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
+
             this._service = new xm.CachedFileService(dir);
             this._loader = new xm.CachedLoader('GithubRawCached', this._service);
 
-            this.stats.logger = xm.getLogger('GithubRawCached');
+            this.stats.logger = this.log;
 
             xm.ObjectUtil.hidePrefixed(this);
         }
@@ -2392,26 +2757,30 @@ var git;
             var storeFile = (path.join).apply(null, tmp);
 
             if (this._debug) {
-                xm.log(storeFile);
+                this.log(storeFile);
             }
 
-            return this._loader.doCachedCall('getFile', storeFile, {}, function () {
-                var reqOpts = {
-                    url: _this._repo.urls.rawFile(commitSha, filePath)
-                };
+            return this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, function () {
+                var req = HTTP.normalizeRequest(_this._repo.urls.rawFile(commitSha, filePath));
+                req.headers = _this.headers;
+
                 if (_this._debug) {
-                    xm.log(reqOpts.url);
+                    _this.log(req);
                 }
                 _this.stats.count('request-start');
 
-                return Q.nfcall(request.get, reqOpts).spread(function (res) {
-                    if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
+                return HTTP.request(req).then(function (res) {
+                    if (!res.status || res.status < 200 || res.status >= 400) {
                         _this.stats.count('request-error');
-                        throw new Error('unexpected status code: ' + res.statusCode);
+                        throw new Error('unexpected status code: ' + res.status);
                     }
+                    if (_this._debug) {
+                        _this.log.inspect(res, 'res', 1);
+                    }
+
                     _this.stats.count('request-complete');
 
-                    return res.body;
+                    return res.body.read();
                 });
             });
         };
@@ -2902,8 +3271,11 @@ var tsd;
             return blob;
         };
 
-        DefIndex.prototype.procureBlobFor = function (content) {
-            var sha = git.GitUtil.blobSHAHex(content);
+        DefIndex.prototype.procureBlobFor = function (content, encoding) {
+            if (typeof encoding === "undefined") { encoding = null; }
+            xm.assertVar('content', content, Buffer);
+
+            var sha = git.GitUtil.blobShaHex(content, encoding);
             var blob = this.procureBlob(sha);
             if (!blob.hasContent()) {
                 blob.setContent(content);
@@ -3048,104 +3420,6 @@ var tsd;
     })();
     tsd.DefIndex = DefIndex;
 })(tsd || (tsd = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
-    var flagFilter = /[gim]/;
-
-    var RegExpGlue = (function () {
-        function RegExpGlue() {
-            var exp = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                exp[_i] = arguments[_i + 0];
-            }
-            this.parts = [];
-            if (exp.length > 0) {
-                this.append.apply(this, exp);
-            }
-        }
-        RegExpGlue.get = function () {
-            var exp = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                exp[_i] = arguments[_i + 0];
-            }
-            var e = new RegExpGlue();
-            return e.append.apply(e, exp);
-        };
-
-        RegExpGlue.prototype.append = function () {
-            var exp = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                exp[_i] = arguments[_i + 0];
-            }
-            var _this = this;
-            exp.forEach(function (value) {
-                _this.parts.push(value);
-            }, this);
-            return this;
-        };
-
-        RegExpGlue.prototype.getBody = function (exp) {
-            expTrim.lastIndex = 0;
-            var trim = expTrim.exec('' + exp);
-            if (!trim) {
-                return '';
-            }
-            return typeof trim[1] !== 'undefined' ? trim[1] : '';
-        };
-
-        RegExpGlue.prototype.getFlags = function (exp) {
-            expTrim.lastIndex = 0;
-            var trim = expTrim.exec('' + exp);
-            if (!trim) {
-                return '';
-            }
-            return typeof trim[2] !== 'undefined' ? this.getCleanFlags(trim[2]) : '';
-        };
-
-        RegExpGlue.prototype.getCleanFlags = function (flags) {
-            var ret = '';
-            for (var i = 0; i < flags.length; i++) {
-                var char = flags.charAt(i);
-                if (flagFilter.test(char) && ret.indexOf(char) < 0) {
-                    ret += char;
-                }
-            }
-            return ret;
-        };
-
-        RegExpGlue.prototype.join = function (flags, seperator) {
-            var glueBody = seperator ? this.getBody(seperator) : '';
-            var chunks = [];
-
-            flags = typeof flags !== 'undefined' ? this.getCleanFlags(flags) : '';
-
-            this.parts.forEach(function (exp, index, arr) {
-                if (typeof exp === 'string') {
-                    chunks.push(exp);
-                    return;
-                }
-                expTrim.lastIndex = 0;
-                var trim = expTrim.exec('' + exp);
-
-                if (!trim) {
-                    return exp;
-                }
-                if (trim.length < 2) {
-                    console.log(trim);
-                    return;
-                }
-                chunks.push(trim[1]);
-            }, this);
-
-            return new RegExp(chunks.join(glueBody), flags);
-        };
-        return RegExpGlue;
-    })();
-    xm.RegExpGlue = RegExpGlue;
-})(xm || (xm = {}));
 var xm;
 (function (xm) {
     'use strict';
@@ -3708,6 +3982,7 @@ var tsd;
     var FS = require('q-io/fs');
     var path = require('path');
     var pointer = require('jsonpointer.js');
+    var ansidiff = require('ansidiff');
 
     var branch_tree = '/commit/commit/tree/sha';
 
@@ -3727,6 +4002,8 @@ var tsd;
             this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
             this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-api'));
             this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-raw'));
+
+            this.gitRaw.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
 
             this.stats.logger = xm.getLogger('Core.stats');
 
@@ -3915,13 +4192,22 @@ var tsd;
         Core.prototype.loadContent = function (file) {
             var _this = this;
             if (file.hasContent()) {
-                return Q(file.blob.content);
+                return Q(file);
             }
             return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then(function (content) {
-                var sha = git.GitUtil.blobSHAHex(content);
                 if (file.blob) {
                     if (!file.blob.hasContent()) {
-                        file.blob.setContent(content);
+                        try  {
+                            file.blob.setContent(content);
+                        } catch (err) {
+                            xm.log.debug(err);
+                            xm.log.debug('path', file.def.path);
+                            xm.log.debug('commitSha', file.commit.commitSha);
+                            xm.log.debug('treeSha', file.commit.treeSha);
+                            xm.log.error('failed to set content');
+
+                            throw err;
+                        }
                     }
                 } else {
                     file.setContent(_this.index.procureBlobFor(content));
@@ -4052,189 +4338,6 @@ var tsd;
         return Core;
     })();
     tsd.Core = Core;
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    var wordParts = /[\w_\.-]/;
-    var wordGreedy = /[\w_\.-]+/;
-    var wordLazy = /[\w_\.-]*?/;
-    var wordGlob = /(\**)([\w_\.-]*?)(\**)/;
-
-    var patternSplit = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
-    var patternSingle = xm.RegExpGlue.get('^', wordGlob, '$').join();
-
-    function escapeExp(str) {
-        return str.replace('.', '\\.');
-    }
-
-    var NameMatcher = (function () {
-        function NameMatcher(pattern) {
-            xm.assertVar('pattern', pattern, 'string');
-            this.pattern = pattern;
-        }
-        NameMatcher.prototype.filter = function (list) {
-            return list.filter(this.getFilterFunc(), this);
-        };
-
-        NameMatcher.prototype.toString = function () {
-            return this.pattern;
-        };
-
-        NameMatcher.prototype.compile = function () {
-            if (!this.pattern) {
-                throw (new Error('NameMatcher undefined pattern'));
-            }
-            this.projectExp = null;
-            this.nameExp = null;
-
-            if (this.pattern.indexOf('/') > -1) {
-                this.compileSplit();
-            } else {
-                this.compileSingle();
-            }
-        };
-
-        NameMatcher.prototype.compileSingle = function () {
-            patternSingle.lastIndex = 0;
-            var match = patternSingle.exec(this.pattern);
-
-            if (match.length < 4) {
-                throw (new Error('NameMatcher bad match: "' + match + '"'));
-            }
-            var glue;
-
-            var gotMatch = false;
-            glue = xm.RegExpGlue.get('^');
-            if (match[1].length > 0) {
-                glue.append(wordLazy);
-                gotMatch = true;
-            }
-            if (match[2].length > 0) {
-                glue.append(escapeExp(match[2]));
-                gotMatch = true;
-            }
-            if (match[3].length > 0) {
-                glue.append(wordLazy);
-                gotMatch = true;
-            }
-            if (gotMatch) {
-                glue.append('$');
-                this.nameExp = glue.join('i');
-            }
-        };
-
-        NameMatcher.prototype.compileSplit = function () {
-            patternSplit.lastIndex = 0;
-            var match = patternSplit.exec(this.pattern);
-
-            if (match.length < 7) {
-                throw (new Error('NameMatcher bad match: "' + match + '"'));
-            }
-            var glue;
-
-            var gotProject = false;
-            glue = xm.RegExpGlue.get('^');
-            if (match[1].length > 0) {
-                glue.append(wordLazy);
-            }
-            if (match[2].length > 0) {
-                glue.append(escapeExp(match[2]));
-                gotProject = true;
-            }
-            if (match[3].length > 0) {
-                glue.append(wordLazy);
-            }
-            if (gotProject) {
-                glue.append('$');
-                this.projectExp = glue.join('i');
-            }
-
-            var gotFile = false;
-            glue = xm.RegExpGlue.get('^');
-            if (match[4].length > 0) {
-                glue.append(wordLazy);
-            }
-            if (match[5].length > 0) {
-                glue.append(escapeExp(match[5]));
-                gotFile = true;
-            }
-            if (match[6].length > 0) {
-                glue.append(wordLazy);
-            }
-            if (gotFile) {
-                glue.append('$');
-                this.nameExp = glue.join('i');
-            }
-        };
-
-        NameMatcher.prototype.getFilterFunc = function () {
-            var _this = this;
-            this.compile();
-
-            if (this.nameExp) {
-                if (this.projectExp) {
-                    return function (file) {
-                        return _this.projectExp.test(file.project) && _this.nameExp.test(file.name);
-                    };
-                } else {
-                    return function (file) {
-                        return _this.nameExp.test(file.name);
-                    };
-                }
-            } else if (this.projectExp) {
-                return function (file) {
-                    return _this.projectExp.test(file.name);
-                };
-            } else {
-                throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(this.pattern) + ''));
-            }
-        };
-        return NameMatcher;
-    })();
-    tsd.NameMatcher = NameMatcher;
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    var InfoMatcher = (function () {
-        function InfoMatcher() {
-        }
-        InfoMatcher.prototype.test = function (info) {
-            return true;
-        };
-        return InfoMatcher;
-    })();
-    tsd.InfoMatcher = InfoMatcher;
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    var Selector = (function () {
-        function Selector(pattern) {
-            if (typeof pattern === "undefined") { pattern = '*'; }
-            this.resolveDependencies = false;
-            this.limit = 10;
-            xm.assertVar('pattern', pattern, 'string');
-            this.pattern = new tsd.NameMatcher(pattern);
-        }
-        Object.defineProperty(Selector.prototype, "requiresHistory", {
-            get: function () {
-                return !!(this.beforeDate || this.afterDate);
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        Selector.prototype.toString = function () {
-            return this.pattern.pattern;
-        };
-        return Selector;
-    })();
-    tsd.Selector = Selector;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
@@ -4396,82 +4499,6 @@ var tsd;
         return API;
     })();
     tsd.API = API;
-})(tsd || (tsd = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var Set = (function () {
-        function Set(values) {
-            this._content = [];
-            if (values) {
-                this.import(values);
-            }
-        }
-        Set.prototype.has = function (value) {
-            return this._content.indexOf(value) > -1;
-        };
-
-        Set.prototype.add = function (value) {
-            if (this._content.indexOf(value) < 0) {
-                this._content.push(value);
-            }
-        };
-
-        Set.prototype.remove = function (value) {
-            var i = this._content.indexOf(value);
-            if (i > -1) {
-                this._content.splice(i, 1);
-            }
-        };
-
-        Set.prototype.values = function () {
-            return this._content.slice(0);
-        };
-
-        Set.prototype.import = function (values) {
-            for (var i = 0, ii = values.length; i < ii; i++) {
-                this.add(values[i]);
-            }
-        };
-
-        Set.prototype.clear = function () {
-            this._content = [];
-        };
-
-        Set.prototype.count = function () {
-            return this._content.length;
-        };
-        return Set;
-    })();
-    xm.Set = Set;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    function callAsync(callback) {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            args[_i] = arguments[_i + 1];
-        }
-        process.nextTick(function () {
-            callback.apply(null, args);
-        });
-    }
-    xm.callAsync = callAsync;
-})(xm || (xm = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    function shaShort(sha) {
-        if (!sha) {
-            return '<no sha>';
-        }
-        return sha.substr(0, tsd.Const.shaShorten);
-    }
-    tsd.shaShort = shaShort;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {

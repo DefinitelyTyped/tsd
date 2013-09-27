@@ -16,6 +16,16 @@ var tests = {
 		selector: {
 			pattern: 'angularjs/angular'
 		}
+	},
+	'chai-assert': {
+		selector: {
+			pattern: 'chai-assert'
+		}
+	},
+	'chai': {
+		selector: {
+			pattern: 'chai'
+		}
 	}
 };
 

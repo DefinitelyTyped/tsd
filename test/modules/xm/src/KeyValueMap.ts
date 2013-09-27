@@ -5,23 +5,21 @@ describe('xm.KeyValueMap', () => {
 	'use strict';
 
 	var assert:Chai.Assert = require('chai').assert;
-	var map:xm.KeyValueMap;
+	var map:xm.KeyValueMap<string>;
 
 	it('is defined', () => {
 		assert.ok(xm.KeyValueMap);
 	});
 	it('is a constructor', () => {
-		assert.ok(new (xm.KeyValueMap)());
+		assert.ok(new xm.KeyValueMap<string>());
 	});
 
 	describe('default', () => {
 
-		//TODO rewrite tests so no state has to be kept between cases
-
-		before(() => {
-			map = new xm.KeyValueMap();
+		beforeEach(() => {
+			map = new xm.KeyValueMap<string>();
 		});
-		after(() => {
+		afterEach(() => {
 			map = null;
 		});
 
@@ -29,78 +27,97 @@ describe('xm.KeyValueMap', () => {
 			assert.ok(map);
 		});
 		it('returns undefined for unset data', () => {
-			assert.notOk(map.get(null));
-			assert.notOk(map.get(''));
+			assert.notOk(map.get('asdaa'));
 			assert.notOk(map.get('xyz'));
 		});
+		it('throws on non=string data', () => {
+			assert.throws(() => {
+				assert.notOk(map.get(<any>123));
+			}, /key must be a string$/);
+
+			assert.throws(() => {
+				assert.notOk(map.get(<string>{}));
+			}, /key must be a string/);
+		});
 		it('returns alt value for unset data', () => {
-			assert.strictEqual(map.get('xyz', 'abc'), 'abc');
-			assert.strictEqual(map.get('xyz', 123), 123);
-			assert.strictEqual(map.get('xyz', false), false);
-			assert.strictEqual(map.get('xyz', true), true);
+			assert.strictEqual(new xm.KeyValueMap<string>().get('key', 'abc'), 'abc');
+			assert.strictEqual(new xm.KeyValueMap<number>().get('key', 123), 123);
+			assert.strictEqual(new xm.KeyValueMap<boolean>().get('key', false), false);
+			assert.strictEqual(new xm.KeyValueMap<Date>().get('key', null), null);
 		});
 
 		describe('with data', () => {
-			it('stores by name', () => {
+
+			beforeEach(() => {
 				map.set('aa', 'valueA');
-				map.set('bb__bb', 100);
-				map.set('cc', [1, 2, 3]);
+				map.set('bb', 'valueB');
+				map.set('cc', 'valueC');
+			});
+
+			it('stores by name', () => {
 				assert.strictEqual(map.get('aa'), 'valueA');
-				assert.strictEqual(map.get('bb__bb'), 100);
-				assert.deepEqual(map.get('cc'), [1, 2, 3]);
+				assert.strictEqual(map.get('bb'), 'valueB');
+				assert.strictEqual(map.get('cc'), 'valueC');
 			});
 			it('lists correct keys', () => {
-				assert.deepEqual(map.keys(), ['aa', 'bb__bb', 'cc']);
+				assert.sameMembers(map.keys(), ['aa', 'bb', 'cc']);
 			});
 			it('lists correct values', () => {
-				assert.deepEqual(map.values(), [<any>'valueA', 100, [1, 2, 3]]);
+				assert.sameMembers(map.values(), ['valueA', 'valueB', 'valueC']);
 			});
+
 			it('overrides data by name', () => {
-				map.set('aa', 200);
-				assert.strictEqual(map.get('aa'), 200);
+				map.set('aa', '123');
+				assert.strictEqual(map.get('aa'), '123');
 				map.set('aa', 'valueA');
 				assert.strictEqual(map.get('aa'), 'valueA');
 			});
 			it('removes data by name', () => {
-				map.remove('bb__bb');
+				map.remove('bb');
 				map.remove('cc');
-				assert.notOk(map.get('bb__bb'));
-				assert.strictEqual(map.get('bb__bb', 123), 123);
-				assert.deepEqual(map.keys(), ['aa']);
+				assert.notOk(map.get('bb'));
+				assert.strictEqual(map.get('bb', '123'), '123');
+				assert.sameMembers(map.keys(), ['aa']);
 			});
 
 			it('has updated keys after remove', () => {
+				map.remove('bb');
 				assert.include(map.keys(), 'aa');
-				assert.notInclude(map.keys(), 'bb__bb');
+				assert.notInclude(map.keys(), 'bb');
 			});
 			it('returns alt value for removed data', () => {
-				assert.strictEqual(map.get('bb__bb', 6), 6);
+				map.remove('bb');
+				assert.strictEqual(map.get('bb', '123'), '123');
 			});
 			it('clears all', () => {
 				map.clear();
-				assert.lengthOf(map.keys(), 0);
+				assert.lengthOf(map.keys(), 0, 'keys');
 			});
 		});
 
 		describe('import/export', () => {
 
-			var data;
+			var data:any;
 
-			before(() => {
-				data = {aa: 'valueAAA', 'bb__bb': 321, cc: [1, 2, 3]};
+			beforeEach(() => {
+				data = {
+					'aa': 'valueA',
+					'bb': 'valueB',
+					'cc': 'valueC'
+				};
 			});
-			after(() => {
+			afterEach(() => {
 				data = null;
 			});
 
 			it('from object', () => {
-				map = new xm.KeyValueMap();
+				map = new xm.KeyValueMap<string>();
 				map.import(data);
 
-				assert.deepEqual(map.keys(), ['aa', 'bb__bb', 'cc']);
-				assert.strictEqual(map.get('aa'), 'valueAAA');
-				assert.strictEqual(map.get('bb__bb'), 321);
-				assert.deepEqual(map.get('cc'), [1, 2, 3]);
+				assert.sameMembers(map.keys(), ['aa', 'bb', 'cc']);
+				assert.strictEqual(map.get('aa'), 'valueA');
+				assert.strictEqual(map.get('bb'), 'valueB');
+				assert.strictEqual(map.get('cc'), 'valueC');
 			});
 			it('to object', () => {
 				map = new xm.KeyValueMap();
@@ -108,24 +125,28 @@ describe('xm.KeyValueMap', () => {
 
 				var exp = map.export();
 				assert.ok(exp);
-				assert.deepEqual(Object.keys(exp), ['aa', 'bb__bb', 'cc']);
-				assert.strictEqual(map.get('aa'), exp.aa);
-				assert.strictEqual(map.get('bb__bb'), exp.bb__bb);
-				assert.deepEqual(map.get('cc'), exp.cc);
+				assert.sameMembers(Object.keys(exp), ['aa', 'bb', 'cc']);
+
+				assert.strictEqual(map.get('aa'), exp['aa']);
+				assert.strictEqual(map.get('bb'), exp['bb']);
+				assert.strictEqual(map.get('cc'), exp['cc']);
 			});
 			it('ignore non-object object', () => {
-				map = new xm.KeyValueMap();
+				map = new xm.KeyValueMap<string>();
 				map.import(null);
-				assert.lengthOf(map.keys(), 0);
+				assert.lengthOf(map.keys(), 0, 'null import');
+
+				map = new xm.KeyValueMap<string>();
+				map.import(<any>[1,2,3]);
+				assert.lengthOf(map.keys(), 0, 'array import');
 			});
 			it('constructor param', () => {
-				map = new xm.KeyValueMap(data);
+				map = new xm.KeyValueMap<string>(data);
+				assert.sameMembers(map.keys(), ['aa', 'bb', 'cc']);
 
-				assert.deepEqual(map.keys(), ['aa', 'bb__bb', 'cc']);
-
-				assert.strictEqual(map.get('aa'), 'valueAAA');
-				assert.strictEqual(map.get('bb__bb'), 321);
-				assert.deepEqual(map.get('cc'), [1, 2, 3]);
+				assert.strictEqual(map.get('aa'), 'valueA');
+				assert.strictEqual(map.get('bb'), 'valueB');
+				assert.strictEqual(map.get('cc'), 'valueC');
 			});
 		});
 	});

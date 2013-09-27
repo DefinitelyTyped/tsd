@@ -8,16 +8,19 @@
 describe('git.GithubAPICached', () => {
 	'use strict';
 
+	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
+
 	var api:git.GithubAPICached;
 	var repo:git.GithubRepo;
 
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
 	var cacheDir:string;
+
+	var gitTest = helper.getGitTestInfo();
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'git-api');
+		cacheDir = path.join(gitTest.cacheDir, 'GithubAPICached', 'git-api');
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		api = new git.GithubAPICached(repo, cacheDir);
 	});
@@ -25,6 +28,7 @@ describe('git.GithubAPICached', () => {
 		repo = null;
 		api = null;
 	});
+
 	it('pretest', () => {
 		assert.isString(gitTest.config.repo.owner, 'owner');
 		assert.isString(gitTest.config.repo.project, 'project');
@@ -129,13 +133,13 @@ describe('git.GithubAPICached', () => {
 			//api.debug = true;
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
-			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'blobResult.json'));
+			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;
-			helper.isStringSHA1(expectedSha, 'fixSha');
+			helper.isStringSHA1(expectedSha, 'expectedJson');
 
 			return api.getBlob(expectedSha).then((first) => {
-				assert.ok(first, 'callback data');
-				assert.isObject(first, 'data');
+				assert.ok(first, 'first data');
+				assert.isObject(first, 'first data');
 
 				//xm.log(api.loader.stats.stats.export());
 				helper.assertStatCounter(api.loader.stats, {
@@ -154,17 +158,19 @@ describe('git.GithubAPICached', () => {
 				assert.strictEqual(first.sha, expectedSha, 'first.sha vs expectedSha');
 
 				first.meta['x-ratelimit-remaining'] = expectedJson.meta['x-ratelimit-remaining'];
+
 				assert.deepEqual(first, expectedJson, 'first vs expectedJson');
 
-				var firstBuffer = git.GitUtil.decodeBlob(first);
+				var firstBuffer = git.GitUtil.decodeBlobJson(first);
 				assert.instanceOf(firstBuffer, Buffer, 'buffer');
-				var firstSha = git.GitUtil.blobSHAHex(firstBuffer);
+
+				var firstSha = git.GitUtil.blobShaHex(firstBuffer, 'utf8');
 				assert.strictEqual(firstSha, expectedSha, 'firstSha vs expected');
 
 				// get again, should be cached
 				return api.getBlob(expectedSha).then((second) => {
-					assert.ok(second, 'second callback data');
-					assert.isObject(second, 'data');
+					assert.ok(second, 'second data');
+					assert.isObject(second, 'second data');
 
 					//xm.log(api.loader.stats.stats.export());
 					helper.assertStatCounter(api.loader.stats, {
@@ -187,9 +193,9 @@ describe('git.GithubAPICached', () => {
 					second.meta['x-ratelimit-remaining'] = first.meta['x-ratelimit-remaining'];
 					assert.deepEqual(first, second, 'first vs second');
 
-					var secondBuffer = git.GitUtil.decodeBlob(first);
+					var secondBuffer = git.GitUtil.decodeBlobJson(first);
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');
-					var secondSha = git.GitUtil.blobSHAHex(secondBuffer);
+					var secondSha = git.GitUtil.blobShaHex(secondBuffer, 'utf8');
 					assert.strictEqual(secondSha, expectedSha, 'secondSha vs expected');
 				});
 			});

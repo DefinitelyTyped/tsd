@@ -27,8 +27,8 @@ module xm {
 	 */
 	export class URLManager {
 
-		private _templates:xm.KeyValueMap = new xm.KeyValueMap();
-		private _vars:xm.KeyValueMap = new xm.KeyValueMap();
+		private _templates = new xm.KeyValueMap<URLTemplate>();
+		private _vars = new xm.KeyValueMap<any>();
 
 		constructor(common?:any) {
 			if (common) {
@@ -52,11 +52,9 @@ module xm {
 		}
 
 		public setVars(map:any):void {
-			for (var id in map) {
-				if (map.hasOwnProperty(id)) {
-					this.setVar(id, map[id]);
-				}
-			}
+			Object.keys(map).forEach((id) => {
+				this.setVar(id, map[id]);
+			});
 		}
 
 		public getTemplate(id:string):URLTemplate {
@@ -68,13 +66,10 @@ module xm {
 
 		public getURL(id:string, vars?:any):string {
 			if (vars) {
-				var name;
 				var obj = this._vars.export();
-				for (name in vars) {
-					if (xm.ObjectUtil.hasOwnProp(vars, name)) {
-						obj[name] = vars[name];
-					}
-				}
+				Object.keys(vars).forEach((id) => {
+					obj[id] = vars[id];
+				});
 				return this.getTemplate(id).fillFromObject(obj);
 			}
 			return this.getTemplate(id).fillFromObject(this._vars.export());

@@ -4,13 +4,13 @@
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
   "installed": {
-    "angularjs/angular.d.ts": {
-      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
-      "blob": "c44f3408e4b90c2572045d231a91f6042cf2e8da"
-    },
     "jquery/jquery.d.ts": {
-      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
       "blob": "99969f710e2dbcac67382988edc7224550d29b86"
+    },
+    "angularjs/angular.d.ts": {
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "blob": "e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f"
     }
   }
 }

@@ -1,5 +1,4 @@
 ///<reference path="_ref.d.ts" />
-///<reference path="../typings/chai/chai-assert.d.ts" />
 
 ///<reference path="../src/bootstrap.ts" />
 ///<reference path="settings.ts" />

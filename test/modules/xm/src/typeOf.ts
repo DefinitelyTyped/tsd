@@ -90,4 +90,20 @@ describe('xm.typeOf', () => {
 			}
 		}
 	});
+
+	describe('isValid() by name', () => {
+		it('isValid', () => {
+			assert.isTrue(xm.isValid(1), 'number');
+			assert.isTrue(xm.isValid(true), 'boolean');
+			assert.isTrue(xm.isValid({}), 'object');
+			assert.isTrue(xm.isValid(0), '0');
+			assert.isTrue(xm.isValid(false), 'false');
+		});
+
+		it('not isValid', () => {
+			assert.isFalse(xm.isValid(undefined), 'undefined');
+			assert.isFalse(xm.isValid(null), 'null');
+			assert.isFalse(xm.isValid(parseFloat('nope')),'parseFloat: NaN');
+		});
+	});
 });

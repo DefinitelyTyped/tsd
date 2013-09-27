@@ -34,7 +34,8 @@ module helper {
 				xm.log(expected);
 			}
 			//use assert.deepEqual for diff report
-			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+			//assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+			assert.deepEqual([act], expected, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
 		if (expected.length > 0 && expectedQueue.length > 0) {

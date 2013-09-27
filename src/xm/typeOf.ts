@@ -129,14 +129,14 @@ module xm {
 
 	// - - - - meta types
 
-	//TODO test
+	//TODO sweet these for new tests
 	export function isOk(obj:any):boolean {
 		return !!obj;
 	}
 
 	export function isValid(obj:any):boolean {
 		var type = typeOf(obj);
-		return (type !== 'undefined' && type !== 'null' && !isNaN(obj));
+		return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));
 	}
 
 	export function isJSONValue(obj:any):boolean {

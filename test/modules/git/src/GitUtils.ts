@@ -9,18 +9,20 @@ describe('git.GitUtils', () => {
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
+	var gitTest = helper.getGitTestInfo();
+
 	describe('getDecodedBlob / blobSHABuffer', () => {
 		it('should decode correct data', () => {
 
-			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'blobResult.json'));
+			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			assert.isObject(expectedJson, 'expectedJson');
 			var expectedSha = expectedJson.sha;
 			helper.isStringSHA1(expectedSha, 'expectedSha');
 
-			var buffer = git.GitUtil.decodeBlob(expectedJson);
+			var buffer = git.GitUtil.decodeBlobJson(expectedJson);
 			assert.instanceOf(buffer, Buffer, 'buffer');
 
-			var sha = git.GitUtil.blobSHAHex(buffer);
+			var sha = git.GitUtil.blobShaHex(buffer, 'utf8');
 			helper.isStringSHA1(sha, 'sha');
 
 			assert.strictEqual(sha, expectedSha, 'sha actual vs expected');

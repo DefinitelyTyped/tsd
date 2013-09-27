@@ -77,7 +77,7 @@ module xm {
 		logger.debug = (...args:any[]) => {
 			writeMulti('debug: '.cyan, '', args);
 		};
-		logger.inspect = (value:any, label?:string, depth:number = 8) => {
+		logger.inspect = (value:any, label?:string, depth:number = 4) => {
 			label = label ? label + ':\n' : '';
 			writer.writeln(label + util.inspect(value, {showHidden: false, depth: depth }));
 		};

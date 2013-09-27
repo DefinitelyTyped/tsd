@@ -9,9 +9,6 @@
 module git {
 	'use strict';
 
-	var assert = require('assert');
-	var _ = require('underscore');
-
 	/*
 	 GithubURLManager: url-templates for common urls
 	 */

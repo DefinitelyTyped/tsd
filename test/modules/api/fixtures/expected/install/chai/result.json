@@ -1,0 +1,50 @@
+{
+  "nameMatches": [
+    {
+      "path": "chai/chai.d.ts",
+      "project": "chai",
+      "name": "chai",
+      "def": {
+        "path": "chai/chai.d.ts",
+        "commit": {
+          "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+        },
+        "blob": {
+          "sha": "9d649a17c5ab817bba74e0eb02d90b1341eb7cc1"
+        },
+        "key": "chai/chai.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+        "solved": true,
+        "dependencies": []
+      },
+      "history": []
+    }
+  ],
+  "selection": [
+    {
+      "path": "chai/chai.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "9d649a17c5ab817bba74e0eb02d90b1341eb7cc1"
+      },
+      "key": "chai/chai.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  ],
+  "written": {
+    "chai/chai.d.ts": {
+      "path": "chai/chai.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "9d649a17c5ab817bba74e0eb02d90b1341eb7cc1"
+      },
+      "key": "chai/chai.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  }
+}

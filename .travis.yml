@@ -9,6 +9,7 @@ branches:
   only:
     - develop-0.5.x
     - develop-0.4.x
+    - travis-debug
 
 env:
   - TRAVIS=true

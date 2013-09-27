@@ -20,7 +20,7 @@ describe('xm.assertVar', () => {
 		it('should fail on invalid', () => {
 			assert.throws(() => {
 				xm.assertVar('myVar', 123, 'string');
-			}, /assertVar\(\) expected "myVar" to be a "string" but got "number": 123/);
+			}, /^expected "myVar" to be a "string" but got "number": 123/);
 		});
 	});
 	describe('number', () => {
@@ -30,7 +30,7 @@ describe('xm.assertVar', () => {
 		it('should fail on invalid', () => {
 			assert.throws(() => {
 				xm.assertVar('myVar', 'abc', 'number');
-			}, /assertVar\(\) expected "myVar" to be a "number" but got "string": "abc"/);
+			}, /^expected "myVar" to be a "number" but got "string": "abc"/);
 		});
 	});
 	describe('regexp', () => {
@@ -40,7 +40,7 @@ describe('xm.assertVar', () => {
 		it('should fail on invalid', () => {
 			assert.throws(() => {
 				xm.assertVar('myVar', 123, 'regexp');
-			}, /assertVar\(\) expected "myVar" to be a "regexp" but got "number": 123/);
+			}, /^expected "myVar" to be a "regexp" but got "number": 123/);
 		});
 	});
 	describe('sha1', () => {
@@ -50,7 +50,7 @@ describe('xm.assertVar', () => {
 		it('should fail on invalid', () => {
 			assert.throws(() => {
 				xm.assertVar('myVar', 'abc', 'sha1');
-			}, /assertVar\(\) expected "myVar" to be a "sha1" but got "string": "abc"/);
+			}, /^expected "myVar" to be a "sha1" but got "string": "abc"/);
 		});
 	});
 	describe('md5', () => {
@@ -60,7 +60,7 @@ describe('xm.assertVar', () => {
 		it('should fail on invalid', () => {
 			assert.throws(() => {
 				xm.assertVar('myVar', 'abc', 'md5');
-			}, /assertVar\(\) expected "myVar" to be a "md5" but got "string": "abc"/);
+			}, /^expected "myVar" to be a "md5" but got "string": "abc"/);
 		});
 	});
 	describe('instanceOf', () => {
@@ -82,7 +82,7 @@ describe('xm.assertVar', () => {
 			var inst = new MyType();
 			assert.throws(() => {
 				xm.assertVar('myVar', inst, MyOtherType);
-			}, /assertVar\(\) expected "myVar" to be instanceof MyOtherType\(\) but is a MyType\(\)/);
+			}, /^expected "myVar" to be instanceof MyOtherType\(\) but is a MyType\(\)/);
 		});
 	});
 });

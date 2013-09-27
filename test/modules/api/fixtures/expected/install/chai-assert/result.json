@@ -1,0 +1,50 @@
+{
+  "nameMatches": [
+    {
+      "path": "chai/chai-assert.d.ts",
+      "project": "chai",
+      "name": "chai-assert",
+      "def": {
+        "path": "chai/chai-assert.d.ts",
+        "commit": {
+          "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+        },
+        "blob": {
+          "sha": "7cd5e3d48bc6299e12c47ac8144913213e2d64fc"
+        },
+        "key": "chai/chai-assert.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+        "solved": true,
+        "dependencies": []
+      },
+      "history": []
+    }
+  ],
+  "selection": [
+    {
+      "path": "chai/chai-assert.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "7cd5e3d48bc6299e12c47ac8144913213e2d64fc"
+      },
+      "key": "chai/chai-assert.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  ],
+  "written": {
+    "chai/chai-assert.d.ts": {
+      "path": "chai/chai-assert.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "7cd5e3d48bc6299e12c47ac8144913213e2d64fc"
+      },
+      "key": "chai/chai-assert.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  }
+}

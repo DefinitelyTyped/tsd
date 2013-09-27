@@ -8,8 +8,9 @@ module helper {
 	export var settings = {
 		// control the cache used a fixture for the tests
 		cache: {
-			forceUpdate: false,
-			allowUpdate: false
+			allowUpdate: false,
+			//do not mess with this
+			forceUpdate: false
 		}
 	};
 	//seriously cool

@@ -1,10 +1,10 @@
 {
-  "key": "[\"getTree\";{\"recursive\":true;\"repo\":\"DefinitelyTyped\";\"sha\":\"bd8e8140cd8d599c0cdadd1308b4ae2becbb57c9\";\"user\":\"borisyankov\";};];",
-  "hash": "d0ba9e8b5775a17d3174b0f2e90c5beb93b14cda",
-  "checksum": "4b0cddd929b3e7a58adf0027d7073d09cb88d5eb",
+  "key": "[\"getTree\";{\"recursive\":true;\"repo\":\"DefinitelyTyped\";\"sha\":\"eaba5697e0350bca6710a23141f2af863818317c\";\"user\":\"borisyankov\";};];",
+  "hash": "1440761ed0af5324c943877fb566d9573554db3b",
+  "checksum": "128158fdbe10ad458ba35bebe46aefd7cb4536f7",
   "value": {
-    "sha": "bd8e8140cd8d599c0cdadd1308b4ae2becbb57c9",
-    "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/bd8e8140cd8d599c0cdadd1308b4ae2becbb57c9",
+    "sha": "eaba5697e0350bca6710a23141f2af863818317c",
+    "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/eaba5697e0350bca6710a23141f2af863818317c",
     "tree": [
       {
         "mode": "100644",
@@ -361,9 +361,9 @@
       {
         "mode": "040000",
         "type": "tree",
-        "sha": "57869f79d9ae28551a2ee96e7726039481f69bc8",
+        "sha": "b2d6706f3a91371b8591208c10ab0fd15862749e",
         "path": "angularjs",
-        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/57869f79d9ae28551a2ee96e7726039481f69bc8"
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/b2d6706f3a91371b8591208c10ab0fd15862749e"
       },
       {
         "mode": "100644",
@@ -424,10 +424,10 @@
       {
         "mode": "100755",
         "type": "blob",
-        "sha": "c44f3408e4b90c2572045d231a91f6042cf2e8da",
+        "sha": "e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f",
         "path": "angularjs/angular.d.ts",
-        "size": 29989,
-        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/blobs/c44f3408e4b90c2572045d231a91f6042cf2e8da"
+        "size": 30132,
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/blobs/e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f"
       },
       {
         "mode": "040000",
@@ -1391,6 +1391,21 @@
       {
         "mode": "040000",
         "type": "tree",
+        "sha": "570add15a10e6a687d955f7a79d54b25795fb8f5",
+        "path": "express-validator",
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/570add15a10e6a687d955f7a79d54b25795fb8f5"
+      },
+      {
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4799dc0ddaf3a5dc8e8cf31d9a62bc738439bc3f",
+        "path": "express-validator/express-validator.d.ts",
+        "size": 3677,
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/blobs/4799dc0ddaf3a5dc8e8cf31d9a62bc738439bc3f"
+      },
+      {
+        "mode": "040000",
+        "type": "tree",
         "sha": "8190b26c4efe007ccf9b0c6e8d7f35f86fde1015",
         "path": "express",
         "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/8190b26c4efe007ccf9b0c6e8d7f35f86fde1015"
@@ -2001,9 +2016,9 @@
       {
         "mode": "040000",
         "type": "tree",
-        "sha": "45f5bff19d2f99ac55bedcce76d10f202cbe4b41",
+        "sha": "16a0d9d6830bf9de10ba52e0c43bcd259f36bf05",
         "path": "gruntjs",
-        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/45f5bff19d2f99ac55bedcce76d10f202cbe4b41"
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/16a0d9d6830bf9de10ba52e0c43bcd259f36bf05"
       },
       {
         "mode": "100644",
@@ -2016,10 +2031,10 @@
       {
         "mode": "100644",
         "type": "blob",
-        "sha": "bac0b7efb54ed69c477e091496251dd8d83ed11d",
+        "sha": "463721da927edf3f9d96749bcf17702f6c689396",
         "path": "gruntjs/gruntjs.d.ts",
-        "size": 3843,
-        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/blobs/bac0b7efb54ed69c477e091496251dd8d83ed11d"
+        "size": 6177,
+        "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/blobs/463721da927edf3f9d96749bcf17702f6c689396"
       },
       {
         "mode": "040000",
@@ -5805,9 +5820,9 @@
     ],
     "meta": {
       "x-ratelimit-limit": "60",
-      "x-ratelimit-remaining": "44"
+      "x-ratelimit-remaining": "40"
     }
   },
   "label": "getTree",
-  "changed": "2013-09-24T21:01:09.932Z"
+  "changed": "2013-09-27T03:58:03.279Z"
 }

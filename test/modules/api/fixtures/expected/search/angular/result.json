@@ -7,12 +7,12 @@
       "def": {
         "path": "angularjs/angular.d.ts",
         "commit": {
-          "commitSha": "3bc329f49a971b3dae92ca682cb81816dbe31a53"
+          "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
         },
         "blob": {
-          "sha": "c44f3408e4b90c2572045d231a91f6042cf2e8da"
+          "sha": "e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f"
         },
-        "key": "angularjs/angular.d.ts-3bc329f49a971b3dae92ca682cb81816dbe31a53",
+        "key": "angularjs/angular.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
         "solved": false,
         "dependencies": []
       },
@@ -23,12 +23,12 @@
     {
       "path": "angularjs/angular.d.ts",
       "commit": {
-        "commitSha": "3bc329f49a971b3dae92ca682cb81816dbe31a53"
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
       },
       "blob": {
-        "sha": "c44f3408e4b90c2572045d231a91f6042cf2e8da"
+        "sha": "e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f"
       },
-      "key": "angularjs/angular.d.ts-3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "key": "angularjs/angular.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
       "solved": false,
       "dependencies": []
     }

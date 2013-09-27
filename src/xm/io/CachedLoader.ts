@@ -37,9 +37,10 @@ module xm {
 	export class CachedLoader {
 		private _debug:boolean = false;
 		private _options:any = new xm.CachedLoaderOptions();
-		private _active:xm.KeyValueMap = new xm.KeyValueMap();
+		private _active:xm.IKeyValueMap<Qpromise> = new xm.KeyValueMap();
 		private _service:xm.CachedLoaderService = null;
 
+		//TODO upgrade log to event tracker
 		stats = new xm.StatCounter();
 
 		constructor(label:string, service:CachedLoaderService) {
@@ -57,6 +58,7 @@ module xm {
 			return xm.jsonToIdent([label, keyTerms ? keyTerms : {}]);
 		}
 
+		//main cache/load flow, the clousure  is only called when no matching keyTerm was found (or cache was locked)
 		doCachedCall(label:string, keyTerms:any, opts:any, cachedCall:() => Qpromise):Qpromise {
 			var key = xm.isString(keyTerms) ? keyTerms : this.getKey(label, keyTerms);
 

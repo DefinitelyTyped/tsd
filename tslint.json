@@ -1,5 +1,8 @@
 {
 	"rules": {
+		"__________": [
+			"tslint is still in development: some rules wait for fixes"
+		],
 		"bitwise": true,
 		"classname": true,
 		"curly": true,
@@ -32,10 +35,10 @@
 		"quotemark": [true, "single"],
 		"radix": true,
 		"semicolon": true,
-		"sub": true,
+		"sub": false,
 		"trailing": true,
 		"varname": false,
-		"_____________________": {
+		"____________________": {
 			"whitespace": [
 				"check-separator",
 				"check-type"

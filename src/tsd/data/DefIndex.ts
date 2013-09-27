@@ -24,10 +24,10 @@ module tsd {
 		private _indexCommit:tsd.DefCommit = null;
 
 		//TODO add generics when moved to TS 0.9
-		private _definitions:xm.IKeyValueMap = new xm.KeyValueMap();
-		private _commits:xm.IKeyValueMap = new xm.KeyValueMap();
-		private _blobs:xm.IKeyValueMap = new xm.KeyValueMap();
-		private _versions:xm.IKeyValueMap = new xm.KeyValueMap();
+		private _definitions:xm.IKeyValueMap<tsd.Def> = new xm.KeyValueMap();
+		private _commits:xm.IKeyValueMap<tsd.DefCommit> = new xm.KeyValueMap();
+		private _blobs:xm.IKeyValueMap<tsd.DefBlob> = new xm.KeyValueMap();
+		private _versions:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 		constructor() {
 
@@ -165,8 +165,10 @@ module tsd {
 		/*
 		 get a DefBlob for a sha (enforces single instances)
 		 */
-		procureBlobFor(content):tsd.DefBlob {
-			var sha = git.GitUtil.blobSHAHex(content);
+		procureBlobFor(content:NodeBuffer, encoding:string = null):tsd.DefBlob {
+			xm.assertVar('content', content, Buffer);
+
+			var sha = git.GitUtil.blobShaHex(content, encoding);
 			var blob:tsd.DefBlob = this.procureBlob(sha);
 			if (!blob.hasContent()) {
 				blob.setContent(content);

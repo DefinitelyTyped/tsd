@@ -1,5 +1,6 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/git/GithubURLManager.ts" />
+///<reference path="helper.ts" />
 
 describe('git.GithubRepo / git.GithubURLManager', () => {
 	'use strict';
@@ -8,6 +9,8 @@ describe('git.GithubRepo / git.GithubURLManager', () => {
 
 	var repo:git.GithubRepo;
 	var urls:git.GithubURLManager;
+
+	var gitTest = helper.getGitTestInfo();
 
 	describe('GithubRepo', () => {
 		it('should be defined', () => {

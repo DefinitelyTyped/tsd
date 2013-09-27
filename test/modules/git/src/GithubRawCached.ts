@@ -6,18 +6,20 @@
 describe('git.GithubRawCached', () => {
 	'use strict';
 
-	var raw:git.GithubRawCached;
+	var path = require('path');
+	var assert:Chai.Assert = require('chai').assert;
 
+	var raw:git.GithubRawCached;
 	var context:tsd.Context;
 	var repo:git.GithubRepo;
 
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
 	var cacheDir:string;
+
+	var gitTest = helper.getGitTestInfo();
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'git-raw');
+		cacheDir = path.join(gitTest.cacheDir, 'GithubRawCached', 'git-raw');
 
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		raw = new git.GithubRawCached(repo, cacheDir);
@@ -40,7 +42,7 @@ describe('git.GithubRawCached', () => {
 	it('should throw on bad params', () => {
 		assert.throws(() => {
 			raw = new git.GithubRawCached(null, null);
-		});
+		}, /^expected "repo" to be defined as a GithubRepo\(.*?\) but got "null"/);
 	});
 
 	it('should have default options', () => {
@@ -52,17 +54,19 @@ describe('git.GithubRawCached', () => {
 
 	describe('getFile', () => {
 
-		var filePath = gitTest.config.api.getFile.filePath;
-		var commitSha = gitTest.config.api.getFile.blobSha;
+		var filePath = gitTest.config.data.async.filePath;
+		var commitSha = gitTest.config.data.async.commitSha;
+		assert.isString(filePath, 'filePath');
+		helper.isStringSHA1(commitSha, 'commitSha');
 
 		it('should cache and return data', () => {
 			//raw.debug = true;
 
 			assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
 
-			return raw.getFile(commitSha, filePath).then((firstData) => {
+			return raw.getFile(commitSha, filePath).then((firstData:NodeBuffer) => {
 				assert.ok(firstData, 'first callback data');
-				assert.isString(firstData, 'first callback data');
+				assert.instanceOf(firstData, Buffer, 'first callback data');
 				assert.operator(firstData.length, '>', 20, 'first callback data');
 
 				//xm.log(raw.loader.stats.stats.export());
@@ -77,15 +81,15 @@ describe('git.GithubRawCached', () => {
 					'write-success': 1,
 					'active-remove': 1,
 					complete: 1
-				}, 'first');
+				}, 'first: ' + commitSha);
 
 				// get again, should be cached
-				return raw.getFile(commitSha, filePath).then((secondData) => {
+				return raw.getFile(commitSha, filePath).then((secondData:NodeBuffer) => {
 					assert.ok(secondData, 'second callback data');
-					assert.isString(secondData, 'second callback data');
+					assert.instanceOf(secondData, Buffer, 'second callback data');
 					assert.operator(secondData.length, '>', 20, 'second callback data');
 
-					assert.strictEqual(firstData, secondData, 'first vs second data');
+					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
 
 					//xm.log(raw.loader.stats.stats.export());
 					helper.assertStatCounter(raw.loader.stats, {
@@ -101,7 +105,7 @@ describe('git.GithubRawCached', () => {
 						complete: 2,
 						'read-hit': 1,
 						'cache-hit': 1
-					}, 'second');
+					}, 'second: ' + commitSha);
 
 				});
 			});

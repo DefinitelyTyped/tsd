@@ -1,5 +1,6 @@
 ///<reference path="../../typings/node/node.d.ts" />
 ///<reference path="../xm/typeOf.ts" />
+///<reference path="../xm/assertVar.ts" />
 
 
 module git {
@@ -8,10 +9,11 @@ module git {
 	var crypto = require('crypto');
 
 	export module GitUtil {
-		/*
-		 getDecodedBlob: decoders for github blob-api
-		 */
-		export function decodeBlob(blobJSON:any):NodeBuffer {
+
+		export function decodeBlobJson(blobJSON:any):NodeBuffer {
+			if (!blobJSON || !blobJSON.encoding) {
+				return null;
+			}
 			switch (blobJSON.encoding) {
 				case 'base64':
 					return <NodeBuffer>new Buffer(blobJSON.content, 'base64');
@@ -22,8 +24,9 @@ module git {
 			}
 		}
 
-		export function blobSHAHex(data:NodeBuffer):string {
-			return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data).digest('hex');
+		export function blobShaHex(data:NodeBuffer, encoding?:string):string {
+			xm.assertVar('data', data, Buffer);
+			return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
 		}
 	}
 }

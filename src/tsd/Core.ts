@@ -21,6 +21,7 @@ module tsd {
 	var FS:Qfs = require('q-io/fs');
 	var path = require('path');
 	var pointer = require('jsonpointer.js');
+	var ansidiff = require('ansidiff');
 
 	var branch_tree:string = '/commit/commit/tree/sha';
 
@@ -39,6 +40,7 @@ module tsd {
 		index:tsd.DefIndex;
 		resolver:tsd.Resolver;
 
+		//TODO unify into single object
 		stats = new xm.StatCounter();
 		log = xm.getLogger('Core');
 		_debug:boolean = false;
@@ -52,6 +54,10 @@ module tsd {
 			this.gitRepo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject);
 			this.gitAPI = new git.GithubAPICached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-api'));
 			this.gitRaw = new git.GithubRawCached(this.gitRepo, path.join(this.context.paths.cacheDir, 'git-raw'));
+
+			//lets be gents
+			//this.gitAPI.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
+			this.gitRaw.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
 
 			this.stats.logger = xm.getLogger('Core.stats');
 
@@ -197,7 +203,7 @@ module tsd {
 		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
 		 */
 		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true):Qpromise {
-			var written:xm.IKeyValueMap = new xm.KeyValueMap();
+			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 			return Q.all(list.map((file:tsd.DefVersion) => {
 				return this.installFile(file, addToConfig).then((file:tsd.DefVersion) => {
@@ -293,14 +299,25 @@ module tsd {
 		 */
 		loadContent(file:tsd.DefVersion):Qpromise {
 			if (file.hasContent()) {
-				return Q(file.blob.content);
+				return Q(file);
 			}
 			return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then((content) => {
-				var sha = git.GitUtil.blobSHAHex(content);
+				//var sha = git.GitUtil.blobShaHex(content, 'utf8');
 				if (file.blob) {
 					// race
 					if (!file.blob.hasContent()) {
-						file.blob.setContent(content);
+						try {
+							file.blob.setContent(content);
+						}
+						catch (err) {
+							xm.log.debug(err);
+							xm.log.debug('path', file.def.path);
+							xm.log.debug('commitSha', file.commit.commitSha);
+							xm.log.debug('treeSha', file.commit.treeSha);
+							xm.log.error('failed to set content');
+							//throw new Error('failed to set content');
+							throw err;
+						}
 					}
 				}
 				else {

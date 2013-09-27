@@ -12,7 +12,6 @@ module tsd {
 	var fs = require('fs');
 	var path = require('path');
 	var util = require('util');
-	var assert = require('assert');
 	var tv4:TV4 = require('tv4');
 
 	/*
@@ -61,7 +60,7 @@ module tsd {
 		repo:string;
 		ref:string;
 
-		private _installed:xm.KeyValueMap = new xm.KeyValueMap();
+		private _installed:xm.IKeyValueMap<InstalledDef> = new xm.KeyValueMap();
 		private _schema:any;
 
 		log:xm.Logger = xm.getLogger('Config');
@@ -119,19 +118,19 @@ module tsd {
 			this._installed.set(file.def.path, def);
 		}
 
-		hasFile(path:string):boolean {
-			xm.assertVar('path', path, 'string');
-			return this._installed.has(path);
+		hasFile(filePath:string):boolean {
+			xm.assertVar('filePath', filePath, 'string');
+			return this._installed.has(filePath);
 		}
 
-		getFile(path:string):tsd.InstalledDef {
-			xm.assertVar('path', path, 'string');
-			return this._installed.get(path, null);
+		getFile(filePath:string):tsd.InstalledDef {
+			xm.assertVar('filePath', filePath, 'string');
+			return this._installed.get(filePath, null);
 		}
 
-		removeFile(path:string) {
-			xm.assertVar('path', path, 'string');
-			this._installed.remove(path);
+		removeFile(filePath:string) {
+			xm.assertVar('filePath', filePath, 'string');
+			this._installed.remove(filePath);
 		}
 
 		getInstalled():tsd.InstalledDef[] {
@@ -186,15 +185,15 @@ module tsd {
 			this.ref = json.ref;
 
 			if (json.installed) {
-				xm.eachProp(json.installed, (data:any, path:string) => {
-					var installed = new tsd.InstalledDef(path);
+				xm.eachProp(json.installed, (data:any, filePath:string) => {
+					var installed = new tsd.InstalledDef(filePath);
 					//TODO move to class
 					//TODO validate some more
 					installed.commitSha = data.commit;
 					installed.blobSha = data.blob;
 
 
-					this._installed.set(path, installed);
+					this._installed.set(filePath, installed);
 				});
 			}
 		}

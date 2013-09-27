@@ -3,6 +3,8 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
+///<reference path="Q.d.ts" />
+
 interface Qfs {
 	open(path:string, options?:any):Qpromise;
 	read(path:string, options?:any):Qpromise;

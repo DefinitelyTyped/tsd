@@ -13,7 +13,6 @@ module xm {
 	'use strict';
 
 	var Q:QStatic = require('q');
-	var assert = require('assert');
 	var fs = require('fs');
 	var path = require('path');
 	var FS:Qfs = require('q-io/fs');

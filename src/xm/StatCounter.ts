@@ -12,7 +12,7 @@ module xm {
 	 */
 	export class StatCounter {
 
-		stats:KeyValueMap = new KeyValueMap();
+		stats:IKeyValueMap<number> = new KeyValueMap();
 		logger:Logger = xm.log;
 
 		constructor(public log:boolean = false) {

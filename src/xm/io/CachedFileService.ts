@@ -17,17 +17,18 @@ module xm {
 	//TODO add encoding opts
 	export class CachedFileService implements xm.CachedLoaderService {
 
-		_dir:string;
+		private dir:string;
 
 		constructor(dir:string) {
 			xm.assertVar('dir', dir, 'string');
-			this._dir = dir;
+			this.dir = dir;
 
-			xm.ObjectUtil.hidePrefixed(this);
+			Object.defineProperty(this, 'dir', {writable: false});
 		}
 
 		getValue(file, opts?):Qpromise {
-			var storeFile = path.join(this._dir, file);
+			var storeFile = path.join(this.dir, file);
+
 			return FS.exists(storeFile).then((exists:boolean) => {
 				if (exists) {
 					return FS.isFile(storeFile).then((isFile:boolean) => {
@@ -35,7 +36,7 @@ module xm {
 							throw(new Error('path exists but is not a file: ' + storeFile));
 						}
 						//read from cache
-						return FS.read(storeFile);
+						return FS.read(storeFile, {flags: 'rb'});
 					});
 				}
 				return null;
@@ -43,25 +44,20 @@ module xm {
 		}
 
 		writeValue(file, label:string, value:any, opts?):Qpromise {
-			var storeFile = path.join(this._dir, file);
+			var storeFile = path.join(this.dir, file);
+
 			return xm.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
-				return FS.write(storeFile, value);
+				return FS.write(storeFile, value, {flags: 'wb'});
 			}).then(() => {
 				return value;
 			}, (err) => {
-				//TODO whut2do?
-				//throw(err);
-				//still return data?
-				return value;
+				xm.log.error('CachedFileService.writeValue: failure');
+				throw(err);
 			});
 		}
 
 		getKeys(opts?):Qpromise {
 			return Q([]);
-		}
-
-		get dir():string {
-			return this._dir;
 		}
 	}
 }

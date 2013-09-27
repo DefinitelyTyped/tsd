@@ -55,6 +55,7 @@ module xm {
 	 mkdirCheckQ: like mkdirp but with writable rights and verification, returns a promise
 	 */
 	//TODO unit test this
+	//TODO why not default make writable? why ever use this without writable?
 	export function mkdirCheckQ(dir:string, writable:boolean = false, testWritable:boolean = false):Qpromise {
 		dir = path.resolve(dir);
 

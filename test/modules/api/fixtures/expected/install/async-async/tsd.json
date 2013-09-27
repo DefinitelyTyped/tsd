@@ -5,7 +5,7 @@
   "ref": "master",
   "installed": {
     "async/async.d.ts": {
-      "commit": "3bc329f49a971b3dae92ca682cb81816dbe31a53",
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
       "blob": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
     }
   }

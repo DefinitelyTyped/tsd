@@ -89,7 +89,7 @@ Selector
 Command options
 
 * :a:   List / design options and unify the names (both for CLI as API)
-* :x:	Add option for file overwrite (always on now)
+* :b:	Add option for file overwrite (always on now)
 * :x:	Add a compact vs detailed option (for search listings or history)
 * :x:	Add option for dependency install (always on now)
 * :x:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
@@ -97,6 +97,7 @@ Command options
 
 Functionality
 
+* :o2: Handle rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * :id:	Add fancy promise progress events + cli display (install etc)
 
@@ -112,7 +113,7 @@ API
 
 * :o:	Export API docs during build :zap:
 * :o:	Export TypeScript definitions :zap:
-* :id:	Consider optimising JavaScript API (less OO-ish)
+* :id:	Consider optimising or wrapping JavaScript API (less OO-ish)
 * :id:	Add options to authenticate to github API for higher rate-limit
 
 Data modelrepo

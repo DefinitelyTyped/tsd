@@ -18,7 +18,7 @@ module tsd {
 	export class Resolver {
 
 		private _core:Core;
-		private _active:xm.KeyValueMap = new xm.KeyValueMap();
+		private _active:xm.KeyValueMap<Qpromise> = new xm.KeyValueMap();
 
 		stats:xm.StatCounter = new xm.StatCounter();
 

@@ -25,7 +25,7 @@ module tsd {
 		nameMatches:tsd.Def[];
 		selection:tsd.DefVersion[];
 		definitions:tsd.Def[];
-		written:xm.IKeyValueMap = new xm.KeyValueMap();
+		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
 		constructor(public index:DefIndex, public selector:tsd.Selector = null) {
@@ -167,6 +167,7 @@ module tsd {
 			return this._core.select(selector).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
 				res.definitions = tsd.DefUtil.getDefs(res.selection);
+
 				//TODO limit history to Selector date filter?
 				return this._core.loadHistoryBulk(res.definitions).thenResolve(res);
 			});
