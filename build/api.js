@@ -442,33 +442,33 @@ var xm;
     })();
     xm.ConsoleLineWriter = ConsoleLineWriter;
 
-    function getLogger(label, writer) {
-        writer = writer || new xm.ConsoleLineWriter();
+    xm.consoleWriter = new ConsoleLineWriter();
 
+    function writeMulti(logger, label, args) {
+        if (logger.mute) {
+            return;
+        }
+        var ret = [];
+        for (var i = 0, ii = args.length; i < ii; i++) {
+            var value = args[i];
+            if (value && typeof value === 'object') {
+                ret.push(util.inspect(value, { showHidden: false, depth: 8 }));
+            } else {
+                ret.push(value);
+            }
+        }
+        xm.consoleWriter.writeln(label + ret.join('; '));
+    }
+
+    function getLogger(label) {
         label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
-
-        var writeMulti = function (prefix, postfix, args) {
-            if (logger.mute) {
-                return;
-            }
-            var ret = [];
-            for (var i = 0, ii = args.length; i < ii; i++) {
-                var value = args[i];
-                if (value && typeof value === 'object') {
-                    ret.push(util.inspect(value, { showHidden: false, depth: 8 }));
-                } else {
-                    ret.push(value);
-                }
-            }
-            writer.writeln(label + prefix + ret.join('; ') + postfix);
-        };
 
         var plain = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
-            writeMulti('', '', args);
+            writeMulti(logger, '', args);
         };
 
         var logger = (function () {
@@ -478,42 +478,68 @@ var xm;
             }
             plain.apply(null, args);
         });
+        var mute = false;
 
         logger.log = plain;
-        logger.mute = false;
+        logger.showLog = true;
+
         logger.ok = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
-            writeMulti('ok: '.green, '', args);
+            if (logger.showLog) {
+                return;
+            }
+            writeMulti(logger, label + 'ok: '.green, args);
         };
         logger.warn = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
-            writeMulti('warn: '.yellow, '', args);
+            if (logger.showLog) {
+                return;
+            }
+            writeMulti(logger, label + 'warn: '.yellow, args);
         };
         logger.error = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
-            writeMulti('error: '.red, '', args);
+            if (logger.showLog) {
+                return;
+            }
+            writeMulti(logger, label + 'error: '.red, args);
         };
         logger.debug = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
-            writeMulti('debug: '.cyan, '', args);
+            if (logger.showLog) {
+                return;
+            }
+            writeMulti(logger, label + 'debug: '.cyan, args);
         };
         logger.inspect = function (value, label, depth) {
             if (typeof depth === "undefined") { depth = 4; }
-            label = label ? label + ':\n' : '';
-            writer.writeln(label + util.inspect(value, { showHidden: false, depth: depth }));
+            if (logger.showLog) {
+                return;
+            }
+            label = label ? label + ': ' : '';
+            xm.consoleWriter.writeln(label + util.inspect(value, { showHidden: false, depth: depth }));
         };
+        Object.defineProperty(logger, 'mute', {
+            get: function () {
+                return mute;
+            },
+            set: function (value) {
+                mute = value;
+                logger.showLog = !value;
+            }
+        });
 
         return logger;
     }
@@ -2674,13 +2700,15 @@ var xm;
 
     var CachedFileService = (function () {
         function CachedFileService(dir) {
+            this._extension = '';
             xm.assertVar('dir', dir, 'string');
             this.dir = dir;
 
             Object.defineProperty(this, 'dir', { writable: false });
+            Object.defineProperty(this, '_extension', { writable: false, enumerable: false });
         }
         CachedFileService.prototype.getValue = function (file, opts) {
-            var storeFile = path.join(this.dir, file);
+            var storeFile = path.join(this.dir, file + this._extension);
 
             return FS.exists(storeFile).then(function (exists) {
                 if (exists) {
@@ -2697,7 +2725,7 @@ var xm;
         };
 
         CachedFileService.prototype.writeValue = function (file, label, value, opts) {
-            var storeFile = path.join(this.dir, file);
+            var storeFile = path.join(this.dir, file + this._extension);
 
             return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
                 return FS.write(storeFile, value, { flags: 'wb' });
@@ -4943,6 +4971,7 @@ var tsd;
                 pleonasm.onload = function () {
                     xm.callAsync(callback);
                 };
+                return;
             }
             xm.callAsync(callback);
         });

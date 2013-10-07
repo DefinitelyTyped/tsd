@@ -22,6 +22,8 @@ module xm {
 		}
 	}
 
+	export var consoleWriter = new ConsoleLineWriter();
+
 	export interface Logger  {
 		(...args:any[]):void;
 		log(...args:any[]):void;
@@ -31,56 +33,83 @@ module xm {
 		debug(...args:any[]):void;
 		inspect(value:any, label?:string, depth?:number):void;
 		mute:boolean;
+		showLog:boolean;
+	}
+	function writeMulti(logger:Logger, label:string, args:any[]):void {
+		if (logger.mute) {
+			return;
+		}
+		var ret = [];
+		for (var i = 0, ii = args.length; i < ii; i++) {
+			var value = args[i];
+			if (value && typeof value === 'object') {
+				ret.push(util.inspect(value, <any>{showHidden: false, depth: 8}));
+			}
+			else {
+				ret.push(value);
+			}
+		}
+		consoleWriter.writeln(label + ret.join('; '));
 	}
 
-	export function getLogger(label?:string, writer?:xm.LineWriter):xm.Logger {
-		writer = writer || new xm.ConsoleLineWriter();
+	export function getLogger(label?:string):xm.Logger {
 
 		label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
 
-		var writeMulti = (prefix:string, postfix:string, args:any[]) => {
-			if (logger.mute) {
-				return;
-			}
-			var ret = [];
-			for (var i = 0, ii = args.length; i < ii; i++) {
-				var value = args[i];
-				if (value && typeof value === 'object') {
-					ret.push(util.inspect(value, {showHidden: false, depth: 8}));
-				}
-				else {
-					ret.push(value);
-				}
-			}
-			writer.writeln(label + prefix + ret.join('; ') + postfix);
-		};
-
 		var plain = (...args:any[]) => {
-			writeMulti('', '', args);
+			writeMulti(logger, '', args);
 		};
 
 		var logger:Logger = <Logger>((...args:any[]) => {
 			plain.apply(null, args);
 		});
+		var mute = false;
 		// alias
 		logger.log = plain;
-		logger.mute = false;
+		logger.showLog = true;
+		//logger.showEvent = true;
+		//logger.showCount = true;
+
 		logger.ok = (...args:any[]) => {
-			writeMulti('ok: '.green, '', args);
+			if (logger.showLog) {
+				return;
+			}
+			writeMulti(logger, label + 'ok: '.green, args);
 		};
 		logger.warn = (...args:any[]) => {
-			writeMulti('warn: '.yellow, '', args);
+			if (logger.showLog) {
+				return;
+			}
+			writeMulti(logger, label + 'warn: '.yellow, args);
 		};
 		logger.error = (...args:any[]) => {
-			writeMulti('error: '.red, '', args);
+			if (logger.showLog) {
+				return;
+			}
+			writeMulti(logger, label + 'error: '.red, args);
 		};
 		logger.debug = (...args:any[]) => {
-			writeMulti('debug: '.cyan, '', args);
+			if (logger.showLog) {
+				return;
+			}
+			writeMulti(logger, label + 'debug: '.cyan, args);
 		};
 		logger.inspect = (value:any, label?:string, depth:number = 4) => {
-			label = label ? label + ':\n' : '';
-			writer.writeln(label + util.inspect(value, {showHidden: false, depth: depth }));
+			if (logger.showLog) {
+				return;
+			}
+			label = label ? label + ': ' : '';
+			consoleWriter.writeln(label + util.inspect(value, <any>{showHidden: false, depth: depth }));
 		};
+		Object.defineProperty(logger, 'mute', {
+			get: function () {
+				return mute;
+			},
+			set: function (value) {
+				mute = value;
+				logger.showLog = !value;
+			}
+		});
 
 		return logger;
 	}

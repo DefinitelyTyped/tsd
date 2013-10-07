@@ -122,9 +122,11 @@ describe('Core', () => {
 			return core.getIndex().then(() => {
 				helper.assertUpdateStat(core.gitAPI.loader, 'core');
 
-				assert.operator(core.index.list.length, '>', 200, 'definitions.list');
+				assert.isTrue(core.index.hasIndex(), 'index.hasIndex');
+				assert.operator(core.index.list.length, '>', 200, 'index.list');
 				//xm.log(core.index.toDump());
 				//TODO validate index data
+
 				return null;
 			});
 		});

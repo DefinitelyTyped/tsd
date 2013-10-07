@@ -246,7 +246,6 @@ module tsd {
 
 			return xm.mkdirCheckQ(dir, true).then(() => {
 				return FS.write(file, json).then(() => {
-					//TODO solve and remove this wizardy: also see my ticket @ https://github.com/kriskowal/q-io/issues/52
 					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not)
 					return FS.stat(file);
 				}).then(() => {

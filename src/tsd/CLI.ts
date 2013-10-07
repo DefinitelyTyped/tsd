@@ -59,13 +59,10 @@ module tsd {
 				pleonasm.onload = () => {
 					xm.callAsync(callback);
 				};
+				return;
 			}
 			xm.callAsync(callback);
 		});
-		/*.then(() => {
-		 var encoded = pleonasm.encode('aabbaa').code;
-		 xm.log(encoded);
-		 });*/
 	}
 
 	function getAPIJob(args:any):Qpromise {

@@ -129,7 +129,7 @@ module xm {
 
 	// - - - - meta types
 
-	//TODO sweet these for new tests
+	//TODO sweep these for new tests
 	export function isOk(obj:any):boolean {
 		return !!obj;
 	}

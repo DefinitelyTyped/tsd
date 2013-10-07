@@ -156,8 +156,8 @@ Internals
 
 Technical
 
-* :vs:	Consider property immutability: Object.freeze()
-* :vs:	Consider ditching getters + private vars for freeze (`xm.ObjectUtils`)
+* :o2:	Consider property immutability: Object.freeze()
+* :o2:	Consider ditching getters + private vars for freeze (`xm.ObjectUtils`)
 * :o:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects)
 * :o:	Add xm interface for debug/log/event tracking
 
@@ -195,4 +195,33 @@ Bugs:
 * :o:	Underscore.d.ts header has multiple authors
 
 More.. always more :rocket:
+
+## Emoji Project Management 
+
+Status indicators:
+
+* :m:	Resolved, closed (mint).
+* :id:	Proposal or idea for consideration.
+* :vs:	Decision needed (this vs that).
+* :sa:	Pending (reaction / remote fix).
+* 
+* :a:	First priority.
+* :b:	Second priority.
+* :ab:	Important non-prioritised.
+* :cl:	Need to clean up.
+* :o2:	Must resolve for release.
+* :x:	Acknowledged, waiting for priority.
+* :o:	Open, incoming, undetermined.
+
+Reserved (short codes):
+
+* :ok:	Decision made?
+* :ng:	
+* :up:	Released?
+* :cd:	Shipped? Released?
+* :on:
+* :tm:
+* :+1:
+* :-1:
+* :v:
 
