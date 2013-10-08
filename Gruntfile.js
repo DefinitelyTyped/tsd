@@ -45,12 +45,12 @@ module.exports = function (grunt) {
 		},
 		todos: {
 			options: {
+				reporter: require('./lib/grunt/todos-reporter').make(grunt),
 				verbose: false,
 				priorities: {
 					low: null,
 					med: /(TODO|FIXME)/
-				},
-				reporter: require('./lib/grunt/todos-reporter').make(grunt)
+				}
 
 			},
 			all: {
@@ -81,7 +81,6 @@ module.exports = function (grunt) {
 				target: 'es5',
 				base_path: 'src/',
 				declaration: false,
-				// should be on but is buggy
 				sourcemap: true
 			},
 			api: {

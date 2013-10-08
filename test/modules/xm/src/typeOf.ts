@@ -103,7 +103,7 @@ describe('xm.typeOf', () => {
 		it('not isValid', () => {
 			assert.isFalse(xm.isValid(undefined), 'undefined');
 			assert.isFalse(xm.isValid(null), 'null');
-			assert.isFalse(xm.isValid(parseFloat('nope')),'parseFloat: NaN');
+			assert.isFalse(xm.isValid(parseFloat('nope')), 'parseFloat: NaN');
 		});
 	});
 });

@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "rimraf": "2.2.2",
-    "grunt": "git://github.com/gruntjs/grunt/#d5a36bee0209d7dc04609737586ce8f3c9b2affc",
+    "grunt": "git://github.com/gruntjs/grunt/#0a4e6e38867cde1c396eb99820436027dccf8023",
     "grunt-cli": "0.1.9",
     "gruntfile-gtx": "0.0.7",
     "grunt-contrib-clean": "0.5.0",
@@ -65,7 +65,7 @@
     "grunt-mocha-test": "0.6.3",
     "grunt-concurrent": "0.4.0",
     "grunt-typescript": "0.2.4",
-    "grunt-tslint": "git://github.com/Bartvds/grunt-tslint/#test",
+    "grunt-tslint": "git://github.com/Bartvds/grunt-tslint/#forked",
     "grunt-execute": "0.1.5",
     "grunt-shell": "0.3.1",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",

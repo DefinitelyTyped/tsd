@@ -49,7 +49,7 @@ module tsd {
 				throw new Error('allready got tree: ' + this.treeSha + ' -> ' + commit.sha);
 			}
 
-			this.treeSha = pointer.get(commit, branch_tree_sha);;
+			this.treeSha = pointer.get(commit, branch_tree_sha);
 
 			//TODO add a bit of checking? error? beh?
 			this.hubAuthor = git.GithubUser.fromJSON(commit.author);

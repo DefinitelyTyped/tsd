@@ -24,7 +24,7 @@ Most of these are file/class/block 'local' changes: easy to fix without conflict
 
 Never enough.
 
-* :a:   Expand API command testing; besides search/install (once update fixtures land)
+* :a:   Expand API command testing; besides search/install ~~(once update fixtures land)~~
 * :x:   Add CLI tests
 * :o:	Add node.js module tests
 * :id:	Consider testing JavaScript output instead of TypeScript source.
@@ -32,7 +32,7 @@ Never enough.
 Working on a way run data tests from fixtures that can be updated easily (otherwise decent coverage is insane to manage) 
 
 * :m:	Run github api+raw caches from fixtures (with easy updates/expansion)
-* :a:   Run API tests from fixtures and stored comparison output (with easy updates/expansion)
+* :m:   Run API tests from fixtures and stored comparison output (with easy updates/expansion)
 
 ## Global / multi-file changes:
 
@@ -116,11 +116,11 @@ API
 * :id:	Consider optimising or wrapping JavaScript API (less OO-ish)
 * :id:	Add options to authenticate to github API for higher rate-limit
 
-Data modelrepo
+Data model/repo
 
 * :o:	Harden JSON import
-* :id:	Consider decoupling from Github json format
-* :id:	Consider adapting to work froma  git-checkout.
+* :id:	Consider decoupling from Github json format (abstract service)
+* :id:	Consider adapting to work from a git-checkout (abstract service)
 
 Info
 
@@ -138,7 +138,7 @@ Cache
 * :m:	Decide on user caching directory: home / AppData like npm
 * :m:	Decide on cache folder version naming scheme
 * :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
-* :a:	Drop 'node-github' dependency and self re-implement github API to leverage http-cache-headers
+* :a:	Drop 'node-github' dependency and self re-implement github API to leverage http-cache-headers (and rate limit timeout info)
 * :b:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :o:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
@@ -146,25 +146,28 @@ Cache
 
 Internals
 
-* :a:	Try recalculating sha1 hash from content (fix: weird error in #master `$ tsd install chai`)
+* :a:	Try recalculating sha1 hash from content (fix: weird error in #master `$ tsd install chai` (fixed by forced line-ends?)
 * :b:	Add local-changes detector using the hash / sha
 * :m:	Change Context objects to use Q/Q-io and not auto-create folders at init
 * :vs:	Decide if API, Core etc need(more) race condition hardening
+* :vs:	Consider if API and/or Core need to be split into command classes.
 * :vs:	Consider adding timeouts
 * :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :o:	Consider global store for JSON pointers and RegExps etc
 
 Technical
 
-* :o2:	Consider property immutability: Object.freeze()
-* :o2:	Consider ditching getters + private vars for freeze (`xm.ObjectUtils`)
-* :o:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects)
+* :a:	Move to TS 0.9 generics definition of Q promises
+* :o2:	Expand property / const immutability: Object.freeze()
+* :o2:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
+* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
 * :o:	Add xm interface for debug/log/event tracking
+* :cl:	Change some utils from static class members to module functions
 
 Cleanup
 
 * :cl:	Sweep and enable tslint.json rules
-* :cl:	Clean `package.json`: fix ~tildes before release, dev vs runtime, npm prune 
+* :cl:	Clean `package.json`: fix some ~tildes before release, dev vs runtime, npm prune 
 * :cl:	Sweep used modules: require() and `package.json`
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
@@ -175,7 +178,7 @@ Publishing
 * :o2:	Add npm pre-publish tests hook :zap:
 * :x:	Add git pre-commit test hook :zap:
 * :vs:	Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
-* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)  zap:
+* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc) :zap:
 * :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
 * :m:	Fix bin/cli `$ npm install . -g` 
 * :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
@@ -200,11 +203,10 @@ More.. always more :rocket:
 
 Status indicators:
 
-* :m:	Resolved, closed (mint).
+* :m:	Resolved and closed (*'mint!'*).
 * :id:	Proposal or idea for consideration.
 * :vs:	Decision needed (this vs that).
 * :sa:	Pending (reaction / remote fix).
-* 
 * :a:	First priority.
 * :b:	Second priority.
 * :ab:	Important non-prioritised.
@@ -216,7 +218,7 @@ Status indicators:
 Reserved (short codes):
 
 * :ok:	Decision made?
-* :ng:	
+* :ng:	(angular :)
 * :up:	Released?
 * :cd:	Shipped? Released?
 * :on:

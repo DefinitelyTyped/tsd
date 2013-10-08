@@ -9,10 +9,12 @@ module xm {
 		active.push(object);
 		Object.freeze(object);
 		for (prop in object) {
-			value = object[prop];
-			if (object.hasOwnProperty(prop) && xm.isObject(object) || xm.isArray(object)) {
-				if (active.indexOf(object) < 0) {
-					deepFreezeRecursive(value, active);
+			if (object.hasOwnProperty(prop)) {
+				value = object[prop];
+				if (xm.isObject(value) || xm.isArray(value)) {
+					if (active.indexOf(object) < 0) {
+						deepFreezeRecursive(value, active);
+					}
 				}
 			}
 		}

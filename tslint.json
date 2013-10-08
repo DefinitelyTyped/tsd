@@ -1,52 +1,58 @@
 {
+	"__notes": [
+		"tslint is still in development: some rules wait for fixes"
+	],
 	"rules": {
-		"__________": [
-			"tslint is still in development: some rules wait for fixes"
-		],
-		"bitwise": true,
-		"classname": true,
+		"class-name": true,
 		"curly": true,
-		"debug": true,
-		"dupkey": true,
-		"duplicate-variable": false,
 		"eofline": true,
-		"eqeqeq": [true, "allow-null-check"],
-		"evil": true,
-		"forin": false,
+		"forin": true,
 		"indent": [true, 4],
-		"labelpos": true,
+		"label-position": true,
 		"label-undefined": true,
-		"maxlen": [true, 240],
-		"noarg": true,
-		"noconsole": [true,
+		"x__max-line-length": [
+			"for legacy reasons this is insanely high, should be < ~120"
+		],
+		"max-line-length": [true, 240],
+		"no-arg": true,
+		"no-bitwise": true,
+		"no-console": [true,
 			"debug",
 			"info",
 			"time",
 			"timeEnd",
 			"trace"
 		],
-		"noconstruct": true,
-		"nounreachable": true,
-		"noempty": false,
-		"oneline": [true,
+		"no-construct": true,
+		"no-debugger": true,
+		"no-duplicate-key": true,
+		"no-duplicate-variable": true,
+		"no-empty": false,
+		"no-eval": true,
+		"no-string-literal": false,
+		"no-trailing-whitespace": true,
+		"no-unreachable": true,
+		"x___one-line": [true,
+			"check-catch",
+			"check-else"
+		],
+		"one-line": [
 			"check-open-brace",
 			"check-whitespace"
 		],
 		"quotemark": [true, "single"],
 		"radix": true,
 		"semicolon": true,
-		"sub": false,
-		"trailing": true,
-		"varname": false,
-		"____________________": {
-			"whitespace": [
-				"check-separator",
-				"check-type"
-			]
-		},
+		"triple-equals": [true, "allow-null-check"],
+		"variable-name": false,
+		"x___whitespace": [
+			true,
+			"check-type"
+		],
 		"whitespace": [true,
 			"check-branch",
 			"check-decl",
+			"check-separator",
 			"check-operator"
 		]
 	}

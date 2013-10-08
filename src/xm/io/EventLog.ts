@@ -58,7 +58,7 @@ module xm {
 					this.parent.event(id, message, data);
 				}
 				if (this.listeners) {
-					for (var i = 0, ii = this.listeners.length; i < ii;i++) {
+					for (var i = 0, ii = this.listeners.length; i < ii; i++) {
 						this.listeners[i].event(id, message, data);
 					}
 				}

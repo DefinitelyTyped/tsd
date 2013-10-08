@@ -137,7 +137,7 @@ describe('xm.KeyValueMap', () => {
 				assert.lengthOf(map.keys(), 0, 'null import');
 
 				map = new xm.KeyValueMap<string>();
-				map.import(<any>[1,2,3]);
+				map.import(<any>[1, 2, 3]);
 				assert.lengthOf(map.keys(), 0, 'array import');
 			});
 			it('constructor param', () => {

@@ -3,6 +3,13 @@
 // Definitions by: Barrie Nemetchek
 // Definitions: https://github.com/borisyankov/DefinitelyTyped  
 
+
+
+//          note these are old TS 0.8 defs : need t be swapped for TS 0.9 generic ones.
+
+
+
+
 interface Qdeferred {
 	promise: Qpromise;
 	resolve(value: any): any;
