@@ -2,7 +2,12 @@
 
 > Big list of things that should/could be done.
 
-See the [INFO.md](INFO.md) for project info and the [README.md](../README.md) for usage and installation.
+See also:
+
+* Main [readme](../README.md)
+* Project [scope](SCOPE.md)
+* Some extra [info](INFO.md)
+* More about [code](CODE.md)
 
 ## Issues
 
@@ -10,7 +15,7 @@ This info might later migrate to the Github Issue tracker.
 
 ## Update docs
 
-Always text to edit in the README or docs.
+Always text to edit in the README or ./docs.
 
 ## Local changes
 
@@ -18,7 +23,7 @@ Browse the code in `/src` and `/test` for `//TODO` comments,
 
 Or use `$ grunt todos` for an overview. :point_left::+1:
 
-Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Note: some are more important then others (but which ones? :smiley_cat:)
+Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Some are more important then others (but which ones? :smiley_cat:)
 
 ## Tests
 
@@ -71,6 +76,7 @@ Browser commands
 
 UIX commands
 
+* :o:	Add auto/scan command (suggest appropriate definitions from package.json/bower.json) (@seanhess: see [codeplex](https://typescript.codeplex.com/discussions/461449) and [TPM](https://github.com/seanhess/TPM))
 * :id:	Consider adding reference/bundle command to generate typing collections (save in config)
 
 Cache commands
@@ -88,16 +94,16 @@ Selector
 
 Command options
 
-* :a:   List / design options and unify the names (both for CLI as API)
+* :a:   Plan options and unify the names (both for CLI as API)
 * :b:	Add option for file overwrite (always on now)
 * :x:	Add a compact vs detailed option (for search listings or history)
-* :x:	Add option for dependency install (always on now)
+* :ab:	Add option for dependency install (always on now)
 * :x:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :o:	.... more
 
 Functionality
 
-* :o2: Handle rate-limit properly
+* :o2:	Handle rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * :id:	Add fancy promise progress events + cli display (install etc)
 
@@ -113,7 +119,7 @@ API
 
 * :o:	Export API docs during build :zap:
 * :o:	Export TypeScript definitions :zap:
-* :id:	Consider optimising or wrapping JavaScript API (less OO-ish)
+* :id:	Consider optimising or wrapping the JavaScript API (less OO-ish)
 * :id:	Add options to authenticate to github API for higher rate-limit
 
 Data model/repo
@@ -154,21 +160,22 @@ Internals
 * :vs:	Consider adding timeouts
 * :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :o:	Consider global store for JSON pointers and RegExps etc
+* :cl:	Clean up usage of module name within same module (eg: `tsd.Def` is not needed in other code inside the `tsd` module (could be a remnant of old TS 0.8 or a old WebStorm 6 glitch fix).
+* :o:	Add xm interface for debug/log/event tracking
+* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
 
 Technical
 
-* :a:	Move to TS 0.9 generics definition of Q promises
+* :a:	Move to TS 0.9 generics definition of Q promises (in progress)
 * :o2:	Expand property / const immutability: Object.freeze()
 * :o2:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
-* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
-* :o:	Add xm interface for debug/log/event tracking
 * :cl:	Change some utils from static class members to module functions
 
 Cleanup
 
-* :cl:	Sweep and enable tslint.json rules
-* :cl:	Clean `package.json`: fix some ~tildes before release, dev vs runtime, npm prune 
-* :cl:	Sweep used modules: require() and `package.json`
+* :cl:	Sweep and enable `tslint.json` rules
+* :cl:	Clean `package.json`: fix some ~tildes before release
+* :cl:	Sweep used modules: require() and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
 * :m:	Verify "use strict" (needed in node?)
@@ -188,7 +195,7 @@ Publishing
 Dependencies
 
 * :id:	Consider dropping underscore?
-* :x:	Update Q with generics
+* :a:	Update Q with generics
 * :o:	Sweep recent xm `package changes for new tests 
 
 Bugs:
@@ -199,7 +206,7 @@ Bugs:
 
 More.. always more :rocket:
 
-## Emoji Project Management 
+## Emoji based Project Management 
 
 Status indicators:
 
