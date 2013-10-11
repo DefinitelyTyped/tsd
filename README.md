@@ -164,6 +164,7 @@ Contributions will be welcome once the application architecture stabilises a bit
 ### v0.5.0 (2013-08)
 
 * Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+* Moved to the DefinitelyTyped organisation
 
 ## License
 
