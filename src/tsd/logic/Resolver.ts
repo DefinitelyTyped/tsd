@@ -7,7 +7,8 @@
 module tsd {
 	'use strict';
 
-	var Q:QStatic = require('q');
+	var Q:typeof Q = require('q');
+
 	var leadingExp = /^\.\.\//;
 
 	/*
@@ -18,7 +19,7 @@ module tsd {
 	export class Resolver {
 
 		private _core:Core;
-		private _active:xm.KeyValueMap<Qpromise> = new xm.KeyValueMap();
+		private _active:xm.KeyValueMap<Q.Promise<DefVersion>> = new xm.KeyValueMap();
 
 		stats:xm.StatCounter = new xm.StatCounter();
 
@@ -32,34 +33,60 @@ module tsd {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		resolveBulk(list:tsd.DefVersion[]):Qpromise {
+		resolveBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
+			var d:Q.Deferred<DefVersion[]> = Q.defer();
+			this.stats.count('solve-bulk-start');
+
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
-			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.resolve(file);
-			})).thenResolve(list);
+			Q.all(list.map((file:tsd.DefVersion) => {
+				return this.resolveDeps(file);
+			})).then(() => {
+				this.stats.count('solve-bulk-success');
+				d.resolve(list);
+			}, (err) => {
+				this.stats.count('solve-bulk-error');
+				d.reject(err);
+			});
+
+			return d.promise;
 		}
 
-		resolve(file:tsd.DefVersion):Qpromise {
+		resolveDeps(file:tsd.DefVersion):Q.Promise<DefVersion> {
+			var d:Q.Deferred<DefVersion> = Q.defer();
+
 			// easy bail
+			//TODO verifiy some more (file.dependencies.length etc)
 			if (file.solved) {
-				this.stats.count('solved-early');
-				return Q(file);
+				this.stats.count('solved-already');
+				d.resolve(file);
+				return d.promise;
 			}
 
 			//handle race conditions
 			if (this._active.has(file.key)) {
 				this.stats.count('active-has');
 				//return running promise
-				return this._active.get(file.key);
+				this._active.get(file.key).done(() => {
+					d.resolve(file);
+				}, d.reject);
+				return d.promise;
 			}
 			else {
 				this.stats.count('active-miss');
 			}
 			// it is not solved and not in the active list so lets load it
 
+			var cleanup = () => {
+				//remove solved promise
+				xm.log.debug('cleanup!');
+				this._active.remove(file.key);
+				this.stats.count('active-remove');
+			};
+
 			//keep the promise for storage
-			var promise:Qpromise = this._core.loadContent(file).then((file:tsd.DefVersion):Qpromise => {
+			//TODO refactor this for readability
+			this._core.loadContent(file).then((file:tsd.DefVersion) => {
 				this.stats.count('file-parse');
 
 				//force empty for robustness
@@ -85,7 +112,7 @@ module tsd {
 				}, []);
 
 				//store to solve and collect promises for unsolved references
-				var queued = <Qpromise[]>refs.reduce((memo:any[], refPath) => {
+				var queued:Q.Promise<DefVersion>[] = refs.reduce((memo:any[], refPath:string) => {
 					if (this._core.index.hasDef(refPath)) {
 						//use .head (could use same commit but that would be version hell with interdependent definitions)
 						var dep:Def = this._core.index.getDef(refPath);
@@ -99,7 +126,7 @@ module tsd {
 							//xm.log('recurse ' + dep.toString());
 
 							//lets go deeper
-							memo.push(this.resolve(dep.head));
+							memo.push(this.resolveDeps(dep.head));
 						}
 					}
 					else {
@@ -112,23 +139,26 @@ module tsd {
 				//keep
 				file.solved = true;
 
-				//remove solved promise
-				this._active.remove(file.key);
-				this.stats.count('active-remove');
-
 				if (queued.length > 0) {
 					this.stats.count('subload-start');
 					return Q.all(queued);
 				}
-				return Q(file);
-
-			}).thenResolve(file);
+				else {
+					this.stats.count('subload-none');
+				}
+			}).then(() => {
+				cleanup();
+				d.resolve(file);
+			}, (err) => {
+				cleanup();
+				d.reject(err);
+			});
 
 			//store promise while it is running
 			this.stats.count('active-set');
-			this._active.set(file.key, promise);
+			this._active.set(file.key, d.promise);
 
-			return promise;
+			return d.promise;
 		}
 	}
 }

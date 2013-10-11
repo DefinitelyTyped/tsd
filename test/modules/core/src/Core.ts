@@ -43,7 +43,7 @@ describe('Core', () => {
 
 	describe('readConfig', () => {
 
-		function testConfig(path:string):Qpromise {
+		function testConfig(path:string):Q.Promise<void> {
 			context.paths.configFile = path;
 			var source = xm.FileUtil.readJSONSync(path);
 
@@ -53,11 +53,12 @@ describe('Core', () => {
 			});
 		}
 
-		function testInvalidConfig(path:string, exp:RegExp):Qpromise {
+		function testInvalidConfig(path:string, exp:RegExp):Q.Promise<void> {
 			context.paths.configFile = path;
 			core = getCore(context);
 			return assert.isRejected(core.readConfig(false), exp);
 		}
+
 		it('should load minimal config data', () => {
 			return testConfig('./test/fixtures/config/default.json');
 		});
@@ -114,12 +115,12 @@ describe('Core', () => {
 		});
 	});
 
-	describe('getIndex', () => {
+	describe('updateIndex', () => {
 		it('should return data', () => {
 			core = getCore(context);
 			//core.debug = true;
 
-			return core.getIndex().then(() => {
+			return core.updateIndex().then(() => {
 				helper.assertUpdateStat(core.gitAPI.loader, 'core');
 
 				assert.isTrue(core.index.hasIndex(), 'index.hasIndex');

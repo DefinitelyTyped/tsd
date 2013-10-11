@@ -9,7 +9,7 @@ describe('API', () => {
 
 	var fs = require('fs');
 	var path = require('path');
-	var FS:Qfs = require('q-io/fs');
+	var FS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 
 	var api:tsd.API;
@@ -84,6 +84,7 @@ describe('API', () => {
 
 				return api.search(selector).then((result:tsd.APIResult) => {
 					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
+					assert.instanceOf(result, tsd.APIResult, 'result');
 
 					xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
 
@@ -108,6 +109,7 @@ describe('API', () => {
 				return api.install(selector).then((result:tsd.APIResult) => {
 					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
 					helper.assertUpdateStat(api.core.gitRaw.loader, 'raw');
+					assert.instanceOf(result, tsd.APIResult, 'result');
 
 					xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
 

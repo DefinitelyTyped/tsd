@@ -229,7 +229,9 @@ var xm;
         if (typeof testWritable === "undefined") { testWritable = false; }
         dir = path.resolve(dir);
 
-        return FS.exists(dir).then(function (exists) {
+        var d = Q.defer();
+
+        FS.exists(dir).then(function (exists) {
             if (exists) {
                 return FS.isDirectory(dir).then(function (isDir) {
                     if (!isDir) {
@@ -240,11 +242,12 @@ var xm;
                     }
                     return null;
                 });
+            } else {
+                if (writable) {
+                    return Q.nfcall(mkdirp, dir, '744');
+                }
+                return Q.nfcall(mkdirp, dir);
             }
-            if (writable) {
-                return Q.nfcall(mkdirp, dir, '744');
-            }
-            return Q.nfcall(mkdirp, dir);
         }).then(function () {
             if (testWritable) {
                 var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
@@ -255,8 +258,10 @@ var xm;
                     throw new Error('no write access to: ' + dir + ' -> ' + err);
                 });
             }
-            return null;
-        }).thenResolve(dir);
+        }).then(function () {
+            d.resolve(dir);
+        });
+        return d.promise;
     }
     xm.mkdirCheckQ = mkdirCheckQ;
 })(xm || (xm = {}));
@@ -324,10 +329,16 @@ var xm;
         FileUtil.writeJSONSync = writeJSONSync;
 
         function writeJSONPromise(dest, data) {
+            var d = Q.defer();
+
             dest = path.resolve(dest);
-            return xm.mkdirCheckQ(path.dirname(dest), true).then(function () {
+            xm.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
                 return FS.write(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
-            });
+            }).then(function () {
+                d.resolve(null);
+            }, d.reject);
+
+            return d.promise;
         }
         FileUtil.writeJSONPromise = writeJSONPromise;
     })(xm.FileUtil || (xm.FileUtil = {}));
@@ -2037,9 +2048,8 @@ var xm;
     'use strict';
 
     var Q = require('q');
-    var fs = require('fs');
-    var path = require('path');
     var FS = require('q-io/fs');
+    var path = require('path');
 
     var CachedJSONStore = (function () {
         function CachedJSONStore(storeFolder) {
@@ -2057,9 +2067,11 @@ var xm;
         }
         CachedJSONStore.prototype.init = function () {
             var _this = this;
+            var defer = Q.defer();
+
             this.stats.count('init');
 
-            return FS.exists(this._dir).then(function (exists) {
+            FS.exists(this._dir).then(function (exists) {
                 if (!exists) {
                     _this.stats.count('init-dir-create', _this._dir);
                     return xm.mkdirCheckQ(_this._dir, true);
@@ -2069,24 +2081,28 @@ var xm;
                     if (isDir) {
                         _this.stats.count('init-dir-exists', _this._dir);
                         return null;
-                    } else {
-                        _this.stats.count('init-dir-error', _this._dir);
-                        throw new Error('is not a directory: ' + _this._dir);
                     }
+                    _this.stats.count('init-dir-error', _this._dir);
+                    throw new Error('is not a directory: ' + _this._dir);
                 });
-            }).fail(function (err) {
+            }).then(function () {
+                defer.resolve(null);
+            }, function (err) {
                 _this.stats.count('init-error');
-                throw err;
+                defer.reject(err);
             });
+
+            return defer.promise;
         };
 
         CachedJSONStore.prototype.getValue = function (key) {
             var _this = this;
-            var src = path.join(this._dir, xm.CachedJSONValue.getHash(key) + '.json');
+            var defer = Q.defer();
 
+            var src = path.join(this._dir, xm.CachedJSONValue.getHash(key) + '.json');
             this.stats.count('get');
 
-            return this.init().then(function () {
+            this.init().then(function () {
                 return FS.exists(src);
             }).then(function (exists) {
                 if (exists) {
@@ -2101,24 +2117,28 @@ var xm;
                             throw (new Error(e + ' -> ' + src));
                         }
                         _this.stats.count('get-read-success');
-                        return cached;
+                        defer.resolve(cached);
                     });
                 }
                 _this.stats.count('get-miss');
-                return null;
+                defer.resolve(null);
             }).fail(function (err) {
                 _this.stats.count('get-error');
-                throw err;
+                defer.reject(err);
             });
+
+            return defer.promise;
         };
 
         CachedJSONStore.prototype.storeValue = function (res) {
             var _this = this;
+            var defer = Q.defer();
+
             var dest = path.join(this._dir, res.getKeyHash() + '.json');
 
             this.stats.count('store');
 
-            return this.init().then(function () {
+            this.init().then(function () {
                 return FS.exists(dest);
             }).then(function (exists) {
                 if (exists) {
@@ -2133,11 +2153,13 @@ var xm;
                 return FS.write(dest, data);
             }).then(function () {
                 _this.stats.count('store-write-success');
-                return res;
+                defer.resolve(res);
             }, function (err) {
                 _this.stats.count('store-write-error');
-                throw err;
+                defer.reject(err);
             });
+
+            return defer.promise;
         };
         return CachedJSONStore;
     })();
@@ -2183,6 +2205,8 @@ var xm;
 
         CachedLoader.prototype.doCachedCall = function (label, keyTerms, opts, cachedCall) {
             var _this = this;
+            var d = Q.defer();
+
             var key = xm.isString(keyTerms) ? keyTerms : this.getKey(label, keyTerms);
 
             opts = _.defaults(opts || {}, this._options);
@@ -2197,14 +2221,16 @@ var xm;
             if (this._active.has(key)) {
                 this.stats.count('active-hit', label);
 
-                return this._active.get(key).then(function (content) {
+                this._active.get(key).then(function (content) {
                     _this.stats.count('active-resolve', label);
-                    return content;
+                    d.resolve(content);
                 }, function (err) {
                     _this.stats.count('active-error', label);
 
-                    throw err;
+                    d.reject(err);
                 });
+
+                return d.promise;
             }
 
             var cleanup = function () {
@@ -2212,7 +2238,7 @@ var xm;
                 _this._active.remove(key);
             };
 
-            var promise = this.cacheRead(opts, label, key).then(function (res) {
+            this.cacheRead(opts, label, key).then(function (res) {
                 if (!xm.isNull(res) && !xm.isUndefined(res)) {
                     _this.stats.count('cache-hit', label);
                     return res;
@@ -2227,77 +2253,90 @@ var xm;
             }).then(function (res) {
                 cleanup();
                 _this.stats.count('complete', label);
-                return res;
+                d.resolve(res);
             }, function (err) {
                 cleanup();
                 _this.stats.count('error', label);
                 xm.log.error(err);
 
-                throw (err);
+                d.reject(err);
             });
 
             this.stats.count('active-set', label);
-            this._active.set(key, promise);
-            return promise;
+            this._active.set(key, d.promise);
+
+            return d.promise;
         };
 
         CachedLoader.prototype.cacheRead = function (opts, label, key) {
             var _this = this;
+            var d = Q.defer();
+
             if (opts.cacheRead) {
                 this.stats.count('read-start', label);
-                return this._service.getValue(key).then(function (res) {
+                this._service.getValue(key).then(function (res) {
                     if (xm.isNull(res) || xm.isUndefined(res)) {
                         _this.stats.count('read-miss', label);
 
-                        return null;
+                        d.resolve(null);
                     } else {
                         _this.stats.count('read-hit', label);
-                        return res;
+                        d.resolve(res);
                     }
                 }, function (err) {
                     _this.stats.count('read-error', label);
                     xm.log.error(err);
-                    throw (err);
+                    d.reject(err);
                 });
+            } else {
+                this.stats.count('read-skip', label);
+                d.resolve(null);
             }
-            this.stats.count('read-skip', label);
-            return Q(null);
+            return d.promise;
         };
 
         CachedLoader.prototype.callLoad = function (opts, label, cachedCall) {
             var _this = this;
+            var d = Q.defer();
+
             if (opts.remoteRead) {
                 this.stats.count('load-start', label);
 
-                return Q(cachedCall()).then(function (res) {
+                Q(cachedCall()).then(function (res) {
                     _this.stats.count('load-success', label);
-                    return res;
+                    d.resolve(res);
                 }, function (err) {
                     _this.stats.count('load-error', label);
                     xm.log.error(err);
-                    throw (err);
+                    d.reject(err);
                 });
+            } else {
+                this.stats.count('load-skip', label);
+                d.resolve(null);
             }
-            this.stats.count('load-skip', label);
-            return Q(null);
+            return d.promise;
         };
 
         CachedLoader.prototype.cacheWrite = function (opts, label, key, value) {
             var _this = this;
+            var d = Q.defer();
+
             if (opts.cacheWrite) {
                 this.stats.count('write-start', label);
 
-                return this._service.writeValue(key, label, value).then(function (info) {
+                this._service.writeValue(key, label, value).then(function (info) {
                     _this.stats.count('write-success', label);
-                    return value;
+                    d.resolve(value);
                 }, function (err) {
                     _this.stats.count('write-error', label);
                     xm.log.error(err);
-                    throw (err);
+                    d.reject(err);
                 });
+            } else {
+                this.stats.count('write-skip', label);
+                d.resolve(null);
             }
-            this.stats.count('write-skip', label);
-            return Q(value);
+            return d.promise;
         };
 
         Object.defineProperty(CachedLoader.prototype, "options", {
@@ -2710,37 +2749,48 @@ var xm;
             Object.defineProperty(this, '_extension', { writable: false, enumerable: false });
         }
         CachedFileService.prototype.getValue = function (file, opts) {
+            var d = Q.defer();
+
             var storeFile = path.join(this.dir, file + this._extension);
 
-            return FS.exists(storeFile).then(function (exists) {
+            FS.exists(storeFile).then(function (exists) {
                 if (exists) {
                     return FS.isFile(storeFile).then(function (isFile) {
                         if (!isFile) {
                             throw (new Error('path exists but is not a file: ' + storeFile));
                         }
 
-                        return FS.read(storeFile, { flags: 'rb' });
+                        return FS.read(storeFile, { flags: 'rb' }).then(d.resolve);
                     });
                 }
-                return null;
+                d.resolve(null);
+            }).fail(function (err) {
+                xm.log.error('CachedFileService.writeValue: failure');
+                d.reject(err);
             });
+
+            return d.promise;
         };
 
         CachedFileService.prototype.writeValue = function (file, label, value, opts) {
+            var d = Q.defer();
+
             var storeFile = path.join(this.dir, file + this._extension);
 
-            return xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
+            xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
                 return FS.write(storeFile, value, { flags: 'wb' });
             }).then(function () {
-                return value;
+                d.resolve(value);
             }, function (err) {
                 xm.log.error('CachedFileService.writeValue: failure');
-                throw (err);
+                d.reject(err);
             });
+
+            return d.promise;
         };
 
         CachedFileService.prototype.getKeys = function (opts) {
-            return Q([]);
+            return Q.resolve([]);
         };
         return CachedFileService;
     })();
@@ -2765,7 +2815,6 @@ var git;
             };
             xm.assertVar('repo', repo, git.GithubRepo);
             xm.assertVar('storeFolder', storeFolder, 'string');
-
             this._repo = repo;
 
             var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
@@ -2779,18 +2828,20 @@ var git;
         }
         GithubRawCached.prototype.getFile = function (commitSha, filePath) {
             var _this = this;
+            var d = Q.defer();
+
             this.stats.count('start');
 
             var tmp = filePath.split(/\/|\\\//g);
             tmp.unshift(commitSha);
 
-            var storeFile = (path.join).apply(null, tmp);
+            var storeFile = FS.join(tmp);
 
             if (this._debug) {
                 this.log(storeFile);
             }
 
-            return this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, function () {
+            this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, function () {
                 var req = HTTP.normalizeRequest(_this._repo.urls.rawFile(commitSha, filePath));
                 req.headers = _this.headers;
 
@@ -2812,7 +2863,11 @@ var git;
 
                     return res.body.read();
                 });
-            });
+            }).then(function (value) {
+                d.resolve(value);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Object.defineProperty(GithubRawCached.prototype, "service", {
@@ -3906,6 +3961,7 @@ var tsd;
     'use strict';
 
     var Q = require('q');
+
     var leadingExp = /^\.\.\//;
 
     var Resolver = (function () {
@@ -3922,29 +3978,52 @@ var tsd;
         }
         Resolver.prototype.resolveBulk = function (list) {
             var _this = this;
+            var d = Q.defer();
+            this.stats.count('solve-bulk-start');
+
             list = tsd.DefUtil.uniqueDefVersion(list);
 
-            return Q.all(list.map(function (file) {
-                return _this.resolve(file);
-            })).thenResolve(list);
+            Q.all(list.map(function (file) {
+                return _this.resolveDeps(file);
+            })).then(function () {
+                _this.stats.count('solve-bulk-success');
+                d.resolve(list);
+            }, function (err) {
+                _this.stats.count('solve-bulk-error');
+                d.reject(err);
+            });
+
+            return d.promise;
         };
 
-        Resolver.prototype.resolve = function (file) {
+        Resolver.prototype.resolveDeps = function (file) {
             var _this = this;
+            var d = Q.defer();
+
             if (file.solved) {
-                this.stats.count('solved-early');
-                return Q(file);
+                this.stats.count('solved-already');
+                d.resolve(file);
+                return d.promise;
             }
 
             if (this._active.has(file.key)) {
                 this.stats.count('active-has');
 
-                return this._active.get(file.key);
+                this._active.get(file.key).done(function () {
+                    d.resolve(file);
+                }, d.reject);
+                return d.promise;
             } else {
                 this.stats.count('active-miss');
             }
 
-            var promise = this._core.loadContent(file).then(function (file) {
+            var cleanup = function () {
+                xm.log.debug('cleanup!');
+                _this._active.remove(file.key);
+                _this.stats.count('active-remove');
+            };
+
+            this._core.loadContent(file).then(function (file) {
                 _this.stats.count('file-parse');
 
                 file.dependencies.splice(0, file.dependencies.length);
@@ -3974,7 +4053,7 @@ var tsd;
                         if (!dep.head.solved && !_this._active.has(dep.head.key)) {
                             _this.stats.count('dep-recurse');
 
-                            memo.push(_this.resolve(dep.head));
+                            memo.push(_this.resolveDeps(dep.head));
                         }
                     } else {
                         xm.log.warn('path reference not in index: ' + refPath);
@@ -3984,20 +4063,24 @@ var tsd;
 
                 file.solved = true;
 
-                _this._active.remove(file.key);
-                _this.stats.count('active-remove');
-
                 if (queued.length > 0) {
                     _this.stats.count('subload-start');
                     return Q.all(queued);
+                } else {
+                    _this.stats.count('subload-none');
                 }
-                return Q(file);
-            }).thenResolve(file);
+            }).then(function () {
+                cleanup();
+                d.resolve(file);
+            }, function (err) {
+                cleanup();
+                d.reject(err);
+            });
 
             this.stats.count('active-set');
-            this._active.set(file.key, promise);
+            this._active.set(file.key, d.promise);
 
-            return promise;
+            return d.promise;
         };
         return Resolver;
     })();
@@ -4040,18 +4123,22 @@ var tsd;
 
             xm.ObjectUtil.hidePrefixed(this);
         }
-        Core.prototype.getIndex = function () {
+        Core.prototype.updateIndex = function () {
             var _this = this;
+            var d = Q.defer();
+
             this.stats.count('index-start');
             if (this.index.hasIndex()) {
                 this.stats.count('index-hit');
-                return Q(this.index);
+
+                d.resolve(null);
+                return d.promise;
             }
             this.stats.count('index-miss');
 
             this.stats.count('index-branch-get');
 
-            return this.gitAPI.getBranch(this.context.config.ref).then(function (branchData) {
+            this.gitAPI.getBranch(this.context.config.ref).then(function (branchData) {
                 var sha = pointer.get(branchData, branch_tree);
                 if (!sha) {
                     _this.stats.count('index-branch-get-fail');
@@ -4062,168 +4149,228 @@ var tsd;
 
                 return _this.gitAPI.getTree(sha, true).then(function (data) {
                     _this.stats.count('index-tree-get-success');
+
                     _this.index.init(branchData, data);
 
-                    return _this.index;
+                    d.resolve(null);
                 }, function (err) {
                     _this.stats.count('index-tree-get-error');
-                    throw err;
+                    d.reject(err);
                 });
-            }, function (err) {
+            }).fail(function (err) {
                 _this.stats.count('index-branch-get-error');
-                throw err;
+                d.reject(err);
             });
+
+            return d.promise;
         };
 
         Core.prototype.select = function (selector) {
             var _this = this;
-            var result = new tsd.APIResult(this.index, selector);
+            var d = Q.defer();
 
-            return this.getIndex().then(function () {
-                result.nameMatches = selector.pattern.filter(_this.index.list);
+            var res = new tsd.APIResult(this.index, selector);
 
-                result.selection = tsd.DefUtil.getHeads(result.nameMatches);
+            this.updateIndex().then(function () {
+                res.nameMatches = selector.pattern.filter(_this.index.list);
+
+                res.selection = tsd.DefUtil.getHeads(res.nameMatches);
 
                 if (selector.resolveDependencies) {
-                    return _this.resolveDepencendiesBulk(result.selection);
+                    return _this.resolveDepencendiesBulk(res.selection);
                 }
-                return null;
-            }).thenResolve(result);
+            }).then(function () {
+                d.resolve(res);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.procureDef = function (path) {
             var _this = this;
-            return this.getIndex().then(function () {
+            var d = Q.defer();
+
+            this.updateIndex().then(function () {
                 var def = _this.index.procureDef(path);
                 if (!def) {
-                    throw new Error('cannot get def for path: ' + path);
+                    d.reject('cannot get def for path: ' + path);
+                    return;
                 }
-                return Q(def);
-            });
+                d.resolve(def);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.procureFile = function (path, commitSha) {
             var _this = this;
-            return this.getIndex().then(function () {
+            var d = Q.defer();
+
+            this.updateIndex().then(function () {
                 var file = _this.index.procureVersionFromSha(path, commitSha);
                 if (!file) {
-                    throw new Error('cannot get file for path: ' + path);
+                    d.reject('cannot get file for path: ' + path);
+                    return;
                 }
-                return Q(file);
-            });
+                d.resolve(file);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.procureCommit = function (commitSha) {
             var _this = this;
-            return this.getIndex().then(function () {
+            var d = Q.defer();
+
+            this.updateIndex().then(function () {
                 var commit = _this.index.procureCommit(commitSha);
                 if (!commit) {
-                    throw new Error('cannot commit def for commitSha: ' + path);
+                    d.reject('cannot commit def for commitSha: ' + path);
+                    return;
                 }
-                return Q(commit);
-            });
+                d.resolve(commit);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.findFile = function (path, commitShaFragment) {
-            return Q.reject('implement me!');
+            var d = Q.defer();
+
+            d.reject('implement me!');
+            return d.promise;
         };
 
         Core.prototype.installFile = function (file, addToConfig) {
             if (typeof addToConfig === "undefined") { addToConfig = true; }
             var _this = this;
-            return this.useFile(file).then(function (file) {
+            var d = Q.defer();
+
+            this.useFile(file).then(function (targetPath) {
                 if (_this.context.config.hasFile(file.def.path)) {
                     _this.context.config.getFile(file.def.path).update(file);
                 } else if (addToConfig) {
                     _this.context.config.addFile(file);
                 }
-                return file;
-            });
+                d.resolve(targetPath);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.installFileBulk = function (list, addToConfig) {
             if (typeof addToConfig === "undefined") { addToConfig = true; }
             var _this = this;
+            var d = Q.defer();
+
             var written = new xm.KeyValueMap();
 
-            return Q.all(list.map(function (file) {
-                return _this.installFile(file, addToConfig).then(function (file) {
+            Q.all(list.map(function (file) {
+                return _this.installFile(file, addToConfig).then(function (targetPath) {
                     written.set(file.def.path, file);
                 });
-            })).thenResolve(written);
+            })).then(function () {
+                d.resolve(written);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.readConfig = function (optional) {
             if (typeof optional === "undefined") { optional = false; }
             var _this = this;
-            return FS.exists(this.context.paths.configFile).then(function (exists) {
+            var d = Q.defer();
+
+            FS.exists(this.context.paths.configFile).then(function (exists) {
                 if (!exists) {
                     if (!optional) {
-                        throw new Error('cannot locate file: ' + _this.context.paths.configFile);
+                        d.reject(new Error('cannot locate file: ' + _this.context.paths.configFile));
+                    } else {
+                        d.resolve(null);
                     }
-                    return null;
+                } else {
+                    return xm.FileUtil.readJSONPromise(_this.context.paths.configFile).then(function (json) {
+                        _this.context.config.parseJSON(json);
+                        d.resolve(null);
+                    });
                 }
-                return xm.FileUtil.readJSONPromise(_this.context.paths.configFile).then(function (json) {
-                    _this.context.config.parseJSON(json);
-                    return null;
-                });
-            });
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.saveConfig = function () {
-            var file = this.context.paths.configFile;
+            var d = Q.defer();
+
+            var target = this.context.paths.configFile;
             var json = JSON.stringify(this.context.config.toJSON(), null, 2);
-            var dir = path.dirname(file);
+            var dir = path.dirname(target);
 
             if (!json || json.length === 0) {
                 return Q.reject(new Error('saveConfig retrieved empty json'));
             }
 
-            return xm.mkdirCheckQ(dir, true).then(function () {
-                return FS.write(file, json).then(function () {
-                    return FS.stat(file);
+            xm.mkdirCheckQ(dir, true).then(function () {
+                return FS.write(target, json).then(function () {
+                    return FS.stat(target);
                 }).then(function () {
                     return Q.delay(100);
                 }).then(function () {
-                    return FS.stat(file).then(function (stat) {
+                    return FS.stat(target).then(function (stat) {
                         if (stat.size === 0) {
-                            throw new Error('saveConfig write zero bytes to: ' + file);
+                            throw new Error('saveConfig write zero bytes to: ' + target);
                         }
                     });
                 });
-            }).thenResolve(file);
+            }).then(function () {
+                d.resolve(target);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.reinstallBulk = function (list) {
             var _this = this;
+            var d = Q.defer();
+
             var written = new xm.KeyValueMap();
 
-            return Q.all(list.map(function (installed) {
+            Q.all(list.map(function (installed) {
                 return _this.procureFile(installed.path, installed.commitSha).then(function (file) {
                     return _this.installFile(file, true).then(function (targetPath) {
-                        written.set(targetPath, file);
+                        written.set(file.def.path, file);
                         return file;
                     });
                 });
-            })).thenResolve(written);
+            })).then(function () {
+                d.resolve(written);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.loadCommitMetaData = function (commit) {
+            var d = Q.defer();
+
             if (commit.hasMetaData()) {
                 return Q(commit);
             }
-            return this.gitAPI.getCommit(commit.commitSha).then(function (json) {
+            this.gitAPI.getCommit(commit.commitSha).then(function (json) {
                 commit.parseJSON(json);
-                return commit;
-            });
+                d.resolve(commit);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.loadContent = function (file) {
             var _this = this;
+            var d = Q.defer();
+
             if (file.hasContent()) {
                 return Q(file);
             }
-            return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then(function (content) {
+            this.gitRaw.getFile(file.commit.commitSha, file.def.path).then(function (content) {
                 if (file.blob) {
                     if (!file.blob.hasContent()) {
                         try  {
@@ -4241,39 +4388,58 @@ var tsd;
                 } else {
                     file.setContent(_this.index.procureBlobFor(content));
                 }
-                return file;
-            });
+                d.resolve(file);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.loadContentBulk = function (list) {
             var _this = this;
-            return Q.all(list.map(function (file) {
+            var d = Q.defer();
+
+            Q.all(list.map(function (file) {
                 return _this.loadContent(file);
-            })).thenResolve(list);
+            })).then(function (list) {
+                d.resolve(list);
+            }, d.reject);
+
+            return d.promise;
         };
 
-        Core.prototype.loadHistory = function (file) {
+        Core.prototype.loadHistory = function (def) {
             var _this = this;
-            if (file.history.length > 0) {
-                return Q(file);
+            var d = Q.defer();
+
+            if (def.history.length > 0) {
+                return Q(def);
             }
-            return this.gitAPI.getPathCommits(this.context.config.ref, file.path).then(function (content) {
-                _this.index.setHistory(file, content);
-                return file;
-            });
+            this.gitAPI.getPathCommits(this.context.config.ref, def.path).then(function (content) {
+                _this.index.setHistory(def, content);
+
+                d.resolve(def);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.loadHistoryBulk = function (list) {
             var _this = this;
+            var d = Q.defer();
+
             list = tsd.DefUtil.uniqueDefs(list);
 
-            return Q.all(list.map(function (file) {
+            Q.all(list.map(function (file) {
                 return _this.loadHistory(file);
-            })).thenResolve(list);
+            })).then(function (list) {
+                d.resolve(list);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.resolveDepencendies = function (file) {
-            return this.resolver.resolve(file);
+            return this.resolver.resolveDeps(file);
         };
 
         Core.prototype.resolveDepencendiesBulk = function (list) {
@@ -4282,7 +4448,9 @@ var tsd;
 
         Core.prototype.parseDefInfo = function (file) {
             var _this = this;
-            return this.loadContent(file).then(function (file) {
+            var d = Q.defer();
+
+            this.loadContent(file).then(function (file) {
                 var parser = new tsd.DefInfoParser(_this.context.verbose);
                 if (file.info) {
                     file.info.resetFields();
@@ -4295,26 +4463,36 @@ var tsd;
                 if (!file.info.isValid()) {
                     _this.log.warn('bad parse in: ' + file);
                 }
-                return file;
-            });
+                d.resolve(file);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.parseDefInfoBulk = function (list) {
             var _this = this;
+            var d = Q.defer();
+
             list = tsd.DefUtil.uniqueDefVersion(list);
 
-            return Q.all(list.map(function (file) {
+            Q.all(list.map(function (file) {
                 return _this.parseDefInfo(file);
-            })).thenResolve(list);
+            })).then(function (list) {
+                d.resolve(list);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.useFile = function (file, overwrite) {
             if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
+            var d = Q.defer();
+
             var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
             var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
 
-            return FS.exists(targetPath).then(function (exists) {
+            FS.exists(targetPath).then(function (exists) {
                 if (exists && !overwrite) {
                     return null;
                 }
@@ -4328,24 +4506,32 @@ var tsd;
                     return xm.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
-                }).then(function () {
-                    return file;
                 });
-            });
+            }).then(function () {
+                d.resolve(targetPath);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Core.prototype.useFileBulk = function (list, overwrite) {
             if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
+            var d = Q.defer();
+
             list = tsd.DefUtil.uniqueDefVersion(list);
 
             var written = new xm.KeyValueMap();
 
-            return Q.all(list.map(function (file) {
-                return _this.useFile(file, overwrite).then(function (file) {
+            Q.all(list.map(function (file) {
+                return _this.useFile(file, overwrite).then(function (targetPath) {
                     written.set(file.def.path, file);
                 });
-            })).thenResolve(written);
+            })).then(function () {
+                d.resolve(written);
+            }, d.reject);
+
+            return d.promise;
         };
 
         Object.defineProperty(Core.prototype, "debug", {
@@ -4400,26 +4586,42 @@ var tsd;
             xm.ObjectUtil.hidePrefixed(this);
         }
         API.prototype.readConfig = function (optional) {
-            return this._core.readConfig(optional).thenResolve(null);
+            var d = Q.defer();
+
+            this._core.readConfig(optional).then(function () {
+                d.resolve(undefined);
+            }, d.reject);
+
+            return d.promise;
         };
 
         API.prototype.saveConfig = function () {
-            return this._core.saveConfig().thenResolve(null);
+            var d = Q.defer();
+
+            this._core.saveConfig().then(function () {
+                d.resolve(null);
+            }, d.reject);
+
+            return d.promise;
         };
 
         API.prototype.search = function (selector) {
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
 
-            return this._core.select(selector);
+            this._core.select(selector).then(d.resolve, d.reject);
+
+            return d.promise;
         };
 
         API.prototype.install = function (selector) {
             var _this = this;
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
 
             selector.resolveDependencies = true;
 
-            return this._core.select(selector).then(function (res) {
+            this._core.select(selector).then(function (res) {
                 var files = res.selection;
 
                 files = tsd.DefUtil.mergeDependencies(files);
@@ -4430,92 +4632,128 @@ var tsd;
                     }
                     res.written = written;
 
-                    return _this._core.saveConfig();
-                }).thenResolve(res);
-            });
+                    return _this._core.saveConfig().then(function () {
+                        d.resolve(res);
+                    });
+                });
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.directInstall = function (path, commitSha) {
             var _this = this;
             xm.assertVar('path', path, 'string');
             xm.assertVar('commitSha', commitSha, 'sha1');
+            var d = Q.defer();
 
             var res = new tsd.APIResult(this._core.index, null);
 
-            return this._core.procureFile(path, commitSha).then(function (file) {
+            this._core.procureFile(path, commitSha).then(function (file) {
                 return _this._core.installFile(file).then(function (targetPath) {
                     res.written.set(targetPath, file);
-                    return null;
+                    d.resolve(res);
                 });
-            }).thenResolve(res);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.installFragment = function (path, commitShaFragment) {
             var _this = this;
             xm.assertVar('path', path, 'string');
+            var d = Q.defer();
 
             var res = new tsd.APIResult(this._core.index, null);
 
-            return this._core.findFile(path, commitShaFragment).then(function (file) {
+            this._core.findFile(path, commitShaFragment).then(function (file) {
                 return _this._core.installFile(file).then(function (targetPath) {
                     res.written.set(targetPath, file);
-                    return res;
+                    d.resolve(res);
                 });
-            }).thenResolve(res);
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.info = function (selector) {
             var _this = this;
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
 
-            return this._core.select(selector).then(function (res) {
-                return _this._core.parseDefInfoBulk(res.selection).thenResolve(res);
-            });
+            this._core.select(selector).then(function (res) {
+                return _this._core.parseDefInfoBulk(res.selection).then(function () {
+                    d.resolve(res);
+                });
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.history = function (selector) {
             var _this = this;
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
 
-            return this._core.select(selector).then(function (res) {
+            this._core.select(selector).then(function (res) {
                 res.definitions = tsd.DefUtil.getDefs(res.selection);
 
-                return _this._core.loadHistoryBulk(res.definitions).thenResolve(res);
-            });
+                return _this._core.loadHistoryBulk(res.definitions).then(function () {
+                    d.resolve(res);
+                });
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.deps = function (selector) {
             var _this = this;
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
 
-            return this._core.select(selector).then(function (res) {
-                return _this._core.resolveDepencendiesBulk(res.selection).thenResolve(res);
-            });
+            this._core.select(selector).then(function (res) {
+                return _this._core.resolveDepencendiesBulk(res.selection).then(function () {
+                    d.resolve(res);
+                });
+            }).fail(d.reject);
+
+            return d.promise;
         };
 
         API.prototype.reinstall = function () {
             var res = new tsd.APIResult(this._core.index, null);
+            var d = Q.defer();
 
-            return this._core.reinstallBulk(this.context.config.getInstalled()).then(function (map) {
+            this._core.reinstallBulk(this.context.config.getInstalled()).then(function (map) {
                 res.written = map;
-                return res;
-            }).thenResolve(res);
+            }).then(function () {
+                d.resolve(res);
+            }, d.reject);
+
+            return d.promise;
         };
 
         API.prototype.compare = function (selector) {
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
+            d.reject(new Error('not implemented yet'));
 
-            return Q.reject(new Error('not implemented yet'));
+            return d.promise;
         };
 
         API.prototype.update = function (selector) {
             xm.assertVar('selector', selector, tsd.Selector);
+            var d = Q.defer();
+            d.reject(new Error('not implemented yet'));
 
-            return Q.reject(new Error('not implemented yet'));
+            return d.promise;
         };
 
         API.prototype.purge = function () {
-            return Q.reject(new Error('not implemented yet'));
+            var d = Q.defer();
+            d.reject(new Error('not implemented yet'));
+
+            return d.promise;
         };
 
         Object.defineProperty(API.prototype, "core", {
@@ -4965,7 +5203,7 @@ var tsd;
         return Job;
     })();
 
-    function loadData(args) {
+    function init(args) {
         return Q.nfcall(function (callback) {
             if (!pleonasm) {
                 pleonasm = require('pleonasm');
@@ -4979,7 +5217,9 @@ var tsd;
     }
 
     function getAPIJob(args) {
-        return loadData(args).then(function () {
+        var d = Q.defer();
+
+        init(args).then(function () {
             if (args.config) {
                 return FS.isFile(args.config).then(function (isFile) {
                     if (!isFile) {
@@ -4996,9 +5236,11 @@ var tsd;
 
             var required = (typeof args.config !== undefined ? true : false);
             return job.api.readConfig(required).then(function () {
-                return job;
+                d.resolve(job);
             });
-        });
+        }, d.reject);
+
+        return d.promise;
     }
 
     function getSelectorJob(args) {
@@ -5187,7 +5429,7 @@ var tsd;
             cmd.options = ['config'];
             cmd.groups = ['support'];
             cmd.execute = function (args) {
-                getAPIJob(args).then(function (job) {
+                getAPIJob(args).done(function (job) {
                     job.api.context.logInfo(true);
                 });
             };
@@ -5200,16 +5442,16 @@ var tsd;
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
                 getSelectorJob(args).then(function (job) {
-                    return job.api.search(job.selector);
-                }).done(function (result) {
-                    reportSucces(null);
+                    return job.api.search(job.selector).done(function (result) {
+                        reportSucces(null);
 
-                    result.selection.forEach(function (file) {
-                        printFileHead(file);
-                        printFileInfo(file);
-                        printFileCommit(file);
-                    });
-                }, reportError);
+                        result.selection.forEach(function (file) {
+                            printFileHead(file);
+                            printFileInfo(file);
+                            printFileCommit(file);
+                        });
+                    }, reportError);
+                });
             };
         });
 
@@ -5220,18 +5462,18 @@ var tsd;
             cmd.groups = ['command', 'primary', 'write'];
             cmd.execute = function (args) {
                 getSelectorJob(args).then(function (job) {
-                    return job.api.install(job.selector);
-                }).done(function (result) {
-                    reportSucces(null);
-
-                    xm.log('');
-                    result.written.keys().sort().forEach(function (path) {
-                        var file = result.written.get(path);
-                        xm.log(file.toString());
+                    return job.api.install(job.selector).done(function (result) {
+                        reportSucces(null);
 
                         xm.log('');
-                    });
-                }, reportError);
+                        result.written.keys().sort().forEach(function (path) {
+                            var file = result.written.get(path);
+                            xm.log(file.toString());
+
+                            xm.log('');
+                        });
+                    }, reportError);
+                });
             };
         });
 
@@ -5242,18 +5484,18 @@ var tsd;
             cmd.groups = ['command', 'primary', 'write'];
             cmd.execute = function (args) {
                 getAPIJob(args).then(function (job) {
-                    return job.api.reinstall();
-                }).done(function (result) {
-                    reportSucces(null);
-
-                    xm.log('');
-                    result.written.keys().sort().forEach(function (path) {
-                        var file = result.written.get(path);
-                        xm.log(file.toString());
+                    return job.api.reinstall().done(function (result) {
+                        reportSucces(null);
 
                         xm.log('');
-                    });
-                }, reportError);
+                        result.written.keys().sort().forEach(function (path) {
+                            var file = result.written.get(path);
+                            xm.log(file.toString());
+
+                            xm.log('');
+                        });
+                    }, reportError);
+                });
             };
         });
 
@@ -5264,16 +5506,16 @@ var tsd;
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
                 getSelectorJob(args).then(function (job) {
-                    return job.api.info(job.selector);
-                }).done(function (result) {
-                    reportSucces(null);
+                    return job.api.info(job.selector).done(function (result) {
+                        reportSucces(null);
 
-                    result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
-                        printFileHead(file);
-                        printFileInfo(file);
-                        printFileCommit(file);
-                    });
-                }, reportError);
+                        result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
+                            printFileHead(file);
+                            printFileInfo(file);
+                            printFileCommit(file);
+                        });
+                    }, reportError);
+                });
             };
         });
 
@@ -5284,22 +5526,22 @@ var tsd;
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
                 getSelectorJob(args).then(function (job) {
-                    return job.api.history(job.selector);
-                }).done(function (result) {
-                    reportSucces(null);
+                    return job.api.history(job.selector).done(function (result) {
+                        reportSucces(null);
 
-                    result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                        printDefHead(def);
-                        printSubHead('head:');
-                        printFileCommit(def.head);
-                        printSubHead('history:');
+                        result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                            printDefHead(def);
+                            printSubHead('head:');
+                            printFileCommit(def.head);
+                            printSubHead('history:');
 
-                        def.history.slice(0).forEach(function (file) {
-                            printFileInfo(file, true);
-                            printFileCommit(file);
+                            def.history.slice(0).forEach(function (file) {
+                                printFileInfo(file, true);
+                                printFileCommit(file);
+                            });
                         });
-                    });
-                }, reportError);
+                    }, reportError);
+                });
             };
         });
 
@@ -5310,27 +5552,27 @@ var tsd;
             cmd.groups = ['command', 'info', 'query'];
             cmd.execute = function (args) {
                 getSelectorJob(args).then(function (job) {
-                    return job.api.deps(job.selector);
-                }).done(function (result) {
-                    reportSucces(null);
+                    return job.api.deps(job.selector).done(function (result) {
+                        reportSucces(null);
 
-                    result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
-                        printFileHead(def);
-                        printFileInfo(def);
+                        result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
+                            printFileHead(def);
+                            printFileInfo(def);
 
-                        if (def.dependencies.length > 0) {
-                            def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                xm.log(' - ' + def.toString());
-                                if (def.head.dependencies.length > 0) {
-                                    def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                        xm.log('    - ' + def.toString());
-                                    });
-                                }
-                            });
-                            xm.log('----');
-                        }
-                    });
-                }, reportError);
+                            if (def.dependencies.length > 0) {
+                                def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                                    xm.log(' - ' + def.toString());
+                                    if (def.head.dependencies.length > 0) {
+                                        def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
+                                            xm.log('    - ' + def.toString());
+                                        });
+                                    }
+                                });
+                                xm.log('----');
+                            }
+                        });
+                    }, reportError);
+                });
             };
         });
 

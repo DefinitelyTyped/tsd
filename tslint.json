@@ -1,5 +1,5 @@
 {
-	"__notes": [
+	"x__notes": [
 		"tslint is still in development: some rules wait for fixes"
 	],
 	"rules": {

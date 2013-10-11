@@ -1,9 +1,9 @@
 ///<reference path="../_ref.ts" />
 
-
 module tsd {
 	'use strict';
 
+	//TODO replace reference node RegExp with a better xml parser (tony the pony)
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
 	var leadingExp = /^\.\.\//;
@@ -25,7 +25,6 @@ module tsd {
 				return def.head;
 			});
 		}
-
 
 		static getHistoryTop(list:tsd.Def[]):tsd.DefVersion[] {
 			return list.map((def:Def) => {
@@ -177,6 +176,5 @@ module tsd {
 			//hmm.. now what?
 			return -1;
 		}
-
 	}
 }

@@ -4,7 +4,6 @@ module git {
 	/*
 	 GitCommitUser: basic git committer
 	  */
-	//TODO rename class? but to what?
 	export class GitUserCommit {
 		name:string;
 		email:string;

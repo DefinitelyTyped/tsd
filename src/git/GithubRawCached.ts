@@ -12,9 +12,9 @@ module git {
 
 	var request = require('request');
 	var path = require('path');
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
-	var HTTP:Qhttp = require('q-io/http');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
+	var HTTP:typeof QioHTTP = require('q-io/http');
 
 	/*
 	 GithubRawCached: get files from raw.github.com and cache on disk
@@ -27,7 +27,7 @@ module git {
 		private _formatVersion:string = '0.2';
 
 		private _service:xm.CachedFileService;
-		private _loader:xm.CachedLoader;
+		private _loader:xm.CachedLoader<NodeBuffer>;
 
 		stats = new xm.StatCounter(false);
 		log = xm.getLogger('GithubRawCached');
@@ -38,7 +38,6 @@ module git {
 		constructor(repo:git.GithubRepo, storeFolder:string) {
 			xm.assertVar('repo', repo, git.GithubRepo);
 			xm.assertVar('storeFolder', storeFolder, 'string');
-
 			this._repo = repo;
 
 			var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
@@ -51,19 +50,21 @@ module git {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		getFile(commitSha:string, filePath:string):Qpromise {
+		getFile(commitSha:string, filePath:string):Q.Promise<NodeBuffer> {
+			var d:Q.Deferred<NodeBuffer> = Q.defer();
+
 			this.stats.count('start');
 
 			var tmp = filePath.split(/\/|\\\//g);
 			tmp.unshift(commitSha);
 
-			var storeFile = <Function>(path.join).apply(null, tmp);
+			var storeFile:string = FS.join(tmp);
 
 			if (this._debug) {
 				this.log(storeFile);
 			}
 
-			return this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, () => {
+			this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, () => {
 
 				var req = HTTP.normalizeRequest(this._repo.urls.rawFile(commitSha, filePath));
 				req.headers = this.headers;
@@ -73,7 +74,7 @@ module git {
 				}
 				this.stats.count('request-start');
 
-				return HTTP.request(req).then((res:Qresponse) => {
+				return HTTP.request(req).then((res:QioHTTP.Response) => {
 					if (!res.status || res.status < 200 || res.status >= 400) {
 						this.stats.count('request-error');
 						throw new Error('unexpected status code: ' + res.status);
@@ -87,38 +88,18 @@ module git {
 					//TODO streams all the way?
 					return res.body.read();
 				});
-			});
+			}).then((value) => {
+				d.resolve(value);
+			}, d.reject);
 
-			//TODO extract call-closure to method? beh?
-			/*return this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, () => {
-				var reqOpts = {
-					url: this._repo.urls.rawFile(commitSha, filePath),
-					headers: this.headers
-				};
-				if (this._debug) {
-					this.log(reqOpts);
-				}
-				this.stats.count('request-start');
-
-				return Q.nfcall(request.get, reqOpts).spread((res) => {
-					if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
-						this.stats.count('request-error');
-						throw new Error('unexpected status code: ' + res.statusCode);
-					}
-					//this.log.inspect(res, 'res', 1);
-					this.stats.count('request-complete');
-					// according to the headers raw github is binary encoded, but from what? utf8?
-					//TODO find correct way to handle encoding type
-					return res.body;
-				});
-			});*/
+			return d.promise;
 		}
 
 		get service():xm.CachedFileService {
 			return this._service;
 		}
 
-		get loader():xm.CachedLoader {
+		get loader():xm.CachedLoader<NodeBuffer> {
 			return this._loader;
 		}
 

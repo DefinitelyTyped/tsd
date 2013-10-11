@@ -13,8 +13,8 @@ module xm {
 	'use strict';
 
 	var fs = require('fs');
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 	var path = require('path');
 	var util = require('util');
 
@@ -62,8 +62,8 @@ module xm {
 			});
 		}
 
-		export function readJSONPromise(src:string):Qpromise {
-			return FS.read(src, {encoding: 'utf8'}).then((text:string) => {
+		export function readJSONPromise(src:string):Q.Promise<any> {
+			return <Q.Promise<any>> FS.read(src, {encoding: 'utf8'}).then((text:string) => {
 				return parseJson(text);
 			});
 		}
@@ -74,11 +74,17 @@ module xm {
 			fs.writeFileSync(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 		}
 
-		export function writeJSONPromise(dest:string, data:any):Qpromise {
+		export function writeJSONPromise(dest:string, data:any):Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+
 			dest = path.resolve(dest);
-			return xm.mkdirCheckQ(path.dirname(dest), true).then(() => {
+			xm.mkdirCheckQ(path.dirname(dest), true).then((dest:string) => {
 				return FS.write(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
-			});
+			}).then(() => {
+				d.resolve(null);
+			}, d.reject);
+
+			return d.promise;
 		}
 	}
 }

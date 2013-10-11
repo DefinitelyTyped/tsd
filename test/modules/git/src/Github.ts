@@ -7,11 +7,11 @@
 ///<reference path="../../../../src/git/GithubRawCached.ts" />
 ///<reference path="../../../../src/git/GithubAPICached.ts" />
 
-describe.only('git.Github', () => {
+describe('git.Github', () => {
 	'use strict';
 
 	var path = require('path');
-	var FS:Qfs = require('q-io/fs');
+	var FS:typeof QioFS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 
 	var api:git.GithubAPICached;
@@ -47,6 +47,7 @@ describe.only('git.Github', () => {
 			return;
 		}
 		it('should return data raw identical to api: "' + label + '"', () => {
+			//raw.debug = true;
 
 			var filePath = test.filePath;
 			var commitSha = test.commitSha;

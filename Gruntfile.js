@@ -150,7 +150,7 @@ module.exports = function (grunt) {
 	gtx.alias('test', ['build', 'gtx-type:moduleTest']);
 	gtx.alias('default', ['build', 'test']);
 
-	var longTimer = (isVagrant ? 250000 : 5000);
+	var longTimer = (isVagrant ? 250000 : 6000);
 
 	// modules
 	gtx.create('xm', 'moduleTest', null, 'lib');

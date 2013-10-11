@@ -8,14 +8,14 @@
 ///<reference path="../io/FileUtil.ts" />
 ///<reference path="../io/mkdirCheck.ts" />
 ///<reference path="CachedJSONValue.ts" />
+///<reference path="../../../typings/q/Q.d.ts" />
 
 module xm {
 	'use strict';
 
-	var Q:QStatic = require('q');
-	var fs = require('fs');
+	var Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 	var path = require('path');
-	var FS:Qfs = require('q-io/fs');
 	/*
 	 CachedJSONStore: data-store for cached json results
 	 */
@@ -40,10 +40,12 @@ module xm {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		private init():Qpromise {
+		private init():Q.Promise<void> {
+			var defer:Q.Deferred<void> = Q.defer();
+
 			this.stats.count('init');
 
-			return FS.exists(this._dir).then((exists:boolean) => {
+			FS.exists(this._dir).then((exists:boolean) => {
 				if (!exists) {
 					this.stats.count('init-dir-create', this._dir);
 					return xm.mkdirCheckQ(this._dir, true);
@@ -54,25 +56,28 @@ module xm {
 						this.stats.count('init-dir-exists', this._dir);
 						return null;
 					}
-					else {
-						this.stats.count('init-dir-error', this._dir);
-						throw new Error('is not a directory: ' + this._dir);
-					}
+					this.stats.count('init-dir-error', this._dir);
+					throw new Error('is not a directory: ' + this._dir);
 				});
-			}).fail((err) => {
+			}).then(() => {
+				defer.resolve(null);
+			}, (err) => {
 				this.stats.count('init-error');
-				throw err;
+				defer.reject(err);
 			});
+
+			return defer.promise;
 		}
 
-		getValue(key:string):Qpromise {
-			var src = path.join(this._dir, xm.CachedJSONValue.getHash(key) + '.json');
+		getValue(key:string):Q.Promise<xm.CachedJSONValue> {
+			var defer:Q.Deferred<xm.CachedJSONValue> = Q.defer();
 
+			var src = path.join(this._dir, xm.CachedJSONValue.getHash(key) + '.json');
 			this.stats.count('get');
 
-			return this.init().then(() => {
+			this.init().then(() => {
 				return FS.exists(src);
-			}).then((exists:boolean) => {
+			}).then((exists) => {
 				if (exists) {
 					this.stats.count('get-exists');
 
@@ -86,25 +91,29 @@ module xm {
 							throw(new Error(e + ' -> ' + src));
 						}
 						this.stats.count('get-read-success');
-						return cached;
+						defer.resolve(cached);
 					});
 				}
 				this.stats.count('get-miss');
-				return null;
+				defer.resolve(null);
 			}).fail((err) => {
 				this.stats.count('get-error');
-				throw err;
+				defer.reject(err);
 			});
+
+			return defer.promise;
 		}
 
-		storeValue(res:xm.CachedJSONValue):Qpromise {
+		storeValue(res:xm.CachedJSONValue):Q.Promise<xm.CachedJSONValue> {
+			var defer:Q.Deferred<xm.CachedJSONValue> = Q.defer();
+
 			var dest = path.join(this._dir, res.getKeyHash() + '.json');
 
 			this.stats.count('store');
 
-			return this.init().then(() => {
+			this.init().then(() => {
 				return FS.exists(dest);
-			}).then((exists:boolean) => {
+			}).then((exists) => {
 				if (exists) {
 					this.stats.count('store-exists');
 					return FS.remove(dest);
@@ -117,11 +126,13 @@ module xm {
 				return FS.write(dest, data);
 			}).then(() => {
 				this.stats.count('store-write-success');
-				return res;
+				defer.resolve(res);
 			}, (err) => {
 				this.stats.count('store-write-error');
-				throw err;
+				defer.reject(err);
 			});
+
+			return defer.promise;
 		}
 	}
 }

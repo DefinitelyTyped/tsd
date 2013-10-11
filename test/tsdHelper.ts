@@ -13,8 +13,8 @@ module helper {
 	var fs = require('fs');
 	var util = require('util');
 	var assert:Chai.Assert = require('chai').assert;
-	var q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var q = require('q');
+	var FS = require('q-io/fs');
 
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
@@ -106,7 +106,7 @@ module helper {
 	}
 
 	//set modes for fixture updates
-	function applyCoreUpdateLoader(loader:xm.CachedLoader) {
+	function applyCoreUpdateLoader(loader:xm.CachedLoader<any>) {
 		var opts = loader.options;
 		if (helper.settings.cache.forceUpdate) {
 			opts.cacheRead = false;
@@ -125,7 +125,7 @@ module helper {
 		}
 	}
 
-	export function assertUpdateStat(loader:xm.CachedLoader, message:string) {
+	export function assertUpdateStat(loader:xm.CachedLoader<any>, message:string) {
 		var stats = loader.stats;
 		if (helper.settings.cache.forceUpdate) {
 			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
@@ -149,17 +149,21 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function listDefPaths(dir:string):Qpromise {
-		return FS.listTree(dir,(full:string, stat):boolean => {
+	export function listDefPaths(dir:string):Q.Promise<string[]> {
+		var d:Q.Deferred<string[]> = Q.defer();
+
+		FS.listTree(dir,(full:string, stat):boolean => {
 			return (stat.isFile() && /\.d\.ts$/.test(full));
 
 		}).then((paths:string[]) => {
-			return paths.map((full:string) => {
+			d.resolve(paths.map((full:string) => {
 				return path.relative(dir, full).replace('\\', '/');
 
 			}).filter((short:string) => {
 				return tsd.Def.isDefPath(short);
-			});
+			}));
 		});
+
+		return d.promise;
 	}
 }

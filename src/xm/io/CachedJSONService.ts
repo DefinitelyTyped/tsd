@@ -5,15 +5,15 @@
 module xm {
 	'use strict';
 
-	var Q:QStatic = require('q');
+	var Q:typeof Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
-	var FS:Qfs = require('q-io/fs');
+	var FS:typeof QioFS = require('q-io/fs');
 	/*
 	 CachedJSONService: a simple JSON implementation of CachedLoaderService using CachedJSONStore
 	 */
 	//TODO add gzip compression?
-	export class CachedJSONService implements xm.CachedLoaderService {
+	export class CachedJSONService implements xm.CachedLoaderService<any> {
 
 		private _store:xm.CachedJSONStore;
 
@@ -24,11 +24,11 @@ module xm {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
-		getCachedRaw(key:string):Qpromise {
+		getCachedRaw(key:string):Q.Promise<any> {
 			return this._store.getValue(key);
 		}
 
-		getValue(key:string, opts?):Qpromise {
+		getValue(key:string, opts?):Q.Promise<any> {
 			return this._store.getValue(key).then((res:xm.CachedJSONValue) => {
 				if (res) {
 					return res.value;
@@ -37,7 +37,7 @@ module xm {
 			});
 		}
 
-		writeValue(key:string, label:string, value:any, opts?):Qpromise {
+		writeValue(key:string, label:string, value:any, opts?):Q.Promise<any> {
 			var cached = new xm.CachedJSONValue(label, key);
 			cached.setValue(value);
 			return this._store.storeValue(cached).then((info) => {
@@ -45,7 +45,7 @@ module xm {
 			});
 		}
 
-		getKeys(opts?):Qpromise {
+		getKeys(opts?):Q.Promise<string[]> {
 			return Q([]);
 		}
 

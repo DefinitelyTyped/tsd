@@ -21,7 +21,6 @@ module git {
 			}
 		}
 
-		//TODO fix this properly
 		parse(text:string):void {
 			this.text = String(text);
 

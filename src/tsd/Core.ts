@@ -17,8 +17,8 @@
 module tsd {
 	'use strict';
 
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 	var path = require('path');
 	var pointer = require('jsonpointer.js');
 	var ansidiff = require('ansidiff');
@@ -71,18 +71,21 @@ module tsd {
 		 lazy get or load the current DefIndex
 		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
 		 */
-		getIndex():Qpromise {
+		updateIndex():Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+
 			this.stats.count('index-start');
 			if (this.index.hasIndex()) {
 				this.stats.count('index-hit');
-				return Q(this.index);
+
+				d.resolve(null);
+				return d.promise;
 			}
 			this.stats.count('index-miss');
 
-
 			this.stats.count('index-branch-get');
 
-			return this.gitAPI.getBranch(this.context.config.ref).then((branchData:any) => {
+			this.gitAPI.getBranch(this.context.config.ref).then((branchData:any) => {
 				var sha = pointer.get(branchData, branch_tree);
 				if (!sha) {
 					this.stats.count('index-branch-get-fail');
@@ -95,212 +98,271 @@ module tsd {
 				return this.gitAPI.getTree(sha, true).then((data:any) => {
 					//this.log(data);
 					this.stats.count('index-tree-get-success');
+
 					this.index.init(branchData, data);
 
-					return this.index;
+					d.resolve(null);
 				}, (err) => {
 					this.stats.count('index-tree-get-error');
-					throw err;
+					d.reject(err);
 				});
-			}, (err) => {
+			}).fail((err) => {
 				this.stats.count('index-branch-get-error');
-				throw err;
+				d.reject(err);
 			});
+
+			return d.promise;
 		}
 
 		/*
 		 run a selector against a DefIndex
 		 promise: ApiResult
 		 */
-		select(selector:Selector):Qpromise {
-			var result = new APIResult(this.index, selector);
+		select(selector:Selector):Q.Promise<APIResult> {
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this.getIndex().then(() => {
-				result.nameMatches = selector.pattern.filter(this.index.list);
+			var res = new APIResult(this.index, selector);
+
+			this.updateIndex().then(() => {
+				res.nameMatches = selector.pattern.filter(this.index.list);
 				// default to all heads
-				result.selection = tsd.DefUtil.getHeads(result.nameMatches);
-				//result.definitions = result.nameMatches.slice(0);
+				res.selection = tsd.DefUtil.getHeads(res.nameMatches);
+				//res.definitions = res.nameMatches.slice(0);
 
 				//TODO apply some more filters in steps? or find better selection model (no god-method but iterative)
 				if (selector.resolveDependencies) {
-					return this.resolveDepencendiesBulk(result.selection);
+					return this.resolveDepencendiesBulk(res.selection);
 				}
-				return null;
+			}).then(() => {
+				d.resolve(res);
+			}, d.reject);
 
-			}).thenResolve(result);
+			return d.promise;
 		}
 
 		/*
 		 procure a Def instance for a path
 		 promise: Def: either fresh or with existing data
 		 */
-		procureDef(path:string):Qpromise {
-			return this.getIndex().then(() => {
+		procureDef(path:string):Q.Promise<Def> {
+			var d:Q.Deferred<Def> = Q.defer();
+
+			this.updateIndex().then(() => {
 				var def:tsd.Def = this.index.procureDef(path);
 				if (!def) {
-					throw new Error('cannot get def for path: ' + path);
+					d.reject('cannot get def for path: ' + path);
+					return;
 				}
-				return Q(def);
-			});
+				d.resolve(def);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 procure a DefVersion instance for a path and commit
 		 promise: DefVersion: either fresh or with existing data
 		 */
-		procureFile(path:string, commitSha:string):Qpromise {
-			return this.getIndex().then(() => {
+		procureFile(path:string, commitSha:string):Q.Promise<DefVersion> {
+			var d:Q.Deferred<DefVersion> = Q.defer();
+
+			this.updateIndex().then(() => {
 				var file:tsd.DefVersion = this.index.procureVersionFromSha(path, commitSha);
 				if (!file) {
-					throw new Error('cannot get file for path: ' + path);
+					d.reject('cannot get file for path: ' + path);
+					return;
 				}
-				return Q(file);
-			});
+				d.resolve(file);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 procure a DefCommit instance for a commit sha
 		 promise: DefCommit: either fresh or with existing data
 		 */
-		procureCommit(commitSha:string):Qpromise {
-			return this.getIndex().then(() => {
+		procureCommit(commitSha:string):Q.Promise<DefCommit> {
+			var d:Q.Deferred<DefCommit> = Q.defer();
+
+			this.updateIndex().then(() => {
 				var commit:tsd.DefCommit = this.index.procureCommit(commitSha);
 				if (!commit) {
-					throw new Error('cannot commit def for commitSha: ' + path);
+					d.reject('cannot commit def for commitSha: ' + path);
+					return;
 				}
-				return Q(commit);
-			});
+				d.resolve(commit);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 find a DefVersion based on its path and a partial commit sha
 		 promise: DefVersion
 		 */
-		findFile(path:string, commitShaFragment:string):Qpromise {
+		findFile(path:string, commitShaFragment:string):Q.Promise<DefVersion> {
+			var d:Q.Deferred<DefVersion> = Q.defer();
 			//TODO implement partial commitSha lookup (github api does thi btu how do we track it?)
-			return Q.reject('implement me!');
+			d.reject('implement me!');
+			return d.promise;
 		}
 
 		/*
 		 install a DefVersion and add to config
 		 promise: string: absolute path of written file
 		 */
-		installFile(file:tsd.DefVersion, addToConfig:boolean = true):Qpromise {
-			return this.useFile(file).then((file:tsd.DefVersion) => {
+		installFile(file:tsd.DefVersion, addToConfig:boolean = true):Q.Promise<string> {
+			var d:Q.Deferred<string> = Q.defer();
 
+			this.useFile(file).then((targetPath:string) => {
 				if (this.context.config.hasFile(file.def.path)) {
 					this.context.config.getFile(file.def.path).update(file);
 				}
 				else if (addToConfig) {
 					this.context.config.addFile(file);
 				}
-				return file;
-			});
+				d.resolve(targetPath);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 bulk version of installFile()
-		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
 		 */
-		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true):Qpromise {
+		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
+			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+
 			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
-			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.installFile(file, addToConfig).then((file:tsd.DefVersion) => {
+			Q.all(list.map((file:tsd.DefVersion) => {
+				return this.installFile(file, addToConfig).then((targetPath:string) => {
 					written.set(file.def.path, file);
 				});
-			})).thenResolve(written);
+			})).then(() => {
+				d.resolve(written);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 load the current configFile, optional to not throw error on missing file
 		 promise: null
 		 */
-		readConfig(optional:boolean = false):Qpromise {
-			return FS.exists(this.context.paths.configFile).then((exists) => {
+		readConfig(optional:boolean = false):Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+
+			FS.exists(this.context.paths.configFile).then((exists) => {
 				if (!exists) {
 					if (!optional) {
-						throw new Error('cannot locate file: ' + this.context.paths.configFile);
+						d.reject(new Error('cannot locate file: ' + this.context.paths.configFile));
 					}
-					return null;
+					else {
+						d.resolve(null);
+					}
 				}
-				return xm.FileUtil.readJSONPromise(this.context.paths.configFile).then((json) => {
-					this.context.config.parseJSON(json);
-					return null;
-				});
-			});
+				else {
+					return xm.FileUtil.readJSONPromise(this.context.paths.configFile).then((json) => {
+						this.context.config.parseJSON(json);
+						d.resolve(null);
+					});
+				}
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 save current config to project json
-		 promise: string: absolute path of written file
+		 promise: string: path of written file
 		 */
-		saveConfig():Qpromise {
-			var file = this.context.paths.configFile;
+		saveConfig():Q.Promise<string> {
+			var d:Q.Deferred<string> = Q.defer();
+
+			var target = this.context.paths.configFile;
 			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
-			var dir = path.dirname(file);
+			var dir = path.dirname(target);
 
 			if (!json || json.length === 0) {
 				return Q.reject(new Error('saveConfig retrieved empty json'));
 			}
 
-			return xm.mkdirCheckQ(dir, true).then(() => {
-				return FS.write(file, json).then(() => {
+			xm.mkdirCheckQ(dir, true).then(() => {
+				return FS.write(target, json).then(() => {
 					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not)
-					return FS.stat(file);
+					return FS.stat(target);
 				}).then(() => {
 					return Q.delay(100);
 				}).then(() => {
 					//now do the real check
-					return FS.stat(file).then((stat) => {
+					return FS.stat(target).then((stat) => {
 						if (stat.size === 0) {
-							throw new Error('saveConfig write zero bytes to: ' + file);
+							throw new Error('saveConfig write zero bytes to: ' + target);
 						}
 					});
 				});
-			}).thenResolve(file);
+			}).then(() => {
+				d.resolve(target);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 reinstall multiple DefVersion's from InstalledDef data
-		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
 		 */
-		reinstallBulk(list:tsd.InstalledDef[]):Qpromise {
+		reinstallBulk(list:tsd.InstalledDef[]):Q.Promise<xm.IKeyValueMap<DefVersion>> {
+			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+
 			var written = new xm.KeyValueMap();
 
-			return Q.all(list.map((installed:tsd.InstalledDef) => {
+			Q.all(list.map((installed:tsd.InstalledDef) => {
 				return this.procureFile(installed.path, installed.commitSha).then((file:tsd.DefVersion)=> {
 					return this.installFile(file, true).then((targetPath:string) => {
-						written.set(targetPath, file);
+						written.set(file.def.path, file);
 						return file;
 					});
 				});
-			})).thenResolve(written);
+			})).then(() => {
+				d.resolve(written);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 lazy load a single DefCommit meta data
 		 promise: DefCommit with meta data fields (authors, message etc)
 		 */
-		loadCommitMetaData(commit:tsd.DefCommit):Qpromise {
+		loadCommitMetaData(commit:tsd.DefCommit):Q.Promise<DefCommit> {
+			var d:Q.Deferred<DefCommit> = Q.defer();
+
 			if (commit.hasMetaData()) {
 				return Q(commit);
 			}
-			return this.gitAPI.getCommit(commit.commitSha).then((json:any) => {
+			this.gitAPI.getCommit(commit.commitSha).then((json:any) => {
 				commit.parseJSON(json);
-				return commit;
-			});
+				d.resolve(commit);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 lazy load a single DefVersion file content
 		 promise: DefVersion; with raw .blob loaded
 		 */
-		loadContent(file:tsd.DefVersion):Qpromise {
+		loadContent(file:tsd.DefVersion):Q.Promise<DefVersion> {
+			var d:Q.Deferred<DefVersion> = Q.defer();
+
 			if (file.hasContent()) {
 				return Q(file);
 			}
-			return this.gitRaw.getFile(file.commit.commitSha, file.def.path).then((content) => {
+			this.gitRaw.getFile(file.commit.commitSha, file.def.path).then((content) => {
 				//var sha = git.GitUtil.blobShaHex(content, 'utf8');
 				if (file.blob) {
 					// race
@@ -322,46 +384,65 @@ module tsd {
 				else {
 					file.setContent(this.index.procureBlobFor(content));
 				}
-				return file;
-			});
+				d.resolve(file);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 bulk version of loadContent
 		 promise: array: bulk results of single calls
 		 */
-		loadContentBulk(list:tsd.DefVersion[]):Qpromise {
-			return Q.all(list.map((file:DefVersion) => {
+		loadContentBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
+			var d:Q.Deferred<DefVersion[]> = Q.defer();
+
+			Q.all(list.map((file:DefVersion) => {
 				return this.loadContent(file);
-			})).thenResolve(list);
+			})).then((list) => {
+				d.resolve(list);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
-		 lazy load a DefVersion commit history meta data
+		 lazy load commit history meta data
 		 promise: Def with .history filled with DefVersion
 		 */
-		loadHistory(file:tsd.Def):Qpromise {
-			if (file.history.length > 0) {
-				return Q(file);
+		loadHistory(def:tsd.Def):Q.Promise<Def> {
+			var d:Q.Deferred<Def> = Q.defer();
+
+			if (def.history.length > 0) {
+				return Q(def);
 			}
-			return this.gitAPI.getPathCommits(this.context.config.ref, file.path).then((content:any[]) => {
+			this.gitAPI.getPathCommits(this.context.config.ref, def.path).then((content:any[]) => {
 				//this.log.inspect(content, null, 2);
 				//TODO add pagination support (see github api docs)
-				this.index.setHistory(file, content);
-				return file;
-			});
+				this.index.setHistory(def, content);
+
+				d.resolve(def);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 bulk version of loadHistory()
 		 promise: array: bulk results of single calls
 		 */
-		loadHistoryBulk(list:tsd.Def[]):Qpromise {
+		loadHistoryBulk(list:tsd.Def[]):Q.Promise<DefVersion[]> {
+			var d:Q.Deferred<DefVersion[]> = Q.defer();
+
 			list = tsd.DefUtil.uniqueDefs(list);
 
-			return Q.all(list.map((file:Def) => {
+			Q.all(list.map((file:Def) => {
 				return this.loadHistory(file);
-			})).thenResolve(list);
+			})).then((list) => {
+				d.resolve(list);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
@@ -369,15 +450,15 @@ module tsd {
 		 promise: DefVersion: with .dependencies resolved (recursive)
 		 */
 		//TODO ditch wrapper function? meh?
-		resolveDepencendies(file:tsd.DefVersion):Qpromise {
-			return this.resolver.resolve(file);
+		resolveDepencendies(file:tsd.DefVersion):Q.Promise<DefVersion> {
+			return this.resolver.resolveDeps(file);
 		}
 
 		/*
 		 bulk version of resolveDepencendies()
 		 promise: array: bulk results of single calls
 		 */
-		resolveDepencendiesBulk(list:tsd.DefVersion[]):Qpromise {
+		resolveDepencendiesBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
 			return this.resolver.resolveBulk(list);
 		}
 
@@ -385,8 +466,10 @@ module tsd {
 		 lazy load a DefVersion content and parse header for DefInfo meta data
 		 promise: DefVersion: with raw .content text and .info DefInfo filled with parsed meta data
 		 */
-		parseDefInfo(file:tsd.DefVersion):Qpromise {
-			return this.loadContent(file).then((file:tsd.DefVersion) => {
+		parseDefInfo(file:tsd.DefVersion):Q.Promise<DefVersion> {
+			var d:Q.Deferred<DefVersion> = Q.defer();
+
+			this.loadContent(file).then((file:tsd.DefVersion) => {
 				var parser = new tsd.DefInfoParser(this.context.verbose);
 				if (file.info) {
 					//TODO why not do an early bail? skip reparse?
@@ -402,32 +485,42 @@ module tsd {
 					this.log.warn('bad parse in: ' + file);
 					//TODO print more debug info
 				}
-				return file;
-			}); //.thenResolve(file);
+				d.resolve(file);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 bulk version of parseDefInfo()
 		 promise: array: bulk results of single calls
 		 */
-		parseDefInfoBulk(list:tsd.DefVersion[]):Qpromise {
+		parseDefInfoBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
+			var d:Q.Deferred<DefVersion[]> = Q.defer();
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
-			return Q.all(list.map((file:tsd.DefVersion) => {
+			Q.all(list.map((file:tsd.DefVersion) => {
 				return this.parseDefInfo(file);
-			})).thenResolve(list);
+
+			})).then((list) => {
+				d.resolve(list);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 lazy load and save a single DefVersion to typings folder
-		 promise: absolute path of written file
+		 promise: DefVersion
 		 */
-		useFile(file:tsd.DefVersion, overwrite:boolean = true):Qpromise {
+		useFile(file:tsd.DefVersion, overwrite:boolean = true):Q.Promise<string> {
+			var d:Q.Deferred<string> = Q.defer();
+
 			var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
 			var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
 
-			return FS.exists(targetPath).then((exists:boolean) => {
+			FS.exists(targetPath).then((exists:boolean) => {
 				if (exists && !overwrite) {
 					//bail
 					return null;
@@ -436,35 +529,43 @@ module tsd {
 				return this.loadContent(file).then(() => {
 					//check again? (race?)
 					return FS.exists(targetPath);
-				}).then((exists:boolean) => {
+				}).then((exists) => {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
 					return xm.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);
-				}).then(() => {
-					return file;
 				});
-			});
+			}).then(() => {
+				d.resolve(targetPath);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 bulk version of useFile()
 		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
 		 */
-		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Qpromise {
+		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
+			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			//this could be a bit more then just 'written'
-			var written = new xm.KeyValueMap();
+			var written:xm.IKeyValueMap<DefVersion> = new xm.KeyValueMap();
 
-			return Q.all(list.map((file:tsd.DefVersion) => {
-				return this.useFile(file, overwrite).then((file:tsd.DefVersion) => {
+			Q.all(list.map((file:tsd.DefVersion) => {
+				return this.useFile(file, overwrite).then((targetPath:string) => {
 					written.set(file.def.path, file);
 				});
-			})).thenResolve(written);
+			})).then(() => {
+				d.resolve(written);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		get debug():boolean {

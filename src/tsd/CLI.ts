@@ -9,8 +9,8 @@ module tsd {
 	'use strict';
 
 	var path = require('path');
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 
 	var pleonasm;
 
@@ -52,8 +52,8 @@ module tsd {
 		//TODO add options object?
 	}
 
-	function loadData(args:any):Qpromise {
-		return Q.nfcall((callback) => {
+	function init(args:any):Q.Promise<any> {
+		return <Q.Promise<any>> Q.nfcall((callback) => {
 			if (!pleonasm) {
 				pleonasm = require('pleonasm');
 				pleonasm.onload = () => {
@@ -65,9 +65,11 @@ module tsd {
 		});
 	}
 
-	function getAPIJob(args:any):Qpromise {
+	function getAPIJob(args:any):Q.Promise<Job> {
+		var d:Q.Deferred<Job> = Q.defer();
+
 		// callback for easy error reporting
-		return loadData(args).then(() => {
+		init(args).then(() => {
 			//verify valid path
 			if (args.config) {
 				return FS.isFile(<string>args.config).then((isFile:boolean) => {
@@ -87,12 +89,14 @@ module tsd {
 
 			var required:boolean = (typeof args.config !== undefined ? true : false);
 			return job.api.readConfig(required).then(() => {
-				return job;
+				d.resolve(job);
 			});
-		});
+		}, d.reject);
+
+		return d.promise;
 	}
 
-	function getSelectorJob(args:any):Qpromise {
+	function getSelectorJob(args:any):Q.Promise<Job> {
 		// callback for easy error reporting
 		return getAPIJob(args).then((job:Job) => {
 			if (args._.length !== 1) {
@@ -296,7 +300,7 @@ module tsd {
 			cmd.options = ['config'];
 			cmd.groups = ['support'];
 			cmd.execute = (args:any) =>  {
-				getAPIJob(args).then((job:Job) => {
+				getAPIJob(args).done((job:Job) => {
 					job.api.context.logInfo(true);
 				});
 			};
@@ -311,18 +315,17 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (args:any) =>  {
 				getSelectorJob(args).then((job:Job) => {
-					return job.api.search(job.selector);
+					return job.api.search(job.selector).done((result:APIResult) => {
+						reportSucces(null);
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
-
-					//TODO report on overwrite
-					result.selection.forEach((file:tsd.DefVersion) => {
-						printFileHead(file);
-						printFileInfo(file);
-						printFileCommit(file);
-					});
-				}, reportError);
+						//TODO report on overwrite
+						result.selection.forEach((file:tsd.DefVersion) => {
+							printFileHead(file);
+							printFileInfo(file);
+							printFileCommit(file);
+						});
+					}, reportError);
+				});
 			};
 		});
 
@@ -333,20 +336,19 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'write'];
 			cmd.execute = (args:any) =>  {
 				getSelectorJob(args).then((job:Job) => {
-					return job.api.install(job.selector);
+					return job.api.install(job.selector).done((result:APIResult) => {
+						reportSucces(null);
+						//TODO report on written/skipped
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
-					//TODO report on written/skipped
-
-					xm.log('');
-					result.written.keys().sort().forEach((path:string) => {
-						var file:tsd.DefVersion = result.written.get(path);
-						xm.log(file.toString());
-						//xm.log('    ' + path);
 						xm.log('');
-					});
-				}, reportError);
+						result.written.keys().sort().forEach((path:string) => {
+							var file:tsd.DefVersion = result.written.get(path);
+							xm.log(file.toString());
+							//xm.log('    ' + path);
+							xm.log('');
+						});
+					}, reportError);
+				});
 			};
 		});
 
@@ -357,20 +359,19 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'write'];
 			cmd.execute = (args:any) =>  {
 				getAPIJob(args).then((job:Job) => {
-					return job.api.reinstall();
+					return job.api.reinstall().done((result:APIResult) => {
+						reportSucces(null);
+						//TODO report on written/skipped
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
-					//TODO report on written/skipped
-
-					xm.log('');
-					result.written.keys().sort().forEach((path:string) => {
-						var file:tsd.DefVersion = result.written.get(path);
-						xm.log(file.toString());
-						//xm.log('    ' + path);
 						xm.log('');
-					});
-				}, reportError);
+						result.written.keys().sort().forEach((path:string) => {
+							var file:tsd.DefVersion = result.written.get(path);
+							xm.log(file.toString());
+							//xm.log('    ' + path);
+							xm.log('');
+						});
+					}, reportError);
+				});
 			};
 		});
 
@@ -381,17 +382,16 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (args:any) =>  {
 				getSelectorJob(args).then((job:Job) => {
-					return job.api.info(job.selector);
+					return job.api.info(job.selector).done((result:APIResult) => {
+						reportSucces(null);
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
-
-					result.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion) => {
-						printFileHead(file);
-						printFileInfo(file);
-						printFileCommit(file);
-					});
-				}, reportError);
+						result.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion) => {
+							printFileHead(file);
+							printFileInfo(file);
+							printFileCommit(file);
+						});
+					}, reportError);
+				});
 			};
 		});
 
@@ -402,24 +402,22 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (args:any) =>  {
 				getSelectorJob(args).then((job:Job) => {
-					return job.api.history(job.selector);
+					return job.api.history(job.selector).done((result:APIResult) => {
+						reportSucces(null);
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
+						result.definitions.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
+							printDefHead(def);
+							printSubHead('head:');
+							printFileCommit(def.head);
+							printSubHead('history:');
 
-					result.definitions.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
-						printDefHead(def);
-						printSubHead('head:');
-						printFileCommit(def.head);
-						printSubHead('history:');
-
-						def.history.slice(0).forEach((file:tsd.DefVersion) => {
-							printFileInfo(file, true);
-							printFileCommit(file);
+							def.history.slice(0).forEach((file:tsd.DefVersion) => {
+								printFileInfo(file, true);
+								printFileCommit(file);
+							});
 						});
-					});
-				}, reportError);
-
+					}, reportError);
+				});
 			};
 		});
 
@@ -430,29 +428,28 @@ module tsd {
 			cmd.groups = ['command', 'info', 'query'];
 			cmd.execute = (args:any) =>  {
 				getSelectorJob(args).then((job:Job) => {
-					return job.api.deps(job.selector);
+					return job.api.deps(job.selector).done((result:APIResult) => {
+						reportSucces(null);
 
-				}).done((result:APIResult) => {
-					reportSucces(null);
+						result.selection.sort(tsd.DefUtil.fileCompare).forEach((def:tsd.DefVersion) => {
+							printFileHead(def);
+							printFileInfo(def);
 
-					result.selection.sort(tsd.DefUtil.fileCompare).forEach((def:tsd.DefVersion) => {
-						printFileHead(def);
-						printFileInfo(def);
-
-						//move ot method
-						if (def.dependencies.length > 0) {
-							def.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
-								xm.log(' - ' + def.toString());
-								if (def.head.dependencies.length > 0) {
-									def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
-										xm.log('    - ' + def.toString());
-									});
-								}
-							});
-							xm.log('----');
-						}
-					});
-				}, reportError);
+							//move ot method
+							if (def.dependencies.length > 0) {
+								def.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
+									xm.log(' - ' + def.toString());
+									if (def.head.dependencies.length > 0) {
+										def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
+											xm.log('    - ' + def.toString());
+										});
+									}
+								});
+								xm.log('----');
+							}
+						});
+					}, reportError);
+				});
 			};
 		});
 

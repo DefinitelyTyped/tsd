@@ -80,7 +80,8 @@ describe('git.GithubRawCached', () => {
 					'write-start': 1,
 					'write-success': 1,
 					'active-remove': 1,
-					complete: 1
+					complete: 1,
+					error: 0
 				}, 'first: ' + commitSha);
 
 				// get again, should be cached
@@ -104,7 +105,8 @@ describe('git.GithubRawCached', () => {
 						'active-remove': 2,
 						complete: 2,
 						'read-hit': 1,
-						'cache-hit': 1
+						'cache-hit': 1,
+						error: 0
 					}, 'second: ' + commitSha);
 
 				});

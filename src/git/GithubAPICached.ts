@@ -16,7 +16,7 @@ module git {
 	'use strict';
 
 	var _ = require('underscore');
-	var Q:QStatic = require('q');
+	var Q:typeof Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
 
@@ -52,7 +52,7 @@ module git {
 		private _repo:git.GithubRepo;
 
 		private _service:xm.CachedJSONService;
-		private _loader:xm.CachedLoader;
+		private _loader:xm.CachedLoader<any>;
 
 		//github's version
 		private _apiVersion:string = '3.0.0';
@@ -81,14 +81,14 @@ module git {
 			});
 		}
 
-		getBranches():Qpromise {
+		getBranches():Q.Promise<any> {
 			var params = this.mergeParams({});
 			return this._loader.doCachedCall('getBranches', params, {}, () => {
 				return Q.nfcall(this._api.repos.getBranches, params);
 			});
 		}
 
-		getBranch(branch:string):Qpromise {
+		getBranch(branch:string):Q.Promise<any> {
 			var params = this.mergeParams({
 				branch: branch
 			});
@@ -97,7 +97,7 @@ module git {
 			});
 		}
 
-		getTree(sha:string, recursive:boolean):Qpromise {
+		getTree(sha:string, recursive:boolean):Q.Promise<any> {
 			var params = this.mergeParams({
 				sha: sha,
 				recursive: recursive
@@ -107,7 +107,7 @@ module git {
 			});
 		}
 
-		getCommit(sha:string):Qpromise {
+		getCommit(sha:string):Q.Promise<any> {
 			var params = this.mergeParams({
 				sha: sha
 			});
@@ -116,7 +116,7 @@ module git {
 			});
 		}
 
-		getBlob(sha:string):Qpromise {
+		getBlob(sha:string):Q.Promise<any> {
 			var params = this.mergeParams({
 				sha: sha,
 				per_page: 100
@@ -126,7 +126,7 @@ module git {
 			});
 		}
 
-		getCommits(sha:string):Qpromise {
+		getCommits(sha:string):Q.Promise<any> {
 			//TODO implement result pagination
 			var params = this.mergeParams({
 				per_page: 100,
@@ -137,7 +137,7 @@ module git {
 			});
 		}
 
-		getPathCommits(sha:string, path:String):Qpromise {
+		getPathCommits(sha:string, path:String):Q.Promise<any> {
 			//TODO implement result pagination
 			var params = this.mergeParams({
 				per_page: 100,
@@ -153,7 +153,7 @@ module git {
 			return this._service;
 		}
 
-		get loader():xm.CachedLoader {
+		get loader():xm.CachedLoader<any> {
 			return this._loader;
 		}
 

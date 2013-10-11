@@ -9,8 +9,8 @@ module tsd {
 
 	var path = require('path');
 	var util = require('util');
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 
 	/*
 	 APIResult: hold result data (composition and meaning may vary)
@@ -53,34 +53,50 @@ module tsd {
 		 read the config from Context.path.configFile
 		 promise: null
 		 */
-		readConfig(optional:boolean):Qpromise {
-			return this._core.readConfig(optional).thenResolve(null);
+		readConfig(optional:boolean):Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+
+			this._core.readConfig(optional).then(() => {
+				d.resolve(undefined);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 save the config to Context.path.configFile
 		 promise: null
 		 */
-		saveConfig():Qpromise {
-			return this._core.saveConfig().thenResolve(null);
+		saveConfig():Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+
+			this._core.saveConfig().then(() => {
+				d.resolve(null);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 list files matching selector
 		 promise: APIResult
 		 */
-		search(selector:tsd.Selector):Qpromise {
+		search(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this._core.select(selector);
+			this._core.select(selector).then(d.resolve, d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 install all files matching selector
 		 promise: APIResult
 		 */
-		install(selector:tsd.Selector):Qpromise {
+		install(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
 			//hardcode for now
 			//TODO make resolveDependencies a proper cli option
@@ -88,8 +104,7 @@ module tsd {
 
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
-			return this._core.select(selector).then((res:tsd.APIResult) => {
-
+			this._core.select(selector).then((res:tsd.APIResult) => {
 				var files:tsd.DefVersion[] = res.selection;
 
 				//TODO dependency merge should be optional
@@ -102,28 +117,34 @@ module tsd {
 					res.written = written;
 
 					//TODO saving config should be optional
-					return this._core.saveConfig();
+					return this._core.saveConfig().then(() => {
+						d.resolve(res);
+					});
+				});
+			}).fail(d.reject);
 
-				}).thenResolve(res);
-			});
+			return d.promise;
 		}
 
 		/*
 		 direct install attempt
 		 promise: APIResult
 		 */
-		directInstall(path:string, commitSha:string):Qpromise {
+		directInstall(path:string, commitSha:string):Q.Promise<APIResult> {
 			xm.assertVar('path', path, 'string');
 			xm.assertVar('commitSha', commitSha, 'sha1');
+			var d:Q.Deferred<APIResult> = Q.defer();
 
 			var res = new tsd.APIResult(this._core.index, null);
 
-			return this._core.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
+			this._core.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
 				return this._core.installFile(file).then((targetPath:string) => {
 					res.written.set(targetPath, file);
-					return null;
+					d.resolve(res);
 				});
-			}).thenResolve(res);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
@@ -131,71 +152,93 @@ module tsd {
 		 promise: APIResult
 		 */
 		//TODO move into selector? meh?
-		installFragment(path:string, commitShaFragment:string):Qpromise {
+		installFragment(path:string, commitShaFragment:string):Q.Promise<APIResult> {
 			xm.assertVar('path', path, 'string');
+			var d:Q.Deferred<APIResult> = Q.defer();
 
 			var res = new tsd.APIResult(this._core.index, null);
 
-			return this._core.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
+			this._core.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
 				return this._core.installFile(file).then((targetPath:string) => {
 					res.written.set(targetPath, file);
-					return res;
+					d.resolve(res);
 				});
-			}).thenResolve(res);
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 download selection and parse and display header info
 		 promise: APIResult
 		 */
-		info(selector:tsd.Selector):Qpromise {
+		info(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this._core.select(selector).then((res:tsd.APIResult) => {
+			this._core.select(selector).then((res:tsd.APIResult) => {
 				//nest for scope
-				return this._core.parseDefInfoBulk(res.selection).thenResolve(res);
-			});
+				return this._core.parseDefInfoBulk(res.selection).then(() => {
+					d.resolve(res);
+				});
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 load commit history
 		 promise: APIResult
 		 */
-		history(selector:tsd.Selector):Qpromise {
+		history(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this._core.select(selector).then((res:tsd.APIResult) => {
+			this._core.select(selector).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
 				res.definitions = tsd.DefUtil.getDefs(res.selection);
 
 				//TODO limit history to Selector date filter?
-				return this._core.loadHistoryBulk(res.definitions).thenResolve(res);
-			});
+				return this._core.loadHistoryBulk(res.definitions).then(() => {
+					d.resolve(res);
+				});
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 download files matching selector and solve dependencies
 		 promise: APIResult
 		 */
-		deps(selector:tsd.Selector):Qpromise {
+		deps(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this._core.select(selector).then((res:tsd.APIResult) => {
-				return this._core.resolveDepencendiesBulk(res.selection).thenResolve(res);
-			});
+			this._core.select(selector).then((res:tsd.APIResult) => {
+				return this._core.resolveDepencendiesBulk(res.selection).then(() => {
+					d.resolve(res);
+				});
+			}).fail(d.reject);
+
+			return d.promise;
 		}
 
 		/*
 		 re-install from config
 		 promise: APIResult
 		 */
-		reinstall():Qpromise {
+		reinstall():Q.Promise<APIResult> {
 			var res = new tsd.APIResult(this._core.index, null);
+			var d:Q.Deferred<APIResult> = Q.defer();
 
-			return this._core.reinstallBulk(this.context.config.getInstalled()).then((map:xm.IKeyValueMap) => {
+			this._core.reinstallBulk(this.context.config.getInstalled()).then((map:xm.IKeyValueMap) => {
 				res.written = map;
-				return res;
-			}).thenResolve(res);
+			}).then(() => {
+				d.resolve(res);
+			}, d.reject);
+
+			return d.promise;
 		}
 
 		/*
@@ -203,10 +246,12 @@ module tsd {
 		 promise: APIResult
 		 */
 		//TODO implement compare() command
-		compare(selector:tsd.Selector):Qpromise {
+		compare(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
+			d.reject(new Error('not implemented yet'));
 
-			return Q.reject(new Error('not implemented yet'));
+			return d.promise;
 		}
 
 		/*
@@ -214,10 +259,12 @@ module tsd {
 		 promise: APIResult
 		 */
 		//TODO implement update() command
-		update(selector:tsd.Selector):Qpromise {
+		update(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar('selector', selector, tsd.Selector);
+			var d:Q.Deferred<APIResult> = Q.defer();
+			d.reject(new Error('not implemented yet'));
 
-			return Q.reject(new Error('not implemented yet'));
+			return d.promise;
 		}
 
 		/*
@@ -225,9 +272,12 @@ module tsd {
 		 promise: APIResult
 		 */
 		//TODO implement: purge() command
-		purge():Qpromise {
-			// add proper safety checks (let's not accidentally rimraf root during development)
-			return Q.reject(new Error('not implemented yet'));
+		purge():Q.Promise<APIResult> {
+			// add proper safety checks (let's not accidentally rimraf too much)
+			var d:Q.Deferred<APIResult> = Q.defer();
+			d.reject(new Error('not implemented yet'));
+
+			return d.promise;
 		}
 
 		get core():tsd.Core {

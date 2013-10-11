@@ -1,6 +1,6 @@
 ///<reference path="_ref.d.ts" />
 
-var Q = require('q');
+var Q:typeof Q = require('q');
 Q.longStackSupport = true;
 
 require('source-map-support').install();

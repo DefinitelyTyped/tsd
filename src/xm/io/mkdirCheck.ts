@@ -10,12 +10,12 @@ module xm {
 	'use strict';
 
 	//TODO move to FileUtil
-	var Q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 	var mkdirp = require('mkdirp');
 	var path = require('path');
 	var fs = require('fs');
-	/*
+	/*var FS:typeof QioFS = require('q-io/fs');
 	 mkdirCheck: like mkdirp but with writable rights and verification, synchronous
 	 */
 	//TODO unit test this
@@ -56,10 +56,12 @@ module xm {
 	 */
 	//TODO unit test this
 	//TODO why not default make writable? why ever use this without writable?
-	export function mkdirCheckQ(dir:string, writable:boolean = false, testWritable:boolean = false):Qpromise {
+	export function mkdirCheckQ(dir:string, writable:boolean = false, testWritable:boolean = false):Q.Promise<string> {
 		dir = path.resolve(dir);
 
-		return FS.exists(dir).then((exists:boolean) => {
+		var d:Q.Deferred<string> = Q.defer();
+
+		FS.exists(dir).then((exists:boolean) => {
 			if (exists) {
 				return FS.isDirectory(dir).then((isDir:boolean) => {
 					if (!isDir) {
@@ -71,10 +73,12 @@ module xm {
 					return null;
 				});
 			}
-			if (writable) {
-				return Q.nfcall(mkdirp, dir, '744');
+			else {
+				if (writable) {
+					return Q.nfcall(mkdirp, dir, '744');
+				}
+				return Q.nfcall(mkdirp, dir);
 			}
-			return Q.nfcall(mkdirp, dir);
 		}).then(() => {
 			if (testWritable) {
 				var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
@@ -85,7 +89,9 @@ module xm {
 					throw new Error('no write access to: ' + dir + ' -> ' + err);
 				});
 			}
-			return null;
-		}).thenResolve(dir);
+		}).then(() => {
+			d.resolve(dir);
+		});
+		return d.promise;
 	}
 }

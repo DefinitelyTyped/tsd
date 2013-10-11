@@ -13,7 +13,7 @@ module xm {
 	'use strict';
 
 	var _ = require('underscore');
-	var Q:QStatic = require('q');
+	var Q:typeof Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
 
@@ -23,10 +23,12 @@ module xm {
 		remoteRead = true;
 	}
 
-	export interface CachedLoaderService {
-		getValue(key:string, opts?):Qpromise;
-		writeValue(key:string, label:string, value, opts?):Qpromise;
-		//getKeys(opts?):Qpromise;
+	export interface CachedLoaderService<T> {
+		getValue(key:string, opts?):Q.Promise<T>;
+		writeValue(key:string, label:string, value, opts?):Q.Promise<T>;
+
+		//TODO do we need this?
+		getKeys(opts?):Q.Promise<string[]>;
 	}
 	/*
 	 CachedLoader: abstraction to execute and cache results of remote calls
@@ -34,16 +36,16 @@ module xm {
 	 with many counters for easy debugging and stats
 	 */
 	//TODO consider adding a lingering active-list option to keep files in memory
-	export class CachedLoader {
+	export class CachedLoader<T> {
 		private _debug:boolean = false;
 		private _options:any = new xm.CachedLoaderOptions();
-		private _active:xm.IKeyValueMap<Qpromise> = new xm.KeyValueMap();
-		private _service:xm.CachedLoaderService = null;
+		private _active:xm.IKeyValueMap<Q.Promise<xm.CachedJSONValue>> = new xm.KeyValueMap();
+		private _service:xm.CachedLoaderService<T> = null;
 
 		//TODO upgrade log to event tracker
 		stats = new xm.StatCounter();
 
-		constructor(label:string, service:CachedLoaderService) {
+		constructor(label:string, service:CachedLoaderService<T>) {
 			xm.assertVar('label', label, 'string');
 			xm.assertVar('service', service, 'object');
 
@@ -59,7 +61,9 @@ module xm {
 		}
 
 		//main cache/load flow, the clousure  is only called when no matching keyTerm was found (or cache was locked)
-		doCachedCall(label:string, keyTerms:any, opts:any, cachedCall:() => Qpromise):Qpromise {
+		doCachedCall(label:string, keyTerms:any, opts:any, cachedCall:() => Q.Promise<T>):Q.Promise<T> {
+			var d:Q.Deferred<T> = Q.defer();
+
 			var key = xm.isString(keyTerms) ? keyTerms : this.getKey(label, keyTerms);
 
 			opts = _.defaults(opts || {}, this._options);
@@ -71,18 +75,19 @@ module xm {
 				xm.log(key);
 			}
 
-			//reuse promise if we are already getting this file
 			if (this._active.has(key)) {
 				this.stats.count('active-hit', label);
 
-				return this._active.get(key).then((content) => {
+				this._active.get(key).then((content:T) => {
 					this.stats.count('active-resolve', label);
-					return content;
+					d.resolve(content);
 				}, (err) => {
 					this.stats.count('active-error', label);
 					//rethrow
-					throw err;
+					d.reject(err);
 				});
+
+				return d.promise;
 			}
 
 			var cleanup = () => {
@@ -91,7 +96,7 @@ module xm {
 			};
 
 			//main logic flow
-			var promise = this.cacheRead(opts, label, key).then((res) => {
+			this.cacheRead(opts, label, key).then((res) => {
 				if (!xm.isNull(res) && !xm.isUndefined(res)) {
 					this.stats.count('cache-hit', label);
 					return res;
@@ -104,80 +109,96 @@ module xm {
 					}
 					return this.cacheWrite(opts, label, key, res).thenResolve(res);
 				});
-			}).then((res) => {
+			}).then((res:T) => {
 				cleanup();
 				this.stats.count('complete', label);
-				return res;
+				d.resolve(res);
+
 			}, (err) => {
 				cleanup();
 				this.stats.count('error', label);
 				xm.log.error(err);
 				//not return res?
-				throw(err);
+				d.reject(err);
 			});
 
 			//cache promise while we are loading
 			this.stats.count('active-set', label);
-			this._active.set(key, promise);
-			return promise;
+			this._active.set(key, d.promise);
+
+			return d.promise;
 		}
 
-		private cacheRead(opts:xm.CachedLoaderOptions, label:string, key:string):Qpromise {
+		private cacheRead(opts:xm.CachedLoaderOptions, label:string, key:string):Q.Promise<T> {
+			var d:Q.Deferred<T> = Q.defer();
+
 			if (opts.cacheRead) {
 				this.stats.count('read-start', label);
-				return this._service.getValue(key).then((res:any) => {
+				this._service.getValue(key).then((res:any) => {
 					if (xm.isNull(res) || xm.isUndefined(res)) {
 						this.stats.count('read-miss', label);
 
-						// it is valid to get empty content
-						return null;
+						d.resolve(null);
 					}
 					else {
 						this.stats.count('read-hit', label);
-						return res;
+						d.resolve(res);
 					}
 				}, (err) => {
 					this.stats.count('read-error', label);
 					xm.log.error(err);
-					throw (err);
+					d.reject(err);
 				});
 			}
-			this.stats.count('read-skip', label);
-			return Q(null);
+			else {
+				this.stats.count('read-skip', label);
+				d.resolve(null);
+			}
+			return d.promise;
 		}
 
-		private callLoad(opts:xm.CachedLoaderOptions, label:string, cachedCall:() => Qpromise) {
+		private callLoad(opts:xm.CachedLoaderOptions, label:string, cachedCall:() => Q.Promise<T>) {
+			var d:Q.Deferred<T> = Q.defer();
+
 			if (opts.remoteRead) {
 				this.stats.count('load-start', label);
 
-				return Q(cachedCall()).then((res) => {
+				Q(cachedCall()).then((res) => {
 					this.stats.count('load-success', label);
-					return res;
+					d.resolve(res);
 				}, (err) => {
 					this.stats.count('load-error', label);
 					xm.log.error(err);
-					throw(err);
+					d.reject(err);
 				});
 			}
-			this.stats.count('load-skip', label);
-			return Q(null);
+			else {
+				this.stats.count('load-skip', label);
+				d.resolve(null);
+			}
+			return d.promise;
 		}
 
-		private cacheWrite(opts:xm.CachedLoaderOptions, label:string, key:string, value):Qpromise {
+		private cacheWrite(opts:xm.CachedLoaderOptions, label:string, key:string, value):Q.Promise<T> {
+			var d:Q.Deferred<T> = Q.defer();
+
 			if (opts.cacheWrite) {
 				this.stats.count('write-start', label);
 
-				return this._service.writeValue(key, label, value).then((info) => {
+				this._service.writeValue(key, label, value).then((info) => {
 					this.stats.count('write-success', label);
-					return value;
+					d.resolve(value);
 				}, (err) => {
 					this.stats.count('write-error', label);
 					xm.log.error(err);
-					throw (err);
+					d.reject(err);
 				});
 			}
-			this.stats.count('write-skip', label);
-			return Q(value);
+			else {
+				this.stats.count('write-skip', label);
+				d.resolve(null);
+			}
+			return d.promise;
 		}
 
 		get options():CachedLoaderOptions {

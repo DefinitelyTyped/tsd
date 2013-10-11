@@ -74,9 +74,9 @@
     "chai-fuzzy": "1.3.0",
     "chai-json-schema": "1.0.4",
     "chai-as-promised": "4.0.0",
-    "mocha-unfunk-reporter": "~0.2.2",
+    "mocha-unfunk-reporter": "0.2",
     "jshint-path-reporter": "0.1",
-    "tslint-path-formatter": "git://github.com/Bartvds/tslint-path-formatter",
+    "tslint-path-formatter": "0.1",
     "mocha": "~1.13.0",
     "mocha-as-promised": "~1.4.0"
   },

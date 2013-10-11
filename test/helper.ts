@@ -9,8 +9,8 @@ module helper {
 	var fs = require('fs');
 	var path = require('path');
 	var util = require('util');
-	var q:QStatic = require('q');
-	var FS:Qfs = require('q-io/fs');
+	var Q:typeof Q = require('q');
+	var FS:typeof QioFS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 	var shaRegExp = /^[0-9a-f]{40}$/;
 	var md5RegExp = /^[0-9a-f]{32}$/;
