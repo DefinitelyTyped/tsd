@@ -3,7 +3,7 @@
 module tsd {
 	'use strict';
 
-	//TODO replace reference node RegExp with a better xml parser (tony the pony)
+	//TODO replace reference node RegExp with a xml parser (tony the pony)
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
 	var leadingExp = /^\.\.\//;
@@ -82,13 +82,15 @@ module tsd {
 		}
 
 		static contains(list:tsd.DefVersion[], file:tsd.DefVersion):boolean {
+			var p = file.def.path;
 			for (var i = 0, ii = list.length; i < ii; i++) {
-				if (list[i].def.path === file.def.path) {
+				if (list[i].def.path === p) {
 					return true;
 				}
 			}
 			return false;
 		}
+
 		static mergeDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
 			for (var i = 0, ii = list.length; i < ii; i++) {

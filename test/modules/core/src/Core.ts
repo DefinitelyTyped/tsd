@@ -13,6 +13,29 @@ describe('Core', () => {
 	var core:tsd.Core;
 	var context:tsd.Context;
 
+	function getCore(context:tsd.Context):tsd.Core {
+		var core = new tsd.Core(context);
+
+		helper.applyCoreUpdate(core);
+		return core;
+	}
+
+	function testConfig(path:string):Q.Promise<void> {
+		context.paths.configFile = path;
+		var source = xm.FileUtil.readJSONSync(path);
+
+		core = getCore(context);
+		return core.readConfig(false).then(() => {
+			helper.assertConfig(core.context.config, source, 'source data');
+		});
+	}
+
+	function testInvalidConfig(path:string, exp:RegExp):Q.Promise<void> {
+		context.paths.configFile = path;
+		core = getCore(context);
+		return assert.isRejected(core.readConfig(false), exp);
+	}
+
 	before(() => {
 	});
 	beforeEach(() => {
@@ -25,13 +48,6 @@ describe('Core', () => {
 		core = null;
 	});
 
-	function getCore(context:tsd.Context):tsd.Core {
-		var core = new tsd.Core(context);
-
-		helper.applyCoreUpdate(core);
-		return core;
-	}
-
 	it('should be defined', () => {
 		assert.isFunction(tsd.Core, 'constructor');
 	});
@@ -42,24 +58,8 @@ describe('Core', () => {
 	});
 
 	describe('readConfig', () => {
-
-		function testConfig(path:string):Q.Promise<void> {
-			context.paths.configFile = path;
-			var source = xm.FileUtil.readJSONSync(path);
-
-			core = getCore(context);
-			return core.readConfig(false).then(() => {
-				helper.assertConfig(core.context.config, source, 'source data');
-			});
-		}
-
-		function testInvalidConfig(path:string, exp:RegExp):Q.Promise<void> {
-			context.paths.configFile = path;
-			core = getCore(context);
-			return assert.isRejected(core.readConfig(false), exp);
-		}
-
-		it('should load minimal config data', () => {
+		//TODO use the actual default
+		it('should load default config data', () => {
 			return testConfig('./test/fixtures/config/default.json');
 		});
 		it('should load minimal config data', () => {
@@ -92,6 +92,7 @@ describe('Core', () => {
 			//modify test data
 			var source = xm.FileUtil.readJSONSync(saveFile);
 			var changed = xm.FileUtil.readJSONSync(saveFile);
+
 			changed.typingsPath = 'some/other/path';
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
 			delete changed.installed['async/async.d.ts'];

@@ -229,7 +229,7 @@ module tsd {
 			xm.assertVar('path', path, 'string');
 			xm.assertVar('commitSha', commitSha, 'sha1');
 
-			var def:tsd.Def = this.getDef(path);
+			var def = this.getDef(path);
 			if (!def) {
 				xm.log.warn('path not in index, attempt-adding: ' + path);
 
@@ -240,14 +240,14 @@ module tsd {
 				throw new Error('cannot procure definition for path: ' + path);
 			}
 
-			var commit:tsd.DefCommit = this.procureCommit(commitSha);
+			var commit = this.procureCommit(commitSha);
 			if (!commit) {
 				throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
 			}
 			if (!commit.hasMetaData()) {
 				//TODO always load meta data? meh? waste of requests?
 			}
-			var file:tsd.DefVersion = this.procureVersion(def, commit);
+			var file = this.procureVersion(def, commit);
 			if (!file) {
 				throw new Error('cannot procure definition version for path: ' + path + ' -> commit: ' + commit.commitSha);
 			}

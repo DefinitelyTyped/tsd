@@ -12,16 +12,19 @@
 ///<reference path="../callAsync.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
+///<reference path="../io/Logger.ts" />
 ///<reference path="../../../typings/easy-table/easy-table.d.ts" />
 
 module xm {
 	'use strict';
 
 	var optimist = require('optimist');
+	var Q:typeof Q = require('q');
+	var exitProcess:(code:number) => void = require('exit');
 	var Table:EasyTableStatic = require('easy-table');
 
 	export interface ExposeAction {
-		(args:any):void;
+		(args:any):Q.Promise<any>;
 	}
 
 	export interface ExposeBuild {
@@ -34,6 +37,14 @@ module xm {
 
 	export interface ExposeSorter {
 		(one:ExposeCommand, two:ExposeCommand):number;
+	}
+
+	export interface ExposeResult {
+		code:number;
+		error:ExposeError;
+	}
+
+	export interface ExposeError extends Error {
 	}
 
 	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
@@ -148,6 +159,7 @@ module xm {
 		private _nodeBin = false;
 		private _index = 0;
 		private _mainGroup = new ExposeGroup();
+		log = xm.getLogger('Expose');
 
 		constructor(public title:string = '') {
 			this.createCommand('help', (cmd:ExposeCommand) => {
@@ -155,6 +167,7 @@ module xm {
 				cmd.groups = ['help'];
 				cmd.execute = (args:any) => {
 					this.printCommands();
+					return null;
 				};
 			});
 
@@ -170,6 +183,8 @@ module xm {
 			});
 
 			xm.ObjectUtil.hidePrefixed(this);
+
+			this.log.showLog = false;
 		}
 
 		defineOption(data:ExposeOption) {
@@ -179,14 +194,9 @@ module xm {
 			this._options.set(data.name, data);
 		}
 
-		/*command(id:string, def:(args:any) => void, label?:string, options?:any, variadic?:any) {
-		 if (this._commands.has(id)) {
-		 throw new Error('id collision on ' + id);
-		 }
-		 this._commands.set(id, new ExposeCommand(id, def, label, options, variadic));
-		 }*/
 		createCommand(id:string, build:ExposeBuild) {
 			xm.assertVar('id', id, 'string');
+
 			if (this._commands.has(id)) {
 				throw new Error('id collision on ' + id);
 			}
@@ -197,7 +207,7 @@ module xm {
 			this._commands.set(id, cmd);
 		}
 
-		createGroup(id:string, build:ExposeBuildGroup) {
+		createGroup(id:string, build:ExposeBuildGroup):void {
 			xm.assertVar('id', id, 'string');
 			if (this._groups.has(id)) {
 				throw new Error('id collision on ' + id);
@@ -232,7 +242,27 @@ module xm {
 			});
 		}
 
-		executeArgv(argvRaw:any, alt?:string) {
+		exit(code:number):void {
+			exitProcess(code);
+		}
+
+		//execute and exit
+		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
+			this.execArgv(argvRaw, alt).then((result:ExposeResult) => {
+				if (result.error) {
+					throw(result.error);
+				}
+				if (exitAfter) {
+					this.exit(result.code);
+				}
+			}).fail((err) => {
+				xm.log.error(err);
+				this.exit(1);
+			});
+		}
+
+		//pasre and execute args, promise result
+		execArgv(argvRaw:any, alt?:string):Q.Promise<ExposeResult> {
 			this.init();
 
 			this._nodeBin = argvRaw[0] === 'node';
@@ -246,12 +276,11 @@ module xm {
 			//defaults
 			if (!argv || argv._.length === 0) {
 				if (alt && this._commands.has(alt)) {
-					this.execute(alt, argv);
+					return this.execute(alt, argv);
 				}
 				else {
-					this.execute('help', argv);
+					return this.execute('help', argv);
 				}
-				return;
 			}
 
 			//command options (option that takes priority, like --version etc)
@@ -259,8 +288,7 @@ module xm {
 				opt = options[i];
 				if (opt.command && argv[opt.name]) {
 					//xm.log('command opt ' + name);
-					this.execute(opt.command, argv);
-					return;
+					return this.execute(opt.command, argv);
 				}
 			}
 
@@ -276,37 +304,51 @@ module xm {
 				if (alt && this._commands.has(alt)) {
 					xm.log.warn('undefined command, using default');
 					xm.log('');
-					this.execute(alt, argv);
+					return this.execute(alt, argv);
 				}
 				else {
 					xm.log.warn('undefined command');
 					xm.log('');
-					this.execute('help', argv);
+					return this.execute('help', argv);
 				}
 			}
 			else if (this._commands.has(cmd)) {
 				// actual command
-				this.execute(cmd, argv);
+				return this.execute(cmd, argv);
 			}
 			else {
 				xm.log.warn('command not found: ' + cmd);
 				xm.log('');
-				this.execute('help', argv, false);
+				return this.execute('help', argv, false);
 			}
 		}
 
-		execute(id:string, args:any = null, head:boolean = false) {
+		//execute command
+		execute(id:string, args:any = null, head:boolean = false):Q.Promise<ExposeResult> {
 			this.init();
 
 			if (!this._commands.has(id)) {
 				xm.log.error('\nunknown command ' + id + '\n');
-				return;
+				return Q({
+					code: 1,
+					err: new Error('unknown command ' + id)
+				});
 			}
 			if (head) {
 				xm.log('\n-> ' + id + '\n');
 			}
 			var f:ExposeCommand = this._commands.get(id);
-			f.execute.call(f, args);
+
+			return Q(f.execute.call(f, args)).then(() => {
+				return {
+					code: 0
+				};
+			}, (err) => {
+				return {
+					code: (err.code && err.code > 0) ? err.code : 1,
+					err: err
+				};
+			});
 		}
 
 		printCommands():void {
@@ -385,6 +427,7 @@ module xm {
 
 					this._commands.values().filter((cmd:ExposeCommand) => {
 						return cmd.groups.indexOf(group.id) > -1;
+
 					}).sort(group.sorter).forEach((cmd:ExposeCommand) => {
 						addCommand(cmd, group);
 
@@ -398,7 +441,7 @@ module xm {
 						commands.cell('one', '--------');
 						commands.newRow();
 						xm.eachProp(group.options, (name:string) => {
-							var option:ExposeOption = this._options.get(name);
+							var option = this._options.get(name);
 							if (commandOptNames.indexOf(name) < 0) {
 								addOption(name);
 							}
@@ -435,6 +478,8 @@ module xm {
 				commands.newRow();
 			}
 			//now output
+
+			//TODO get rid of this nasty trim
 			xm.log(commands.print().replace(/\s*$/, ''));
 		}
 

@@ -1,0 +1,31 @@
+
+tsd 0.5.0-dev
+
+Main commands
+--------                                       
+   search <selector>       Search definitions                
+   install <selector>      Install definitions               
+      --save               <undefined>                       
+   reinstall <selector>    Re-install definitions from config
+   info <selector>         Display definition info           
+   history <selector>      Display definition history        
+   deps <selector>         List dependencies                 
+--------                                                     
+      -c, --config <path>  Path to config file (string)      
+                                                             
+Help commands
+--------                                       
+   help                    Display usage help                
+   version                 Display version                   
+                                                             
+Other commands
+--------                                      
+   settings                Display config settings           
+      -c, --config <path>  Path to config file (string)      
+                                                             
+Global options
+--------                                      
+      -h, --help           Display usage help (flag)         
+      -V, --version        Display version information (flag)
+      --dev                Development mode (flag)           
+      --verbose            Verbose output (flag)

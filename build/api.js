@@ -293,8 +293,18 @@ var xm;
             return json;
         }
 
-        function readJSONSync(src) {
+        function doReadJSONSync(src) {
             return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
+        }
+
+        function readJSONSync(src) {
+            var json;
+            try  {
+                json = doReadJSONSync(src);
+            } catch (err) {
+                json = doReadJSONSync(src);
+            }
+            return json;
         }
         FileUtil.readJSONSync = readJSONSync;
 
@@ -2798,7 +2808,6 @@ var xm;
 })(xm || (xm = {}));
 var git;
 (function (git) {
-    var request = require('request');
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
@@ -2984,13 +2993,15 @@ var tsd;
         };
 
         DefUtil.contains = function (list, file) {
+            var p = file.def.path;
             for (var i = 0, ii = list.length; i < ii; i++) {
-                if (list[i].def.path === file.def.path) {
+                if (list[i].def.path === p) {
                     return true;
                 }
             }
             return false;
         };
+
         DefUtil.mergeDependencies = function (list) {
             var ret = [];
             for (var i = 0, ii = list.length; i < ii; i++) {
@@ -4094,7 +4105,6 @@ var tsd;
     var FS = require('q-io/fs');
     var path = require('path');
     var pointer = require('jsonpointer.js');
-    var ansidiff = require('ansidiff');
 
     var branch_tree = '/commit/commit/tree/sha';
 
@@ -4599,7 +4609,7 @@ var tsd;
             var d = Q.defer();
 
             this._core.saveConfig().then(function () {
-                d.resolve(null);
+                d.resolve(undefined);
             }, d.reject);
 
             return d.promise;
@@ -4772,6 +4782,8 @@ var xm;
     'use strict';
 
     var optimist = require('optimist');
+    var Q = require('q');
+    var exitProcess = require('exit');
     var Table = require('easy-table');
 
     function exposeSortIndex(one, two) {
@@ -4862,11 +4874,13 @@ var xm;
             this._nodeBin = false;
             this._index = 0;
             this._mainGroup = new ExposeGroup();
+            this.log = xm.getLogger('Expose');
             this.createCommand('help', function (cmd) {
                 cmd.label = 'Display usage help';
                 cmd.groups = ['help'];
                 cmd.execute = function (args) {
                     _this.printCommands();
+                    return null;
                 };
             });
 
@@ -4882,6 +4896,8 @@ var xm;
             });
 
             xm.ObjectUtil.hidePrefixed(this);
+
+            this.log.showLog = false;
         }
         Expose.prototype.defineOption = function (data) {
             if (this._options.has(data.name)) {
@@ -4892,6 +4908,7 @@ var xm;
 
         Expose.prototype.createCommand = function (id, build) {
             xm.assertVar('id', id, 'string');
+
             if (this._commands.has(id)) {
                 throw new Error('id collision on ' + id);
             }
@@ -4937,7 +4954,27 @@ var xm;
             });
         };
 
-        Expose.prototype.executeArgv = function (argvRaw, alt) {
+        Expose.prototype.exit = function (code) {
+            exitProcess(code);
+        };
+
+        Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
+            if (typeof exitAfter === "undefined") { exitAfter = true; }
+            var _this = this;
+            this.execArgv(argvRaw, alt).then(function (result) {
+                if (result.error) {
+                    throw (result.error);
+                }
+                if (exitAfter) {
+                    _this.exit(result.code);
+                }
+            }).fail(function (err) {
+                xm.log.error(err);
+                _this.exit(1);
+            });
+        };
+
+        Expose.prototype.execArgv = function (argvRaw, alt) {
             this.init();
 
             this._nodeBin = argvRaw[0] === 'node';
@@ -4950,18 +4987,16 @@ var xm;
 
             if (!argv || argv._.length === 0) {
                 if (alt && this._commands.has(alt)) {
-                    this.execute(alt, argv);
+                    return this.execute(alt, argv);
                 } else {
-                    this.execute('help', argv);
+                    return this.execute('help', argv);
                 }
-                return;
             }
 
             for (i = 0, ii = options.length; i < ii; i++) {
                 opt = options[i];
                 if (opt.command && argv[opt.name]) {
-                    this.execute(opt.command, argv);
-                    return;
+                    return this.execute(opt.command, argv);
                 }
             }
 
@@ -4975,18 +5010,18 @@ var xm;
                 if (alt && this._commands.has(alt)) {
                     xm.log.warn('undefined command, using default');
                     xm.log('');
-                    this.execute(alt, argv);
+                    return this.execute(alt, argv);
                 } else {
                     xm.log.warn('undefined command');
                     xm.log('');
-                    this.execute('help', argv);
+                    return this.execute('help', argv);
                 }
             } else if (this._commands.has(cmd)) {
-                this.execute(cmd, argv);
+                return this.execute(cmd, argv);
             } else {
                 xm.log.warn('command not found: ' + cmd);
                 xm.log('');
-                this.execute('help', argv, false);
+                return this.execute('help', argv, false);
             }
         };
 
@@ -4997,13 +5032,26 @@ var xm;
 
             if (!this._commands.has(id)) {
                 xm.log.error('\nunknown command ' + id + '\n');
-                return;
+                return Q({
+                    code: 1,
+                    err: new Error('unknown command ' + id)
+                });
             }
             if (head) {
                 xm.log('\n-> ' + id + '\n');
             }
             var f = this._commands.get(id);
-            f.execute.call(f, args);
+
+            return Q(f.execute.call(f, args)).then(function () {
+                return {
+                    code: 0
+                };
+            }, function (err) {
+                return {
+                    code: (err.code && err.code > 0) ? err.code : 1,
+                    err: err
+                };
+            });
         };
 
         Expose.prototype.printCommands = function () {
@@ -5169,6 +5217,7 @@ var tsd;
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
+    var exit = require('exit');
 
     var pleonasm;
 
@@ -5421,6 +5470,7 @@ var tsd;
             cmd.groups = ['help'];
             cmd.execute = function (args) {
                 xm.log(xm.PackageJSON.getLocal().version);
+                return null;
             };
         });
 
@@ -5429,8 +5479,9 @@ var tsd;
             cmd.options = ['config'];
             cmd.groups = ['support'];
             cmd.execute = function (args) {
-                getAPIJob(args).done(function (job) {
+                return getAPIJob(args).then(function (job) {
                     job.api.context.logInfo(true);
+                    return null;
                 });
             };
         });
@@ -5441,8 +5492,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
-                getSelectorJob(args).then(function (job) {
-                    return job.api.search(job.selector).done(function (result) {
+                return getSelectorJob(args).then(function (job) {
+                    return job.api.search(job.selector).then(function (result) {
                         reportSucces(null);
 
                         result.selection.forEach(function (file) {
@@ -5450,8 +5501,8 @@ var tsd;
                             printFileInfo(file);
                             printFileCommit(file);
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 
@@ -5461,8 +5512,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'write'];
             cmd.execute = function (args) {
-                getSelectorJob(args).then(function (job) {
-                    return job.api.install(job.selector).done(function (result) {
+                return getSelectorJob(args).then(function (job) {
+                    return job.api.install(job.selector).then(function (result) {
                         reportSucces(null);
 
                         xm.log('');
@@ -5472,8 +5523,8 @@ var tsd;
 
                             xm.log('');
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 
@@ -5483,8 +5534,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'write'];
             cmd.execute = function (args) {
-                getAPIJob(args).then(function (job) {
-                    return job.api.reinstall().done(function (result) {
+                return getAPIJob(args).then(function (job) {
+                    return job.api.reinstall().then(function (result) {
                         reportSucces(null);
 
                         xm.log('');
@@ -5494,8 +5545,8 @@ var tsd;
 
                             xm.log('');
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 
@@ -5505,8 +5556,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
-                getSelectorJob(args).then(function (job) {
-                    return job.api.info(job.selector).done(function (result) {
+                return getSelectorJob(args).then(function (job) {
+                    return job.api.info(job.selector).then(function (result) {
                         reportSucces(null);
 
                         result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
@@ -5514,8 +5565,8 @@ var tsd;
                             printFileInfo(file);
                             printFileCommit(file);
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 
@@ -5525,8 +5576,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (args) {
-                getSelectorJob(args).then(function (job) {
-                    return job.api.history(job.selector).done(function (result) {
+                return getSelectorJob(args).then(function (job) {
+                    return job.api.history(job.selector).then(function (result) {
                         reportSucces(null);
 
                         result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
@@ -5540,8 +5591,8 @@ var tsd;
                                 printFileCommit(file);
                             });
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 
@@ -5551,8 +5602,8 @@ var tsd;
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'info', 'query'];
             cmd.execute = function (args) {
-                getSelectorJob(args).then(function (job) {
-                    return job.api.deps(job.selector).done(function (result) {
+                return getSelectorJob(args).then(function (job) {
+                    return job.api.deps(job.selector).then(function (result) {
                         reportSucces(null);
 
                         result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
@@ -5571,8 +5622,8 @@ var tsd;
                                 xm.log('----');
                             }
                         });
-                    }, reportError);
-                });
+                    });
+                }, reportError);
             };
         });
 

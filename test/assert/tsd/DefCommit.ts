@@ -13,4 +13,16 @@ module helper {
 		//TODO serialise more DefCommit
 		return json;
 	}
+
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	export function assertDefCommit(commit:tsd.DefCommit, values:any, message:string) {
+		assert.ok(commit, message + ': commit');
+		assert.ok(values, message + ': values');
+		assert.instanceOf(commit, tsd.DefCommit, message + ': info');
+
+		helper.propStrictEqual(commit, values, 'commitSha', message);
+		helper.isStringSHA1(values.commitSha, message + ': values.commitSha');
+	}
 }

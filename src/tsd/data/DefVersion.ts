@@ -21,6 +21,7 @@ module tsd {
 		private _blob:tsd.DefBlob = null;
 
 		//parse from tags
+		//TODO shouldn't this be DefVersion? from same commit? (still could easily get the head)
 		dependencies:tsd.Def[] = [];
 		solved:boolean = false;
 

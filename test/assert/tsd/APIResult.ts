@@ -55,7 +55,7 @@ module helper {
 			helper.assertDefArray(result.definitions, values.definitions, message + ': definitions');
 		}
 		if (values.written) {
-			helper.assertKeyValue(result.written, values.written, helper.assertDefVersion, message + ': written');
+			helper.assertKeyValue(result.written, values.written, helper.assertDefVersionFlat, message + ': written');
 		}
 	}
 }

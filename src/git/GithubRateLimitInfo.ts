@@ -15,6 +15,7 @@ module git {
 		}
 
 		readFromRes(response:any) {
+			//TODO assert rate limit extraction?
 			if (response && xm.isObject(response.meta)) {
 				if (xm.ObjectUtil.hasOwnProp(response.meta, 'x-ratelimit-limit')) {
 					this.limit = parseInt(response.meta['x-ratelimit-limit'], 10);

@@ -30,9 +30,9 @@ Most of these are file/class/block 'local' changes: easy to fix without conflict
 Never enough.
 
 * :a:   Expand API command testing; besides search/install ~~(once update fixtures land)~~
-* :x:   Add CLI tests
+* :a:   Add CLI tests
 * :o:	Add node.js module tests
-* :id:	Consider testing JavaScript output instead of TypeScript source.
+* :id:	Consider testing JavaScript output instead of TypeScript source (with compiled declarations: so those get checked too).
 
 Working on a way run data tests from fixtures that can be updated easily (otherwise decent coverage is insane to manage) 
 
@@ -45,29 +45,29 @@ Working on a way run data tests from fixtures that can be updated easily (otherw
 
 Basics commands
 
-* :m:	Add help (show commands) 
-* :m:	Add version (show version)
-* :x:	Add init (new json with repo/branch)
-* :m:	Add settings (show config info)
-* :m:	Add reinstall (from config)
-* :vs:	Consider unifying local/remote selectors (tricky)
+* :m:	Add **help** (show commands) 
+* :m:	Add **version** (show version)
+* :x:	Add **init** (new json with repo/branch)
+* :m:	Add **settings** (show config info)
+* :m:	Add **reinstall** (from config)
+* :vs:	Consider unifying local remote selectors (tricky. maybe a param)
 
 Remote selector commands
 
-* :m:	Add search (search definitions)
-* :m:	Add install (install definitions)
-* :o:	Add direct (install from commit sha, or blob)
-* :m:	Add info (parse file content)
-* :m:	Add history (list commit history)
-* :o:	Add details (detailed commit history), needed?
+* :m:	Add **search** (search definitions)
+* :m:	Add **install** (install definitions)
+* :o:	Add **direct** (install from commit sha, or blob)
+* :m:	Add **info** (parse file content)
+* :m:	Add **history** (list commit history)
+* :o:	Add **details** (detailed commit history), needed?
 * :x:	Enhance deps (list dependencies), make recursive and display
 
 Local selector commands
 
-* :x:	Add local (search local files)
-* :x:	Add uninstall (remove local files)
-* :x:	Add compare (check for updates)
-* :x:	Add update (apply updates)
+* :x:	Add **local** (search local files)
+* :x:	Add **uninstall** (remove local files)
+* :x:	Add **compare** (check for updates)
+* :x:	Add **update** (apply updates)
 
 Browser commands
 
@@ -82,7 +82,7 @@ UIX commands
 Cache commands
 
 * :b:	Add purge (or flush)
-* :b:	Add dump (see content)
+* :b:	Add dump (see cache content)
 
 Selector
 
@@ -135,7 +135,12 @@ Info
 
 Config
 
-* :m:	Improve config JSON-Schema (RegExp)
+* :o2:	Improve config JSON-Schema (RegExp)
+	* Improve flexibility
+	* Update tsd tests to verify changes
+	* Update typingsPath: should be 0 length (lazy for current dir)
+	* Update commit: should be > ~6 length (as per git convention)
+	* Update blob: should be optional, still fixed at 40 (as per concept commit is leading)
 * :o:	Improve config validation reporting (see tv4, chai-json-schema)
 * :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
 
@@ -144,7 +149,7 @@ Cache
 * :m:	Decide on user caching directory: home / AppData like npm
 * :m:	Decide on cache folder version naming scheme
 * :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
-* :a:	Drop 'node-github' dependency and self re-implement github API to leverage http-cache-headers (and rate limit timeout info)
+* :a:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate limit timeout info)
 * :b:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :o:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
@@ -159,23 +164,25 @@ Internals
 * :vs:	Consider if API and/or Core need to be split into command classes.
 * :vs:	Consider adding timeouts
 * :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
+* :id:	Consider moving to class model with promise-based methods
+* :id:	Consider adding class based façade with promise-based methods
 * :o:	Consider global store for JSON pointers and RegExps etc
-* :cl:	Clean up usage of module name within same module (eg: `tsd.Def` is not needed in other code inside the `tsd` module (could be a remnant of old TS 0.8 or a old WebStorm 6 glitch fix).
+* :cl:	Clean usage of module name within same module (eg: `tsd.Def` is not needed in other code inside the `tsd` module (could be a remnant of old TS 0.8 or a WebStorm 6 glitch fix).
 * :o:	Add xm interface for debug/log/event tracking
 * :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
 
 Technical
 
-* :a:	Move to TS 0.9 generics definition of Q promises (in progress)
-* :o2:	Expand property / const immutability: Object.freeze()
-* :o2:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
+* :m:	Move to TS 0.9 generics definition of Q promises
+* :cl:	Expand property / const immutability: Object.freeze()
+* :cl:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
 * :cl:	Change some utils from static class members to module functions
 
 Cleanup
 
 * :cl:	Sweep and enable `tslint.json` rules
 * :cl:	Clean `package.json`: fix some ~tildes before release
-* :cl:	Sweep used modules: require() and `package.json`, dev vs runtime, npm prune 
+* :cl:	Sweep used modules: `require()` and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
 * :m:	Verify "use strict" (needed in node?)
@@ -195,7 +202,7 @@ Publishing
 Dependencies
 
 * :id:	Consider dropping underscore?
-* :a:	Update Q with generics
+* :m:	Update Q with generics
 * :o:	Sweep recent xm `package changes for new tests 
 
 Bugs:
@@ -208,25 +215,25 @@ More.. always more :rocket:
 
 ## Emoji based Project Management 
 
-Status indicators:
+Status indicators (with memory hint):
 
 * :m:	Resolved and closed (*'mint!'*).
-* :id:	Proposal or idea for consideration.
+* :id:	Proposal or idea for consideration (idea).
 * :vs:	Decision needed (this vs that).
-* :sa:	Pending (reaction / remote fix).
-* :a:	First priority.
-* :b:	Second priority.
-* :ab:	Important non-prioritised.
-* :cl:	Need to clean up.
-* :o2:	Must resolve for release.
-* :x:	Acknowledged, waiting for priority.
-* :o:	Open, incoming, undetermined.
+* :sa:	Pending external action (servicing).
+* :ok:	Decision made (ok).
+* :ng:	Won't fix (no-go).
+* :up:	Deployed (systems up).
+* :a:	First priority (prio A).
+* :b:	Second priority (prio B).
+* :ab:	Important non-prioritised (A or B or ?).
+* :cl:	Need to clean up (clean).
+* :o2:	Resolve for release (open).
+* :x:	Acknowledged, pending on priority (status X).
+* :o:	Open, incoming, undetermined (open).
 
 Reserved (short codes):
 
-* :ok:	Decision made?
-* :ng:	(angular :)
-* :up:	Released?
 * :cd:	Shipped? Released?
 * :on:
 * :tm:

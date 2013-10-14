@@ -26,7 +26,6 @@ module helper {
 		helper.propStrictEqual(blob, values, 'sha', message);
 
 		if (values.content) {
-			//TODO add reliable decoder
 			assert.strictEqual(blob.content.toString('base64'), values.content, message + ': content');
 		}
 	}

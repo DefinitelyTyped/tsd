@@ -4,7 +4,7 @@
       "path": "angularjs/angular.d.ts",
       "project": "angularjs",
       "name": "angular",
-      "def": {
+      "head": {
         "path": "angularjs/angular.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -19,7 +19,7 @@
             "path": "jquery/jquery.d.ts",
             "project": "jquery",
             "name": "jquery",
-            "def": {
+            "head": {
               "path": "jquery/jquery.d.ts",
               "commit": {
                 "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -54,7 +54,7 @@
           "path": "jquery/jquery.d.ts",
           "project": "jquery",
           "name": "jquery",
-          "def": {
+          "head": {
             "path": "jquery/jquery.d.ts",
             "commit": {
               "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -72,18 +72,6 @@
     }
   ],
   "written": {
-    "jquery/jquery.d.ts": {
-      "path": "jquery/jquery.d.ts",
-      "commit": {
-        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
-      },
-      "blob": {
-        "sha": "99969f710e2dbcac67382988edc7224550d29b86"
-      },
-      "key": "jquery/jquery.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
-      "solved": true,
-      "dependencies": []
-    },
     "angularjs/angular.d.ts": {
       "path": "angularjs/angular.d.ts",
       "commit": {
@@ -99,7 +87,7 @@
           "path": "jquery/jquery.d.ts",
           "project": "jquery",
           "name": "jquery",
-          "def": {
+          "head": {
             "path": "jquery/jquery.d.ts",
             "commit": {
               "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -114,6 +102,18 @@
           "history": []
         }
       ]
+    },
+    "jquery/jquery.d.ts": {
+      "path": "jquery/jquery.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "99969f710e2dbcac67382988edc7224550d29b86"
+      },
+      "key": "jquery/jquery.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
     }
   }
 }

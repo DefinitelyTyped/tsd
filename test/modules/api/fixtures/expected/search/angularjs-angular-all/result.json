@@ -4,7 +4,7 @@
       "path": "angularjs/angular-cookies.d.ts",
       "project": "angularjs",
       "name": "angular-cookies",
-      "def": {
+      "head": {
         "path": "angularjs/angular-cookies.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -22,7 +22,7 @@
       "path": "angularjs/angular-mocks.d.ts",
       "project": "angularjs",
       "name": "angular-mocks",
-      "def": {
+      "head": {
         "path": "angularjs/angular-mocks.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -40,7 +40,7 @@
       "path": "angularjs/angular-resource.d.ts",
       "project": "angularjs",
       "name": "angular-resource",
-      "def": {
+      "head": {
         "path": "angularjs/angular-resource.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -58,7 +58,7 @@
       "path": "angularjs/angular-sanitize.d.ts",
       "project": "angularjs",
       "name": "angular-sanitize",
-      "def": {
+      "head": {
         "path": "angularjs/angular-sanitize.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -76,7 +76,7 @@
       "path": "angularjs/angular-scenario.d.ts",
       "project": "angularjs",
       "name": "angular-scenario",
-      "def": {
+      "head": {
         "path": "angularjs/angular-scenario.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
@@ -94,7 +94,7 @@
       "path": "angularjs/angular.d.ts",
       "project": "angularjs",
       "name": "angular",
-      "def": {
+      "head": {
         "path": "angularjs/angular.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"

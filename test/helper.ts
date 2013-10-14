@@ -1,7 +1,10 @@
+///<reference path="_ref.d.ts" />
 ///<reference path="globals.ts" />
 ///<reference path="assert/xm/_all.ts" />
 ///<reference path="assert/xm/unordered.ts" />
 ///<reference path="../src/xm/data/PackageJSON.ts" />
+
+var global = this;
 
 module helper {
 	'use strict';
@@ -10,8 +13,13 @@ module helper {
 	var path = require('path');
 	var util = require('util');
 	var Q:typeof Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
+	var FS:typeof QioFS = require('q-io/fs')
+	var Reader:Qio.BufferReader = require('q-io/reader');
 	var assert:Chai.Assert = require('chai').assert;
+	var childProcess = require('child_process');
+	var bufferEqual = require('buffer-equal');
+	var streams = require('memory-streams');
+
 	var shaRegExp = /^[0-9a-f]{40}$/;
 	var md5RegExp = /^[0-9a-f]{32}$/;
 
@@ -51,18 +59,46 @@ module helper {
 		xm.log(message + JSON.stringify(object, null, 4));
 	}
 
+	//should be assertStringSHA1
 	export function isStringSHA1(value:any, msg?:string) {
 		assert.isString(value, msg);
 		assert.match(String(value), shaRegExp, msg);
 	}
 
+	//should be assertStringMD5
 	export function isStringMD5(value:any, msg?:string) {
 		assert.isString(value, msg);
 		assert.match(String(value), md5RegExp, msg);
 	}
 
-	export function propStrictEqual(actual, expected, prop, message) {
-		assert.strictEqual(actual[prop], expected[prop], message + '.' + prop);
+	export function propStrictEqual(actual, expected, prop:string, message:string) {
+		assert.property(actual, prop, message + '.' + prop + ' actual');
+		assert.property(expected, prop, message + '.' + prop + ' expected');
+		assert.strictEqual(actual[prop], expected[prop], message + '.' + prop + ' equal');
+	}
+
+	export function assertBufferEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string) {
+		assert.instanceOf(act, Buffer, msg + ': ' + act);
+		assert.instanceOf(exp, Buffer, msg + ': ' + exp);
+		assert(bufferEqual(act, exp), msg + ': bufferEqual');
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	//for safety
+	var promiseDoneMistake = function () {
+		throw new Error('don\'t use callback when using promises');
+	};
+
+	//monkey patch
+	it.promised = function promised(expectation:string, assertion?:(call:() => void) => void):void {
+		it(expectation, (done) => {
+			Q(assertion(promiseDoneMistake)).done(() => {
+				done();
+			}, (err) => {
+				done(err);
+			});
+		});
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -72,5 +108,72 @@ module helper {
 	}
 	export interface IsLikeCB {
 		(actual, expected):boolean;
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	export interface RunCLIResult {
+		code:number;
+		error:Error;
+		stdout:NodeBuffer;
+		stderr:NodeBuffer;
+		args:string[];
+	}
+
+	//TODO decide to update runCLI to use fork() instead of exec() or spawn()
+	export function runCLI(modulePath:string, args:string[], cwd:string = './'):Q.Promise<RunCLIResult> {
+		assert.isArray(args, 'args');
+
+		var d:Q.Deferred<RunCLIResult> = Q.defer();
+
+		var stdout:NodeBuffer[] = [];
+		var stderr:NodeBuffer[] = [];
+
+		var options:any = {
+			cwd: path.resolve(cwd),
+			silent: true
+		};
+
+		//xm.log(['node', modulePath, args.join(' ')].join(' '));
+
+		var child = childProcess.fork(modulePath, args, options);
+		if (!child) {
+			d.resolve({error: new Error('child spawned as null'), code: 1, stdout: null, stderr: null, args: args});
+			return d.promise;
+		}
+
+		var getRes = function (code:number = 0, err:Error = null):RunCLIResult {
+			return {
+				code: code,
+				error: err || null,
+				stdout: Buffer.concat(stdout),
+				stderr: Buffer.concat(stderr),
+				args: args
+			}
+		};
+
+		child.on('error', (err) => {
+			if (err) {
+				xm.log.error('child process exited with code ' + err.code);
+				xm.log.error(err);
+			}
+			//never fail (we might test for cli failure after all)
+			d.resolve(getRes(1, err));
+		});
+
+		child.on('exit', (event) => {
+			d.resolve(getRes(0, null));
+		});
+
+		child.stdout.on('data', (chunk) => {
+			stdout.push(chunk);
+		});
+		child.stderr.on('data', (chunk) => {
+			stderr.push(chunk);
+		});
+
+		//return Q.resolve(getRes(2));
+
+		return d.promise;
 	}
 }

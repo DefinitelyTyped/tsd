@@ -15,8 +15,7 @@ module tsd {
 	/*
 	 APIResult: hold result data (composition and meaning may vary)
 	 */
-	//TODO rename to DefSelection?
-	//TODO consider splitting into more specific result for  each command?
+	//TODO consider splitting into more specific result for each command?
 	//TODO consider ditching index (why is it in here?)
 	//TODO add useful methods to result (wrap some helpers from DefUtils)
 	export class APIResult {
@@ -51,7 +50,7 @@ module tsd {
 
 		/*
 		 read the config from Context.path.configFile
-		 promise: null
+		 promise: undefined
 		 */
 		readConfig(optional:boolean):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
@@ -65,13 +64,13 @@ module tsd {
 
 		/*
 		 save the config to Context.path.configFile
-		 promise: null
+		 promise: undefined
 		 */
 		saveConfig():Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
 
 			this._core.saveConfig().then(() => {
-				d.resolve(null);
+				d.resolve(undefined);
 			}, d.reject);
 
 			return d.promise;

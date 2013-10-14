@@ -29,6 +29,9 @@ declare var it: {
     skip(expectation: string, assertion?: () => void): void;
     skip(expectation: string, assertion?: (done: (error?: Error) => void) => void): void;
     timeout(ms: number): void;
+
+    //monkey patched
+    promised(expectation: string, assertion?: () => void): void;
 };
 
 declare function before(action: () => void): void;

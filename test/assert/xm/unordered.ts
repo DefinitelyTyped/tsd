@@ -5,11 +5,15 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
+	//TODO test these assertions
+
 	//helper: assert lists of unordered items
 	//first finds an identity match, then applies real assertion
 	export function assertUnorderedLike(actual:any[], expected:any[], matcher:IsLikeCB, assertion:AssertCB, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
+		assert.isFunction(matcher, 'matcher');
+		assert.isFunction(assertion, 'assertion');
 		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
 
 		//clones
@@ -29,9 +33,6 @@ module helper {
 					//jump
 					continue outer;
 				}
-			}
-			if (expected.length > 0) {
-				xm.log(expected);
 			}
 			//use assert.deepEqual for diff report
 			//assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
@@ -54,7 +55,7 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//helper: assert lists of unordered items
-	//naively hammers assertions: every element has to pass exactly one comparative assertion
+	//naively hammers assertions: every element has to pass at least one comparative assertion
 	export function assertUnorderedNaive(actual:any[], expected:any[], assertion:AssertCB, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');

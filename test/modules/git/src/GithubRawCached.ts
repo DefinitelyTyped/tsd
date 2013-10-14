@@ -59,7 +59,7 @@ describe('git.GithubRawCached', () => {
 		assert.isString(filePath, 'filePath');
 		helper.isStringSHA1(commitSha, 'commitSha');
 
-		it('should cache and return data', () => {
+		it.promised('should cache and return data', () => {
 			//raw.debug = true;
 
 			assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
@@ -67,7 +67,7 @@ describe('git.GithubRawCached', () => {
 			return raw.getFile(commitSha, filePath).then((firstData:NodeBuffer) => {
 				assert.ok(firstData, 'first callback data');
 				assert.instanceOf(firstData, Buffer, 'first callback data');
-				assert.operator(firstData.length, '>', 20, 'first callback data');
+				assert.operator(firstData.length, '>', 0, 'first callback data');
 
 				//xm.log(raw.loader.stats.stats.export());
 				helper.assertStatCounter(raw.loader.stats, {
@@ -88,7 +88,7 @@ describe('git.GithubRawCached', () => {
 				return raw.getFile(commitSha, filePath).then((secondData:NodeBuffer) => {
 					assert.ok(secondData, 'second callback data');
 					assert.instanceOf(secondData, Buffer, 'second callback data');
-					assert.operator(secondData.length, '>', 20, 'second callback data');
+					assert.operator(secondData.length, '>', 0, 'second callback data');
 
 					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
 
@@ -108,7 +108,6 @@ describe('git.GithubRawCached', () => {
 						'cache-hit': 1,
 						error: 0
 					}, 'second: ' + commitSha);
-
 				});
 			});
 		});

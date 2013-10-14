@@ -31,6 +31,7 @@ describe('API', () => {
 	it('should be defined', () => {
 		assert.isFunction(tsd.API, 'constructor');
 	});
+
 	it('should throw on bad params', () => {
 		assert.throws(() => {
 			api = new tsd.API(null);
@@ -50,7 +51,7 @@ describe('API', () => {
 		api.context.config.log.mute = mute;
 	}
 
-	function applyTempInfo(group:string, name:string, test:any, selector:tsd.Selector):helper.TestInfo {
+	function applyTestInfo(group:string, name:string, test:any, selector:tsd.Selector):helper.TestInfo {
 		var tmp = helper.getTestInfo(group, name, true);
 
 		api.context.paths.configFile = tmp.configFile;
@@ -63,9 +64,11 @@ describe('API', () => {
 		return tmp;
 	}
 
-	function getSelector(json) {
-		assert.property(json, 'pattern');
-		var selector = new tsd.Selector(json.pattern);
+	function getSelector(test) {
+		assert.property(test, 'selector');
+		assert.property(test.selector, 'pattern');
+		var selector = new tsd.Selector(test.selector.pattern);
+
 		return selector;
 	}
 
@@ -75,12 +78,12 @@ describe('API', () => {
 			if (data.skip) {
 				return;
 			}
-			var selector = getSelector(test.selector);
 
-			it('selector "' + name + '"', () => {
+			it.promised('selector "' + name + '"', () => {
 				api = getAPI(context);
 
-				var info = applyTempInfo('search', name, data, selector);
+				var selector = getSelector(test);
+				var info = applyTestInfo('search', name, data, selector);
 
 				return api.search(selector).then((result:tsd.APIResult) => {
 					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
@@ -89,7 +92,7 @@ describe('API', () => {
 					xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
 
 					var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
-					helper.assertAPIResult(result, resultExpect, 'resultActual');
+					helper.assertAPIResult(result, resultExpect, 'result');
 				});
 			});
 		});
@@ -99,12 +102,15 @@ describe('API', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'install'));
 
 		xm.eachProp(data.tests, (test, name) => {
-			var selector = getSelector(test.selector);
+			if (data.skip) {
+				return;
+			}
 
-			it('selector "' + name + '"', () => {
+			it.promised('test "' + name + '"', () => {
 				api = getAPI(context);
 
-				var info = applyTempInfo('install', name, test, selector);
+				var selector = getSelector(test);
+				var info = applyTestInfo('install', name, test, selector);
 
 				return api.install(selector).then((result:tsd.APIResult) => {
 					helper.assertUpdateStat(api.core.gitAPI.loader, 'api');

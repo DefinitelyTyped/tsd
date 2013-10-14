@@ -21,7 +21,6 @@ module tsd {
 	var FS:typeof QioFS = require('q-io/fs');
 	var path = require('path');
 	var pointer = require('jsonpointer.js');
-	var ansidiff = require('ansidiff');
 
 	var branch_tree:string = '/commit/commit/tree/sha';
 

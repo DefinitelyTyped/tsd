@@ -7,8 +7,6 @@
 ///<reference path="../src/xm/typeOf.ts" />
 ///<reference path="../src/xm/assertVar.ts" />
 
-require('mocha-as-promised')();
-
 var chai:Chai.ChaiStatic = require('chai');
 chai.use(require('chai-fuzzy'));
 chai.use(require('chai-json-schema'));

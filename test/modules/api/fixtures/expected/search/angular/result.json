@@ -4,7 +4,7 @@
       "path": "angularjs/angular.d.ts",
       "project": "angularjs",
       "name": "angular",
-      "def": {
+      "head": {
         "path": "angularjs/angular.d.ts",
         "commit": {
           "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"

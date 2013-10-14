@@ -33,7 +33,6 @@ describe('git.GithubAPICached', () => {
 		assert.isString(gitTest.config.repo.owner, 'owner');
 		assert.isString(gitTest.config.repo.project, 'project');
 	});
-
 	it('should be defined', () => {
 		assert.isFunction(git.GithubAPICached, 'constructor');
 	});
@@ -63,7 +62,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getCachedRaw', () => {
-		it('should not return data for bogus key', () => {
+		it.promised('should not return data for bogus key', () => {
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
 			return api.service.getCachedRaw(api.loader.getKey('bleh blah')).then((data) => {
@@ -75,7 +74,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getBranches', () => {
-		it('should cache and return data from store', () => {
+		it.promised('should cache and return data from store', () => {
 			//api.debug = true;
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
@@ -129,7 +128,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getBlob', () => {
-		it('should cache and return data from store', () => {
+		it.promised('should cache and return data from store', () => {
 			//api.debug = true;
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 

@@ -8,6 +8,7 @@
 
 //TODO add support for q-io/http-apps
 //TODO add verified support for q-io/fs-mock
+//TODO fix Readers/Writers properly
 //TODO find solution for overloaded return types (QioFS.open/QioFS.read)
 //     for some ideas see https://typescript.codeplex.com/discussions/461587#post1105930)
 
@@ -165,7 +166,7 @@ declare module QioHTTP {
 	interface Response {
 		status:number;
 		headers:Headers;
-		body:QioStream.Reader
+		body:Qio.Reader
 		onclose:() => void;
 		node:any;
 	}
@@ -173,7 +174,7 @@ declare module QioHTTP {
 		[name:string]:string;
 		[name:string]:string[];
 	}
-	interface Body extends QioStream.Stream {
+	interface Body extends Qio.Stream {
 
 	}
 	interface Application {
@@ -181,7 +182,7 @@ declare module QioHTTP {
 	}
 }
 
-declare module QioStream {
+declare module Qio {
 	interface ForEachCallback {
 		(chunk:NodeBuffer):Q.Promise<any>;
 		(chunk:string):Q.Promise<any>;
@@ -196,13 +197,6 @@ declare module QioStream {
 		close():void;
 		node:NodeBuffer;
 	}
-	interface BufferReader {
-		new ():Reader;
-		read(stream:Reader, charset:string):string;
-		read(stream:Reader):NodeBuffer;
-		join(buffers:NodeBuffer[]):NodeBuffer;
-	}
-
 	interface Writer {
 		write(content:string):void;
 		write(content:NodeBuffer):void;
@@ -211,15 +205,26 @@ declare module QioStream {
 		destroy():void;
 		node:NodeBuffer;
 	}
-	interface BufferWriter {
-		(writer:NodeBuffer):Writer
-	}
 
 	interface Stream extends Reader, Writer {
 	}
-	interface BufferStream {
-		(buffer:NodeBuffer, encoding:string):Stream
+
+	interface BufferReader extends QioBufferReader {
+
 	}
+}
+interface QioBufferReader {
+	new ():Qio.Reader;
+	read(stream:Qio.Reader, charset:string):string;
+	read(stream:Qio.Reader):NodeBuffer;
+	join(buffers:NodeBuffer[]):NodeBuffer;
+}
+interface QioBufferWriter {
+	(writer:NodeBuffer):Qio.Writer;
+	Writer:Qio.Writer;
+}
+interface QioBufferStream {
+	(buffer:NodeBuffer, encoding:string):Qio.Stream
 }
 
 declare module "q-io/http" {
@@ -227,4 +232,13 @@ export = QioHTTP;
 }
 declare module "q-io/fs" {
 export = QioFS;
+}
+declare module "q-io/reader" {
+export = QioBufferReader;
+}
+declare module "q-io/writer" {
+export = QioBufferWriter;
+}
+declare module "q-io/buffer-stream" {
+export = QioBufferStream;
 }

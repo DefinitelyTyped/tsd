@@ -27,7 +27,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function assertDefVersion(file:tsd.DefVersion, values:any, message:string) {
+	export function assertDefVersion(file:tsd.DefVersion, values:any, recursive:boolean, message:string) {
 		assert.ok(file, message + ': file');
 		assert.ok(values, message + ': values');
 		assert.instanceOf(file, tsd.DefVersion, message + ': file');
@@ -35,30 +35,32 @@ module helper {
 		if (values.path) {
 			assert.strictEqual(file.def.path, values.path, message + ': file.path');
 		}
-		if (values.commitSha) {
-			helper.isStringSHA1(file.commit.commitSha, message + ': file.commit.commitSha');
-			helper.isStringSHA1(values.commitSha, message + ': values.commitSha');
-			assert.strictEqual(file.commit.commitSha, values.commitSha, message + ': file.commit.commitSha');
+		if (values.commit) {
+			helper.assertDefCommit(file.commit, values.commit, message + ': file.commit');
 		}
 		if (values.blob) {
 			helper.assertDefBlob(file.blob, values.blob, message + ': file.blob');
 		}
 		if (typeof values.solved !== 'undefined') {
 			assert.isBoolean(values.solved, message + ': values.solved');
-			helper.propStrictEqual(file, values, 'email', message + ': file');
+			//helper.propStrictEqual(file, values, 'email', message + ': file');
 		}
 		if (values.info) {
 			helper.assertDefInfo(file.info, values.info, message + ': file.info');
 		}
 		if (values.dependencies) {
-			helper.assertDefArray(file.dependencies, values.dependencies, 'dependencies');
+			helper.assertDefArray(file.dependencies, values.dependencies, 'file.dependencies');
 		}
+	}
+
+	export function assertDefVersionFlat(file:tsd.DefVersion, values:any, message:string) {
+		assertDefVersion(file, values, false, message);
 	}
 
 	var assertDefVersionArrayUnordered:AssertCB = helper.getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
 		return (act.def.path === exp.path && act.commit.commitSha === exp.commit.commitSha);
 	}, (act:tsd.DefVersion, exp:any, message?:string) => {
-		assertDefVersion(act, exp, message + ': ' + tsd.shaShort(exp.commit.commitSha));
+		assertDefVersion(act, exp, false, message + ': ' + tsd.shaShort(exp.commit.commitSha));
 	}, 'DefVersion');
 
 	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string) {

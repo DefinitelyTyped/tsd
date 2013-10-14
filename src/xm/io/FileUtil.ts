@@ -42,8 +42,20 @@ module xm {
 			return json;
 		}
 
-		export function readJSONSync(src:string):any {
+		function doReadJSONSync(src:string):any {
 			return parseJson(fs.readFileSync(src, {encoding: 'utf8'}));
+		}
+
+		export function readJSONSync(src:string):any {
+			var json;
+			try {
+				json = doReadJSONSync(src);
+			}
+			catch (err) {
+				//retry.. weird glitch (windows)
+				json = doReadJSONSync(src);
+			}
+			return json;
 		}
 
 		export function readJSON(src:string, callback:(err, res:any) => void) {

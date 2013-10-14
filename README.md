@@ -1,6 +1,6 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/Diullei/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/Diullei/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd)
+[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd)
 
 > TypeScript Definition Package Manager
 
@@ -118,7 +118,7 @@ Include TSD as any npm dependency in your project and create instances of the AP
 		//this is bad
 	});
 
-TSD uses Promise/A+ by the excellent [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
+TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
 
 ### API docs 
 

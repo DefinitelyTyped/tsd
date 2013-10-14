@@ -45,6 +45,7 @@ module xm {
 	//TODO expand validation options, add RegExp /string length (use extended xm.typeOf.ts)
 	//TODO use extended xm.typeOf
 	//TODO custom error?
+	//TODO re-order arguments to comply with regular assertions
 	export function assertVar(label:string, value:any, type:any, opt:boolean = false):void {
 		if (arguments.length < 3) {
 			throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');

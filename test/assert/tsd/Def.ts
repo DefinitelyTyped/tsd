@@ -15,7 +15,7 @@ module helper {
 		json.name = def.name;
 		json.semver = def.semver;
 
-		json.def = helper.serialiseDefVersion(def.head, false);
+		json.head = helper.serialiseDefVersion(def.head, false);
 		json.history = [];
 		//version from the DefIndex commit +tree (may be not our edit)
 		if (def.history && recursive) {
@@ -44,12 +44,12 @@ module helper {
 			helper.propStrictEqual(def, values, 'pathTerm', message);
 		}
 		if (values.head) {
-			helper.assertDefVersion(def.head, values.head, message + '.head');
+			helper.assertDefVersion(def.head, values.head, false, message + '.head');
 		}
 		if (values.history) {
 			//exactly this order
 			for (var i = 0, ii = values.history.length; i < ii; i++) {
-				helper.assertDefVersion(def.history[i], values.history[i], '#' + i);
+				helper.assertDefVersion(def.history[i], values.history[i], false, '#' + i);
 			}
 			helper.propStrictEqual(def.history, values.history, 'length', message);
 		}

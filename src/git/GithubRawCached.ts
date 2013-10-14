@@ -10,7 +10,6 @@
 
 module git {
 
-	var request = require('request');
 	var path = require('path');
 	var Q:typeof Q = require('q');
 	var FS:typeof QioFS = require('q-io/fs');

@@ -12,12 +12,13 @@ module helper {
 
 	var fs = require('fs');
 	var util = require('util');
-	var assert:Chai.Assert = require('chai').assert;
 	var q = require('q');
 	var FS = require('q-io/fs');
 
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var configSchema;
 
@@ -30,22 +31,14 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function pad(num:number, len:number):string {
-		var ret = num.toString(10);
-		while (ret.length < len) {
-			ret = '0' + ret;
-		}
-		return ret;
-	}
-
-	export function getCacheDir():string {
+	export function getFixedCacheDir():string {
 		return path.join(helper.getProjectRoot(), 'test', 'fixtures', tsd.Const.cacheDir);
 	}
 
 	export function getContext() {
 		var context:tsd.Context;
 		context = new tsd.Context();
-		context.paths.cacheDir = getCacheDir();
+		context.paths.cacheDir = getFixedCacheDir();
 		return context;
 	}
 
@@ -59,12 +52,23 @@ module helper {
 
 		configFile:string;
 		resultFile:string;
+		errorFile:string;
+		stdoutFile:string;
+		stderrFile:string;
 
 		testDump:string;
 		selectorDump:string;
+		argsDump:string;
 
 		resultExpect:string;
 		configExpect:string;
+		errorExpect:string;
+		stdoutExpect:string;
+		stderrExpect:string;
+
+		modBuildDir:string;
+		modBuildAPI:string;
+		modBuildCLI:string;
 	}
 
 	export function getTestInfo(group:string, name:string, createConfigFile:boolean = true):TestInfo {
@@ -72,8 +76,10 @@ module helper {
 		var tmpDir = path.join(__dirname, 'result', group, name);
 		var dumpDir = path.resolve(tmpDir, 'dump');
 		var fixturesDir = path.resolve(__dirname, '..', 'fixtures', 'expected', group, name);
+		var modBuildDir = path.resolve(__dirname, '..', '..', '..', '..', 'build');
 
 		xm.mkdirCheckSync(tmpDir, true);
+		xm.mkdirCheckSync(modBuildDir, true);
 
 		var info = new TestInfo();
 		info.name = name;
@@ -85,12 +91,24 @@ module helper {
 
 		info.configFile = path.join(tmpDir, tsd.Const.configFile);
 		info.resultFile = path.join(tmpDir, 'result.json');
-
-		info.testDump = path.join(dumpDir, 'test.json');
-		info.selectorDump = path.join(dumpDir, 'selector.json');
+		info.errorFile = path.join(tmpDir, 'error.json');
+		info.stdoutFile = path.join(tmpDir, 'stdout.txt');
+		info.stderrFile = path.join(tmpDir, 'stderr.txt');
 
 		info.configExpect = path.join(fixturesDir, tsd.Const.configFile);
 		info.resultExpect = path.join(fixturesDir, 'result.json');
+		info.errorExpect = path.join(fixturesDir, 'error.json');
+		info.stdoutExpect = path.join(fixturesDir, 'stdout.txt');
+		info.stderrExpect = path.join(fixturesDir, 'stderr.txt');
+
+		info.testDump = path.join(dumpDir, 'test.json');
+		info.argsDump = path.join(dumpDir, 'args.json');
+		info.selectorDump = path.join(dumpDir, 'selector.json');
+
+		info.modBuildDir = modBuildDir;
+		//TODO decide to assert these?
+		info.modBuildAPI = path.join(modBuildDir, 'api.js');
+		info.modBuildCLI = path.join(modBuildDir, 'cli.js');
 
 		if (createConfigFile) {
 			fs.writeFileSync(info.configFile, fs.readFileSync('./test/fixtures/config/default.json', {encoding: 'utf8'}), {encoding: 'utf8'});
@@ -125,6 +143,7 @@ module helper {
 		}
 	}
 
+	//TODO update to verify exacter using the event/log solution when it's ready
 	export function assertUpdateStat(loader:xm.CachedLoader<any>, message:string) {
 		var stats = loader.stats;
 		if (helper.settings.cache.forceUpdate) {
@@ -152,7 +171,7 @@ module helper {
 	export function listDefPaths(dir:string):Q.Promise<string[]> {
 		var d:Q.Deferred<string[]> = Q.defer();
 
-		FS.listTree(dir,(full:string, stat):boolean => {
+		FS.listTree(dir, (full:string, stat):boolean => {
 			return (stat.isFile() && /\.d\.ts$/.test(full));
 
 		}).then((paths:string[]) => {
