@@ -14,8 +14,8 @@ module git {
 		urls:git.GithubURLManager;
 
 		constructor(public ownerName:string, public projectName:string) {
-			xm.assertVar('ownerName', ownerName, 'string');
-			xm.assertVar('projectName', projectName, 'string');
+			xm.assertVar(ownerName, 'string', 'ownerName');
+			xm.assertVar(projectName, 'string', 'projectName');
 
 			this.urls = new git.GithubURLManager(this);
 		}

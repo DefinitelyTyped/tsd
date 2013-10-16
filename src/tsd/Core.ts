@@ -45,7 +45,7 @@ module tsd {
 		_debug:boolean = false;
 
 		constructor(public context:tsd.Context) {
-			xm.assertVar('context', context, tsd.Context);
+			xm.assertVar(context, tsd.Context, 'context');
 
 			this.resolver = new tsd.Resolver(this);
 			this.index = new tsd.DefIndex();
@@ -100,6 +100,7 @@ module tsd {
 
 					this.index.init(branchData, data);
 
+					this.stats.count('index-success');
 					d.resolve(null);
 				}, (err) => {
 					this.stats.count('index-tree-get-error');
@@ -121,7 +122,6 @@ module tsd {
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			var res = new APIResult(this.index, selector);
-
 			this.updateIndex().then(() => {
 				res.nameMatches = selector.pattern.filter(this.index.list);
 				// default to all heads
@@ -203,6 +203,7 @@ module tsd {
 		findFile(path:string, commitShaFragment:string):Q.Promise<DefVersion> {
 			var d:Q.Deferred<DefVersion> = Q.defer();
 			//TODO implement partial commitSha lookup (github api does thi btu how do we track it?)
+			//TODO cache Tree if searching (when querying against many commits)
 			d.reject('implement me!');
 			return d.promise;
 		}
@@ -289,7 +290,7 @@ module tsd {
 				return Q.reject(new Error('saveConfig retrieved empty json'));
 			}
 
-			xm.mkdirCheckQ(dir, true).then(() => {
+			xm.FileUtil.mkdirCheckQ(dir, true).then(() => {
 				return FS.write(target, json).then(() => {
 					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not)
 					return FS.stat(target);
@@ -532,7 +533,7 @@ module tsd {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
-					return xm.mkdirCheckQ(path.dirname(targetPath), true);
+					return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);
 				});

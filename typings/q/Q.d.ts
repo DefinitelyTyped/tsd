@@ -16,7 +16,7 @@ declare module Q {
 
 	interface Deferred<T> {
 		promise: Promise<T>;
-		resolve(value: T): void;
+		resolve(value?: T): void;
 		reject(reason: any): void;
 		reject<U>(reason: any): IPromise<U>;
 		notify(value: any): void;
@@ -54,6 +54,7 @@ declare module Q {
 		keys(): Promise<string[]>;
 
 		timeout(ms: number, message?: string): Promise<T>;
+		timeout(ms: number, message?: Error): Promise<T>;
 		delay(ms: number): Promise<T>;
 
 		thenResolve<U>(object?:T):Promise<T>;

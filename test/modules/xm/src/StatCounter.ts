@@ -15,7 +15,7 @@ describe('xm.StatCounter', () => {
 		counter = null;
 	});
 	it('is instanced', () => {
-		assert.ok(counter);
+		assert.isObject(counter);
 	});
 	it('starts empty', () => {
 		assert.strictEqual(counter.total(), 0, 'total');

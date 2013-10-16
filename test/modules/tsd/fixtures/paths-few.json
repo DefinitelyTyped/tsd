@@ -25,5 +25,6 @@
 	"jquery.cookie/jquery.cookie.d.ts",
 	"jquery.cycle/jquery.cycle.d.ts",
 	"jquery.validation/jquery.validation.d.ts",
-	"jquery/jquery.d.ts"
+	"jquery/jquery.d.ts",
+	"q/Q.d.ts"
 ]

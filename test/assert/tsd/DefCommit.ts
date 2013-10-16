@@ -6,7 +6,7 @@ module helper {
 	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseDefCommit(commit:tsd.DefCommit, recursive:boolean):any {
-		xm.assertVar('commit', commit, tsd.DefCommit);
+		xm.assertVar(commit, tsd.DefCommit, 'commit');
 
 		var json:any = {};
 		json.commitSha = commit.commitSha;

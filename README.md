@@ -10,7 +10,9 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 
 :warning: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
 
-Use TSD as a CLI command `$ tsd`, similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module: `require('tsd')`. 
+TSD is used as a CLI command `$ tsd` similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module. 
+
+Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated users so TSD employs a caching layer to minimise API requests. In regular use you likely will never hit the limit, as the actual definition files are downloaded over the non-limited Github RAW service. We are looking into a API proxy service for the incidental overflow.
 
 ### Usage as CLI command
 
@@ -120,13 +122,22 @@ Include TSD as any npm dependency in your project and create instances of the AP
 
 TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
 
+Definition data pulled from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) using the [Github API](http://developer.github.com/). 
+
 ### API docs 
 
 :x: Not yet. 
 
+## Internal docs
+
+* Project [scope](docs/SCOPE.md)
+* Some extra [info](docs/INFO.md)
+* Things [todo](docs/TODO.md)
+* More about [code](docs/CODE.md)
+
 ## Build
 
-TSD is written in [TypeScript](http://www.typescriptlang.org/) and build using [Grunt](http://www,gruntjs.com). All definition data pulled live from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) using the [Github API](http://developer.github.com/).
+TSD is written in [TypeScript](http://www.typescriptlang.org/) and build using [Grunt](http://www,gruntjs.com). It is recommend you use a parsing IDE (WebStorm/Eclipse/VisualStudio).
 
 To rebuild clone or fork the repos:
 
@@ -144,7 +155,7 @@ Either install global or use in dev folder:
 	// run in dev folder
 	$ node ./build/cli.js install angular --dev
 
-	// install to globa;
+	// install to global cli
 	$ npm install . -g
 
 TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to easily test separate test sets during development:
@@ -154,6 +165,9 @@ TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to easily tes
 
 	// for example: run only api tests
 	$ grunt gtx:api
+	$ grunt gtx:cli
+	$ grunt gtx:tsd
+	//.. etc
 
 ## Contribute
 
@@ -161,13 +175,17 @@ Contributions will be welcome once the application architecture stabilises a bit
 
 ## Change log
 
-### v0.5.0 (2013-08)
+### v0.5.x ( > 2013-08)
 
 * Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
-* Moved to the DefinitelyTyped organisation
+
+### v0.3.x
+
+* Original version by @[Diullei ](https://github.com/Diullei).
 
 ## License
 
+Copyright (c) 2013 by Bart van der Schoor
 Copyright (c) 2012 by Diullei Gomes
 
-Licensed under the [MIT license](https://raw.github.com/Diullei/tsd/master/LICENSE.txt).
+Licensed under the [MIT license](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt).

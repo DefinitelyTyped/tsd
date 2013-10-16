@@ -7,7 +7,7 @@ module helper {
 	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseAPIResult(result:tsd.APIResult):any {
-		xm.assertVar('result', result, tsd.APIResult);
+		xm.assertVar(result, tsd.APIResult, 'result');
 
 		var json:any = {};
 		if (result.error) {

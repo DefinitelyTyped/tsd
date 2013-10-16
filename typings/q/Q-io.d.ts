@@ -10,7 +10,7 @@
 //TODO add verified support for q-io/fs-mock
 //TODO fix Readers/Writers properly
 //TODO find solution for overloaded return types (QioFS.open/QioFS.read)
-//     for some ideas see https://typescript.codeplex.com/discussions/461587#post1105930)
+//     for some ideas see https://typescript.codeplex.com/discussions/461587#post1105930
 
 declare module QioFS {
 

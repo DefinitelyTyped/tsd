@@ -7,7 +7,7 @@
  * */
 
 ///<reference path="../DateUtil.ts" />
-///<reference path="../io/Logger.ts" />
+///<reference path="../Logger.ts" />
 ///<reference path="../inspect.ts" />
 ///<reference path="../../../typings/colors/colors.d.ts" />
 
@@ -23,6 +23,7 @@ module xm {
 		return input;
 	}
 
+	//TODO make full dispatcher?
 	export module logging {
 
 		export class EventLog {

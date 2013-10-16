@@ -4,7 +4,7 @@
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
 ///<reference path="hash.ts" />
-///<reference path="Logger.ts" />
+///<reference path="../Logger.ts" />
 ///<reference path="FileUtil.ts" />
 ///<reference path="CachedJSONValue.ts" />
 ///<reference path="CachedJSONStore.ts" />
@@ -46,8 +46,8 @@ module xm {
 		stats = new xm.StatCounter();
 
 		constructor(label:string, service:CachedLoaderService<T>) {
-			xm.assertVar('label', label, 'string');
-			xm.assertVar('service', service, 'object');
+			xm.assertVar(label, 'string', 'label');
+			xm.assertVar(service, 'object', 'service');
 
 			this._service = service;
 			this.stats.logger = xm.getLogger(label + '.CachedLoader');
@@ -71,8 +71,8 @@ module xm {
 			this.stats.count('start', label);
 
 			if (this._debug) {
-				xm.log(opts);
-				xm.log(key);
+				xm.log.debug(opts);
+				xm.log.debug(key);
 			}
 
 			if (this._active.has(key)) {

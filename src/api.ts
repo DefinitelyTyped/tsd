@@ -4,14 +4,15 @@
 ///<reference path="tsd/CLI.ts" />
 ///<reference path="bootstrap.ts" />
 
+//TODO decide on export git + xm (no)
 (module).exports = {
 	tsd: tsd,
-	xm: xm,
-	git: git,
+	//xm: xm,
+	//git: git,
 	runARGV: tsd.runARGV,
 	// move to API?
 	getAPI: function (configPath:string, verbose:boolean = false):tsd.API {
-		xm.assertVar('configPath', configPath, 'string');
+		xm.assertVar(configPath, 'string', 'configPath');
 		return new tsd.API(new tsd.Context(configPath, verbose));
 	}
 };

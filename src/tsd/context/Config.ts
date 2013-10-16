@@ -2,7 +2,7 @@
 ///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="../../xm/iterate.ts" />
 ///<reference path="../../xm/ObjectUtil.ts" />
-///<reference path="../../xm/io/Logger.ts" />
+///<reference path="../../xm/Logger.ts" />
 ///<reference path="../../xm/data/PackageJSON.ts" />
 ///<reference path="../data/DefVersion.ts" />
 
@@ -25,20 +25,20 @@ module tsd {
 
 		constructor(path:string) {
 			if (path) {
-				xm.assertVar('path', path, 'string');
+				xm.assertVar(path, 'string', 'path');
 				this.path = path;
 			}
 		}
 
 		update(file:tsd.DefVersion) {
 			//TODO maybe too much testing? :D
-			xm.assertVar('file', file, tsd.DefVersion);
+			xm.assertVar(file, tsd.DefVersion, 'file');
 
-			xm.assertVar('commit', file.commit, tsd.DefCommit);
-			xm.assertVar('commit.sha', file.commit.commitSha, 'sha1');
+			xm.assertVar(file.commit, tsd.DefCommit, 'commit');
+			xm.assertVar(file.commit.commitSha, 'sha1', 'commit.sha');
 
-			xm.assertVar('blob', file.blob, tsd.DefBlob);
-			xm.assertVar('blob.sha', file.blob.sha, 'sha1');
+			xm.assertVar(file.blob, tsd.DefBlob, 'blob');
+			xm.assertVar(file.blob.sha, 'sha1', 'blob.sha');
 
 			this.path = file.def.path;
 			this.commitSha = file.commit.commitSha;
@@ -66,7 +66,7 @@ module tsd {
 		log:xm.Logger = xm.getLogger('Config');
 
 		constructor(schema:any) {
-			xm.assertVar('schema', schema, 'object');
+			xm.assertVar(schema, 'object', 'schema');
 			this._schema = schema;
 
 			//import defaults
@@ -104,7 +104,7 @@ module tsd {
 		}
 
 		addFile(file:tsd.DefVersion) {
-			xm.assertVar('file', file, tsd.DefVersion);
+			xm.assertVar(file, tsd.DefVersion, 'file');
 
 			var def:tsd.InstalledDef;
 			if (this._installed.has(file.def.path)) {
@@ -119,17 +119,17 @@ module tsd {
 		}
 
 		hasFile(filePath:string):boolean {
-			xm.assertVar('filePath', filePath, 'string');
+			xm.assertVar(filePath, 'string', 'filePath');
 			return this._installed.has(filePath);
 		}
 
 		getFile(filePath:string):tsd.InstalledDef {
-			xm.assertVar('filePath', filePath, 'string');
+			xm.assertVar(filePath, 'string', 'filePath');
 			return this._installed.get(filePath, null);
 		}
 
 		removeFile(filePath:string) {
-			xm.assertVar('filePath', filePath, 'string');
+			xm.assertVar(filePath, 'string', 'filePath');
 			this._installed.remove(filePath);
 		}
 
@@ -160,7 +160,7 @@ module tsd {
 		}
 
 		parseJSON(json:any) {
-			xm.assertVar('json', json, 'object');
+			xm.assertVar(json, 'object', 'json');
 
 			this._installed.clear();
 

@@ -39,6 +39,36 @@ var data = [
 		pattern: '*syn*/async',
 		result: ['async/async.d.ts']
 	},
+	{
+		pattern: 'Q',
+		result: ['q/Q.d.ts']
+	},
+	{
+		pattern: 'q',
+		result: ['q/Q.d.ts']
+	},
+	{
+		pattern: 'q/q',
+		result: ['q/Q.d.ts']
+	},
+	{
+		pattern: 'q*/q',
+		result: ['q/Q.d.ts']
+	},
+	{
+		pattern: 'jquery.bbq/jquery.bbq',
+		result: ['jquery.bbq/jquery.bbq.d.ts']
+	},
+	{
+		pattern: 'jquery.*/jquery.bbq',
+		result: ['jquery.bbq/jquery.bbq.d.ts']
+	},
+	{
+		pattern: 'jquery.bbq/jquery.*',
+		result: ['jquery.bbq/jquery.bbq.d.ts']
+	}
+
+
 ];
 module.exports = {
 	data:data,

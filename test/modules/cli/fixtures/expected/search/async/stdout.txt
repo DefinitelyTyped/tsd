@@ -1,0 +1,10 @@
+
+-> tsd 0.5.1-alpha.1 (preview)
+--------
+
+async/async.d.ts : 6b5f41 : 5ba56e
+----
+   <no info>
+----
+
+bye!

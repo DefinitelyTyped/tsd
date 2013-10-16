@@ -224,5 +224,6 @@
 	"webrtc/RTCPeerConnection.d.ts",
 	"youtube/youtube.d.ts",
 	"zepto/zepto.d.ts",
-	"zeroclipboard/zeroclipboard.d.ts"
+	"zeroclipboard/zeroclipboard.d.ts",
+	"q/Q.d.ts"
 ]

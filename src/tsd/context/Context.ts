@@ -1,7 +1,6 @@
 ///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="../../xm/iterate.ts" />
-///<reference path="../../xm/io/Logger.ts" />
-///<reference path="../../xm/io/mkdirCheck.ts" />
+///<reference path="../../xm/Logger.ts" />
 ///<reference path="../../xm/data/PackageJSON.ts" />
 ///<reference path="Config.ts" />
 ///<reference path="Paths.ts" />
@@ -25,7 +24,7 @@ module tsd {
 		log:xm.Logger = xm.getLogger('Context');
 
 		constructor(public configFile:string = null, public verbose:boolean = false) {
-			//xm.assertVar('configPath', configPath, 'string', true);
+			xm.assertVar(configFile, 'string', 'configFile', true);
 
 			this.packageInfo = xm.PackageJSON.getLocal();
 

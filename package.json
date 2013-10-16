@@ -1,7 +1,7 @@
 {
   "name": "tsd",
   "description": "The TypeScript definition package manager.",
-  "version": "0.5.0-dev",
+  "version": "0.5.1-alpha.1",
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
     "type": "git",
@@ -13,7 +13,8 @@
   },
   "contributors": [
     {
-      "name": "Diullei Gomes"
+      "name": "Diullei Gomes",
+      "url": "https://github.com/Diullei"
     }
   ],
   "licenses": [
@@ -38,11 +39,11 @@
   "dependencies": {
     "q": "0.9.6",
     "q-io": "1.9.4",
+    "exit": "~0.1.1",
     "async": "0.2.9",
     "underscore": "1.5.1",
     "mkdirp": "0.3.5",
     "semver": "2.1.0",
-    "pkginfo": "0.3.0",
     "github": "0.1.10",
     "tv4": "~1.0.8",
     "uri-templates": "0.1.1",
@@ -51,7 +52,6 @@
     "colors": "0.6.1",
     "easy-table": "0.2.0",
     "pleonasm": "~1.0.0",
-    "exit": "~0.1.1",
     "assertion-error": "~1.0.0",
     "source-map-support": "0.2.3"
   },
@@ -69,7 +69,7 @@
     "grunt-mocha-test": "~0.7.0",
     "grunt-concurrent": "0.4.0",
     "grunt-typescript": "0.2.4",
-    "grunt-tslint": "git://github.com/Bartvds/grunt-tslint/#forked",
+    "grunt-tslint": "~0.3.2",
     "tslint-path-formatter": "0.1",
     "grunt-execute": "0.1.5",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
@@ -81,6 +81,7 @@
     "chai-json-schema": "1.0.4",
     "chai-as-promised": "4.0.0",
     "buffer-equal": "0.0.0",
-    "memory-streams": "0.0.3"
+    "memory-streams": "0.0.3",
+    "xregexp": "~2.0.0"
   }
 }

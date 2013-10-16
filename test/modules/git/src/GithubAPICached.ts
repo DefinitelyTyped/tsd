@@ -62,7 +62,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getCachedRaw', () => {
-		it.promised('should not return data for bogus key', () => {
+		it.eventually('should not return data for bogus key', () => {
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
 			return api.service.getCachedRaw(api.loader.getKey('bleh blah')).then((data) => {
@@ -74,7 +74,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getBranches', () => {
-		it.promised('should cache and return data from store', () => {
+		it.eventually('should cache and return data from store', () => {
 			//api.debug = true;
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
@@ -128,7 +128,7 @@ describe('git.GithubAPICached', () => {
 		});
 	});
 	describe('getBlob', () => {
-		it.promised('should cache and return data from store', () => {
+		it.eventually('should cache and return data from store', () => {
 			//api.debug = true;
 			assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 

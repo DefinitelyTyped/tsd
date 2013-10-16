@@ -31,7 +31,7 @@ module tsd {
 		//moar fields?
 
 		constructor(commitSha:string) {
-			xm.assertVar('commitSha', commitSha, 'string');
+			xm.assertVar(commitSha, 'string', 'commitSha');
 
 			this.commitSha = commitSha;
 
@@ -40,7 +40,7 @@ module tsd {
 		}
 
 		parseJSON(commit:any):void {
-			xm.assertVar('commit', commit, 'object');
+			xm.assertVar(commit, 'object', 'commit');
 			if (commit.sha !== this.commitSha) {
 				throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
 			}

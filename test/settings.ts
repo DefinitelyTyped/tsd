@@ -1,5 +1,5 @@
 ///<reference path="../src/xm/ObjectUtil.ts" />
-///<reference path="../src/xm/io/Logger.ts" />
+///<reference path="../src/xm/Logger.ts" />
 
 module helper {
 	'use strict';

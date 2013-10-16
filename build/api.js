@@ -6,7 +6,7 @@ var xm;
 
     var KeyValueMap = (function () {
         function KeyValueMap(data) {
-            this._store = {};
+            this._store = Object.create(null);
             if (data) {
                 this.import(data);
             }
@@ -38,13 +38,7 @@ var xm;
         };
 
         KeyValueMap.prototype.keys = function () {
-            var ret = [];
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret.push(key);
-                }
-            }
-            return ret;
+            return Object.keys(this._store);
         };
 
         KeyValueMap.prototype.values = function () {
@@ -187,93 +181,13 @@ var xm;
 (function (xm) {
     'use strict';
 
+    var fs = require('fs');
+    var path = require('path');
+    var util = require('util');
+
     var Q = require('q');
     var FS = require('q-io/fs');
     var mkdirp = require('mkdirp');
-    var path = require('path');
-    var fs = require('fs');
-
-    function mkdirCheckSync(dir, writable, testWritable) {
-        if (typeof writable === "undefined") { writable = false; }
-        if (typeof testWritable === "undefined") { testWritable = false; }
-        dir = path.resolve(dir);
-        if (fs.existsSync(dir)) {
-            if (!fs.statSync(dir).isDirectory()) {
-                throw (new Error('path exists but is not a directory: ' + dir));
-            }
-            if (writable) {
-                fs.chmodSync(dir, '744');
-            }
-        } else {
-            if (writable) {
-                mkdirp.sync(dir, '744');
-            } else {
-                mkdirp.sync(dir);
-            }
-        }
-        if (testWritable) {
-            var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-            try  {
-                fs.writeFileSync(testFile, 'test');
-                fs.unlinkSync(testFile);
-            } catch (e) {
-                throw new Error('no write access to: ' + dir + ' -> ' + e);
-            }
-        }
-        return dir;
-    }
-    xm.mkdirCheckSync = mkdirCheckSync;
-
-    function mkdirCheckQ(dir, writable, testWritable) {
-        if (typeof writable === "undefined") { writable = false; }
-        if (typeof testWritable === "undefined") { testWritable = false; }
-        dir = path.resolve(dir);
-
-        var d = Q.defer();
-
-        FS.exists(dir).then(function (exists) {
-            if (exists) {
-                return FS.isDirectory(dir).then(function (isDir) {
-                    if (!isDir) {
-                        throw (new Error('path exists but is not a directory: ' + dir));
-                    }
-                    if (writable) {
-                        return FS.chmod(dir, '744');
-                    }
-                    return null;
-                });
-            } else {
-                if (writable) {
-                    return Q.nfcall(mkdirp, dir, '744');
-                }
-                return Q.nfcall(mkdirp, dir);
-            }
-        }).then(function () {
-            if (testWritable) {
-                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-
-                return FS.write(testFile, 'test').then(function () {
-                    return FS.remove(testFile);
-                }).catch(function (err) {
-                    throw new Error('no write access to: ' + dir + ' -> ' + err);
-                });
-            }
-        }).then(function () {
-            d.resolve(dir);
-        });
-        return d.promise;
-    }
-    xm.mkdirCheckQ = mkdirCheckQ;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var fs = require('fs');
-    var Q = require('q');
-    var FS = require('q-io/fs');
-    var path = require('path');
-    var util = require('util');
 
     (function (FileUtil) {
         function parseJson(text) {
@@ -299,11 +213,9 @@ var xm;
 
         function readJSONSync(src) {
             var json;
-            try  {
-                json = doReadJSONSync(src);
-            } catch (err) {
-                json = doReadJSONSync(src);
-            }
+
+            json = doReadJSONSync(src);
+
             return json;
         }
         FileUtil.readJSONSync = readJSONSync;
@@ -333,7 +245,7 @@ var xm;
 
         function writeJSONSync(dest, data) {
             dest = path.resolve(dest);
-            xm.mkdirCheckSync(path.dirname(dest));
+            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
             fs.writeFileSync(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
         }
         FileUtil.writeJSONSync = writeJSONSync;
@@ -342,7 +254,7 @@ var xm;
             var d = Q.defer();
 
             dest = path.resolve(dest);
-            xm.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
+            xm.FileUtil.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
                 return FS.write(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
             }).then(function () {
                 d.resolve(null);
@@ -351,6 +263,92 @@ var xm;
             return d.promise;
         }
         FileUtil.writeJSONPromise = writeJSONPromise;
+
+        function readFileSync(dest, encoding) {
+            if (typeof encoding === "undefined") { encoding = 'utf8'; }
+            return fs.readFileSync(dest, { encoding: encoding });
+        }
+        FileUtil.readFileSync = readFileSync;
+
+        function writeFileSync(dest, data, encoding) {
+            if (typeof encoding === "undefined") { encoding = 'utf8'; }
+            dest = path.resolve(dest);
+            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+            fs.writeFileSync(dest, data, { encoding: encoding });
+        }
+        FileUtil.writeFileSync = writeFileSync;
+
+        function mkdirCheckSync(dir, writable, testWritable) {
+            if (typeof writable === "undefined") { writable = false; }
+            if (typeof testWritable === "undefined") { testWritable = false; }
+            dir = path.resolve(dir);
+            if (fs.existsSync(dir)) {
+                if (!fs.statSync(dir).isDirectory()) {
+                    throw (new Error('path exists but is not a directory: ' + dir));
+                }
+                if (writable) {
+                    fs.chmodSync(dir, '744');
+                }
+            } else {
+                if (writable) {
+                    mkdirp.sync(dir, '744');
+                } else {
+                    mkdirp.sync(dir);
+                }
+            }
+            if (testWritable) {
+                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+                try  {
+                    fs.writeFileSync(testFile, 'test');
+                    fs.unlinkSync(testFile);
+                } catch (e) {
+                    throw new Error('no write access to: ' + dir + ' -> ' + e);
+                }
+            }
+            return dir;
+        }
+        FileUtil.mkdirCheckSync = mkdirCheckSync;
+
+        function mkdirCheckQ(dir, writable, testWritable) {
+            if (typeof writable === "undefined") { writable = false; }
+            if (typeof testWritable === "undefined") { testWritable = false; }
+            dir = path.resolve(dir);
+
+            var d = Q.defer();
+
+            FS.exists(dir).then(function (exists) {
+                if (exists) {
+                    return FS.isDirectory(dir).then(function (isDir) {
+                        if (!isDir) {
+                            throw (new Error('path exists but is not a directory: ' + dir));
+                        }
+                        if (writable) {
+                            return FS.chmod(dir, '744');
+                        }
+                        return null;
+                    });
+                } else {
+                    if (writable) {
+                        return Q.nfcall(mkdirp, dir, '744');
+                    }
+                    return Q.nfcall(mkdirp, dir);
+                }
+            }).then(function () {
+                if (testWritable) {
+                    var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+
+                    return FS.write(testFile, 'test').then(function () {
+                        return FS.remove(testFile);
+                    }).catch(function (err) {
+                        throw new Error('no write access to: ' + dir + ' -> ' + err);
+                    });
+                }
+            }).then(function () {
+                d.resolve(dir);
+            });
+            return d.promise;
+        }
+        FileUtil.mkdirCheckQ = mkdirCheckQ;
     })(xm.FileUtil || (xm.FileUtil = {}));
     var FileUtil = xm.FileUtil;
 })(xm || (xm = {}));
@@ -445,128 +443,6 @@ var xm;
         return res;
     }
     xm.filterHash = filterHash;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var util = require('util');
-    require('colors');
-
-    var ConsoleLineWriter = (function () {
-        function ConsoleLineWriter() {
-        }
-        ConsoleLineWriter.prototype.writeln = function (str) {
-            console.log(str);
-        };
-        return ConsoleLineWriter;
-    })();
-    xm.ConsoleLineWriter = ConsoleLineWriter;
-
-    xm.consoleWriter = new ConsoleLineWriter();
-
-    function writeMulti(logger, label, args) {
-        if (logger.mute) {
-            return;
-        }
-        var ret = [];
-        for (var i = 0, ii = args.length; i < ii; i++) {
-            var value = args[i];
-            if (value && typeof value === 'object') {
-                ret.push(util.inspect(value, { showHidden: false, depth: 8 }));
-            } else {
-                ret.push(value);
-            }
-        }
-        xm.consoleWriter.writeln(label + ret.join('; '));
-    }
-
-    function getLogger(label) {
-        label = arguments.length > 0 ? (String(label) + ': ').cyan : '';
-
-        var plain = function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            writeMulti(logger, '', args);
-        };
-
-        var logger = (function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            plain.apply(null, args);
-        });
-        var mute = false;
-
-        logger.log = plain;
-        logger.showLog = true;
-
-        logger.ok = function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            if (logger.showLog) {
-                return;
-            }
-            writeMulti(logger, label + 'ok: '.green, args);
-        };
-        logger.warn = function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            if (logger.showLog) {
-                return;
-            }
-            writeMulti(logger, label + 'warn: '.yellow, args);
-        };
-        logger.error = function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            if (logger.showLog) {
-                return;
-            }
-            writeMulti(logger, label + 'error: '.red, args);
-        };
-        logger.debug = function () {
-            var args = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                args[_i] = arguments[_i + 0];
-            }
-            if (logger.showLog) {
-                return;
-            }
-            writeMulti(logger, label + 'debug: '.cyan, args);
-        };
-        logger.inspect = function (value, label, depth) {
-            if (typeof depth === "undefined") { depth = 4; }
-            if (logger.showLog) {
-                return;
-            }
-            label = label ? label + ': ' : '';
-            xm.consoleWriter.writeln(label + util.inspect(value, { showHidden: false, depth: depth }));
-        };
-        Object.defineProperty(logger, 'mute', {
-            get: function () {
-                return mute;
-            },
-            set: function (value) {
-                mute = value;
-                logger.showLog = !value;
-            }
-        });
-
-        return logger;
-    }
-    xm.getLogger = getLogger;
-
-    xm.log = getLogger();
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -739,6 +615,7 @@ var xm;
 
     function getTypeOfWrap(add) {
         var typeMap = getTypeOfMap(add);
+
         return function isType(obj, type) {
             if (hasOwnProp(typeMap, type)) {
                 return typeMap[type].call(null, obj);
@@ -747,6 +624,74 @@ var xm;
         };
     }
     xm.getTypeOfWrap = getTypeOfWrap;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function deepFreezeRecursive(object, active) {
+        var value, prop;
+        active.push(object);
+        Object.freeze(object);
+        for (prop in object) {
+            if (object.hasOwnProperty(prop)) {
+                value = object[prop];
+                if (xm.isObject(value) || xm.isArray(value)) {
+                    if (active.indexOf(object) < 0) {
+                        deepFreezeRecursive(value, active);
+                    }
+                }
+            }
+        }
+    }
+
+    var ObjectUtil = (function () {
+        function ObjectUtil() {
+        }
+        ObjectUtil.hasOwnProp = function (obj, prop) {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+        };
+
+        ObjectUtil.defineProp = function (object, property, settings) {
+            Object.defineProperty(object, property, settings);
+        };
+
+        ObjectUtil.defineProps = function (object, propertyNames, settings) {
+            propertyNames.forEach(function (property) {
+                ObjectUtil.defineProp(object, property, settings);
+            });
+        };
+
+        ObjectUtil.hidePrefixed = function (object, ownOnly) {
+            if (typeof ownOnly === "undefined") { ownOnly = true; }
+            for (var property in object) {
+                if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
+                    ObjectUtil.defineProp(object, property, { enumerable: false });
+                }
+            }
+        };
+
+        ObjectUtil.lockProps = function (object, props) {
+            props.forEach(function (property) {
+                Object.defineProperty(object, property, { writable: false });
+            });
+        };
+
+        ObjectUtil.freezeProps = function (object, props) {
+            props.forEach(function (property) {
+                Object.defineProperty(object, property, { writable: false });
+                Object.freeze(object[property]);
+            });
+        };
+
+        ObjectUtil.deepFreeze = function (object) {
+            if (xm.isObject(object) || xm.isArray(object)) {
+                deepFreezeRecursive(object, []);
+            }
+        };
+        return ObjectUtil;
+    })();
+    xm.ObjectUtil = ObjectUtil;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -855,7 +800,7 @@ var xm;
     }
     xm.throwAssert = throwAssert;
 
-    function assertVar(label, value, type, opt) {
+    function assertVar(value, type, label, opt) {
         if (typeof opt === "undefined") { opt = false; }
         if (arguments.length < 3) {
             throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');
@@ -863,111 +808,967 @@ var xm;
         var valueKind = xm.typeOf(value);
         var typeKind = xm.typeOf(type);
 
-        var opts = [];
-        var typeStrim = xm.toValueStrim(type);
-
         if (valueKind === 'undefined' || valueKind === 'null') {
             if (!opt) {
-                throw new AssertionError('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
+                throw new AssertionError('expected "' + label + '" to be defined as a ' + xm.toValueStrim(type) + ' but got "' + value + '"');
             }
         } else if (typeKind === 'function') {
             if (!(value instanceof type)) {
-                throw new AssertionError('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new AssertionError('expected "' + label + '" to be instanceof ' + xm.toValueStrim(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if (typeKind === 'string') {
             if (xm.hasOwnProp(typeOfAssert, type)) {
                 var check = typeOfAssert[type];
                 if (!check(value)) {
-                    throw new AssertionError('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                    throw new AssertionError('expected "' + label + '" to be a ' + xm.toValueStrim(type) + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new AssertionError('unknown type-assertion parameter ' + typeStrim + ' for "' + label + '"');
+                throw new AssertionError('unknown type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
             }
         } else {
-            throw new AssertionError('bad type-assertion parameter ' + typeStrim + ' for "' + label + '"');
+            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
         }
     }
     xm.assertVar = assertVar;
 })(xm || (xm = {}));
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var xm;
 (function (xm) {
-    'use strict';
+    (function (styler) {
+        function clean(str) {
+            return '' + str;
+        }
 
-    function deepFreezeRecursive(object, active) {
-        var value, prop;
-        active.push(object);
-        Object.freeze(object);
-        for (prop in object) {
-            if (object.hasOwnProperty(prop)) {
-                value = object[prop];
-                if (xm.isObject(value) || xm.isArray(value)) {
-                    if (active.indexOf(object) < 0) {
-                        deepFreezeRecursive(value, active);
+        var NoStyler = (function () {
+            function NoStyler() {
+            }
+            NoStyler.prototype.ok = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.fail = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.warn = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.error = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.warning = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.success = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.accent = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.plain = function (str) {
+                return clean(str);
+            };
+
+            NoStyler.prototype.zero = function () {
+                return '';
+            };
+            return NoStyler;
+        })();
+        styler.NoStyler = NoStyler;
+
+        var PlainStyler = (function (_super) {
+            __extends(PlainStyler, _super);
+            function PlainStyler() {
+                _super.apply(this, arguments);
+            }
+            PlainStyler.prototype.ok = function (str) {
+                return clean(str).toLocaleUpperCase();
+            };
+
+            PlainStyler.prototype.warn = function (str) {
+                return clean(str).toLocaleUpperCase();
+            };
+
+            PlainStyler.prototype.fail = function (str) {
+                return clean(str).toLocaleUpperCase();
+            };
+            return PlainStyler;
+        })(NoStyler);
+        styler.PlainStyler = PlainStyler;
+
+        var WrapStyler = (function () {
+            function WrapStyler() {
+                this.styles = {};
+            }
+            WrapStyler.prototype.ok = function (str) {
+                return this.success(clean(str));
+            };
+
+            WrapStyler.prototype.warn = function (str) {
+                return this.warning(clean(str));
+            };
+
+            WrapStyler.prototype.fail = function (str) {
+                return this.error(clean(str));
+            };
+
+            WrapStyler.prototype.error = function (str) {
+                return this.wrap(clean(str), 'red');
+            };
+
+            WrapStyler.prototype.warning = function (str) {
+                return this.wrap(clean(str), 'yellow');
+            };
+
+            WrapStyler.prototype.success = function (str) {
+                return this.wrap(clean(str), 'green');
+            };
+
+            WrapStyler.prototype.accent = function (str) {
+                return this.wrap(clean(str), 'cyan');
+            };
+
+            WrapStyler.prototype.plain = function (str) {
+                return clean(str);
+            };
+
+            WrapStyler.prototype.zero = function () {
+                return '';
+            };
+
+            WrapStyler.prototype.wrap = function (str, style) {
+                if (!this.styles.hasOwnProperty(style)) {
+                    return clean(str);
+                }
+                var tmp = this.styles[style];
+                return tmp[0] + clean(str) + tmp[1];
+            };
+            return WrapStyler;
+        })();
+        styler.WrapStyler = WrapStyler;
+
+        styler.ansiWrapTable = {
+            'bold': ['\033[1m', '\033[22m'],
+            'italic': ['\033[3m', '\033[23m'],
+            'underline': ['\033[4m', '\033[24m'],
+            'inverse': ['\033[7m', '\033[27m'],
+            'white': ['\033[37m', '\033[39m'],
+            'grey': ['\033[90m', '\033[39m'],
+            'black': ['\033[30m', '\033[39m'],
+            'blue': ['\033[34m', '\033[39m'],
+            'cyan': ['\033[36m', '\033[39m'],
+            'green': ['\033[32m', '\033[39m'],
+            'magenta': ['\033[35m', '\033[39m'],
+            'red': ['\033[31m', '\033[39m'],
+            'yellow': ['\033[33m', '\033[39m']
+        };
+
+        var ANSIWrapStyler = (function (_super) {
+            __extends(ANSIWrapStyler, _super);
+            function ANSIWrapStyler() {
+                _super.call(this);
+                this.styles = styler.ansiWrapTable;
+            }
+            return ANSIWrapStyler;
+        })(WrapStyler);
+        styler.ANSIWrapStyler = ANSIWrapStyler;
+
+        var ANSIStyler = (function () {
+            function ANSIStyler() {
+            }
+            ANSIStyler.prototype.ok = function (str) {
+                return '\033[32m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.fail = function (str) {
+                return '\033[31m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.warn = function (str) {
+                return '\033[33m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.error = function (str) {
+                return '\033[31m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.warning = function (str) {
+                return '\033[33m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.success = function (str) {
+                return '\033[32m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.accent = function (str) {
+                return '\033[36m' + clean(str) + '\033[39m';
+            };
+
+            ANSIStyler.prototype.plain = function (str) {
+                return clean(str);
+            };
+
+            ANSIStyler.prototype.zero = function () {
+                return '';
+            };
+            return ANSIStyler;
+        })();
+        styler.ANSIStyler = ANSIStyler;
+
+        styler.htmlWrapTable = {
+            'bold': ['<b>', '</b>'],
+            'italic': ['<i>', '</i>'],
+            'underline': ['<u>', '</u>'],
+            'inverse': ['<span style="background-color:black;color:white;">', '</span>'],
+            'white': ['<span style="color:white;">', '</span>'],
+            'grey': ['<span style="color:grey;">', '</span>'],
+            'black': ['<span style="color:black;">', '</span>'],
+            'blue': ['<span style="color:blue;">', '</span>'],
+            'cyan': ['<span style="color:cyan;">', '</span>'],
+            'green': ['<span style="color:green;">', '</span>'],
+            'magenta': ['<span style="color:magenta;">', '</span>'],
+            'red': ['<span style="color:red;">', '</span>'],
+            'yellow': ['<span style="color:yellow;">', '</span>']
+        };
+
+        var HTMLWrapStyler = (function (_super) {
+            __extends(HTMLWrapStyler, _super);
+            function HTMLWrapStyler() {
+                _super.call(this);
+                this.styles = styler.htmlWrapTable;
+            }
+            return HTMLWrapStyler;
+        })(WrapStyler);
+        styler.HTMLWrapStyler = HTMLWrapStyler;
+
+        var CSSStyler = (function (_super) {
+            __extends(CSSStyler, _super);
+            function CSSStyler(prefix) {
+                _super.call(this);
+                if (typeof prefix === 'string') {
+                    this.prefix = prefix;
+                } else {
+                    this.prefix = 'styler-';
+                }
+            }
+            CSSStyler.prototype.ok = function (str) {
+                return this.wrap(str, 'ok');
+            };
+
+            CSSStyler.prototype.warn = function (str) {
+                return this.wrap(str, 'warn');
+            };
+
+            CSSStyler.prototype.fail = function (str) {
+                return this.wrap(str, 'fail');
+            };
+
+            CSSStyler.prototype.error = function (str) {
+                return this.wrap(str, 'error');
+            };
+
+            CSSStyler.prototype.warning = function (str) {
+                return this.wrap(str, 'warning');
+            };
+
+            CSSStyler.prototype.success = function (str) {
+                return this.wrap(str, 'success');
+            };
+
+            CSSStyler.prototype.accent = function (str) {
+                return this.wrap(str, 'accent');
+            };
+
+            CSSStyler.prototype.plain = function (str) {
+                return this.wrap(str, 'plain');
+            };
+
+            CSSStyler.prototype.wrap = function (str, style) {
+                return '<span class="' + this.prefix + style + '">' + clean(str) + '</span>';
+            };
+            return CSSStyler;
+        })(WrapStyler);
+        styler.CSSStyler = CSSStyler;
+
+        var DevStyler = (function () {
+            function DevStyler() {
+            }
+            DevStyler.prototype.ok = function (str) {
+                return '[ok|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.fail = function (str) {
+                return '[fail|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.warn = function (str) {
+                return '[warn|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.error = function (str) {
+                return '[error|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.warning = function (str) {
+                return '[warning|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.success = function (str) {
+                return '[success|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.accent = function (str) {
+                return '[accent|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.plain = function (str) {
+                return '[plain|' + clean(str) + ']';
+            };
+
+            DevStyler.prototype.zero = function () {
+                return '[zero]';
+            };
+            return DevStyler;
+        })();
+        styler.DevStyler = DevStyler;
+    })(xm.styler || (xm.styler = {}));
+    var styler = xm.styler;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    (function (writer) {
+        var lineBreak = /\r?\n/;
+
+        var LineWriter = (function () {
+            function LineWriter() {
+                this.textBuffer = '';
+            }
+            LineWriter.prototype.start = function () {
+                this.textBuffer = '';
+            };
+
+            LineWriter.prototype.finalise = function () {
+                this.flushLineBuffer();
+            };
+
+            LineWriter.prototype.write = function (str) {
+                if (str === '') {
+                    return;
+                }
+                this.textBuffer += str;
+
+                var arr = this.textBuffer.split(lineBreak);
+                var len = arr.length;
+                if (len > 0) {
+                    for (var i = 0; i < len - 1; i++) {
+                        this.flushLine(arr[i]);
+                    }
+                    this.textBuffer = arr[len - 1];
+                }
+            };
+
+            LineWriter.prototype.writeln = function (str) {
+                if (arguments.length === 0 || (this.textBuffer === '' && str === '')) {
+                    this.flushLine('');
+                    return;
+                }
+                this.textBuffer += str;
+
+                var arr = this.textBuffer.split(lineBreak);
+                var len = arr.length;
+                if (len > 0) {
+                    for (var i = 0; i < len; i++) {
+                        this.flushLine(arr[i]);
+                    }
+                    this.textBuffer = '';
+                }
+            };
+
+            LineWriter.prototype.flushLine = function (str) {
+            };
+
+            LineWriter.prototype.flushLineBuffer = function () {
+                if (this.textBuffer.length > 0) {
+                    var arr = this.textBuffer.split(lineBreak);
+                    var len = arr.length;
+                    if (len > 0) {
+                        for (var i = 0; i < len; i++) {
+                            this.flushLine(arr[i]);
+                        }
+                        this.textBuffer = '';
                     }
                 }
+            };
+            return LineWriter;
+        })();
+        writer.LineWriter = LineWriter;
+
+        var ConsoleLineWriter = (function (_super) {
+            __extends(ConsoleLineWriter, _super);
+            function ConsoleLineWriter() {
+                _super.apply(this, arguments);
             }
-        }
-    }
+            ConsoleLineWriter.prototype.flushLine = function (str) {
+                console.log(str);
+            };
+            return ConsoleLineWriter;
+        })(LineWriter);
+        writer.ConsoleLineWriter = ConsoleLineWriter;
 
-    var ObjectUtil = (function () {
-        function ObjectUtil() {
-        }
-        ObjectUtil.hasOwnProp = function (obj, prop) {
-            return Object.prototype.hasOwnProperty.call(obj, prop);
-        };
-
-        ObjectUtil.defineProp = function (object, property, settings) {
-            Object.defineProperty(object, property, settings);
-        };
-
-        ObjectUtil.defineProps = function (object, propertyNames, settings) {
-            propertyNames.forEach(function (property) {
-                ObjectUtil.defineProp(object, property, settings);
-            });
-        };
-
-        ObjectUtil.hidePrefixed = function (object, ownOnly) {
-            if (typeof ownOnly === "undefined") { ownOnly = true; }
-            for (var property in object) {
-                if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
-                    ObjectUtil.defineProp(object, property, { enumerable: false });
+        var BufferWriter = (function () {
+            function BufferWriter(seperator) {
+                if (typeof seperator !== 'string') {
+                    this.seperator = '\n';
+                } else {
+                    this.seperator = seperator;
                 }
             }
-        };
+            BufferWriter.prototype.start = function () {
+                this.buffer = '';
+            };
 
-        ObjectUtil.lockProps = function (object, props) {
-            props.forEach(function (property) {
-                Object.defineProperty(object, property, { writable: false });
-            });
-        };
+            BufferWriter.prototype.write = function (str) {
+                if (str) {
+                    this.buffer += str;
+                }
+            };
 
-        ObjectUtil.freezeProps = function (object, props) {
-            props.forEach(function (property) {
-                Object.defineProperty(object, property, { writable: false });
-                Object.freeze(object[property]);
-            });
-        };
+            BufferWriter.prototype.writeln = function (str) {
+                if (arguments.length > 0 && str.length > 0) {
+                    this.buffer += str + this.seperator;
+                } else {
+                    this.buffer += this.seperator;
+                }
+            };
 
-        ObjectUtil.deepFreeze = function (object) {
-            if (xm.isObject(object) || xm.isArray(object)) {
-                deepFreezeRecursive(object, []);
+            BufferWriter.prototype.finalise = function () {
+            };
+            return BufferWriter;
+        })();
+        writer.BufferWriter = BufferWriter;
+
+        var ConsoleBufferWriter = (function (_super) {
+            __extends(ConsoleBufferWriter, _super);
+            function ConsoleBufferWriter() {
+                _super.apply(this, arguments);
             }
+            ConsoleBufferWriter.prototype.finalise = function () {
+                if (this.buffer.length > 0) {
+                    console.log(this.buffer);
+                }
+                this.buffer = '';
+            };
+            return ConsoleBufferWriter;
+        })(BufferWriter);
+        writer.ConsoleBufferWriter = ConsoleBufferWriter;
+
+        var WritableStreamWriter = (function (_super) {
+            __extends(WritableStreamWriter, _super);
+            function WritableStreamWriter(stream) {
+                _super.call(this);
+                this.stream = stream;
+            }
+            WritableStreamWriter.prototype.start = function () {
+            };
+
+            WritableStreamWriter.prototype.finalise = function () {
+            };
+
+            WritableStreamWriter.prototype.flushLine = function (str) {
+                if (str.length > 0) {
+                    this.stream.write(str + '\n', 'utf8');
+                }
+            };
+            return WritableStreamWriter;
+        })(LineWriter);
+        writer.WritableStreamWriter = WritableStreamWriter;
+
+        var NullWriter = (function () {
+            function NullWriter() {
+            }
+            NullWriter.prototype.start = function () {
+            };
+
+            NullWriter.prototype.finalise = function () {
+            };
+
+            NullWriter.prototype.write = function (str) {
+            };
+
+            NullWriter.prototype.writeln = function (str) {
+            };
+            return NullWriter;
+        })();
+        writer.NullWriter = NullWriter;
+    })(xm.writer || (xm.writer = {}));
+    var writer = xm.writer;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var util = require('util');
+
+    var StyledOut = (function () {
+        function StyledOut(writer, styler) {
+            if (typeof writer === "undefined") { writer = null; }
+            if (typeof styler === "undefined") { styler = null; }
+            this._writer = (writer || new xm.writer.ConsoleLineWriter());
+            this._styler = (styler || new xm.styler.ANSIStyler());
+
+            this._writer.start();
+
+            xm.ObjectUtil.hidePrefixed(this);
+        }
+        StyledOut.prototype.write = function (str) {
+            this._writer.write(this._styler.plain(str));
+            return this;
         };
-        return ObjectUtil;
+
+        StyledOut.prototype.line = function (str) {
+            if (typeof str === "undefined") { str = ''; }
+            this._writer.writeln(this._styler.plain(str));
+            return this;
+        };
+
+        StyledOut.prototype.ln = function () {
+            this._writer.writeln(this._styler.zero());
+            return this;
+        };
+
+        StyledOut.prototype.span = function (str) {
+            this._writer.write(this._styler.plain(str));
+            return this;
+        };
+
+        StyledOut.prototype.block = function (str) {
+            this._writer.writeln(this._styler.plain(str));
+            return this;
+        };
+
+        StyledOut.prototype.clear = function () {
+            this._writer.writeln(this._styler.zero());
+            this._writer.writeln(this._styler.zero());
+            return this;
+        };
+
+        StyledOut.prototype.ruler = function () {
+            this._writer.writeln('--------');
+            return this;
+        };
+
+        StyledOut.prototype.ruler2 = function () {
+            this._writer.writeln('----');
+            return this;
+        };
+
+        StyledOut.prototype.h1 = function (str) {
+            this._writer.writeln(this._styler.accent(str));
+            this.ruler();
+            this._writer.writeln();
+            return this;
+        };
+
+        StyledOut.prototype.h2 = function (str) {
+            this._writer.writeln(this._styler.accent(str));
+            this.ruler();
+            return this;
+        };
+
+        StyledOut.prototype.plain = function (str) {
+            this._writer.writeln(this._styler.plain(str));
+            return this;
+        };
+
+        StyledOut.prototype.accent = function (str) {
+            this._writer.write(this._styler.accent(str));
+            return this;
+        };
+
+        StyledOut.prototype.space = function () {
+            this._writer.write(this._styler.plain(' '));
+            return this;
+        };
+
+        StyledOut.prototype.success = function (str) {
+            this._writer.write(this._styler.success(str));
+            return this;
+        };
+
+        StyledOut.prototype.warning = function (str) {
+            this._writer.write(this._styler.warning(str));
+            return this;
+        };
+
+        StyledOut.prototype.error = function (str) {
+            this._writer.write(this._styler.error(str));
+            return this;
+        };
+
+        StyledOut.prototype.ok = function (str) {
+            this._writer.writeln(this._styler.ok(str));
+            return this;
+        };
+
+        StyledOut.prototype.warn = function (str) {
+            this._writer.writeln(this._styler.warn(str));
+            return this;
+        };
+
+        StyledOut.prototype.fail = function (str) {
+            this._writer.writeln(this._styler.fail(str));
+            return this;
+        };
+
+        StyledOut.prototype.cond = function (condition, str, alt) {
+            if (condition) {
+                this._writer.write(this._styler.plain(str));
+            } else if (arguments.length > 2) {
+                this._writer.write(this._styler.plain(alt));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.inspect = function (value, depth, showHidden) {
+            if (typeof depth === "undefined") { depth = 4; }
+            if (typeof showHidden === "undefined") { showHidden = false; }
+            this._writer.writeln(this._styler.plain(util.inspect(value, { showHidden: showHidden, depth: depth })));
+            return this;
+        };
+
+        StyledOut.prototype.unfunk = function () {
+            this.useStyler(new xm.styler.NoStyler());
+            return this;
+        };
+
+        StyledOut.prototype.finalise = function () {
+            this._writer.finalise();
+        };
+
+        StyledOut.prototype.useWriter = function (writer) {
+            xm.assertVar(writer, 'object', 'writer');
+            this._writer.finalise();
+            this._writer = writer;
+            this._writer.start();
+            return this;
+        };
+
+        StyledOut.prototype.useStyler = function (styler) {
+            xm.assertVar(styler, 'object', 'styler');
+            this._styler = styler;
+            return this;
+        };
+
+        Object.defineProperty(StyledOut.prototype, "writer", {
+            get: function () {
+                return this._writer;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(StyledOut.prototype, "styler", {
+            get: function () {
+                return this._styler;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return StyledOut;
     })();
-    xm.ObjectUtil = ObjectUtil;
+    xm.StyledOut = StyledOut;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
     'use strict';
 
-    var pkginfo = require('pkginfo');
+    var path = require('path');
+
+    (function (stack) {
+        var stackExp = /^ *at (.*?) \((.*?)(?::(\d+))?(?::(\d+))?\)$/gm;
+
+        var Stackline = (function () {
+            function Stackline() {
+                this.line = NaN;
+                this.column = NaN;
+            }
+            Stackline.prototype.getLink = function () {
+                if (!this.file) {
+                    return '';
+                }
+                if (isNaN(this.line)) {
+                    return this.file;
+                }
+                var ret = '[' + this.line;
+                if (!isNaN(this.column)) {
+                    ret += ',' + this.column;
+                }
+                return this.file + ret + ']';
+            };
+            return Stackline;
+        })();
+        stack.Stackline = Stackline;
+
+        function getRawStack(err) {
+            err = err || new Error();
+            if (err.stack) {
+                if (typeof (chrome) !== 'undefined' || typeof (process) !== 'undefined') {
+                    return err.stack.replace(/\n[^\n]*/, '');
+                } else if (typeof (Components) !== 'undefined') {
+                    return err.stack.substring(err.stack.indexOf('\n') + 1);
+                } else {
+                    return err.stack;
+                }
+            }
+            return '';
+        }
+        stack.getRawStack = getRawStack;
+
+        function isAbsolute(str) {
+            str = path.normalize(str);
+            var resolve = path.resolve(str);
+            if (resolve === str) {
+                return true;
+            }
+            return false;
+        }
+
+        function trimInternalLines(lines) {
+            var cut = lines.length - 1;
+            while (cut > 0) {
+                var line = lines[cut];
+                if (!line.internal) {
+                    break;
+                }
+                cut--;
+            }
+            return lines.slice(0, cut + 1);
+        }
+        stack.trimInternalLines = trimInternalLines;
+
+        function lineFromMatch(match) {
+            var len = match.length;
+
+            var line = new Stackline();
+            line.call = match[1];
+
+            line.file = len > 1 ? match[2] : '';
+
+            line.line = len > 2 ? parseInt(match[3], 10) : NaN;
+            line.column = len > 3 ? parseInt(match[4], 10) : NaN;
+
+            line.link = line.getLink();
+
+            line.absolute = isAbsolute(line.file);
+            line.internal = !line.absolute;
+            return line;
+        }
+
+        function getStackLines(keep, offset, trim, err) {
+            if (typeof keep === "undefined") { keep = 0; }
+            if (typeof offset === "undefined") { offset = 0; }
+            if (typeof trim === "undefined") { trim = false; }
+            var stack = getRawStack(err);
+
+            var trimTop = 2 + offset;
+            var keepBottom = keep + offset;
+
+            var line;
+            var lines = [];
+            var match;
+
+            stackExp.lastIndex = 0;
+
+            while ((match = stackExp.exec(stack))) {
+                stackExp.lastIndex = match.index + match[0].length;
+
+                trimTop--;
+                if (trimTop > 0) {
+                    continue;
+                }
+                line = lineFromMatch(match);
+
+                lines.push(line);
+
+                if (keep > 0) {
+                    keepBottom--;
+                    if (keepBottom <= 0) {
+                        break;
+                    }
+                }
+            }
+            if (trim) {
+                lines = trimInternalLines(lines);
+            }
+            return lines;
+        }
+        stack.getStackLines = getStackLines;
+    })(xm.stack || (xm.stack = {}));
+    var stack = xm.stack;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var util = require('util');
+    require('colors');
+
+    xm.consoleOut = new xm.StyledOut();
+
+    function writeMulti(logger, args) {
+        var ret = [];
+        for (var i = 0, ii = args.length; i < ii; i++) {
+            var value = args[i];
+            if (value && typeof value === 'object') {
+                ret.push(util.inspect(value, { showHidden: false, depth: 8 }));
+            } else {
+                ret.push(value);
+            }
+        }
+        logger.out.line(ret.join('; '));
+    }
+
+    function getLogger(label) {
+        label = arguments.length > 0 ? (String(label) + ' ') : '';
+
+        var precall = function () {
+        };
+
+        var plain = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                writeMulti(logger, args);
+            }
+        };
+
+        var doLog = function (logger, args) {
+            if (args.length > 0) {
+                logger.out.span(' ');
+                writeMulti(logger, args);
+            }
+        };
+
+        var logger = (function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                plain.apply(null, args);
+            }
+        });
+        logger.out = xm.consoleOut;
+        logger.enabled = true;
+
+        logger.log = plain;
+
+        logger.ok = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').success(label + 'ok');
+                doLog(logger, args);
+            }
+        };
+        logger.warn = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').warning(label + 'warning');
+                doLog(logger, args);
+            }
+        };
+        logger.error = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').error(label + 'error');
+                doLog(logger, args);
+            }
+        };
+        logger.debug = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').accent(label + 'debug');
+                doLog(logger, args);
+            }
+        };
+        logger.inspect = function (value, depth, label) {
+            if (typeof depth === "undefined") { depth = 3; }
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').cond(arguments.length > 2, label + ' ').inspect(value, depth);
+            }
+        };
+        logger.json = function (value, label) {
+            if (logger.enabled) {
+                precall();
+                logger.out.span('-> ').cond(arguments.length > 2, label + ' ').block(JSON.stringify(value, null, 3));
+            }
+        };
+
+        return logger;
+    }
+    xm.getLogger = getLogger;
+
+    xm.log = getLogger();
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var fs = require('fs');
+    var path = require('path');
+
+    function findInfo(pmodule, dir) {
+        if (!dir) {
+            dir = path.dirname(pmodule.filename);
+        }
+
+        var file = path.join(dir, 'package.json');
+        if (fs.existsSync(file)) {
+            return file;
+        }
+
+        if (dir === '/') {
+            throw new Error('Could not find package.json up from: ' + dir);
+        } else if (!dir || dir === '.') {
+            throw new Error('Cannot find package.json from unspecified directory');
+        }
+
+        return findInfo(pmodule, path.dirname(dir));
+    }
 
     var PackageJSON = (function () {
         function PackageJSON(pkg, path) {
             if (typeof path === "undefined") { path = null; }
             this.path = path;
-            xm.assertVar('pkg', pkg, 'object');
+            xm.assertVar(pkg, 'object', 'pkg');
             this._pkg = pkg;
 
             xm.ObjectUtil.hidePrefixed(this);
@@ -1012,9 +1813,24 @@ var xm;
             return this.name + '-' + this.version;
         };
 
+        PackageJSON.prototype.getHomepage = function (short) {
+            if (typeof short === "undefined") { short = false; }
+            var homepage = this._pkg.homepage;
+            if (homepage) {
+                if (short) {
+                    return homepage.replace(/(^https?:\/\/)|(\/?$)/g, '');
+                }
+                return homepage;
+            }
+            if (short) {
+                return '<no homepage>';
+            }
+            return '';
+        };
+
         PackageJSON.find = function () {
             if (!PackageJSON._localPath) {
-                PackageJSON._localPath = pkginfo.find((module));
+                PackageJSON._localPath = findInfo((module));
             }
             return PackageJSON._localPath;
         };
@@ -1037,12 +1853,12 @@ var tsd;
 (function (tsd) {
     'use strict';
 
-    var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
+    var nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
 
     var Def = (function () {
         function Def(path) {
             this.history = [];
-            xm.assertVar('path', path, 'string');
+            xm.assertVar(path, 'string', 'path');
             this.path = path;
         }
         Object.defineProperty(Def.prototype, "pathTerm", {
@@ -1058,14 +1874,12 @@ var tsd;
         };
 
         Def.isDefPath = function (path) {
-            return nameExp.test(path);
-        };
-
-        Def.getPath = function (path) {
+            nameExp.lastIndex = 0;
             return nameExp.test(path);
         };
 
         Def.getFrom = function (path) {
+            nameExp.lastIndex = 0;
             var match = nameExp.exec(path);
             if (!match) {
                 return null;
@@ -1170,7 +1984,7 @@ var git;
         GitUtil.decodeBlobJson = decodeBlobJson;
 
         function blobShaHex(data, encoding) {
-            xm.assertVar('data', data, Buffer);
+            xm.assertVar(data, Buffer, 'data');
             return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
         }
         GitUtil.blobShaHex = blobShaHex;
@@ -1188,7 +2002,7 @@ var tsd;
             this.sha = null;
             this.content = null;
             this.encoding = 'utf8';
-            xm.assertVar('sha', sha, 'sha1');
+            xm.assertVar(sha, 'sha1', 'sha');
             this.sha = sha;
             this.encoding = encoding;
 
@@ -1205,7 +2019,7 @@ var tsd;
         };
 
         DefBlob.prototype.setContent = function (content, encoding) {
-            xm.assertVar('content', content, Buffer);
+            xm.assertVar(content, Buffer, 'content');
             if (xm.isValid(this.content)) {
                 throw new Error('content already set: ' + this.sha);
             }
@@ -1246,8 +2060,8 @@ var tsd;
             this._blob = null;
             this.dependencies = [];
             this.solved = false;
-            xm.assertVar('def', def, tsd.Def);
-            xm.assertVar('commit', commit, tsd.DefCommit);
+            xm.assertVar(def, tsd.Def, 'def');
+            xm.assertVar(commit, tsd.DefCommit, 'commit');
 
             this._def = def;
             this._commit = commit;
@@ -1255,7 +2069,7 @@ var tsd;
             xm.ObjectUtil.hidePrefixed(this);
         }
         DefVersion.prototype.setContent = function (blob) {
-            xm.assertVar('blob', blob, tsd.DefBlob);
+            xm.assertVar(blob, tsd.DefBlob, 'blob');
             if (this._blob) {
                 throw new Error('already got a blob: ' + this._blob.sha + ' != ' + blob.sha);
             }
@@ -1323,18 +2137,18 @@ var tsd;
     var InstalledDef = (function () {
         function InstalledDef(path) {
             if (path) {
-                xm.assertVar('path', path, 'string');
+                xm.assertVar(path, 'string', 'path');
                 this.path = path;
             }
         }
         InstalledDef.prototype.update = function (file) {
-            xm.assertVar('file', file, tsd.DefVersion);
+            xm.assertVar(file, tsd.DefVersion, 'file');
 
-            xm.assertVar('commit', file.commit, tsd.DefCommit);
-            xm.assertVar('commit.sha', file.commit.commitSha, 'sha1');
+            xm.assertVar(file.commit, tsd.DefCommit, 'commit');
+            xm.assertVar(file.commit.commitSha, 'sha1', 'commit.sha');
 
-            xm.assertVar('blob', file.blob, tsd.DefBlob);
-            xm.assertVar('blob.sha', file.blob.sha, 'sha1');
+            xm.assertVar(file.blob, tsd.DefBlob, 'blob');
+            xm.assertVar(file.blob.sha, 'sha1', 'blob.sha');
 
             this.path = file.def.path;
             this.commitSha = file.commit.commitSha;
@@ -1352,7 +2166,7 @@ var tsd;
         function Config(schema) {
             this._installed = new xm.KeyValueMap();
             this.log = xm.getLogger('Config');
-            xm.assertVar('schema', schema, 'object');
+            xm.assertVar(schema, 'object', 'schema');
             this._schema = schema;
 
             this.typingsPath = tsd.Const.typingsFolder;
@@ -1399,7 +2213,7 @@ var tsd;
         });
 
         Config.prototype.addFile = function (file) {
-            xm.assertVar('file', file, tsd.DefVersion);
+            xm.assertVar(file, tsd.DefVersion, 'file');
 
             var def;
             if (this._installed.has(file.def.path)) {
@@ -1413,17 +2227,17 @@ var tsd;
         };
 
         Config.prototype.hasFile = function (filePath) {
-            xm.assertVar('filePath', filePath, 'string');
+            xm.assertVar(filePath, 'string', 'filePath');
             return this._installed.has(filePath);
         };
 
         Config.prototype.getFile = function (filePath) {
-            xm.assertVar('filePath', filePath, 'string');
+            xm.assertVar(filePath, 'string', 'filePath');
             return this._installed.get(filePath, null);
         };
 
         Config.prototype.removeFile = function (filePath) {
-            xm.assertVar('filePath', filePath, 'string');
+            xm.assertVar(filePath, 'string', 'filePath');
             this._installed.remove(filePath);
         };
 
@@ -1452,7 +2266,7 @@ var tsd;
 
         Config.prototype.parseJSON = function (json) {
             var _this = this;
-            xm.assertVar('json', json, 'object');
+            xm.assertVar(json, 'object', 'json');
 
             this._installed.clear();
 
@@ -1500,7 +2314,7 @@ var tsd;
             this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
         }
         Paths.getCacheDirName = function () {
-            return (process.platform === 'win32' ? tsd.Const.cacheDir : '.' + tsd.Const.ident);
+            return (process.platform === 'win32' ? tsd.Const.cacheDir : '.' + tsd.Const.cacheDir);
         };
 
         Paths.getUserHome = function () {
@@ -1531,6 +2345,8 @@ var tsd;
             this.configFile = configFile;
             this.verbose = verbose;
             this.log = xm.getLogger('Context');
+            xm.assertVar(configFile, 'string', 'configFile', true);
+
             this.packageInfo = xm.PackageJSON.getLocal();
 
             this.paths = new tsd.Paths();
@@ -1672,11 +2488,11 @@ var tsd;
 
     var NameMatcher = (function () {
         function NameMatcher(pattern) {
-            xm.assertVar('pattern', pattern, 'string');
+            xm.assertVar(pattern, 'string', 'pattern');
             this.pattern = pattern;
         }
         NameMatcher.prototype.filter = function (list) {
-            return list.filter(this.getFilterFunc(), this);
+            return list.filter(this.getFilterFunc());
         };
 
         NameMatcher.prototype.toString = function () {
@@ -1819,7 +2635,8 @@ var tsd;
             if (typeof pattern === "undefined") { pattern = '*'; }
             this.resolveDependencies = false;
             this.limit = 10;
-            xm.assertVar('pattern', pattern, 'string');
+            this.timeLimit = 10000;
+            xm.assertVar(pattern, 'string', 'pattern');
             this.pattern = new tsd.NameMatcher(pattern);
         }
         Object.defineProperty(Selector.prototype, "requiresHistory", {
@@ -1983,8 +2800,8 @@ var xm;
             this.value = null;
             this.changed = null;
             this.options = null;
-            xm.assertVar('label', label, 'string');
-            xm.assertVar('key', key, 'string');
+            xm.assertVar(label, 'string', 'label');
+            xm.assertVar(key, 'string', 'key');
             this.label = label;
             this.key = key;
             this.options = options || null;
@@ -1998,7 +2815,7 @@ var xm;
             if (!xm.isJSONValue(value)) {
                 throw new Error('cannot store non-JSON values: ' + xm.typeOf(value));
             }
-            xm.assertVar('changed', changed, Date, true);
+            xm.assertVar(changed, Date, 'changed', true);
 
             this.value = value;
             this.changed = changed || new Date();
@@ -2021,11 +2838,11 @@ var xm;
         };
 
         CachedJSONValue.fromJSON = function (json) {
-            xm.assertVar('label', json.label, 'string');
-            xm.assertVar('key', json.key, 'string');
-            xm.assertVar('hash', json.hash, 'sha1');
-            xm.assertVar('checksum', json.checksum, 'sha1');
-            xm.assertVar('changed', json.changed, 'string');
+            xm.assertVar(json.label, 'string', 'label');
+            xm.assertVar(json.key, 'string', 'key');
+            xm.assertVar(json.hash, 'sha1', 'hash');
+            xm.assertVar(json.checksum, 'sha1', 'checksum');
+            xm.assertVar(json.changed, 'string', 'changed');
 
             var changedDateNum = Date.parse(json.changed);
             if (isNaN(changedDateNum)) {
@@ -2065,7 +2882,7 @@ var xm;
         function CachedJSONStore(storeFolder) {
             this.stats = new xm.StatCounter();
             this._formatVersion = '0.2';
-            xm.assertVar('storeFolder', storeFolder, 'string');
+            xm.assertVar(storeFolder, 'string', 'storeFolder');
 
             storeFolder = storeFolder.replace(/[\\\/]+$/, '') + '-fmt' + this._formatVersion;
 
@@ -2084,7 +2901,7 @@ var xm;
             FS.exists(this._dir).then(function (exists) {
                 if (!exists) {
                     _this.stats.count('init-dir-create', _this._dir);
-                    return xm.mkdirCheckQ(_this._dir, true);
+                    return xm.FileUtil.mkdirCheckQ(_this._dir, true);
                 }
 
                 return FS.isDirectory(_this._dir).then(function (isDir) {
@@ -2156,7 +2973,7 @@ var xm;
                     return FS.remove(dest);
                 }
                 _this.stats.count('store-new');
-                return xm.mkdirCheckQ(path.dirname(dest), true);
+                return xm.FileUtil.mkdirCheckQ(path.dirname(dest), true);
             }).then(function () {
                 _this.stats.count('store-write');
                 var data = JSON.stringify(res.toJSON(), null, 2);
@@ -2201,8 +3018,8 @@ var xm;
             this._active = new xm.KeyValueMap();
             this._service = null;
             this.stats = new xm.StatCounter();
-            xm.assertVar('label', label, 'string');
-            xm.assertVar('service', service, 'object');
+            xm.assertVar(label, 'string', 'label');
+            xm.assertVar(service, 'object', 'service');
 
             this._service = service;
             this.stats.logger = xm.getLogger(label + '.CachedLoader');
@@ -2224,8 +3041,8 @@ var xm;
             this.stats.count('start', label);
 
             if (this._debug) {
-                xm.log(opts);
-                xm.log(key);
+                xm.log.debug(opts);
+                xm.log.debug(key);
             }
 
             if (this._active.has(key)) {
@@ -2384,7 +3201,8 @@ var xm;
 
     var CachedJSONService = (function () {
         function CachedJSONService(dir) {
-            xm.assertVar('dir', dir, 'string');
+            xm.assertVar(dir, 'string', 'dir');
+
             this._store = new xm.CachedJSONStore(dir);
 
             xm.ObjectUtil.hidePrefixed(this);
@@ -2482,12 +3300,6 @@ var xm;
     })();
     xm.URLManager = URLManager;
 })(xm || (xm = {}));
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 var git;
 (function (git) {
     'use strict';
@@ -2499,7 +3311,7 @@ var git;
             this._base = 'https://github.com/{owner}/{project}';
             this._api = 'https://api.github.com/repos/{owner}/{project}';
             this._raw = 'https://raw.github.com/{owner}/{project}';
-            xm.assertVar('repo', repo, git.GithubRepo);
+            xm.assertVar(repo, git.GithubRepo, 'repo');
 
             this.setVars({
                 owner: repo.ownerName,
@@ -2526,8 +3338,8 @@ var git;
         };
 
         GithubURLManager.prototype.rawFile = function (commit, path) {
-            xm.assertVar('commit', commit, 'string');
-            xm.assertVar('path', path, 'string');
+            xm.assertVar(commit, 'string', 'commit');
+            xm.assertVar(path, 'string', 'path');
 
             return this.getURL('rawFile', {
                 commit: commit,
@@ -2546,8 +3358,8 @@ var git;
         function GithubRepo(ownerName, projectName) {
             this.ownerName = ownerName;
             this.projectName = projectName;
-            xm.assertVar('ownerName', ownerName, 'string');
-            xm.assertVar('projectName', projectName, 'string');
+            xm.assertVar(ownerName, 'string', 'ownerName');
+            xm.assertVar(projectName, 'string', 'projectName');
 
             this.urls = new git.GithubURLManager(this);
         }
@@ -2610,8 +3422,8 @@ var git;
         function GithubAPICached(repo, storeFolder) {
             this._apiVersion = '3.0.0';
             this._debug = false;
-            xm.assertVar('repo', repo, git.GithubRepo);
-            xm.assertVar('storeFolder', storeFolder, 'string');
+            xm.assertVar(repo, git.GithubRepo, 'repo');
+            xm.assertVar(storeFolder, 'string', 'storeFolder');
 
             this._repo = repo;
             this._api = new Github({
@@ -2752,7 +3564,7 @@ var xm;
     var CachedFileService = (function () {
         function CachedFileService(dir) {
             this._extension = '';
-            xm.assertVar('dir', dir, 'string');
+            xm.assertVar(dir, 'string', 'dir');
             this.dir = dir;
 
             Object.defineProperty(this, 'dir', { writable: false });
@@ -2787,7 +3599,7 @@ var xm;
 
             var storeFile = path.join(this.dir, file + this._extension);
 
-            xm.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
+            xm.FileUtil.mkdirCheckQ(path.dirname(storeFile), true).then(function () {
                 return FS.write(storeFile, value, { flags: 'wb' });
             }).then(function () {
                 d.resolve(value);
@@ -2822,8 +3634,8 @@ var git;
             this.headers = {
                 'User-Agent': 'xm.GithubRawCached'
             };
-            xm.assertVar('repo', repo, git.GithubRepo);
-            xm.assertVar('storeFolder', storeFolder, 'string');
+            xm.assertVar(repo, git.GithubRepo, 'repo');
+            xm.assertVar(storeFolder, 'string', 'storeFolder');
             this._repo = repo;
 
             var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
@@ -2865,7 +3677,7 @@ var git;
                         throw new Error('unexpected status code: ' + res.status);
                     }
                     if (_this._debug) {
-                        _this.log.inspect(res, 'res', 1);
+                        _this.log.inspect(res, 1, 'res');
                     }
 
                     _this.stats.count('request-complete');
@@ -3173,7 +3985,7 @@ var tsd;
         function DefCommit(commitSha) {
             this.hasMeta = false;
             this.message = new git.GitCommitMessage();
-            xm.assertVar('commitSha', commitSha, 'string');
+            xm.assertVar(commitSha, 'string', 'commitSha');
 
             this.commitSha = commitSha;
 
@@ -3181,7 +3993,7 @@ var tsd;
             xm.ObjectUtil.lockProps(this, ['commitSha']);
         }
         DefCommit.prototype.parseJSON = function (commit) {
-            xm.assertVar('commit', commit, 'object');
+            xm.assertVar(commit, 'object', 'commit');
             if (commit.sha !== this.commitSha) {
                 throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
             }
@@ -3263,8 +4075,8 @@ var tsd;
 
         DefIndex.prototype.init = function (branch, tree) {
             var _this = this;
-            xm.assertVar('branch', branch, 'object');
-            xm.assertVar('tree', tree, 'object');
+            xm.assertVar(branch, 'object', 'branch');
+            xm.assertVar(tree, 'object', 'tree');
 
             if (this._hasIndex) {
                 return;
@@ -3275,16 +4087,16 @@ var tsd;
             this._versions.clear();
             this._definitions.clear();
 
-            xm.assertVar('branch', branch, 'object');
-            xm.assertVar('tree', tree, 'object');
+            xm.assertVar(branch, 'object', 'branch');
+            xm.assertVar(tree, 'object', 'tree');
 
             var commitSha = pointer.get(branch, commit_sha);
             var treeSha = tree.sha;
             var sha = pointer.get(branch, branch_tree_sha);
 
-            xm.assertVar('sha', sha, 'string');
-            xm.assertVar('treeSha', treeSha, 'string');
-            xm.assertVar('commitSha', commitSha, 'string');
+            xm.assertVar(sha, 'string', 'sha');
+            xm.assertVar(treeSha, 'string', 'treeSha');
+            xm.assertVar(commitSha, 'string', 'commitSha');
 
             if (sha !== treeSha) {
                 throw new Error('branch and tree sha mismatch');
@@ -3320,14 +4132,14 @@ var tsd;
 
         DefIndex.prototype.setHistory = function (def, commitJsonArray) {
             var _this = this;
-            xm.assertVar('def', def, tsd.Def);
-            xm.assertVar('commits', commitJsonArray, 'array');
+            xm.assertVar(def, tsd.Def, 'def');
+            xm.assertVar(commitJsonArray, 'array', 'commits');
 
             def.history = [];
 
             commitJsonArray.map(function (json) {
                 if (!json || !json.sha) {
-                    xm.log.inspect(json, 'weird: json no sha');
+                    xm.log.inspect(json, 1, 'weird: json no sha');
                 }
                 var commit = _this.procureCommit(json.sha);
                 if (!commit) {
@@ -3341,7 +4153,7 @@ var tsd;
         };
 
         DefIndex.prototype.procureCommit = function (commitSha) {
-            xm.assertVar('commitSha', commitSha, 'sha1');
+            xm.assertVar(commitSha, 'sha1', 'commitSha');
 
             var commit;
             if (this._commits.has(commitSha)) {
@@ -3354,7 +4166,7 @@ var tsd;
         };
 
         DefIndex.prototype.procureBlob = function (blobSha) {
-            xm.assertVar('blobSha', blobSha, 'sha1');
+            xm.assertVar(blobSha, 'sha1', 'blobSha');
 
             var blob;
             if (this._blobs.has(blobSha)) {
@@ -3368,7 +4180,7 @@ var tsd;
 
         DefIndex.prototype.procureBlobFor = function (content, encoding) {
             if (typeof encoding === "undefined") { encoding = null; }
-            xm.assertVar('content', content, Buffer);
+            xm.assertVar(content, Buffer, 'content');
 
             var sha = git.GitUtil.blobShaHex(content, encoding);
             var blob = this.procureBlob(sha);
@@ -3379,7 +4191,7 @@ var tsd;
         };
 
         DefIndex.prototype.procureDef = function (path) {
-            xm.assertVar('path', path, 'string');
+            xm.assertVar(path, 'string', 'path');
 
             var def = null;
 
@@ -3396,8 +4208,8 @@ var tsd;
         };
 
         DefIndex.prototype.procureVersion = function (def, commit) {
-            xm.assertVar('def', def, tsd.Def);
-            xm.assertVar('commit', commit, tsd.DefCommit);
+            xm.assertVar(def, tsd.Def, 'def');
+            xm.assertVar(commit, tsd.DefCommit, 'commit');
 
             var file;
 
@@ -3417,8 +4229,8 @@ var tsd;
         };
 
         DefIndex.prototype.procureVersionFromSha = function (path, commitSha) {
-            xm.assertVar('path', path, 'string');
-            xm.assertVar('commitSha', commitSha, 'sha1');
+            xm.assertVar(path, 'string', 'path');
+            xm.assertVar(commitSha, 'sha1', 'commitSha');
 
             var def = this.getDef(path);
             if (!def) {
@@ -3979,7 +4791,7 @@ var tsd;
         function Resolver(core) {
             this._active = new xm.KeyValueMap();
             this.stats = new xm.StatCounter();
-            xm.assertVar('core', core, tsd.Core);
+            xm.assertVar(core, tsd.Core, 'core');
             this._core = core;
 
             this.stats.log = this._core.context.verbose;
@@ -4029,7 +4841,6 @@ var tsd;
             }
 
             var cleanup = function () {
-                xm.log.debug('cleanup!');
                 _this._active.remove(file.key);
                 _this.stats.count('active-remove');
             };
@@ -4116,7 +4927,7 @@ var tsd;
             this.stats = new xm.StatCounter();
             this.log = xm.getLogger('Core');
             this._debug = false;
-            xm.assertVar('context', context, tsd.Context);
+            xm.assertVar(context, tsd.Context, 'context');
 
             this.resolver = new tsd.Resolver(this);
             this.index = new tsd.DefIndex();
@@ -4162,6 +4973,7 @@ var tsd;
 
                     _this.index.init(branchData, data);
 
+                    _this.stats.count('index-success');
                     d.resolve(null);
                 }, function (err) {
                     _this.stats.count('index-tree-get-error');
@@ -4180,7 +4992,6 @@ var tsd;
             var d = Q.defer();
 
             var res = new tsd.APIResult(this.index, selector);
-
             this.updateIndex().then(function () {
                 res.nameMatches = selector.pattern.filter(_this.index.list);
 
@@ -4320,7 +5131,7 @@ var tsd;
                 return Q.reject(new Error('saveConfig retrieved empty json'));
             }
 
-            xm.mkdirCheckQ(dir, true).then(function () {
+            xm.FileUtil.mkdirCheckQ(dir, true).then(function () {
                 return FS.write(target, json).then(function () {
                     return FS.stat(target);
                 }).then(function () {
@@ -4513,7 +5324,7 @@ var tsd;
                     if (exists) {
                         return FS.remove(targetPath);
                     }
-                    return xm.mkdirCheckQ(path.dirname(targetPath), true);
+                    return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
                 });
@@ -4579,8 +5390,8 @@ var tsd;
             this.index = index;
             this.selector = selector;
             this.written = new xm.KeyValueMap();
-            xm.assertVar('index', index, tsd.DefIndex);
-            xm.assertVar('selector', selector, tsd.Selector, true);
+            xm.assertVar(index, tsd.DefIndex, 'index');
+            xm.assertVar(selector, tsd.Selector, 'selector', true);
         }
         return APIResult;
     })();
@@ -4589,7 +5400,8 @@ var tsd;
     var API = (function () {
         function API(context) {
             this.context = context;
-            xm.assertVar('context', context, tsd.Context);
+            this._debug = false;
+            xm.assertVar(context, tsd.Context, 'context');
 
             this._core = new tsd.Core(this.context);
 
@@ -4616,7 +5428,7 @@ var tsd;
         };
 
         API.prototype.search = function (selector) {
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
             this._core.select(selector).then(d.resolve, d.reject);
@@ -4626,7 +5438,7 @@ var tsd;
 
         API.prototype.install = function (selector) {
             var _this = this;
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
             selector.resolveDependencies = true;
@@ -4653,8 +5465,8 @@ var tsd;
 
         API.prototype.directInstall = function (path, commitSha) {
             var _this = this;
-            xm.assertVar('path', path, 'string');
-            xm.assertVar('commitSha', commitSha, 'sha1');
+            xm.assertVar(path, 'string', 'path');
+            xm.assertVar(commitSha, 'sha1', 'commitSha');
             var d = Q.defer();
 
             var res = new tsd.APIResult(this._core.index, null);
@@ -4671,7 +5483,7 @@ var tsd;
 
         API.prototype.installFragment = function (path, commitShaFragment) {
             var _this = this;
-            xm.assertVar('path', path, 'string');
+            xm.assertVar(path, 'string', 'path');
             var d = Q.defer();
 
             var res = new tsd.APIResult(this._core.index, null);
@@ -4688,7 +5500,7 @@ var tsd;
 
         API.prototype.info = function (selector) {
             var _this = this;
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
             this._core.select(selector).then(function (res) {
@@ -4702,7 +5514,7 @@ var tsd;
 
         API.prototype.history = function (selector) {
             var _this = this;
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
             this._core.select(selector).then(function (res) {
@@ -4718,7 +5530,7 @@ var tsd;
 
         API.prototype.deps = function (selector) {
             var _this = this;
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
             this._core.select(selector).then(function (res) {
@@ -4744,7 +5556,7 @@ var tsd;
         };
 
         API.prototype.compare = function (selector) {
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
             d.reject(new Error('not implemented yet'));
 
@@ -4752,7 +5564,7 @@ var tsd;
         };
 
         API.prototype.update = function (selector) {
-            xm.assertVar('selector', selector, tsd.Selector);
+            xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
             d.reject(new Error('not implemented yet'));
 
@@ -4765,6 +5577,19 @@ var tsd;
 
             return d.promise;
         };
+
+        Object.defineProperty(API.prototype, "debug", {
+            get: function () {
+                return this._debug;
+            },
+            set: function (value) {
+                this._debug = value;
+                this._core.debug = this._debug;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
 
         Object.defineProperty(API.prototype, "core", {
             get: function () {
@@ -4792,9 +5617,9 @@ var xm;
         } else if (one.index > two.index) {
             return 1;
         }
-        if (one.id < two.id) {
+        if (one.name < two.name) {
             return -1;
-        } else if (one.id > two.id) {
+        } else if (one.name > two.name) {
             return 1;
         }
         return 0;
@@ -4814,9 +5639,9 @@ var xm;
     xm.exposeSortHasElem = exposeSortHasElem;
 
     function exposeSortId(one, two) {
-        if (one.id < two.id) {
+        if (one.name < two.name) {
             return -1;
-        } else if (one.id > two.id) {
+        } else if (one.name > two.name) {
             return 1;
         }
         if (one.index < two.index) {
@@ -4834,9 +5659,9 @@ var xm;
         } else if (one.index > two.index) {
             return 1;
         }
-        if (one.id < two.id) {
+        if (one.name < two.name) {
             return -1;
-        } else if (one.id > two.id) {
+        } else if (one.name > two.name) {
             return 1;
         }
         return 0;
@@ -4862,20 +5687,30 @@ var xm;
     })();
     xm.ExposeGroup = ExposeGroup;
 
+    var ExposeOption = (function () {
+        function ExposeOption() {
+            this.global = false;
+        }
+        return ExposeOption;
+    })();
+    xm.ExposeOption = ExposeOption;
+
     var Expose = (function () {
-        function Expose(title) {
+        function Expose(title, output) {
             if (typeof title === "undefined") { title = ''; }
+            if (typeof output === "undefined") { output = null; }
             var _this = this;
             this.title = title;
             this._commands = new xm.KeyValueMap();
             this._options = new xm.KeyValueMap();
             this._groups = new xm.KeyValueMap();
             this._isInit = false;
-            this._nodeBin = false;
             this._index = 0;
             this._mainGroup = new ExposeGroup();
-            this.log = xm.getLogger('Expose');
-            this.createCommand('help', function (cmd) {
+            this.output = (output || new xm.StyledOut());
+
+            this.createCommand(function (cmd) {
+                cmd.name = 'help';
                 cmd.label = 'Display usage help';
                 cmd.groups = ['help'];
                 cmd.execute = function (args) {
@@ -4884,51 +5719,69 @@ var xm;
                 };
             });
 
-            this.defineOption({
-                name: 'help',
-                short: 'h',
-                description: 'Display usage help',
-                type: 'flag',
-                default: null,
-                placeholder: null,
-                command: 'help',
-                global: true
+            this.defineOption(function (opt) {
+                opt.name = 'help';
+                opt.short = 'h';
+                opt.description = 'Display usage help';
+                opt.type = 'flag';
+                opt.command = 'help';
+                opt.global = true;
             });
 
             xm.ObjectUtil.hidePrefixed(this);
-
-            this.log.showLog = false;
         }
-        Expose.prototype.defineOption = function (data) {
-            if (this._options.has(data.name)) {
-                throw new Error('option id collision on ' + data.name);
+        Expose.prototype.defineOption = function (build) {
+            var opt = new ExposeOption();
+            build(opt);
+
+            xm.assertVar(opt.name, 'string', 'opt.name');
+
+            if (this._options.has(opt.name)) {
+                throw new Error('opt.name collision on ' + opt.name);
             }
-            this._options.set(data.name, data);
+            this._options.set(opt.name, opt);
         };
 
-        Expose.prototype.createCommand = function (id, build) {
-            xm.assertVar('id', id, 'string');
-
-            if (this._commands.has(id)) {
-                throw new Error('id collision on ' + id);
-            }
+        Expose.prototype.createCommand = function (build) {
             var cmd = new ExposeCommand();
-            cmd.id = id;
-            cmd.index = (++this._index);
             build(cmd);
-            this._commands.set(id, cmd);
+            cmd.index = (++this._index);
+
+            xm.assertVar(cmd.name, 'string', 'build.name');
+
+            if (this._commands.has(cmd.name)) {
+                throw new Error('cmd.name collision on ' + cmd.name);
+            }
+            this._commands.set(cmd.name, cmd);
         };
 
-        Expose.prototype.createGroup = function (id, build) {
-            xm.assertVar('id', id, 'string');
-            if (this._groups.has(id)) {
-                throw new Error('id collision on ' + id);
-            }
+        Expose.prototype.defineGroup = function (build) {
             var group = new ExposeGroup();
-            group.id = id;
-            group.index = (++this._index);
             build(group);
-            this._groups.set(id, group);
+            group.index = (++this._index);
+
+            xm.assertVar(group.name, 'string', 'group.name');
+
+            if (this._groups.has(group.name)) {
+                throw new Error('group.name collision on ' + group.name);
+            }
+            this._groups.set(group.name, group);
+        };
+
+        Expose.prototype.applyOptions = function (argv) {
+            var _this = this;
+            var argv = optimist.parse(argv);
+
+            Object.keys(argv).forEach(function (name) {
+                if (name !== '_' && _this._options.has(name)) {
+                    var opt = _this._options.get(name);
+                    if (opt.apply) {
+                        opt.apply(argv[name], argv);
+                    }
+                }
+            });
+
+            return argv;
         };
 
         Expose.prototype.init = function () {
@@ -4938,8 +5791,8 @@ var xm;
             }
             this._isInit = true;
 
-            xm.eachProp(this._options.keys(), function (id) {
-                var option = _this._options.get(id);
+            xm.eachProp(this._options.keys(), function (name) {
+                var option = _this._options.get(name);
                 if (option.short) {
                     optimist.alias(option.name, option.short);
                 }
@@ -4955,13 +5808,18 @@ var xm;
         };
 
         Expose.prototype.exit = function (code) {
+            if (code !== 0) {
+                this.output.line().fail('error');
+            } else {
+                this.output.line().ok('bye!');
+            }
             exitProcess(code);
         };
 
         Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
             if (typeof exitAfter === "undefined") { exitAfter = true; }
             var _this = this;
-            this.execArgv(argvRaw, alt).then(function (result) {
+            this.executeRaw(argvRaw, alt).then(function (result) {
                 if (result.error) {
                     throw (result.error);
                 }
@@ -4969,80 +5827,78 @@ var xm;
                     _this.exit(result.code);
                 }
             }).fail(function (err) {
-                xm.log.error(err);
+                _this.output.error(err.toString()).clear();
                 _this.exit(1);
             });
         };
 
-        Expose.prototype.execArgv = function (argvRaw, alt) {
+        Expose.prototype.executeRaw = function (argvRaw, alt) {
             this.init();
 
-            this._nodeBin = argvRaw[0] === 'node';
+            if (!alt || !this._commands.has(alt)) {
+                alt = 'help';
+            }
 
             var options = this._options.values();
             var opt;
             var i, ii;
 
-            var argv = optimist.parse(argvRaw);
-
-            if (!argv || argv._.length === 0) {
-                if (alt && this._commands.has(alt)) {
-                    return this.execute(alt, argv);
-                } else {
-                    return this.execute('help', argv);
-                }
+            var argv = this.applyOptions(argvRaw);
+            if (!argv) {
+                return this.executeCommand(alt, argv);
             }
 
             for (i = 0, ii = options.length; i < ii; i++) {
                 opt = options[i];
                 if (opt.command && argv[opt.name]) {
-                    return this.execute(opt.command, argv);
+                    return this.executeCommand(opt.command, argv);
                 }
             }
 
             var cmd = argv._.shift();
-            if (cmd === 'node') {
-                argv._.shift();
-            }
+
+            cmd = argv._.shift();
+
             cmd = argv._.shift();
 
             if (typeof cmd === 'undefined') {
-                if (alt && this._commands.has(alt)) {
-                    xm.log.warn('undefined command, using default');
-                    xm.log('');
-                    return this.execute(alt, argv);
-                } else {
-                    xm.log.warn('undefined command');
-                    xm.log('');
-                    return this.execute('help', argv);
-                }
+                return this.executeCommand(alt, argv);
             } else if (this._commands.has(cmd)) {
-                return this.execute(cmd, argv);
+                return this.executeCommand(cmd, argv);
             } else {
-                xm.log.warn('command not found: ' + cmd);
-                xm.log('');
-                return this.execute('help', argv, false);
+                this.output.line().warning('command not found: ' + cmd).clear();
+                return this.executeCommand('help', argv);
             }
         };
 
-        Expose.prototype.execute = function (id, args, head) {
+        Expose.prototype.executeCommand = function (name, args) {
             if (typeof args === "undefined") { args = null; }
-            if (typeof head === "undefined") { head = false; }
+            var _this = this;
             this.init();
 
-            if (!this._commands.has(id)) {
-                xm.log.error('\nunknown command ' + id + '\n');
+            if (!this._commands.has(name)) {
                 return Q({
                     code: 1,
-                    err: new Error('unknown command ' + id)
+                    err: new Error('unknown command ' + name)
                 });
             }
-            if (head) {
-                xm.log('\n-> ' + id + '\n');
-            }
-            var f = this._commands.get(id);
+            var cmd = this._commands.get(name);
 
-            return Q(f.execute.call(f, args)).then(function () {
+            var defer = Q.defer();
+
+            Q.resolve().then(function () {
+                if (_this.before) {
+                    return Q(_this.before(cmd, args));
+                }
+                return null;
+            }).then(function () {
+                return Q(cmd.execute(args));
+            }).then(function () {
+                if (_this.after) {
+                    return Q(_this.after(cmd, args));
+                }
+                return null;
+            }).then(function () {
                 return {
                     code: 0
                 };
@@ -5051,13 +5907,17 @@ var xm;
                     code: (err.code && err.code > 0) ? err.code : 1,
                     err: err
                 };
+            }).done(function (ret) {
+                defer.resolve(ret);
             });
+
+            return defer.promise;
         };
 
         Expose.prototype.printCommands = function () {
             var _this = this;
             if (this.title) {
-                xm.log(this.title + '\n');
+                this.output.accent(this.title).clear();
             }
 
             var optionString = function (option) {
@@ -5087,7 +5947,7 @@ var xm;
             };
 
             var addCommand = function (cmd, group) {
-                var usage = cmd.id;
+                var usage = cmd.name;
                 if (cmd.variadic.length > 0) {
                     usage += ' <' + cmd.variadic.join(', ') + '>';
                 }
@@ -5126,11 +5986,11 @@ var xm;
                     commands.newRow();
 
                     _this._commands.values().filter(function (cmd) {
-                        return cmd.groups.indexOf(group.id) > -1;
+                        return cmd.groups.indexOf(group.name) > -1;
                     }).sort(group.sorter).forEach(function (cmd) {
                         addCommand(cmd, group);
 
-                        var i = allCommands.indexOf(cmd.id);
+                        var i = allCommands.indexOf(cmd.name);
                         if (i > -1) {
                             allCommands.splice(i, 1);
                         }
@@ -5153,8 +6013,8 @@ var xm;
             if (allCommands.length > 0) {
                 commands.cell('one', 'Other commands\n--------');
                 commands.newRow();
-                allCommands.forEach(function (id) {
-                    addCommand(_this._commands.get(id), _this._mainGroup);
+                allCommands.forEach(function (name) {
+                    addCommand(_this._commands.get(name), _this._mainGroup);
                 });
                 commands.newRow();
             }
@@ -5176,16 +6036,8 @@ var xm;
                 commands.newRow();
             }
 
-            xm.log(commands.print().replace(/\s*$/, ''));
+            this.output.block(commands.print().replace(/\s*$/, ''));
         };
-
-        Object.defineProperty(Expose.prototype, "nodeBin", {
-            get: function () {
-                return this._nodeBin;
-            },
-            enumerable: true,
-            configurable: true
-        });
         return Expose;
     })();
     xm.Expose = Expose;
@@ -5217,17 +6069,64 @@ var tsd;
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
-    var exit = require('exit');
+
+    var output = new xm.StyledOut();
+
+    function useColor(color, argv) {
+        switch (color) {
+            case 'no':
+            case 'off':
+            case 'none':
+                output.useStyler(new xm.styler.NoStyler());
+                break;
+            case 'ansi':
+                output.useStyler(new xm.styler.ANSIStyler());
+                break;
+            case 'html':
+                output.useStyler(new xm.styler.HTMLWrapStyler());
+                break;
+            case 'css':
+                output.useStyler(new xm.styler.CSSStyler());
+                break;
+            case 'dev':
+                output.useStyler(new xm.styler.DevStyler());
+                break;
+            default:
+                output.useStyler(new xm.styler.NoStyler());
+                break;
+        }
+    }
+
+    function printPreviewNotice() {
+        var pkg = xm.PackageJSON.getLocal();
+
+        output.line().span('->').space().span(pkg.getNameVersion()).space().accent('(preview)').line().ruler().line();
+
+        return Q.resolve();
+    }
 
     var pleonasm;
+    var pleonasmPromise;
+
+    function loadPleonasm() {
+        if (pleonasmPromise) {
+            return pleonasmPromise;
+        }
+
+        return Q.resolve();
+    }
 
     function pleo(input) {
         input = input.substring(0, 6);
-        return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
+        if (pleonasm) {
+            return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
+        } else {
+            return input;
+        }
     }
 
     function getContext(args) {
-        xm.assertVar('args', args, 'object');
+        xm.assertVar(args, 'object', 'args');
 
         var context = new tsd.Context(args.config, args.verbose);
 
@@ -5253,16 +6152,7 @@ var tsd;
     })();
 
     function init(args) {
-        return Q.nfcall(function (callback) {
-            if (!pleonasm) {
-                pleonasm = require('pleonasm');
-                pleonasm.onload = function () {
-                    xm.callAsync(callback);
-                };
-                return;
-            }
-            xm.callAsync(callback);
-        });
+        return loadPleonasm();
     }
 
     function getAPIJob(args) {
@@ -5284,10 +6174,11 @@ var tsd;
             job.api = new tsd.API(job.context);
 
             var required = (typeof args.config !== undefined ? true : false);
+
             return job.api.readConfig(required).then(function () {
                 d.resolve(job);
             });
-        }, d.reject);
+        }).fail(d.reject);
 
         return d.promise;
     }
@@ -5304,9 +6195,14 @@ var tsd;
     }
 
     function runARGV(argvRaw) {
-        var expose = new xm.Expose(xm.PackageJSON.getLocal().getNameVersion());
+        var expose = new xm.Expose('', output);
 
-        expose.createGroup('command', function (group) {
+        expose.before = function (cmd, args) {
+            return printPreviewNotice();
+        };
+
+        expose.defineGroup(function (group) {
+            group.name = 'command';
             group.label = 'Main commands';
             group.options = ['config'];
             group.sorter = function (one, two) {
@@ -5323,106 +6219,95 @@ var tsd;
             };
         });
 
-        expose.createGroup('help', function (group) {
+        expose.defineGroup(function (group) {
+            group.name = 'help';
             group.label = 'Help commands';
         });
 
-        expose.defineOption({
-            name: 'version',
-            short: 'V',
-            description: 'Display version information',
-            type: 'flag',
-            default: null,
-            placeholder: null,
-            command: 'version',
-            global: true
+        expose.defineOption(function (opt) {
+            opt.name = 'version';
+            opt.short = 'V';
+            opt.description = 'Display version information';
+            opt.type = 'flag';
+            opt.command = 'version';
+            opt.global = true;
         });
 
-        expose.defineOption({
-            name: 'config',
-            description: 'Path to config file',
-            short: 'c',
-            type: 'string',
-            default: null,
-            placeholder: 'path',
-            command: null,
-            global: false
+        expose.defineOption(function (opt) {
+            opt.name = 'config';
+            opt.description = 'Path to config file';
+            opt.short = 'c';
+            opt.type = 'string';
+            opt.placeholder = 'path';
         });
 
-        expose.defineOption({
-            name: 'verbose',
-            short: null,
-            description: 'Verbose output',
-            type: 'flag',
-            default: false,
-            placeholder: null,
-            command: null,
-            global: true
+        expose.defineOption(function (opt) {
+            opt.name = 'verbose';
+            opt.description = 'Verbose output';
+            opt.type = 'flag';
+            opt.default = false;
+            opt.global = true;
         });
 
-        expose.defineOption({
-            name: 'dev',
-            short: null,
-            description: 'Development mode',
-            type: 'flag',
-            default: null,
-            placeholder: null,
-            command: null,
-            global: true
+        expose.defineOption(function (opt) {
+            opt.name = 'dev';
+            opt.description = 'Development mode';
+            opt.type = 'flag';
+            opt.global = true;
         });
 
-        expose.defineOption({
-            name: 'dummy',
-            short: null,
-            description: 'Dummy mode',
-            type: 'flag',
-            default: null,
-            placeholder: null,
-            command: null,
-            global: false
+        expose.defineOption(function (opt) {
+            opt.name = 'dummy';
+            opt.description = 'Dummy mode';
+            opt.type = 'flag';
+            opt.global = false;
+        });
+
+        expose.defineOption(function (opt) {
+            opt.name = 'color';
+            opt.description = 'Specify CLI color mode';
+            opt.type = 'string';
+            opt.global = true;
+            opt.apply = function (value, argv) {
+                useColor(value, argv);
+            };
         });
 
         function reportError(err) {
-            xm.log('-> ' + 'an error occured!'.red);
-            xm.log('');
+            output.error('-> ' + 'an error occured!').clear();
+
             if (err.stack) {
-                xm.log(err.stack);
+                output.block(err.stack);
             } else {
-                xm.log(String(err));
+                output.line(err);
             }
         }
 
         function reportSucces(result) {
-            xm.log('');
-            xm.log('-> ' + 'success!'.green);
             if (result) {
-                xm.assertVar('result', result, tsd.APIResult);
-                xm.log('');
                 result.selection.forEach(function (def) {
-                    xm.log(def.toString());
+                    output.line(def.toString());
                     if (def.info) {
-                        xm.log(def.info.toString());
-                        xm.log(def.info);
+                        output.line(def.info.toString());
+                        output.line(def.info);
                     }
                 });
             }
         }
 
         function printSubHead(text) {
-            xm.log(' ' + text);
-            xm.log('----');
+            output.line(' ' + text);
+            output.ruler2();
         }
 
         function printDefHead(def) {
-            xm.log('');
-            xm.log(def.toString() + ' ' + pleo(def.head.blob.shaShort));
-            xm.log('----');
+            output.line(def.toString() + ' ' + pleo(def.head.blob.shaShort));
+            output.ruler2();
         }
 
         function printFileHead(file) {
-            xm.log('');
-            xm.log(file.toString()) + ' ' + pleo(file.blob.shaShort);
-            xm.log('----');
+            output.line(file.toString()) + ' ' + pleo(file.blob.shaShort);
+            output.ruler2();
         }
 
         function printFileCommit(file, skipNull) {
@@ -5430,18 +6315,18 @@ var tsd;
             if (file.commit) {
                 var line = '   ' + file.commit.commitShort;
 
-                line += ' | ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
-                line += ' | ' + file.commit.gitAuthor.name;
+                line += '  |  ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
+                line += '  |  ' + file.commit.gitAuthor.name;
                 if (file.commit.hubAuthor) {
                     line += ' @' + file.commit.hubAuthor.login;
                 }
-                xm.log(line);
+                output.line(line);
 
-                xm.log('   ' + file.commit.message.subject);
-                xm.log('----');
+                output.line('   ' + file.commit.message.subject);
+                output.ruler2();
             } else if (!skipNull) {
-                xm.log('   ' + '<no commmit>');
-                xm.log('----');
+                output.line('   ' + '<no commmit>');
+                output.ruler2();
             }
         }
 
@@ -5449,32 +6334,34 @@ var tsd;
             if (typeof skipNull === "undefined") { skipNull = false; }
             if (file.info) {
                 if (file.info.isValid()) {
-                    xm.log('   ' + file.info.toString());
-                    xm.log('      ' + file.info.projectUrl);
+                    output.line('   ' + file.info.toString());
+                    output.line('      ' + file.info.projectUrl);
                     file.info.authors.forEach(function (author) {
-                        xm.log('      ' + author.toString());
+                        output.line('      ' + author.toString());
                     });
-                    xm.log('----');
+                    output.ruler2();
                 } else {
-                    xm.log('   ' + '<invalid info>');
-                    xm.log('----');
+                    output.line('   ' + '<invalid info>');
+                    output.ruler2();
                 }
             } else if (!skipNull) {
-                xm.log('   ' + '<no info>');
-                xm.log('----');
+                output.line('   ' + '<no info>');
+                output.ruler2();
             }
         }
 
-        expose.createCommand('version', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'version';
             cmd.label = 'Display version';
             cmd.groups = ['help'];
             cmd.execute = function (args) {
-                xm.log(xm.PackageJSON.getLocal().version);
+                output.line(xm.PackageJSON.getLocal().version);
                 return null;
             };
         });
 
-        expose.createCommand('settings', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'settings';
             cmd.label = 'Display config settings';
             cmd.options = ['config'];
             cmd.groups = ['support'];
@@ -5486,7 +6373,8 @@ var tsd;
             };
         });
 
-        expose.createCommand('search', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'search';
             cmd.label = 'Search definitions';
             cmd.options = ['config'];
             cmd.variadic = ['selector'];
@@ -5499,14 +6387,14 @@ var tsd;
                         result.selection.forEach(function (file) {
                             printFileHead(file);
                             printFileInfo(file);
-                            printFileCommit(file);
                         });
                     });
                 }, reportError);
             };
         });
 
-        expose.createCommand('install', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'install';
             cmd.label = 'Install definitions';
             cmd.options = jobOptions(['save']);
             cmd.variadic = ['selector'];
@@ -5516,19 +6404,20 @@ var tsd;
                     return job.api.install(job.selector).then(function (result) {
                         reportSucces(null);
 
-                        xm.log('');
+                        output.line();
                         result.written.keys().sort().forEach(function (path) {
                             var file = result.written.get(path);
-                            xm.log(file.toString());
+                            output.line(file.toString());
 
-                            xm.log('');
+                            output.line();
                         });
                     });
                 }, reportError);
             };
         });
 
-        expose.createCommand('reinstall', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'reinstall';
             cmd.label = 'Re-install definitions from config';
             cmd.options = jobOptions();
             cmd.variadic = ['selector'];
@@ -5538,19 +6427,21 @@ var tsd;
                     return job.api.reinstall().then(function (result) {
                         reportSucces(null);
 
-                        xm.log('');
+                        output.line();
+
                         result.written.keys().sort().forEach(function (path) {
                             var file = result.written.get(path);
-                            xm.log(file.toString());
+                            output.line(file.toString());
 
-                            xm.log('');
+                            output.line();
                         });
                     });
                 }, reportError);
             };
         });
 
-        expose.createCommand('info', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'info';
             cmd.label = 'Display definition info';
             cmd.options = jobOptions();
             cmd.variadic = ['selector'];
@@ -5570,7 +6461,8 @@ var tsd;
             };
         });
 
-        expose.createCommand('history', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'history';
             cmd.label = 'Display definition history';
             cmd.options = jobOptions();
             cmd.variadic = ['selector'];
@@ -5596,7 +6488,8 @@ var tsd;
             };
         });
 
-        expose.createCommand('deps', function (cmd) {
+        expose.createCommand(function (cmd) {
+            cmd.name = 'deps';
             cmd.label = 'List dependencies';
             cmd.options = jobOptions();
             cmd.variadic = ['selector'];
@@ -5612,14 +6505,14 @@ var tsd;
 
                             if (def.dependencies.length > 0) {
                                 def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                    xm.log(' - ' + def.toString());
+                                    output.line(' - ' + def.toString());
                                     if (def.head.dependencies.length > 0) {
                                         def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                            xm.log('    - ' + def.toString());
+                                            output.line('    - ' + def.toString());
                                         });
                                     }
                                 });
-                                xm.log('----');
+                                output.ruler2();
                             }
                         });
                     });
@@ -5639,12 +6532,10 @@ require('source-map-support').install();
 process.setMaxListeners(20);
 (module).exports = {
     tsd: tsd,
-    xm: xm,
-    git: git,
     runARGV: tsd.runARGV,
     getAPI: function (configPath, verbose) {
         if (typeof verbose === "undefined") { verbose = false; }
-        xm.assertVar('configPath', configPath, 'string');
+        xm.assertVar(configPath, 'string', 'configPath');
         return new tsd.API(new tsd.Context(configPath, verbose));
     }
 };

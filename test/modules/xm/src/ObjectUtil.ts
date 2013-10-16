@@ -13,6 +13,7 @@ describe('xm.ObjectUtil', () => {
 
 	var assert:Chai.Assert = require('chai').assert;
 
+	//TODO add tests for more methods
 	describe('hidePrefixed()', () => {
 		it('should return formatted string', () => {
 			var keys;

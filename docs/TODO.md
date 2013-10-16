@@ -29,8 +29,9 @@ Most of these are file/class/block 'local' changes: easy to fix without conflict
 
 Never enough.
 
-* :a:   Expand API command testing; besides search/install ~~(once update fixtures land)~~
-* :a:   Add CLI tests
+* :a:   Expand API command testing (cover more commands)
+* :a:   Expand CLI tests (cover more commands)
+* :m:   Add CLI test setup
 * :o:	Add node.js module tests
 * :id:	Consider testing JavaScript output instead of TypeScript source (with compiled declarations: so those get checked too).
 
@@ -49,7 +50,8 @@ Basics commands
 * :m:	Add **version** (show version)
 * :x:	Add **init** (new json with repo/branch)
 * :m:	Add **settings** (show config info)
-* :m:	Add **reinstall** (from config)
+* :b:	Add **reinstall** (from config)
+* :a:	Add **index** (list definition overview)
 * :vs:	Consider unifying local remote selectors (tricky. maybe a param)
 
 Remote selector commands
@@ -86,7 +88,7 @@ Cache commands
 
 Selector
 
-* :x:	Improve globbing/RegExp :zap:
+* :x:	Improve globbing/RegExp (clean and more then just wrapping) :zap:
 * :x:	Add support for semver :zap:
 * :x:	Add support for multiple Selectors (blend results in select()) :zap:
 * :x:	Add InfoMatcher to Selector / select() :zap:
@@ -95,10 +97,10 @@ Selector
 Command options
 
 * :a:   Plan options and unify the names (both for CLI as API)
-* :b:	Add option for file overwrite (always on now)
-* :x:	Add a compact vs detailed option (for search listings or history)
+* :a:	Add option for file overwrite (always on now)
+* :a:	Add a compact vs detailed option (for search listings or history)
 * :ab:	Add option for dependency install (always on now)
-* :x:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
+* :a:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :o:	.... more
 
 Functionality
@@ -114,6 +116,7 @@ CLI
 * :x:	Optimise and unify CLI output (indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
 * :x:	Add TSD release/updates news to CLI console (periodically pull json from github) :zap:
+* :o:	Expand Expose to generate CLI documentation (using StyledOut and a HTML/Markdown Styler + Writer)
 
 API
 
@@ -138,7 +141,7 @@ Config
 * :o2:	Improve config JSON-Schema (RegExp)
 	* Improve flexibility
 	* Update tsd tests to verify changes
-	* Update typingsPath: should be 0 length (lazy for current dir)
+	* Update typingsPath: should be 1 length
 	* Update commit: should be > ~6 length (as per git convention)
 	* Update blob: should be optional, still fixed at 40 (as per concept commit is leading)
 * :o:	Improve config validation reporting (see tv4, chai-json-schema)
@@ -165,8 +168,8 @@ Internals
 * :vs:	Consider adding timeouts
 * :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :id:	Consider moving to class model with promise-based methods
-* :id:	Consider adding class based façade with promise-based methods
-* :o:	Consider global store for JSON pointers and RegExps etc
+* :id:	Consider adding class based façade to model, with promise-based methods
+* :id:	Consider global store for JSON pointers and RegExps etc
 * :cl:	Clean usage of module name within same module (eg: `tsd.Def` is not needed in other code inside the `tsd` module (could be a remnant of old TS 0.8 or a WebStorm 6 glitch fix).
 * :o:	Add xm interface for debug/log/event tracking
 * :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
@@ -180,7 +183,7 @@ Technical
 
 Cleanup
 
-* :cl:	Sweep and enable `tslint.json` rules
+* :x:	Sweep and enable `tslint.json` rules
 * :cl:	Clean `package.json`: fix some ~tildes before release
 * :cl:	Sweep used modules: `require()` and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
@@ -190,14 +193,16 @@ Cleanup
 Publishing
 
 * :o2:	Add npm pre-publish tests hook :zap:
+* :o2:	Add test setup to test :zap:
 * :x:	Add git pre-commit test hook :zap:
-* :vs:	Decide docs use of name-casing: use either TSD or tsd? (npm and bower are lowercase)
-* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc) :zap:
+* :ok:	Use uppercase 'TSD' (looks like a type otherwise) ~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~
+* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)
 * :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
 * :m:	Fix bin/cli `$ npm install . -g` 
 * :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
 * :x:	Compile a build number + date into application :zap:
-* :x:	Credits :smiley_cat:
+* :m:	Credits
+* :o:	Licence to Apache 2.0
 
 Dependencies
 

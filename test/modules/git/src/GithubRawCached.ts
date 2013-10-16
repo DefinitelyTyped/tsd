@@ -59,7 +59,7 @@ describe('git.GithubRawCached', () => {
 		assert.isString(filePath, 'filePath');
 		helper.isStringSHA1(commitSha, 'commitSha');
 
-		it.promised('should cache and return data', () => {
+		it.eventually('should cache and return data', () => {
 			//raw.debug = true;
 
 			assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');

@@ -5,12 +5,12 @@ describe('CLI Query', () => {
 	'use strict';
 
 	var fs = require('fs');
-	var path = require('path');
 	var FS = require('q-io/fs');
+	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
 	function applyTestInfo(group:string, name:string, test:any, createConfigFile:boolean = false):helper.TestInfo {
-		var info = helper.getTestInfo(group, name, createConfigFile);
+		var info = helper.getTestInfo(group, name, test, createConfigFile);
 
 		xm.FileUtil.writeJSONSync(info.testDump, test);
 
@@ -33,10 +33,17 @@ describe('CLI Query', () => {
 			args.push.apply(args, data.command);
 		}
 
+		if (test.color) {
+			args.push('--color', test.color);
+		}
+		else {
+			args.push('--color', 'no');
+		}
+
 		if (test.selector && test.selector.pattern) {
 			args.push(test.selector.pattern);
 		}
-		args.push('--config', info.configFile);
+		//args.push('--config', info.configFile);
 
 		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc for re-run
 		xm.FileUtil.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
@@ -44,7 +51,7 @@ describe('CLI Query', () => {
 		return args;
 	}
 
-	function assertResult(result:helper.RunCLIResult, test, info:helper.TestInfo, args):void {
+	function assertCLIResult(result:helper.RunCLIResult, test, info:helper.TestInfo, args):void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
@@ -59,6 +66,7 @@ describe('CLI Query', () => {
 
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect);
 		assert.operator(stdoutExpect.length, '>=', 0, 'stdoutExpect.length');
+
 		//TODO find out how to compare cli output (what is the real encoding? how to get string diff?)
 		helper.assertBufferEqual(result.stdout, stdoutExpect, 'result.stdout');
 
@@ -76,20 +84,21 @@ describe('CLI Query', () => {
 	describe('help', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'help'));
 
-		xm.eachProp(data.tests, function (test, name) {
-			if (data.skip) {
+		xm.eachProp(data.tests, (test, name) => {
+			var debug = test.debug;
+			if (test.skip) {
 				return;
 			}
 
-			it.promised('test "' + name + '"', () => {
+			it.eventually('test "' + name + '"', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
-				return helper.runCLI(info.modBuildCLI, args).then((result:helper.RunCLIResult) => {
+				return helper.runCLI(info.modBuildCLI, args, debug).then((result:helper.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
-					assertResult(result, test, info, args);
+					assertCLIResult(result, test, info, args);
 				});
 			});
 		});
@@ -98,20 +107,21 @@ describe('CLI Query', () => {
 	describe('search', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
 
-		xm.eachProp(data.tests, function (test, name) {
-			if (data.skip) {
+		xm.eachProp(data.tests, (test, name) => {
+			var debug = test.debug;
+			if (test.skip) {
 				return;
 			}
 
-			it.promised('test "' + name + '"', () => {
+			it.eventually('test "' + name + '"', () => {
 				var info = applyTestInfo('search', name, data);
 				var args = getArgs(test, data, info);
 
-				return helper.runCLI(info.modBuildCLI, args).then((result:helper.RunCLIResult) => {
+				return helper.runCLI(info.modBuildCLI, args, debug).then((result:helper.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
-					assertResult(result, test, info, args);
+					assertCLIResult(result, test, info, args);
 				});
 			});
 		});

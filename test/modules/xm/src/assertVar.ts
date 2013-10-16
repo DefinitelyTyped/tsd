@@ -8,58 +8,58 @@ describe('xm.assertVar', () => {
 
 	describe('optional', () => {
 		it('should pass null/undefined on optional', () => {
-			xm.assertVar('myVar', undefined, 'string', true);
-			xm.assertVar('myVar', null, 'string', true);
+			xm.assertVar(undefined, 'string', 'myVar', true);
+			xm.assertVar(null, 'string', 'myVar', true);
 		});
 	});
 	describe('string', () => {
 		it('should pass on valid', () => {
-			xm.assertVar('myVar', 'aaa', 'string');
-			xm.assertVar('myVar', '', 'string');
+			xm.assertVar('aaa', 'string', 'myVar');
+			xm.assertVar('', 'string', 'myVar');
 		});
 		it('should fail on invalid', () => {
 			assert.throws(() => {
-				xm.assertVar('myVar', 123, 'string');
+				xm.assertVar(123, 'string', 'myVar');
 			}, /^expected "myVar" to be a "string" but got "number": 123/);
 		});
 	});
 	describe('number', () => {
 		it('should pass on valid', () => {
-			xm.assertVar('myVar', 123, 'number');
+			xm.assertVar(123, 'number', 'myVar');
 		});
 		it('should fail on invalid', () => {
 			assert.throws(() => {
-				xm.assertVar('myVar', 'abc', 'number');
+				xm.assertVar('abc', 'number', 'myVar');
 			}, /^expected "myVar" to be a "number" but got "string": "abc"/);
 		});
 	});
 	describe('regexp', () => {
 		it('should pass on valid', () => {
-			xm.assertVar('myVar', /123/, 'regexp');
+			xm.assertVar(/123/, 'regexp', 'myVar');
 		});
 		it('should fail on invalid', () => {
 			assert.throws(() => {
-				xm.assertVar('myVar', 123, 'regexp');
+				xm.assertVar(123, 'regexp', 'myVar');
 			}, /^expected "myVar" to be a "regexp" but got "number": 123/);
 		});
 	});
 	describe('sha1', () => {
 		it('should pass on valid', () => {
-			xm.assertVar('myVar', '7ef3f65b1be3699db091aaec81ab0b205919a6d0', 'sha1');
+			xm.assertVar('7ef3f65b1be3699db091aaec81ab0b205919a6d0', 'sha1', 'myVar');
 		});
 		it('should fail on invalid', () => {
 			assert.throws(() => {
-				xm.assertVar('myVar', 'abc', 'sha1');
+				xm.assertVar('abc', 'sha1', 'myVar');
 			}, /^expected "myVar" to be a "sha1" but got "string": "abc"/);
 		});
 	});
 	describe('md5', () => {
 		it('should pass on valid', () => {
-			xm.assertVar('myVar', '80b28dda155a27c42cabd42381dc7670', 'md5');
+			xm.assertVar('80b28dda155a27c42cabd42381dc7670', 'md5', 'myVar');
 		});
 		it('should fail on invalid', () => {
 			assert.throws(() => {
-				xm.assertVar('myVar', 'abc', 'md5');
+				xm.assertVar('abc', 'md5', 'myVar');
 			}, /^expected "myVar" to be a "md5" but got "string": "abc"/);
 		});
 	});
@@ -75,13 +75,13 @@ describe('xm.assertVar', () => {
 
 		it('should pass on valid', () => {
 			var inst = new MyType();
-			xm.assertVar('myVar', inst, MyType);
+			xm.assertVar(inst, MyType, 'myVar');
 		});
 
 		it('should fail on invalid', () => {
 			var inst = new MyType();
 			assert.throws(() => {
-				xm.assertVar('myVar', inst, MyOtherType);
+				xm.assertVar(inst, MyOtherType, 'myVar');
 			}, /^expected "myVar" to be instanceof MyOtherType\(\) but is a MyType\(\)/);
 		});
 	});

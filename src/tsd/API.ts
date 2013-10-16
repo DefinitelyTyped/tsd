@@ -15,8 +15,7 @@ module tsd {
 	/*
 	 APIResult: hold result data (composition and meaning may vary)
 	 */
-	//TODO consider splitting into more specific result for each command?
-	//TODO consider ditching index (why is it in here?)
+	//TODO consider splitting into more specific result for each command
 	//TODO add useful methods to result (wrap some helpers from DefUtils)
 	export class APIResult {
 
@@ -28,20 +27,21 @@ module tsd {
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
 		constructor(public index:DefIndex, public selector:tsd.Selector = null) {
-			xm.assertVar('index', index, DefIndex);
-			xm.assertVar('selector', selector, tsd.Selector, true);
+			xm.assertVar(index, DefIndex, 'index');
+			xm.assertVar(selector, tsd.Selector, 'selector', true);
 		}
 	}
 
 	/*
-	 API: the high-level API used by dependants: methods promise ApiResults
+	 API: the high-level API used by dependants
 	 */
 	export class API {
 
 		private _core:Core;
+		private _debug:boolean = false;
 
 		constructor(public context:tsd.Context) {
-			xm.assertVar('context', context, tsd.Context);
+			xm.assertVar(context, tsd.Context, 'context');
 
 			this._core = new tsd.Core(this.context);
 
@@ -50,7 +50,6 @@ module tsd {
 
 		/*
 		 read the config from Context.path.configFile
-		 promise: undefined
 		 */
 		readConfig(optional:boolean):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
@@ -64,7 +63,6 @@ module tsd {
 
 		/*
 		 save the config to Context.path.configFile
-		 promise: undefined
 		 */
 		saveConfig():Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
@@ -78,10 +76,9 @@ module tsd {
 
 		/*
 		 list files matching selector
-		 promise: APIResult
 		 */
 		search(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this._core.select(selector).then(d.resolve, d.reject);
@@ -91,10 +88,9 @@ module tsd {
 
 		/*
 		 install all files matching selector
-		 promise: APIResult
 		 */
 		install(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			//hardcode for now
@@ -127,11 +123,10 @@ module tsd {
 
 		/*
 		 direct install attempt
-		 promise: APIResult
 		 */
 		directInstall(path:string, commitSha:string):Q.Promise<APIResult> {
-			xm.assertVar('path', path, 'string');
-			xm.assertVar('commitSha', commitSha, 'sha1');
+			xm.assertVar(path, 'string', 'path');
+			xm.assertVar(commitSha, 'sha1', 'commitSha');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			var res = new tsd.APIResult(this._core.index, null);
@@ -148,11 +143,10 @@ module tsd {
 
 		/*
 		 direct install from partial commitSha
-		 promise: APIResult
 		 */
 		//TODO move into selector? meh?
 		installFragment(path:string, commitShaFragment:string):Q.Promise<APIResult> {
-			xm.assertVar('path', path, 'string');
+			xm.assertVar(path, 'string', 'path');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			var res = new tsd.APIResult(this._core.index, null);
@@ -169,10 +163,9 @@ module tsd {
 
 		/*
 		 download selection and parse and display header info
-		 promise: APIResult
 		 */
 		info(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this._core.select(selector).then((res:tsd.APIResult) => {
@@ -187,10 +180,9 @@ module tsd {
 
 		/*
 		 load commit history
-		 promise: APIResult
 		 */
 		history(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this._core.select(selector).then((res:tsd.APIResult) => {
@@ -208,10 +200,9 @@ module tsd {
 
 		/*
 		 download files matching selector and solve dependencies
-		 promise: APIResult
 		 */
 		deps(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this._core.select(selector).then((res:tsd.APIResult) => {
@@ -225,7 +216,6 @@ module tsd {
 
 		/*
 		 re-install from config
-		 promise: APIResult
 		 */
 		reinstall():Q.Promise<APIResult> {
 			var res = new tsd.APIResult(this._core.index, null);
@@ -241,12 +231,11 @@ module tsd {
 		}
 
 		/*
-		 compare repo data with local installed file and check for changes.
-		 promise: APIResult
+		 compare repo data with local installed file and check for changes
 		 */
 		//TODO implement compare() command
 		compare(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 			d.reject(new Error('not implemented yet'));
 
@@ -254,12 +243,11 @@ module tsd {
 		}
 
 		/*
-		 run compare and get latest files.
-		 promise: APIResult
+		 run compare and get latest files
 		 */
 		//TODO implement update() command
 		update(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar('selector', selector, tsd.Selector);
+			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 			d.reject(new Error('not implemented yet'));
 
@@ -268,7 +256,6 @@ module tsd {
 
 		/*
 		 clear caches and temporary files
-		 promise: APIResult
 		 */
 		//TODO implement: purge() command
 		purge():Q.Promise<APIResult> {
@@ -277,6 +264,15 @@ module tsd {
 			d.reject(new Error('not implemented yet'));
 
 			return d.promise;
+		}
+
+		get debug():boolean {
+			return this._debug;
+		}
+
+		set debug(value:boolean) {
+			this._debug = value;
+			this._core.debug = this._debug;
 		}
 
 		get core():tsd.Core {

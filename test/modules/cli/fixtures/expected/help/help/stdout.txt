@@ -1,5 +1,6 @@
 
-tsd 0.5.0-dev
+-> tsd 0.5.1-alpha.1 (preview)
+--------
 
 Main commands
 --------                                       
@@ -27,5 +28,8 @@ Global options
 --------                                      
       -h, --help           Display usage help (flag)         
       -V, --version        Display version information (flag)
+      --color              Specify CLI color mode (string)   
       --dev                Development mode (flag)           
       --verbose            Verbose output (flag)
+
+bye!

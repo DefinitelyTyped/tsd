@@ -135,13 +135,13 @@ module.exports = function (grunt) {
 	gtx.alias('prep', ['clean:tmp', 'jshint:support', 'jshint:fixtures']);
 
 	// cli commands
-	//TODO verify tslint:source properly kills and continue doesn't skip errors (could also be flawed grunt preview version)
+	//TODO verify warnings properly kill and grunt-concurrent doesn't skip errors (could also be flawed grunt preview version)
 	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'copy:cli', 'tslint:source', 'mochaTest:integrity']);
 
 	gtx.alias('test', ['build', 'tslint:helper', 'gtx-type:moduleTest']);
 	gtx.alias('default', ['build', 'test']);
 
-	var longTimer = (isVagrant ? 250000 : 2000);
+	var longTimer = (isVagrant ? 250000 : 5000);
 
 	// modules
 	gtx.create('xm', 'moduleTest', null, 'lib');

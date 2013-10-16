@@ -10,19 +10,19 @@
 module helper {
 	'use strict';
 
-	var fs = require('fs');
-	var util = require('util');
 	var q = require('q');
 	var FS = require('q-io/fs');
-
+	var fs = require('fs');
+	var util = require('util');
 	var path = require('path');
+
 	var assert:Chai.Assert = require('chai').assert;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var configSchema;
 
-	export function getConfigSchema() {
+	export function getConfigSchema():any {
 		if (!configSchema) {
 			configSchema = xm.FileUtil.readJSONSync(path.join(helper.getProjectRoot(), 'schema', tsd.Const.configSchemaFile));
 		}
@@ -71,15 +71,19 @@ module helper {
 		modBuildCLI:string;
 	}
 
-	export function getTestInfo(group:string, name:string, createConfigFile:boolean = true):TestInfo {
+	export function getTestInfo(group:string, name:string, test, createConfigFile:boolean = true):TestInfo {
 
 		var tmpDir = path.join(__dirname, 'result', group, name);
 		var dumpDir = path.resolve(tmpDir, 'dump');
 		var fixturesDir = path.resolve(__dirname, '..', 'fixtures', 'expected', group, name);
 		var modBuildDir = path.resolve(__dirname, '..', '..', '..', '..', 'build');
 
-		xm.mkdirCheckSync(tmpDir, true);
-		xm.mkdirCheckSync(modBuildDir, true);
+		if (test.fixtures) {
+			fixturesDir = path.resolve(fixturesDir, '..', test.fixtures);
+		}
+
+		xm.FileUtil.mkdirCheckSync(tmpDir, true);
+		xm.FileUtil.mkdirCheckSync(modBuildDir, true);
 
 		var info = new TestInfo();
 		info.name = name;

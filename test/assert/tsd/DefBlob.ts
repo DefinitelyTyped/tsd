@@ -6,7 +6,7 @@ module helper {
 	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseDefBlob(blob:tsd.DefBlob, recursive:boolean):any {
-		xm.assertVar('blob', blob, tsd.DefBlob);
+		xm.assertVar(blob, tsd.DefBlob, 'blob');
 
 		var json:any = {};
 		json.sha = blob.sha;

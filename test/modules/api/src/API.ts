@@ -16,12 +16,12 @@ describe('API', () => {
 	var context:tsd.Context;
 
 	before(() => {
-
+	});
+	after(() => {
 	});
 	beforeEach(() => {
 		context = helper.getContext();
-		context.log.mute = true;
-		context.config.log.mute = true;
+		context.config.log.enabled = false;
 	});
 	afterEach(() => {
 		context = null;
@@ -45,21 +45,15 @@ describe('API', () => {
 		return api;
 	}
 
-	function applyMute(mute:boolean) {
-		api.core.debug = !mute;
-		api.context.log.mute = mute;
-		api.context.config.log.mute = mute;
-	}
-
 	function applyTestInfo(group:string, name:string, test:any, selector:tsd.Selector):helper.TestInfo {
-		var tmp = helper.getTestInfo(group, name, true);
+		var tmp = helper.getTestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
 
 		xm.FileUtil.writeJSONSync(tmp.testDump, test);
 		xm.FileUtil.writeJSONSync(tmp.selectorDump, selector);
 
-		applyMute(!test.debug);
+		api.debug = test.debug;
 
 		return tmp;
 	}
@@ -74,12 +68,13 @@ describe('API', () => {
 
 	describe('search', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
+
 		xm.eachProp(data.tests, (test, name) => {
-			if (data.skip) {
+			if (test.skip) {
 				return;
 			}
 
-			it.promised('selector "' + name + '"', () => {
+			it.eventually('selector "' + name + '"', () => {
 				api = getAPI(context);
 
 				var selector = getSelector(test);
@@ -106,7 +101,7 @@ describe('API', () => {
 				return;
 			}
 
-			it.promised('test "' + name + '"', () => {
+			it.eventually('test "' + name + '"', () => {
 				api = getAPI(context);
 
 				var selector = getSelector(test);

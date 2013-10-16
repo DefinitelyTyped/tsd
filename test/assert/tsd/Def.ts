@@ -7,7 +7,7 @@ module helper {
 	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseDef(def:tsd.Def, recursive:boolean):any {
-		xm.assertVar('def', def, tsd.Def);
+		xm.assertVar(def, tsd.Def, 'def');
 
 		var json:any = {};
 		json.path = def.path;

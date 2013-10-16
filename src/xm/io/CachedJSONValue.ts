@@ -1,6 +1,6 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../assertVar.ts" />
-///<reference path="Logger.ts" />
+///<reference path="../Logger.ts" />
 ///<reference path="hash.ts" />
 ///<reference path="../typeOf.ts" />
 ///<reference path="../ObjectUtil.ts" />
@@ -21,8 +21,8 @@ module xm {
 		options:any = null;
 
 		constructor(label:String, key:string, options?:any) {
-			xm.assertVar('label', label, 'string');
-			xm.assertVar('key', key, 'string');
+			xm.assertVar(label, 'string', 'label');
+			xm.assertVar(key, 'string', 'key');
 			this.label = label;
 			this.key = key;
 			this.options = options || null;
@@ -37,7 +37,7 @@ module xm {
 			if (!xm.isJSONValue(value)) {
 				throw new Error('cannot store non-JSON values: ' + xm.typeOf(value));
 			}
-			xm.assertVar('changed', changed, Date, true);
+			xm.assertVar(changed, Date, 'changed', true);
 
 			this.value = value;
 			this.changed = changed || new Date();
@@ -65,11 +65,11 @@ module xm {
 
 		//TODO maybe JSON Schema? overkill?
 		static fromJSON(json:any):xm.CachedJSONValue {
-			xm.assertVar('label', json.label, 'string');
-			xm.assertVar('key', json.key, 'string');
-			xm.assertVar('hash', json.hash, 'sha1');
-			xm.assertVar('checksum', json.checksum, 'sha1');
-			xm.assertVar('changed', json.changed, 'string');
+			xm.assertVar(json.label, 'string', 'label');
+			xm.assertVar(json.key, 'string', 'key');
+			xm.assertVar(json.hash, 'sha1', 'hash');
+			xm.assertVar(json.checksum, 'sha1', 'checksum');
+			xm.assertVar(json.changed, 'string', 'changed');
 
 			var changedDateNum = Date.parse(json.changed);
 			if (isNaN(changedDateNum)) {

@@ -40,7 +40,7 @@ describe('Core', () => {
 	});
 	beforeEach(() => {
 		context = helper.getContext();
-		context.config.log.mute = true;
+		context.config.log.enabled = false;
 		context.paths.configFile = './test/fixtures/config/default.json';
 	});
 	afterEach(() => {

@@ -18,7 +18,9 @@ module xm {
 		private _store:xm.CachedJSONStore;
 
 		constructor(dir:string) {
-			xm.assertVar('dir', dir, 'string');
+			xm.assertVar(dir, 'string', 'dir');
+
+			//TODO maybe this should be a shared store? meh?
 			this._store = new xm.CachedJSONStore(dir);
 
 			xm.ObjectUtil.hidePrefixed(this);

@@ -24,7 +24,7 @@ module tsd {
 		stats:xm.StatCounter = new xm.StatCounter();
 
 		constructor(core:Core) {
-			xm.assertVar('core', core, Core);
+			xm.assertVar(core, Core, 'core');
 			this._core = core;
 
 			this.stats.log = this._core.context.verbose;
@@ -79,7 +79,6 @@ module tsd {
 
 			var cleanup = () => {
 				//remove solved promise
-				xm.log.debug('cleanup!');
 				this._active.remove(file.key);
 				this.stats.count('active-remove');
 			};

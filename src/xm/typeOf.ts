@@ -7,11 +7,7 @@
  * */
 module xm {
 	'use strict';
-	/*!
-	 * some original code copied and then modified from: Chai - type utility
-	 * Copyright(c) 2012-2013 Jake Luer <jake@alogicalparadox.com>
-	 * MIT Licensed
-	 */
+
 	var natives = {
 		'[object Arguments]': 'arguments',
 		'[object Array]': 'array',
@@ -166,6 +162,7 @@ module xm {
 	//get a wrapper to check in the cloned/extended map
 	export function getTypeOfWrap(add?:any):(obj:any, type:string) => boolean {
 		var typeMap = getTypeOfMap(add);
+
 		return function isType(obj:any, type:string):boolean {
 			if (hasOwnProp(typeMap, type)) {
 				return typeMap[type].call(null, obj);

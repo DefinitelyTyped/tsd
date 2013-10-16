@@ -4,7 +4,8 @@
 module tsd {
 	'use strict';
 
-	var nameExp = /^(\w[\w_\.-]+?\w)\/(\w[\w_\.-]+?\w)\.d\.ts$/;
+	var nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
+
 
 	/*
 	 Def: single definition in repo (identified by its path)
@@ -27,7 +28,7 @@ module tsd {
 		history:tsd.DefVersion[] = [];
 
 		constructor(path:string) {
-			xm.assertVar('path', path, 'string');
+			xm.assertVar(path, 'string', 'path');
 			this.path = path;
 		}
 
@@ -40,15 +41,12 @@ module tsd {
 		}
 
 		static isDefPath(path:string):boolean {
-			return nameExp.test(path);
-		}
-
-		static getPath(path:string):boolean {
+			nameExp.lastIndex = 0;
 			return nameExp.test(path);
 		}
 
 		static getFrom(path:string):tsd.Def {
-
+			nameExp.lastIndex = 0;
 			var match = nameExp.exec(path);
 			if (!match) {
 				return null;

@@ -14,12 +14,10 @@ describe('Config', () => {
 
 	beforeEach(() => {
 		config = new tsd.Config(helper.getConfigSchema());
-		config.log.mute = true;
+		config.log.enabled = false;
 	});
 	afterEach(() => {
 		config = null;
-
-		require('assert');
 	});
 
 	it('is instance', () => {

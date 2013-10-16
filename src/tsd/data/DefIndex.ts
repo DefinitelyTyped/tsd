@@ -45,8 +45,8 @@ module tsd {
 		//TODO add more input data verification
 		//TODO consider decoupling of github api data (low prio)
 		init(branch:any, tree:any):void {
-			xm.assertVar('branch', branch, 'object');
-			xm.assertVar('tree', tree, 'object');
+			xm.assertVar(branch, 'object', 'branch');
+			xm.assertVar(tree, 'object', 'tree');
 
 			if (this._hasIndex) {
 				return;
@@ -57,16 +57,16 @@ module tsd {
 			this._versions.clear();
 			this._definitions.clear();
 
-			xm.assertVar('branch', branch, 'object');
-			xm.assertVar('tree', tree, 'object');
+			xm.assertVar(branch, 'object', 'branch');
+			xm.assertVar(tree, 'object', 'tree');
 
 			var commitSha = pointer.get(branch, commit_sha);
 			var treeSha = tree.sha;
 			var sha = pointer.get(branch, branch_tree_sha);
 
-			xm.assertVar('sha', sha, 'string');
-			xm.assertVar('treeSha', treeSha, 'string');
-			xm.assertVar('commitSha', commitSha, 'string');
+			xm.assertVar(sha, 'string', 'sha');
+			xm.assertVar(treeSha, 'string', 'treeSha');
+			xm.assertVar(commitSha, 'string', 'commitSha');
 
 			//verify tree is from branch (compare sha's)
 			if (sha !== treeSha) {
@@ -81,7 +81,6 @@ module tsd {
 			var def:tsd.Def;
 			var file:tsd.DefVersion;
 
-			//TODO parse blob sha from tree
 			xm.eachElem(tree.tree, (elem:git.GithubJSONTreeElem) => {
 				var char = elem.path.charAt(0);
 				if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDefPath(elem.path)) {
@@ -106,8 +105,8 @@ module tsd {
 		 set the history of a single Def from json data
 		 */
 		setHistory(def:tsd.Def, commitJsonArray:any[]):void {
-			xm.assertVar('def', def, tsd.Def);
-			xm.assertVar('commits', commitJsonArray, 'array');
+			xm.assertVar(def, tsd.Def, 'def');
+			xm.assertVar(commitJsonArray, 'array', 'commits');
 
 			//force reset for robustness
 			def.history = [];
@@ -115,7 +114,7 @@ module tsd {
 			//TODO harden data validation
 			commitJsonArray.map((json) => {
 				if (!json || !json.sha) {
-					xm.log.inspect(json, 'weird: json no sha');
+					xm.log.inspect(json, 1, 'weird: json no sha');
 				}
 				var commit = this.procureCommit(json.sha);
 				if (!commit) {
@@ -132,7 +131,7 @@ module tsd {
 		 get a DefCommit for a sha (enforces single instances)
 		 */
 		procureCommit(commitSha:string):tsd.DefCommit {
-			xm.assertVar('commitSha', commitSha, 'sha1');
+			xm.assertVar(commitSha, 'sha1', 'commitSha');
 
 			var commit:tsd.DefCommit;
 			if (this._commits.has(commitSha)) {
@@ -149,7 +148,7 @@ module tsd {
 		 get a DefBlob for a sha (enforces single instances)
 		 */
 		procureBlob(blobSha:string):tsd.DefBlob {
-			xm.assertVar('blobSha', blobSha, 'sha1');
+			xm.assertVar(blobSha, 'sha1', 'blobSha');
 
 			var blob:tsd.DefBlob;
 			if (this._blobs.has(blobSha)) {
@@ -166,7 +165,7 @@ module tsd {
 		 get a DefBlob for a sha (enforces single instances)
 		 */
 		procureBlobFor(content:NodeBuffer, encoding:string = null):tsd.DefBlob {
-			xm.assertVar('content', content, Buffer);
+			xm.assertVar(content, Buffer, 'content');
 
 			var sha = git.GitUtil.blobShaHex(content, encoding);
 			var blob:tsd.DefBlob = this.procureBlob(sha);
@@ -180,7 +179,7 @@ module tsd {
 		 get a Def for a path (enforces single instances)
 		 */
 		procureDef(path:string):tsd.Def {
-			xm.assertVar('path', path, 'string');
+			xm.assertVar(path, 'string', 'path');
 
 			var def:tsd.Def = null;
 
@@ -201,8 +200,8 @@ module tsd {
 		 get a DefVersion for a Def + DefCommit combination (enforces single instances)
 		 */
 		procureVersion(def:tsd.Def, commit:tsd.DefCommit):tsd.DefVersion {
-			xm.assertVar('def', def, tsd.Def);
-			xm.assertVar('commit', commit, tsd.DefCommit);
+			xm.assertVar(def, tsd.Def, 'def');
+			xm.assertVar(commit, tsd.DefCommit, 'commit');
 
 			var file:tsd.DefVersion;
 
@@ -226,8 +225,8 @@ module tsd {
 		 attempt to get a DefVersion (and its Def and DefCommit) for a path + commitSha combination (enforces single instances)
 		 */
 		procureVersionFromSha(path:string, commitSha:string):tsd.DefVersion {
-			xm.assertVar('path', path, 'string');
-			xm.assertVar('commitSha', commitSha, 'sha1');
+			xm.assertVar(path, 'string', 'path');
+			xm.assertVar(commitSha, 'sha1', 'commitSha');
 
 			var def = this.getDef(path);
 			if (!def) {

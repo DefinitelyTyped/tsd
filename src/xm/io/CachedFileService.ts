@@ -22,7 +22,7 @@ module xm {
 		private _extension:string = '';
 
 		constructor(dir:string) {
-			xm.assertVar('dir', dir, 'string');
+			xm.assertVar(dir, 'string', 'dir');
 			this.dir = dir;
 
 			Object.defineProperty(this, 'dir', {writable: false});
@@ -58,7 +58,7 @@ module xm {
 
 			var storeFile = path.join(this.dir, file + this._extension);
 
-			xm.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
+			xm.FileUtil.mkdirCheckQ(path.dirname(storeFile), true).then(() => {
 				return FS.write(storeFile, value, {flags: 'wb'});
 			}).then(() => {
 				//return same content

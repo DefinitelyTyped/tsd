@@ -16,7 +16,7 @@ module tsd {
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
 	function escapeExp(str) {
-		//this needs hardening (or ditch)
+		//TODO this needs hardening
 		return str.replace('.', '\\.');
 	}
 	/*
@@ -31,12 +31,12 @@ module tsd {
 		private nameExp:RegExp;
 
 		constructor(pattern:string) {
-			xm.assertVar('pattern', pattern, 'string');
+			xm.assertVar(pattern, 'string', 'pattern');
 			this.pattern = pattern;
 		}
 
 		filter(list:tsd.Def[]):tsd.Def[] {
-			return list.filter(this.getFilterFunc(), this);
+			return list.filter(this.getFilterFunc());
 		}
 
 		toString():string {
@@ -59,6 +59,9 @@ module tsd {
 				//just look at the names
 				this.compileSingle();
 			}
+
+			//xm.log(this.projectExp);
+			//xm.log(this.nameExp);
 		}
 
 		private compileSingle():void {
@@ -133,8 +136,6 @@ module tsd {
 				glue.append('$');
 				this.nameExp = glue.join('i');
 			}
-			//xm.log(this.projectExp);
-			//xm.log(this.nameExp);
 		}
 
 		//TODO (auto) cache compile result

@@ -16,7 +16,7 @@ describe('xm.URLManager', () => {
 
 	it('should be constructor', () => {
 		urls = new xm.URLManager({name: 'foo'});
-		assert.ok(urls, 'instance');
+		assert.isObject(urls, 'instance');
 	});
 
 	describe('setVar()', () => {

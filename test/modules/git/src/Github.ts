@@ -78,12 +78,11 @@ describe('git.Github', () => {
 					assert.strictEqual(rawSha, blobSha, 'rawSha vs blobSha');
 					assert.strictEqual(apiSha, rawSha, 'apiSha vs rawSha');
 
-
 					//this explodes.. weird!
 					//assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
 					//temp hackish
-					return xm.mkdirCheckQ(gitTest.extraDir, true).then(() => {
+					return xm.FileUtil.mkdirCheckQ(gitTest.extraDir, true).then(() => {
 						return FS.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
 					}).then(() => {
 						return FS.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});

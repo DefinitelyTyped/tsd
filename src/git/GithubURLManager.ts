@@ -20,7 +20,7 @@ module git {
 
 		constructor(repo:GithubRepo) {
 			super();
-			xm.assertVar('repo', repo, GithubRepo);
+			xm.assertVar(repo, GithubRepo, 'repo');
 
 			this.setVars({
 				owner: repo.ownerName,
@@ -49,8 +49,8 @@ module git {
 		}
 
 		rawFile(commit:string, path:string):string {
-			xm.assertVar('commit', commit, 'string');
-			xm.assertVar('path', path, 'string');
+			xm.assertVar(commit, 'string', 'commit');
+			xm.assertVar(path, 'string', 'path');
 
 			return this.getURL('rawFile', {
 				commit: commit,

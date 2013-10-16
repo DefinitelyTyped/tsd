@@ -2,18 +2,20 @@
 var lib = require('../../../lib/lib');
 
 var tests = {
-	'default': {
-		command: []
-	},
-	'h-short': {
-		command: [
-			'-h'
-		]
-	},
 	'help': {
 		command: [
 			'help'
 		]
+	},
+	'default': {
+		command: [],
+		fixtures: 'help'
+	},
+	'h-short': {
+		command: [
+			'-h'
+		],
+		fixtures: 'help'
 	}
 };
 

@@ -1,0 +1,13 @@
+[plain|aa]
+[plain|bb]
+[plain|-> ][success|x y z ok][plain| ][plain|cc]
+[plain|-> ][warning|x y z warning][plain| ][plain|dd]
+[plain|-> ][error|x y z error][plain| ][plain|ee]
+[plain|-> ][accent|x y z debug][plain| ][plain|ff]
+[plain|-> ][plain|{ a: [Object] }]
+[plain|-> ][plain|{ a: { b: 2 } }]
+[plain|-> ][plain|{
+   "a": {
+      "b": 2
+   }
+}]

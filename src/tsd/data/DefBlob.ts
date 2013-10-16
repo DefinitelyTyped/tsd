@@ -12,7 +12,7 @@ module tsd {
 		encoding:string = 'utf8';
 
 		constructor(sha:string, content:any = null, encoding:string = null) {
-			xm.assertVar('sha', sha, 'sha1');
+			xm.assertVar(sha, 'sha1', 'sha');
 			this.sha = sha;
 			this.encoding = encoding;
 
@@ -31,7 +31,7 @@ module tsd {
 		}
 
 		setContent(content:NodeBuffer, encoding?:string):void {
-			xm.assertVar('content', content, Buffer);
+			xm.assertVar(content, Buffer, 'content');
 			if (xm.isValid(this.content)) {
 				throw new Error('content already set: ' + this.sha);
 			}

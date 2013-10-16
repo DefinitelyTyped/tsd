@@ -7,7 +7,7 @@ module helper {
 	var assert:Chai.Assert = require('chai').assert;
 
 	export function serialiseAuthor(author:xm.AuthorInfo):any {
-		xm.assertVar('author', author, xm.AuthorInfo);
+		xm.assertVar(author, xm.AuthorInfo, 'author');
 		return author.toJSON();
 	}
 

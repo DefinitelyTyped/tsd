@@ -14,8 +14,29 @@
 module xm {
 	'use strict';
 
-	//TODO co-implement and ditch pkginfo dependency
-	var pkginfo = require('pkginfo');
+	var fs = require('fs');
+	var path = require('path');
+
+	//partial from pkginfo
+	function findInfo(pmodule, dir?) {
+		if (!dir) {
+			dir = path.dirname(pmodule.filename);
+		}
+
+		var file = path.join(dir, 'package.json');
+		if (fs.existsSync(file)) {
+			return file;
+		}
+
+		if (dir === '/') {
+			throw new Error('Could not find package.json up from: ' + dir);
+		}
+		else if (!dir || dir === '.') {
+			throw new Error('Cannot find package.json from unspecified directory');
+		}
+		//one-up
+		return findInfo(pmodule, path.dirname(dir));
+	}
 
 	/*
 	 PackageJSON: wrap a package.json
@@ -24,11 +45,12 @@ module xm {
 	export class PackageJSON {
 
 		private _pkg:any;
+
 		private static _localPath:string;
 		private static _local:PackageJSON;
 
 		constructor(pkg:any, public path:string = null) {
-			xm.assertVar('pkg', pkg, 'object');
+			xm.assertVar(pkg, 'object', 'pkg');
 			this._pkg = pkg;
 
 			xm.ObjectUtil.hidePrefixed(this);
@@ -59,9 +81,23 @@ module xm {
 			return this.name + '-' + this.version;
 		}
 
+		getHomepage(short:boolean = false):string {
+			var homepage:string = this._pkg.homepage;
+			if (homepage) {
+				if (short) {
+					return homepage.replace(/(^https?:\/\/)|(\/?$)/g, '');
+				}
+				return homepage;
+			}
+			if (short) {
+				return '<no homepage>';
+			}
+			return '';
+		}
+
 		static find():string {
 			if (!PackageJSON._localPath) {
-				PackageJSON._localPath = pkginfo.find((module));
+				PackageJSON._localPath = findInfo((module));
 			}
 			return PackageJSON._localPath;
 		}

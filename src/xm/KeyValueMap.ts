@@ -11,8 +11,6 @@ module xm {
 
 	var hasProp = Object.prototype.hasOwnProperty;
 
-	//TODO: generics for TS 0.9
-
 	/*
 	 IKeyValueMap: key-value map
 	 */
@@ -28,12 +26,14 @@ module xm {
 		clear ():void;
 	}
 	/*
-	 KeyValueMap: yer basic string key-value map, safe from property interference
+	 KeyValueMap: yer basic string key-value map, safe from prototype interference
 	 */
+	//TODO remove hasProp/hasOwnProperty once tslint can temporarily disable the for-in rules
+	//     see (use with dict-pattern object(
 	export class KeyValueMap<T> implements IKeyValueMap<T> {
 
-		//need proper type
-		private _store:{ [key: string]:T } = {};
+		//use object without prototype
+		private _store:{ [key: string]:T } = Object.create(null);
 
 		constructor(data?:any) {
 			if (data) {
@@ -68,13 +68,7 @@ module xm {
 		}
 
 		keys():string[] {
-			var ret:string[] = [];
-			for (var key in this._store) {
-				if (hasProp.call(this._store, key)) {
-					ret.push(key);
-				}
-			}
-			return ret;
+			return Object.keys(this._store);
 		}
 
 		values():T[] {

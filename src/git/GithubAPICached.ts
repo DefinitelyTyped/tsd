@@ -4,7 +4,7 @@
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/io/hash.ts" />
-///<reference path="../xm/io/Logger.ts" />
+///<reference path="../xm/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/CachedJSONValue.ts" />
 ///<reference path="../xm/io/CachedLoader.ts" />
@@ -60,8 +60,8 @@ module git {
 		private _debug:boolean = false;
 
 		constructor(repo:GithubRepo, storeFolder:string) {
-			xm.assertVar('repo', repo, GithubRepo);
-			xm.assertVar('storeFolder', storeFolder, 'string');
+			xm.assertVar(repo, GithubRepo, 'repo');
+			xm.assertVar(storeFolder, 'string', 'storeFolder');
 
 			this._repo = repo;
 			this._api = <git.GithubJS> new Github({

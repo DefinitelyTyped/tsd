@@ -11,7 +11,6 @@ describe('Context', () => {
 	var assert:Chai.Assert = require('chai').assert;
 
 	describe('Paths', () => {
-		var paths:tsd.Paths;
 		it('is defined as function', () => {
 			assert.isFunction(tsd.Paths);
 		});
@@ -19,8 +18,8 @@ describe('Context', () => {
 	});
 
 	describe('Context', () => {
-
 		var ctx:tsd.Context;
+
 		beforeEach(() => {
 			ctx = new tsd.Context();
 		});

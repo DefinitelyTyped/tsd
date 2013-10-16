@@ -4,9 +4,8 @@
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
 ///<reference path="../io/hash.ts" />
-///<reference path="../io/Logger.ts" />
+///<reference path="../Logger.ts" />
 ///<reference path="../io/FileUtil.ts" />
-///<reference path="../io/mkdirCheck.ts" />
 ///<reference path="CachedJSONValue.ts" />
 ///<reference path="../../../typings/q/Q.d.ts" />
 
@@ -28,7 +27,7 @@ module xm {
 		private _formatVersion:string = '0.2';
 
 		constructor(storeFolder:string) {
-			xm.assertVar('storeFolder', storeFolder, 'string');
+			xm.assertVar(storeFolder, 'string', 'storeFolder');
 
 			storeFolder = storeFolder.replace(/[\\\/]+$/, '') + '-fmt' + this._formatVersion;
 
@@ -48,7 +47,7 @@ module xm {
 			FS.exists(this._dir).then((exists:boolean) => {
 				if (!exists) {
 					this.stats.count('init-dir-create', this._dir);
-					return xm.mkdirCheckQ(this._dir, true);
+					return xm.FileUtil.mkdirCheckQ(this._dir, true);
 				}
 
 				return FS.isDirectory(this._dir).then((isDir:boolean) => {
@@ -119,7 +118,7 @@ module xm {
 					return FS.remove(dest);
 				}
 				this.stats.count('store-new');
-				return xm.mkdirCheckQ(path.dirname(dest), true);
+				return xm.FileUtil.mkdirCheckQ(path.dirname(dest), true);
 			}).then(() => {
 				this.stats.count('store-write');
 				var data = JSON.stringify(res.toJSON(), null, 2);

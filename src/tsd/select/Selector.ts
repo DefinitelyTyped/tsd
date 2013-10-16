@@ -8,6 +8,7 @@ module tsd {
 	/*
 	 Selector: bundles the various selector options
 	 */
+	//TODO abstractify selector critera for extension
 	export class Selector {
 
 		pattern:NameMatcher;
@@ -21,9 +22,10 @@ module tsd {
 		beforeDate:Date;
 		afterDate:Date;
 		commitSha:string;
+		timeLimit:number = 10000;
 
 		constructor(pattern:string = '*') {
-			xm.assertVar('pattern', pattern, 'string');
+			xm.assertVar(pattern, 'string', 'pattern');
 			this.pattern = new tsd.NameMatcher(pattern);
 		}
 

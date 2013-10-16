@@ -25,7 +25,7 @@ module git {
 		}
 
 		export function blobShaHex(data:NodeBuffer, encoding?:string):string {
-			xm.assertVar('data', data, Buffer);
+			xm.assertVar(data, Buffer, 'data');
 			return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
 		}
 	}

@@ -1,5 +1,5 @@
-///<reference path='../../xm/io/Logger.ts' />
-///<reference path='../../xm/io/Logger.ts' />
+///<reference path='../../xm/Logger.ts' />
+///<reference path='../../xm/Logger.ts' />
 ///<reference path='../../_ref.d.ts' />
 ///<reference path='Const.ts' />
 
@@ -22,7 +22,7 @@ module tsd {
 		}
 
 		static getCacheDirName():string {
-			return (process.platform === 'win32' ? Const.cacheDir : '.' + Const.ident);
+			return (process.platform === 'win32' ? Const.cacheDir : '.' + Const.cacheDir);
 		}
 
 		static getUserHome():string {

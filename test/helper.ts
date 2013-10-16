@@ -13,12 +13,11 @@ module helper {
 	var path = require('path');
 	var util = require('util');
 	var Q:typeof Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs')
+	var FS:typeof QioFS = require('q-io/fs');
 	var Reader:Qio.BufferReader = require('q-io/reader');
 	var assert:Chai.Assert = require('chai').assert;
 	var childProcess = require('child_process');
 	var bufferEqual = require('buffer-equal');
-	var streams = require('memory-streams');
 
 	var shaRegExp = /^[0-9a-f]{40}$/;
 	var md5RegExp = /^[0-9a-f]{32}$/;
@@ -83,6 +82,12 @@ module helper {
 		assert(bufferEqual(act, exp), msg + ': bufferEqual');
 	}
 
+	export function assertBufferUTFEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string) {
+		assert.instanceOf(act, Buffer, msg + ': ' + act);
+		assert.instanceOf(exp, Buffer, msg + ': ' + exp);
+		assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');
+	}
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//for safety
@@ -91,7 +96,7 @@ module helper {
 	};
 
 	//monkey patch
-	it.promised = function promised(expectation:string, assertion?:(call:() => void) => void):void {
+	it.eventually = function eventually(expectation:string, assertion?:(call:() => void) => void):void {
 		it(expectation, (done) => {
 			Q(assertion(promiseDoneMistake)).done(() => {
 				done();
@@ -99,7 +104,7 @@ module helper {
 				done(err);
 			});
 		});
-	}
+	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -120,8 +125,9 @@ module helper {
 		args:string[];
 	}
 
-	//TODO decide to update runCLI to use fork() instead of exec() or spawn()
-	export function runCLI(modulePath:string, args:string[], cwd:string = './'):Q.Promise<RunCLIResult> {
+	//TODO decide runCLI use fork(), exec() or spawn() (fork slightly faster? does it matter?)
+	//TODO fix code to properly show errors
+	export function runCLI(modulePath:string, args:string[], debug:boolean = false, cwd:string = './'):Q.Promise<RunCLIResult> {
 		assert.isArray(args, 'args');
 
 		var d:Q.Deferred<RunCLIResult> = Q.defer();
@@ -134,23 +140,46 @@ module helper {
 			silent: true
 		};
 
-		//xm.log(['node', modulePath, args.join(' ')].join(' '));
-
-		var child = childProcess.fork(modulePath, args, options);
-		if (!child) {
-			d.resolve({error: new Error('child spawned as null'), code: 1, stdout: null, stderr: null, args: args});
-			return d.promise;
-		}
-
-		var getRes = function (code:number = 0, err:Error = null):RunCLIResult {
-			return {
+		var getRes = (code:number = 0, err:Error = null):RunCLIResult => {
+			var res:RunCLIResult = {
 				code: code,
 				error: err || null,
 				stdout: Buffer.concat(stdout),
 				stderr: Buffer.concat(stderr),
 				args: args
+			};
+			if (debug && res.code > 0) {
+				xm.log.debug(['node', modulePath , res.args.join(' ')].join(' '));
+				xm.log.debug('error: ' + res.error);
+				xm.log.debug('code: ' + res.code);
+				/*xm.log(res.stdout.toString('utf8'));
+				 if (res.stderr.length) {
+				 xm.log.error(res.stderr.toString('utf8'));
+				 }*/
 			}
+			return res;
 		};
+
+		args.unshift(modulePath);
+
+		var child = childProcess.spawn('node', args, options);
+		if (!child) {
+			d.resolve(getRes(1, new Error('child spawned as null')));
+			return d.promise;
+		}
+
+		child.stdout.on('data', (chunk) => {
+			stdout.push(chunk);
+			if (debug) {
+				process.stdout.write(chunk);
+			}
+		});
+		child.stderr.on('data', (chunk) => {
+			stderr.push(chunk);
+			if (debug) {
+				process.stdout.write(chunk);
+			}
+		});
 
 		child.on('error', (err) => {
 			if (err) {
@@ -164,15 +193,6 @@ module helper {
 		child.on('exit', (event) => {
 			d.resolve(getRes(0, null));
 		});
-
-		child.stdout.on('data', (chunk) => {
-			stdout.push(chunk);
-		});
-		child.stderr.on('data', (chunk) => {
-			stderr.push(chunk);
-		});
-
-		//return Q.resolve(getRes(2));
 
 		return d.promise;
 	}

@@ -43,43 +43,38 @@ module xm {
 	 assertVar: assert a variable (like a function argument) and throw informative error on assertion failure
 	 */
 	//TODO expand validation options, add RegExp /string length (use extended xm.typeOf.ts)
-	//TODO use extended xm.typeOf
-	//TODO custom error?
-	//TODO re-order arguments to comply with regular assertions
-	export function assertVar(label:string, value:any, type:any, opt:boolean = false):void {
+	//TODO use extended xm.typeOf (more types)
+	export function assertVar(value:any, type:any, label:string, opt:boolean = false):void {
 		if (arguments.length < 3) {
 			throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');
 		}
 		var valueKind = xm.typeOf(value);
 		var typeKind = xm.typeOf(type);
 
-		var opts = [];
-		var typeStrim = xm.toValueStrim(type);
-
 		// undefined or null
 		if (valueKind === 'undefined' || valueKind === 'null') {
 			if (!opt) {
-				throw new AssertionError('expected "' + label + '" to be defined as a ' + typeStrim + ' but got "' + value + '"');
+				throw new AssertionError('expected "' + label + '" to be defined as a ' + xm.toValueStrim(type) + ' but got "' + value + '"');
 			}
 		}
 		else if (typeKind === 'function') {
 			if (!(value instanceof type)) {
-				throw new AssertionError('expected "' + label + '" to be instanceof ' + typeStrim + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+				throw new AssertionError('expected "' + label + '" to be instanceof ' + xm.toValueStrim(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
 			}
 		}
 		else if (typeKind === 'string') {
 			if (xm.hasOwnProp(typeOfAssert, type)) {
 				var check = typeOfAssert[type];
 				if (!check(value)) {
-					throw new AssertionError('expected "' + label + '" to be a ' + typeStrim + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+					throw new AssertionError('expected "' + label + '" to be a ' + xm.toValueStrim(type) + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
 				}
 			}
 			else {
-				throw new AssertionError('unknown type-assertion parameter ' + typeStrim + ' for "' + label + '"');
+				throw new AssertionError('unknown type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
 			}
 		}
 		else {
-			throw new AssertionError('bad type-assertion parameter ' + typeStrim + ' for "' + label + '"');
+			throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
 		}
 	}	//make a compact debug string from any object
 }

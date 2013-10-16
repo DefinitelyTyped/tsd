@@ -1,8 +1,7 @@
 ///<reference path="../_ref.d.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
-///<reference path="../xm/io/Logger.ts" />
+///<reference path="../xm/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
-///<reference path="../xm/io/mkdirCheck.ts" />
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/io/CachedLoader.ts" />
 ///<reference path="../xm/io/CachedFileService.ts" />
@@ -35,8 +34,8 @@ module git {
 		};
 
 		constructor(repo:git.GithubRepo, storeFolder:string) {
-			xm.assertVar('repo', repo, git.GithubRepo);
-			xm.assertVar('storeFolder', storeFolder, 'string');
+			xm.assertVar(repo, git.GithubRepo, 'repo');
+			xm.assertVar(storeFolder, 'string', 'storeFolder');
 			this._repo = repo;
 
 			var dir = path.join(storeFolder, this._repo.getCacheKey() + '-fmt' + this._formatVersion);
@@ -79,7 +78,7 @@ module git {
 						throw new Error('unexpected status code: ' + res.status);
 					}
 					if (this._debug) {
-						this.log.inspect(res, 'res', 1);
+						this.log.inspect(res, 1, 'res');
 					}
 					//this.log.inspect(res, 'res', 1);
 					this.stats.count('request-complete');

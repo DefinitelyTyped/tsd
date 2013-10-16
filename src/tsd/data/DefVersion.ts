@@ -29,8 +29,8 @@ module tsd {
 		info:tsd.DefInfo;
 
 		constructor(def:tsd.Def, commit:tsd.DefCommit) {
-			xm.assertVar('def', def, tsd.Def);
-			xm.assertVar('commit', commit, tsd.DefCommit);
+			xm.assertVar(def, tsd.Def, 'def');
+			xm.assertVar(commit, tsd.DefCommit, 'commit');
 
 			this._def = def;
 			this._commit = commit;
@@ -39,7 +39,7 @@ module tsd {
 		}
 
 		setContent(blob:tsd.DefBlob):void {
-			xm.assertVar('blob', blob, tsd.DefBlob);
+			xm.assertVar(blob, tsd.DefBlob, 'blob');
 			if (this._blob) {
 				throw new Error('already got a blob: ' + this._blob.sha + ' != ' + blob.sha);
 			}
