@@ -1,6 +1,6 @@
 {
   "name": "tsd",
-  "description": "The TypeScript definition package manager.",
+  "description": "TypeScript definition package manager.",
   "version": "0.5.1-alpha.1",
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
@@ -19,8 +19,8 @@
   ],
   "licenses": [
     {
-      "type": "MIT",
-      "url": "https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt"
+      "type": "Apache 2.0",
+      "url": "https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt"
     }
   ],
   "preferGlobal": true,

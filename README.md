@@ -28,7 +28,7 @@ Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.gi
 
 :rocket: For npm preview install directly from github (if you feel particularly adventurous):
 
-	$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g
+	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
 
 #### Commands
 
@@ -188,4 +188,4 @@ Contributions will be welcome once the application architecture stabilises a bit
 Copyright (c) 2013 by Bart van der Schoor
 Copyright (c) 2012 by Diullei Gomes
 
-Licensed under the [MIT license](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt).
+Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt).
