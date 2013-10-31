@@ -96,8 +96,11 @@ module tsd {
 
 		var context = new tsd.Context(args.config, args.verbose);
 
-		if (args.dev) {
+		if (xm.isString(args.dev)) {
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+		}
+		else if (xm.isString(args.cacheDir)) {
+			context.paths.cacheDir = path.resolve(args.cacheDir);
 		}
 		else {
 			context.paths.cacheDir = Paths.getUserCacheDir();
@@ -150,7 +153,7 @@ module tsd {
 
 			//TODO parse more standard options from args
 
-			var required:boolean = (typeof args.config !== undefined ? true : false);
+			var required:boolean = (xm.isValid(args.config));
 
 			return job.api.readConfig(required).then(() => {
 				d.resolve(job);
@@ -228,6 +231,14 @@ module tsd {
 			opt.short = 'c';
 			opt.type = 'string';
 			opt.placeholder = 'path';
+		});
+
+		expose.defineOption((opt:xm.ExposeOption) => {
+			opt.name = 'cacheDir';
+			opt.description = 'Path to cache directory';
+			opt.type = 'string';
+			opt.placeholder = 'path';
+			opt.global = true;
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {

@@ -28,6 +28,7 @@ Global options
 --------                                      
       -h, --help           Display usage help (flag)         
       -V, --version        Display version information (flag)
+      --cacheDir <path>    Path to cache directory (string)  
       --color              Specify CLI color mode (string)   
       --dev                Development mode (flag)           
       --verbose            Verbose output (flag)

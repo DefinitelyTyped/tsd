@@ -50,6 +50,10 @@ module helper {
 		fixturesDir:string;
 		typingsDir:string;
 
+		cacheDirTestFixed:string;
+		cacheDirDev:string;
+		cacheDirUser:string;
+
 		configFile:string;
 		resultFile:string;
 		errorFile:string;
@@ -92,6 +96,10 @@ module helper {
 		info.tmpDir = tmpDir;
 		info.fixturesDir = fixturesDir;
 		info.typingsDir = path.join(tmpDir, 'typings');
+
+		info.cacheDirTestFixed = getFixedCacheDir();
+		info.cacheDirDev = path.join(helper.getProjectRoot(), tsd.Const.cacheDir);
+		info.cacheDirUser = tsd.Paths.getUserCacheDir();
 
 		info.configFile = path.join(tmpDir, tsd.Const.configFile);
 		info.resultFile = path.join(tmpDir, 'result.json');

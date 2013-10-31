@@ -33,19 +33,20 @@ describe('CLI Query', () => {
 			args.push.apply(args, data.command);
 		}
 
+		if (test.selector && test.selector.pattern) {
+			args.push(test.selector.pattern);
+		}
+
 		if (test.color) {
 			args.push('--color', test.color);
 		}
 		else {
 			args.push('--color', 'no');
 		}
-
-		if (test.selector && test.selector.pattern) {
-			args.push(test.selector.pattern);
-		}
+		args.push('--cacheDir', info.cacheDirTestFixed);
 		//args.push('--config', info.configFile);
 
-		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc for re-run
+		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
 		xm.FileUtil.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
 
 		return args;

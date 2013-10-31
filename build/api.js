@@ -6130,8 +6130,10 @@ var tsd;
 
         var context = new tsd.Context(args.config, args.verbose);
 
-        if (args.dev) {
+        if (xm.isString(args.dev)) {
             context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+        } else if (xm.isString(args.cacheDir)) {
+            context.paths.cacheDir = path.resolve(args.cacheDir);
         } else {
             context.paths.cacheDir = tsd.Paths.getUserCacheDir();
         }
@@ -6173,7 +6175,7 @@ var tsd;
             job.context = getContext(args);
             job.api = new tsd.API(job.context);
 
-            var required = (typeof args.config !== undefined ? true : false);
+            var required = (xm.isValid(args.config));
 
             return job.api.readConfig(required).then(function () {
                 d.resolve(job);
@@ -6239,6 +6241,14 @@ var tsd;
             opt.short = 'c';
             opt.type = 'string';
             opt.placeholder = 'path';
+        });
+
+        expose.defineOption(function (opt) {
+            opt.name = 'cacheDir';
+            opt.description = 'Path to cache directory';
+            opt.type = 'string';
+            opt.placeholder = 'path';
+            opt.global = true;
         });
 
         expose.defineOption(function (opt) {
