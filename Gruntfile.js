@@ -132,14 +132,28 @@ module.exports = function (grunt) {
 	});
 
 	// assemble!
-	gtx.alias('prep', ['clean:tmp', 'jshint:support', 'jshint:fixtures']);
-
+	gtx.alias('prep', [
+		'clean:tmp',
+		'jshint:support',
+		'jshint:fixtures'
+	]);
 	// cli commands
-	//TODO verify warnings properly kill and grunt-concurrent doesn't skip errors (could also be flawed grunt preview version)
-	gtx.alias('build', ['prep', 'clean:build', 'typescript:api', 'copy:cli', 'tslint:source', 'mochaTest:integrity']);
-
-	gtx.alias('test', ['build', 'tslint:helper', 'gtx-type:moduleTest']);
-	gtx.alias('default', ['build', 'test']);
+	gtx.alias('build', [
+		'clean:build',
+		'prep',
+		'typescript:api',
+		'copy:cli',
+		'tslint:source',
+		'mochaTest:integrity'
+	]);
+	gtx.alias('test', [
+		'build',
+		'tslint:helper',
+		'gtx-type:moduleTest'
+	]);
+	gtx.alias('default', [
+		'test'
+	]);
 
 	var longTimer = (isVagrant ? 250000 : 5000);
 

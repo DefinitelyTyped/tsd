@@ -64,17 +64,16 @@ describe('CLI Query', () => {
 			fs.writeFileSync(info.errorFile, result.error);
 		}
 
-		var stdoutExpect = fs.readFileSync(info.stdoutExpect);
+		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
 		assert.operator(stdoutExpect.length, '>=', 0, 'stdoutExpect.length');
 
 		//TODO find out how to compare cli output (what is the real encoding? how to get string diff?)
-		helper.assertBufferEqual(result.stdout, stdoutExpect, 'result.stdout');
+		assert.strictEqual(result.stdout.toString('utf8'), stdoutExpect, 'result.stdout');
 
 		if (fs.existsSync(info.stderrExpect)) {
-			var stderrExpect = xm.FileUtil.readJSONSync(info.stderrExpect);
-			helper.assertBufferEqual(result.stderr, stderrExpect, 'result.stderr');
+			var stderrExpect = fs.readFileSync(info.stderrExpect, 'utf8');
+			assert.strictEqual(result.stderr.toString('utf8'), stderrExpect, 'result.stderr');
 		}
-
 		if (fs.existsSync(info.errorExpect)) {
 			var errorExpect = xm.FileUtil.readJSONSync(info.errorExpect);
 			assert.jsonOf(result.error, errorExpect, 'result.error');
