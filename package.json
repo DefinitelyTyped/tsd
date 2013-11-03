@@ -83,6 +83,7 @@
     "chai-as-promised": "4.0.0",
     "buffer-equal": "0.0.0",
     "memory-streams": "0.0.3",
-    "grunt-ts": "~1.4.0"
+    "grunt-ts": "~1.4.0",
+    "grunt-shell": "~0.5.0"
   }
 }
