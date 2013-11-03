@@ -23,12 +23,178 @@ module xm {
 	'use strict';
 
 	var optimist = require('optimist');
+	var jsesc = require('jsesc');
 	var Q:typeof Q = require('q');
 	var exitProcess:(code:number) => void = require('exit');
+	//TODO ditch easy-table
 	var Table:EasyTableStatic = require('easy-table');
 
+	export var converStringMap:any = Object.create(null);
+
+	converStringMap.number = function (input:string) {
+		var num = parseFloat(input);
+		if (isNaN(num)) {
+			throw new Error('input is NaN and not float');
+		}
+		return num;
+	};
+	converStringMap.int = function (input:string) {
+		var num = parseInt(input, 10);
+		if (isNaN(num)) {
+			throw new Error('input is NaN and not integer');
+		}
+		return num;
+	};
+	converStringMap.boolean = function (input:string) {
+		input = ('' + input).toLowerCase();
+		if (input === '' || input === '0') {
+			return false;
+		}
+		switch (input) {
+			case 'false':
+			case 'null':
+			case 'nan':
+			case 'undefined':
+				//language
+			case 'no':
+			case 'off':
+			case 'disabled':
+				return false;
+		}
+		return true;
+	};
+	converStringMap.flag = function (input:string) {
+		if (xm.isUndefined(input) || input === '') {
+			//empty flag is true
+			return true;
+		}
+		return converStringMap.boolean(input);
+	};
+	converStringMap['number[]'] = function (input:string) {
+		return input.split(/ ?[,] ?/g).map((value) => {
+			return converStringMap.number(value);
+		});
+	};
+	converStringMap['int[]'] = function (input:string) {
+		return input.split(/ ?[,] ?/g).map((value) => {
+			return converStringMap.int(value);
+		});
+	};
+	converStringMap['string[]'] = function (input:string) {
+		return input.split(/ ?[,] ?/g);
+	};
+	converStringMap.json = function (input:string) {
+		return JSON.parse(input);
+	};
+
+	export function convertStringTo(input:string, type:string):any {
+		if (xm.hasOwnProp(converStringMap, type)) {
+			return converStringMap[type](input);
+		}
+		return input;
+	}
+
+	/*
+	 ExposeContext: access the parameters of a single call
+	 */
+	export class ExposeContext {
+
+		expose:Expose;
+		command:ExposeCommand;
+		argv:any;
+
+		constructor(expose:Expose, argv, command?:ExposeCommand) {
+			this.expose = expose;
+			this.command = command;
+			this.argv = argv;
+		}
+
+		hasArg(name:string, alt?:any):any {
+			return xm.hasOwnProp(this.argv, name);
+		}
+
+		getArgRaw(name:string, alt?:any):any {
+			if (xm.hasOwnProp(this.argv, name)) {
+				return this.argv[name];
+			}
+			return alt;
+		}
+
+		getArg(name:string, alt?:any):any {
+			if (xm.hasOwnProp(this.argv, name)) {
+				if (this.expose.options.has(name)) {
+					var option = this.expose.options.get(name);
+					if (option.type) {
+						return xm.convertStringTo(this.argv[name], option.type);
+					}
+				}
+				return this.argv[name];
+			}
+			return alt;
+		}
+
+		getArgAs(name:string, type:string, alt?:any):any {
+			if (xm.hasOwnProp(this.argv, name)) {
+				return xm.convertStringTo(this.argv[name], type);
+			}
+			return alt;
+		}
+
+		getArgAt(index:number, alt?:any):any {
+			if (index >= 0 && index < this.argv._.length) {
+				return this.argv._[index];
+			}
+			return alt;
+		}
+
+		//(booya!)
+		getArgAtAs(index:number, type:string, alt?:any):any {
+			if (index >= 0 && index < this.argv._.length) {
+				return xm.convertStringTo(this.argv._[index], type);
+			}
+			return alt;
+		}
+
+		getArgNames():string[] {
+			return Object.keys(this.argv).filter((name:string) => {
+				return (name !== '_');
+			});
+		}
+
+		getEnum(name:string, alt?:any):any {
+			if (xm.hasOwnProp(this.argv, name)) {
+				if (this.expose.options.has(name)) {
+					var option = this.expose.options.get(name);
+					var value = this.getArg(name);
+					if (option.enum.indexOf(value) > -1) {
+						return value;
+					}
+				}
+			}
+			return alt;
+		}
+
+		shiftArg(alt?:string):any {
+			if (this.argv._.length > 0) {
+				return this.argv._.shift();
+			}
+			return alt;
+		}
+
+		shiftArgAs(type:string, alt?:string):any {
+			if (this.argv._.length > 0) {
+				return xm.convertStringTo(this.argv._.shift(), type);
+			}
+			return alt;
+		}
+
+		get numArgs():number {
+			return this.argv._.length;
+		}
+	}
+
 	export interface ExposeAction {
-		(args:any):Q.Promise<any>;
+		(ctx:ExposeContext):Q.Promise<any>;
 	}
 
 	export interface ExposeBuild {
@@ -44,7 +210,7 @@ module xm {
 	}
 
 	export interface ExposeHook {
-		(cmd:ExposeCommand, args:any):Q.Promise<void>;
+		(cmd:ExposeCommand, ctx:ExposeContext):Q.Promise<void>;
 	}
 
 	export interface ExposeOptionApply {
@@ -53,6 +219,7 @@ module xm {
 
 	export interface ExposeResult {
 		code:number;
+		ctx:ExposeContext;
 		error:ExposeError;
 	}
 
@@ -119,6 +286,30 @@ module xm {
 		return 0;
 	}
 
+	export function exposeSortOption(one:ExposeOption, two:ExposeOption):number {
+		if (one.short && !two.short) {
+			return -1;
+		}
+		if (!one.short && two.short) {
+			return 1;
+		}
+		if (one.short && two.short) {
+			if (one.short.toLowerCase() < two.short.toLowerCase()) {
+				return -1;
+			}
+			else if (one.short.toLowerCase() > two.short.toLowerCase()) {
+				return 1;
+			}
+		}
+		if (one.name.toLowerCase() < two.name.toLowerCase()) {
+			return -1;
+		}
+		else if (one.name.toLowerCase() > two.name.toLowerCase()) {
+			return 1;
+		}
+		return 0;
+	}
+
 	export class ExposeCommand {
 		name:string;
 		execute:ExposeAction;
@@ -128,6 +319,7 @@ module xm {
 		options:string[] = [];
 		variadic:string[] = [];
 		groups:string[] = [];
+		note:string[] = [];
 
 		constructor() {
 		}
@@ -153,7 +345,9 @@ module xm {
 		default:any;
 		command:string;
 		global:boolean = false;
-		//enum:any[] = [];
+		optional:boolean = true;
+		enum:any[] = [];
+		note:string[] = [];
 		apply:ExposeOptionApply;
 	}
 
@@ -166,12 +360,13 @@ module xm {
 	//TODO add feature for printable placeholder sub-info (format etc)
 	export class Expose {
 
-		private _commands = new KeyValueMap<ExposeCommand>();
-		private _options = new KeyValueMap<ExposeOption>();
-		private _groups = new KeyValueMap<ExposeGroup>();
+		commands = new KeyValueMap<ExposeCommand>();
+		options = new KeyValueMap<ExposeOption>();
+		groups = new KeyValueMap<ExposeGroup>();
+		mainGroup = new ExposeGroup();
+
 		private _isInit = false;
 		private _index = 0;
-		private _mainGroup = new ExposeGroup();
 
 		output:xm.StyledOut;
 
@@ -185,7 +380,7 @@ module xm {
 				cmd.name = 'help';
 				cmd.label = 'Display usage help';
 				cmd.groups = ['help'];
-				cmd.execute = (args:any) => {
+				cmd.execute = (ctx:xm.ExposeContext) => {
 					this.printCommands();
 					return null;
 				};
@@ -200,7 +395,10 @@ module xm {
 				opt.global = true;
 			});
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+				writable: false,
+				enumerable: false
+			});
 		}
 
 		defineOption(build:(opt:ExposeOption) => void) {
@@ -209,10 +407,10 @@ module xm {
 
 			xm.assertVar(opt.name, 'string', 'opt.name');
 
-			if (this._options.has(opt.name)) {
+			if (this.options.has(opt.name)) {
 				throw new Error('opt.name collision on ' + opt.name);
 			}
-			this._options.set(opt.name, opt);
+			this.options.set(opt.name, opt);
 		}
 
 		createCommand(build:ExposeBuild):void {
@@ -222,10 +420,10 @@ module xm {
 
 			xm.assertVar(cmd.name, 'string', 'build.name');
 
-			if (this._commands.has(cmd.name)) {
+			if (this.commands.has(cmd.name)) {
 				throw new Error('cmd.name collision on ' + cmd.name);
 			}
-			this._commands.set(cmd.name, cmd);
+			this.commands.set(cmd.name, cmd);
 		}
 
 		defineGroup(build:ExposeBuildGroup):void {
@@ -235,25 +433,25 @@ module xm {
 
 			xm.assertVar(group.name, 'string', 'group.name');
 
-			if (this._groups.has(group.name)) {
+			if (this.groups.has(group.name)) {
 				throw new Error('group.name collision on ' + group.name);
 			}
-			this._groups.set(group.name, group);
+			this.groups.set(group.name, group);
 		}
 
-		applyOptions(argv:any):any {
-			var argv = optimist.parse(argv);
+		applyOptions(argv:any):ExposeContext {
+			argv = optimist.parse(argv);
+			var ctx = new ExposeContext(this, argv, null);
 
 			Object.keys(argv).forEach((name:string) => {
-				if (name !== '_' && this._options.has(name)) {
-					var opt = this._options.get(name);
+				if (name !== '_' && this.options.has(name)) {
+					var opt = this.options.get(name);
 					if (opt.apply) {
-						opt.apply(argv[name], argv);
+						opt.apply(ctx.getArg(name), argv);
 					}
 				}
 			});
-
-			return argv;
+			return ctx;
 		}
 
 		init():void {
@@ -262,16 +460,10 @@ module xm {
 			}
 			this._isInit = true;
 
-			xm.eachProp(this._options.keys(), (name) => {
-				var option:ExposeOption = this._options.get(name);
+			xm.eachProp(this.options.keys(), (name) => {
+				var option:ExposeOption = this.options.get(name);
 				if (option.short) {
 					optimist.alias(option.name, option.short);
-				}
-				if (option.type === 'flag') {
-					optimist.boolean(option.name);
-				}
-				else if (option.type === 'string') {
-					optimist.string(option.name);
 				}
 				if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
 					optimist.default(option.name, option.default);
@@ -281,8 +473,8 @@ module xm {
 
 		exit(code:number):void {
 			if (code !== 0) {
-				//this.output.line().error('Closing with exit code ' + code).clear();
-				this.output.line().fail('error');
+				this.output.line().error('Closing with exit code ' + code).clear();
+				//this.output.line().fail('error');
 			}
 			else {
 				//this.output.line().success('Closing with exit code ' + code).clear();
@@ -293,7 +485,7 @@ module xm {
 
 		//execute and exit
 		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
-			this.executeRaw(argvRaw, alt).then((result:ExposeResult) => {
+			Q(this.executeRaw(argvRaw, alt).then((result:ExposeResult) => {
 				if (result.error) {
 					throw(result.error);
 				}
@@ -302,92 +494,99 @@ module xm {
 				}
 			}).fail((err) => {
 				//TODO what to do? with final error?
-				this.output.error(err.toString()).clear();
+				if (err.stack) {
+					this.output.span(err.stack).clear();
+				}
+				else {
+					this.output.error(err.toString()).clear();
+				}
 				this.exit(1);
-			});
+			}));
 		}
 
 		//parse and execute args, promise result
 		executeRaw(argvRaw:any, alt?:string):Q.Promise<ExposeResult> {
 			this.init();
 
-			if (!alt || !this._commands.has(alt)) {
+			if (!alt || !this.commands.has(alt)) {
 				alt = 'help';
 			}
 
-			var options:ExposeOption[] = this._options.values();
+			var options:ExposeOption[] = this.options.values();
 			var opt:ExposeOption;
 			var i:number, ii:number;
 
-			var argv = this.applyOptions(argvRaw);
-			if (!argv) {
-				return this.executeCommand(alt, argv);
+			var ctx = this.applyOptions(argvRaw);
+			if (!ctx) {
+				return this.executeCommand(alt);
 			}
 
 			//command options (option that takes priority, like --version etc)
 			for (i = 0, ii = options.length; i < ii; i++) {
 				opt = options[i];
-				if (opt.command && argv[opt.name]) {
-					return this.executeCommand(opt.command, argv);
+				if (opt.command && ctx.hasArg(opt.name)) {
+					return this.executeCommand(opt.command, ctx);
 				}
 			}
 
 			//clean argv 'bin' padding
 			//node
-			var cmd = argv._.shift();
+			var cmd = ctx.shiftArg();
 			//script
-			cmd = argv._.shift();
-			//command
-			cmd = argv._.shift();
+			cmd = ctx.shiftArg();
 
-			if (typeof cmd === 'undefined') {
+			if (ctx.numArgs === 0) {
 				//this.output.warning('undefined command').clear();
-				return this.executeCommand(alt, argv);
+				return this.executeCommand(alt, ctx);
 			}
-			else if (this._commands.has(cmd)) {
+			//command
+			cmd = ctx.shiftArg();
+			if (this.commands.has(cmd)) {
 				// actual command
-				return this.executeCommand(cmd, argv);
+				return this.executeCommand(cmd, ctx);
 			}
 			else {
 				this.output.line().warning('command not found: ' + cmd).clear();
-				return this.executeCommand('help', argv);
+				return this.executeCommand('help', ctx);
 			}
 		}
 
 		//execute command, promise result
-		executeCommand(name:string, args:any = null):Q.Promise<ExposeResult> {
+		executeCommand(name:string, ctx:xm.ExposeContext = null):Q.Promise<ExposeResult> {
 			this.init();
 
-			if (!this._commands.has(name)) {
+			if (!this.commands.has(name)) {
 				return Q({
 					code: 1,
-					err: new Error('unknown command ' + name)
+					error: new Error('unknown command ' + name)
 				});
 			}
-			var cmd:ExposeCommand = this._commands.get(name);
+			var cmd:ExposeCommand = this.commands.get(name);
 
 			var defer:Q.Deferred<ExposeResult> = Q.defer();
 
 			Q.resolve().then(() => {
 				if (this.before) {
-					return Q(this.before(cmd, args));
+					return Q(this.before(cmd, ctx));
 				}
 				return null;
 			}).then(() => {
-				return Q(cmd.execute(args));
+				return Q(cmd.execute(ctx));
 			}).then(() => {
 				if (this.after) {
-					return Q(this.after(cmd, args));
+					return Q(this.after(cmd, ctx));
 				}
 				return null;
 			}).then(() => {
 				return {
-					code: 0
+					code: 0,
+					ctx: ctx
 				};
 			}, (err) => {
 				return {
 					code: (err.code && err.code > 0) ? err.code : 1,
-					err: err
+					error: err,
+					ctx: ctx
 				};
 			}).done((ret:ExposeResult) => {
 				defer.resolve(ret);
@@ -396,6 +595,7 @@ module xm {
 			return defer.promise;
 		}
 
+		//TODO replace easy-tables with layout that supports colored/wrapped/non-printable output
 		printCommands():void {
 			if (this.title) {
 				this.output.accent(this.title).clear();
@@ -403,7 +603,8 @@ module xm {
 
 			var optionString = (option:ExposeOption):string => {
 				var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-				return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+				return '--' + option.name + placeholder;
+				//return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
 			};
 
 			var commands = new Table();
@@ -412,20 +613,63 @@ module xm {
 			var globalOptNames:string[] = [];
 			var commandPadding:string = '   ';
 			var optPadding:string = '      ';
+			var optPaddingHalf:string = ' : ';
 
-			var optKeys = this._options.keys().sort();
+			var sortOptionName = (one:string, two:string) => {
+				return exposeSortOption(this.options.get(one), this.options.get(two));
+			};
+
+			var optKeys = this.options.keys().sort(sortOptionName);
+
+			var addHeader = (label:string) => {
+				commands.cell('one', label);
+				commands.newRow();
+				addDivider();
+			};
+
+			var addDivider = () => {
+				commands.cell('one', '--------');
+				commands.cell('short', '----');
+				commands.cell('two', '--------');
+				commands.newRow();
+			};
 
 			var addOption = (name:string) => {
-				var option:ExposeOption = this._options.get(name, null);
+				var option:ExposeOption = this.options.get(name, null);
 				if (!option) {
 					commands.cell('one', optPadding + '--' + name);
-					commands.cell('two', '<undefined>');
+					commands.cell('two', optPaddingHalf + '<undefined>');
 				}
 				else {
 					commands.cell('one', optPadding + optionString(option));
-					commands.cell('two', option.description + ' (' + option.type + ')');
+					if (option.short) {
+						commands.cell('short', ' -' + option.short);
+					}
+					var desc = optPaddingHalf + option.description;
+					desc += ' (' + option.type;
+					desc += (option.default ? ', default: ' + option.default : '');
+					desc += ')';
+					commands.cell('two', desc);
+
+					if (option.enum.length > 0) {
+						commands.cell('two', '   ' + option.enum.map((value:any) => {
+							if (xm.isNumber(value)) {
+								return value;
+							}
+							var str = ('' + value);
+							if (/^[\w_-]*$/.test(str)) {
+								return str;
+							}
+							return '\'' + jsesc(('' + value), {
+								quotes: 'single'
+							}) + '\'';
+						}).join(','));
+
+					}
 				}
 				commands.newRow();
+
+				addNote(option.note);
 			};
 
 			var addCommand = (cmd:ExposeCommand, group:ExposeGroup) => {
@@ -437,8 +681,10 @@ module xm {
 				commands.cell('two', cmd.label);
 				commands.newRow();
 
-				xm.eachProp(cmd.options, (name:string) => {
-					var option:ExposeOption = this._options.get(name);
+				addNote(cmd.note);
+
+				cmd.options.sort(sortOptionName).forEach((name:string) => {
+					var option:ExposeOption = this.options.get(name);
 					if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
 						addOption(name);
 					}
@@ -446,19 +692,27 @@ module xm {
 				//commands.newRow();
 			};
 
-			var allCommands = this._commands.keys();
-			var allGroups = this._groups.values();
+			var addNote = (note:any) => {
+				if (note && note.length > 0) {
+					commands.cell('one', '');
+					commands.cell('two', '   <' + (xm.isArray(note) ? note.join('>/n<') : note) + '>');
+					commands.newRow();
+				}
+			};
 
-			xm.eachElem(optKeys, (name:string) => {
-				var option:ExposeOption = this._options.get(name);
+			var allCommands = this.commands.keys();
+			var allGroups = this.groups.values();
+
+			optKeys.forEach((name:string) => {
+				var option:ExposeOption = this.options.get(name);
 				if (option.command) {
 					//addOption(option);
 					commandOptNames.push(option.name);
 				}
 			});
 			//commands.newRow();
-			xm.eachElem(optKeys, (name:string) => {
-				var option:ExposeOption = this._options.get(name);
+			optKeys.forEach((name:string) => {
+				var option:ExposeOption = this.options.get(name);
 				if (option.global && !option.command) {
 					//addOption(option);
 					globalOptNames.push(option.name);
@@ -466,11 +720,10 @@ module xm {
 			});
 
 			if (allGroups.length > 0) {
-				xm.eachProp(this._groups.values().sort(exposeSortGroup), (group:ExposeGroup) => {
-					commands.cell('one', group.label + '\n--------');
-					commands.newRow();
+				this.groups.values().sort(exposeSortGroup).forEach((group:ExposeGroup) => {
+					addHeader(group.label);
 
-					this._commands.values().filter((cmd:ExposeCommand) => {
+					this.commands.values().filter((cmd:ExposeCommand) => {
 						return cmd.groups.indexOf(group.name) > -1;
 
 					}).sort(group.sorter).forEach((cmd:ExposeCommand) => {
@@ -483,32 +736,31 @@ module xm {
 					});
 
 					if (group.options.length > 0) {
-						commands.cell('one', '--------');
-						commands.newRow();
-						xm.eachProp(group.options, (name:string) => {
-							var option = this._options.get(name);
+						addDivider();
+						group.options.sort(sortOptionName).forEach((name:string) => {
+							var option = this.options.get(name);
 							if (commandOptNames.indexOf(name) < 0) {
 								addOption(name);
 							}
 						});
 					}
 					commands.newRow();
-					//xm.eachProp(this._commands.keys().sort(), (name) => {});
+					//xm.eachProp(this.commands.keys().sort(), (name) => {});
 				});
 			}
 
 			if (allCommands.length > 0) {
-				commands.cell('one', 'Other commands\n--------');
-				commands.newRow();
+				addHeader('Other commands');
+
 				allCommands.forEach((name) => {
-					addCommand(this._commands.get(name), this._mainGroup);
+					addCommand(this.commands.get(name), this.mainGroup);
 				});
 				commands.newRow();
 			}
 
 			if (commandOptNames.length > 0 && globalOptNames.length > 0) {
-				commands.cell('one', 'Global options\n--------');
-				commands.newRow();
+				addHeader('Global options');
+
 				if (commandOptNames.length > 0) {
 					xm.eachElem(commandOptNames, (name:string) => {
 						addOption(name);

@@ -63,7 +63,6 @@ module git {
 			}
 
 			this._loader.doCachedCall('GithubRawCached.getFile', storeFile, {}, () => {
-
 				var req = HTTP.normalizeRequest(this._repo.urls.rawFile(commitSha, filePath));
 				req.headers = this.headers;
 

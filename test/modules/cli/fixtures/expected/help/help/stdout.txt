@@ -2,35 +2,49 @@
 -> tsd 0.5.1-alpha.1 (preview)
 --------
 
-Main commands
---------                                       
-   search <selector>       Search definitions                
-   install <selector>      Install definitions               
-      --save               <undefined>                       
-   reinstall <selector>    Re-install definitions from config
-   info <selector>         Display definition info           
-   history <selector>      Display definition history        
-   deps <selector>         List dependencies                 
---------                                                     
-      -c, --config <path>  Path to config file (string)      
-                                                             
-Help commands
---------                                       
-   help                    Display usage help                
-   version                 Display version                   
-                                                             
-Other commands
---------                                      
-   settings                Display config settings           
-      -c, --config <path>  Path to config file (string)      
-                                                             
-Global options
---------                                      
-      -h, --help           Display usage help (flag)         
-      -V, --version        Display version information (flag)
-      --cacheDir <path>    Path to cache directory (string)  
-      --color              Specify CLI color mode (string)   
-      --dev                Development mode (flag)           
-      --verbose            Verbose output (flag)
+Main commands                                                                                          
+--------                 ----  --------                                                                
+   search <selector>           Search definitions                                                      
+   install <selector>          Install definitions                                                     
+      --overwrite         -o    : Overwrite existing definitions (flag)                                
+      --resolve           -r    : Include reference dependencies (flag)                                
+      --save              -s    : Save to config file (flag)                                           
+   info <selector>             Display definition info                                                 
+      --resolve           -r    : Include reference dependencies (flag)                                
+   history <selector>          Display definition history                                              
+   reinstall                   Re-install definitions from config                                      
+      --overwrite         -o    : Overwrite existing definitions (flag)                                
+--------                 ----  --------                                                                
+      --commit <sha1>     -c    : Commit hash (string)                                                 
+                                  <partially implemented>                                              
+      --limit <num>       -l    : Sanity limit for expensive API calls, 0 = unlimited (int, default: 3)
+                                  <not implemented>                                                    
+      --cacheDir <path>         : Path to cache directory (string)                                     
+      --config <path>           : Path to config file (string)                                         
+      --max <num>               : Enforce a maximum amount of results, 0 = unlimited (int)             
+                                  <not implemented>                                                    
+      --min <num>               : Enforce a minimum amount of results (int)                            
+                                  <not implemented>                                                    
+                                                                                                       
+Help commands                                                                                          
+--------                 ----  --------                                                                
+   help                        Display usage help                                                      
+   version                     Display version                                                         
+                                                                                                       
+Other commands                                                                                         
+--------                 ----  --------                                                                
+   settings                    Display config settings                                                 
+      --cacheDir <path>         : Path to cache directory (string)                                     
+      --config <path>           : Path to config file (string)                                         
+                                                                                                       
+Global options                                                                                         
+--------                 ----  --------                                                                
+      --help              -h    : Display usage help (flag)                                            
+      --version           -V    : Display version information (flag)                                   
+      --color <name>              no,plain,ansi,html,css,dev                                           
+      --dev                     : Development mode (flag)                                              
+      --timeout <ms>            : Set operation timeout in milliseconds, 0 = unlimited (int)           
+                                  <not implemented>                                                    
+      --verbose                 : Verbose output (flag)
 
 bye!

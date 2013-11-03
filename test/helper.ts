@@ -24,16 +24,6 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function pad(num:number, len:number):string {
-		var ret = num.toString(10);
-		while (ret.length < len) {
-			ret = '0' + ret;
-		}
-		return ret;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	export function getProjectRoot():string {
 		return path.dirname(xm.PackageJSON.find());
 	}
@@ -48,6 +38,32 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	//helper to get a readable debug message (useful when comparing things absed on 2 paths)
+	//can be improved freely (as required as it is for visualisation only)
+	export function getPathMessage(pathA:string, pathB:string, message:string):string {
+		//make absolute
+		pathA = path.resolve(pathA);
+		pathB = path.resolve(pathB);
+		var elemsA = pathA.split(path.sep);
+		var elemsB = pathB.split(path.sep);
+
+		//remove identical parts
+		while (elemsA.length > 0 && elemsB.length > 0 && elemsA[0] === elemsB[0]) {
+			elemsA.shift();
+			elemsB.shift();
+		}
+
+		//same paths?
+		if (elemsA.length === 0 && elemsA.length === elemsB.length) {
+			return message + ': \'' + path.basename(pathA) + '\'';
+		}
+
+		//different, print remains
+		return message + ': ' + '\'' + elemsA.join(path.sep) + '\' vs \'' + elemsB.join(path.sep) + '\'';
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	export function dump(object:any, message?:string, depth:number = 6, showHidden:boolean = false):any {
 		message = xm.isUndefined(message) ? '' : message + ': ';
 		xm.log(message + util.inspect(object, showHidden, depth, true));
@@ -58,16 +74,14 @@ module helper {
 		xm.log(message + JSON.stringify(object, null, 4));
 	}
 
-	//should be assertStringSHA1
-	export function isStringSHA1(value:any, msg?:string) {
+	export function assertFormatSHA1(value:string, msg?:string) {
 		assert.isString(value, msg);
-		assert.match(String(value), shaRegExp, msg);
+		assert.match(value, shaRegExp, msg);
 	}
 
-	//should be assertStringMD5
-	export function isStringMD5(value:any, msg?:string) {
+	export function assertFormatMD5(value:string, msg?:string) {
 		assert.isString(value, msg);
-		assert.match(String(value), md5RegExp, msg);
+		assert.match(value, md5RegExp, msg);
 	}
 
 	export function propStrictEqual(actual, expected, prop:string, message:string) {
@@ -91,9 +105,9 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//for safety
-	var promiseDoneMistake = function () {
-		throw new Error('don\'t use callback when using promises');
-	};
+	function promiseDoneMistake() {
+		throw new Error('don\'t use a done() callback when using it.eventually()');
+	}
 
 	//monkey patch
 	it.eventually = function eventually(expectation:string, assertion?:(call:() => void) => void):void {

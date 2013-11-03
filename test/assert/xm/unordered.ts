@@ -29,19 +29,19 @@ module helper {
 				if (matcher(act, exp)) {
 					//do assertion
 					assertion(act, exp, message);
-					expected.splice(i, 1);
+					expectedQueue.splice(i, 1);
 					//jump
 					continue outer;
 				}
 			}
 			//use assert.deepEqual for diff report
 			//assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
-			assert.deepEqual([act], expected, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+			assert.deepEqual([act], expectedQueue, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
-		if (expected.length > 0 && expectedQueue.length > 0) {
+		if (expectedQueue.length > 0) {
 			//use deepEqual for nice report
-			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
+			assert.deepEqual([], expectedQueue, message + ': remaining expect elements: ' + expectedQueue.length);
 		}
 	}
 
@@ -59,23 +59,24 @@ module helper {
 	export function assertUnorderedNaive(actual:any[], expected:any[], assertion:AssertCB, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
+		assert.isFunction(assertion, 'assertion');
 		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
 
 		//clones
 		var actualQueue = actual.slice(0);
 		var expectedQueue = expected.slice(0);
 
-		outer : while (actual.length > 0) {
-			var act = actual.pop();
-			for (var i = 0, ii = expected.length; i < ii; i++) {
-				var exp = expected[i];
+		outer : while (actualQueue.length > 0) {
+			var act = actualQueue.pop();
+			for (var i = 0, ii = expectedQueue.length; i < ii; i++) {
+				var exp = expectedQueue[i];
 
 				//try every assertion
 				try {
 					assertion(act, exp, message);
 
 					//passed, remove it
-					expected.splice(i, 1);
+					expectedQueue.splice(i, 1);
 					//jump
 					continue outer;
 				}
@@ -86,9 +87,9 @@ module helper {
 			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
 		//also bad
-		if (expected.length > 0 && expectedQueue.length > 0) {
+		if (expectedQueue.length > 0) {
 			//use assert.deepEqual for diff report
-			assert.deepEqual([], expected, message + ': remaining expect elements: ' + expected.length);
+			assert.deepEqual([], expectedQueue, message + ': remaining expect elements: ' + expectedQueue.length);
 		}
 	}
 

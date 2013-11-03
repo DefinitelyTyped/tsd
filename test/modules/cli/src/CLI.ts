@@ -33,8 +33,19 @@ describe('CLI Query', () => {
 			args.push.apply(args, data.command);
 		}
 
-		if (test.selector && test.selector.pattern) {
-			args.push(test.selector.pattern);
+		if (test.selector) {
+			if (test.selector.pattern) {
+				args.push(test.selector.pattern);
+			}
+			if (test.selector.overwrite) {
+				args.push('--overwrite');
+			}
+			if (test.selector.resolve) {
+				args.push('--resolve');
+			}
+			if (test.selector.save) {
+				args.push('--save');
+			}
 		}
 
 		if (test.color) {
@@ -68,7 +79,6 @@ describe('CLI Query', () => {
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
 		assert.operator(stdoutExpect.length, '>=', 0, 'stdoutExpect.length');
 
-		//TODO find out how to compare cli output (what is the real encoding? how to get string diff?)
 		assert.strictEqual(result.stdout.toString('utf8'), stdoutExpect, 'result.stdout');
 
 		if (fs.existsSync(info.stderrExpect)) {

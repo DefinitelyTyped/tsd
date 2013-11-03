@@ -66,6 +66,10 @@ module tsd {
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
+		getInstallPath(def:tsd.Def):string {
+			return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
+		}
+
 		/*
 		 lazy get or load the current DefIndex
 		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
@@ -212,10 +216,10 @@ module tsd {
 		 install a DefVersion and add to config
 		 promise: string: absolute path of written file
 		 */
-		installFile(file:tsd.DefVersion, addToConfig:boolean = true):Q.Promise<string> {
+		installFile(file:tsd.DefVersion, addToConfig:boolean = true, overwrite:boolean = false):Q.Promise<string> {
 			var d:Q.Deferred<string> = Q.defer();
 
-			this.useFile(file).then((targetPath:string) => {
+			this.useFile(file, overwrite).then((targetPath:string) => {
 				if (this.context.config.hasFile(file.def.path)) {
 					this.context.config.getFile(file.def.path).update(file);
 				}
@@ -232,14 +236,16 @@ module tsd {
 		 bulk version of installFile()
 		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
 		 */
-		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
+		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true, overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
 			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
 
 			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 			Q.all(list.map((file:tsd.DefVersion) => {
-				return this.installFile(file, addToConfig).then((targetPath:string) => {
-					written.set(file.def.path, file);
+				return this.installFile(file, addToConfig, overwrite).then((targetPath:string) => {
+					if (targetPath) {
+						written.set(file.def.path, file);
+					}
 				});
 			})).then(() => {
 				d.resolve(written);
@@ -276,7 +282,7 @@ module tsd {
 		}
 
 		/*
-		 save current config to project json
+		 save current config to json
 		 promise: string: path of written file
 		 */
 		saveConfig():Q.Promise<string> {
@@ -315,14 +321,14 @@ module tsd {
 		 reinstall multiple DefVersion's from InstalledDef data
 		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
 		 */
-		reinstallBulk(list:tsd.InstalledDef[]):Q.Promise<xm.IKeyValueMap<DefVersion>> {
+		reinstallBulk(list:tsd.InstalledDef[], overwrite:boolean = false):Q.Promise<xm.IKeyValueMap<DefVersion>> {
 			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
 
 			var written = new xm.KeyValueMap();
 
 			Q.all(list.map((installed:tsd.InstalledDef) => {
 				return this.procureFile(installed.path, installed.commitSha).then((file:tsd.DefVersion)=> {
-					return this.installFile(file, true).then((targetPath:string) => {
+					return this.installFile(file, overwrite).then((targetPath:string) => {
 						written.set(file.def.path, file);
 						return file;
 					});
@@ -362,6 +368,7 @@ module tsd {
 			if (file.hasContent()) {
 				return Q(file);
 			}
+
 			this.gitRaw.getFile(file.commit.commitSha, file.def.path).then((content) => {
 				//var sha = git.GitUtil.blobShaHex(content, 'utf8');
 				if (file.blob) {
@@ -371,7 +378,7 @@ module tsd {
 							file.blob.setContent(content);
 						}
 						catch (err) {
-							xm.log.debug(err);
+							xm.log.warn(err);
 							xm.log.debug('path', file.def.path);
 							xm.log.debug('commitSha', file.commit.commitSha);
 							xm.log.debug('treeSha', file.commit.treeSha);
@@ -482,7 +489,7 @@ module tsd {
 				parser.parse(file.info, file.blob.content.toString('utf8'));
 
 				if (!file.info.isValid()) {
-					this.log.warn('bad parse in: ' + file);
+					//this.log.warn('bad parse in: ' + file);
 					//TODO print more debug info
 				}
 				d.resolve(file);
@@ -514,16 +521,16 @@ module tsd {
 		 lazy load and save a single DefVersion to typings folder
 		 promise: DefVersion
 		 */
-		useFile(file:tsd.DefVersion, overwrite:boolean = true):Q.Promise<string> {
+		useFile(file:tsd.DefVersion, overwrite:boolean):Q.Promise<string> {
 			var d:Q.Deferred<string> = Q.defer();
 
-			var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
-			var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
+			var targetPath = this.getInstallPath(file.def);
 
-			FS.exists(targetPath).then((exists:boolean) => {
-				if (exists && !overwrite) {
-					//bail
-					return null;
+			xm.FileUtil.canWriteFile(targetPath, overwrite).then((canWrite:boolean) => {
+				if (!canWrite) {
+					xm.log.out.warning('skipped existing file: ' + file.def.path).line();
+					d.resolve(null);
+					return;
 				}
 				//write
 				return this.loadContent(file).then(() => {
@@ -536,10 +543,10 @@ module tsd {
 					return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);
+				}).then(() => {
+					d.resolve(targetPath);
 				});
-			}).then(() => {
-				d.resolve(targetPath);
-			}, d.reject);
+			}).fail(d.reject);
 
 			return d.promise;
 		}

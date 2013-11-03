@@ -31,6 +31,7 @@ module xm {
 			}
 			catch (err) {
 				if (err.name === 'SyntaxError') {
+					//TODO find/write module to pretty print parse errors
 					xm.log.error(err);
 					xm.log('---');
 					xm.log(text);
@@ -189,6 +190,21 @@ module xm {
 				d.resolve(dir);
 			});
 			return d.promise;
+		}
+
+		export function canWriteFile(targetPath:string, overwrite:boolean) {
+			return FS.exists(targetPath).then((exists:boolean) => {
+				if (!exists) {
+					return true;
+				}
+				return FS.isFile(targetPath).then((isFile:boolean) => {
+					if (isFile) {
+						return overwrite;
+					}
+					//TODO add folder write test?
+					return false;
+				});
+			});
 		}
 	}
 }

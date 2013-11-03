@@ -1,0 +1,50 @@
+{
+  "nameMatches": [
+    {
+      "path": "async/async.d.ts",
+      "project": "async",
+      "name": "async",
+      "head": {
+        "path": "async/async.d.ts",
+        "commit": {
+          "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+        },
+        "blob": {
+          "sha": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
+        },
+        "key": "async/async.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+        "solved": true,
+        "dependencies": []
+      },
+      "history": []
+    }
+  ],
+  "selection": [
+    {
+      "path": "async/async.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
+      },
+      "key": "async/async.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  ],
+  "written": {
+    "async/async.d.ts": {
+      "path": "async/async.d.ts",
+      "commit": {
+        "commitSha": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+      },
+      "blob": {
+        "sha": "5ba56e0dbb7cc433d5b98ab3cbbf5e0d92954ff1"
+      },
+      "key": "async/async.d.ts-c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "solved": true,
+      "dependencies": []
+    }
+  }
+}

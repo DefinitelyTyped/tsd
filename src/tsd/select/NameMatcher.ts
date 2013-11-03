@@ -15,9 +15,9 @@ module tsd {
 	var patternSplit:RegExp = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
-	function escapeExp(str) {
-		//TODO this needs hardening
-		return str.replace('.', '\\.');
+	function escapeRegExpChars(str) {
+		//http://stackoverflow.com/a/1144788/1026362
+		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 	}
 	/*
 	 NameMatcher: match name selector (globs etc)
@@ -80,7 +80,7 @@ module tsd {
 				gotMatch = true;
 			}
 			if (match[2].length > 0) {
-				glue.append(escapeExp(match[2]));
+				glue.append(escapeRegExpChars(match[2]));
 				gotMatch = true;
 			}
 			if (match[3].length > 0) {
@@ -109,7 +109,7 @@ module tsd {
 				glue.append(wordLazy);
 			}
 			if (match[2].length > 0) {
-				glue.append(escapeExp(match[2]));
+				glue.append(escapeRegExpChars(match[2]));
 				gotProject = true;
 			}
 			if (match[3].length > 0) {
@@ -126,7 +126,7 @@ module tsd {
 				glue.append(wordLazy);
 			}
 			if (match[5].length > 0) {
-				glue.append(escapeExp(match[5]));
+				glue.append(escapeRegExpChars(match[5]));
 				gotFile = true;
 			}
 			if (match[6].length > 0) {

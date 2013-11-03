@@ -6,18 +6,19 @@ describe('xm.Set', () => {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	var list:xm.Set;
 
 	it('is defined', () => {
 		assert.ok(xm.Set);
 	});
 	it('is a constructor', () => {
-		assert.ok(new (xm.Set)());
+		assert.ok(new xm.Set<string>());
 	});
 
 	describe('default', () => {
+		var list:xm.Set<any>;
+
 		beforeEach(() => {
-			list = new xm.Set();
+			list = new xm.Set<any>();
 		});
 		afterEach(() => {
 			list = null;

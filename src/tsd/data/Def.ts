@@ -4,13 +4,17 @@
 module tsd {
 	'use strict';
 
-	var nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
-
 
 	/*
 	 Def: single definition in repo (identified by its path)
 	 */
 	export class Def {
+
+		//static nameExp = /^([a-z](?:[\._\-]*[a-z0-9]+)*)\/([a-z](?:[\._\-]*[a-z0-9]+)*)\.d\.ts$/i;
+		//static nameExpEnd = /([a-z](?:[\._\-]*[a-z0-9]+)*)\/([a-z](?:[\._\-]*[a-z0-9]+)*)\.d\.ts$/i;
+
+		static nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
+		static nameExpEnd = /([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
 
 		// unique identifier: 'project/name' (should support 'project/name-v0.1.3-alpha')
 		path:string;
@@ -40,14 +44,29 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		static isDefPath(path:string):boolean {
-			nameExp.lastIndex = 0;
-			return nameExp.test(path);
+		static getPathExp(trim:boolean):RegExp {
+			var useExp:RegExp = (trim ? Def.nameExpEnd : Def.nameExp);
+			useExp.lastIndex = 0;
+			return useExp;
 		}
 
-		static getFrom(path:string):tsd.Def {
-			nameExp.lastIndex = 0;
-			var match = nameExp.exec(path);
+		static isDefPath(path:string, trim:boolean = false):boolean {
+			return Def.getPathExp(trim).test(path);
+		}
+
+		static getFileFrom(path:string):string {
+			var useExp:RegExp = Def.getPathExp(true);
+			var match = useExp.exec(path);
+			if (!match) {
+				return null;
+			}
+			return match[1] + '/' + match[2] + '.d.ts';
+		}
+
+		static getFrom(path:string, trim:boolean = false):tsd.Def {
+			var useExp:RegExp = Def.getPathExp(trim);
+
+			var match:RegExpExecArray = useExp.exec(path);
 			if (!match) {
 				return null;
 			}
@@ -60,7 +79,9 @@ module tsd {
 			var file = new tsd.Def(path);
 			file.project = match[1];
 			file.name = match[2];
+
 			xm.ObjectUtil.lockProps(file, ['path', 'project', 'name']);
+
 			//TODO support semver postfix 'project/name-v0.1.3-alpha'
 			// path.semver = match[3];
 

@@ -20,7 +20,7 @@ Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.gi
 
 	$ npm install tsd -g
 
-:wrench: For development preview install from a git-checkout (at whatever state it is):
+:wrench: For development preview install from a git-checkout:
 
 	$ npm install
 	$ grunt build
@@ -30,19 +30,28 @@ Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.gi
 
 	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
 
-#### Commands
+#### Call CLI
+
+Global `tsd` binary
 
 	$ tsd	
 	$ tsd -h
 
-:bangbang: Possibly outdated method list:
+:wrench: For development run from a local install/checkout
+
+	$ node ./build/cli.js -h
+
+#### Commands
+
+:bangbang: Possibly outdated method list
 
 	$ tsd search <selector>
-	$ tsd install <selector>
 	$ tsd info <selector>
 	$ tsd history <selector>
+	$ tsd install <selector>
 	$ tsd reinstall
 	...
+	$ tsd help
 
 ### Selector
 
@@ -186,6 +195,7 @@ Contributions will be welcome once the application architecture stabilises a bit
 ## License
 
 Copyright (c) 2013 by Bart van der Schoor
-Copyright (c) 2012 by Diullei Gomes
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt).
+
+Copyright (c) 2012 by Diullei Gomes

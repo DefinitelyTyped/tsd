@@ -17,13 +17,13 @@ describe('git.GitUtils', () => {
 			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			assert.isObject(expectedJson, 'expectedJson');
 			var expectedSha = expectedJson.sha;
-			helper.isStringSHA1(expectedSha, 'expectedSha');
+			helper.assertFormatSHA1(expectedSha, 'expectedSha');
 
 			var buffer = git.GitUtil.decodeBlobJson(expectedJson);
 			assert.instanceOf(buffer, Buffer, 'buffer');
 
 			var sha = git.GitUtil.blobShaHex(buffer, 'utf8');
-			helper.isStringSHA1(sha, 'sha');
+			helper.assertFormatSHA1(sha, 'sha');
 
 			assert.strictEqual(sha, expectedSha, 'sha actual vs expected');
 		});

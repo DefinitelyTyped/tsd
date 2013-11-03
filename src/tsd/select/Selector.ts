@@ -8,21 +8,26 @@ module tsd {
 	/*
 	 Selector: bundles the various selector options
 	 */
-	//TODO abstractify selector critera for extension
 	export class Selector {
 
 		pattern:NameMatcher;
 
-		resolveDependencies:boolean = false;
-
-		//TODO implement something like these
+		//TODO implement something like DateMatcher / InfoMatcher?
 		//dateMatcher:DateMatcher;
 		infoMatcher:InfoMatcher;
-		limit:number = 10;
 		beforeDate:Date;
 		afterDate:Date;
 		commitSha:string;
-		timeLimit:number = 10000;
+		blobSha:string;
+		timeout:number = 10000;
+		minMatches:number = 0;
+		maxMatches:number = 0;
+		limitApi:number = 0;
+
+		//move to options?
+		overwriteFiles:boolean = false;
+		resolveDependencies:boolean = false;
+		saveToConfig:boolean = false;
 
 		constructor(pattern:string = '*') {
 			xm.assertVar(pattern, 'string', 'pattern');

@@ -37,6 +37,10 @@ module tsd {
 			this.config = new Config(schema);
 		}
 
+		getTypingsDir():string {
+			return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+		}
+
 		logInfo(details:boolean = false):void {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);

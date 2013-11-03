@@ -1,0 +1,20 @@
+{
+  "typingsPath": "typings",
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "installed": {
+    "angularjs/angular-cookies.d.ts": {
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "blob": "4dc2e038e13b2a7e71f338076f4875228e9027cf"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "blob": "99969f710e2dbcac67382988edc7224550d29b86"
+    },
+    "angularjs/angular.d.ts": {
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
+      "blob": "e76c2be094981c2852bd70a9c3fcbc7f99ff9c8f"
+    }
+  }
+}

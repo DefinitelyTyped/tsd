@@ -57,7 +57,7 @@ describe('git.GithubRawCached', () => {
 		var filePath = gitTest.config.data.async.filePath;
 		var commitSha = gitTest.config.data.async.commitSha;
 		assert.isString(filePath, 'filePath');
-		helper.isStringSHA1(commitSha, 'commitSha');
+		helper.assertFormatSHA1(commitSha, 'commitSha');
 
 		it.eventually('should cache and return data', () => {
 			//raw.debug = true;

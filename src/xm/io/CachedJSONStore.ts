@@ -87,10 +87,18 @@ module xm {
 						}
 						catch (e) {
 							this.stats.count('get-read-error');
-							throw(new Error(e + ' -> ' + src));
+							//throw(new Error(e + ' -> ' + src));
+							defer.resolve(null);
 						}
 						this.stats.count('get-read-success');
 						defer.resolve(cached);
+					}, (err) => {
+						if (err.name === 'SyntaxError') {
+							this.stats.count('get-read-parse-error', src);
+							defer.resolve(null);
+						}
+						//rethrow
+						throw err;
 					});
 				}
 				this.stats.count('get-miss');

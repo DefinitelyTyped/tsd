@@ -62,7 +62,6 @@ module xm {
 		}
 
 		//TODO unit-test this against toJSON()
-
 		//TODO maybe JSON Schema? overkill?
 		static fromJSON(json:any):xm.CachedJSONValue {
 			xm.assertVar(json.label, 'string', 'label');
@@ -73,7 +72,7 @@ module xm {
 
 			var changedDateNum = Date.parse(json.changed);
 			if (isNaN(changedDateNum)) {
-				throw new Error('bad date: changed: ' + json.date);
+				throw new Error('bad date: invalid date: ' + json.date);
 			}
 
 			var call = new xm.CachedJSONValue(json.label, json.key, json.options);

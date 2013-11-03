@@ -69,8 +69,14 @@ module tsd {
 			return this._blob;
 		}
 
+		//human friendly
+		get blobShaShort():string {
+			return this._blob ? this._blob.shaShort : '<no blob>';
+		}
+
 		toString():string {
-			var str = (this._def ? this._def.path : '<no def>');
+			var str = '';
+			str += (this._def ? this._def.path : '<no def>');
 			str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
 			str += ' : ' + (this._blob ? this._blob.shaShort : '<no blob>');
 			return str;

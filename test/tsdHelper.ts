@@ -4,13 +4,14 @@
 
 ///<reference path="assert/tsd/_all.ts" />
 ///<reference path="assert/xm/_all.ts" />
+///<reference path="assert/git/_all.ts" />
 
 ///<reference path="../src/xm/io/CachedLoader.ts" />
 
 module helper {
 	'use strict';
 
-	var q = require('q');
+	var Q = require('q');
 	var FS = require('q-io/fs');
 	var fs = require('fs');
 	var util = require('util');
@@ -69,6 +70,7 @@ module helper {
 		errorExpect:string;
 		stdoutExpect:string;
 		stderrExpect:string;
+		typingsExpect:string;
 
 		modBuildDir:string;
 		modBuildAPI:string;
@@ -112,6 +114,7 @@ module helper {
 		info.errorExpect = path.join(fixturesDir, 'error.json');
 		info.stdoutExpect = path.join(fixturesDir, 'stdout.txt');
 		info.stderrExpect = path.join(fixturesDir, 'stderr.txt');
+		info.typingsExpect = path.join(fixturesDir, 'typings');
 
 		info.testDump = path.join(dumpDir, 'test.json');
 		info.argsDump = path.join(dumpDir, 'args.json');
@@ -130,56 +133,6 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function applyCoreUpdate(core:tsd.Core) {
-		applyCoreUpdateLoader(core.gitAPI.loader);
-		applyCoreUpdateLoader(core.gitRaw.loader);
-	}
-
-	//set modes for fixture updates
-	function applyCoreUpdateLoader(loader:xm.CachedLoader<any>) {
-		var opts = loader.options;
-		if (helper.settings.cache.forceUpdate) {
-			opts.cacheRead = false;
-			opts.remoteRead = true;
-			opts.cacheWrite = true;
-		}
-		else if (helper.settings.cache.allowUpdate) {
-			opts.cacheRead = true;
-			opts.remoteRead = true;
-			opts.cacheWrite = true;
-		}
-		else {
-			opts.cacheRead = true;
-			opts.remoteRead = false;
-			opts.cacheWrite = false;
-		}
-	}
-
-	//TODO update to verify exacter using the event/log solution when it's ready
-	export function assertUpdateStat(loader:xm.CachedLoader<any>, message:string) {
-		var stats = loader.stats;
-		if (helper.settings.cache.forceUpdate) {
-			assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
-			assert.operator(stats.get('load-start'), '>=', 0, message + ': forceUpdate: load-start');
-			assert.operator(stats.get('write-succes'), '>=', 0, message + ': forceUpdate: write-succes');
-		}
-		else if (helper.settings.cache.allowUpdate) {
-			//assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
-			//assert.operator(stats.get('load-start'), '>=', 0, message + ': allowUpdate: load-start');
-			//assert.operator(stats.get('write-succes'), '>=', 0, message + ': allowUpdate: write-succes');
-
-			var sum = stats.get('load-start') + stats.get('write-succes') + stats.get('cache-hit');
-			assert.operator(sum, '>', 0, message + ': allowUpdate: sum');
-		}
-		else {
-			assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
-			assert.operator(stats.get('load-start'), '===', 0, message + ': noUpdate: load-start');
-			assert.operator(stats.get('write-succes'), '===', 0, message + ': noUpdate: write-succes');
-		}
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	export function listDefPaths(dir:string):Q.Promise<string[]> {
 		var d:Q.Deferred<string[]> = Q.defer();
 
@@ -193,6 +146,35 @@ module helper {
 			}).filter((short:string) => {
 				return tsd.Def.isDefPath(short);
 			}));
+		}).fail(d.reject);
+
+		return d.promise;
+	}
+
+	export function assertDefPathsP(actualDir:string, expectedDir:string, assertContent:boolean, message:string):Q.Promise<void> {
+		var d:Q.Deferred<void> = Q.defer();
+
+		Q.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths, expectedPaths) => {
+			assert.sameMembers(actualPaths, expectedPaths, message);
+
+			if (assertContent) {
+				xm.log.json(actualPaths);
+				xm.log.json(expectedPaths);
+
+				helper.assertUnorderedLike(actualPaths, expectedPaths, (actualPath, expectedPath) => {
+					xm.log('match', tsd.Def.getFileFrom(actualPath), tsd.Def.getFileFrom(expectedPath));
+					return (tsd.Def.getFileFrom(actualPath) === tsd.Def.getFileFrom(expectedPath));
+
+				}, (actualPath, expectedPath) => {
+
+					xm.log('assert', actualPath, expectedPath);
+					var msg = helper.getPathMessage(actualPath, expectedPath, message);
+
+					helper.assertBufferUTFEqual(fs.readfile(actualPath), fs.readfile(actualPath), msg);
+					//helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
+				}, message);
+			}
+			d.resolve();
 		});
 
 		return d.promise;

@@ -137,6 +137,12 @@ module tsd {
 			return this._installed.values();
 		}
 
+		getInstalledPaths():string[] {
+			return this._installed.values().map((file:tsd.InstalledDef) => {
+				return file.path;
+			});
+		}
+
 		//TODO unit test this against JSON-Schema (maybe always?)
 		toJSON():any {
 			var json = {

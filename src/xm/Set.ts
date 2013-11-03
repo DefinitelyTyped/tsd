@@ -10,23 +10,23 @@ module xm {
 	'use strict';
 
 	/*
-	 ISet: yer basic set interface
+	 ISet: basic set interface
 	 */
-	export interface ISet {
-		has (value:any):boolean;
-		add (value:any):void;
-		remove (value:any):void;
-		values ():any[];
-		import (values:string[]):void;
+	export interface ISet<T> {
+		has (value:T):boolean;
+		add (value:T):void;
+		remove (value:T):void;
+		values ():T[];
+		import (values:T[]):void;
 		clear ():void;
 		count ():number;
 	}
 	/*
 	 Set: yer basic set: unordered but unique values
 	 */
-	export class Set implements ISet {
+	export class Set<T> implements ISet<T> {
 
-		private _content:any[] = [];
+		private _content:T[] = [];
 
 		constructor(values?:any[]) {
 			if (values) {
@@ -34,28 +34,28 @@ module xm {
 			}
 		}
 
-		has(value:any):boolean {
+		has(value:T):boolean {
 			return this._content.indexOf(value) > -1;
 		}
 
-		add(value:any):void {
+		add(value:T):void {
 			if (this._content.indexOf(value) < 0) {
 				this._content.push(value);
 			}
 		}
 
-		remove(value:any):void {
+		remove(value:T):void {
 			var i = this._content.indexOf(value);
 			if (i > -1) {
 				this._content.splice(i, 1);
 			}
 		}
 
-		values():any[] {
+		values():T[] {
 			return this._content.slice(0);
 		}
 
-		import(values:any[]):void {
+		import(values:T[]):void {
 			for (var i = 0, ii = values.length; i < ii; i++) {
 				this.add(values[i]);
 			}

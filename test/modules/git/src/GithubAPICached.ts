@@ -134,7 +134,7 @@ describe('git.GithubAPICached', () => {
 
 			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;
-			helper.isStringSHA1(expectedSha, 'expectedJson');
+			helper.assertFormatSHA1(expectedSha, 'expectedJson');
 
 			return api.getBlob(expectedSha).then((first) => {
 				assert.ok(first, 'first data');

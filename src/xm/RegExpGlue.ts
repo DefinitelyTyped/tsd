@@ -18,6 +18,7 @@ module xm {
 	/*
 	 RegExpGlue: glue RegExp's and strings together into longer RegExps
 	 */
+	//TODO refactor API to work better with optional escaping string chars
 	export class RegExpGlue {
 
 		parts:any[] = [];
@@ -31,6 +32,11 @@ module xm {
 		static get(...exp:any[]):RegExpGlue {
 			var e = new RegExpGlue();
 			return e.append.apply(e, exp);
+		}
+
+		static escapeChars(str:string):string {
+			//http://stackoverflow.com/a/1144788/1026362
+			return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 		}
 
 		append(...exp:any[]):RegExpGlue {
@@ -70,11 +76,8 @@ module xm {
 		}
 
 		join(flags?:string, seperator?:RegExp):RegExp {
-			//console.log('join flags: ' + flags + ' seperator: ' + seperator);
-			//console.log(this.parts);
 			var glueBody = seperator ? this.getBody(seperator) : '';
 			var chunks:string[] = [];
-			//console.log(glueBody);
 
 			flags = typeof flags !== 'undefined' ? this.getCleanFlags(flags) : '';
 
@@ -85,8 +88,6 @@ module xm {
 				}
 				expTrim.lastIndex = 0;
 				var trim = expTrim.exec('' + exp);
-				//console.log('loppp ' + exp);
-				//console.log(trim);
 				if (!trim) {
 					return exp;
 				}

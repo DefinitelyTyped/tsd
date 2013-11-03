@@ -31,6 +31,50 @@ module tsd {
 			xm.assertVar(selector, tsd.Selector, 'selector', true);
 		}
 	}
+	export class APIMessage {
+		message:string;
+		tag:string;
+
+		constructor(message:string, tag:string) {
+			this.message = message;
+			this.tag = tag;
+		}
+
+		toString() {
+			return this.tag + ':' + this.message;
+		}
+	}
+
+	export class APIProgress extends APIMessage {
+		total:number;
+		current:number;
+
+		constructor(message:string, code:string, total:number = 0, current:number = 0) {
+			super(message, code);
+			this.total = total;
+			this.current = current;
+		}
+
+		getRatio():number {
+			if (this.total > 0) {
+				return Math.min(Math.max(0, this.current), this.total) / this.total;
+			}
+			return 0;
+		}
+
+		getPerc():string {
+			return Math.round(this.getRatio() * 100) + '%';
+		}
+
+		getOf():string {
+			return this.current + '/' + this.total;
+		}
+
+		toString() {
+			return super.toString() + ':';
+		}
+	}
+
 
 	/*
 	 API: the high-level API used by dependants
@@ -94,27 +138,25 @@ module tsd {
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			//hardcode for now
-			//TODO make resolveDependencies a proper cli option
-			selector.resolveDependencies = true;
-
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
 			this._core.select(selector).then((res:tsd.APIResult) => {
 				var files:tsd.DefVersion[] = res.selection;
 
-				//TODO dependency merge should be optional
 				files = tsd.DefUtil.mergeDependencies(files);
 
-				return this._core.installFileBulk(files).then((written:xm.IKeyValueMap) => {
+				return this._core.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then((written:xm.IKeyValueMap) => {
 					if (!written) {
 						throw new Error('expected install paths');
 					}
 					res.written = written;
 
-					//TODO saving config should be optional
-					return this._core.saveConfig().then(() => {
-						d.resolve(res);
-					});
+					if (selector.saveToConfig) {
+						return this._core.saveConfig().then(() => {
+							d.resolve(res);
+						});
+					}
+					d.resolve(res);
 				});
 			}).fail(d.reject);
 
@@ -132,10 +174,10 @@ module tsd {
 			var res = new tsd.APIResult(this._core.index, null);
 
 			this._core.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
-				return this._core.installFile(file).then((targetPath:string) => {
-					res.written.set(targetPath, file);
-					d.resolve(res);
-				});
+				/*return this._core.installFile(file, selector.saveToConfig, selector.overwriteFiles).then((targetPath:string) => {
+				 res.written.set(targetPath, file);
+				 d.resolve(res);
+				 });*/
 			}).fail(d.reject);
 
 			return d.promise;
@@ -199,29 +241,13 @@ module tsd {
 		}
 
 		/*
-		 download files matching selector and solve dependencies
-		 */
-		deps(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
-
-			this._core.select(selector).then((res:tsd.APIResult) => {
-				return this._core.resolveDepencendiesBulk(res.selection).then(() => {
-					d.resolve(res);
-				});
-			}).fail(d.reject);
-
-			return d.promise;
-		}
-
-		/*
 		 re-install from config
 		 */
-		reinstall():Q.Promise<APIResult> {
+		reinstall(overwrite:boolean = false):Q.Promise<APIResult> {
 			var res = new tsd.APIResult(this._core.index, null);
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			this._core.reinstallBulk(this.context.config.getInstalled()).then((map:xm.IKeyValueMap) => {
+			this._core.reinstallBulk(this.context.config.getInstalled(), overwrite).then((map:xm.IKeyValueMap) => {
 				res.written = map;
 			}).then(() => {
 				d.resolve(res);
@@ -235,18 +261,6 @@ module tsd {
 		 */
 		//TODO implement compare() command
 		compare(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
-			d.reject(new Error('not implemented yet'));
-
-			return d.promise;
-		}
-
-		/*
-		 run compare and get latest files
-		 */
-		//TODO implement update() command
-		update(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 			d.reject(new Error('not implemented yet'));

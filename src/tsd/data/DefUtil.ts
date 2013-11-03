@@ -35,6 +35,18 @@ module tsd {
 			});
 		}
 
+		static getPaths(list:tsd.Def[]):string[] {
+			return list.map((def:Def) => {
+				return def.path;
+			});
+		}
+
+		static getPathsOf(list:tsd.DefVersion[]):string[] {
+			return list.map((file:DefVersion) => {
+				return file.def.path;
+			});
+		}
+
 		static uniqueDefVersion(list:tsd.DefVersion[]):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
 			outer: for (var i = 0, ii = list.length; i < ii; i++) {
@@ -91,19 +103,25 @@ module tsd {
 			return false;
 		}
 
-		static mergeDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
-			var ret:tsd.DefVersion[] = [];
+		static mergeDependencies(list:tsd.DefVersion[], target?:tsd.DefVersion[]):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = target || [];
 			for (var i = 0, ii = list.length; i < ii; i++) {
 				var file = list[i];
 				if (!DefUtil.contains(ret, file)) {
 					ret.push(file);
+					DefUtil.mergeDependenciesOf(file.dependencies, ret);
 				}
-				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
-					var tmp = file.dependencies[j];
-					//TODO harden mergeDependencies
-					if (!DefUtil.contains(ret, tmp.head)) {
-						ret.push(tmp.head);
-					}
+			}
+			return ret;
+		}
+
+		static mergeDependenciesOf(list:tsd.Def[], target?:tsd.DefVersion[]):tsd.DefVersion[] {
+			var ret:tsd.DefVersion[] = target || [];
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				var file = list[i].head;
+				if (!DefUtil.contains(ret, file)) {
+					ret.push(file);
+					DefUtil.mergeDependenciesOf(file.dependencies, ret);
 				}
 			}
 			return ret;

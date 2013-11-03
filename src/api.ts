@@ -5,6 +5,7 @@
 ///<reference path="bootstrap.ts" />
 
 //TODO decide on export git + xm (no)
+//TODO improve code (nice TS 0.9 single export)
 (module).exports = {
 	tsd: tsd,
 	//xm: xm,

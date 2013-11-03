@@ -16,7 +16,7 @@ module xm {
 	//TODO ditch wrap and hardcode or auto-compile style table lookups (for sanity) <partially implemented>
 	export module styler {
 
-		function clean(str:string):string {
+		export function clean(str:string):string {
 			return '' + str;
 		}
 
@@ -165,9 +165,9 @@ module xm {
 			}
 		}
 
+		//hardcode speedfreaks
 		export class ANSIStyler implements Styler {
 
-			//hardcode speedfreaks
 			ok(str:string):string {
 				return '\033[32m' + clean(str) + '\033[39m';
 			}

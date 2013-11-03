@@ -1,4 +1,5 @@
 ///<reference path="../../tsdHelper.ts" />
+///<reference path="../../tsdHelper.ts" />
 
 module helper {
 	'use strict';
@@ -23,6 +24,6 @@ module helper {
 		assert.instanceOf(commit, tsd.DefCommit, message + ': info');
 
 		helper.propStrictEqual(commit, values, 'commitSha', message);
-		helper.isStringSHA1(values.commitSha, message + ': values.commitSha');
+		helper.assertFormatSHA1(values.commitSha, message + ': values.commitSha');
 	}
 }

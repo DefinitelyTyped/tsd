@@ -1,5 +1,6 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="helper.ts" />
+///<reference path="../../../assert/git/_all.ts" />
 ///<reference path="../../../../src/xm/io/hash.ts" />
 ///<reference path="../../../../src/xm/iterate.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
@@ -54,8 +55,8 @@ describe('git.Github', () => {
 			var blobSha = test.blobSha;
 
 			assert.isString(filePath, 'filePath');
-			helper.isStringSHA1(commitSha, 'commitSha');
-			helper.isStringSHA1(blobSha, 'blobSha');
+			helper.assertFormatSHA1(commitSha, 'commitSha');
+			helper.assertFormatSHA1(blobSha, 'blobSha');
 
 			return raw.getFile(commitSha, filePath).then((rawData:NodeBuffer) => {
 				assert.ok(rawData, 'raw data');
@@ -63,7 +64,7 @@ describe('git.Github', () => {
 				assert.operator(rawData.length, '>', 20, 'raw data');
 
 				var rawSha = git.GitUtil.blobShaHex(rawData, 'utf8');
-				helper.isStringSHA1(rawSha, 'rawSha');
+				helper.assertFormatSHA1(rawSha, 'rawSha');
 
 				return api.getBlob(blobSha).then((apiData) => {
 					assert.ok(apiData, 'api data');
@@ -73,12 +74,13 @@ describe('git.Github', () => {
 					assert.instanceOf(apiBuffer, Buffer, 'api buffer');
 
 					var apiSha = git.GitUtil.blobShaHex(apiBuffer);
-					helper.isStringSHA1(apiSha, 'sha');
+					helper.assertFormatSHA1(apiSha, 'sha');
 
 					assert.strictEqual(rawSha, blobSha, 'rawSha vs blobSha');
 					assert.strictEqual(apiSha, rawSha, 'apiSha vs rawSha');
 
 					//this explodes.. weird!
+
 					//assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
 					//temp hackish

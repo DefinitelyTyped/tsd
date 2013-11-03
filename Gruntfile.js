@@ -5,7 +5,7 @@ module.exports = function (grunt) {
 	if (isVagrant) {
 		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
 	}
-	var cpuCores = require('os').cpus().length;
+	//var cpuCores = require('os').cpus().length;
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 
@@ -14,9 +14,10 @@ module.exports = function (grunt) {
 		'grunt-contrib-copy',
 		'grunt-contrib-clean',
 		'grunt-tslint',
-		'grunt-typescript',
+		'grunt-ts',
 		'grunt-execute',
 		'grunt-todos',
+		'grunt-shell',
 		'grunt-mocha-test'
 	]);
 	// gtx.autoNpmPkg();
@@ -73,25 +74,33 @@ module.exports = function (grunt) {
 			},
 			integrity: ['test/integrity.js']
 		},
-		typescript: {
+		ts: {
 			options: {
 				module: 'commonjs',
 				target: 'es5',
-				base_path: 'src/',
 				declaration: false,
 				sourcemap: true
 			},
 			api: {
 				src: ['src/api.ts'],
-				dest: 'build/api.js'
+				out: 'build/api.js'
 			},
-			/*cli: {
-				src: ['src/cli.ts'],
-				dest: 'build/cli.js'
-			},*/
+			//use this non-checked-in file to test small snippets of code
 			dev: {
 				src: ['src/dev.ts'],
-				dest: 'tmp/dev.js'
+				out: 'tmp/dev.js'
+			}
+		},
+		shell: {
+			demo_help: {
+				command: [
+					'node',
+					'./build/cli.js',
+					'-h'
+				].join(' '),
+				options: {
+					stdout: true
+				}
 			}
 		},
 		execute: {
@@ -104,17 +113,15 @@ module.exports = function (grunt) {
 		}
 	});
 
-	// module tester
+	// module tester macro
 	gtx.define('moduleTest', function (macro, id) {
 		var testPath = 'test/modules/' + id + '/';
 
 		macro.newTask('clean', [testPath + 'tmp/**/*']);
-		macro.newTask('typescript', {
-			options: {
-				base_path: testPath
-			},
+		macro.newTask('ts', {
+			options: {},
 			src: [testPath + 'src/**/*.ts'],
-			dest: testPath + 'tmp/' + id + '.test.js'
+			out: testPath + 'tmp/' + id + '.test.js'
 		});
 		macro.newTask('tslint', {
 			src: [testPath + 'src/**/*.ts']
@@ -128,32 +135,8 @@ module.exports = function (grunt) {
 		macro.tag('module');
 		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source or tslint:helper)
 	}, {
-		concurrent: cpuCores
+		concurrent: 1 //cpuCores
 	});
-
-	// assemble!
-	gtx.alias('prep', [
-		'clean:tmp',
-		'jshint:support',
-		'jshint:fixtures'
-	]);
-	// cli commands
-	gtx.alias('build', [
-		'clean:build',
-		'prep',
-		'typescript:api',
-		'copy:cli',
-		'tslint:source',
-		'mochaTest:integrity'
-	]);
-	gtx.alias('test', [
-		'build',
-		'tslint:helper',
-		'gtx-type:moduleTest'
-	]);
-	gtx.alias('default', [
-		'test'
-	]);
 
 	var longTimer = (isVagrant ? 250000 : 5000);
 
@@ -163,8 +146,35 @@ module.exports = function (grunt) {
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
 
-	gtx.alias('run', ['build', 'shell:cli']);
-	gtx.alias('dev', ['prep', 'typescript:dev', 'execute:dev']);
+	// assemble!
+	gtx.alias('prep', [
+		'clean:tmp',
+		'jshint:support',
+		'jshint:fixtures'
+	]);
+	gtx.alias('build', [
+		'clean:build',
+		'prep',
+		'ts:api',
+		'copy:cli',
+		'tslint:source',
+		'mochaTest:integrity',
+		'shell:demo_help'
+	]);
+	gtx.alias('test', [
+		'build',
+		'tslint:helper',
+		'gtx-type:moduleTest'
+	]);
+	gtx.alias('default', [
+		'test'
+	]);
+	gtx.alias('demo:help', [
+		'shell:demo_help'
+	]);
+
+	//gtx.alias('run', ['build', 'demo:help']);
+	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
 
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');

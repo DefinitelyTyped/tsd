@@ -43,14 +43,19 @@ module xm {
 				}
 			}
 		}
+		static hideProps(object, props:string[]) {
+			props.forEach((property:string) => {
+				Object.defineProperty(object, property, {enumerable: false});
+			});
+		}
 
-		static lockProps(object, props) {
+		static lockProps(object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 			});
 		}
 
-		static freezeProps(object, props) {
+		static freezeProps(object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 				Object.freeze(object[property]);

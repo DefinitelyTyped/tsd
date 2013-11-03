@@ -349,6 +349,22 @@ var xm;
             return d.promise;
         }
         FileUtil.mkdirCheckQ = mkdirCheckQ;
+
+        function canWriteFile(targetPath, overwrite) {
+            return FS.exists(targetPath).then(function (exists) {
+                if (!exists) {
+                    return true;
+                }
+                return FS.isFile(targetPath).then(function (isFile) {
+                    if (isFile) {
+                        return overwrite;
+                    }
+
+                    return false;
+                });
+            });
+        }
+        FileUtil.canWriteFile = canWriteFile;
     })(xm.FileUtil || (xm.FileUtil = {}));
     var FileUtil = xm.FileUtil;
 })(xm || (xm = {}));
@@ -670,6 +686,11 @@ var xm;
                 }
             }
         };
+        ObjectUtil.hideProps = function (object, props) {
+            props.forEach(function (property) {
+                Object.defineProperty(object, property, { enumerable: false });
+            });
+        };
 
         ObjectUtil.lockProps = function (object, props) {
             props.forEach(function (property) {
@@ -843,6 +864,7 @@ var xm;
         function clean(str) {
             return '' + str;
         }
+        styler.clean = clean;
 
         var NoStyler = (function () {
             function NoStyler() {
@@ -1853,8 +1875,6 @@ var tsd;
 (function (tsd) {
     'use strict';
 
-    var nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
-
     var Def = (function () {
         function Def(path) {
             this.history = [];
@@ -1873,14 +1893,31 @@ var tsd;
             return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
         };
 
-        Def.isDefPath = function (path) {
-            nameExp.lastIndex = 0;
-            return nameExp.test(path);
+        Def.getPathExp = function (trim) {
+            var useExp = (trim ? Def.nameExpEnd : Def.nameExp);
+            useExp.lastIndex = 0;
+            return useExp;
         };
 
-        Def.getFrom = function (path) {
-            nameExp.lastIndex = 0;
-            var match = nameExp.exec(path);
+        Def.isDefPath = function (path, trim) {
+            if (typeof trim === "undefined") { trim = false; }
+            return Def.getPathExp(trim).test(path);
+        };
+
+        Def.getFileFrom = function (path) {
+            var useExp = Def.getPathExp(true);
+            var match = useExp.exec(path);
+            if (!match) {
+                return null;
+            }
+            return match[1] + '/' + match[2] + '.d.ts';
+        };
+
+        Def.getFrom = function (path, trim) {
+            if (typeof trim === "undefined") { trim = false; }
+            var useExp = Def.getPathExp(trim);
+
+            var match = useExp.exec(path);
             if (!match) {
                 return null;
             }
@@ -1893,10 +1930,13 @@ var tsd;
             var file = new tsd.Def(path);
             file.project = match[1];
             file.name = match[2];
+
             xm.ObjectUtil.lockProps(file, ['path', 'project', 'name']);
 
             return file;
         };
+        Def.nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
+        Def.nameExpEnd = /([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
         return Def;
     })();
     tsd.Def = Def;
@@ -2115,8 +2155,17 @@ var tsd;
             configurable: true
         });
 
+        Object.defineProperty(DefVersion.prototype, "blobShaShort", {
+            get: function () {
+                return this._blob ? this._blob.shaShort : '<no blob>';
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         DefVersion.prototype.toString = function () {
-            var str = (this._def ? this._def.path : '<no def>');
+            var str = '';
+            str += (this._def ? this._def.path : '<no def>');
             str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
             str += ' : ' + (this._blob ? this._blob.shaShort : '<no blob>');
             return str;
@@ -2245,6 +2294,12 @@ var tsd;
             return this._installed.values();
         };
 
+        Config.prototype.getInstalledPaths = function () {
+            return this._installed.values().map(function (file) {
+                return file.path;
+            });
+        };
+
         Config.prototype.toJSON = function () {
             var json = {
                 typingsPath: this.typingsPath,
@@ -2357,6 +2412,10 @@ var tsd;
 
             this.config = new tsd.Config(schema);
         }
+        Context.prototype.getTypingsDir = function () {
+            return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+        };
+
         Context.prototype.logInfo = function (details) {
             if (typeof details === "undefined") { details = false; }
             this.log(this.packageInfo.getNameVersion());
@@ -2397,6 +2456,10 @@ var xm;
             }
             var e = new RegExpGlue();
             return e.append.apply(e, exp);
+        };
+
+        RegExpGlue.escapeChars = function (str) {
+            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
         };
 
         RegExpGlue.prototype.append = function () {
@@ -2453,7 +2516,6 @@ var xm;
                 }
                 expTrim.lastIndex = 0;
                 var trim = expTrim.exec('' + exp);
-
                 if (!trim) {
                     return exp;
                 }
@@ -2482,8 +2544,8 @@ var tsd;
     var patternSplit = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
     var patternSingle = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
-    function escapeExp(str) {
-        return str.replace('.', '\\.');
+    function escapeRegExpChars(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     }
 
     var NameMatcher = (function () {
@@ -2529,7 +2591,7 @@ var tsd;
                 gotMatch = true;
             }
             if (match[2].length > 0) {
-                glue.append(escapeExp(match[2]));
+                glue.append(escapeRegExpChars(match[2]));
                 gotMatch = true;
             }
             if (match[3].length > 0) {
@@ -2557,7 +2619,7 @@ var tsd;
                 glue.append(wordLazy);
             }
             if (match[2].length > 0) {
-                glue.append(escapeExp(match[2]));
+                glue.append(escapeRegExpChars(match[2]));
                 gotProject = true;
             }
             if (match[3].length > 0) {
@@ -2574,7 +2636,7 @@ var tsd;
                 glue.append(wordLazy);
             }
             if (match[5].length > 0) {
-                glue.append(escapeExp(match[5]));
+                glue.append(escapeRegExpChars(match[5]));
                 gotFile = true;
             }
             if (match[6].length > 0) {
@@ -2633,9 +2695,13 @@ var tsd;
     var Selector = (function () {
         function Selector(pattern) {
             if (typeof pattern === "undefined") { pattern = '*'; }
+            this.timeout = 10000;
+            this.minMatches = 0;
+            this.maxMatches = 0;
+            this.limitApi = 0;
+            this.overwriteFiles = false;
             this.resolveDependencies = false;
-            this.limit = 10;
-            this.timeLimit = 10000;
+            this.saveToConfig = false;
             xm.assertVar(pattern, 'string', 'pattern');
             this.pattern = new tsd.NameMatcher(pattern);
         }
@@ -2846,7 +2912,7 @@ var xm;
 
             var changedDateNum = Date.parse(json.changed);
             if (isNaN(changedDateNum)) {
-                throw new Error('bad date: changed: ' + json.date);
+                throw new Error('bad date: invalid date: ' + json.date);
             }
 
             var call = new xm.CachedJSONValue(json.label, json.key, json.options);
@@ -2941,10 +3007,18 @@ var xm;
                             cached = xm.CachedJSONValue.fromJSON(json);
                         } catch (e) {
                             _this.stats.count('get-read-error');
-                            throw (new Error(e + ' -> ' + src));
+
+                            defer.resolve(null);
                         }
                         _this.stats.count('get-read-success');
                         defer.resolve(cached);
+                    }, function (err) {
+                        if (err.name === 'SyntaxError') {
+                            _this.stats.count('get-read-parse-error', src);
+                            defer.resolve(null);
+                        }
+
+                        throw err;
                     });
                 }
                 _this.stats.count('get-miss');
@@ -3756,6 +3830,18 @@ var tsd;
             });
         };
 
+        DefUtil.getPaths = function (list) {
+            return list.map(function (def) {
+                return def.path;
+            });
+        };
+
+        DefUtil.getPathsOf = function (list) {
+            return list.map(function (file) {
+                return file.def.path;
+            });
+        };
+
         DefUtil.uniqueDefVersion = function (list) {
             var ret = [];
             outer:
@@ -3814,19 +3900,25 @@ var tsd;
             return false;
         };
 
-        DefUtil.mergeDependencies = function (list) {
-            var ret = [];
+        DefUtil.mergeDependencies = function (list, target) {
+            var ret = target || [];
             for (var i = 0, ii = list.length; i < ii; i++) {
                 var file = list[i];
                 if (!DefUtil.contains(ret, file)) {
                     ret.push(file);
+                    DefUtil.mergeDependenciesOf(file.dependencies, ret);
                 }
-                for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
-                    var tmp = file.dependencies[j];
+            }
+            return ret;
+        };
 
-                    if (!DefUtil.contains(ret, tmp.head)) {
-                        ret.push(tmp.head);
-                    }
+        DefUtil.mergeDependenciesOf = function (list, target) {
+            var ret = target || [];
+            for (var i = 0, ii = list.length; i < ii; i++) {
+                var file = list[i].head;
+                if (!DefUtil.contains(ret, file)) {
+                    ret.push(file);
+                    DefUtil.mergeDependenciesOf(file.dependencies, ret);
                 }
             }
             return ret;
@@ -4944,6 +5036,10 @@ var tsd;
 
             xm.ObjectUtil.hidePrefixed(this);
         }
+        Core.prototype.getInstallPath = function (def) {
+            return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
+        };
+
         Core.prototype.updateIndex = function () {
             var _this = this;
             var d = Q.defer();
@@ -5062,12 +5158,13 @@ var tsd;
             return d.promise;
         };
 
-        Core.prototype.installFile = function (file, addToConfig) {
+        Core.prototype.installFile = function (file, addToConfig, overwrite) {
             if (typeof addToConfig === "undefined") { addToConfig = true; }
+            if (typeof overwrite === "undefined") { overwrite = false; }
             var _this = this;
             var d = Q.defer();
 
-            this.useFile(file).then(function (targetPath) {
+            this.useFile(file, overwrite).then(function (targetPath) {
                 if (_this.context.config.hasFile(file.def.path)) {
                     _this.context.config.getFile(file.def.path).update(file);
                 } else if (addToConfig) {
@@ -5079,16 +5176,19 @@ var tsd;
             return d.promise;
         };
 
-        Core.prototype.installFileBulk = function (list, addToConfig) {
+        Core.prototype.installFileBulk = function (list, addToConfig, overwrite) {
             if (typeof addToConfig === "undefined") { addToConfig = true; }
+            if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
             var d = Q.defer();
 
             var written = new xm.KeyValueMap();
 
             Q.all(list.map(function (file) {
-                return _this.installFile(file, addToConfig).then(function (targetPath) {
-                    written.set(file.def.path, file);
+                return _this.installFile(file, addToConfig, overwrite).then(function (targetPath) {
+                    if (targetPath) {
+                        written.set(file.def.path, file);
+                    }
                 });
             })).then(function () {
                 d.resolve(written);
@@ -5150,7 +5250,8 @@ var tsd;
             return d.promise;
         };
 
-        Core.prototype.reinstallBulk = function (list) {
+        Core.prototype.reinstallBulk = function (list, overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = false; }
             var _this = this;
             var d = Q.defer();
 
@@ -5158,7 +5259,7 @@ var tsd;
 
             Q.all(list.map(function (installed) {
                 return _this.procureFile(installed.path, installed.commitSha).then(function (file) {
-                    return _this.installFile(file, true).then(function (targetPath) {
+                    return _this.installFile(file, overwrite).then(function (targetPath) {
                         written.set(file.def.path, file);
                         return file;
                     });
@@ -5191,13 +5292,14 @@ var tsd;
             if (file.hasContent()) {
                 return Q(file);
             }
+
             this.gitRaw.getFile(file.commit.commitSha, file.def.path).then(function (content) {
                 if (file.blob) {
                     if (!file.blob.hasContent()) {
                         try  {
                             file.blob.setContent(content);
                         } catch (err) {
-                            xm.log.debug(err);
+                            xm.log.warn(err);
                             xm.log.debug('path', file.def.path);
                             xm.log.debug('commitSha', file.commit.commitSha);
                             xm.log.debug('treeSha', file.commit.treeSha);
@@ -5282,7 +5384,6 @@ var tsd;
                 parser.parse(file.info, file.blob.content.toString('utf8'));
 
                 if (!file.info.isValid()) {
-                    _this.log.warn('bad parse in: ' + file);
                 }
                 d.resolve(file);
             }).fail(d.reject);
@@ -5306,16 +5407,16 @@ var tsd;
         };
 
         Core.prototype.useFile = function (file, overwrite) {
-            if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
             var d = Q.defer();
 
-            var typingsDir = this.context.config.resolveTypingsPath(path.dirname(this.context.paths.configFile));
-            var targetPath = path.join(typingsDir, file.def.path.replace(/[//\/]/g, path.sep));
+            var targetPath = this.getInstallPath(file.def);
 
-            FS.exists(targetPath).then(function (exists) {
-                if (exists && !overwrite) {
-                    return null;
+            xm.FileUtil.canWriteFile(targetPath, overwrite).then(function (canWrite) {
+                if (!canWrite) {
+                    xm.log.out.warning('skipped existing file: ' + file.def.path).line();
+                    d.resolve(null);
+                    return;
                 }
 
                 return _this.loadContent(file).then(function () {
@@ -5327,10 +5428,10 @@ var tsd;
                     return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
+                }).then(function () {
+                    d.resolve(targetPath);
                 });
-            }).then(function () {
-                d.resolve(targetPath);
-            }, d.reject);
+            }).fail(d.reject);
 
             return d.promise;
         };
@@ -5396,6 +5497,48 @@ var tsd;
         return APIResult;
     })();
     tsd.APIResult = APIResult;
+    var APIMessage = (function () {
+        function APIMessage(message, tag) {
+            this.message = message;
+            this.tag = tag;
+        }
+        APIMessage.prototype.toString = function () {
+            return this.tag + ':' + this.message;
+        };
+        return APIMessage;
+    })();
+    tsd.APIMessage = APIMessage;
+
+    var APIProgress = (function (_super) {
+        __extends(APIProgress, _super);
+        function APIProgress(message, code, total, current) {
+            if (typeof total === "undefined") { total = 0; }
+            if (typeof current === "undefined") { current = 0; }
+            _super.call(this, message, code);
+            this.total = total;
+            this.current = current;
+        }
+        APIProgress.prototype.getRatio = function () {
+            if (this.total > 0) {
+                return Math.min(Math.max(0, this.current), this.total) / this.total;
+            }
+            return 0;
+        };
+
+        APIProgress.prototype.getPerc = function () {
+            return Math.round(this.getRatio() * 100) + '%';
+        };
+
+        APIProgress.prototype.getOf = function () {
+            return this.current + '/' + this.total;
+        };
+
+        APIProgress.prototype.toString = function () {
+            return _super.prototype.toString.call(this) + ':';
+        };
+        return APIProgress;
+    })(APIMessage);
+    tsd.APIProgress = APIProgress;
 
     var API = (function () {
         function API(context) {
@@ -5441,22 +5584,23 @@ var tsd;
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
 
-            selector.resolveDependencies = true;
-
             this._core.select(selector).then(function (res) {
                 var files = res.selection;
 
                 files = tsd.DefUtil.mergeDependencies(files);
 
-                return _this._core.installFileBulk(files).then(function (written) {
+                return _this._core.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then(function (written) {
                     if (!written) {
                         throw new Error('expected install paths');
                     }
                     res.written = written;
 
-                    return _this._core.saveConfig().then(function () {
-                        d.resolve(res);
-                    });
+                    if (selector.saveToConfig) {
+                        return _this._core.saveConfig().then(function () {
+                            d.resolve(res);
+                        });
+                    }
+                    d.resolve(res);
                 });
             }).fail(d.reject);
 
@@ -5464,7 +5608,6 @@ var tsd;
         };
 
         API.prototype.directInstall = function (path, commitSha) {
-            var _this = this;
             xm.assertVar(path, 'string', 'path');
             xm.assertVar(commitSha, 'sha1', 'commitSha');
             var d = Q.defer();
@@ -5472,10 +5615,6 @@ var tsd;
             var res = new tsd.APIResult(this._core.index, null);
 
             this._core.procureFile(path, commitSha).then(function (file) {
-                return _this._core.installFile(file).then(function (targetPath) {
-                    res.written.set(targetPath, file);
-                    d.resolve(res);
-                });
             }).fail(d.reject);
 
             return d.promise;
@@ -5528,25 +5667,12 @@ var tsd;
             return d.promise;
         };
 
-        API.prototype.deps = function (selector) {
-            var _this = this;
-            xm.assertVar(selector, tsd.Selector, 'selector');
-            var d = Q.defer();
-
-            this._core.select(selector).then(function (res) {
-                return _this._core.resolveDepencendiesBulk(res.selection).then(function () {
-                    d.resolve(res);
-                });
-            }).fail(d.reject);
-
-            return d.promise;
-        };
-
-        API.prototype.reinstall = function () {
+        API.prototype.reinstall = function (overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = false; }
             var res = new tsd.APIResult(this._core.index, null);
             var d = Q.defer();
 
-            this._core.reinstallBulk(this.context.config.getInstalled()).then(function (map) {
+            this._core.reinstallBulk(this.context.config.getInstalled(), overwrite).then(function (map) {
                 res.written = map;
             }).then(function () {
                 d.resolve(res);
@@ -5556,14 +5682,6 @@ var tsd;
         };
 
         API.prototype.compare = function (selector) {
-            xm.assertVar(selector, tsd.Selector, 'selector');
-            var d = Q.defer();
-            d.reject(new Error('not implemented yet'));
-
-            return d.promise;
-        };
-
-        API.prototype.update = function (selector) {
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
             d.reject(new Error('not implemented yet'));
@@ -5607,9 +5725,171 @@ var xm;
     'use strict';
 
     var optimist = require('optimist');
+    var jsesc = require('jsesc');
     var Q = require('q');
     var exitProcess = require('exit');
+
     var Table = require('easy-table');
+
+    xm.converStringMap = Object.create(null);
+
+    xm.converStringMap.number = function (input) {
+        var num = parseFloat(input);
+        if (isNaN(num)) {
+            throw new Error('input is NaN and not float');
+        }
+        return num;
+    };
+    xm.converStringMap.int = function (input) {
+        var num = parseInt(input, 10);
+        if (isNaN(num)) {
+            throw new Error('input is NaN and not integer');
+        }
+        return num;
+    };
+    xm.converStringMap.boolean = function (input) {
+        input = ('' + input).toLowerCase();
+        if (input === '' || input === '0') {
+            return false;
+        }
+        switch (input) {
+            case 'false':
+            case 'null':
+            case 'nan':
+            case 'undefined':
+
+            case 'no':
+            case 'off':
+            case 'disabled':
+                return false;
+        }
+        return true;
+    };
+    xm.converStringMap.flag = function (input) {
+        if (xm.isUndefined(input) || input === '') {
+            return true;
+        }
+        return xm.converStringMap.boolean(input);
+    };
+    xm.converStringMap['number[]'] = function (input) {
+        return input.split(/ ?[,] ?/g).map(function (value) {
+            return xm.converStringMap.number(value);
+        });
+    };
+    xm.converStringMap['int[]'] = function (input) {
+        return input.split(/ ?[,] ?/g).map(function (value) {
+            return xm.converStringMap.int(value);
+        });
+    };
+    xm.converStringMap['string[]'] = function (input) {
+        return input.split(/ ?[,] ?/g);
+    };
+    xm.converStringMap.json = function (input) {
+        return JSON.parse(input);
+    };
+
+    function convertStringTo(input, type) {
+        if (xm.hasOwnProp(xm.converStringMap, type)) {
+            return xm.converStringMap[type](input);
+        }
+        return input;
+    }
+    xm.convertStringTo = convertStringTo;
+
+    var ExposeContext = (function () {
+        function ExposeContext(expose, argv, command) {
+            this.expose = expose;
+            this.command = command;
+            this.argv = argv;
+        }
+        ExposeContext.prototype.hasArg = function (name, alt) {
+            return xm.hasOwnProp(this.argv, name);
+        };
+
+        ExposeContext.prototype.getArgRaw = function (name, alt) {
+            if (xm.hasOwnProp(this.argv, name)) {
+                return this.argv[name];
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.getArg = function (name, alt) {
+            if (xm.hasOwnProp(this.argv, name)) {
+                if (this.expose.options.has(name)) {
+                    var option = this.expose.options.get(name);
+                    if (option.type) {
+                        return xm.convertStringTo(this.argv[name], option.type);
+                    }
+                }
+                return this.argv[name];
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.getArgAs = function (name, type, alt) {
+            if (xm.hasOwnProp(this.argv, name)) {
+                return xm.convertStringTo(this.argv[name], type);
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.getArgAt = function (index, alt) {
+            if (index >= 0 && index < this.argv._.length) {
+                return this.argv._[index];
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.getArgAtAs = function (index, type, alt) {
+            if (index >= 0 && index < this.argv._.length) {
+                return xm.convertStringTo(this.argv._[index], type);
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.getArgNames = function () {
+            return Object.keys(this.argv).filter(function (name) {
+                return (name !== '_');
+            });
+        };
+
+        ExposeContext.prototype.getEnum = function (name, alt) {
+            if (xm.hasOwnProp(this.argv, name)) {
+                if (this.expose.options.has(name)) {
+                    var option = this.expose.options.get(name);
+                    var value = this.getArg(name);
+                    if (option.enum.indexOf(value) > -1) {
+                        return value;
+                    }
+                }
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.shiftArg = function (alt) {
+            if (this.argv._.length > 0) {
+                return this.argv._.shift();
+            }
+            return alt;
+        };
+
+        ExposeContext.prototype.shiftArgAs = function (type, alt) {
+            if (this.argv._.length > 0) {
+                return xm.convertStringTo(this.argv._.shift(), type);
+            }
+            return alt;
+        };
+
+        Object.defineProperty(ExposeContext.prototype, "numArgs", {
+            get: function () {
+                return this.argv._.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return ExposeContext;
+    })();
+    xm.ExposeContext = ExposeContext;
 
     function exposeSortIndex(one, two) {
         if (one.index < two.index) {
@@ -5668,11 +5948,35 @@ var xm;
     }
     xm.exposeSortGroup = exposeSortGroup;
 
+    function exposeSortOption(one, two) {
+        if (one.short && !two.short) {
+            return -1;
+        }
+        if (!one.short && two.short) {
+            return 1;
+        }
+        if (one.short && two.short) {
+            if (one.short.toLowerCase() < two.short.toLowerCase()) {
+                return -1;
+            } else if (one.short.toLowerCase() > two.short.toLowerCase()) {
+                return 1;
+            }
+        }
+        if (one.name.toLowerCase() < two.name.toLowerCase()) {
+            return -1;
+        } else if (one.name.toLowerCase() > two.name.toLowerCase()) {
+            return 1;
+        }
+        return 0;
+    }
+    xm.exposeSortOption = exposeSortOption;
+
     var ExposeCommand = (function () {
         function ExposeCommand() {
             this.options = [];
             this.variadic = [];
             this.groups = [];
+            this.note = [];
         }
         return ExposeCommand;
     })();
@@ -5690,6 +5994,9 @@ var xm;
     var ExposeOption = (function () {
         function ExposeOption() {
             this.global = false;
+            this.optional = true;
+            this.enum = [];
+            this.note = [];
         }
         return ExposeOption;
     })();
@@ -5701,19 +6008,19 @@ var xm;
             if (typeof output === "undefined") { output = null; }
             var _this = this;
             this.title = title;
-            this._commands = new xm.KeyValueMap();
-            this._options = new xm.KeyValueMap();
-            this._groups = new xm.KeyValueMap();
+            this.commands = new xm.KeyValueMap();
+            this.options = new xm.KeyValueMap();
+            this.groups = new xm.KeyValueMap();
+            this.mainGroup = new ExposeGroup();
             this._isInit = false;
             this._index = 0;
-            this._mainGroup = new ExposeGroup();
             this.output = (output || new xm.StyledOut());
 
             this.createCommand(function (cmd) {
                 cmd.name = 'help';
                 cmd.label = 'Display usage help';
                 cmd.groups = ['help'];
-                cmd.execute = function (args) {
+                cmd.execute = function (ctx) {
                     _this.printCommands();
                     return null;
                 };
@@ -5728,7 +6035,10 @@ var xm;
                 opt.global = true;
             });
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+                writable: false,
+                enumerable: false
+            });
         }
         Expose.prototype.defineOption = function (build) {
             var opt = new ExposeOption();
@@ -5736,10 +6046,10 @@ var xm;
 
             xm.assertVar(opt.name, 'string', 'opt.name');
 
-            if (this._options.has(opt.name)) {
+            if (this.options.has(opt.name)) {
                 throw new Error('opt.name collision on ' + opt.name);
             }
-            this._options.set(opt.name, opt);
+            this.options.set(opt.name, opt);
         };
 
         Expose.prototype.createCommand = function (build) {
@@ -5749,10 +6059,10 @@ var xm;
 
             xm.assertVar(cmd.name, 'string', 'build.name');
 
-            if (this._commands.has(cmd.name)) {
+            if (this.commands.has(cmd.name)) {
                 throw new Error('cmd.name collision on ' + cmd.name);
             }
-            this._commands.set(cmd.name, cmd);
+            this.commands.set(cmd.name, cmd);
         };
 
         Expose.prototype.defineGroup = function (build) {
@@ -5762,26 +6072,26 @@ var xm;
 
             xm.assertVar(group.name, 'string', 'group.name');
 
-            if (this._groups.has(group.name)) {
+            if (this.groups.has(group.name)) {
                 throw new Error('group.name collision on ' + group.name);
             }
-            this._groups.set(group.name, group);
+            this.groups.set(group.name, group);
         };
 
         Expose.prototype.applyOptions = function (argv) {
             var _this = this;
-            var argv = optimist.parse(argv);
+            argv = optimist.parse(argv);
+            var ctx = new ExposeContext(this, argv, null);
 
             Object.keys(argv).forEach(function (name) {
-                if (name !== '_' && _this._options.has(name)) {
-                    var opt = _this._options.get(name);
+                if (name !== '_' && _this.options.has(name)) {
+                    var opt = _this.options.get(name);
                     if (opt.apply) {
-                        opt.apply(argv[name], argv);
+                        opt.apply(ctx.getArg(name), argv);
                     }
                 }
             });
-
-            return argv;
+            return ctx;
         };
 
         Expose.prototype.init = function () {
@@ -5791,15 +6101,10 @@ var xm;
             }
             this._isInit = true;
 
-            xm.eachProp(this._options.keys(), function (name) {
-                var option = _this._options.get(name);
+            xm.eachProp(this.options.keys(), function (name) {
+                var option = _this.options.get(name);
                 if (option.short) {
                     optimist.alias(option.name, option.short);
-                }
-                if (option.type === 'flag') {
-                    optimist.boolean(option.name);
-                } else if (option.type === 'string') {
-                    optimist.string(option.name);
                 }
                 if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
                     optimist.default(option.name, option.default);
@@ -5809,7 +6114,7 @@ var xm;
 
         Expose.prototype.exit = function (code) {
             if (code !== 0) {
-                this.output.line().fail('error');
+                this.output.line().error('Closing with exit code ' + code).clear();
             } else {
                 this.output.line().ok('bye!');
             }
@@ -5819,7 +6124,7 @@ var xm;
         Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
             if (typeof exitAfter === "undefined") { exitAfter = true; }
             var _this = this;
-            this.executeRaw(argvRaw, alt).then(function (result) {
+            Q(this.executeRaw(argvRaw, alt).then(function (result) {
                 if (result.error) {
                     throw (result.error);
                 }
@@ -5827,85 +6132,92 @@ var xm;
                     _this.exit(result.code);
                 }
             }).fail(function (err) {
-                _this.output.error(err.toString()).clear();
+                if (err.stack) {
+                    _this.output.span(err.stack).clear();
+                } else {
+                    _this.output.error(err.toString()).clear();
+                }
                 _this.exit(1);
-            });
+            }));
         };
 
         Expose.prototype.executeRaw = function (argvRaw, alt) {
             this.init();
 
-            if (!alt || !this._commands.has(alt)) {
+            if (!alt || !this.commands.has(alt)) {
                 alt = 'help';
             }
 
-            var options = this._options.values();
+            var options = this.options.values();
             var opt;
             var i, ii;
 
-            var argv = this.applyOptions(argvRaw);
-            if (!argv) {
-                return this.executeCommand(alt, argv);
+            var ctx = this.applyOptions(argvRaw);
+            if (!ctx) {
+                return this.executeCommand(alt);
             }
 
             for (i = 0, ii = options.length; i < ii; i++) {
                 opt = options[i];
-                if (opt.command && argv[opt.name]) {
-                    return this.executeCommand(opt.command, argv);
+                if (opt.command && ctx.hasArg(opt.name)) {
+                    return this.executeCommand(opt.command, ctx);
                 }
             }
 
-            var cmd = argv._.shift();
+            var cmd = ctx.shiftArg();
 
-            cmd = argv._.shift();
+            cmd = ctx.shiftArg();
 
-            cmd = argv._.shift();
+            if (ctx.numArgs === 0) {
+                return this.executeCommand(alt, ctx);
+            }
 
-            if (typeof cmd === 'undefined') {
-                return this.executeCommand(alt, argv);
-            } else if (this._commands.has(cmd)) {
-                return this.executeCommand(cmd, argv);
+            cmd = ctx.shiftArg();
+            if (this.commands.has(cmd)) {
+                return this.executeCommand(cmd, ctx);
             } else {
                 this.output.line().warning('command not found: ' + cmd).clear();
-                return this.executeCommand('help', argv);
+                return this.executeCommand('help', ctx);
             }
         };
 
-        Expose.prototype.executeCommand = function (name, args) {
-            if (typeof args === "undefined") { args = null; }
+        Expose.prototype.executeCommand = function (name, ctx) {
+            if (typeof ctx === "undefined") { ctx = null; }
             var _this = this;
             this.init();
 
-            if (!this._commands.has(name)) {
+            if (!this.commands.has(name)) {
                 return Q({
                     code: 1,
-                    err: new Error('unknown command ' + name)
+                    error: new Error('unknown command ' + name)
                 });
             }
-            var cmd = this._commands.get(name);
+            var cmd = this.commands.get(name);
 
             var defer = Q.defer();
 
             Q.resolve().then(function () {
                 if (_this.before) {
-                    return Q(_this.before(cmd, args));
+                    return Q(_this.before(cmd, ctx));
                 }
                 return null;
             }).then(function () {
-                return Q(cmd.execute(args));
+                return Q(cmd.execute(ctx));
             }).then(function () {
                 if (_this.after) {
-                    return Q(_this.after(cmd, args));
+                    return Q(_this.after(cmd, ctx));
                 }
                 return null;
             }).then(function () {
                 return {
-                    code: 0
+                    code: 0,
+                    ctx: ctx
                 };
             }, function (err) {
                 return {
                     code: (err.code && err.code > 0) ? err.code : 1,
-                    err: err
+                    error: err,
+                    ctx: ctx
                 };
             }).done(function (ret) {
                 defer.resolve(ret);
@@ -5922,7 +6234,7 @@ var xm;
 
             var optionString = function (option) {
                 var placeholder = option.placeholder ? ' <' + option.placeholder + '>' : '';
-                return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
+                return '--' + option.name + placeholder;
             };
 
             var commands = new Table();
@@ -5931,19 +6243,61 @@ var xm;
             var globalOptNames = [];
             var commandPadding = '   ';
             var optPadding = '      ';
+            var optPaddingHalf = ' : ';
 
-            var optKeys = this._options.keys().sort();
+            var sortOptionName = function (one, two) {
+                return exposeSortOption(_this.options.get(one), _this.options.get(two));
+            };
+
+            var optKeys = this.options.keys().sort(sortOptionName);
+
+            var addHeader = function (label) {
+                commands.cell('one', label);
+                commands.newRow();
+                addDivider();
+            };
+
+            var addDivider = function () {
+                commands.cell('one', '--------');
+                commands.cell('short', '----');
+                commands.cell('two', '--------');
+                commands.newRow();
+            };
 
             var addOption = function (name) {
-                var option = _this._options.get(name, null);
+                var option = _this.options.get(name, null);
                 if (!option) {
                     commands.cell('one', optPadding + '--' + name);
-                    commands.cell('two', '<undefined>');
+                    commands.cell('two', optPaddingHalf + '<undefined>');
                 } else {
                     commands.cell('one', optPadding + optionString(option));
-                    commands.cell('two', option.description + ' (' + option.type + ')');
+                    if (option.short) {
+                        commands.cell('short', ' -' + option.short);
+                    }
+                    var desc = optPaddingHalf + option.description;
+                    desc += ' (' + option.type;
+                    desc += (option.default ? ', default: ' + option.default : '');
+                    desc += ')';
+                    commands.cell('two', desc);
+
+                    if (option.enum.length > 0) {
+                        commands.cell('two', '   ' + option.enum.map(function (value) {
+                            if (xm.isNumber(value)) {
+                                return value;
+                            }
+                            var str = ('' + value);
+                            if (/^[\w_-]*$/.test(str)) {
+                                return str;
+                            }
+                            return '\'' + jsesc(('' + value), {
+                                quotes: 'single'
+                            }) + '\'';
+                        }).join(','));
+                    }
                 }
                 commands.newRow();
+
+                addNote(option.note);
             };
 
             var addCommand = function (cmd, group) {
@@ -5955,37 +6309,46 @@ var xm;
                 commands.cell('two', cmd.label);
                 commands.newRow();
 
-                xm.eachProp(cmd.options, function (name) {
-                    var option = _this._options.get(name);
+                addNote(cmd.note);
+
+                cmd.options.sort(sortOptionName).forEach(function (name) {
+                    var option = _this.options.get(name);
                     if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
                         addOption(name);
                     }
                 });
             };
 
-            var allCommands = this._commands.keys();
-            var allGroups = this._groups.values();
+            var addNote = function (note) {
+                if (note && note.length > 0) {
+                    commands.cell('one', '');
+                    commands.cell('two', '   <' + (xm.isArray(note) ? note.join('>/n<') : note) + '>');
+                    commands.newRow();
+                }
+            };
 
-            xm.eachElem(optKeys, function (name) {
-                var option = _this._options.get(name);
+            var allCommands = this.commands.keys();
+            var allGroups = this.groups.values();
+
+            optKeys.forEach(function (name) {
+                var option = _this.options.get(name);
                 if (option.command) {
                     commandOptNames.push(option.name);
                 }
             });
 
-            xm.eachElem(optKeys, function (name) {
-                var option = _this._options.get(name);
+            optKeys.forEach(function (name) {
+                var option = _this.options.get(name);
                 if (option.global && !option.command) {
                     globalOptNames.push(option.name);
                 }
             });
 
             if (allGroups.length > 0) {
-                xm.eachProp(this._groups.values().sort(exposeSortGroup), function (group) {
-                    commands.cell('one', group.label + '\n--------');
-                    commands.newRow();
+                this.groups.values().sort(exposeSortGroup).forEach(function (group) {
+                    addHeader(group.label);
 
-                    _this._commands.values().filter(function (cmd) {
+                    _this.commands.values().filter(function (cmd) {
                         return cmd.groups.indexOf(group.name) > -1;
                     }).sort(group.sorter).forEach(function (cmd) {
                         addCommand(cmd, group);
@@ -5997,10 +6360,9 @@ var xm;
                     });
 
                     if (group.options.length > 0) {
-                        commands.cell('one', '--------');
-                        commands.newRow();
-                        xm.eachProp(group.options, function (name) {
-                            var option = _this._options.get(name);
+                        addDivider();
+                        group.options.sort(sortOptionName).forEach(function (name) {
+                            var option = _this.options.get(name);
                             if (commandOptNames.indexOf(name) < 0) {
                                 addOption(name);
                             }
@@ -6011,17 +6373,17 @@ var xm;
             }
 
             if (allCommands.length > 0) {
-                commands.cell('one', 'Other commands\n--------');
-                commands.newRow();
+                addHeader('Other commands');
+
                 allCommands.forEach(function (name) {
-                    addCommand(_this._commands.get(name), _this._mainGroup);
+                    addCommand(_this.commands.get(name), _this.mainGroup);
                 });
                 commands.newRow();
             }
 
             if (commandOptNames.length > 0 && globalOptNames.length > 0) {
-                commands.cell('one', 'Global options\n--------');
-                commands.newRow();
+                addHeader('Global options');
+
                 if (commandOptNames.length > 0) {
                     xm.eachElem(commandOptNames, function (name) {
                         addOption(name);
@@ -6072,28 +6434,32 @@ var tsd;
 
     var output = new xm.StyledOut();
 
-    function useColor(color, argv) {
-        switch (color) {
-            case 'no':
-            case 'off':
-            case 'none':
-                output.useStyler(new xm.styler.NoStyler());
-                break;
-            case 'ansi':
-                output.useStyler(new xm.styler.ANSIStyler());
-                break;
-            case 'html':
-                output.useStyler(new xm.styler.HTMLWrapStyler());
-                break;
-            case 'css':
-                output.useStyler(new xm.styler.CSSStyler());
-                break;
-            case 'dev':
-                output.useStyler(new xm.styler.DevStyler());
-                break;
-            default:
-                output.useStyler(new xm.styler.NoStyler());
-                break;
+    var styleMap = new xm.KeyValueMap();
+
+    styleMap.set('no', function (ctx) {
+        output.useStyler(new xm.styler.NoStyler());
+    });
+    styleMap.set('plain', function (ctx) {
+        output.useStyler(new xm.styler.PlainStyler());
+    });
+    styleMap.set('ansi', function (ctx) {
+        output.useStyler(new xm.styler.ANSIStyler());
+    });
+    styleMap.set('html', function (ctx) {
+        output.useStyler(new xm.styler.HTMLWrapStyler());
+    });
+    styleMap.set('css', function (ctx) {
+        output.useStyler(new xm.styler.CSSStyler());
+    });
+    styleMap.set('dev', function (ctx) {
+        output.useStyler(new xm.styler.DevStyler());
+    });
+
+    function useColor(color, ctx) {
+        if (styleMap.has(color)) {
+            styleMap.get(color)(ctx);
+        } else {
+            styleMap.get('no')(ctx);
         }
     }
 
@@ -6125,19 +6491,128 @@ var tsd;
         }
     }
 
-    function getContext(args) {
-        xm.assertVar(args, 'object', 'args');
+    function getContext(ctx) {
+        xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-        var context = new tsd.Context(args.config, args.verbose);
+        var context = new tsd.Context(ctx.getArg('config'), ctx.getArg('verbose'));
 
-        if (xm.isString(args.dev)) {
+        if (ctx.getArg('dev')) {
             context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
-        } else if (xm.isString(args.cacheDir)) {
-            context.paths.cacheDir = path.resolve(args.cacheDir);
+        } else if (ctx.hasArg('cacheDir')) {
+            context.paths.cacheDir = path.resolve(ctx.getArg('cacheDir'));
         } else {
             context.paths.cacheDir = tsd.Paths.getUserCacheDir();
         }
         return context;
+    }
+
+    function reportError(err) {
+        output.error('-> ' + 'an error occured!').clear();
+
+        if (err.stack) {
+            output.block(err.stack);
+        } else {
+            output.line(err);
+        }
+    }
+
+    function reportProgress(obj) {
+        output.accent('progress').space().inspect(obj, 3);
+    }
+
+    function reportSucces(result) {
+        if (result) {
+            result.selection.forEach(function (def) {
+                output.line(def.toString());
+                if (def.info) {
+                    output.line(def.info.toString());
+                    output.line(def.info);
+                }
+            });
+        }
+    }
+
+    function printSubHead(text) {
+        output.line(' ' + text);
+        output.ruler2();
+    }
+
+    function printDefHead(def) {
+        output.line(def.toString() + ' ' + pleo(def.head.blob.shaShort));
+        output.ruler2();
+    }
+
+    function printFileHead(file) {
+        printFile(file);
+        output.ruler2();
+    }
+
+    function printFile(file) {
+        var str = '';
+        str += (file.def ? file.def.path : '<no def>');
+        str += '  :  ' + (file.commit ? file.commit.commitShort : '<no commit>');
+        str += '  :  ' + (file.blob ? file.blob.shaShort : '<no blob>');
+        output.line(str);
+    }
+
+    function printFileCommit(file, skipNull) {
+        if (typeof skipNull === "undefined") { skipNull = false; }
+        if (file.commit) {
+            var line = '   ' + file.commit.commitShort;
+
+            line += '  |  ' + file.blobShaShort;
+
+            line += '  |  ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
+            line += '  |  ' + file.commit.gitAuthor.name;
+            if (file.commit.hubAuthor) {
+                line += '  @  ' + file.commit.hubAuthor.login;
+            }
+            output.line(line);
+
+            output.line();
+            output.line('   ' + file.commit.message.subject);
+            output.ruler2();
+        } else if (!skipNull) {
+            output.line('   ' + '<no commmit>');
+            output.ruler2();
+        }
+    }
+
+    function printFileInfo(file, skipNull) {
+        if (typeof skipNull === "undefined") { skipNull = false; }
+        if (file.info) {
+            if (file.info.isValid()) {
+                output.line('   ' + file.info.toString());
+                output.line('      ' + file.info.projectUrl);
+                file.info.authors.forEach(function (author) {
+                    output.line('      ' + author.toString());
+                });
+                output.ruler2();
+            } else {
+                output.line('   ' + '<invalid info>');
+                output.ruler2();
+            }
+        } else if (!skipNull) {
+            output.line('   ' + '<no info>');
+            output.ruler2();
+        }
+    }
+
+    function printDependencies(file) {
+        if (file.dependencies.length > 0) {
+            tsd.DefUtil.mergeDependenciesOf(file.dependencies).filter(function (refer) {
+                return refer.def.path !== file.def.path;
+            }).sort(tsd.DefUtil.fileCompare).forEach(function (refer) {
+                output.line(' - ' + refer.toString());
+
+                if (refer.dependencies.length > 0) {
+                    refer.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (refer) {
+                        output.line('    - ' + refer.path);
+                    });
+                }
+            });
+            output.ruler2();
+        }
     }
 
     var defaultJobOptions = ['config'];
@@ -6153,18 +6628,18 @@ var tsd;
         return Job;
     })();
 
-    function init(args) {
+    function init(ctx) {
         return loadPleonasm();
     }
 
-    function getAPIJob(args) {
+    function getAPIJob(ctx) {
         var d = Q.defer();
 
-        init(args).then(function () {
-            if (args.config) {
-                return FS.isFile(args.config).then(function (isFile) {
+        init(ctx).then(function () {
+            if (ctx.hasArg('config')) {
+                return FS.isFile(ctx.getArg('config')).then(function (isFile) {
                     if (!isFile) {
-                        throw new Error('specified config is not a file: ' + args.config);
+                        throw new Error('specified --config is not a file: ' + ctx.getArg('config'));
                     }
                     return null;
                 });
@@ -6172,12 +6647,12 @@ var tsd;
             return null;
         }).then(function () {
             var job = new Job();
-            job.context = getContext(args);
+            job.context = getContext(ctx);
             job.api = new tsd.API(job.context);
 
-            var required = (xm.isValid(args.config));
+            var required = ctx.hasArg('config');
 
-            return job.api.readConfig(required).then(function () {
+            return job.api.readConfig(!required).then(function () {
                 d.resolve(job);
             });
         }).fail(d.reject);
@@ -6185,31 +6660,48 @@ var tsd;
         return d.promise;
     }
 
-    function getSelectorJob(args) {
-        return getAPIJob(args).then(function (job) {
-            if (args._.length !== 1) {
+    function getSelectorJob(ctx) {
+        return getAPIJob(ctx).then(function (job) {
+            if (ctx.numArgs !== 1) {
                 throw new Error('pass one selector pattern');
             }
 
-            job.selector = new tsd.Selector(args._[0]);
+            job.selector = new tsd.Selector(ctx.getArgAt(0));
+            job.selector.blobSha = ctx.getArg('blob');
+            job.selector.commitSha = ctx.getArg('commit');
+
+            job.selector.timeout = ctx.getArg('timeout');
+            job.selector.limitApi = ctx.getArg('limit');
+            job.selector.minMatches = ctx.getArg('min');
+            job.selector.maxMatches = ctx.getArg('max');
+
+            job.selector.saveToConfig = ctx.getArg('save');
+            job.selector.overwriteFiles = ctx.getArg('overwrite');
+            job.selector.resolveDependencies = ctx.getArg('resolve');
+
             return job;
         });
     }
 
-    function runARGV(argvRaw) {
+    function getExpose() {
         var expose = new xm.Expose('', output);
 
-        expose.before = function (cmd, args) {
+        expose.before = function (cmd, ctx) {
             return printPreviewNotice();
         };
 
         expose.defineGroup(function (group) {
             group.name = 'command';
             group.label = 'Main commands';
-            group.options = ['config'];
+            group.options = ['config', 'commit', 'cacheDir', 'min', 'max', 'limit'];
             group.sorter = function (one, two) {
                 var sort;
+
                 sort = xm.exposeSortHasElem(one.groups, two.groups, 'primary');
+                if (sort !== 0) {
+                    return sort;
+                }
+                sort = xm.exposeSortHasElem(one.groups, two.groups, 'local');
                 if (sort !== 0) {
                     return sort;
                 }
@@ -6236,27 +6728,23 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'config';
-            opt.description = 'Path to config file';
-            opt.short = 'c';
-            opt.type = 'string';
-            opt.placeholder = 'path';
-        });
-
-        expose.defineOption(function (opt) {
-            opt.name = 'cacheDir';
-            opt.description = 'Path to cache directory';
-            opt.type = 'string';
-            opt.placeholder = 'path';
-            opt.global = true;
-        });
-
-        expose.defineOption(function (opt) {
             opt.name = 'verbose';
             opt.description = 'Verbose output';
             opt.type = 'flag';
             opt.default = false;
             opt.global = true;
+        });
+
+        expose.defineOption(function (opt) {
+            opt.name = 'color';
+            opt.description = 'Specify CLI color mode';
+            opt.type = 'string';
+            opt.placeholder = 'name';
+            opt.global = true;
+            opt.enum = styleMap.keys();
+            opt.apply = function (value, argv) {
+                useColor(value, argv);
+            };
         });
 
         expose.defineOption(function (opt) {
@@ -6267,116 +6755,120 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'dummy';
-            opt.description = 'Dummy mode';
-            opt.type = 'flag';
+            opt.name = 'config';
+            opt.description = 'Path to config file';
+            opt.type = 'string';
+            opt.placeholder = 'path';
             opt.global = false;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'color';
-            opt.description = 'Specify CLI color mode';
+            opt.name = 'cacheDir';
+            opt.description = 'Path to cache directory';
             opt.type = 'string';
-            opt.global = true;
-            opt.apply = function (value, argv) {
-                useColor(value, argv);
-            };
+            opt.placeholder = 'path';
+            opt.global = false;
         });
 
-        function reportError(err) {
-            output.error('-> ' + 'an error occured!').clear();
+        expose.defineOption(function (opt) {
+            opt.name = 'save';
+            opt.short = 's';
+            opt.description = 'Save to config file';
+            opt.type = 'flag';
+            opt.default = false;
+        });
 
-            if (err.stack) {
-                output.block(err.stack);
-            } else {
-                output.line(err);
-            }
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'overwrite';
+            opt.short = 'o';
+            opt.description = 'Overwrite existing definitions';
+            opt.type = 'flag';
+            opt.default = false;
+        });
 
-        function reportSucces(result) {
-            if (result) {
-                result.selection.forEach(function (def) {
-                    output.line(def.toString());
-                    if (def.info) {
-                        output.line(def.info.toString());
-                        output.line(def.info);
-                    }
-                });
-            }
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'limit';
+            opt.short = 'l';
+            opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
+            opt.type = 'int';
+            opt.default = 3;
+            opt.placeholder = 'num';
+            opt.note = ['not implemented'];
+        });
 
-        function printSubHead(text) {
-            output.line(' ' + text);
-            output.ruler2();
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'max';
+            opt.description = 'Enforce a maximum amount of results, 0 = unlimited';
+            opt.type = 'int';
+            opt.default = 0;
+            opt.placeholder = 'num';
+            opt.note = ['not implemented'];
+        });
 
-        function printDefHead(def) {
-            output.line(def.toString() + ' ' + pleo(def.head.blob.shaShort));
-            output.ruler2();
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'min';
+            opt.description = 'Enforce a minimum amount of results';
+            opt.type = 'int';
+            opt.default = 0;
+            opt.placeholder = 'num';
+            opt.note = ['not implemented'];
+        });
 
-        function printFileHead(file) {
-            output.line(file.toString()) + ' ' + pleo(file.blob.shaShort);
-            output.ruler2();
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'timeout';
+            opt.description = 'Set operation timeout in milliseconds, 0 = unlimited';
+            opt.type = 'int';
+            opt.default = 0;
+            opt.global = true;
+            opt.placeholder = 'ms';
+            opt.note = ['not implemented'];
+        });
 
-        function printFileCommit(file, skipNull) {
-            if (typeof skipNull === "undefined") { skipNull = false; }
-            if (file.commit) {
-                var line = '   ' + file.commit.commitShort;
+        expose.defineOption(function (opt) {
+            opt.name = 'blob';
+            opt.short = 'b';
+            opt.description = 'Blob hash';
+            opt.type = 'string';
+            opt.placeholder = 'sha1';
+            opt.global = false;
+        });
 
-                line += '  |  ' + xm.DateUtil.toNiceUTC(file.commit.gitAuthor.date);
-                line += '  |  ' + file.commit.gitAuthor.name;
-                if (file.commit.hubAuthor) {
-                    line += ' @' + file.commit.hubAuthor.login;
-                }
-                output.line(line);
+        expose.defineOption(function (opt) {
+            opt.name = 'commit';
+            opt.short = 'c';
+            opt.description = 'Commit hash';
+            opt.type = 'string';
+            opt.placeholder = 'sha1';
+            opt.global = false;
+            opt.note = ['partially implemented'];
+        });
 
-                output.line('   ' + file.commit.message.subject);
-                output.ruler2();
-            } else if (!skipNull) {
-                output.line('   ' + '<no commmit>');
-                output.ruler2();
-            }
-        }
-
-        function printFileInfo(file, skipNull) {
-            if (typeof skipNull === "undefined") { skipNull = false; }
-            if (file.info) {
-                if (file.info.isValid()) {
-                    output.line('   ' + file.info.toString());
-                    output.line('      ' + file.info.projectUrl);
-                    file.info.authors.forEach(function (author) {
-                        output.line('      ' + author.toString());
-                    });
-                    output.ruler2();
-                } else {
-                    output.line('   ' + '<invalid info>');
-                    output.ruler2();
-                }
-            } else if (!skipNull) {
-                output.line('   ' + '<no info>');
-                output.ruler2();
-            }
-        }
+        expose.defineOption(function (opt) {
+            opt.name = 'resolve';
+            opt.short = 'r';
+            opt.description = 'Include reference dependencies';
+            opt.type = 'flag';
+            opt.global = false;
+            opt.default = false;
+        });
 
         expose.createCommand(function (cmd) {
             cmd.name = 'version';
             cmd.label = 'Display version';
             cmd.groups = ['help'];
-            cmd.execute = function (args) {
+            cmd.execute = (function (ctx) {
                 output.line(xm.PackageJSON.getLocal().version);
                 return null;
-            };
+            });
         });
 
         expose.createCommand(function (cmd) {
             cmd.name = 'settings';
             cmd.label = 'Display config settings';
-            cmd.options = ['config'];
+            cmd.options = ['config', 'cacheDir'];
             cmd.groups = ['support'];
-            cmd.execute = function (args) {
-                return getAPIJob(args).then(function (job) {
+            cmd.execute = function (ctx) {
+                return getAPIJob(ctx).then(function (job) {
                     job.api.context.logInfo(true);
                     return null;
                 });
@@ -6386,17 +6878,16 @@ var tsd;
         expose.createCommand(function (cmd) {
             cmd.name = 'search';
             cmd.label = 'Search definitions';
-            cmd.options = ['config'];
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'query'];
-            cmd.execute = function (args) {
-                return getSelectorJob(args).then(function (job) {
+            cmd.execute = function (ctx) {
+                return getSelectorJob(ctx).then(function (job) {
                     return job.api.search(job.selector).then(function (result) {
                         reportSucces(null);
 
                         result.selection.forEach(function (file) {
-                            printFileHead(file);
-                            printFileInfo(file);
+                            printFile(file);
+                            output.line();
                         });
                     });
                 }, reportError);
@@ -6406,44 +6897,17 @@ var tsd;
         expose.createCommand(function (cmd) {
             cmd.name = 'install';
             cmd.label = 'Install definitions';
-            cmd.options = jobOptions(['save']);
+            cmd.options = ['overwrite', 'save', 'resolve'];
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'write'];
-            cmd.execute = function (args) {
-                return getSelectorJob(args).then(function (job) {
+            cmd.execute = function (ctx) {
+                return getSelectorJob(ctx).then(function (job) {
                     return job.api.install(job.selector).then(function (result) {
                         reportSucces(null);
 
-                        output.line();
                         result.written.keys().sort().forEach(function (path) {
                             var file = result.written.get(path);
                             output.line(file.toString());
-
-                            output.line();
-                        });
-                    });
-                }, reportError);
-            };
-        });
-
-        expose.createCommand(function (cmd) {
-            cmd.name = 'reinstall';
-            cmd.label = 'Re-install definitions from config';
-            cmd.options = jobOptions();
-            cmd.variadic = ['selector'];
-            cmd.groups = ['command', 'primary', 'write'];
-            cmd.execute = function (args) {
-                return getAPIJob(args).then(function (job) {
-                    return job.api.reinstall().then(function (result) {
-                        reportSucces(null);
-
-                        output.line();
-
-                        result.written.keys().sort().forEach(function (path) {
-                            var file = result.written.get(path);
-                            output.line(file.toString());
-
-                            output.line();
                         });
                     });
                 }, reportError);
@@ -6453,11 +6917,11 @@ var tsd;
         expose.createCommand(function (cmd) {
             cmd.name = 'info';
             cmd.label = 'Display definition info';
-            cmd.options = jobOptions();
             cmd.variadic = ['selector'];
+            cmd.options = ['resolve'];
             cmd.groups = ['command', 'primary', 'query'];
-            cmd.execute = function (args) {
-                return getSelectorJob(args).then(function (job) {
+            cmd.execute = function (ctx) {
+                return getSelectorJob(ctx).then(function (job) {
                     return job.api.info(job.selector).then(function (result) {
                         reportSucces(null);
 
@@ -6465,20 +6929,20 @@ var tsd;
                             printFileHead(file);
                             printFileInfo(file);
                             printFileCommit(file);
+                            printDependencies(file);
                         });
                     });
-                }, reportError);
+                }, reportError, reportProgress);
             };
         });
 
         expose.createCommand(function (cmd) {
             cmd.name = 'history';
             cmd.label = 'Display definition history';
-            cmd.options = jobOptions();
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'query'];
-            cmd.execute = function (args) {
-                return getSelectorJob(args).then(function (job) {
+            cmd.execute = function (ctx) {
+                return getSelectorJob(ctx).then(function (job) {
                     return job.api.history(job.selector).then(function (result) {
                         reportSucces(null);
 
@@ -6494,52 +6958,51 @@ var tsd;
                             });
                         });
                     });
-                }, reportError);
+                }, reportError, reportProgress);
             };
         });
 
         expose.createCommand(function (cmd) {
-            cmd.name = 'deps';
-            cmd.label = 'List dependencies';
-            cmd.options = jobOptions();
-            cmd.variadic = ['selector'];
-            cmd.groups = ['command', 'info', 'query'];
-            cmd.execute = function (args) {
-                return getSelectorJob(args).then(function (job) {
-                    return job.api.deps(job.selector).then(function (result) {
+            cmd.name = 'reinstall';
+            cmd.label = 'Re-install definitions from config';
+            cmd.options = ['overwrite'];
+            cmd.groups = ['command', 'local', 'write'];
+            cmd.execute = function (ctx) {
+                return getAPIJob(ctx).then(function (job) {
+                    return job.api.reinstall(ctx.getArg('option')).then(function (result) {
                         reportSucces(null);
 
-                        result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (def) {
-                            printFileHead(def);
-                            printFileInfo(def);
+                        output.line();
 
-                            if (def.dependencies.length > 0) {
-                                def.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                    output.line(' - ' + def.toString());
-                                    if (def.head.dependencies.length > 0) {
-                                        def.head.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (def) {
-                                            output.line('    - ' + def.toString());
-                                        });
-                                    }
-                                });
-                                output.ruler2();
-                            }
+                        result.written.keys().sort().forEach(function (path) {
+                            var file = result.written.get(path);
+                            output.line(file.toString());
+
+                            output.line();
                         });
                     });
-                }, reportError);
+                }, reportError, reportProgress);
             };
         });
 
-        expose.executeArgv(argvRaw, 'help');
+        return expose;
+    }
+    tsd.getExpose = getExpose;
+
+    function runARGV(argvRaw) {
+        getExpose().executeArgv(argvRaw, 'help');
     }
     tsd.runARGV = runARGV;
 })(tsd || (tsd = {}));
-var Q = require('q');
-Q.longStackSupport = true;
+var tsd;
+(function (tsd) {
+    var Q = require('q');
+    Q.longStackSupport = true;
 
-require('source-map-support').install();
+    require('source-map-support').install();
 
-process.setMaxListeners(20);
+    process.setMaxListeners(20);
+})(tsd || (tsd = {}));
 (module).exports = {
     tsd: tsd,
     runARGV: tsd.runARGV,
