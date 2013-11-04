@@ -1,2 +1,2 @@
-*.ts		text eol=lf
-*.txt		text eol=lf
+*.ts	-text
+*.txt	-text
