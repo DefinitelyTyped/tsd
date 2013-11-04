@@ -85,6 +85,10 @@ module.exports = function (grunt) {
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},
+			blobSha: {
+				src: ['src/util/blobSha.ts'],
+				out: 'util/blobSha.js'
+			},
 			//use this non-checked-in file to test small snippets of code
 			dev: {
 				src: ['src/dev.ts'],
@@ -183,6 +187,7 @@ module.exports = function (grunt) {
 	gtx.alias('edit_04', 'gtx:core');
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
+	gtx.alias('edit_07', 'ts:blobSha');
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();

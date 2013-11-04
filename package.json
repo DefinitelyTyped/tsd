@@ -57,9 +57,6 @@
     "xregexp": "~2.0.0",
     "jsesc": "~0.4.3"
   },
-  "peerDependencies": {
-    "grunt": "~0.4.1"
-  },
   "devDependencies": {
     "grunt": "git://github.com/gruntjs/grunt/#0a4e6e38867cde1c396eb99820436027dccf8023",
     "grunt-cli": "0.1.9",
@@ -84,6 +81,7 @@
     "buffer-equal": "0.0.0",
     "memory-streams": "0.0.3",
     "grunt-ts": "~1.4.0",
-    "grunt-shell": "~0.5.0"
+    "grunt-shell": "~0.5.0",
+    "ansidiff": "~1.0.0"
   }
 }

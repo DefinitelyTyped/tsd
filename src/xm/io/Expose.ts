@@ -31,6 +31,8 @@ module xm {
 
 	export var converStringMap:any = Object.create(null);
 
+	var splitSV = /[\t ]*[,][\t ]*/g;
+
 	converStringMap.number = function (input:string) {
 		var num = parseFloat(input);
 		if (isNaN(num)) {
@@ -71,17 +73,17 @@ module xm {
 		return converStringMap.boolean(input);
 	};
 	converStringMap['number[]'] = function (input:string) {
-		return input.split(/ ?[,] ?/g).map((value) => {
+		return input.split(splitSV).map((value) => {
 			return converStringMap.number(value);
 		});
 	};
 	converStringMap['int[]'] = function (input:string) {
-		return input.split(/ ?[,] ?/g).map((value) => {
+		return input.split(splitSV).map((value) => {
 			return converStringMap.int(value);
 		});
 	};
 	converStringMap['string[]'] = function (input:string) {
-		return input.split(/ ?[,] ?/g);
+		return input.split(splitSV);
 	};
 	converStringMap.json = function (input:string) {
 		return JSON.parse(input);
@@ -97,19 +99,22 @@ module xm {
 	/*
 	 ExposeContext: access the parameters of a single call
 	 */
+	//TODO Expose should have a reject/reolve method
 	export class ExposeContext {
 
 		expose:Expose;
 		command:ExposeCommand;
 		argv:any;
+		out:xm.StyledOut;
 
 		constructor(expose:Expose, argv, command?:ExposeCommand) {
 			this.expose = expose;
 			this.command = command;
 			this.argv = argv;
+			this.out = this.expose.output;
 		}
 
-		hasArg(name:string, alt?:any):any {
+		hasArg(name:string):any {
 			return xm.hasOwnProp(this.argv, name);
 		}
 
@@ -155,6 +160,13 @@ module xm {
 			return alt;
 		}
 
+		//(gasp!)
+		getArgsAs(type:string):any[] {
+			return this.argv._.map((value:string) => {
+				return xm.convertStringTo(value, type);
+			});
+		}
+
 		getArgNames():string[] {
 			return Object.keys(this.argv).filter((name:string) => {
 				return (name !== '_');
@@ -194,15 +206,7 @@ module xm {
 	}
 
 	export interface ExposeAction {
-		(ctx:ExposeContext):Q.Promise<any>;
-	}
-
-	export interface ExposeBuild {
-		(cmd:ExposeCommand):void;
-	}
-
-	export interface ExposeBuildGroup {
-		(group:ExposeGroup):void;
+		(ctx:ExposeContext):any;
 	}
 
 	export interface ExposeSorter {
@@ -210,7 +214,7 @@ module xm {
 	}
 
 	export interface ExposeHook {
-		(cmd:ExposeCommand, ctx:ExposeContext):Q.Promise<void>;
+		(cmd:ExposeCommand, ctx:ExposeContext):any;
 	}
 
 	export interface ExposeOptionApply {
@@ -376,7 +380,7 @@ module xm {
 		constructor(public title:string = '', output:xm.StyledOut = null) {
 			this.output = (output || new xm.StyledOut());
 
-			this.createCommand((cmd:ExposeCommand) => {
+			this.defineCommand((cmd:ExposeCommand) => {
 				cmd.name = 'help';
 				cmd.label = 'Display usage help';
 				cmd.groups = ['help'];
@@ -413,7 +417,7 @@ module xm {
 			this.options.set(opt.name, opt);
 		}
 
-		createCommand(build:ExposeBuild):void {
+		defineCommand(build:(cmd:ExposeCommand) => void):void {
 			var cmd = new ExposeCommand();
 			build(cmd);
 			cmd.index = (++this._index);
@@ -426,7 +430,7 @@ module xm {
 			this.commands.set(cmd.name, cmd);
 		}
 
-		defineGroup(build:ExposeBuildGroup):void {
+		defineGroup(build:(group:ExposeGroup) => void):void {
 			var group = new ExposeGroup();
 			build(group);
 			group.index = (++this._index);

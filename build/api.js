@@ -1338,11 +1338,93 @@ var xm;
 var xm;
 (function (xm) {
     var util = require('util');
+    var jsesc = require('jsesc');
+
+    (function (encode) {
+        encode.stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+        encode.stringEsc = {
+            quotes: 'double'
+        };
+        encode.stringEscWrap = {
+            json: true,
+            quotes: 'double',
+            wrap: true
+        };
+        encode.stringQuote = '"';
+
+        encode.identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+        encode.identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+        encode.identEscWrap = {
+            quotes: 'double',
+            wrap: true
+        };
+        encode.intExp = /^\d+$/;
+
+        function wrapIfComplex(input) {
+            if (!encode.identAnyExp.test(String(input))) {
+                return jsesc(input, encode.stringEscWrap);
+            }
+            return input;
+        }
+        encode.wrapIfComplex = wrapIfComplex;
+
+        encode.escapeRep = '\\$&';
+        encode.escapeAdd = '\\$&$&';
+
+        function getReplacerFunc(chars, values, addSelf) {
+            if (typeof addSelf === "undefined") { addSelf = false; }
+            return function (match) {
+                var i = chars.indexOf(match);
+                if (i > -1 && i < values.length) {
+                    return values[i] + (addSelf ? match : '');
+                }
+                return match;
+            };
+        }
+        encode.getReplacerFunc = getReplacerFunc;
+        function splitFix(chars) {
+            return chars.split('').map(function (char) {
+                return '\\' + char;
+            });
+        }
+
+        encode.nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
+        encode.nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
+        encode.nonPrintVal = splitFix('bfnrtv0\\');
+        encode.nonPrintRep = getReplacerFunc(encode.nonPrintChr, encode.nonPrintVal);
+
+        encode.nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
+        encode.nonPrintNotNLChr = '\b\f\t\v\\'.split('');
+        encode.nonPrintNotNLVal = splitFix('bftv0\\');
+        encode.nonPrintNotNLRep = getReplacerFunc(encode.nonPrintNotNLChr, encode.nonPrintNotNLVal);
+
+        encode.nonPrintNLExp = /(?:\r\n)|\n|\r/g;
+        encode.nonPrintNLChr = ['\r\n', '\n', '\r'];
+        encode.nonPrintNLVal = ['\\r\\n', '\\n', '\\r'];
+        encode.nonPrintNLRep = getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal);
+
+        function stringDebug(input, newline) {
+            if (typeof newline === "undefined") { newline = false; }
+            if (newline) {
+                return input.replace(encode.nonPrintNotNLExp, encode.nonPrintNotNLRep).replace(encode.nonPrintNLExp, getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal, true));
+            }
+            return input.replace(encode.nonPrintExp, encode.nonPrintRep);
+        }
+        encode.stringDebug = stringDebug;
+    })(xm.encode || (xm.encode = {}));
+    var encode = xm.encode;
 
     var StyledOut = (function () {
         function StyledOut(writer, styler) {
             if (typeof writer === "undefined") { writer = null; }
             if (typeof styler === "undefined") { styler = null; }
+            this.nibs = {
+                arrow: '-> ',
+                double: '>> ',
+                bullet: ' - ',
+                edge: ' | ',
+                none: '   '
+            };
             this._writer = (writer || new xm.writer.ConsoleLineWriter());
             this._styler = (styler || new xm.styler.ANSIStyler());
 
@@ -1463,6 +1545,51 @@ var xm;
             if (typeof depth === "undefined") { depth = 4; }
             if (typeof showHidden === "undefined") { showHidden = false; }
             this._writer.writeln(this._styler.plain(util.inspect(value, { showHidden: showHidden, depth: depth })));
+            return this;
+        };
+
+        StyledOut.prototype.stringWrap = function (str) {
+            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(str)));
+            return this;
+        };
+
+        StyledOut.prototype.label = function (label) {
+            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(label) + ': '));
+            return this;
+        };
+
+        StyledOut.prototype.indent = function () {
+            this._writer.write(this.nibs.none);
+            return this;
+        };
+
+        StyledOut.prototype.bullet = function () {
+            this._writer.write(this._styler.accent(this.nibs.bullet));
+            return this;
+        };
+
+        StyledOut.prototype.index = function (num) {
+            this._writer.write(this._styler.plain(String(num) + +': '));
+            return this;
+        };
+
+        StyledOut.prototype.info = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._writer.write(this._styler.accent(this.nibs.arrow));
+            } else {
+                this._writer.write(this._styler.plain(this.nibs.arrow));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.report = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._writer.write(this._styler.accent(this.nibs.double));
+            } else {
+                this._writer.write(this._styler.plain(this.nibs.double));
+            }
             return this;
         };
 
@@ -5733,6 +5860,8 @@ var xm;
 
     xm.converStringMap = Object.create(null);
 
+    var splitSV = /[\t ]*[,][\t ]*/g;
+
     xm.converStringMap.number = function (input) {
         var num = parseFloat(input);
         if (isNaN(num)) {
@@ -5772,17 +5901,17 @@ var xm;
         return xm.converStringMap.boolean(input);
     };
     xm.converStringMap['number[]'] = function (input) {
-        return input.split(/ ?[,] ?/g).map(function (value) {
+        return input.split(splitSV).map(function (value) {
             return xm.converStringMap.number(value);
         });
     };
     xm.converStringMap['int[]'] = function (input) {
-        return input.split(/ ?[,] ?/g).map(function (value) {
+        return input.split(splitSV).map(function (value) {
             return xm.converStringMap.int(value);
         });
     };
     xm.converStringMap['string[]'] = function (input) {
-        return input.split(/ ?[,] ?/g);
+        return input.split(splitSV);
     };
     xm.converStringMap.json = function (input) {
         return JSON.parse(input);
@@ -5801,8 +5930,9 @@ var xm;
             this.expose = expose;
             this.command = command;
             this.argv = argv;
+            this.out = this.expose.output;
         }
-        ExposeContext.prototype.hasArg = function (name, alt) {
+        ExposeContext.prototype.hasArg = function (name) {
             return xm.hasOwnProp(this.argv, name);
         };
 
@@ -5845,6 +5975,12 @@ var xm;
                 return xm.convertStringTo(this.argv._[index], type);
             }
             return alt;
+        };
+
+        ExposeContext.prototype.getArgsAs = function (type) {
+            return this.argv._.map(function (value) {
+                return xm.convertStringTo(value, type);
+            });
         };
 
         ExposeContext.prototype.getArgNames = function () {
@@ -6016,7 +6152,7 @@ var xm;
             this._index = 0;
             this.output = (output || new xm.StyledOut());
 
-            this.createCommand(function (cmd) {
+            this.defineCommand(function (cmd) {
                 cmd.name = 'help';
                 cmd.label = 'Display usage help';
                 cmd.groups = ['help'];
@@ -6052,7 +6188,7 @@ var xm;
             this.options.set(opt.name, opt);
         };
 
-        Expose.prototype.createCommand = function (build) {
+        Expose.prototype.defineCommand = function (build) {
             var cmd = new ExposeCommand();
             build(cmd);
             cmd.index = (++this._index);
@@ -6852,7 +6988,7 @@ var tsd;
             opt.default = false;
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'version';
             cmd.label = 'Display version';
             cmd.groups = ['help'];
@@ -6862,7 +6998,7 @@ var tsd;
             });
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'settings';
             cmd.label = 'Display config settings';
             cmd.options = ['config', 'cacheDir'];
@@ -6875,7 +7011,7 @@ var tsd;
             };
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'search';
             cmd.label = 'Search definitions';
             cmd.variadic = ['selector'];
@@ -6894,7 +7030,7 @@ var tsd;
             };
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'install';
             cmd.label = 'Install definitions';
             cmd.options = ['overwrite', 'save', 'resolve'];
@@ -6914,7 +7050,7 @@ var tsd;
             };
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'info';
             cmd.label = 'Display definition info';
             cmd.variadic = ['selector'];
@@ -6936,7 +7072,7 @@ var tsd;
             };
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'history';
             cmd.label = 'Display definition history';
             cmd.variadic = ['selector'];
@@ -6962,7 +7098,7 @@ var tsd;
             };
         });
 
-        expose.createCommand(function (cmd) {
+        expose.defineCommand(function (cmd) {
             cmd.name = 'reinstall';
             cmd.label = 'Re-install definitions from config';
             cmd.options = ['overwrite'];

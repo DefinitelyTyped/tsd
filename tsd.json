@@ -23,6 +23,18 @@
     "underscore/underscore.d.ts": {
       "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768",
       "blob": "cd7a2867e5a04b13f6d6143b87e519e8f28a6062"
+    },
+    "angularjs/angular-cookies.d.ts": {
+      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638",
+      "blob": "60eebbacb02fad10c66df953fbd7c546adb4464f"
+    },
+    "angularjs/angular.d.ts": {
+      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638",
+      "blob": "f396593ef57f019e05495a2eeadf05d68e4f736e"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638",
+      "blob": "332ee75da76233b015ce68413208fa3c51e86eaf"
     }
   }
 }

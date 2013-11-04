@@ -495,7 +495,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'version';
 			cmd.label = 'Display version';
 			cmd.groups = ['help'];
@@ -505,7 +505,7 @@ module tsd {
 			});
 		});
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'settings';
 			cmd.label = 'Display config settings';
 			cmd.options = ['config', 'cacheDir'];
@@ -520,7 +520,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'search';
 			cmd.label = 'Search definitions';
 			cmd.variadic = ['selector'];
@@ -543,7 +543,7 @@ module tsd {
 			};
 		});
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'install';
 			cmd.label = 'Install definitions';
 			cmd.options = ['overwrite', 'save', 'resolve'];
@@ -567,7 +567,7 @@ module tsd {
 			};
 		});
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'info';
 			cmd.label = 'Display definition info';
 			cmd.variadic = ['selector'];
@@ -589,7 +589,7 @@ module tsd {
 			};
 		});
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'history';
 			cmd.label = 'Display definition history';
 			cmd.variadic = ['selector'];
@@ -615,7 +615,7 @@ module tsd {
 			};
 		});
 
-		expose.createCommand((cmd:xm.ExposeCommand) => {
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
 			cmd.label = 'Re-install definitions from config';
 			cmd.options = ['overwrite'];
