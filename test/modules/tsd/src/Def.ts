@@ -1,6 +1,6 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
-///<reference path="../../../../src/xm/io/hash.ts" />
+///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 
 ///<reference path="../../../../src/tsd/data/Def.ts" />
@@ -19,44 +19,71 @@ describe('Def', () => {
 		});
 	});
 
-
-	before(() => {
-
-	});
-	after(() => {
-	});
-
-	function assertDef(path:string, expectMatch:boolean = true) {
-		assert.isString(path, 'path');
-		if (expectMatch) {
-			assert(tsd.Def.isDefPath(path), 'expected "' + path + '" to be a Def path');
-		}
-		else {
-			assert(!tsd.Def.isDefPath(path), 'expected "' + path + '" to not be a Def path');
-		}
-	}
 	describe('isDef', () => {
 
-		var data = {
-			'a/a.d.ts': true,
-			'aa/aa.d.ts': true,
-			'a/aa.d.ts': true,
-			'a/b-b-b-b-b-b-b.d.ts': true,
-			'a/a-a_a-a.d.ts': true,
-			'a-a/a-a.d.ts': true,
-			'_a/a.d.ts': false,
-			'a_/a.d.ts': false,
+		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
 
-			'aa/aa.1.0.0.d.ts': true,
-			'aa/aa-v1.0.0.d.ts': true,
+		after(() => {
+			data = null;
+		});
 
-			'amplifyjs/amplifyjs-tests.ts': false,
-			'azure-mobile-services-client/AzureMobileServicesClient-tests.ts': false,
-		};
+		function assertIsDef(path:string, expectMatch:boolean = true) {
+			assert.isString(path, 'path');
+			if (expectMatch) {
+				assert(tsd.Def.isDefPath(path), 'expected "' + path + '" to be a Def path');
 
-		xm.eachProp(data, (expect, path) => {
-			it('test "' + path + '"', () => {
-				assertDef(path, expect);
+				//double check
+				var def = tsd.Def.getFrom(path);
+				assert.instanceOf(def, tsd.Def);
+			}
+			else {
+				assert(!tsd.Def.isDefPath(path), 'expected "' + path + '" to not be a Def path');
+			}
+		}
+
+		xm.eachProp(data, (group, label) => {
+			describe(label, () => {
+				xm.eachProp(group, (expect, path) => {
+					it((expect ? 'pass' : 'fail') + ' "' + path + '"', () => {
+						assertIsDef(path, expect);
+					});
+				});
+			});
+		});
+	});
+
+	describe('getFrom', () => {
+
+		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
+
+		after(() => {
+			data = null;
+		});
+
+		function assertDefFrom(path:string, fields:any) {
+			assert.isString(path, 'path');
+			assert.isObject(fields, 'fields');
+
+			var def = tsd.Def.getFrom(path);
+			assert.isObject(def, 'def');
+			assert.strictEqual(def.project, fields.project, 'def.project');
+			assert.strictEqual(def.name, fields.name, 'def.name');
+
+			if (fields.semver) {
+				assert.strictEqual(def.semver, fields.semver, 'def.semver');
+			}
+			else {
+				assert.notOk(def.semver, 'def.semver');
+			}
+		}
+
+		xm.eachProp(data, (group, label) => {
+			describe(label, () => {
+				xm.eachProp(group, (fields, path) => {
+					it('test "' + path + '" to "' + fields.semver + '"', () => {
+						assertDefFrom(path, fields);
+					});
+				});
 			});
 		});
 	});

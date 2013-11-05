@@ -217,7 +217,6 @@
 	"videojs/videojs.d.ts",
 	"viewporter/viewporter.d.ts",
 	"vimeo/froogaloop.d.ts",
-	"webaudioapi/waa-20120802.d.ts",
 	"webaudioapi/waa-nightly.d.ts",
 	"webaudioapi/waa.d.ts",
 	"webrtc/MediaStream.d.ts",

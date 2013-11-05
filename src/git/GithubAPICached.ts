@@ -3,7 +3,7 @@
 ///<reference path="../xm/StatCounter.ts" />
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
-///<reference path="../xm/io/hash.ts" />
+///<reference path="../xm/hash.ts" />
 ///<reference path="../xm/Logger.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/CachedJSONValue.ts" />

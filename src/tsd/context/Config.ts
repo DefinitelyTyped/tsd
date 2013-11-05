@@ -12,6 +12,7 @@ module tsd {
 	var fs = require('fs');
 	var path = require('path');
 	var util = require('util');
+	var AssertionError = require('assertion-error');
 	var tv4:TV4 = require('tv4');
 
 	/*
@@ -21,7 +22,6 @@ module tsd {
 
 		path:string;
 		commitSha:string;
-		blobSha:string;
 
 		constructor(path:string) {
 			if (path) {
@@ -31,18 +31,13 @@ module tsd {
 		}
 
 		update(file:tsd.DefVersion) {
-			//TODO maybe too much testing? :D
 			xm.assertVar(file, tsd.DefVersion, 'file');
 
 			xm.assertVar(file.commit, tsd.DefCommit, 'commit');
 			xm.assertVar(file.commit.commitSha, 'sha1', 'commit.sha');
 
-			xm.assertVar(file.blob, tsd.DefBlob, 'blob');
-			xm.assertVar(file.blob.sha, 'sha1', 'blob.sha');
-
 			this.path = file.def.path;
 			this.commitSha = file.commit.commitSha;
-			this.blobSha = file.blob.sha;
 		}
 
 		toString():string {
@@ -55,7 +50,7 @@ module tsd {
 	 */
 	export class Config {
 
-		typingsPath:string;
+		path:string;
 		version:string;
 		repo:string;
 		ref:string;
@@ -67,10 +62,12 @@ module tsd {
 
 		constructor(schema:any) {
 			xm.assertVar(schema, 'object', 'schema');
+			xm.assert((schema.version !== tsd.Const.configVersion), 'bad schema config version', schema.version, tsd.Const.configVersion, true);
+
 			this._schema = schema;
 
 			//import defaults
-			this.typingsPath = tsd.Const.typingsFolder;
+			this.path = tsd.Const.typingsFolder;
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
 			this.ref = tsd.Const.mainBranch;
@@ -81,9 +78,9 @@ module tsd {
 
 		resolveTypingsPath(relativeToDir:string):string {
 			var cfgFull = path.resolve(relativeToDir);
-			var typings = this.typingsPath.replace(/[\\\/]/g, path.sep);
+			var typings = this.path.replace(/[\\\/]/g, path.sep);
 
-			if (/^([\\\/]|\w:)/.test(this.typingsPath)) {
+			if (/^([\\\/]|\w:)/.test(this.path)) {
 				//absolute path
 				return typings;
 			}
@@ -146,7 +143,7 @@ module tsd {
 		//TODO unit test this against JSON-Schema (maybe always?)
 		toJSON():any {
 			var json = {
-				typingsPath: this.typingsPath,
+				path: this.path,
 				version: this.version,
 				repo: this.repo,
 				ref: this.ref,
@@ -154,14 +151,17 @@ module tsd {
 			};
 
 			this._installed.values().forEach((file:tsd.InstalledDef) => {
-				//xm.log(file);
 				json.installed[file.path] = {
-					commit: file.commitSha,
-					blob: file.blobSha
+					commit: file.commitSha
 					//what more?
 				};
 			});
-
+			var res = tv4.validateResult(json, this._schema);
+			if (!res.valid || res.missing.length > 0) {
+				//this is messed up: internal checks and schema not equivalent
+				this.log.warn(res.error.message);
+				return null;
+			}
 			return json;
 		}
 
@@ -176,7 +176,7 @@ module tsd {
 			if (!res.valid || res.missing.length > 0) {
 				this.log.error(res.error.message);
 				if (res.error.dataPath) {
-					this.log.error(res.error.dataPath);
+					this.log.warn(res.error.dataPath);
 				}
 				/*if (res.error.schemaPath) {
 				 xm.log.error(res.error.schemaPath);
@@ -185,7 +185,7 @@ module tsd {
 			}
 
 			//TODO harden validation besides schema
-			this.typingsPath = json.typingsPath;
+			this.path = json.path;
 			this.version = json.version;
 			this.repo = json.repo;
 			this.ref = json.ref;
@@ -196,8 +196,6 @@ module tsd {
 					//TODO move to class
 					//TODO validate some more
 					installed.commitSha = data.commit;
-					installed.blobSha = data.blob;
-
 
 					this._installed.set(filePath, installed);
 				});

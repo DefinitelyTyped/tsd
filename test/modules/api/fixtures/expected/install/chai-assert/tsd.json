@@ -1,12 +1,11 @@
 {
-  "typingsPath": "typings",
+  "path": "typings",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
   "installed": {
     "chai/chai-assert.d.ts": {
-      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed",
-      "blob": "7cd5e3d48bc6299e12c47ac8144913213e2d64fc"
+      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
     }
   }
 }

@@ -1,6 +1,6 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/tsd/select/Selector.ts" />
-///<reference path="../../../../src/xm/io/hash.ts" />
+///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 
 ///<reference path="../../../../src/tsd/data/Def.ts" />
@@ -23,10 +23,11 @@ describe('Selector', () => {
 	describe('NameMatcher', () => {
 		var list:tsd.Def[];
 		var files:tsd.Def[];
-		var select:any;
+		var select:any = {};
 
 		//get data to generate cases
-		select = require(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher'));
+		select.data = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
+		select.source = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
 		assert.ok(select.data, 'select.data');
 		assert.ok(select.source, 'select.source');
 
@@ -70,7 +71,7 @@ describe('Selector', () => {
 			}
 		}
 
-		describe('basisc', () => {
+		describe('basics', () => {
 			it('single letter', () => {
 				assertMatch('a', 'a/b', false);
 				assertMatch('b', 'a/b', true);

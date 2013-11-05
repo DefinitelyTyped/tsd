@@ -1,7 +1,7 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../Logger.ts" />
-///<reference path="hash.ts" />
+///<reference path="../hash.ts" />
 ///<reference path="../typeOf.ts" />
 ///<reference path="../ObjectUtil.ts" />
 

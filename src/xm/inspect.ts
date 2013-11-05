@@ -7,6 +7,7 @@
  * */
 
 ///<reference path="typeOf.ts" />
+///<reference path="encode.ts" />
 
 interface Function {
 	name:string;
@@ -54,6 +55,7 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
+				//TODO optimise deptp: doent loop over limit
 				return '[' + trimLine(obj.map((value) => {
 					return toValueStrim(value, depth);
 				}).join(','), objCut, false) + ']';
@@ -63,20 +65,20 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
+				//TODO optimise deptp: doent loop over limit
 				return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map((key) => {
 					return trimLine(key) + ':' + toValueStrim(obj[key], depth);
 				}).join(','), objCut, false) + '}';
 			}
 			default :
-				throw(new Error('toValueStrim: cannot serialise type: ' + type));
+				throw (new Error('toValueStrim: cannot serialise type: ' + type));
 		}
 	}
 
-	export function trimLine(value, cutoff:number = 30, quotes:boolean = true) {
-		value = String(value).replace('\r', '\\r').replace('\n', '\\n').replace('\t', '\\t');
+	export function trimLine(value:string, cutoff:number = 30, wrapQuotes:boolean = true):string {
 		if (value.length > cutoff - 2) {
 			value = value.substr(0, cutoff - 5) + '...';
 		}
-		return quotes ? '"' + value + '"' : value;
+		return xm.wrapIfComplex(value, {quotes: wrapQuotes});
 	}
 }

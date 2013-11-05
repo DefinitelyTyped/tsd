@@ -51,7 +51,7 @@ describe('Context', () => {
 		it('exports config', () => {
 			assert.isObject(ctx.config, 'config');
 			assert.instanceOf(ctx.config, tsd.Config, 'config');
-			assert.isString(ctx.config.typingsPath, 'typingsPath');
+			assert.isString(ctx.config.path, 'path');
 			assert.isString(ctx.config.version, 'version');
 			assert.isString(ctx.config.repo, 'repo');
 			assert.isString(ctx.config.ref, 'ref');

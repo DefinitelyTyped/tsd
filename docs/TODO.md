@@ -50,9 +50,9 @@ Basics commands
 * :m:	Add **version** (show version)
 * :x:	Add **init** (new json with repo/branch)
 * :m:	Add **settings** (show config info)
-* :b:	Add **reinstall** (from config)
-* :a:	Add **index** (list definition overview)
-* :vs:	Consider unifying local remote selectors (tricky. maybe a param)
+* :m:	Add **reinstall** (from config)
+* :b:	Add **index** (list definition overview) (use search * for now)
+* :vs:	Consider unifying local remote selectors
 
 Remote selector commands
 
@@ -61,8 +61,8 @@ Remote selector commands
 * :o:	Add **direct** (install from commit sha, or blob)
 * :m:	Add **info** (parse file content)
 * :m:	Add **history** (list commit history)
-* :o:	Add **details** (detailed commit history), needed?
-* :x:	Enhance deps (list dependencies), make recursive and display
+* :ng:	Add **details** ~~(detailed commit history)~~ (add param for history)
+* :m:	Enhance deps (list dependencies), make recursive and display
 
 Local selector commands
 
@@ -96,27 +96,27 @@ Selector
 
 Command options
 
-* :a:   Plan options and unify the names (both for CLI as API)
-* :a:	Add option for file overwrite (always on now)
-* :a:	Add a compact vs detailed option (for search listings or history)
-* :ab:	Add option for dependency install (always on now)
-* :a:	Add option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
+* :b:   Plan options and unify the names (both for CLI as API)
+* :m:	Add option for file overwrite (always on now) `--overwrite`
+* :b:	Add a compact vs detailed option (for search listings or history)
+* :m:	Add option for dependency install (always on now) `--resolve`
+* :a:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :o:	.... more
 
 Functionality
 
 * :o2:	Handle rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* :id:	Add fancy promise progress events + cli display (install etc)
+* :id:	Add fancy promise progress events + CLI display (install etc)
 
 CLI
 
 * :m:	Improve Expose for crisper CLI help screen layout (table/columns)
 * :m:   Improve Expose to order/group commands :zap:
-* :x:	Optimise and unify CLI output (indenting/seperator/headers etc) :zap:
+* :x:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
 * :x:	Add TSD release/updates news to CLI console (periodically pull json from github) :zap:
-* :o:	Expand Expose to generate CLI documentation (using StyledOut and a HTML/Markdown Styler + Writer)
+* :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
 
 API
 
@@ -128,23 +128,24 @@ API
 Data model/repo
 
 * :o:	Harden JSON import
-* :id:	Consider decoupling from Github json format (abstract service)
-* :id:	Consider adapting to work from a git-checkout (abstract service)
+* :a:	Consider decoupling from Github json format (abstract service)
+* :ab:	Consider adapting to work from a git-checkout (abstract service)
 
 Info
 
 * :m:	Import tests for header parser from tsd-deftools @bartvds
-* :o:	Improve DefInfo/Parser to extract more info from more files :zap:
+* :o:	Improve `DefInfo`/`Parser` to extract more info from more files :zap:
 
 Config
 
 * :o2:	Improve config JSON-Schema (RegExp)
 	* Improve flexibility
 	* Update tsd tests to verify changes
-	* Update typingsPath: should be 1 length
-	* Update commit: should be > ~6 length (as per git convention)
-	* Update blob: should be optional, still fixed at 40 (as per concept commit is leading)
-* :o:	Improve config validation reporting (see tv4, chai-json-schema)
+	* Update ~~typingsPath~~ ('path' now): should be 1 length
+	* Update commit: should be (7-40) length (as per git convention)
+	* ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit
+* :a:	Validate config save-data before writing to diskk, catch invalid json
+* :o:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
 * :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
 
 Cache
@@ -162,17 +163,16 @@ Internals
 
 * :a:	Try recalculating sha1 hash from content (fix: weird error in #master `$ tsd install chai` (fixed by forced line-ends?)
 * :b:	Add local-changes detector using the hash / sha
-* :m:	Change Context objects to use Q/Q-io and not auto-create folders at init
+* :m:	Change Context objects to use `Q`/`Q-io` and not auto-create folders at init
 * :vs:	Decide if API, Core etc need(more) race condition hardening
 * :vs:	Consider if API and/or Core need to be split into command classes.
-* :vs:	Consider adding timeouts
+* :vs:	Consider adding timeout
 * :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :id:	Consider moving to class model with promise-based methods
 * :id:	Consider adding class based façade to model, with promise-based methods
 * :id:	Consider global store for JSON pointers and RegExps etc
-* :cl:	Clean usage of module name within same module (eg: `tsd.Def` is not needed in other code inside the `tsd` module (could be a remnant of old TS 0.8 or a WebStorm 6 glitch fix).
-* :o:	Add xm interface for debug/log/event tracking
-* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in EventLog.ts)
+* :o:	Add xm interface for debug/log/event tracking (`xm.EventLog`)
+* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
 Technical
 
@@ -197,23 +197,23 @@ Publishing
 * :x:	Add git pre-commit test hook :zap:
 * :ok:	Use uppercase 'TSD' (looks like a type otherwise) ~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~
 * :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)
-* :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku.
+* :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku. Use TSD's Git module to proxy API request
 * :m:	Fix bin/cli `$ npm install . -g` 
 * :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
 * :x:	Compile a build number + date into application :zap:
 * :m:	Credits
-* :o:	Licence to Apache 2.0
+* :m:	Licence to Apache 2.0
 
 Dependencies
 
-* :id:	Consider dropping underscore?
-* :m:	Update Q with generics
+* :m:	Consider dropping `underscore`?
+* :m:	Update `Q` with generics
 * :o:	Sweep recent xm `package changes for new tests 
 
 Bugs:
 
-* :o:	Installing `$ tsd install chai` gives content error
-* :o:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
+* :m:	Installing `$ tsd install chai` gives content error
+* :a:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
 * :o:	Underscore.d.ts header has multiple authors
 
 More.. always more :rocket:

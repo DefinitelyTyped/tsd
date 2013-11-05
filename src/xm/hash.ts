@@ -6,8 +6,8 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../typeOf.ts" />
-///<reference path="../inspect.ts" />
+///<reference path="typeOf.ts" />
+///<reference path="inspect.ts" />
 
 module xm {
 	'use strict';
@@ -24,6 +24,15 @@ module xm {
 
 	export function sha1Short(data:string, length:number = 8):string {
 		return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
+	}
+
+	//don't trim additional whitespace
+	//var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
+	var hashNormExp = /[\r\n]+/g;
+	var hashNew = '\n';
+
+	export function hashNormalines(input:string):string {
+		return sha1(input.replace(hashNormExp, hashNew));
 	}
 
 	// hash any json-like-object's data to a ident-string

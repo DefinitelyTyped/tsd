@@ -1,11 +1,10 @@
 {
-  "path": "typings",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
   "installed": {
-    "chai/chai.d.ts": {
-      "commit": "c2df10e5f1b18fdd0b561da0a8804e4d534c59ed"
+    "async/async.d.ts": {
+      "commit": "35f964c6a40a3e11e5e56bbd519f14de3fdb66b5"
     }
   }
 }

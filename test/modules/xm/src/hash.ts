@@ -1,5 +1,6 @@
 ///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/io/hash.ts" />
+///<reference path="../../../../src/xm/hash.ts" />
+///<reference path="../../../../src/xm/encode.ts" />
 
 describe('xm.hash', () => {
 
@@ -54,14 +55,19 @@ describe('xm.hash', () => {
 		it('should return different hash for different data', () => {
 			var ori = xm.jsonToIdent(valueA);
 			var alt;
+
 			alt = xm.jsonToIdent(valueX1);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX1');
+
 			alt = xm.jsonToIdent(valueX2);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX2');
+
 			alt = xm.jsonToIdent(valueX3);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX3');
+
 			alt = xm.jsonToIdent(valueX4);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX4');
+
 			alt = xm.jsonToIdent(valueX5);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX5');
 		});
@@ -100,6 +106,67 @@ describe('xm.hash', () => {
 			assert.isString(hashB, 'hashB');
 			assert.strictEqual(hashA, hashB, 'equal');
 			assert.strictEqual(hashA, expected, 'preset hash');
+		});
+	});
+
+	describe('hashNormalines()', () => {
+
+		function assertHashNormalines(label:string, values:string[], match:boolean = true) {
+			var len = values.length;
+			for (var i = 0; i < len; i++) {
+				var valueA = values[i];
+				var hashedA = xm.hashNormalines(valueA);
+				for (var j = (match ? i : i + 1); j < len; j++) {
+					var valueB = values[j];
+					var hashedB = xm.hashNormalines(valueB);
+
+					if (match) {
+						assert.strictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + xm.wrapIfComplex(valueA) + ' vs ' + xm.wrapIfComplex(valueB));
+					}
+					else {
+						assert.notStrictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + xm.wrapIfComplex(valueA) + ' vs ' + xm.wrapIfComplex(valueB));
+					}
+				}
+			}
+		}
+
+		it('should return identical hash for similar single line string', () => {
+			var values = [
+				'abc',
+				'abc'
+			];
+			assertHashNormalines('abs', values);
+		});
+
+		it('should return identical hash for similar multiline string', () => {
+			var values = [
+				'\na\nb\nc\n',
+				'\ra\r\nb\nc\r\n',
+				'\r\na\r\nb\r\nc\r\n',
+				'\r\n\r\na\r\n\r\n\r\nb\r\nc\r\n\r\n\r\n',
+			];
+			assertHashNormalines('abs', values);
+		});
+
+		it('should return identical hash for similar padded multiline string', () => {
+			var values = [
+				'\n a\n b \n c\n',
+				'\r a\r\n b \n c\r\n',
+				'\r\n a\r\n b \r\n c\r\n',
+				'\r\n\r\n a\r\n\r\n\r\n b \r\n c\r\n\r\n\r\n',
+			];
+			assertHashNormalines('abs', values);
+		});
+
+		it('should not return identical hash for mixed abc string', () => {
+			var values = [
+				'abc',
+				' abc ',
+				'   abc  ',
+				'\n abc \n',
+				' abc \r\n'
+			];
+			assertHashNormalines('abs', values, false);
 		});
 	});
 });

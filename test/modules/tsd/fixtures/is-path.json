@@ -1,0 +1,49 @@
+{
+	"basic": {
+		"a/a.d.ts": true,
+		"aa/bb.d.ts": true,
+		"a/bb.d.ts": true,
+		"a/b-b-b-b-b-b-b.d.ts": true,
+		"a/a-a_a-a.d.ts": true,
+		"a-a/a-a.d.ts": true,
+		"AA/a.d.ts": true,
+		"a/AA.d.ts": true
+
+	},
+	"debatable": {
+		"_a/a.d.ts": true,
+		"a_/a.d.ts": true,
+		"a/_a.d.ts": true,
+		"a/a_.d.ts": true
+	},
+	"space": {
+		" a/a.d.ts": false,
+		"a/ a.d.ts": false,
+		"a /a.d.ts": false,
+		"a/a .d.ts": false,
+		"a a/bb.d.ts": false,
+		"aa/a a.d.ts": false
+	},
+	"odd": {
+		" a/a|a.d.ts": false,
+		" a/a:a.d.ts": false,
+		" a/a%a.d.ts": false,
+		"aa/bb3210.d.ts": true
+	},
+	"semver": {
+		"aa/bb.1.0.d.ts": true,
+		"aa/bb-v1.0.d.ts": true,
+		"aa/bb.1.0-alpha.d.ts": true,
+		"aa/bb-v1.0-alpha.d.ts": true,
+
+		"aa/bb.1.0.0.d.ts": true,
+		"aa/bb-v1.0.0.d.ts": true,
+		"aa/bb.1.0.0-alpha.d.ts": true,
+
+		"aa/bb.1.0.0-al p ha.d.ts": false
+	},
+	"bugs": {
+		"amplifyjs/amplifyjs-tests.ts": false,
+		"azure-mobile-services-client/AzureMobileServicesClient-tests.ts": false
+	}
+}

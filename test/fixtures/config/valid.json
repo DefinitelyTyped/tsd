@@ -1,12 +1,11 @@
 {
-  "typingsPath": "typings",
   "version": "v4",
+  "path": "typings",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
   "installed": {
     "async/async.d.ts": {
-      "commit": "6c7c46480d7f10cde4bc42b50e61da89373d1a10",
-      "blob": "835c10777e974f72cc341a101655012e20675c05"
+      "commit": "6c7c46480d7f10cde4bc42b50e61da89373d1a10"
     }
   }
 }

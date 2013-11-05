@@ -3,7 +3,7 @@
 ///<reference path="../StatCounter.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
-///<reference path="../io/hash.ts" />
+///<reference path="../hash.ts" />
 ///<reference path="../Logger.ts" />
 ///<reference path="../io/FileUtil.ts" />
 ///<reference path="CachedJSONValue.ts" />

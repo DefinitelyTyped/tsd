@@ -89,7 +89,7 @@ module.exports = function (grunt) {
 				src: ['src/util/blobSha.ts'],
 				out: 'util/blobSha.js'
 			},
-			//use this non-checked-in file to test small snippets of code
+			//use this non-checked-in file to test small snippets of dev code
 			dev: {
 				src: ['src/dev.ts'],
 				out: 'tmp/dev.js'
@@ -101,6 +101,22 @@ module.exports = function (grunt) {
 					'node',
 					'./build/cli.js',
 					'-h'
+				].join(' '),
+				options: {
+					stdout: true
+				}
+			},
+			//use this to test stuff
+			dev_01: {
+				command: [
+					'node',
+					'./build/cli.js',
+					'history',
+					'sync',
+					'-s',
+					'-o',
+					'-r',
+					'--dev'
 				].join(' '),
 				options: {
 					stdout: true
@@ -178,6 +194,7 @@ module.exports = function (grunt) {
 	]);
 
 	//gtx.alias('run', ['build', 'demo:help']);
+	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
 	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
 
 	// additional editor toolbar mappings

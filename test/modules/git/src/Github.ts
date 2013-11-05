@@ -1,7 +1,7 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="helper.ts" />
 ///<reference path="../../../assert/git/_all.ts" />
-///<reference path="../../../../src/xm/io/hash.ts" />
+///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/xm/iterate.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="../../../../src/git/GithubRepo.ts" />

@@ -716,6 +716,82 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    var util = require('util');
+    var jsesc = require('jsesc');
+
+    var stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var stringEsc = {
+        quotes: 'double'
+    };
+    var stringEscWrap = {
+        json: true,
+        quotes: 'double',
+        wrap: true
+    };
+    var stringQuote = '"';
+
+    var identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var identEscWrap = {
+        quotes: 'double',
+        wrap: true
+    };
+    var intExp = /^\d+$/;
+
+    var escapeRep = '\\$&';
+    var escapeAdd = '\\$&$&';
+
+    function splitFix(chars) {
+        return chars.split('').map(function (char) {
+            return '\\' + char;
+        });
+    }
+
+    function getReplacerFunc(chars, values, addSelf) {
+        if (typeof addSelf === "undefined") { addSelf = false; }
+        return function (match) {
+            var i = chars.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return values[i] + (addSelf ? match : '');
+            }
+            return match;
+        };
+    }
+
+    var nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
+    var nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
+    var nonPrintVal = splitFix('bfnrtv0\\');
+    var nonPrintRep = getReplacerFunc(nonPrintChr, nonPrintVal);
+
+    var nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
+    var nonPrintNotNLChr = '\b\f\t\v\\'.split('');
+    var nonPrintNotNLVal = splitFix('bftv0\\');
+    var nonPrintNotNLRep = getReplacerFunc(nonPrintNotNLChr, nonPrintNotNLVal);
+
+    var nonPrintNLExp = /[\r\n]/g;
+    var nonPrintNLChr = ['\n', '\r'];
+    var nonPrintNLVal = ['\\n', '\\r'];
+    var nonPrintNLRep = getReplacerFunc(nonPrintNLChr, nonPrintNLVal);
+
+    function wrapIfComplex(input, args) {
+        if (!identAnyExp.test(String(input))) {
+            return jsesc(input, args || stringEscWrap);
+        }
+        return input;
+    }
+    xm.wrapIfComplex = wrapIfComplex;
+
+    function stringDebug(input, newline) {
+        if (typeof newline === "undefined") { newline = false; }
+        if (newline) {
+            return input.replace(nonPrintNotNLExp, nonPrintNotNLRep).replace(nonPrintNLExp, getReplacerFunc(nonPrintNLChr, nonPrintNLVal, true));
+        }
+        return input.replace(nonPrintExp, nonPrintRep);
+    }
+    xm.stringDebug = stringDebug;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
     'use strict';
 
     function getFuncLabel(func) {
@@ -759,6 +835,7 @@ var xm;
                 if (depth <= 0) {
                     return '<maximum recursion>';
                 }
+
                 return '[' + trimLine(obj.map(function (value) {
                     return toValueStrim(value, depth);
                 }).join(','), objCut, false) + ']';
@@ -767,6 +844,7 @@ var xm;
                 if (depth <= 0) {
                     return '<maximum recursion>';
                 }
+
                 return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
                     return trimLine(key) + ':' + toValueStrim(obj[key], depth);
                 }).join(','), objCut, false) + '}';
@@ -777,14 +855,13 @@ var xm;
     }
     xm.toValueStrim = toValueStrim;
 
-    function trimLine(value, cutoff, quotes) {
+    function trimLine(value, cutoff, wrapQuotes) {
         if (typeof cutoff === "undefined") { cutoff = 30; }
-        if (typeof quotes === "undefined") { quotes = true; }
-        value = String(value).replace('\r', '\\r').replace('\n', '\\n').replace('\t', '\\t');
+        if (typeof wrapQuotes === "undefined") { wrapQuotes = true; }
         if (value.length > cutoff - 2) {
             value = value.substr(0, cutoff - 5) + '...';
         }
-        return quotes ? '"' + value + '"' : value;
+        return xm.wrapIfComplex(value, { quotes: wrapQuotes });
     }
     xm.trimLine = trimLine;
 })(xm || (xm = {}));
@@ -813,11 +890,34 @@ var xm;
         md5: isMd5
     });
 
-    function throwAssert(message, actual, expected, showDiff) {
+    function assert(pass, message, actual, expected, showDiff, ssf) {
+        if (typeof showDiff === "undefined") { showDiff = true; }
+        if (pass) {
+            return;
+        }
+        if (message) {
+            message.replace(/\{([\w+])\}/g, function (match, id) {
+                switch (id) {
+                    case 'act':
+                        return xm.toValueStrim(actual);
+                    case 'exp':
+                        return xm.toValueStrim(expected);
+                    default:
+                        return '{' + id + '}';
+                }
+            });
+            message += ': ';
+        } else {
+            message = '';
+        }
+        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff }, ssf);
+    }
+    xm.assert = assert;
+
+    function throwAssert(message, actual, expected, showDiff, ssf) {
         if (typeof showDiff === "undefined") { showDiff = true; }
         message = message ? message + ': ' : '';
-        message += 'values not equal';
-        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff });
+        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff }, ssf);
     }
     xm.throwAssert = throwAssert;
 
@@ -1338,81 +1438,6 @@ var xm;
 var xm;
 (function (xm) {
     var util = require('util');
-    var jsesc = require('jsesc');
-
-    (function (encode) {
-        encode.stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.stringEsc = {
-            quotes: 'double'
-        };
-        encode.stringEscWrap = {
-            json: true,
-            quotes: 'double',
-            wrap: true
-        };
-        encode.stringQuote = '"';
-
-        encode.identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.identEscWrap = {
-            quotes: 'double',
-            wrap: true
-        };
-        encode.intExp = /^\d+$/;
-
-        function wrapIfComplex(input) {
-            if (!encode.identAnyExp.test(String(input))) {
-                return jsesc(input, encode.stringEscWrap);
-            }
-            return input;
-        }
-        encode.wrapIfComplex = wrapIfComplex;
-
-        encode.escapeRep = '\\$&';
-        encode.escapeAdd = '\\$&$&';
-
-        function getReplacerFunc(chars, values, addSelf) {
-            if (typeof addSelf === "undefined") { addSelf = false; }
-            return function (match) {
-                var i = chars.indexOf(match);
-                if (i > -1 && i < values.length) {
-                    return values[i] + (addSelf ? match : '');
-                }
-                return match;
-            };
-        }
-        encode.getReplacerFunc = getReplacerFunc;
-        function splitFix(chars) {
-            return chars.split('').map(function (char) {
-                return '\\' + char;
-            });
-        }
-
-        encode.nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
-        encode.nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
-        encode.nonPrintVal = splitFix('bfnrtv0\\');
-        encode.nonPrintRep = getReplacerFunc(encode.nonPrintChr, encode.nonPrintVal);
-
-        encode.nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
-        encode.nonPrintNotNLChr = '\b\f\t\v\\'.split('');
-        encode.nonPrintNotNLVal = splitFix('bftv0\\');
-        encode.nonPrintNotNLRep = getReplacerFunc(encode.nonPrintNotNLChr, encode.nonPrintNotNLVal);
-
-        encode.nonPrintNLExp = /(?:\r\n)|\n|\r/g;
-        encode.nonPrintNLChr = ['\r\n', '\n', '\r'];
-        encode.nonPrintNLVal = ['\\r\\n', '\\n', '\\r'];
-        encode.nonPrintNLRep = getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal);
-
-        function stringDebug(input, newline) {
-            if (typeof newline === "undefined") { newline = false; }
-            if (newline) {
-                return input.replace(encode.nonPrintNotNLExp, encode.nonPrintNotNLRep).replace(encode.nonPrintNLExp, getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal, true));
-            }
-            return input.replace(encode.nonPrintExp, encode.nonPrintRep);
-        }
-        encode.stringDebug = stringDebug;
-    })(xm.encode || (xm.encode = {}));
-    var encode = xm.encode;
 
     var StyledOut = (function () {
         function StyledOut(writer, styler) {
@@ -1549,12 +1574,12 @@ var xm;
         };
 
         StyledOut.prototype.stringWrap = function (str) {
-            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(str)));
+            this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
             return this;
         };
 
         StyledOut.prototype.label = function (label) {
-            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(label) + ': '));
+            this._writer.write(this._styler.plain(xm.wrapIfComplex(label) + ': '));
             return this;
         };
 
@@ -2002,6 +2027,8 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    var semver = require('semver');
+
     var Def = (function () {
         function Def(path) {
             this.history = [];
@@ -2026,11 +2053,6 @@ var tsd;
             return useExp;
         };
 
-        Def.isDefPath = function (path, trim) {
-            if (typeof trim === "undefined") { trim = false; }
-            return Def.getPathExp(trim).test(path);
-        };
-
         Def.getFileFrom = function (path) {
             var useExp = Def.getPathExp(true);
             var match = useExp.exec(path);
@@ -2038,6 +2060,26 @@ var tsd;
                 return null;
             }
             return match[1] + '/' + match[2] + '.d.ts';
+        };
+
+        Def.isDefPath = function (path, trim) {
+            if (typeof trim === "undefined") { trim = false; }
+            if (Def.getPathExp(trim).test(path)) {
+                Def.versionEnd.lastIndex = 0;
+                var semMatch = Def.versionEnd.exec(path);
+                if (!semMatch) {
+                    return true;
+                }
+                var sem = semMatch[1];
+                if (Def.twoNums.test(sem)) {
+                    sem += '.0';
+                }
+                if (semMatch.length > 2) {
+                    sem += semMatch[2];
+                }
+                return semver.valid(sem);
+            }
+            return false;
         };
 
         Def.getFrom = function (path, trim) {
@@ -2058,12 +2100,34 @@ var tsd;
             file.project = match[1];
             file.name = match[2];
 
+            Def.versionEnd.lastIndex = 0;
+            var semMatch = Def.versionEnd.exec(file.name);
+            if (semMatch) {
+                var sem = semMatch[1];
+
+                if (Def.twoNums.test(sem)) {
+                    sem += '.0';
+                }
+                if (semMatch.length > 2) {
+                    sem += semMatch[2];
+                }
+
+                if (semver.valid(sem)) {
+                    file.semver = sem;
+                    file.name = file.name.substr(0, semMatch.index);
+                } else {
+                }
+            }
+
             xm.ObjectUtil.lockProps(file, ['path', 'project', 'name']);
 
             return file;
         };
-        Def.nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
-        Def.nameExpEnd = /([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
+        Def.nameExp = /^([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
+        Def.nameExpEnd = /([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
+
+        Def.versionEnd = /(?:-v?)(\d+(?:\.\d+)*)((?:-[a-z]+)?)$/i;
+        Def.twoNums = /^\d+\.\d+$/;
         return Def;
     })();
     tsd.Def = Def;
@@ -2308,6 +2372,7 @@ var tsd;
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
+    var AssertionError = require('assertion-error');
     var tv4 = require('tv4');
 
     var InstalledDef = (function () {
@@ -2323,12 +2388,8 @@ var tsd;
             xm.assertVar(file.commit, tsd.DefCommit, 'commit');
             xm.assertVar(file.commit.commitSha, 'sha1', 'commit.sha');
 
-            xm.assertVar(file.blob, tsd.DefBlob, 'blob');
-            xm.assertVar(file.blob.sha, 'sha1', 'blob.sha');
-
             this.path = file.def.path;
             this.commitSha = file.commit.commitSha;
-            this.blobSha = file.blob.sha;
         };
 
         InstalledDef.prototype.toString = function () {
@@ -2343,9 +2404,11 @@ var tsd;
             this._installed = new xm.KeyValueMap();
             this.log = xm.getLogger('Config');
             xm.assertVar(schema, 'object', 'schema');
+            xm.assert((schema.version !== tsd.Const.configVersion), 'bad schema config version', schema.version, tsd.Const.configVersion, true);
+
             this._schema = schema;
 
-            this.typingsPath = tsd.Const.typingsFolder;
+            this.path = tsd.Const.typingsFolder;
             this.version = tsd.Const.configVersion;
             this.repo = tsd.Const.definitelyRepo;
             this.ref = tsd.Const.mainBranch;
@@ -2355,9 +2418,9 @@ var tsd;
         }
         Config.prototype.resolveTypingsPath = function (relativeToDir) {
             var cfgFull = path.resolve(relativeToDir);
-            var typings = this.typingsPath.replace(/[\\\/]/g, path.sep);
+            var typings = this.path.replace(/[\\\/]/g, path.sep);
 
-            if (/^([\\\/]|\w:)/.test(this.typingsPath)) {
+            if (/^([\\\/]|\w:)/.test(this.path)) {
                 return typings;
             }
 
@@ -2429,7 +2492,7 @@ var tsd;
 
         Config.prototype.toJSON = function () {
             var json = {
-                typingsPath: this.typingsPath,
+                path: this.path,
                 version: this.version,
                 repo: this.repo,
                 ref: this.ref,
@@ -2438,11 +2501,14 @@ var tsd;
 
             this._installed.values().forEach(function (file) {
                 json.installed[file.path] = {
-                    commit: file.commitSha,
-                    blob: file.blobSha
+                    commit: file.commitSha
                 };
             });
-
+            var res = tv4.validateResult(json, this._schema);
+            if (!res.valid || res.missing.length > 0) {
+                this.log.warn(res.error.message);
+                return null;
+            }
             return json;
         };
 
@@ -2457,13 +2523,13 @@ var tsd;
             if (!res.valid || res.missing.length > 0) {
                 this.log.error(res.error.message);
                 if (res.error.dataPath) {
-                    this.log.error(res.error.dataPath);
+                    this.log.warn(res.error.dataPath);
                 }
 
                 throw (new Error('malformed config: doesn\'t comply with json-schema: ' + res.error.message + (res.error.dataPath ? ': ' + res.error.dataPath : '')));
             }
 
-            this.typingsPath = json.typingsPath;
+            this.path = json.path;
             this.version = json.version;
             this.repo = json.repo;
             this.ref = json.ref;
@@ -2473,7 +2539,6 @@ var tsd;
                     var installed = new tsd.InstalledDef(filePath);
 
                     installed.commitSha = data.commit;
-                    installed.blobSha = data.blob;
 
                     _this._installed.set(filePath, installed);
                 });
@@ -2938,6 +3003,14 @@ var xm;
         return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
     }
     xm.sha1Short = sha1Short;
+
+    var hashNormExp = /[\r\n]+/g;
+    var hashNew = '\n';
+
+    function hashNormalines(input) {
+        return sha1(input.replace(hashNormExp, hashNew));
+    }
+    xm.hashNormalines = hashNormalines;
 
     function jsonToIdent(obj) {
         var ret = '';
@@ -4213,6 +4286,7 @@ var tsd;
         }
         DefCommit.prototype.parseJSON = function (commit) {
             xm.assertVar(commit, 'object', 'commit');
+            xm.log('parseJSON');
             if (commit.sha !== this.commitSha) {
                 throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
             }
@@ -4222,6 +4296,8 @@ var tsd;
             }
 
             this.treeSha = pointer.get(commit, branch_tree_sha);
+            xm.log(commit);
+            xm.assertVar(this.treeSha, 'sha1', 'treeSha');
 
             this.hubAuthor = git.GithubUser.fromJSON(commit.author);
             this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
@@ -4240,7 +4316,7 @@ var tsd;
         };
 
         DefCommit.prototype.toString = function () {
-            return this.treeSha;
+            return this.commitSha;
         };
 
         Object.defineProperty(DefCommit.prototype, "changeDate", {

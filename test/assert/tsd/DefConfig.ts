@@ -10,7 +10,7 @@ module helper {
 		assert.ok(values, message + ': values');
 		assert.instanceOf(config, tsd.Config, message + ': config');
 
-		helper.propStrictEqual(config, values, 'typingsPath', message);
+		helper.propStrictEqual(config, values, 'path', message);
 		helper.propStrictEqual(config, values, 'version', message);
 		helper.propStrictEqual(config, values, 'repo', message);
 		helper.propStrictEqual(config, values, 'ref', message);
@@ -24,7 +24,7 @@ module helper {
 
 		var json = config.toJSON();
 		assert.jsonSchema(json, helper.getConfigSchema(), message + ': schema');
-		helper.propStrictEqual(json, values, 'typingsPath', message + ': json');
+		helper.propStrictEqual(json, values, 'path', message + ': json');
 		helper.propStrictEqual(json, values, 'version', message + ': json');
 		helper.propStrictEqual(json, values, 'repo', message + ': json');
 		helper.propStrictEqual(json, values, 'ref', message + ': json');

@@ -1,6 +1,6 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/xm/StatCounter.ts" />
-///<reference path="../../../../src/xm/io/styler.ts" />
+///<reference path="../../../../src/xm/styler.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 
 describe('xm.styler', () => {

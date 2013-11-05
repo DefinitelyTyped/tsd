@@ -33,10 +33,33 @@ module xm {
 		md5: isMd5
 	});
 
-	export function throwAssert(message:string, actual:any, expected:any, showDiff:boolean = true):void {
+	//TODO test xm.assert()
+	export function assert(pass:boolean, message:string, actual:any, expected:any, showDiff:boolean = true, ssf?:any):void {
+		if (pass) {
+			return;
+		}
+		if (message) {
+			message.replace(/\{([\w+])\}/g, (match, id) => {
+				switch (id) {
+					case 'act':
+						return xm.toValueStrim(actual);
+					case 'exp':
+						return xm.toValueStrim(expected);
+					default:
+						return '{' + id + '}';
+				}
+			});
+			message += ': ';
+		}
+		else {
+			message = '';
+		}
+		throw new AssertionError(message, {actual: actual, expected: expected, showDiff: showDiff}, ssf);
+	}
+
+	export function throwAssert(message:string, actual:any, expected:any, showDiff:boolean = true, ssf?:any):void {
 		message = message ? message + ': ' : '';
-		message += 'values not equal';
-		throw new AssertionError(message, {actual: actual, expected: expected, showDiff: showDiff});
+		throw new AssertionError(message, {actual: actual, expected: expected, showDiff: showDiff}, ssf);
 	}
 
 	/*

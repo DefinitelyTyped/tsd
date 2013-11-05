@@ -1,6 +1,6 @@
 {
-	"typingsPath": "typings",
 	"version": "v4",
+	"path": "typings",
 	"repo": "borisyankov/DefinitelyTyped",
 	"ref": "master",
 	"installed": {}

@@ -6,9 +6,9 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../DateUtil.ts" />
-///<reference path="../Logger.ts" />
-///<reference path="../inspect.ts" />
+///<reference path="DateUtil.ts" />
+///<reference path="Logger.ts" />
+///<reference path="inspect.ts" />
 ///<reference path="../../../typings/colors/colors.d.ts" />
 
 module xm {

@@ -93,7 +93,7 @@ describe('Core', () => {
 			var source = xm.FileUtil.readJSONSync(saveFile);
 			var changed = xm.FileUtil.readJSONSync(saveFile);
 
-			changed.typingsPath = 'some/other/path';
+			changed.path = 'some/other/path';
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
 			delete changed.installed['async/async.d.ts'];
 
@@ -101,7 +101,7 @@ describe('Core', () => {
 				helper.assertConfig(core.context.config, source, 'core.context.config');
 
 				//modify data
-				core.context.config.typingsPath = 'some/other/path';
+				core.context.config.path = 'some/other/path';
 				core.context.config.getInstalled()[0].path = 'bleh/blah.d.ts';
 
 				return core.saveConfig();

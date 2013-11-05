@@ -41,6 +41,7 @@ module tsd {
 
 		parseJSON(commit:any):void {
 			xm.assertVar(commit, 'object', 'commit');
+			xm.log('parseJSON');
 			if (commit.sha !== this.commitSha) {
 				throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
 			}
@@ -50,6 +51,8 @@ module tsd {
 			}
 
 			this.treeSha = pointer.get(commit, branch_tree_sha);
+			xm.log(commit);
+			xm.assertVar(this.treeSha, 'sha1', 'treeSha');
 
 			//TODO add a bit of checking? error? beh?
 			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
@@ -69,7 +72,7 @@ module tsd {
 		}
 
 		toString():string {
-			return this.treeSha;
+			return this.commitSha;
 		}
 
 		//TODO verify ths order is optimal

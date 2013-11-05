@@ -23,35 +23,68 @@ describe('Config', () => {
 	it('is instance', () => {
 		assert.isObject(config);
 	});
-	var valid = [
-		'default',
-		'valid',
-		'valid-alt',
-		'valid-minimal',
-	];
-	var invalid = [
-		['missing-typingsPath', /^malformed config:/],
-		['path-bad-chars', /^malformed config:/],
-		['path-no-project', /^malformed config:/],
-		['path-no-type', /^malformed config:/]
-	];
-	valid.forEach((name) => {
-		it('parses "' + name + '"', () => {
-			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + name + '.json');
-
-			config.parseJSON(json);
-			helper.assertConfig(config, json, name);
+	describe('schema-validate own toJSON()', () => {
+		it('return null on bad ref', () => {
+			config.ref = '$$$$$';
+			assert.isNull(config.toJSON());
+		});
+		it('return null on bad path', () => {
+			config.path = '';
+			assert.isNull(config.toJSON());
+		});
+		it('return null on bad version', () => {
+			config.version = '321xyz';
+			assert.isNull(config.toJSON());
+		});
+		it('return null on bad repo', () => {
+			config.repo = 'X ^ _ ^  X';
+			assert.isNull(config.toJSON());
 		});
 	});
-	invalid.forEach((tuple) => {
-		it('rejects "' + tuple[0] + '"', () => {
-			assert.lengthOf(tuple, 2, 'tuple');
 
-			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
-			assert.throws(() => {
-				//xm.log(json);
-				config.parseJSON(json);
-			}, (<string>tuple[1]));
+	describe('schema', () => {
+		describe('valid', () => {
+			var valid = [
+				'default',
+				'valid',
+				'valid-alt',
+				'valid-minimal',
+				'valid-short-commit'
+			];
+			valid.forEach((name) => {
+				it('parses "' + name + '"', () => {
+					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + name + '.json');
+
+					config.parseJSON(json);
+					helper.assertConfig(config, json, name);
+				});
+			});
+		});
+
+		describe('invalid', () => {
+			var invalid = [
+				['missing-path', /^malformed config:/],
+				['path-bad-chars', /^malformed config:/],
+				['path-no-project', /^malformed config:/],
+				['path-no-type', /^malformed config:/],
+				['commit-lacking-length', /^malformed config:/],
+				['commit-missing', /^malformed config:/],
+				['commit-over-length', /^malformed config:/],
+				['path-no-type', /^malformed config:/]
+			];
+			invalid.forEach((tuple) => {
+				it('rejects "' + tuple[0] + '"', () => {
+					assert.lengthOf(tuple, 2, 'tuple');
+
+					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
+					assert.throws(() => {
+						//xm.log(json);
+						config.parseJSON(json);
+
+						//borky cast
+					}, (<string>tuple[1]));
+				});
+			});
 		});
 	});
 });

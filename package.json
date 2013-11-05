@@ -1,7 +1,7 @@
 {
   "name": "tsd",
   "description": "TypeScript definition package manager.",
-  "version": "0.5.1-alpha.1",
+  "version": "0.5.1-alpha.2",
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
     "type": "git",
@@ -43,7 +43,7 @@
     "async": "0.2.9",
     "underscore": "1.5.1",
     "mkdirp": "0.3.5",
-    "semver": "2.1.0",
+    "semver": "~2.1.0",
     "github": "0.1.10",
     "tv4": "~1.0.8",
     "uri-templates": "0.1.1",
@@ -72,7 +72,7 @@
     "grunt-execute": "0.1.5",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
     "mocha": "~1.13.0",
-    "mocha-unfunk-reporter": "~0.3.3",
+    "mocha-unfunk-reporter": "~0.3.4",
     "chai": "git://github.com/Bartvds/chai/#ec97fb27707253ddf3714cccc9f1f6c3afb20cca",
     "chai-fs": "0.0.1",
     "chai-fuzzy": "1.3.0",

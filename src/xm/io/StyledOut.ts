@@ -1,82 +1,12 @@
 /// <reference path="../ObjectUtil.ts" />
 /// <reference path="../assertVar.ts" />
-/// <reference path="styler.ts" />
+/// <reference path="../styler.ts" />
+/// <reference path="../encode.ts" />
 /// <reference path="writer.ts" />
 
 module xm {
 
 	var util = require('util');
-	var jsesc = require('jsesc');
-
-	export module encode {
-
-		export var stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-		export var stringEsc = {
-			quotes: 'double'
-		};
-		export var stringEscWrap = {
-			json: true,
-			quotes: 'double',
-			wrap: true
-		};
-		export var stringQuote = '"';
-
-		export var identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-		export var identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-		export var identEscWrap = {
-			quotes: 'double',
-			wrap: true
-		};
-		export var intExp = /^\d+$/;
-
-		export function wrapIfComplex(input:string):string {
-			if (!identAnyExp.test(String(input))) {
-				return jsesc(input, stringEscWrap);
-			}
-			return input;
-		}
-
-		export var escapeRep = '\\$&';
-		export var escapeAdd = '\\$&$&';
-
-		export function getReplacerFunc(chars:string[], values:string[], addSelf:boolean = false) {
-			return function (match) {
-				var i = chars.indexOf(match);
-				if (i > -1 && i < values.length) {
-					return values[i] + (addSelf ? match : '');
-				}
-				return match;
-			};
-		}
-		function splitFix(chars:string):string[] {
-			return chars.split('').map((char:string) => {
-				return '\\' + char;
-			});
-		}
-
-		//TODO is there no better way then this?
-		export var nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
-		export var nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
-		export var nonPrintVal = splitFix('bfnrtv0\\');
-		export var nonPrintRep = getReplacerFunc(nonPrintChr, nonPrintVal);
-
-		export var nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
-		export var nonPrintNotNLChr = '\b\f\t\v\\'.split('');
-		export var nonPrintNotNLVal = splitFix('bftv0\\');
-		export var nonPrintNotNLRep = getReplacerFunc(nonPrintNotNLChr, nonPrintNotNLVal);
-
-		export var nonPrintNLExp = /(?:\r\n)|\n|\r/g;
-		export var nonPrintNLChr = ['\r\n', '\n', '\r'];
-		export var nonPrintNLVal = ['\\r\\n', '\\n', '\\r'];
-		export var nonPrintNLRep = getReplacerFunc(nonPrintNLChr, nonPrintNLVal);
-
-		export function stringDebug(input:string, newline:boolean = false):string {
-			if (newline) {
-				return input.replace(nonPrintNotNLExp, nonPrintNotNLRep).replace(nonPrintNLExp, getReplacerFunc(nonPrintNLChr, nonPrintNLVal, true));
-			}
-			return input.replace(nonPrintExp, nonPrintRep);
-		}
-	}
 
 	/*
 	 StyledOut: composite log text writer with semantic chainable api and swappable components (unfunkable)
@@ -247,7 +177,7 @@ module xm {
 
 		//TODO add test?
 		stringWrap(str:string):StyledOut {
-			this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(str)));
+			this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
 			return this;
 		}
 
@@ -255,7 +185,7 @@ module xm {
 
 		//TODO add test/
 		label(label:string):StyledOut {
-			this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(label) + ': '));
+			this._writer.write(this._styler.plain(xm.wrapIfComplex(label) + ': '));
 			return this;
 		}
 
