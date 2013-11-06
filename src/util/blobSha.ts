@@ -44,11 +44,11 @@ module git {
 					if (shaRaw !== shaNormal) {
 						ctx.out.indent().success(shaRaw).line();
 						ctx.out.indent().error(shaNormal).line();
-						ctx.out.line(ansidiff.chars(xm.stringDebug(raw, true), xm.stringDebug(normalised, true)));
+						ctx.out.line(ansidiff.chars(xm.escapeControl(raw, true), xm.escapeControl(normalised, true)));
 					}
 					else {
 						ctx.out.indent().success(shaRaw).line();
-						ctx.out.indent().success(xm.stringDebug(raw, true)).line();
+						ctx.out.indent().success(xm.escapeControl(raw, true)).line();
 					}
 
 				});

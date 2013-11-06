@@ -131,6 +131,11 @@ var xm;
     }
     xm.isBoolean = isBoolean;
 
+    function isArrayLike(obj) {
+        return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
+    }
+    xm.isArrayLike = isArrayLike;
+
     function isOk(obj) {
         return !!obj;
     }
@@ -170,7 +175,7 @@ var xm;
     function getTypeOfWrap(add) {
         var typeMap = getTypeOfMap(add);
 
-        return function isType(obj, type) {
+        return function isTypeWrap(obj, type) {
             if (hasOwnProp(typeMap, type)) {
                 return typeMap[type].call(null, obj);
             }
@@ -178,6 +183,172 @@ var xm;
         };
     }
     xm.getTypeOfWrap = getTypeOfWrap;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var util = require('util');
+
+    var stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var stringQuote = '"';
+
+    var identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
+    var intExp = /^\d+$/;
+
+    var escapeRep = '\\$&';
+    var escapeAdd = '\\$&$&';
+
+    xm.singleQuoteExp = /([^'\\]*(?:\\.[^'\\]*)*)'/g;
+    xm.doubleQuoteExp = /([^"\\]*(?:\\.[^"\\]*)*)"/g;
+
+    function getReplacerFunc(matches, values) {
+        return function (match) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return values[i];
+            }
+            return match;
+        };
+    }
+    xm.getReplacerFunc = getReplacerFunc;
+
+    function getEscaper(vars) {
+        var values = (xm.isString(vars.values) ? vars.values.split('') : vars.values);
+        var matches = (xm.isString(vars.matches) ? vars.matches.split('') : vars.matches);
+        var replacer = function (match) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return '\\' + values[i];
+            }
+            return match;
+        };
+
+        var exp = new RegExp('[' + values.map(function (char) {
+            return '\\' + char;
+        }).join('') + ']', 'g');
+
+        return function (input) {
+            return input.replace(exp, replacer);
+        };
+    }
+    xm.getEscaper = getEscaper;
+
+    function getMultiReplacer(vars) {
+        var values = vars.values;
+        var matches = vars.matches;
+        var replacer = function (match) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return values[i];
+            }
+            return match;
+        };
+
+        var exp = new RegExp(vars.exps.map(function (char) {
+            return '(?:' + char + ')';
+        }).join('|'), 'g');
+
+        return function (input) {
+            return input.replace(exp, replacer);
+        };
+    }
+    xm.getMultiReplacer = getMultiReplacer;
+
+    xm.unprintCC = getEscaper({
+        matches: '\b\f\n\r\t\v\0',
+        values: 'bfnrtv0'
+    });
+    xm.unprintNL = getEscaper({
+        matches: '\r\n',
+        values: 'rn'
+    });
+    xm.unprintNotNL = getEscaper({
+        matches: '\b\f\t\v\0',
+        values: 'bftv0'
+    });
+    xm.unprintNLS = getMultiReplacer({
+        exps: ['\\r\\n', '\\n', '\\r'],
+        matches: ['\r\n', '\n', '\r'],
+        values: ['\\r\\n\r\n', '\\n\n', '\\r\r']
+    });
+
+    function quoteSingle(input) {
+        return input.replace(xm.singleQuoteExp, '$1\\\'');
+    }
+    xm.quoteSingle = quoteSingle;
+
+    function quoteDouble(input) {
+        return input.replace(xm.doubleQuoteExp, '$1\\"');
+    }
+    xm.quoteDouble = quoteDouble;
+
+    function quoteSingleWrap(input) {
+        return '\'' + input.replace(xm.singleQuoteExp, '$1\\\'') + '\'';
+    }
+    xm.quoteSingleWrap = quoteSingleWrap;
+
+    function quoteDoubleWrap(input) {
+        return '"' + input.replace(xm.doubleQuoteExp, '$1\\"') + '"';
+    }
+    xm.quoteDoubleWrap = quoteDoubleWrap;
+
+    function escapeControl(input, reAddNewlines) {
+        if (typeof reAddNewlines === "undefined") { reAddNewlines = false; }
+        input = String(input);
+        if (reAddNewlines) {
+            return xm.unprintNLS(xm.unprintNotNL(input));
+        }
+        return xm.unprintCC(input);
+    }
+    xm.escapeControl = escapeControl;
+
+    function wrapQuotes(input, double) {
+        input = escapeControl(input);
+        if (double) {
+            return quoteDoubleWrap(input);
+        }
+        return quoteSingleWrap(input);
+    }
+    xm.wrapQuotes = wrapQuotes;
+
+    function wrapIfComplex(input, double) {
+        input = String(input);
+        if (!identAnyExp.test(input)) {
+            return wrapQuotes(xm.unprintCC(input), double);
+        }
+        return input;
+    }
+    xm.wrapIfComplex = wrapIfComplex;
+
+    function trim(value, cutoff) {
+        if (typeof cutoff === "undefined") { cutoff = 60; }
+        if (cutoff && value.length > cutoff) {
+            return value.substr(0, cutoff) + '...';
+        }
+        return value;
+    }
+    xm.trim = trim;
+
+    function trimWrap(value, cutoff, double) {
+        if (typeof cutoff === "undefined") { cutoff = 60; }
+        if (cutoff && value.length > cutoff) {
+            return xm.wrapQuotes(value.substr(0, cutoff), double) + '...';
+        }
+        return xm.wrapQuotes(value, double);
+    }
+    xm.trimWrap = trimWrap;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -195,12 +366,10 @@ var xm;
     }
     xm.getFuncLabel = getFuncLabel;
 
-    function toValueStrim(obj, depth) {
+    function toValueStrim(obj, depth, cutoff) {
         if (typeof depth === "undefined") { depth = 4; }
+        if (typeof cutoff === "undefined") { cutoff = 80; }
         var type = xm.typeOf(obj);
-
-        var strCut = 40;
-        var objCut = 50;
 
         depth--;
 
@@ -214,7 +383,7 @@ var xm;
             case 'number':
                 return obj.toString(10);
             case 'string':
-                return trimLine(obj, strCut);
+                return xm.trimWrap(obj, cutoff);
             case 'date':
                 return obj.toISOString();
             case 'function':
@@ -224,34 +393,25 @@ var xm;
                 if (depth <= 0) {
                     return '<maximum recursion>';
                 }
-                return '[' + trimLine(obj.map(function (value) {
-                    return toValueStrim(value, depth);
-                }).join(','), objCut, false) + ']';
+
+                return '[' + xm.trim(obj.map(function (value) {
+                    return xm.trim(value, depth);
+                }).join(','), cutoff) + ']';
             }
             case 'object': {
                 if (depth <= 0) {
                     return '<maximum recursion>';
                 }
-                return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
-                    return trimLine(key) + ':' + toValueStrim(obj[key], depth);
-                }).join(','), objCut, false) + '}';
+
+                return xm.trim(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
+                    return xm.trim(key) + ':' + toValueStrim(obj[key], depth);
+                }).join(','), cutoff) + '}';
             }
             default:
                 throw (new Error('toValueStrim: cannot serialise type: ' + type));
         }
     }
     xm.toValueStrim = toValueStrim;
-
-    function trimLine(value, cutoff, quotes) {
-        if (typeof cutoff === "undefined") { cutoff = 30; }
-        if (typeof quotes === "undefined") { quotes = true; }
-        value = String(value).replace('\r', '\\r').replace('\n', '\\n').replace('\t', '\\t');
-        if (value.length > cutoff - 2) {
-            value = value.substr(0, cutoff - 5) + '...';
-        }
-        return quotes ? '"' + value + '"' : value;
-    }
-    xm.trimLine = trimLine;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -278,11 +438,34 @@ var xm;
         md5: isMd5
     });
 
-    function throwAssert(message, actual, expected, showDiff) {
+    function assert(pass, message, actual, expected, showDiff, ssf) {
         if (typeof showDiff === "undefined") { showDiff = true; }
-        message = message ? message + ': ' : '';
-        message += 'values not equal';
-        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff });
+        if (pass) {
+            return;
+        }
+        if (xm.isString(message)) {
+            message = message.replace(/\{([\w]+)\}/gi, function (match, id) {
+                switch (id) {
+                    case 'act':
+                    case 'actual':
+                        return xm.toValueStrim(actual);
+                    case 'exp':
+                    case 'expected':
+                        return xm.toValueStrim(expected);
+                    default:
+                        return match;
+                }
+            });
+        } else {
+            message = '';
+        }
+        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff }, ssf);
+    }
+    xm.assert = assert;
+
+    function throwAssert(message, actual, expected, showDiff, ssf) {
+        if (typeof showDiff === "undefined") { showDiff = true; }
+        xm.assert(false, message, actual, expected, showDiff, ssf);
     }
     xm.throwAssert = throwAssert;
 
@@ -294,25 +477,26 @@ var xm;
         var valueKind = xm.typeOf(value);
         var typeKind = xm.typeOf(type);
 
-        if (valueKind === 'undefined' || valueKind === 'null') {
+        if (!xm.isValid(value)) {
+            xm.log('valueKind', valueKind);
             if (!opt) {
-                throw new AssertionError('expected "' + label + '" to be defined as a ' + xm.toValueStrim(type) + ' but got "' + value + '"');
+                throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be defined as a ' + xm.toValueStrim(type) + ' but got a ' + (valueKind === 'number' ? 'NaN' : xm.wrapQuotes(valueKind)));
             }
         } else if (typeKind === 'function') {
             if (!(value instanceof type)) {
-                throw new AssertionError('expected "' + label + '" to be instanceof ' + xm.toValueStrim(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be instanceof ' + xm.getFuncLabel(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if (typeKind === 'string') {
             if (xm.hasOwnProp(typeOfAssert, type)) {
                 var check = typeOfAssert[type];
                 if (!check(value)) {
-                    throw new AssertionError('expected "' + label + '" to be a ' + xm.toValueStrim(type) + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                    throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be a ' + xm.wrapQuotes(type) + ' but got a ' + xm.wrapQuotes(valueKind) + ': ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new AssertionError('unknown type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type) + ' for ' + xm.toValueStrim(value) + '');
             }
         } else {
-            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label) + '');
         }
     }
     xm.assertVar = assertVar;
@@ -1098,81 +1282,6 @@ var xm;
 var xm;
 (function (xm) {
     var util = require('util');
-    var jsesc = require('jsesc');
-
-    (function (encode) {
-        encode.stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.stringEsc = {
-            quotes: 'double'
-        };
-        encode.stringEscWrap = {
-            json: true,
-            quotes: 'double',
-            wrap: true
-        };
-        encode.stringQuote = '"';
-
-        encode.identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-        encode.identEscWrap = {
-            quotes: 'double',
-            wrap: true
-        };
-        encode.intExp = /^\d+$/;
-
-        function wrapIfComplex(input) {
-            if (!encode.identAnyExp.test(String(input))) {
-                return jsesc(input, encode.stringEscWrap);
-            }
-            return input;
-        }
-        encode.wrapIfComplex = wrapIfComplex;
-
-        encode.escapeRep = '\\$&';
-        encode.escapeAdd = '\\$&$&';
-
-        function getReplacerFunc(chars, values, addSelf) {
-            if (typeof addSelf === "undefined") { addSelf = false; }
-            return function (match) {
-                var i = chars.indexOf(match);
-                if (i > -1 && i < values.length) {
-                    return values[i] + (addSelf ? match : '');
-                }
-                return match;
-            };
-        }
-        encode.getReplacerFunc = getReplacerFunc;
-        function splitFix(chars) {
-            return chars.split('').map(function (char) {
-                return '\\' + char;
-            });
-        }
-
-        encode.nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
-        encode.nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
-        encode.nonPrintVal = splitFix('bfnrtv0\\');
-        encode.nonPrintRep = getReplacerFunc(encode.nonPrintChr, encode.nonPrintVal);
-
-        encode.nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
-        encode.nonPrintNotNLChr = '\b\f\t\v\\'.split('');
-        encode.nonPrintNotNLVal = splitFix('bftv0\\');
-        encode.nonPrintNotNLRep = getReplacerFunc(encode.nonPrintNotNLChr, encode.nonPrintNotNLVal);
-
-        encode.nonPrintNLExp = /(?:\r\n)|\n|\r/g;
-        encode.nonPrintNLChr = ['\r\n', '\n', '\r'];
-        encode.nonPrintNLVal = ['\\r\\n', '\\n', '\\r'];
-        encode.nonPrintNLRep = getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal);
-
-        function stringDebug(input, newline) {
-            if (typeof newline === "undefined") { newline = false; }
-            if (newline) {
-                return input.replace(encode.nonPrintNotNLExp, encode.nonPrintNotNLRep).replace(encode.nonPrintNLExp, getReplacerFunc(encode.nonPrintNLChr, encode.nonPrintNLVal, true));
-            }
-            return input.replace(encode.nonPrintExp, encode.nonPrintRep);
-        }
-        encode.stringDebug = stringDebug;
-    })(xm.encode || (xm.encode = {}));
-    var encode = xm.encode;
 
     var StyledOut = (function () {
         function StyledOut(writer, styler) {
@@ -1309,12 +1418,12 @@ var xm;
         };
 
         StyledOut.prototype.stringWrap = function (str) {
-            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(str)));
+            this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
             return this;
         };
 
         StyledOut.prototype.label = function (label) {
-            this._writer.write(this._styler.plain(xm.encode.wrapIfComplex(label) + ': '));
+            this._writer.write(this._styler.plain(xm.wrapIfComplex(label) + ': '));
             return this;
         };
 
@@ -2369,7 +2478,7 @@ var git;
                 }
 
                 return FS.read(filePath, { flags: 'rb' }).then(function (buffer) {
-                    if (buffer.length == 0) {
+                    if (buffer.length === 0) {
                         ctx.out.indent().error('empty file').line();
                     }
                     var raw = buffer.toString('utf8');
@@ -2380,10 +2489,10 @@ var git;
                     if (shaRaw !== shaNormal) {
                         ctx.out.indent().success(shaRaw).line();
                         ctx.out.indent().error(shaNormal).line();
-                        ctx.out.line(ansidiff.chars(xm.encode.stringDebug(raw, true), xm.encode.stringDebug(normalised, true)));
+                        ctx.out.line(ansidiff.chars(xm.escapeControl(raw, true), xm.escapeControl(normalised, true)));
                     } else {
                         ctx.out.indent().success(shaRaw).line();
-                        ctx.out.indent().success(xm.encode.stringDebug(raw, true)).line();
+                        ctx.out.indent().success(xm.escapeControl(raw, true)).line();
                     }
                 });
             })).then(function () {

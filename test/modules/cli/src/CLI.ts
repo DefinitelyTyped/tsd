@@ -63,27 +63,36 @@ describe('CLI Query', () => {
 		return args;
 	}
 
+	var trimHeaderExp = /^[.\s]*?(-> tsd.*)\s+?-*\s*/;
+
+	function trimHeader(str:string):string {
+		return str.replace(trimHeaderExp, '');
+	}
+
 	function assertCLIResult(result:helper.RunCLIResult, test, info:helper.TestInfo, args):void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
 
-		fs.writeFileSync(info.stdoutFile, result.stdout);
+		var stdout = trimHeader(result.stdout.toString('utf8'));
+		var stderr = trimHeader(result.stderr.toString('utf8'));
+
+		fs.writeFileSync(info.stdoutFile, stdout, 'utf8');
 		if (result.stderr.length > 0) {
-			fs.writeFileSync(info.stderrFile, result.stderr);
+			fs.writeFileSync(info.stderrFile, stderr, 'utf8');
 		}
 		if (result.error) {
-			fs.writeFileSync(info.errorFile, result.error);
+			xm.FileUtil.writeJSONSync(info.errorFile, result.error);
 		}
 
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
 		assert.operator(stdoutExpect.length, '>=', 0, 'stdoutExpect.length');
 
-		assert.strictEqual(result.stdout.toString('utf8'), stdoutExpect, 'result.stdout');
+		assert.strictEqual(stdout, stdoutExpect, 'result.stdout');
 
 		if (fs.existsSync(info.stderrExpect)) {
 			var stderrExpect = fs.readFileSync(info.stderrExpect, 'utf8');
-			assert.strictEqual(result.stderr.toString('utf8'), stderrExpect, 'result.stderr');
+			assert.strictEqual(stderr, stderrExpect, 'result.stderr');
 		}
 		if (fs.existsSync(info.errorExpect)) {
 			var errorExpect = xm.FileUtil.readJSONSync(info.errorExpect);

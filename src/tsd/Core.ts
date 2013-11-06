@@ -89,6 +89,9 @@ module tsd {
 			this.stats.count('index-branch-get');
 
 			this.gitAPI.getBranch(this.context.config.ref).then((branchData:any) => {
+				if (!branchData) {
+					d.reject(new Error('cannot load branch data'));
+				}
 				var sha = pointer.get(branchData, branch_tree);
 				if (!sha) {
 					this.stats.count('index-branch-get-fail');
@@ -289,16 +292,21 @@ module tsd {
 			var d:Q.Deferred<string> = Q.defer();
 
 			var target = this.context.paths.configFile;
-			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
 			var dir = path.dirname(target);
 
-			if (!json || json.length === 0) {
-				return Q.reject(new Error('saveConfig retrieved empty json'));
+			var obj = this.context.config.toJSON();
+			if (!obj) {
+				return Q.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
+			}
+			var json = JSON.stringify(this.context.config.toJSON(), null, 2);
+			if (!json) {
+				return Q.reject(new Error('config could not be serialised to JSON'));
 			}
 
 			xm.FileUtil.mkdirCheckQ(dir, true).then(() => {
 				return FS.write(target, json).then(() => {
-					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not)
+					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).
+					//this might me a Node + Windows issue, or just my crappy workstation
 					return FS.stat(target);
 				}).then(() => {
 					return Q.delay(100);
@@ -306,7 +314,7 @@ module tsd {
 					//now do the real check
 					return FS.stat(target).then((stat) => {
 						if (stat.size === 0) {
-							throw new Error('saveConfig write zero bytes to: ' + target);
+							throw new Error('saveConfig written zero bytes to: ' + target + ' (looks lie');
 						}
 					});
 				});

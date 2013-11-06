@@ -107,7 +107,7 @@ module.exports = function (grunt) {
 				}
 			},
 			//use this to test stuff
-			dev_01: {
+			dev_hist: {
 				command: [
 					'node',
 					'./build/cli.js',
@@ -195,7 +195,7 @@ module.exports = function (grunt) {
 
 	//gtx.alias('run', ['build', 'demo:help']);
 	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
-	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
+	gtx.alias('run', ['build', 'shell:dev_hist']);
 
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');

@@ -38,18 +38,19 @@ module xm {
 		if (pass) {
 			return;
 		}
-		if (message) {
-			message.replace(/\{([\w+])\}/g, (match, id) => {
+		if (xm.isString(message)) {
+			message = message.replace(/\{([\w]+)\}/gi, (match, id) => {
 				switch (id) {
 					case 'act':
+					case 'actual':
 						return xm.toValueStrim(actual);
 					case 'exp':
+					case 'expected':
 						return xm.toValueStrim(expected);
 					default:
-						return '{' + id + '}';
+						return match;
 				}
 			});
-			message += ': ';
 		}
 		else {
 			message = '';
@@ -58,15 +59,15 @@ module xm {
 	}
 
 	export function throwAssert(message:string, actual:any, expected:any, showDiff:boolean = true, ssf?:any):void {
-		message = message ? message + ': ' : '';
-		throw new AssertionError(message, {actual: actual, expected: expected, showDiff: showDiff}, ssf);
+		xm.assert(false, message, actual, expected, showDiff, ssf);
 	}
 
 	/*
 	 assertVar: assert a variable (like a function argument) and throw informative error on assertion failure
 	 */
 	//TODO expand validation options, add RegExp /string length (use extended xm.typeOf.ts)
-	//TODO use extended xm.typeOf (more types)
+	//TODO use extended xm.typeOf (more types and meta types)
+	//TODO clean line-length insanity
 	export function assertVar(value:any, type:any, label:string, opt:boolean = false):void {
 		if (arguments.length < 3) {
 			throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');
@@ -74,30 +75,51 @@ module xm {
 		var valueKind = xm.typeOf(value);
 		var typeKind = xm.typeOf(type);
 
-		// undefined or null
-		if (valueKind === 'undefined' || valueKind === 'null') {
+		// undefined or null or NaN
+		if (!xm.isValid(value)) {
 			if (!opt) {
-				throw new AssertionError('expected "' + label + '" to be defined as a ' + xm.toValueStrim(type) + ' but got "' + value + '"');
+				throw new AssertionError(
+					'expected ' + xm.wrapQuotes(label, true)
+						+ ' to be defined as a ' + xm.toValueStrim(type)
+						+ ' but got ' + (valueKind === 'number' ? 'NaN' : valueKind)
+				);
 			}
 		}
 		else if (typeKind === 'function') {
 			if (!(value instanceof type)) {
-				throw new AssertionError('expected "' + label + '" to be instanceof ' + xm.toValueStrim(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+				throw new AssertionError(
+					'expected ' + xm.wrapQuotes(label, true)
+						+ ' to be instanceof ' + xm.getFuncLabel(type)
+						+ ' but is a ' + xm.getFuncLabel(value.constructor)
+						+ ': ' + xm.toValueStrim(value))
+					;
 			}
 		}
 		else if (typeKind === 'string') {
 			if (xm.hasOwnProp(typeOfAssert, type)) {
 				var check = typeOfAssert[type];
 				if (!check(value)) {
-					throw new AssertionError('expected "' + label + '" to be a ' + xm.toValueStrim(type) + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+					throw new AssertionError(
+						'expected ' + xm.wrapQuotes(label, true)
+							+ ' to be a ' + xm.wrapQuotes(type, true)
+							+ ' but got a ' + xm.wrapQuotes(valueKind, true)
+							+ ': ' + xm.toValueStrim(value)
+					);
 				}
 			}
 			else {
-				throw new AssertionError('unknown type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+				throw new AssertionError(
+					'unknown type-assertion parameter ' + xm.wrapQuotes(type, true)
+						+ ' for ' + xm.toValueStrim(value) + ''
+				);
 			}
 		}
 		else {
-			throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+			throw new AssertionError(
+				'bad type-assertion parameter '
+					+ xm.toValueStrim(type) + ' for '
+					+ xm.wrapQuotes(label, true) + ''
+			);
 		}
-	}	//make a compact debug string from any object
+	}
 }

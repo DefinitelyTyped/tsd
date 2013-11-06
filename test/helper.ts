@@ -4,8 +4,6 @@
 ///<reference path="assert/xm/unordered.ts" />
 ///<reference path="../src/xm/data/PackageJSON.ts" />
 
-var global = this;
-
 module helper {
 	'use strict';
 
@@ -100,6 +98,30 @@ module helper {
 		assert.instanceOf(act, Buffer, msg + ': ' + act);
 		assert.instanceOf(exp, Buffer, msg + ': ' + exp);
 		assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');
+	}
+
+	//hackish to get more ingot then assert.throws()
+	export function assertError(exec:() => void, expected:any, msg?:string) {
+		msg = (msg ? msg + ': ' : '');
+		try {
+			exec();
+		}
+		catch (e) {
+			var errorMsg:any = e.message.toString().match(/.*/m);
+			if (errorMsg) {
+				errorMsg = errorMsg[0];
+				if (xm.isRegExp(expected)) {
+					if (!expected.test(errorMsg)) {
+						assert.strictEqual(errorMsg, '', msg + 'expected to match RegExp: ' + expected);
+					}
+				}
+				else {
+					assert.strictEqual(errorMsg, expected, msg + 'match message');
+				}
+				return;
+			}
+		}
+		assert.strictEqual('', expected.toString(), msg + 'expected to throw and match ' + expected);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

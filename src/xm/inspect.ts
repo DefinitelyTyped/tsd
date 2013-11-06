@@ -26,11 +26,8 @@ module xm {
 		return '<anonymous>';
 	}
 
-	export function toValueStrim(obj:any, depth:number = 4):string {
+	export function toValueStrim(obj:any, depth:number = 4, cutoff:number = 80):string {
 		var type = xm.typeOf(obj);
-
-		var strCut = 40;
-		var objCut = 50;
 
 		depth--;
 
@@ -44,7 +41,7 @@ module xm {
 			case 'number' :
 				return obj.toString(10);
 			case 'string' :
-				return trimLine(obj, strCut);
+				return trimWrap(obj, cutoff, true);
 			case 'date' :
 				return obj.toISOString();
 			case 'function' :
@@ -55,30 +52,23 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
-				//TODO optimise deptp: doent loop over limit
-				return '[' + trimLine(obj.map((value) => {
-					return toValueStrim(value, depth);
-				}).join(','), objCut, false) + ']';
+				//TODO optimise depth: doesn't loop over limit
+				return '[' + trim(obj.map((value) => {
+					return trim(value, depth);
+				}).join(','), cutoff) + ']';
 			}
 			case 'object' :
 			{
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
-				//TODO optimise deptp: doent loop over limit
-				return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map((key) => {
-					return trimLine(key) + ':' + toValueStrim(obj[key], depth);
-				}).join(','), objCut, false) + '}';
+				//TODO optimise depth: doesn't loop over limit
+				return trim(String(obj) + ' {' + Object.keys(obj).sort().map((key) => {
+					return trim(key) + ':' + toValueStrim(obj[key], depth);
+				}).join(','), cutoff) + '}';
 			}
 			default :
 				throw (new Error('toValueStrim: cannot serialise type: ' + type));
 		}
-	}
-
-	export function trimLine(value:string, cutoff:number = 30, wrapQuotes:boolean = true):string {
-		if (value.length > cutoff - 2) {
-			value = value.substr(0, cutoff - 5) + '...';
-		}
-		return xm.wrapIfComplex(value, {quotes: wrapQuotes});
 	}
 }

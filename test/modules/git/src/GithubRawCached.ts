@@ -24,6 +24,7 @@ describe('git.GithubRawCached', () => {
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
 		raw = new git.GithubRawCached(repo, cacheDir);
 	});
+
 	afterEach(() => {
 		context = null;
 		repo = null;
@@ -40,9 +41,9 @@ describe('git.GithubRawCached', () => {
 	});
 
 	it('should throw on bad params', () => {
-		assert.throws(() => {
+		helper.assertError(() => {
 			raw = new git.GithubRawCached(null, null);
-		}, /^expected "repo" to be defined as a GithubRepo\(.*?\) but got "null"/);
+		}, 'expected "repo" to be defined as a GithubRepo(ownerName, projectName) but got null');
 	});
 
 	it('should have default options', () => {

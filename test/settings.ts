@@ -108,4 +108,5 @@ module helper {
 	xm.ObjectUtil.deepFreeze(settings);
 
 	xm.log.debug('helper.settings', settings);
+	xm.log.debug('helper.settings.cache', CacheMode[settings.cache]);
 }

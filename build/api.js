@@ -593,6 +593,11 @@ var xm;
     }
     xm.isBoolean = isBoolean;
 
+    function isArrayLike(obj) {
+        return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
+    }
+    xm.isArrayLike = isArrayLike;
+
     function isOk(obj) {
         return !!obj;
     }
@@ -632,7 +637,7 @@ var xm;
     function getTypeOfWrap(add) {
         var typeMap = getTypeOfMap(add);
 
-        return function isType(obj, type) {
+        return function isTypeWrap(obj, type) {
             if (hasOwnProp(typeMap, type)) {
                 return typeMap[type].call(null, obj);
             }
@@ -717,78 +722,168 @@ var xm;
 var xm;
 (function (xm) {
     var util = require('util');
-    var jsesc = require('jsesc');
 
     var stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-    var stringEsc = {
-        quotes: 'double'
-    };
-    var stringEscWrap = {
-        json: true,
-        quotes: 'double',
-        wrap: true
-    };
     var stringQuote = '"';
 
     var identExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
     var identAnyExp = /^[a-z0-9](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
-    var identEscWrap = {
-        quotes: 'double',
-        wrap: true
-    };
     var intExp = /^\d+$/;
 
     var escapeRep = '\\$&';
     var escapeAdd = '\\$&$&';
 
-    function splitFix(chars) {
-        return chars.split('').map(function (char) {
-            return '\\' + char;
-        });
-    }
+    xm.singleQuoteExp = /([^'\\]*(?:\\.[^'\\]*)*)'/g;
+    xm.doubleQuoteExp = /([^"\\]*(?:\\.[^"\\]*)*)"/g;
 
-    function getReplacerFunc(chars, values, addSelf) {
-        if (typeof addSelf === "undefined") { addSelf = false; }
+    function getReplacerFunc(matches, values) {
         return function (match) {
-            var i = chars.indexOf(match);
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
             if (i > -1 && i < values.length) {
-                return values[i] + (addSelf ? match : '');
+                return values[i];
             }
             return match;
         };
     }
+    xm.getReplacerFunc = getReplacerFunc;
 
-    var nonPrintExp = /[\b\f\n\r\t\v\0\\]/g;
-    var nonPrintChr = '\b\f\n\r\t\v\0\\'.split('');
-    var nonPrintVal = splitFix('bfnrtv0\\');
-    var nonPrintRep = getReplacerFunc(nonPrintChr, nonPrintVal);
+    function getEscaper(vars) {
+        var values = (xm.isString(vars.values) ? vars.values.split('') : vars.values);
+        var matches = (xm.isString(vars.matches) ? vars.matches.split('') : vars.matches);
+        var replacer = function (match) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return '\\' + values[i];
+            }
+            return match;
+        };
 
-    var nonPrintNotNLExp = /[\b\f\t\v\0\\]/g;
-    var nonPrintNotNLChr = '\b\f\t\v\\'.split('');
-    var nonPrintNotNLVal = splitFix('bftv0\\');
-    var nonPrintNotNLRep = getReplacerFunc(nonPrintNotNLChr, nonPrintNotNLVal);
+        var exp = new RegExp('[' + values.map(function (char) {
+            return '\\' + char;
+        }).join('') + ']', 'g');
 
-    var nonPrintNLExp = /[\r\n]/g;
-    var nonPrintNLChr = ['\n', '\r'];
-    var nonPrintNLVal = ['\\n', '\\r'];
-    var nonPrintNLRep = getReplacerFunc(nonPrintNLChr, nonPrintNLVal);
+        return function (input) {
+            return input.replace(exp, replacer);
+        };
+    }
+    xm.getEscaper = getEscaper;
 
-    function wrapIfComplex(input, args) {
-        if (!identAnyExp.test(String(input))) {
-            return jsesc(input, args || stringEscWrap);
+    function getMultiReplacer(vars) {
+        var values = vars.values;
+        var matches = vars.matches;
+        var replacer = function (match) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            var i = matches.indexOf(match);
+            if (i > -1 && i < values.length) {
+                return values[i];
+            }
+            return match;
+        };
+
+        var exp = new RegExp(vars.exps.map(function (char) {
+            return '(?:' + char + ')';
+        }).join('|'), 'g');
+
+        return function (input) {
+            return input.replace(exp, replacer);
+        };
+    }
+    xm.getMultiReplacer = getMultiReplacer;
+
+    xm.unprintCC = getEscaper({
+        matches: '\b\f\n\r\t\v\0',
+        values: 'bfnrtv0'
+    });
+    xm.unprintNL = getEscaper({
+        matches: '\r\n',
+        values: 'rn'
+    });
+    xm.unprintNotNL = getEscaper({
+        matches: '\b\f\t\v\0',
+        values: 'bftv0'
+    });
+    xm.unprintNLS = getMultiReplacer({
+        exps: ['\\r\\n', '\\n', '\\r'],
+        matches: ['\r\n', '\n', '\r'],
+        values: ['\\r\\n\r\n', '\\n\n', '\\r\r']
+    });
+
+    function quoteSingle(input) {
+        return input.replace(xm.singleQuoteExp, '$1\\\'');
+    }
+    xm.quoteSingle = quoteSingle;
+
+    function quoteDouble(input) {
+        return input.replace(xm.doubleQuoteExp, '$1\\"');
+    }
+    xm.quoteDouble = quoteDouble;
+
+    function quoteSingleWrap(input) {
+        return '\'' + input.replace(xm.singleQuoteExp, '$1\\\'') + '\'';
+    }
+    xm.quoteSingleWrap = quoteSingleWrap;
+
+    function quoteDoubleWrap(input) {
+        return '"' + input.replace(xm.doubleQuoteExp, '$1\\"') + '"';
+    }
+    xm.quoteDoubleWrap = quoteDoubleWrap;
+
+    function escapeControl(input, reAddNewlines) {
+        if (typeof reAddNewlines === "undefined") { reAddNewlines = false; }
+        input = String(input);
+        if (reAddNewlines) {
+            return xm.unprintNLS(xm.unprintNotNL(input));
+        }
+        return xm.unprintCC(input);
+    }
+    xm.escapeControl = escapeControl;
+
+    function wrapQuotes(input, double) {
+        input = escapeControl(input);
+        if (double) {
+            return quoteDoubleWrap(input);
+        }
+        return quoteSingleWrap(input);
+    }
+    xm.wrapQuotes = wrapQuotes;
+
+    function wrapIfComplex(input, double) {
+        input = String(input);
+        if (!identAnyExp.test(input)) {
+            return wrapQuotes(xm.unprintCC(input), double);
         }
         return input;
     }
     xm.wrapIfComplex = wrapIfComplex;
 
-    function stringDebug(input, newline) {
-        if (typeof newline === "undefined") { newline = false; }
-        if (newline) {
-            return input.replace(nonPrintNotNLExp, nonPrintNotNLRep).replace(nonPrintNLExp, getReplacerFunc(nonPrintNLChr, nonPrintNLVal, true));
+    function trim(value, cutoff) {
+        if (typeof cutoff === "undefined") { cutoff = 60; }
+        if (cutoff && value.length > cutoff) {
+            return value.substr(0, cutoff) + '...';
         }
-        return input.replace(nonPrintExp, nonPrintRep);
+        return value;
     }
-    xm.stringDebug = stringDebug;
+    xm.trim = trim;
+
+    function trimWrap(value, cutoff, double) {
+        if (typeof cutoff === "undefined") { cutoff = 60; }
+        if (cutoff && value.length > cutoff) {
+            return xm.wrapQuotes(value.substr(0, cutoff), double) + '...';
+        }
+        return xm.wrapQuotes(value, double);
+    }
+    xm.trimWrap = trimWrap;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -806,12 +901,10 @@ var xm;
     }
     xm.getFuncLabel = getFuncLabel;
 
-    function toValueStrim(obj, depth) {
+    function toValueStrim(obj, depth, cutoff) {
         if (typeof depth === "undefined") { depth = 4; }
+        if (typeof cutoff === "undefined") { cutoff = 80; }
         var type = xm.typeOf(obj);
-
-        var strCut = 40;
-        var objCut = 50;
 
         depth--;
 
@@ -825,7 +918,7 @@ var xm;
             case 'number':
                 return obj.toString(10);
             case 'string':
-                return trimLine(obj, strCut);
+                return xm.trimWrap(obj, cutoff, true);
             case 'date':
                 return obj.toISOString();
             case 'function':
@@ -836,34 +929,24 @@ var xm;
                     return '<maximum recursion>';
                 }
 
-                return '[' + trimLine(obj.map(function (value) {
-                    return toValueStrim(value, depth);
-                }).join(','), objCut, false) + ']';
+                return '[' + xm.trim(obj.map(function (value) {
+                    return xm.trim(value, depth);
+                }).join(','), cutoff) + ']';
             }
             case 'object': {
                 if (depth <= 0) {
                     return '<maximum recursion>';
                 }
 
-                return trimLine(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
-                    return trimLine(key) + ':' + toValueStrim(obj[key], depth);
-                }).join(','), objCut, false) + '}';
+                return xm.trim(String(obj) + ' {' + Object.keys(obj).sort().map(function (key) {
+                    return xm.trim(key) + ':' + toValueStrim(obj[key], depth);
+                }).join(','), cutoff) + '}';
             }
             default:
                 throw (new Error('toValueStrim: cannot serialise type: ' + type));
         }
     }
     xm.toValueStrim = toValueStrim;
-
-    function trimLine(value, cutoff, wrapQuotes) {
-        if (typeof cutoff === "undefined") { cutoff = 30; }
-        if (typeof wrapQuotes === "undefined") { wrapQuotes = true; }
-        if (value.length > cutoff - 2) {
-            value = value.substr(0, cutoff - 5) + '...';
-        }
-        return xm.wrapIfComplex(value, { quotes: wrapQuotes });
-    }
-    xm.trimLine = trimLine;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -895,18 +978,19 @@ var xm;
         if (pass) {
             return;
         }
-        if (message) {
-            message.replace(/\{([\w+])\}/g, function (match, id) {
+        if (xm.isString(message)) {
+            message = message.replace(/\{([\w]+)\}/gi, function (match, id) {
                 switch (id) {
                     case 'act':
+                    case 'actual':
                         return xm.toValueStrim(actual);
                     case 'exp':
+                    case 'expected':
                         return xm.toValueStrim(expected);
                     default:
-                        return '{' + id + '}';
+                        return match;
                 }
             });
-            message += ': ';
         } else {
             message = '';
         }
@@ -916,8 +1000,7 @@ var xm;
 
     function throwAssert(message, actual, expected, showDiff, ssf) {
         if (typeof showDiff === "undefined") { showDiff = true; }
-        message = message ? message + ': ' : '';
-        throw new AssertionError(message, { actual: actual, expected: expected, showDiff: showDiff }, ssf);
+        xm.assert(false, message, actual, expected, showDiff, ssf);
     }
     xm.throwAssert = throwAssert;
 
@@ -929,25 +1012,25 @@ var xm;
         var valueKind = xm.typeOf(value);
         var typeKind = xm.typeOf(type);
 
-        if (valueKind === 'undefined' || valueKind === 'null') {
+        if (!xm.isValid(value)) {
             if (!opt) {
-                throw new AssertionError('expected "' + label + '" to be defined as a ' + xm.toValueStrim(type) + ' but got "' + value + '"');
+                throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be defined as a ' + xm.toValueStrim(type) + ' but got ' + (valueKind === 'number' ? 'NaN' : valueKind));
             }
         } else if (typeKind === 'function') {
             if (!(value instanceof type)) {
-                throw new AssertionError('expected "' + label + '" to be instanceof ' + xm.toValueStrim(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be instanceof ' + xm.getFuncLabel(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if (typeKind === 'string') {
             if (xm.hasOwnProp(typeOfAssert, type)) {
                 var check = typeOfAssert[type];
                 if (!check(value)) {
-                    throw new AssertionError('expected "' + label + '" to be a ' + xm.toValueStrim(type) + ' but got "' + valueKind + '": ' + xm.toValueStrim(value));
+                    throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be a ' + xm.wrapQuotes(type, true) + ' but got a ' + xm.wrapQuotes(valueKind, true) + ': ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new AssertionError('unknown type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type, true) + ' for ' + xm.toValueStrim(value) + '');
             }
         } else {
-            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for "' + label + '"');
+            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label, true) + '');
         }
     }
     xm.assertVar = assertVar;
@@ -4271,7 +4354,6 @@ var tsd;
     'use strict';
 
     var pointer = require('jsonpointer.js');
-    var branch_tree_sha = '/commit/commit/tree/sha';
 
     var DefCommit = (function () {
         function DefCommit(commitSha) {
@@ -4287,16 +4369,15 @@ var tsd;
         DefCommit.prototype.parseJSON = function (commit) {
             xm.assertVar(commit, 'object', 'commit');
             xm.log('parseJSON');
-            if (commit.sha !== this.commitSha) {
-                throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
+            if (commit.sha !== this.commitSha + 'xxx') {
+                xm.throwAssert('not my tree: {act}, {exp}', this.commitSha, commit.sha);
             }
 
             if (this.treeSha) {
                 throw new Error('allready got tree: ' + this.treeSha + ' -> ' + commit.sha);
             }
 
-            this.treeSha = pointer.get(commit, branch_tree_sha);
-            xm.log(commit);
+            this.treeSha = pointer.get(commit, '/commit/tree/sha');
             xm.assertVar(this.treeSha, 'sha1', 'treeSha');
 
             this.hubAuthor = git.GithubUser.fromJSON(commit.author);
@@ -5259,6 +5340,9 @@ var tsd;
             this.stats.count('index-branch-get');
 
             this.gitAPI.getBranch(this.context.config.ref).then(function (branchData) {
+                if (!branchData) {
+                    d.reject(new Error('cannot load branch data'));
+                }
                 var sha = pointer.get(branchData, branch_tree);
                 if (!sha) {
                     _this.stats.count('index-branch-get-fail');
@@ -5427,11 +5511,15 @@ var tsd;
             var d = Q.defer();
 
             var target = this.context.paths.configFile;
-            var json = JSON.stringify(this.context.config.toJSON(), null, 2);
             var dir = path.dirname(target);
 
-            if (!json || json.length === 0) {
-                return Q.reject(new Error('saveConfig retrieved empty json'));
+            var obj = this.context.config.toJSON();
+            if (!obj) {
+                return Q.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
+            }
+            var json = JSON.stringify(this.context.config.toJSON(), null, 2);
+            if (!json) {
+                return Q.reject(new Error('config could not be serialised to JSON'));
             }
 
             xm.FileUtil.mkdirCheckQ(dir, true).then(function () {
@@ -5442,7 +5530,7 @@ var tsd;
                 }).then(function () {
                     return FS.stat(target).then(function (stat) {
                         if (stat.size === 0) {
-                            throw new Error('saveConfig write zero bytes to: ' + target);
+                            throw new Error('saveConfig written zero bytes to: ' + target + ' (looks lie');
                         }
                     });
                 });

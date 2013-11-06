@@ -125,6 +125,11 @@ module xm {
 
 	// - - - - meta types
 
+	//TODO add more?
+	export function isArrayLike(obj:any):boolean {
+		return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
+	}
+
 	export function isOk(obj:any):boolean {
 		return !!obj;
 	}
@@ -162,7 +167,7 @@ module xm {
 	export function getTypeOfWrap(add?:any):(obj:any, type:string) => boolean {
 		var typeMap = getTypeOfMap(add);
 
-		return function isType(obj:any, type:string):boolean {
+		return function isTypeWrap(obj:any, type:string):boolean {
 			if (hasOwnProp(typeMap, type)) {
 				return typeMap[type].call(null, obj);
 			}

@@ -7,7 +7,6 @@ module tsd {
 	'use strict';
 
 	var pointer = require('jsonpointer.js');
-	var branch_tree_sha:string = '/commit/commit/tree/sha';
 
 	/*
 	 DefCommit: meta-data for a single github commit
@@ -42,16 +41,15 @@ module tsd {
 		parseJSON(commit:any):void {
 			xm.assertVar(commit, 'object', 'commit');
 			xm.log('parseJSON');
-			if (commit.sha !== this.commitSha) {
-				throw new Error('not my tree: ' + this.commitSha + ' -> ' + commit.sha);
+			if (commit.sha !== this.commitSha + 'xxx') {
+				xm.throwAssert('not my tree: {act}, {exp}', this.commitSha, commit.sha);
 			}
 			//TODO verify it is valid object
 			if (this.treeSha) {
 				throw new Error('allready got tree: ' + this.treeSha + ' -> ' + commit.sha);
 			}
 
-			this.treeSha = pointer.get(commit, branch_tree_sha);
-			xm.log(commit);
+			this.treeSha = pointer.get(commit, '/commit/tree/sha');
 			xm.assertVar(this.treeSha, 'sha1', 'treeSha');
 
 			//TODO add a bit of checking? error? beh?
