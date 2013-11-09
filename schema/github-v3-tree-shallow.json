@@ -1,0 +1,13 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema",
+	"id": "github-v3-index-dev-1",
+	"type": "object",
+	"required": ["version", "repo", "ref", "path"],
+	"properties": {
+		"version": {
+			"title": "config-format version",
+			"type": "string",
+			"enum": ["v4"]
+		}
+	}
+}

@@ -7,23 +7,27 @@
  * */
 
 /// <reference path="io/StyledOut.ts" />
+/// <reference path="EventLog.ts" />
 /// <reference path="stack.ts" />
 
 module xm {
 	'use strict';
 
 	var util = require('util');
-	require('colors');
 
 	export var consoleOut:xm.StyledOut = new xm.StyledOut();
+	// will be set below
+	export var log:xm.Logger;
 
-	export interface Logger  {
+	export interface Logger {
 		(...args:any[]):void;
 		ok(...args:any[]):void;
 		log(...args:any[]):void;
 		warn(...args:any[]):void;
 		error(...args:any[]):void;
 		debug(...args:any[]):void;
+		status(...args:any[]):void;
+		//TODO flip depth/label order
 		inspect(value:any, depth?:number, label?:string):void;
 		json(value:any):void;
 		enabled:boolean;
@@ -52,10 +56,10 @@ module xm {
 		var precall = function () {
 			//not working with promises
 			/*if (logger.callSite) {
-				xm.stack.getStackLines(0, 0, true).map((line:xm.stack.Stackline) => {
-					logger.out.span('-# ').line(line.link);
-				});
-			}*/
+			 xm.stack.getStackLines(0, 0, true).map((line:xm.stack.Stackline) => {
+			 logger.out.span('-# ').line(line.link);
+			 });
+			 }*/
 		};
 
 		var plain = function (...args:any[]) {
@@ -111,6 +115,13 @@ module xm {
 				doLog(logger, args);
 			}
 		};
+		logger.status = function (...args:any[]) {
+			if (logger.enabled) {
+				precall();
+				logger.out.accent('-> ').span(label);
+				doLog(logger, args);
+			}
+		};
 		logger.inspect = function (value:any, depth:number = 3, label?:string) {
 			if (logger.enabled) {
 				precall();
@@ -127,5 +138,6 @@ module xm {
 		return logger;
 	}
 
-	export var log:xm.Logger = getLogger();
+	xm.log = getLogger();
+	Object.defineProperty(xm, 'log', {writable: false});
 }

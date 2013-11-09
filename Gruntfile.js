@@ -13,6 +13,7 @@ module.exports = function (grunt) {
 		'grunt-contrib-jshint',
 		'grunt-contrib-copy',
 		'grunt-contrib-clean',
+		'grunt-contrib-connect',
 		'grunt-tslint',
 		'grunt-ts',
 		'grunt-execute',
@@ -146,6 +147,14 @@ module.exports = function (grunt) {
 		macro.newTask('tslint', {
 			src: [testPath + 'src/**/*.ts']
 		});
+		if (macro.getParam('http', 0)) {
+			macro.newTask('connect', {
+				options: {
+					port: macro.getParam('http'),
+					base: testPath + 'tmp/'
+				}
+			});
+		}
 		macro.newTask('mochaTest', {
 			options: {
 				timeout: macro.getParam('timeout', 3000)
@@ -165,6 +174,10 @@ module.exports = function (grunt) {
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	gtx.create('http', 'moduleTest', {
+		timeout: longTimer,
+		http: 9797
+	}, 'lib');
 
 	// assemble!
 	gtx.alias('prep', [
@@ -205,6 +218,7 @@ module.exports = function (grunt) {
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
 	gtx.alias('edit_07', 'ts:blobSha');
+	gtx.alias('edit_08', 'gtx:http');
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();

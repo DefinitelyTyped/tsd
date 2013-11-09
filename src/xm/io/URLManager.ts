@@ -8,7 +8,7 @@
 
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
-///<reference path="../ObjectUtil.ts" />
+
 module xm {
 	'use strict';
 
@@ -53,7 +53,7 @@ module xm {
 
 		public setVars(map:any):void {
 			Object.keys(map).forEach((id) => {
-				this.setVar(id, map[id]);
+				this._vars.set(id, map[id]);
 			});
 		}
 

@@ -31,6 +31,7 @@ module tsd {
 			xm.assertVar(selector, tsd.Selector, 'selector', true);
 		}
 	}
+
 	export class APIMessage {
 		message:string;
 		tag:string;
@@ -81,15 +82,16 @@ module tsd {
 	 */
 	export class API {
 
-		private _core:Core;
-		private _debug:boolean = false;
+		public core:tsd.Core;
+		public track:xm.EventLog;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar(context, tsd.Context, 'context');
 
-			this._core = new tsd.Core(this.context);
+			this.core = new tsd.Core(this.context);
+			this.track = new xm.EventLog('api', 'API');
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.ObjectUtil.lockProps(this, ['core', 'track']);
 		}
 
 		/*
@@ -98,7 +100,7 @@ module tsd {
 		readConfig(optional:boolean):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
 
-			this._core.readConfig(optional).then(() => {
+			this.core.config.readConfig(optional).then(() => {
 				d.resolve(undefined);
 			}, d.reject);
 
@@ -111,7 +113,7 @@ module tsd {
 		saveConfig():Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
 
-			this._core.saveConfig().then(() => {
+			this.core.config.saveConfig().then(() => {
 				d.resolve(undefined);
 			}, d.reject);
 
@@ -125,7 +127,7 @@ module tsd {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			this._core.select(selector).then(d.resolve, d.reject);
+			this.core.select(selector).then(d.resolve, d.reject);
 
 			return d.promise;
 		}
@@ -140,22 +142,16 @@ module tsd {
 			//hardcode for now
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
-			this._core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).then((res:tsd.APIResult) => {
 				var files:tsd.DefVersion[] = res.selection;
 
 				files = tsd.DefUtil.mergeDependencies(files);
 
-				return this._core.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then((written:xm.IKeyValueMap) => {
+				return this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then((written:xm.IKeyValueMap) => {
 					if (!written) {
 						throw new Error('expected install paths');
 					}
 					res.written = written;
-
-					if (selector.saveToConfig) {
-						return this._core.saveConfig().then(() => {
-							d.resolve(res);
-						});
-					}
 					d.resolve(res);
 				});
 			}).fail(d.reject);
@@ -169,12 +165,12 @@ module tsd {
 		directInstall(path:string, commitSha:string):Q.Promise<APIResult> {
 			xm.assertVar(path, 'string', 'path');
 			xm.assertVar(commitSha, 'sha1', 'commitSha');
-			var d:Q.Deferred<APIResult> = Q.defer();
+			var d:Q.Deferred<APIResult> = Q.defer<APIResult>();
 
-			var res = new tsd.APIResult(this._core.index, null);
+			var res = new tsd.APIResult(this.core.index, null);
 
-			this._core.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
-				/*return this._core.installFile(file, selector.saveToConfig, selector.overwriteFiles).then((targetPath:string) => {
+			this.core.index.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
+				/*return this.core.installFile(file, selector.saveToConfig, selector.overwriteFiles).then((targetPath:string) => {
 				 res.written.set(targetPath, file);
 				 d.resolve(res);
 				 });*/
@@ -191,10 +187,10 @@ module tsd {
 			xm.assertVar(path, 'string', 'path');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			var res = new tsd.APIResult(this._core.index, null);
+			var res = new tsd.APIResult(this.core.index, null);
 
-			this._core.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
-				return this._core.installFile(file).then((targetPath:string) => {
+			this.core.index.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
+				return this.core.installer.installFile(file).then((targetPath:string) => {
 					res.written.set(targetPath, file);
 					d.resolve(res);
 				});
@@ -210,9 +206,9 @@ module tsd {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			this._core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).then((res:tsd.APIResult) => {
 				//nest for scope
-				return this._core.parseDefInfoBulk(res.selection).then(() => {
+				return this.core.parser.parseDefInfoBulk(res.selection).then(() => {
 					d.resolve(res);
 				});
 			}).fail(d.reject);
@@ -227,12 +223,12 @@ module tsd {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			this._core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
 				res.definitions = tsd.DefUtil.getDefs(res.selection);
 
 				//TODO limit history to Selector date filter?
-				return this._core.loadHistoryBulk(res.definitions).then(() => {
+				return this.core.content.loadHistoryBulk(res.definitions).then(() => {
 					d.resolve(res);
 				});
 			}).fail(d.reject);
@@ -244,14 +240,14 @@ module tsd {
 		 re-install from config
 		 */
 		reinstall(overwrite:boolean = false):Q.Promise<APIResult> {
-			var res = new tsd.APIResult(this._core.index, null);
+			var res = new tsd.APIResult(this.core.index, null);
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			this._core.reinstallBulk(this.context.config.getInstalled(), overwrite).then((map:xm.IKeyValueMap) => {
+			this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).then((map:xm.IKeyValueMap) => {
 				res.written = map;
 			}).then(() => {
-				d.resolve(res);
-			}, d.reject);
+					d.resolve(res);
+				}, d.reject);
 
 			return d.promise;
 		}
@@ -279,18 +275,8 @@ module tsd {
 
 			return d.promise;
 		}
-
-		get debug():boolean {
-			return this._debug;
-		}
-
-		set debug(value:boolean) {
-			this._debug = value;
-			this._core.debug = this._debug;
-		}
-
-		get core():tsd.Core {
-			return this._core;
+		set verbose(verbose:boolean) {
+			this.core.verbose = verbose;
 		}
 	}
 }

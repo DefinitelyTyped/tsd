@@ -4,11 +4,11 @@ module tsd {
 	export var Const = {
 		ident : 'tsd',
 		configFile : 'tsd.json',
+		typingsDir : 'typings',
 		cacheDir : 'tsd-cache',
-		configSchemaFile : 'tsd-v4.json',
 
-		typingsFolder : 'typings',
 		configVersion: 'v4',
+		configSchemaFile : 'tsd-v4.json',
 		definitelyRepo: 'borisyankov/DefinitelyTyped',
 		mainBranch: 'master',
 

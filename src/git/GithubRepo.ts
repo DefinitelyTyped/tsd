@@ -1,5 +1,7 @@
 ///<reference path="../xm/assertVar.ts" />
-///<reference path="GithubURLManager.ts" />
+///<reference path="GithubURLs.ts" />
+///<reference path="loader/GithubAPI.ts" />
+///<reference path="loader/GithubRaw.ts" />
 
 module git {
 	'use strict';
@@ -11,13 +13,28 @@ module git {
 	//TODO Object.freeze or make getters of props?
 	export class GithubRepo {
 
-		urls:git.GithubURLManager;
+		ownerName:string;
+		projectName:string;
+		storeDir:string;
 
-		constructor(public ownerName:string, public projectName:string) {
+		urls:git.GithubURLs;
+		api:git.GithubAPI;
+		raw:git.GithubRaw;
+
+		constructor(ownerName:string, projectName:string, storeDir:string) {
 			xm.assertVar(ownerName, 'string', 'ownerName');
 			xm.assertVar(projectName, 'string', 'projectName');
+			xm.assertVar(storeDir, 'string', 'storeDir');
 
-			this.urls = new git.GithubURLManager(this);
+			this.ownerName = ownerName;
+			this.projectName = projectName;
+			this.storeDir = storeDir;
+
+			this.urls = new git.GithubURLs(this);
+			this.api = new git.GithubAPI(this, path.join(this.storeDir, 'git-api'));
+			this.raw = new git.GithubRaw(this,  path.join(this.storeDir, 'git-raw'));
+
+			xm.ObjectUtil.lockProps(this, Object.keys(this));
 		}
 
 		getCacheKey():string {

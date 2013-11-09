@@ -1,5 +1,5 @@
-///<reference path="../xm/typeOf.ts" />
-///<reference path="../xm/ObjectUtil.ts" />
+///<reference path="../../xm/typeOf.ts" />
+///<reference path="../../xm/ObjectUtil.ts" />
 
 module git {
 	'use strict';

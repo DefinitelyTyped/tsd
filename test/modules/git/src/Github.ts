@@ -5,8 +5,8 @@
 ///<reference path="../../../../src/xm/iterate.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="../../../../src/git/GithubRepo.ts" />
-///<reference path="../../../../src/git/GithubRawCached.ts" />
-///<reference path="../../../../src/git/GithubAPICached.ts" />
+///<reference path="../../../../src/git/loader/GithubRaw.ts" />
+///<reference path="../../../../src/git/loader/GithubAPI.ts" />
 
 describe('git.Github', () => {
 	'use strict';
@@ -15,8 +15,8 @@ describe('git.Github', () => {
 	var FS:typeof QioFS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var api:git.GithubAPICached;
-	var raw:git.GithubRawCached;
+	var api:git.GithubAPI;
+	var raw:git.GithubRaw;
 	var repo:git.GithubRepo;
 
 	var cacheDir:string;
@@ -27,8 +27,8 @@ describe('git.Github', () => {
 		//use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'git-api');
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
-		api = new git.GithubAPICached(repo, path.join(gitTest.cacheDir, 'git-api'));
-		raw = new git.GithubRawCached(repo, path.join(gitTest.cacheDir, 'git-raw'));
+		api = new git.GithubAPI(repo, path.join(gitTest.cacheDir, 'git-api'));
+		raw = new git.GithubRaw(repo, path.join(gitTest.cacheDir, 'git-raw'));
 	});
 
 	afterEach(() => {
@@ -38,8 +38,8 @@ describe('git.Github', () => {
 
 	it('pretest', () => {
 		assert.instanceOf(repo, git.GithubRepo, 'repo');
-		assert.instanceOf(api, git.GithubAPICached, 'api');
-		assert.instanceOf(raw, git.GithubRawCached, 'raw');
+		assert.instanceOf(api, git.GithubAPI, 'api');
+		assert.instanceOf(raw, git.GithubRaw, 'raw');
 		assert.isString(gitTest.config.repo.project, 'project');
 	});
 

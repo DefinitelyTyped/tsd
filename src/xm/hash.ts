@@ -14,15 +14,15 @@ module xm {
 
 	var crypto = require('crypto');
 
-	export function md5(data:string):string {
+	export function md5(data:any):string {
 		return crypto.createHash('md5').update(data).digest('hex');
 	}
 
-	export function sha1(data:string):string {
+	export function sha1(data:any):string {
 		return crypto.createHash('sha1').update(data).digest('hex');
 	}
 
-	export function sha1Short(data:string, length:number = 8):string {
+	export function sha1Short(data:any, length:number = 8):string {
 		return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
 	}
 

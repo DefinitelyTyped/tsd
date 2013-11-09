@@ -1,14 +1,13 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../git/GithubJSON.ts" />
+///<reference path="../../git/model/GithubJSON.ts" />
 ///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="DefCommit.ts" />
 
 module tsd {
 	'use strict';
 
-	var pointer = require('jsonpointer.js');
+	var pointer = require('json-pointer');
 	var commit_sha:string = '/commit/sha';
-
 	var branch_tree_sha:string = '/commit/commit/tree/sha';
 
 	/*
@@ -23,14 +22,12 @@ module tsd {
 		private _hasIndex:boolean = false;
 		private _indexCommit:tsd.DefCommit = null;
 
-		//TODO add generics when moved to TS 0.9
 		private _definitions:xm.IKeyValueMap<tsd.Def> = new xm.KeyValueMap();
 		private _commits:xm.IKeyValueMap<tsd.DefCommit> = new xm.KeyValueMap();
 		private _blobs:xm.IKeyValueMap<tsd.DefBlob> = new xm.KeyValueMap();
 		private _versions:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 		constructor() {
-
 			//hide from inspect()
 			xm.ObjectUtil.hidePrefixed(this);
 		}

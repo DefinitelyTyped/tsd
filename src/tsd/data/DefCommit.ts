@@ -1,12 +1,12 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../git/GithubJSON.ts" />
-///<reference path="../../git/GithubUser.ts" />
-///<reference path="../../git/GitCommitMessage.ts" />
+///<reference path="../../git/model/GithubJSON.ts" />
+///<reference path="../../git/model/GithubUser.ts" />
+///<reference path="../../git/model/GitCommitMessage.ts" />
 
 module tsd {
 	'use strict';
 
-	var pointer = require('jsonpointer.js');
+	var pointer = require('json-pointer');
 
 	/*
 	 DefCommit: meta-data for a single github commit
@@ -30,7 +30,7 @@ module tsd {
 		//moar fields?
 
 		constructor(commitSha:string) {
-			xm.assertVar(commitSha, 'string', 'commitSha');
+			xm.assertVar(commitSha, 'sha1', 'commitSha');
 
 			this.commitSha = commitSha;
 
@@ -40,15 +40,11 @@ module tsd {
 
 		parseJSON(commit:any):void {
 			xm.assertVar(commit, 'object', 'commit');
-			xm.log('parseJSON');
-			if (commit.sha !== this.commitSha + 'xxx') {
-				xm.throwAssert('not my tree: {act}, {exp}', this.commitSha, commit.sha);
-			}
-			//TODO verify it is valid object
-			if (this.treeSha) {
-				throw new Error('allready got tree: ' + this.treeSha + ' -> ' + commit.sha);
-			}
+			xm.assert((commit.sha !== this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
+			xm.assert(!!this.treeSha, 'already have tree {a}, {e}', this.treeSha, commit.sha);
+
+			//TODO verify it is valid object
 			this.treeSha = pointer.get(commit, '/commit/tree/sha');
 			xm.assertVar(this.treeSha, 'sha1', 'treeSha');
 

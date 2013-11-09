@@ -1,8 +1,9 @@
-///<reference path="../Core.ts" />
-///<reference path="../API.ts" />
 ///<reference path="../data/DefUtil.ts" />
 ///<reference path="../data/Def.ts" />
 ///<reference path="../data/DefVersion.ts" />
+///<reference path="../data/DefBlob.ts" />
+///<reference path="SubCore.ts" />
+///<reference path="../../xm/promise.ts" />
 
 module tsd {
 	'use strict';
@@ -16,134 +17,94 @@ module tsd {
 	 */
 	//TODO add unit test,  verify race condition solver works properly
 	//TODO 'resolve' not good choice (conflicts with promises)
-	export class Resolver {
+	export class Resolver extends tsd.SubCore {
 
-		private _core:Core;
-		private _active:xm.KeyValueMap<Q.Promise<DefVersion>> = new xm.KeyValueMap();
+		static active:string = 'active';
+		static solved:string = 'solved';
+		static remove:string = 'remove';
+		static bulk:string = 'bulk';
+		static resolve:string = 'resolve';
+		static parse:string = 'parse';
+		static subload:string = 'subload';
+		static dep_recurse:string = 'dep_recurse';
+		static dep_added:string = 'dep_added';
+		static dep_missing:string = 'dep_missing';
 
-		stats:xm.StatCounter = new xm.StatCounter();
+		private _stash:xm.PromiseStash<tsd.DefVersion>;
 
-		constructor(core:Core) {
-			xm.assertVar(core, Core, 'core');
-			this._core = core;
+		constructor(core:tsd.Core) {
+			super(core, 'resolve', 'Resolver');
 
-			this.stats.log = this._core.context.verbose;
-			this.stats.logger = xm.getLogger('Resolver');
-
-			xm.ObjectUtil.hidePrefixed(this);
+			this._stash = new xm.PromiseStash<tsd.DefVersion>();
 		}
 
-		resolveBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
-			var d:Q.Deferred<DefVersion[]> = Q.defer();
-			this.stats.count('solve-bulk-start');
+		/*
+		 bulk version of resolveDepencendies()
+		 promise: array: bulk results of single calls
+		 */
+		resolveBulk(list:tsd.DefVersion[]):Q.Promise<tsd.DefVersion[]> {
+			var d:Q.Deferred<tsd.DefVersion[]> = Q.defer();
+
+			this.track.promise(d.promise, Resolver.bulk);
 
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			Q.all(list.map((file:tsd.DefVersion) => {
 				return this.resolveDeps(file);
+
 			})).then(() => {
-				this.stats.count('solve-bulk-success');
 				d.resolve(list);
-			}, (err) => {
-				this.stats.count('solve-bulk-error');
+			},(err) => {
 				d.reject(err);
-			});
+			}).done();
 
 			return d.promise;
 		}
 
-		resolveDeps(file:tsd.DefVersion):Q.Promise<DefVersion> {
-			var d:Q.Deferred<DefVersion> = Q.defer();
-
-			// easy bail
-			//TODO verifiy some more (file.dependencies.length etc)
+		/*
+		 lazy resolve a tsd.DefVersion's dependencies
+		 promise: tsd.DefVersion: with .dependencies resolved (recursive)
+		 */
+		resolveDeps(file:tsd.DefVersion):Q.Promise<tsd.DefVersion> {
 			if (file.solved) {
-				this.stats.count('solved-already');
-				d.resolve(file);
-				return d.promise;
+				this.track.skip(Resolver.solved);
+				return Q(file)(file)
 			}
-
-			//handle race conditions
-			if (this._active.has(file.key)) {
-				this.stats.count('active-has');
-				//return running promise
-				this._active.get(file.key).done(() => {
-					d.resolve(file);
-				}, d.reject);
-				return d.promise;
-			}
-			else {
-				this.stats.count('active-miss');
+			if (this._stash.has(file.key)) {
+				this.track.skip(Resolver.active);
+				return this._stash.promise(file.key);
 			}
 			// it is not solved and not in the active list so lets load it
 
+			var d:Q.Deferred<tsd.DefVersion> = this._stash.defer(file.key);
+			this.track.start(Resolver.resolve);
+
 			var cleanup = () => {
 				//remove solved promise
-				this._active.remove(file.key);
-				this.stats.count('active-remove');
+				this._stash.remove(file.key);
+				this.track.event(Resolver.remove);
 			};
 
-			//keep the promise for storage
-			//TODO refactor this for readability
-			this._core.loadContent(file).then((file:tsd.DefVersion) => {
-				this.stats.count('file-parse');
+			Q.all([
+				this.core.index.getIndex(),
+				this.core.content.loadContent(file)
+			]).spread((index:tsd.DefIndex, blob:tsd.DefBlob) => {
+				this.track.event(Resolver.parse);
 
 				//force empty for robustness
 				file.dependencies.splice(0, file.dependencies.length);
 
-				var refs:string[] = tsd.DefUtil.extractReferenceTags(file.blob.content.toString('utf8'));
-
-				//filter reasonable formed paths
-				refs = <string[]>refs.reduce((memo:any[], refPath:string):any[] => {
-					//TODO harder def-test? why?
-					refPath = refPath.replace(leadingExp, '');
-					//same folder
-					if (refPath.indexOf('/') < 0) {
-						refPath = file.def.project + '/' + refPath;
-					}
-					if (tsd.Def.isDefPath(refPath)) {
-						memo.push(refPath);
-					}
-					else {
-						xm.log.warn('not a usable reference: ' + refPath);
-					}
-					return memo;
-				}, []);
-
-				//store to solve and collect promises for unsolved references
-				var queued:Q.Promise<DefVersion>[] = refs.reduce((memo:any[], refPath:string) => {
-					if (this._core.index.hasDef(refPath)) {
-						//use .head (could use same commit but that would be version hell with interdependent definitions)
-						var dep:Def = this._core.index.getDef(refPath);
-						file.dependencies.push(dep);
-						this.stats.count('dep-added');
-
-						//TODO decide if always to go with head or not
-						//maybe it need some resolving itself?
-						if (!dep.head.solved && !this._active.has(dep.head.key)) {
-							this.stats.count('dep-recurse');
-							//xm.log('recurse ' + dep.toString());
-
-							//lets go deeper
-							memo.push(this.resolveDeps(dep.head));
-						}
-					}
-					else {
-						xm.log.warn('path reference not in index: ' + refPath);
-						//TODO weird: could be removed a file; add it? beh?
-					}
-					return memo;
-				}, []);
+				var queued:Q.Promise<tsd.DefVersion>[] = this.applyResolution(index, file, blob.content.toString(blob.encoding));
 
 				//keep
 				file.solved = true;
 
 				if (queued.length > 0) {
-					this.stats.count('subload-start');
+					this.track.event(Resolver.subload);
 					return Q.all(queued);
 				}
 				else {
-					this.stats.count('subload-none');
+					this.track.skip(Resolver.subload);
 				}
 			}).then(() => {
 				cleanup();
@@ -153,11 +114,55 @@ module tsd {
 				d.reject(err);
 			});
 
-			//store promise while it is running
-			this.stats.count('active-set');
-			this._active.set(file.key, d.promise);
-
 			return d.promise;
+		}
+
+		applyResolution(index:tsd.DefIndex, file:tsd.DefVersion, content:string):Q.Promise<tsd.DefVersion>[] {
+			var refs:string[] = this.extractPaths(file, content);
+
+			return refs.reduce((memo:Q.Promise<tsd.DefVersion>[], refPath:string) => {
+				if (index.hasDef(refPath)) {
+					//use .head (could use same commit but that would be version hell with interdependent definitions)
+					var dep:tsd.Def = index.getDef(refPath);
+					file.dependencies.push(dep);
+					this.track.event(Resolver.dep_added, dep.path);
+
+					//TODO decide if always to go with head or not
+					//maybe it need some resolving itself?
+					if (!dep.head.solved && !this._stash.has(dep.head.key)) {
+						this.track.event(Resolver.dep_recurse, dep.path);
+						//xm.log('recurse ' + dep.toString());
+
+						//lets go deeper
+						memo.push(this.resolveDeps(dep.head));
+					}
+				}
+				else {
+					this.track.warning(Resolver.dep_missing);
+					xm.log.warn('path reference not in index: ' + refPath);
+					//TODO weird: could be removed a file; add it? beh?
+				}
+				return memo;
+			}, []);
+		}
+
+		extractPaths(file:tsd.DefVersion, content:string):string[] {
+			//filter reasonable formed paths
+			return tsd.DefUtil.extractReferenceTags(content).reduce((memo:string[], refPath:string):any[] => {
+				//TODO harder def-test? why?
+				refPath = refPath.replace(leadingExp, '');
+				//same folder
+				if (refPath.indexOf('/') < 0) {
+					refPath = file.def.project + '/' + refPath;
+				}
+				if (tsd.Def.isDefPath(refPath)) {
+					memo.push(refPath);
+				}
+				else {
+					this.track.logger.warn('not a usable reference: ' + refPath);
+				}
+				return memo;
+			}, []);
 		}
 	}
 }

@@ -67,7 +67,7 @@ module tsd {
 			this._schema = schema;
 
 			//import defaults
-			this.path = tsd.Const.typingsFolder;
+			this.path = tsd.Const.typingsDir;
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
 			this.ref = tsd.Const.mainBranch;

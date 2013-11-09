@@ -39,6 +39,19 @@ var xm;
         'null'
     ];
 
+    var primitiveTypes = [
+        'boolean',
+        'number',
+        'string'
+    ];
+
+    var valueTypes = [
+        'boolean',
+        'number',
+        'string',
+        'null'
+    ];
+
     var objectNameExp = /(^\[object )|(\]$)/gi;
 
     function toProtoString(obj) {
@@ -148,10 +161,19 @@ var xm;
     xm.isValid = isValid;
 
     function isJSONValue(obj) {
-        var type = typeOf(obj);
-        return jsonTypes.indexOf(type) > -1;
+        return jsonTypes.indexOf(typeOf(obj)) > -1;
     }
     xm.isJSONValue = isJSONValue;
+
+    function isPrimitive(obj) {
+        return primitiveTypes.indexOf(typeOf(obj)) > -1;
+    }
+    xm.isPrimitive = isPrimitive;
+
+    function isValueType(obj) {
+        return valueTypes.indexOf(typeOf(obj)) > -1;
+    }
+    xm.isValueType = isValueType;
 
     function getTypeOfMap(add) {
         var name;
@@ -187,6 +209,7 @@ var xm;
 var xm;
 (function (xm) {
     var util = require('util');
+    var jsesc = require('jsesc');
 
     var stringExp = /^[a-z](?:[a-z0-9_\-]*?[a-z0-9])?$/i;
     var stringQuote = '"';
@@ -349,6 +372,38 @@ var xm;
         return xm.wrapQuotes(value, double);
     }
     xm.trimWrap = trimWrap;
+
+    var escapableExp = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+    var meta = {
+        '\b': '\\b',
+        '\t': '\\t',
+        '\n': '\\n',
+        '\f': '\\f',
+        '\r': '\\r',
+        '"': '\\"',
+        '\\': '\\\\'
+    };
+    var jsonNW = {
+        json: true,
+        wrap: false,
+        quotes: 'double'
+    };
+
+    function escapeSimple(str) {
+        escapableExp.lastIndex = 0;
+        if (escapableExp.test(str)) {
+            return str.replace(escapableExp, function (a) {
+                var c = meta[a];
+                if (typeof c === 'string') {
+                    return c;
+                }
+
+                return jsesc(a, jsonNW);
+            });
+        }
+        return str;
+    }
+    xm.escapeSimple = escapeSimple;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -383,7 +438,7 @@ var xm;
             case 'number':
                 return obj.toString(10);
             case 'string':
-                return xm.trimWrap(obj, cutoff);
+                return xm.trimWrap(obj, cutoff, true);
             case 'date':
                 return obj.toISOString();
             case 'function':
@@ -425,6 +480,15 @@ var xm;
         }
         return /^[0-9a-f]{40}$/.test(value);
     }
+    xm.isSha = isSha;
+
+    function isShaShort(value) {
+        if (typeof value !== 'string') {
+            return false;
+        }
+        return /^[0-9a-f]{6,40}$/.test(value);
+    }
+    xm.isShaShort = isShaShort;
 
     function isMd5(value) {
         if (typeof value !== 'string') {
@@ -432,26 +496,36 @@ var xm;
         }
         return /^[0-9a-f]{32}$/.test(value);
     }
+    xm.isMd5 = isMd5;
 
     var typeOfAssert = xm.getTypeOfMap({
         sha1: isSha,
+        sha1Short: isShaShort,
         md5: isMd5
     });
 
     function assert(pass, message, actual, expected, showDiff, ssf) {
         if (typeof showDiff === "undefined") { showDiff = true; }
-        if (pass) {
+        if (!!pass) {
             return;
         }
         if (xm.isString(message)) {
             message = message.replace(/\{([\w]+)\}/gi, function (match, id) {
                 switch (id) {
+                    case 'a':
                     case 'act':
                     case 'actual':
-                        return xm.toValueStrim(actual);
+                        if (arguments.length > 2) {
+                            return xm.toValueStrim(actual);
+                        }
+                        break;
+                    case 'e':
                     case 'exp':
                     case 'expected':
-                        return xm.toValueStrim(expected);
+                        if (arguments.length > 3) {
+                            return xm.toValueStrim(expected);
+                        }
+                        break;
                     default:
                         return match;
                 }
@@ -478,25 +552,24 @@ var xm;
         var typeKind = xm.typeOf(type);
 
         if (!xm.isValid(value)) {
-            xm.log('valueKind', valueKind);
             if (!opt) {
-                throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be defined as a ' + xm.toValueStrim(type) + ' but got a ' + (valueKind === 'number' ? 'NaN' : xm.wrapQuotes(valueKind)));
+                throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be defined as a ' + xm.toValueStrim(type) + ' but got ' + (valueKind === 'number' ? 'NaN' : valueKind));
             }
         } else if (typeKind === 'function') {
             if (!(value instanceof type)) {
-                throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be instanceof ' + xm.getFuncLabel(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
+                throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be instanceof ' + xm.getFuncLabel(type) + ' but is a ' + xm.getFuncLabel(value.constructor) + ': ' + xm.toValueStrim(value));
             }
         } else if (typeKind === 'string') {
             if (xm.hasOwnProp(typeOfAssert, type)) {
                 var check = typeOfAssert[type];
                 if (!check(value)) {
-                    throw new AssertionError('expected ' + xm.wrapQuotes(label) + ' to be a ' + xm.wrapQuotes(type) + ' but got a ' + xm.wrapQuotes(valueKind) + ': ' + xm.toValueStrim(value));
+                    throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be a ' + xm.wrapQuotes(type, true) + ' but got a ' + xm.wrapQuotes(valueKind, true) + ': ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type) + ' for ' + xm.toValueStrim(value) + '');
+                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type, true) + ' for ' + xm.toValueStrim(value) + '');
             }
         } else {
-            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label) + '');
+            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label, true) + '');
         }
     }
     xm.assertVar = assertVar;
@@ -1508,6 +1581,307 @@ var xm;
 (function (xm) {
     'use strict';
 
+    function pad(number) {
+        var r = String(number);
+        if (r.length === 1) {
+            r = '0' + r;
+        }
+        return r;
+    }
+
+    (function (DateUtil) {
+        function toNiceUTC(date) {
+            return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
+        }
+        DateUtil.toNiceUTC = toNiceUTC;
+    })(xm.DateUtil || (xm.DateUtil = {}));
+    var DateUtil = xm.DateUtil;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var StatCounter = (function () {
+        function StatCounter(log) {
+            this.stats = Object.create(null);
+            this.log = xm.log;
+            this.log = log;
+        }
+        StatCounter.prototype.count = function (id, label) {
+            var value = (id in this.stats ? this.stats[id] + 1 : 1);
+            this.stats[id] = value;
+
+            if (this.log) {
+                this.log.debug(id + ': ' + value + (label ? ': ' + label : ''));
+            }
+            return value;
+        };
+
+        StatCounter.prototype.get = function (id) {
+            if (id in this.stats) {
+                return this.stats[id];
+            }
+            return 0;
+        };
+
+        StatCounter.prototype.has = function (id) {
+            return (id in this.stats);
+        };
+
+        StatCounter.prototype.zero = function () {
+            var _this = this;
+            Object.keys(this.stats).forEach(function (id) {
+                _this.stats[id] = 0;
+            });
+        };
+
+        StatCounter.prototype.total = function () {
+            var _this = this;
+            return Object.keys(this.stats).reduce(function (memo, id) {
+                return memo + _this.stats[id];
+            }, 0);
+        };
+
+        StatCounter.prototype.counterNames = function () {
+            return Object.keys(this.stats);
+        };
+
+        StatCounter.prototype.hasAllZero = function () {
+            var _this = this;
+            return !Object.keys(this.stats).some(function (id) {
+                return _this.stats[id] !== 0;
+            });
+        };
+
+        StatCounter.prototype.clear = function () {
+            this.stats = Object.create(null);
+        };
+
+        StatCounter.prototype.getReport = function (label) {
+            var _this = this;
+            return (label ? label + ':\n' : '') + Object.keys(this.stats).sort().reduce(function (memo, id) {
+                memo.push(id + ': ' + _this.stats[id]);
+                return memo;
+            }, []).join('\n');
+        };
+        return StatCounter;
+    })();
+    xm.StatCounter = StatCounter;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function padL(input, len, char) {
+        var char = String(char).charAt(0);
+        var input = String(input);
+        while (input.length < len) {
+            input = char + input;
+        }
+        return input;
+    }
+
+    function valueMap(data) {
+        var out = Object.keys(data).reduce(function (memo, key) {
+            if (xm.isValueType(data[key])) {
+                memo[key] = data[key];
+            }
+            return memo;
+        }, Object.create(null));
+        return out;
+    }
+    xm.valueMap = valueMap;
+
+    xm.Level = {
+        start: 'start',
+        complete: 'complete',
+        failure: 'failure',
+        skip: 'skip',
+        event: 'event',
+        error: 'error',
+        warning: 'warning',
+        success: 'success',
+        status: 'status',
+        promise: 'promise',
+        resolve: 'resolve',
+        reject: 'reject',
+        notify: 'notify',
+        debug: 'debug',
+        log: 'log'
+    };
+    xm.Level = xm.valueMap(xm.Level);
+
+    Object.freeze(xm.Level);
+
+    xm.startTime = Date.now();
+    Object.defineProperty(xm, 'startTime', { writable: false });
+
+    var EventLog = (function () {
+        function EventLog(prefix, label, logger) {
+            if (typeof prefix === "undefined") { prefix = ''; }
+            if (typeof label === "undefined") { label = ''; }
+            this._items = [];
+            this.logEnabled = false;
+            this._trackEnabled = false;
+            this._trackLimit = 100;
+            this._trackPrune = 30;
+            this._label = label;
+            this._prefix = (prefix ? prefix + '-' : '');
+            this.logger = logger || (label ? xm.getLogger(this._label) : xm.log);
+            this._startAt = Date.now();
+        }
+        EventLog.prototype.start = function (type, message, data) {
+            return this.track(xm.Level.start, type, message, data);
+        };
+
+        EventLog.prototype.promise = function (promise, type, message, data) {
+            var _this = this;
+            promise.then(function () {
+                return _this.track(xm.Level.resolve, type, message, data, promise);
+            }, function (err) {
+                return _this.track(xm.Level.reject, type, message, err, promise);
+            }, function () {
+                return _this.track(xm.Level.notify, type, message, data, promise);
+            });
+            return this.track(xm.Level.promise, type, message, data, promise);
+        };
+
+        EventLog.prototype.complete = function (type, message, data) {
+            return this.track(xm.Level.complete, type, message, data);
+        };
+
+        EventLog.prototype.failure = function (type, message, data) {
+            return this.track(xm.Level.complete, type, message, data);
+        };
+
+        EventLog.prototype.event = function (type, message, data) {
+            return this.track(xm.Level.event, type, message, data);
+        };
+
+        EventLog.prototype.skip = function (type, message, data) {
+            return this.track(xm.Level.skip, type, message, data);
+        };
+
+        EventLog.prototype.error = function (type, message, data) {
+            return this.track(xm.Level.error, type, message, data);
+        };
+
+        EventLog.prototype.warning = function (type, message, data) {
+            return this.track(xm.Level.warning, type, message, data);
+        };
+
+        EventLog.prototype.success = function (type, message, data) {
+            return this.track(xm.Level.success, type, message, data);
+        };
+
+        EventLog.prototype.status = function (type, message, data) {
+            return this.track(xm.Level.status, type, message, data);
+        };
+
+        EventLog.prototype.log = function (type, message, data) {
+            return this.track(xm.Level.log, type, message, data);
+        };
+
+        EventLog.prototype.debug = function (type, message, data) {
+            return this.track(xm.Level.debug, type, message, data);
+        };
+
+        EventLog.prototype.track = function (action, type, message, data, group) {
+            var item = new EventLogItem();
+            item.type = this._prefix + type;
+            item.action = action;
+            item.message = message;
+            item.data = data;
+            item.time = (item.time - xm.startTime);
+            item.group = group;
+
+            Object.freeze(item);
+
+            if (this._trackEnabled) {
+                this._items.push(item);
+                this.trim();
+            }
+            if (this.logEnabled) {
+                this.logger.status(this.getItemString(item));
+            }
+            return this;
+        };
+
+        EventLog.prototype.trim = function (all) {
+            if (typeof all === "undefined") { all = false; }
+            if (all) {
+                this._items.splice(0, this._items.length);
+            } else if (this._trackLimit > 0 && this._items.length > this._trackLimit + this._trackPrune) {
+                this._items.splice(this._trackLimit, this._items.length - this._trackPrune);
+            }
+        };
+
+        EventLog.prototype.reset = function () {
+            this._startAt = Date.now();
+            this._items.splice(0, this._items.length);
+        };
+
+        EventLog.prototype.setTrack = function (enabled, limit, prune) {
+            if (typeof limit === "undefined") { limit = NaN; }
+            if (typeof prune === "undefined") { prune = NaN; }
+            this._trackEnabled = enabled;
+            this._trackLimit = (isNaN(limit) ? this._trackLimit : limit);
+            this._trackPrune = (isNaN(prune) ? this._trackPrune : prune);
+        };
+
+        EventLog.prototype.getItemString = function (item) {
+            var msg = item.type + ' ' + (this._label ? this._label + ': ' : '');
+            return padL(item.time, 8, '0') + ' ' + msg + ' ' + xm.trimWrap(item.message, 80, true) + ' : ' + xm.toValueStrim(item.data);
+        };
+
+        EventLog.prototype.getHistory = function () {
+            var _this = this;
+            var memo = [];
+            if (this._label) {
+                memo.push(this._label + '(' + this._items.length + ')' + '\n');
+            }
+            return this._items.reduce(function (memo, item) {
+                memo.push(_this.getItemString(item));
+                return memo;
+            }, memo).join('\n');
+        };
+
+        EventLog.prototype.getStats = function () {
+            var ret = new xm.StatCounter();
+            this._items.forEach(function (item) {
+                ret.count(item.action);
+            });
+            return ret;
+        };
+
+        EventLog.prototype.getItems = function () {
+            return (this._trackLimit > 0 ? this._items.slice(0, this._trackLimit) : this._items.slice(0));
+        };
+
+        EventLog.prototype.getReport = function (label) {
+            return this.getStats().getReport(label);
+        };
+        return EventLog;
+    })();
+    xm.EventLog = EventLog;
+
+    var itemCounter = 0;
+
+    var EventLogItem = (function () {
+        function EventLogItem() {
+            this.index = (++itemCounter);
+        }
+        EventLogItem.prototype.toString = function () {
+            return this.type + ' #' + this.index;
+        };
+        return EventLogItem;
+    })();
+    xm.EventLogItem = EventLogItem;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
     var path = require('path');
 
     (function (stack) {
@@ -1637,9 +2011,10 @@ var xm;
     'use strict';
 
     var util = require('util');
-    require('colors');
 
     xm.consoleOut = new xm.StyledOut();
+
+    xm.log;
 
     function writeMulti(logger, args) {
         var ret = [];
@@ -1736,6 +2111,17 @@ var xm;
                 doLog(logger, args);
             }
         };
+        logger.status = function () {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                args[_i] = arguments[_i + 0];
+            }
+            if (logger.enabled) {
+                precall();
+                logger.out.accent('-> ').span(label);
+                doLog(logger, args);
+            }
+        };
         logger.inspect = function (value, depth, label) {
             if (typeof depth === "undefined") { depth = 3; }
             if (logger.enabled) {
@@ -1755,6 +2141,7 @@ var xm;
     xm.getLogger = getLogger;
 
     xm.log = getLogger();
+    Object.defineProperty(xm, 'log', { writable: false });
 })(xm || (xm = {}));
 var xm;
 (function (xm) {

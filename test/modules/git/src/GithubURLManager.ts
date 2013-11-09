@@ -1,14 +1,14 @@
 ///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/GithubURLManager.ts" />
+///<reference path="../../../../src/git/GithubURLs.ts" />
 ///<reference path="helper.ts" />
 
-describe('git.GithubRepo / git.GithubURLManager', () => {
+describe('git.GithubRepo / git.GithubURLs', () => {
 	'use strict';
 
 	var assert:Chai.Assert = require('chai').assert;
 
 	var repo:git.GithubRepo;
-	var urls:git.GithubURLManager;
+	var urls:git.GithubURLs;
 
 	var gitTest = helper.getGitTestInfo();
 
@@ -28,13 +28,13 @@ describe('git.GithubRepo / git.GithubURLManager', () => {
 		});
 	});
 
-	describe('GithubURLManager', () => {
+	describe('GithubURLs', () => {
 		it('should be defined', () => {
-			assert.isFunction(git.GithubURLManager, 'GithubURLManager.constructor');
+			assert.isFunction(git.GithubURLs, 'GithubURLs.constructor');
 		});
 		it('should throw on bad params', () => {
 			assert.throws(() => {
-				urls = new git.GithubURLManager(null);
+				urls = new git.GithubURLs(null);
 			});
 		});
 		it('should return replaced urls', () => {

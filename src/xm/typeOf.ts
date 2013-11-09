@@ -44,6 +44,19 @@ module xm {
 		'null'
 	];
 
+	var primitiveTypes:string[] = [
+		'boolean',
+		'number',
+		'string'
+	];
+
+	var valueTypes:string[] = [
+		'boolean',
+		'number',
+		'string',
+		'null'
+	];
+
 	var objectNameExp = /(^\[object )|(\]$)/gi;
 
 	export function toProtoString(obj:any):string {
@@ -140,9 +153,18 @@ module xm {
 	}
 
 	export function isJSONValue(obj:any):boolean {
-		var type = typeOf(obj);
-		return jsonTypes.indexOf(type) > -1;
+		return jsonTypes.indexOf(typeOf(obj)) > -1;
 	}
+
+	export function isPrimitive(obj:any):boolean {
+		return primitiveTypes.indexOf(typeOf(obj)) > -1;
+	}
+
+	export function isValueType(obj:any):boolean {
+		return valueTypes.indexOf(typeOf(obj)) > -1;
+	}
+
+	// - - - -
 
 	//clone/extend the map
 	export function getTypeOfMap(add?:any) {

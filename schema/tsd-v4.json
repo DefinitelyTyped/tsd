@@ -6,32 +6,32 @@
 	"required": ["version", "repo", "ref", "path"],
 	"properties": {
 		"version": {
-			"title": "config-format version",
+			"description": "config-format version",
 			"type": "string",
 			"enum": ["v4"]
 		},
 		"path": {
-			"title": "path to definition directory",
+			"description": "path to definition directory",
 			"type": "string",
 			"minLength": "1"
 		},
 		"repo": {
-			"title": "github repository \"owner/name\"",
+			"description": "github repository \"owner/name\"",
 			"type": "string",
 			"pattern": "^[\\w\\.-]+/[\\w\\.-]+$"
 		},
 		"ref": {
-			"title": "git index ref (branch/commit)",
+			"description": "git index ref (branch/commit)",
 			"type": "string",
 			"pattern": "^[\\w\\.-]+$"
 		},
 		"cache": {
-			"title": "path to (shared) tsd-cache",
+			"description": "path to (shared) tsd-cache",
 			"type": "string",
 			"minLength": "1"
 		},
 		"installed": {
-			"title": "index of installed definitions",
+			"description": "index of installed definitions",
 			"type": "object",
 			"additionalProperties": false,
 			"patternProperties": {

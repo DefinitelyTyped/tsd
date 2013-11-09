@@ -44,10 +44,8 @@
     "underscore": "1.5.1",
     "mkdirp": "0.3.5",
     "semver": "~2.1.0",
-    "github": "0.1.10",
     "tv4": "~1.0.8",
     "uri-templates": "0.1.1",
-    "jsonpointer.js": "0.3.0",
     "optimist": "0.6.0",
     "colors": "0.6.1",
     "easy-table": "0.2.0",
@@ -55,7 +53,8 @@
     "assertion-error": "~1.0.0",
     "source-map-support": "0.2.3",
     "xregexp": "~2.0.0",
-    "jsesc": "~0.4.3"
+    "jsesc": "~0.4.3",
+    "json-pointer": "0.0.4"
   },
   "devDependencies": {
     "grunt": "git://github.com/gruntjs/grunt/#0a4e6e38867cde1c396eb99820436027dccf8023",
@@ -72,16 +71,17 @@
     "grunt-execute": "0.1.5",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
     "mocha": "~1.13.0",
-    "mocha-unfunk-reporter": "~0.3.5",
-    "chai": "git://github.com/Bartvds/chai/#ec97fb27707253ddf3714cccc9f1f6c3afb20cca",
+    "mocha-unfunk-reporter": "git://github.com/Bartvds/mocha-unfunk-reporter",
+    "chai": "git://github.com/Bartvds/chai",
     "chai-fs": "0.0.1",
     "chai-fuzzy": "1.3.0",
-    "chai-json-schema": "1.0.4",
+    "chai-json-schema": "git://github.com/Bartvds/chai-json-schema",
     "chai-as-promised": "4.0.0",
     "buffer-equal": "0.0.0",
     "memory-streams": "0.0.3",
     "grunt-ts": "~1.4.0",
     "grunt-shell": "~0.5.0",
-    "ansidiff": "~1.0.0"
+    "ansidiff": "~1.0.0",
+    "grunt-contrib-connect": "~0.5.0"
   }
 }

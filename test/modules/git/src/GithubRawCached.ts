@@ -1,15 +1,15 @@
 ///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/GithubRawCached.ts" />
+///<reference path="../../../../src/git/loader/GithubRaw.ts" />
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 ///<reference path="helper.ts" />
 
-describe('git.GithubRawCached', () => {
+describe('git.GithubRaw', () => {
 	'use strict';
 
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var raw:git.GithubRawCached;
+	var raw:git.GithubRaw;
 	var context:tsd.Context;
 	var repo:git.GithubRepo;
 
@@ -19,10 +19,10 @@ describe('git.GithubRawCached', () => {
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'GithubRawCached', 'git-raw');
+		cacheDir = path.join(gitTest.cacheDir, 'GithubRaw', 'git-raw');
 
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
-		raw = new git.GithubRawCached(repo, cacheDir);
+		raw = new git.GithubRaw(repo, cacheDir);
 	});
 
 	afterEach(() => {
@@ -37,17 +37,17 @@ describe('git.GithubRawCached', () => {
 	});
 
 	it('should be defined', () => {
-		assert.isFunction(git.GithubRawCached, 'constructor');
+		assert.isFunction(git.GithubRaw, 'constructor');
 	});
 
 	it('should throw on bad params', () => {
 		helper.assertError(() => {
-			raw = new git.GithubRawCached(null, null);
+			raw = new git.GithubRaw(null, null);
 		}, 'expected "repo" to be defined as a GithubRepo(ownerName, projectName) but got null');
 	});
 
 	it('should have default options', () => {
-		assert.isFunction(git.GithubRawCached, 'constructor');
+		assert.isFunction(git.GithubRaw, 'constructor');
 		assert.isTrue(raw.loader.options.cacheRead, 'options.cacheRead');
 		assert.isTrue(raw.loader.options.cacheWrite, 'options.cacheWrite');
 		assert.isTrue(raw.loader.options.remoteRead, 'options.remoteRead');

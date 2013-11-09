@@ -6,8 +6,6 @@
 ///<reference path="assert/xm/_all.ts" />
 ///<reference path="assert/git/_all.ts" />
 
-///<reference path="../src/xm/io/CachedLoader.ts" />
-
 module helper {
 	'use strict';
 
@@ -41,6 +39,11 @@ module helper {
 		context = new tsd.Context();
 		context.paths.cacheDir = getFixedCacheDir();
 		return context;
+	}
+
+	export function applyCoreUpdate(core:tsd.Core) {
+		core.repo.api.cache.opts.applyCacheMode(helper.settings.cache);
+		core.repo.raw.cache.opts.applyCacheMode(helper.settings.cache);
 	}
 
 	export class TestInfo {

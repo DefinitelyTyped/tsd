@@ -9,3 +9,5 @@
 	* Move plugins int their project (jquery.xyx, like angular)
 	* Always work in branch, never master (needed?)
 	* Clean headers 
+
+# Cache flow

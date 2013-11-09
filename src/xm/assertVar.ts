@@ -14,14 +14,21 @@ module xm {
 
 	var AssertionError = require('assertion-error');
 
-	function isSha(value:any):boolean {
+	export function isSha(value:any):boolean {
 		if (typeof value !== 'string') {
 			return false;
 		}
 		return /^[0-9a-f]{40}$/.test(value);
 	}
 
-	function isMd5(value:any):boolean {
+	export function isShaShort(value:any):boolean {
+		if (typeof value !== 'string') {
+			return false;
+		}
+		return /^[0-9a-f]{6,40}$/.test(value);
+	}
+
+	export function isMd5(value:any):boolean {
 		if (typeof value !== 'string') {
 			return false;
 		}
@@ -30,23 +37,32 @@ module xm {
 
 	var typeOfAssert:any = xm.getTypeOfMap({
 		sha1: isSha,
+		sha1Short: isShaShort,
 		md5: isMd5
 	});
 
 	//TODO test xm.assert()
-	export function assert(pass:boolean, message:string, actual:any, expected:any, showDiff:boolean = true, ssf?:any):void {
-		if (pass) {
+	export function assert(pass:boolean, message:string, actual?:any, expected?:any, showDiff:boolean = true, ssf?:any):void {
+		if (!!pass) {
 			return;
 		}
 		if (xm.isString(message)) {
 			message = message.replace(/\{([\w]+)\}/gi, (match, id) => {
 				switch (id) {
+					case 'a':
 					case 'act':
 					case 'actual':
-						return xm.toValueStrim(actual);
+						if (arguments.length > 2) {
+							return xm.toValueStrim(actual);
+						}
+						break;
+					case 'e':
 					case 'exp':
 					case 'expected':
-						return xm.toValueStrim(expected);
+						if (arguments.length > 3) {
+							return xm.toValueStrim(expected);
+						}
+						break;
 					default:
 						return match;
 				}

@@ -1,17 +1,17 @@
 ///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/GithubAPICached.ts" />
+///<reference path="../../../../src/git/loader/GithubAPI.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 ///<reference path="../../../../src/tsd/context/Context.ts" />
 ///<reference path="helper.ts" />
 
-describe('git.GithubAPICached', () => {
+describe('git.GithubAPI', () => {
 	'use strict';
 
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var api:git.GithubAPICached;
+	var api:git.GithubAPI;
 	var repo:git.GithubRepo;
 
 	var cacheDir:string;
@@ -20,9 +20,9 @@ describe('git.GithubAPICached', () => {
 
 	beforeEach(() => {
 		//use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'GithubAPICached', 'git-api');
+		cacheDir = path.join(gitTest.cacheDir, 'GithubAPI', 'git-api');
 		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
-		api = new git.GithubAPICached(repo, cacheDir);
+		api = new git.GithubAPI(repo, cacheDir);
 	});
 	afterEach(() => {
 		repo = null;
@@ -34,11 +34,11 @@ describe('git.GithubAPICached', () => {
 		assert.isString(gitTest.config.repo.project, 'project');
 	});
 	it('should be defined', () => {
-		assert.isFunction(git.GithubAPICached, 'constructor');
+		assert.isFunction(git.GithubAPI, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new git.GithubAPICached(null, null);
+			api = new git.GithubAPI(null, null);
 		});
 	});
 	it('should have default options', () => {

@@ -10,9 +10,9 @@ module git {
 	'use strict';
 
 	/*
-	 GithubURLManager: url-templates for common urls
+	 GithubURLs: url-templates for common urls
 	 */
-	export class GithubURLManager extends xm.URLManager {
+	export class GithubURLs extends xm.URLManager {
 
 		private _base:string = 'https://github.com/{owner}/{project}';
 		private _api:string = 'https://api.github.com/repos/{owner}/{project}';
@@ -32,7 +32,8 @@ module git {
 			this.addTemplate('base', this._base);
 			this.addTemplate('raw', this._raw);
 			this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
-
+			this.addTemplate('apiTree', this._raw + '/git/trees/{sha}');
+			this.addTemplate('apiBranches', this._raw + '/branches/{branch}');
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
@@ -53,6 +54,15 @@ module git {
 			xm.assertVar(path, 'string', 'path');
 
 			return this.getURL('rawFile', {
+				commit: commit,
+				path: path
+			});
+		}
+
+		apiTree(sha1:string):string {
+			xm.assertVar(sha1, 'sha1', 'sha1');
+
+			return this.getURL('apiTree', {
 				commit: commit,
 				path: path
 			});

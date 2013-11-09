@@ -12,65 +12,65 @@ module xm {
 	 */
 	export class StatCounter {
 
-		stats:IKeyValueMap<number> = new KeyValueMap();
-		logger:Logger = xm.log;
+		stats:{[id:string]:number} = Object.create(null);
+		log:Logger = xm.log;
 
-		constructor(public log:boolean = false) {
-
+		constructor(log?:Logger) {
+			this.log = log;
 		}
 
 		count(id:string, label?:string):number {
-			var value = this.stats.get(id, 0) + 1;
-			this.stats.set(id, value);
+			var value = (id in this.stats ? this.stats[id] + 1 : 1);
+			this.stats[id] = value;
 
-			if (this.log && this.logger) {
-				this.logger('-> ' + id + ': ' + this.stats.get(id) + (label ? ': ' + label : ''));
+			if (this.log) {
+				this.log.debug(id + ': ' + value + (label ? ': ' + label : ''));
 			}
 			return value;
 		}
 
 		get(id:string):number {
-			return this.stats.get(id, 0);
+			if (id in this.stats) {
+				return this.stats[id];
+			}
+			return 0;
 		}
 
 		has(id:string):boolean {
-			return this.stats.has(id);
+			return (id in this.stats);
 		}
 
 		zero():void {
-			this.stats.keys().forEach((id:string) => {
-				this.stats.set(id, 0);
+			Object.keys(this.stats).forEach((id:string) => {
+				this.stats[id] = 0;
 			});
 		}
 
 		total():number {
-			return this.stats.values().reduce((memo:number, value:number) => {
-				return memo + value;
+			return Object.keys(this.stats).reduce((memo:number, id:string) => {
+				return memo + this.stats[id];
 			}, 0);
 		}
 
 		counterNames():string[] {
-			return this.stats.keys();
+			return Object.keys(this.stats);
 		}
 
 		hasAllZero():boolean {
-			return !this.stats.values().some((value:number) => {
-				return value !== 0;
+			return !Object.keys(this.stats).some((id:string) => {
+				return this.stats[id] !== 0;
 			});
 		}
 
 		clear():void {
-			this.stats.clear();
+			this.stats = Object.create(null);
 		}
 
 		getReport(label?:string):string {
-			var ret = [];
-			var keys = this.stats.keys();
-			keys.sort();
-			keys.forEach((id:string) => {
-				ret.push(id + ': ' + this.stats.get(id));
-			});
-			return (label ? label + ':\n' : '') + ret.join('\n');
+			return (label ? label + ':\n' : '') + Object.keys(this.stats).sort().reduce((memo:string[], id:string) => {
+				memo.push(id + ': ' + this.stats[id]);
+				return memo;
+			}, []).join('\n');
 		}
 	}
 }

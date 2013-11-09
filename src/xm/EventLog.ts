@@ -9,7 +9,7 @@
 ///<reference path="DateUtil.ts" />
 ///<reference path="Logger.ts" />
 ///<reference path="inspect.ts" />
-///<reference path="../../../typings/colors/colors.d.ts" />
+///<reference path="StatCounter.ts" />
 
 module xm {
 	'use strict';
@@ -23,123 +23,228 @@ module xm {
 		return input;
 	}
 
-	//TODO make full dispatcher?
-	export module logging {
-
-		export class EventLog {
-			private _items:EventLogItem[] = [];
-			label:string;
-			startAt:number;
-			log:xm.Logger;
-			parent:EventLog;
-			listeners:EventLog[];
-
-			logEnabled:boolean = false;
-			countEnabled:boolean = false;
-
-			constructor(log:xm.Logger, label:any) {
-				this.label = label;
-				this.log = log || xm.getLogger(this.label);
-				this.startAt = Date.now();
+	export function valueMap(data:any):any {
+		var out = Object.keys(data).reduce((memo:any, key:string) => {
+			if (xm.isValueType(data[key])) {
+				memo[key] = data[key];
 			}
+			return memo;
+		}, Object.create(null));
+		return out;
+	}
 
-			event(type:string, message:string, data:any):EventLogItem {
-				var item = new EventLogItem(type, message, data);
-				if (this.countEnabled) {
-					this._items.push(item);
-				}
-				if (this.logEnabled) {
-					var msg = id;
-					if (message) {
-						msg += ' - ' + xm.inspect(message);
-					}
-					this.log.log(msg);
-				}
-				if (this.parent) {
-					this.parent.event(id, message, data);
-				}
-				if (this.listeners) {
-					for (var i = 0, ii = this.listeners.length; i < ii; i++) {
-						this.listeners[i].event(id, message, data);
-					}
-				}
-				return item;
+	//some standard levels
+	//TODO replace with proper enum
+	export var Level = {
+		start: 'start',
+		complete: 'complete',
+		failure: 'failure',
+		skip: 'skip',
+
+		event: 'event',
+
+		error: 'error',
+		warning: 'warning',
+		success: 'success',
+		status: 'status',
+
+		promise: 'promise',
+		resolve: 'resolve',
+		reject: 'reject',
+		notify: 'notify',
+
+		debug: 'debug',
+		log: 'log'
+	};
+	Level = xm.valueMap(Level);
+	//subzero
+	Object.freeze(Level);
+
+	export var startTime = Date.now();
+	Object.defineProperty(xm, 'startTime', {writable: false});
+
+	export class EventLog {
+		private _items:EventLogItem[] = [];
+
+		private _label:string;
+		private _prefix:string;
+		private _startAt:number;
+		logger:xm.Logger;
+
+		logEnabled:boolean = false;
+		private _trackEnabled:boolean = false;
+		private _trackLimit:number = 100;
+		private _trackPrune:number = 30;
+
+		constructor(prefix:string = '', label:string = '', logger?:xm.Logger) {
+			this._label = label;
+			this._prefix = (prefix ? prefix + '-' : '');
+			this.logger = logger || (label ? xm.getLogger(this._label) : xm.log);
+			this._startAt = Date.now();
+		}
+
+		//many lazy wrappers
+
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		start(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.start, type, message, data);
+		}
+
+		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLog {
+			promise.then(() => {
+				return this.track(Level.resolve, type, message, data, promise);
+			}, (err) => {
+				return this.track(Level.reject, type, message, err, promise);
+			}, () => {
+				return this.track(Level.notify, type, message, data, promise);
+			});
+			return this.track(Level.promise, type, message, data, promise);
+		}
+
+		complete(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.complete, type, message, data);
+		}
+
+		failure(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.complete, type, message, data);
+		}
+
+		event(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.event, type, message, data);
+		}
+
+		skip(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.skip, type, message, data);
+		}
+
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		error(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.error, type, message, data);
+		}
+
+		warning(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.warning, type, message, data);
+		}
+
+		success(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.success, type, message, data);
+		}
+
+		status(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.status, type, message, data);
+		}
+
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		log(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.log, type, message, data);
+		}
+
+		debug(type:string, message?:string, data?:any):EventLog {
+			return this.track(Level.debug, type, message, data);
+		}
+
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		track(action:string, type:string, message?:string, data?:any, group?:any):EventLog {
+			var item = new EventLogItem();
+			item.type = this._prefix + type;
+			item.action = action;
+			item.message = message;
+			item.data = data;
+			item.time = (item.time - startTime);
+			item.group = group;
+			//fresh
+			Object.freeze(item);
+
+			if (this._trackEnabled) {
+				this._items.push(item);
+				this.trim();
 			}
-
-			getChild():EventLog {
-				var log = new EventLog(this.log, this.label);
-				log.parent = this;
-				return log;
+			if (this.logEnabled) {
+				this.logger.status(this.getItemString(item));
 			}
+			return this;
+		}
 
-			addListener(log:EventLog):void {
-				if (log !== parent && this.listeners.indexOf(log) < 0) {
-					this.listeners.push(log);
-				}
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		trim(all:boolean = false):void {
+			if (all) {
+				this._items.splice(0, this._items.length)
 			}
-
-			removeListener(log:EventLog):void {
-				var i = this.listeners.indexOf(log);
-				if (i > -1) {
-					this.listeners.splice(i, 1);
-				}
-			}
-
-			getHistory():string[] {
-				var date = new Date();
-				//var toNiceUTC = xm.DateUtil.toNiceUTC;
-				var memo = [];
-				if (this.label) {
-					memo.push(this.label + '(' + this._items.length + ')' + '\n');
-				}
-				return this._items.reduce((memo:string[], item:EventLogItem) => {
-					date.time = this.startAt - item.time;
-					var timeStr = padL((this.startAt - item.time), 8, '0');
-					//filter items?
-					memo.push(timeStr + ' ' + xm.inspect(item.message));
-					return memo;
-				}, memo);
-			}
-
-			getStats():{[type:string]:number} {
-				var ret = {};
-				this._items.forEach((id:string) => {
-					if (ret.hasOwnProperty(id)) {
-						ret[id] += 1;
-					}
-					else {
-						ret[id] = 1;
-					}
-				});
-				return ret;
-			}
-
-			getReport(label?:string):string {
-				var ret = [];
-				var stats = this.getStats();
-				var keys = stats.keys();
-				keys.sort();
-				keys.forEach((id:string) => {
-					ret.push(id + ': ' + stats[id]);
-				});
-				return (label ? label + ':\n' : '') + ret.join('\n');
+			else if (this._trackLimit > 0 && this._items.length > this._trackLimit + this._trackPrune) {
+				this._items.splice(this._trackLimit, this._items.length - this._trackPrune);
 			}
 		}
 
-		var index = 0;
+		reset():void {
+			this._startAt = Date.now();
+			this._items.splice(0, this._items.length);
+		}
 
-		export class EventLogItem {
-			time:number;
-			index:number;
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-			constructor(public type:string, public message:any, public data:String) {
-				this.time = Date.now();
-				this.index = (++index);
+		setTrack(enabled:boolean, limit:number = NaN, prune:number = NaN):void {
+			this._trackEnabled = enabled;
+			this._trackLimit = (isNaN(limit) ? this._trackLimit : limit);
+			this._trackPrune = (isNaN(prune) ? this._trackPrune : prune);
+		}
+
+		getItemString(item:EventLogItem):string {
+			var msg = item.type + ' ' + (this._label ? this._label + ': ' : '');
+			return padL(item.time, 8, '0') + ' ' + msg + ' ' + xm.trimWrap(item.message, 80, true) + ' : ' + xm.toValueStrim(item.data);
+		}
+
+		getHistory():string {
+			var memo = [];
+			if (this._label) {
+				memo.push(this._label + '(' + this._items.length + ')' + '\n');
 			}
+			return this._items.reduce((memo:string[], item:EventLogItem) => {
+				memo.push(this.getItemString(item));
+				return memo;
+			}, memo).join('\n');
+		}
 
-			toString():string {
-				return this.type + ':' + this.message;
-			}
+		getStats():xm.StatCounter {
+			var ret = new xm.StatCounter();
+			this._items.forEach((item:EventLogItem) => {
+				ret.count(item.action);
+			});
+			return ret;
+		}
+
+		getItems():EventLogItem[] {
+			return (this._trackLimit > 0 ? this._items.slice(0, this._trackLimit) : this._items.slice(0));
+		}
+
+		getReport(label?:string):string {
+			return this.getStats().getReport(label);
+		}
+	}
+
+	var itemCounter = 0;
+
+	export class EventLogItem {
+		type:string;
+		action:string;
+
+		message:string;
+		data:any;
+		index:number;
+		time:number;
+
+		group:any;
+
+		constructor() {
+			this.index = (++itemCounter);
+		}
+
+		toString():string {
+			return this.type + ' #' + this.index;
 		}
 	}
 }

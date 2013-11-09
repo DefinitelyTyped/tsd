@@ -19,14 +19,17 @@ module tsd {
 		paths:Paths;
 		config:Config;
 		packageInfo:xm.PackageJSON;
+		verbose:boolean;
 
 		//TODO use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
 
-		constructor(public configFile:string = null, public verbose:boolean = false) {
+		constructor(configFile:string = null, verbose:boolean = false) {
 			xm.assertVar(configFile, 'string', 'configFile', true);
+			xm.assertVar(verbose, 'boolean', 'verbose');
 
 			this.packageInfo = xm.PackageJSON.getLocal();
+			this.verbose = verbose;
 
 			this.paths = new Paths();
 			if (configFile) {

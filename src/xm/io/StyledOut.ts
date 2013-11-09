@@ -19,6 +19,11 @@ module xm {
 	//TODO implement feature to remember if last input closed a line (or otherwise auto close it)
 	//TODO implement abstract line-start/line-end/clear to auto-insert line-breaks, link to indent/layout etc
 	//TODO implement tree/stack-style with push/pop/flush/pointer states?
+	//TODO revise API for common usage scenarios
+	// -final reporting (succes/fail/pending/total + pluralise etc)
+	// -various statuses (expected etc)
+	//TODO drop ok/fail/warn
+	//TODO split further into semantics and structure
 	export class StyledOut {
 
 		private _styler:xm.styler.Styler;

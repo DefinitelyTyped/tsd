@@ -232,4 +232,54 @@ module helper {
 
 		return d.promise;
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	//TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
+	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string) {
+		var stats = cache.track;
+
+		var items = cache.track.getItems().filter((item:xm.EventLogItem) => {
+			return true;
+		}).map((item:xm.EventLogItem) => {
+			return item.action;
+		});
+		assert.operator(items, '>=', 0, 'items');
+
+		//TOOD yuk.. rewrite for new caching system with EventLog
+		///var sum:number;
+		/*switch (helper.settings.cache) {
+		 case CacheMode.forceRemote:
+		 assert.operator(stats.get('cache-hit'), '===', 0, message + ': allRemote: cache-hit');
+		 assert.operator(stats.get('load-success'), '>', 0, message + ': allRemote: load-success');
+		 assert.operator(stats.get('write-success'), '===', 0, message + ': allRemote: write-success');
+		 break;
+		 case CacheMode.forceUpdate:
+		 assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
+
+		 sum = stats.get('load-success') + stats.get('write-success');
+		 assert.operator(sum, '>', 0, message + ': forceUpdate: sum (load-success + write-success)');
+		 break;
+		 case CacheMode.allowUpdate:
+		 //assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
+		 //assert.operator(stats.get('load-success'), '>=', 0, message + ': allowUpdate: load-success');
+		 //assert.operator(stats.get('write-success'), '>=', 0, message + ': allowUpdate: write-success');
+
+		 sum = stats.get('load-success') + stats.get('write-success') + stats.get('cache-hit');
+		 assert.operator(sum, '>', 0, message + ': allowUpdate: sum (load-success + write-success + cache-hit)');
+		 break;
+		 case CacheMode.allowRemote:
+		 assert.operator(stats.get('write-success'), '==', 0, message + ': allowRemote: write-success');
+
+		 sum = stats.get('load-success') + stats.get('cache-hit');
+		 assert.operator(sum, '>', 0, message + ': allowRemote: sum (load-success + cache-hit)');
+		 break;
+		 case CacheMode.forceLocal:
+		 default:
+		 assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
+		 assert.operator(stats.get('load-success'), '===', 0, message + ': noUpdate: load-success');
+		 assert.operator(stats.get('write-success'), '===', 0, message + ': noUpdate: write-success');
+		 break;
+		 }*/
+	}
 }
