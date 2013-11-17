@@ -28,12 +28,19 @@ module git {
 			});
 
 			// externalise later
-			this.addTemplate('api', this._api);
 			this.addTemplate('base', this._base);
+
 			this.addTemplate('raw', this._raw);
 			this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
-			this.addTemplate('apiTree', this._raw + '/git/trees/{sha}');
-			this.addTemplate('apiBranches', this._raw + '/branches/{branch}');
+
+			this.addTemplate('api', this._api);
+			this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
+			this.addTemplate('apiBranch', this._api + '/branches/{branch}');
+			this.addTemplate('apiBranches', this._api + '/branches');
+			this.addTemplate('apiCommit', this._api + '/commits/{commit}');
+			this.addTemplate('apiPathCommits', this._api + '/commits?sha={commit}&path={path}');
+			this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
+
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
@@ -50,21 +57,54 @@ module git {
 		}
 
 		rawFile(commit:string, path:string):string {
-			xm.assertVar(commit, 'string', 'commit');
+			xm.assertVar(commit, 'sha1', 'commit');
 			xm.assertVar(path, 'string', 'path');
-
 			return this.getURL('rawFile', {
 				commit: commit,
 				path: path
 			});
 		}
 
-		apiTree(sha1:string):string {
-			xm.assertVar(sha1, 'sha1', 'sha1');
+		apiBranches():string {
+			return this.getURL('apiBranches');
+		}
 
+		apiBranch(name:string):string {
+			xm.assertVar(name, 'string', 'name');
+			return this.getURL('apiBranch', {
+				branch: name
+			});
+		}
+
+		apiTree(tree:string, recursive?:any):string {
+			xm.assertVar(tree, 'sha1', 'tree');
 			return this.getURL('apiTree', {
+				tree: tree,
+				recursive: (recursive ? 1 : 0)
+			});
+		}
+
+		apiPathCommits(commit:string, path:string):string {
+			xm.assertVar(commit, 'sha1', 'commit');
+			xm.assertVar(path, 'string', 'path');
+			return this.getURL('apiPathCommits', {
 				commit: commit,
 				path: path
+			});
+		}
+
+		apiCommit(commit:string, recursive?:any):string {
+			xm.assertVar(commit, 'sha1', 'commit');
+			return this.getURL('apiCommit', {
+				commit: commit,
+				recursive: recursive
+			});
+		}
+
+		apiBlob(sha:string):string {
+			xm.assertVar(sha, 'sha1', 'sha');
+			return this.getURL('apiBlob', {
+				blob: sha
 			});
 		}
 	}

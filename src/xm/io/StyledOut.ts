@@ -121,6 +121,7 @@ module xm {
 
 		// - - - - - layout (inline) - - - - -
 
+		// entering the sanity/insanity twilight zone (lets push it, see what happens)
 		space():StyledOut {
 			this._writer.write(this._styler.plain(' '));
 			return this;

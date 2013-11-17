@@ -25,7 +25,7 @@ describe('Core', () => {
 		var source = xm.FileUtil.readJSONSync(path);
 
 		core = getCore(context);
-		return core.readConfig(false).then(() => {
+		return core.config.readConfig(false).then(() => {
 			helper.assertConfig(core.context.config, source, 'source data');
 		});
 	}
@@ -33,7 +33,7 @@ describe('Core', () => {
 	function testInvalidConfig(path:string, exp:RegExp):Q.Promise<void> {
 		context.paths.configFile = path;
 		core = getCore(context);
-		return assert.isRejected(core.readConfig(false), exp);
+		return assert.isRejected(core.config.readConfig(false), exp);
 	}
 
 	before(() => {
@@ -76,7 +76,7 @@ describe('Core', () => {
 		it('should pass on missing optional data', () => {
 			context.paths.configFile = './non-existing_____/tsd.json';
 			core = getCore(context);
-			return assert.isFulfilled(core.readConfig(true));
+			return assert.isFulfilled(core.config.readConfig(true));
 		});
 	});
 	describe('saveConfig', () => {
@@ -87,7 +87,7 @@ describe('Core', () => {
 			context.paths.configFile = saveFile;
 
 			core = getCore(context);
-			//core.debug = true;
+			//core.verbose = true;
 
 			//modify test data
 			var source = xm.FileUtil.readJSONSync(saveFile);
@@ -97,14 +97,14 @@ describe('Core', () => {
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
 			delete changed.installed['async/async.d.ts'];
 
-			return core.readConfig(false).then(() => {
+			return core.config.readConfig(false).then(() => {
 				helper.assertConfig(core.context.config, source, 'core.context.config');
 
 				//modify data
 				core.context.config.path = 'some/other/path';
 				core.context.config.getInstalled()[0].path = 'bleh/blah.d.ts';
 
-				return core.saveConfig();
+				return core.config.saveConfig();
 			}).then(() => {
 				assert.notIsEmptyFile(context.paths.configFile);
 				return xm.FileUtil.readJSONPromise(context.paths.configFile);
@@ -117,18 +117,15 @@ describe('Core', () => {
 	});
 
 	describe('updateIndex', () => {
-		it('should return data', () => {
+		it.eventually('should return data', () => {
 			core = getCore(context);
-			//core.debug = true;
+			//core.verbose = true;
 
-			return core.updateIndex().then(() => {
-				helper.assertUpdateStat(core.gitAPI.loader, 'core');
-
-				assert.isTrue(core.index.hasIndex(), 'index.hasIndex');
-				assert.operator(core.index.list.length, '>', 200, 'index.list');
-				//xm.log(core.index.toDump());
+			return core.index.getIndex().then((index:tsd.DefIndex) => {
+				assert.isTrue(index.hasIndex(), 'index.hasIndex');
+				assert.operator(index.list.length, '>', 200, 'index.list');
+				//xm.log(index.toDump());
 				//TODO validate index data
-
 				return null;
 			});
 		});

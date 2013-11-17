@@ -5,21 +5,24 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDefVersion(file:tsd.DefVersion, recursive:boolean):any {
+	export function serialiseDefVersion(file:tsd.DefVersion, recursive:number = 0):any {
 		xm.assertVar(file, tsd.DefVersion, 'file');
+		recursive -= 1;
 
 		var json:any = {};
 		json.path = file.def.path;
-		json.commit = helper.serialiseDefCommit(file.commit, false);
-		if (file.blob) {
-			json.blob = helper.serialiseDefBlob(file.blob, false);
-		}
 		json.key = file.key;
 		json.solved = file.solved;
-		if (file.dependencies) {
+		if (recursive >= 0) {
+			json.commit = helper.serialiseDefCommit(file.commit, recursive);
+			if (file.blob) {
+				json.blob = helper.serialiseDefBlob(file.blob, recursive);
+			}
+		}
+		if (file.dependencies && recursive >= 0) {
 			json.dependencies = [];
 			file.dependencies.forEach((def:tsd.Def) => {
-				json.dependencies.push(helper.serialiseDef(def, false));
+				json.dependencies.push(helper.serialiseDef(def, recursive));
 			});
 		}
 		return json;
@@ -27,7 +30,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function assertDefVersion(file:tsd.DefVersion, values:any, recursive:boolean, message:string) {
+	export function assertDefVersion(file:tsd.DefVersion, values:any, message:string) {
 		assert.ok(file, message + ': file');
 		assert.ok(values, message + ': values');
 		assert.instanceOf(file, tsd.DefVersion, message + ': file');
@@ -54,13 +57,13 @@ module helper {
 	}
 
 	export function assertDefVersionFlat(file:tsd.DefVersion, values:any, message:string) {
-		assertDefVersion(file, values, false, message);
+		assertDefVersion(file, values, message);
 	}
 
 	var assertDefVersionArrayUnordered:AssertCB = helper.getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
-		return (act.def.path === exp.path && act.commit.commitSha === exp.commit.commitSha);
+		return (act.def.path === exp.path && exp.commit && act.commit.commitSha === exp.commit.commitSha);
 	}, (act:tsd.DefVersion, exp:any, message?:string) => {
-		assertDefVersion(act, exp, false, message + ': ' + tsd.shaShort(exp.commit.commitSha));
+		assertDefVersion(act, exp, message + ': ' + tsd.shaShort(exp.commit.commitSha));
 	}, 'DefVersion');
 
 	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string) {

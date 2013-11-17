@@ -166,12 +166,9 @@ module helper {
 				xm.log.json(expectedPaths);
 
 				helper.assertUnorderedLike(actualPaths, expectedPaths, (actualPath, expectedPath) => {
-					xm.log('match', tsd.Def.getFileFrom(actualPath), tsd.Def.getFileFrom(expectedPath));
 					return (tsd.Def.getFileFrom(actualPath) === tsd.Def.getFileFrom(expectedPath));
 
 				}, (actualPath, expectedPath) => {
-
-					xm.log('assert', actualPath, expectedPath);
 					var msg = helper.getPathMessage(actualPath, expectedPath, message);
 
 					helper.assertBufferUTFEqual(fs.readfile(actualPath), fs.readfile(actualPath), msg);

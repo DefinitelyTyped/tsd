@@ -1,5 +1,6 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../../tsd/data/DefIndex.ts" />
+///<reference path="../../tsd/data/DefInfoParser.ts" />
 ///<reference path="SubCore.ts" />
 
 module tsd {
@@ -18,9 +19,10 @@ module tsd {
 		 */
 		parseDefInfo(file:tsd.DefVersion):Q.Promise<DefVersion> {
 			var d:Q.Deferred<DefVersion> = Q.defer();
+			this.track.promise(d.promise, 'parse', file.key);
 
-			this.loadContent(file).then((file:tsd.DefVersion) => {
-				var parser = new tsd.DefInfoParser(this.context.verbose);
+			this.core.content.loadContent(file).then((file:tsd.DefVersion) => {
+				var parser = new tsd.DefInfoParser(this.core.context.verbose);
 				if (file.info) {
 					//TODO why not do an early bail? skip reparse?
 					file.info.resetFields();
@@ -47,6 +49,7 @@ module tsd {
 		 */
 		parseDefInfoBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
 			var d:Q.Deferred<DefVersion[]> = Q.defer();
+			this.track.promise(d.promise, 'parse_bulk');
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 

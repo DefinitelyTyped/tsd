@@ -8,6 +8,7 @@
 
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
+///<reference path="../typeOf.ts" />
 
 module xm {
 	'use strict';
@@ -27,8 +28,8 @@ module xm {
 	 */
 	export class URLManager {
 
-		private _templates = new xm.KeyValueMap<URLTemplate>();
-		private _vars = new xm.KeyValueMap<any>();
+		private _templates:{[id:string]:URLTemplate} = Object.create(null);
+		private _vars = Object.create(null);
 
 		constructor(common?:any) {
 			if (common) {
@@ -37,42 +38,49 @@ module xm {
 		}
 
 		public addTemplate(id:string, url:string):void {
-			if (this._templates.has(id)) {
+			if (id in this._templates) {
 				throw (new Error('cannot redefine template: ' + id));
 			}
-			this._templates.set(id, uriTemplates(url));
+			this._templates[id] = uriTemplates(url);
 		}
 
 		public setVar(id:string, value:any):void {
-			this._vars.set(id, value);
+			this._vars[id] = value;
 		}
 
 		public getVar(id:string):string {
-			return this._vars.get(id, null);
+			return (id in this._vars ? this._vars[id] : null);
 		}
 
 		public setVars(map:any):void {
 			Object.keys(map).forEach((id) => {
-				this._vars.set(id, map[id]);
+				if (xm.isValid(map[id])) {
+					this._vars[id] = map[id];
+				}
+				else {
+					delete this._vars[id];
+				}
 			});
 		}
 
 		public getTemplate(id:string):URLTemplate {
-			if (!this._templates.has(id)) {
-				throw (new Error('undefined url template: ' + id));
+			if (id in this._templates) {
+				return this._templates[id];
 			}
-			return this._templates.get(id);
+			throw (new Error('undefined url template: ' + id));
 		}
 
 		public getURL(id:string, vars?:any):string {
 			if (vars) {
-				var obj = this._vars.export();
+				var obj = Object.create(this._vars);
 				Object.keys(vars).forEach((id) => {
-					obj[id] = vars[id];
+					if (xm.isValid(vars[id])) {
+						obj[id] = vars[id];
+					}
 				});
 				return this.getTemplate(id).fillFromObject(obj);
 			}
-			return this.getTemplate(id).fillFromObject(this._vars.export());
+			return this.getTemplate(id).fillFromObject(this._vars);
 		}
 	}
 }

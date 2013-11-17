@@ -5,6 +5,7 @@
  */
 module xm {
 
+	//TODO interate with StyledOut/styler
 	//TODO look into unifing this based on streams (so similar..)
 	export module writer {
 
@@ -12,9 +13,9 @@ module xm {
 		//TODO decide if line-based flushing should be enforced
 		export interface TextWriter {
 			start();
-			//append (parse for line ends)
+			//append (parse for newlines)
 			write(str:string);
-			//append and end line
+			//append newline
 			writeln(str?:string);
 			finalise();
 		}

@@ -171,8 +171,8 @@ declare module QioHTTP {
 		node:any;
 	}
 	interface Headers {
-		[name:string]:string;
-		[name:string]:string[];
+		[name:string]:any;
+		[name:string]:any[];
 	}
 	interface Body extends Qio.Stream {
 
@@ -192,10 +192,10 @@ declare module Qio {
 	}
 
 	interface Reader extends ForEach {
-		read(charset:string):string;
-		read():NodeBuffer;
+		read(charset:string):Q.Promise<string>;
+		read():Q.Promise<NodeBuffer>;
 		close():void;
-		node:NodeBuffer;
+		node:ReadableStream;
 	}
 	interface Writer {
 		write(content:string):void;
@@ -203,7 +203,7 @@ declare module Qio {
 		flush():Q.Promise<void>;
 		close():void;
 		destroy():void;
-		node:NodeBuffer;
+		node:WritableStream;
 	}
 
 	interface Stream extends Reader, Writer {

@@ -12,11 +12,11 @@ module helper {
 
 	export var settings = {
 		// control the cache used as fixture for the tests
-		cache: xm.http.HTTPCacheMode.forceLocal
+		cache: xm.http.CacheMode.allowUpdate
 	};
 	//seriously cool
 	xm.ObjectUtil.deepFreeze(settings);
 
 	xm.log.debug('helper.settings', settings);
-	xm.log.debug('helper.settings.cache', xm.http.HTTPCacheMode[settings.cache]);
+	xm.log.debug('helper.settings.cache', xm.http.CacheMode[settings.cache]);
 }

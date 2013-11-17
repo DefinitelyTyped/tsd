@@ -96,6 +96,10 @@ module tsd {
 			return this.repo.split('/')[1];
 		}
 
+		get repoRef():string {
+			return this.repo + '#' + this.ref;
+		}
+
 		get schema():any {
 			return this._schema;
 		}

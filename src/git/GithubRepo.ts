@@ -6,6 +6,8 @@
 module git {
 	'use strict';
 
+	var path = require('path');
+
 	/*
 	 GithubRepo: basic github repo info
 	 */
@@ -28,11 +30,12 @@ module git {
 
 			this.ownerName = ownerName;
 			this.projectName = projectName;
-			this.storeDir = storeDir;
+			this.storeDir =  path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
 			this.urls = new git.GithubURLs(this);
-			this.api = new git.GithubAPI(this, path.join(this.storeDir, 'git-api'));
-			this.raw = new git.GithubRaw(this,  path.join(this.storeDir, 'git-raw'));
+
+			this.api = new git.GithubAPI(this, this.storeDir);
+			this.raw = new git.GithubRaw(this, this.storeDir);
 
 			xm.ObjectUtil.lockProps(this, Object.keys(this));
 		}
@@ -43,6 +46,11 @@ module git {
 
 		toString():string {
 			return this.ownerName + '/' + this.projectName;
+		}
+
+		set verbose(verbose:boolean) {
+			this.api.verbose = verbose;
+			this.raw.verbose = verbose;
 		}
 	}
 }

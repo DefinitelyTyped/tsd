@@ -6,8 +6,9 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseAuthor(author:xm.AuthorInfo):any {
+	export function serialiseAuthor(author:xm.AuthorInfo, recursive:number = 0):any {
 		xm.assertVar(author, xm.AuthorInfo, 'author');
+		recursive -= 1;
 		return author.toJSON();
 	}
 

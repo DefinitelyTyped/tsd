@@ -366,6 +366,7 @@ var xm;
 
     function trimWrap(value, cutoff, double) {
         if (typeof cutoff === "undefined") { cutoff = 60; }
+        value = String(value);
         if (cutoff && value.length > cutoff) {
             return xm.wrapQuotes(value.substr(0, cutoff), double) + '...';
         }
@@ -1740,8 +1741,8 @@ var xm;
                 return _this.track(xm.Level.resolve, type, message, data, promise);
             }, function (err) {
                 return _this.track(xm.Level.reject, type, message, err, promise);
-            }, function () {
-                return _this.track(xm.Level.notify, type, message, data, promise);
+            }, function (note) {
+                return _this.track(xm.Level.notify, type, message, note, promise);
             });
             return this.track(xm.Level.promise, type, message, data, promise);
         };
@@ -1792,7 +1793,7 @@ var xm;
             item.action = action;
             item.message = message;
             item.data = data;
-            item.time = (item.time - xm.startTime);
+            item.time = (Date.now() - xm.startTime);
             item.group = group;
 
             Object.freeze(item);
@@ -1830,15 +1831,22 @@ var xm;
         };
 
         EventLog.prototype.getItemString = function (item) {
-            var msg = item.type + ' ' + (this._label ? this._label + ': ' : '');
-            return padL(item.time, 8, '0') + ' ' + msg + ' ' + xm.trimWrap(item.message, 80, true) + ' : ' + xm.toValueStrim(item.data);
+            var msg = padL(item.index, 6, '0') + ' ' + item.action + ': ' + item.type;
+
+            if (xm.isValid(item.message) && item.message.length > 0) {
+                msg += ': ' + xm.trimWrap(item.message, 80, true);
+            }
+            if (xm.isValid(item.data)) {
+                msg += ': ' + xm.toValueStrim(item.data);
+            }
+            return msg;
         };
 
         EventLog.prototype.getHistory = function () {
             var _this = this;
             var memo = [];
             if (this._label) {
-                memo.push(this._label + '(' + this._items.length + ')' + '\n');
+                memo.push(this._label + '(' + this._items.length + ')');
             }
             return this._items.reduce(function (memo, item) {
                 memo.push(_this.getItemString(item));
@@ -1872,7 +1880,7 @@ var xm;
             this.index = (++itemCounter);
         }
         EventLogItem.prototype.toString = function () {
-            return this.type + ' #' + this.index;
+            return this.action + ':' + this.type + ' #' + this.index;
         };
         return EventLogItem;
     })();
@@ -2023,10 +2031,16 @@ var xm;
             if (value && typeof value === 'object') {
                 ret.push(util.inspect(value, { showHidden: false, depth: 8 }));
             } else {
+                value = String(value);
+                if (value.length === 0) {
+                    continue;
+                }
                 ret.push(value);
             }
         }
-        logger.out.line(ret.join('; '));
+        if (ret.length > 0) {
+            logger.out.line(ret.join('; '));
+        }
     }
 
     function getLogger(label) {
@@ -2048,7 +2062,6 @@ var xm;
 
         var doLog = function (logger, args) {
             if (args.length > 0) {
-                logger.out.span(' ');
                 writeMulti(logger, args);
             }
         };
@@ -2074,7 +2087,7 @@ var xm;
             }
             if (logger.enabled) {
                 precall();
-                logger.out.span('-> ').success(label + 'ok');
+                logger.out.span('-> ').success(label + 'ok ');
                 doLog(logger, args);
             }
         };
@@ -2085,7 +2098,7 @@ var xm;
             }
             if (logger.enabled) {
                 precall();
-                logger.out.span('-> ').warning(label + 'warning');
+                logger.out.span('-> ').warning(label + 'warning ');
                 doLog(logger, args);
             }
         };
@@ -2096,7 +2109,7 @@ var xm;
             }
             if (logger.enabled) {
                 precall();
-                logger.out.span('-> ').error(label + 'error');
+                logger.out.span('-> ').error(label + 'error ');
                 doLog(logger, args);
             }
         };
@@ -2107,7 +2120,7 @@ var xm;
             }
             if (logger.enabled) {
                 precall();
-                logger.out.span('-> ').accent(label + 'debug');
+                logger.out.span('-> ').accent(label + 'debug ');
                 doLog(logger, args);
             }
         };
@@ -2118,7 +2131,7 @@ var xm;
             }
             if (logger.enabled) {
                 precall();
-                logger.out.accent('-> ').span(label);
+                logger.out.accent('-> ').span(label + ' ');
                 doLog(logger, args);
             }
         };

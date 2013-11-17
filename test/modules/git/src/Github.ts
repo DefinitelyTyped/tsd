@@ -15,8 +15,6 @@ describe('git.Github', () => {
 	var FS:typeof QioFS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var api:git.GithubAPI;
-	var raw:git.GithubRaw;
 	var repo:git.GithubRepo;
 
 	var cacheDir:string;
@@ -26,21 +24,17 @@ describe('git.Github', () => {
 	beforeEach(() => {
 		//use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'git-api');
-		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project);
-		api = new git.GithubAPI(repo, path.join(gitTest.cacheDir, 'git-api'));
-		raw = new git.GithubRaw(repo, path.join(gitTest.cacheDir, 'git-raw'));
+		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project, gitTest.cacheDir);
 	});
 
 	afterEach(() => {
 		repo = null;
-		api = null;
 	});
 
 	it('pretest', () => {
 		assert.instanceOf(repo, git.GithubRepo, 'repo');
-		assert.instanceOf(api, git.GithubAPI, 'api');
-		assert.instanceOf(raw, git.GithubRaw, 'raw');
-		assert.isString(gitTest.config.repo.project, 'project');
+		assert.instanceOf(repo.api, git.GithubAPI, 'api');
+		assert.instanceOf(repo.raw, git.GithubRaw, 'raw');
 	});
 
 	xm.eachProp(gitTest.config.data, (test, label:string) => {
@@ -58,7 +52,7 @@ describe('git.Github', () => {
 			helper.assertFormatSHA1(commitSha, 'commitSha');
 			helper.assertFormatSHA1(blobSha, 'blobSha');
 
-			return raw.getFile(commitSha, filePath).then((rawData:NodeBuffer) => {
+			return repo.raw.getBinary(commitSha, filePath).then((rawData:NodeBuffer) => {
 				assert.ok(rawData, 'raw data');
 				assert.instanceOf(rawData, Buffer, 'raw data');
 				assert.operator(rawData.length, '>', 20, 'raw data');
@@ -66,7 +60,7 @@ describe('git.Github', () => {
 				var rawSha = git.GitUtil.blobShaHex(rawData, 'utf8');
 				helper.assertFormatSHA1(rawSha, 'rawSha');
 
-				return api.getBlob(blobSha).then((apiData) => {
+				return repo.api.getBlob(blobSha).then((apiData) => {
 					assert.ok(apiData, 'api data');
 					assert.isObject(apiData, 'api data');
 
@@ -80,7 +74,6 @@ describe('git.Github', () => {
 					assert.strictEqual(apiSha, rawSha, 'apiSha vs rawSha');
 
 					//this explodes.. weird!
-
 					//assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
 					//temp hackish

@@ -7,10 +7,11 @@ var tests = {
 			pattern: 'async'
 		}
 	},
-	'angular': {
+	'bootstrap': {
 		selector: {
-			pattern: 'angular'
-		}
+			pattern: 'bootstrap'
+		},
+		resolve: true
 	},
 	'angularjs-angular-all': {
 		selector: {

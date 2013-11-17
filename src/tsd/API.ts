@@ -13,7 +13,7 @@ module tsd {
 	var FS:typeof QioFS = require('q-io/fs');
 
 	/*
-	 APIResult: hold result data (composition and meaning may vary)
+	 APIResult: hold result data (composition may vary)
 	 */
 	//TODO consider splitting into more specific result for each command
 	//TODO add useful methods to result (wrap some helpers from DefUtils)
@@ -26,8 +26,7 @@ module tsd {
 		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
-		constructor(public index:DefIndex, public selector:tsd.Selector = null) {
-			xm.assertVar(index, DefIndex, 'index');
+		constructor(public selector:tsd.Selector = null) {
 			xm.assertVar(selector, tsd.Selector, 'selector', true);
 		}
 	}
@@ -101,7 +100,7 @@ module tsd {
 			var d:Q.Deferred<void> = Q.defer();
 
 			this.core.config.readConfig(optional).then(() => {
-				d.resolve(undefined);
+				d.resolve();
 			}, d.reject);
 
 			return d.promise;
@@ -114,7 +113,7 @@ module tsd {
 			var d:Q.Deferred<void> = Q.defer();
 
 			this.core.config.saveConfig().then(() => {
-				d.resolve(undefined);
+				d.resolve();
 			}, d.reject);
 
 			return d.promise;
@@ -152,28 +151,13 @@ module tsd {
 						throw new Error('expected install paths');
 					}
 					res.written = written;
+					if (selector.saveToConfig) {
+						return this.core.config.saveConfig().then(() => {
+							d.resolve(res);
+						});
+					}
 					d.resolve(res);
 				});
-			}).fail(d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 direct install attempt
-		 */
-		directInstall(path:string, commitSha:string):Q.Promise<APIResult> {
-			xm.assertVar(path, 'string', 'path');
-			xm.assertVar(commitSha, 'sha1', 'commitSha');
-			var d:Q.Deferred<APIResult> = Q.defer<APIResult>();
-
-			var res = new tsd.APIResult(this.core.index, null);
-
-			this.core.index.procureFile(path, commitSha).then((file:tsd.DefVersion) => {
-				/*return this.core.installFile(file, selector.saveToConfig, selector.overwriteFiles).then((targetPath:string) => {
-				 res.written.set(targetPath, file);
-				 d.resolve(res);
-				 });*/
 			}).fail(d.reject);
 
 			return d.promise;
@@ -187,7 +171,7 @@ module tsd {
 			xm.assertVar(path, 'string', 'path');
 			var d:Q.Deferred<APIResult> = Q.defer();
 
-			var res = new tsd.APIResult(this.core.index, null);
+			var res = new tsd.APIResult(null);
 
 			this.core.index.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
 				return this.core.installer.installFile(file).then((targetPath:string) => {
@@ -240,7 +224,7 @@ module tsd {
 		 re-install from config
 		 */
 		reinstall(overwrite:boolean = false):Q.Promise<APIResult> {
-			var res = new tsd.APIResult(this.core.index, null);
+			var res = new tsd.APIResult(null);
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).then((map:xm.IKeyValueMap) => {

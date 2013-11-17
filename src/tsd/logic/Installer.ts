@@ -1,14 +1,15 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../../tsd/data/DefIndex.ts" />
+///<reference path="../../xm/io/FileUtil.ts" />
 ///<reference path="SubCore.ts" />
 
 module tsd {
 	'use strict';
 
 	var Q = require('q');
+	var path = require('path');
+	var FS:typeof QioFS = require('q-io/fs');
 	var pointer = require('json-pointer');
-
-	var branch_tree:string = '/commit/commit/tree/sha';
 
 	export class Installer extends tsd.SubCore {
 
@@ -22,6 +23,7 @@ module tsd {
 		 */
 		installFile(file:tsd.DefVersion, addToConfig:boolean = true, overwrite:boolean = false):Q.Promise<string> {
 			var d:Q.Deferred<string> = Q.defer();
+			this.track.promise(d.promise, 'file');
 
 			this.useFile(file, overwrite).then((targetPath:string) => {
 				if (this.core.context.config.hasFile(file.def.path)) {
@@ -42,6 +44,7 @@ module tsd {
 		 */
 		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true, overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
 			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+			this.track.promise(d.promise, 'file_bulk');
 
 			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
@@ -64,6 +67,7 @@ module tsd {
 		 */
 		reinstallBulk(list:tsd.InstalledDef[], overwrite:boolean = false):Q.Promise<xm.IKeyValueMap<DefVersion>> {
 			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+			this.track.promise(d.promise, 'reinstall_bulk');
 
 			var written = new xm.KeyValueMap();
 
@@ -87,6 +91,7 @@ module tsd {
 		 */
 		useFile(file:tsd.DefVersion, overwrite:boolean):Q.Promise<string> {
 			var d:Q.Deferred<string> = Q.defer();
+			this.track.promise(d.promise, 'use', file.key);
 
 			var targetPath = this.core.getInstallPath(file.def);
 
@@ -121,6 +126,7 @@ module tsd {
 		 */
 		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
 			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+			this.track.promise(d.promise, 'use_bulk');
 
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);

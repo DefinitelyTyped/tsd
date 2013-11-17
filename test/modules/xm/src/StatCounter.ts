@@ -9,7 +9,7 @@ describe('xm.StatCounter', () => {
 	var counter:xm.StatCounter;
 
 	beforeEach(() => {
-		counter = new xm.StatCounter(false);
+		counter = new xm.StatCounter(null);
 	});
 	afterEach(() => {
 		counter = null;

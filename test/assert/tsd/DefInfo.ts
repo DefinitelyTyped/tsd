@@ -5,8 +5,10 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDefInfo(info:tsd.DefInfo, recursive:boolean):any {
+	export function serialiseDefInfo(info:tsd.DefInfo, recursive:number = 0):any {
 		xm.assertVar(info, tsd.DefInfo, 'info');
+
+		recursive -= 1;
 
 		var json:any = {};
 		json.name = info.name;
@@ -17,9 +19,9 @@ module helper {
 		json.reposUrl = info.reposUrl;
 		json.references = info.references.slice(0);
 		json.authors = [];
-		if (info.authors && recursive) {
+		if (info.authors && recursive >= 0) {
 			info.authors.forEach((author:xm.AuthorInfo) => {
-				json.authors.push(serialiseAuthor(author));
+				json.authors.push(helper.serialiseAuthor(author, recursive));
 			});
 		}
 		return json;

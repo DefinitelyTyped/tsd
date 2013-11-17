@@ -8,9 +8,6 @@
 module git {
 
 	var path = require('path');
-	var Q:typeof Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
-	var HTTP:typeof QioHTTP = require('q-io/http');
 
 	/*
 	 GithubRaw: get files from raw.github.com and cache on disk

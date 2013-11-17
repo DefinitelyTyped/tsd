@@ -40,9 +40,9 @@ module tsd {
 
 		parseJSON(commit:any):void {
 			xm.assertVar(commit, 'object', 'commit');
-			xm.assert((commit.sha !== this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
+			xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
-			xm.assert(!!this.treeSha, 'already have tree {a}, {e}', this.treeSha, commit.sha);
+			xm.assert(!this.treeSha, 'already have tree {a}, {e}', this.treeSha, commit.sha);
 
 			//TODO verify it is valid object
 			this.treeSha = pointer.get(commit, '/commit/tree/sha');

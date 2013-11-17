@@ -39,7 +39,7 @@ module tsd {
 
 			this._defer = Q.defer<tsd.DefIndex>();
 
-			this.track.promise(	this._defer.promise, IndexManager.init);
+			this.track.promise(this._defer.promise, IndexManager.init, this.core.context.config.repoRef);
 			this.track.start(IndexManager.branch_get);
 
 			this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData:any) => {
@@ -122,7 +122,7 @@ module tsd {
 			this.getIndex().then((index:tsd.DefIndex) => {
 				var commit:tsd.DefCommit = index.procureCommit(commitSha);
 				if (!commit) {
-					throw new Error('cannot commit def for commitSha: ' + path);
+					throw new Error('cannot commit def for commitSha: ' + commitSha);
 				}
 				d.resolve(commit);
 			}).fail((err) => {

@@ -1,5 +1,7 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="GithubLoader.ts" />
+///<reference path="../../../typings/underscore/underscore.d.ts" />
+///<reference path="../../xm/io/HTTPCache.ts" />
 
 module git {
 	'use strict';
@@ -14,6 +16,10 @@ module git {
 	//TODO find out if a HEAD requests counts for rate-limiting
 	export class GithubAPI extends git.GithubLoader {
 
+		static get_file = 'get_file';
+
+		metaHeaders:any = {};
+
 		//github's version
 		private apiVersion:string = '3.0.0';
 
@@ -23,89 +29,94 @@ module git {
 
 			this.formatVersion = '1.0';
 
-			var dir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.repo.getCacheKey() + '-api' + this.apiVersion + '-fmt' + this.formatVersion);
-			this.cache = new xm.HTTPCache(dir, null, null);
+			var opts = new xm.http.CacheOpts();
+			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
 			this._initGithubLoader(['apiVersion']);
-		}
 
-		mergeParams(vars?:any):any {
-			return _.defaults(vars || {}, {
-				user: this.repo.ownerName,
-				repo: this.repo.projectName
-			});
+			this.metaHeaders['x-ratelimit-limit'] = parseInt;
+			this.metaHeaders['x-ratelimit-remaining'] = parseInt;
+			this.metaHeaders['x-ratelimit-reset'] = function (value) {
+				return new Date(parseInt(value, 10) * 1000);
+			};
 		}
 
 		getBranches():Q.Promise<any> {
-			var params = this.mergeParams({});
-
+			var url = this.repo.urls.apiBranches();
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
 		getBranch(branch:string):Q.Promise<any> {
-			var params = this.mergeParams({
-				branch: branch
-			});
-
+			var url = this.repo.urls.apiBranch(branch);
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
 		getTree(sha:string, recursive:boolean):Q.Promise<any> {
-			var params = this.mergeParams({
-				sha: sha,
-				recursive: recursive
-			});
+			var url = this.repo.urls.apiTree(sha, (recursive ? 1 : undefined));
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
 		getCommit(sha:string):Q.Promise<any> {
-			var params = this.mergeParams({
-				sha: sha
-			});
+			var url = this.repo.urls.apiCommit(sha);
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
 		getBlob(sha:string):Q.Promise<any> {
-			var params = this.mergeParams({
-				sha: sha,
-				per_page: 100
-			});
+			var url = this.repo.urls.apiBlob(sha);
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
-		getCommits(sha:string):Q.Promise<any> {
+		/*
+		 getCommits(sha:string):Q.Promise<any> {
+		 //TODO implement result pagination
+		 var params = this.mergeParams({
+		 per_page: 100,
+		 sha: sha
+		 });
+		 }
+		 */
+		getPathCommits(sha:string, path:string):Q.Promise<any> {
 			//TODO implement result pagination
-			var params = this.mergeParams({
-				per_page: 100,
-				sha: sha
-			});
+			var url = this.repo.urls.apiPathCommits(sha, path);
+			var request = new xm.http.Request(url);
+			return this.getFile<any>(request, true);
 		}
 
-		getPathCommits(sha:string, path:String):Q.Promise<any> {
-			//TODO implement result pagination
-			var params = this.mergeParams({
-				per_page: 100,
-				sha: sha,
-				path: path
-			});
-		}
-
-		getFile<T>(params, koder:xm.IContentKoder<T>):Q.Promise<T> {
-			//should be a low hex
-			xm.assertVar(commitSha, 'sha1', 'commitSha');
-			xm.assertVar(filePath, 'sha1Short', 'filePath');
-			xm.assertVar(koder, 'object', 'koder');
+		getFile<T>(request:xm.http.Request, addMeta:boolean, koder?:xm.IContentKoder<T>):Q.Promise<T> {
+			//TODO add some schema validation
+			var koder = (koder || xm.JSONKoder.main);
 
 			var d:Q.Deferred<T> = Q.defer();
-			this.track.promise(d.promise, GithubRaw.get_file);
+			this.track.promise(d.promise, GithubAPI.get_file, request.url);
 
-			var url = this.repo.urls.rawFile(commitSha, filePath);
-			var headers = {};
-
-			var request = new xm.HTTPRequest(url, headers, koder.ext);
 			request.lock();
 
-			this.cache.getObject(request).then((object:xm.HTTPCacheObject) => {
-				this.track.success(GithubRaw.get_file);
-				return koder.decode(object.body);
-			}).then(d.resolve, d.reject).done();
+			this.cache.getObject(request).progress(d.notify).then((object:xm.http.CacheObject) => {
+				return koder.decode(object.body).then((res:any) => {
+					if (addMeta && xm.isObject(res)) {
+						res.meta = {};
+						if (object.response) {
+							Object.keys(this.metaHeaders).forEach((key:string) => {
+								if (xm.hasOwnProp(object.response.headers, key)) {
+									res.meta[key] = this.metaHeaders[key](object.response.headers[key]);
+								}
+							});
+						}
+					}
+					return res;
+				}).then(d.resolve);
+			}).fail(d.reject).done();
 
 			return d.promise;
+		}
+
+		getCacheKey():string {
+			return 'git-api-v' + this.apiVersion + '-fmt' + this.formatVersion;
 		}
 	}
 }

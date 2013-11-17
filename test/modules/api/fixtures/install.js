@@ -20,23 +20,22 @@ var tests = {
 			pattern: 'async/async'
 		}
 	}),
-	'angular-cookies': lib.extend(installOpts, {
+	'bootstrap' : lib.extend(installOpts, {
+		debug: false,
 		selector: {
-			pattern: 'angularjs/angular-cookies'
+			pattern: 'bootstrap/bootstrap'
 		}
 	}),
-	'angular-cookies-no-resolve': lib.extend(installOpts, {
+	'bootstrap-no-resolve' : lib.extend(installOpts, {
+		debug: false,
 		resolve: false,
 		selector: {
-			pattern: 'angularjs/angular-cookies'
+			pattern: 'bootstrap/bootstrap'
 		}
 	}),
-	'angular-cookies-no-overwrite': lib.extend(installOpts, {
+	'bootstrap-no-overwrite' : lib.extend(installOpts, {
 		debug: false,
 		overwrite: false,
-		selector: {
-			pattern: 'angularjs/angular-cookies'
-		},
 		modify: {
 			before: {
 				content : {
@@ -44,14 +43,8 @@ var tests = {
 				}
 			}
 		},
-		written: [
-			'angularjs/angular-cookies.d.ts',
-			'angularjs/angular.d.ts'
-		]
-	}),
-	'chai-assert': lib.extend(installOpts, {
 		selector: {
-			pattern: 'chai-assert'
+			pattern: 'bootstrap/bootstrap'
 		}
 	}),
 	'chai': lib.extend(installOpts, {

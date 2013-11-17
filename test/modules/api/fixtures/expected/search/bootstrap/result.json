@@ -1,0 +1,36 @@
+{
+  "selection": [
+    {
+      "path": "bootstrap/bootstrap.d.ts",
+      "key": "bootstrap/bootstrap.d.ts-1efa27f49add3fcb68450f2c1cfa8fc581ec2506",
+      "solved": true,
+      "commit": {
+        "commitSha": "1efa27f49add3fcb68450f2c1cfa8fc581ec2506"
+      },
+      "blob": {
+        "sha": "c14bf61d4b35530cd4f42fe1759f52dea96fd61f"
+      },
+      "dependencies": [
+        {
+          "path": "jquery/jquery.d.ts",
+          "project": "jquery",
+          "name": "jquery"
+        }
+      ]
+    }
+  ],
+  "nameMatches": [
+    {
+      "path": "bootstrap/bootstrap.d.ts",
+      "project": "bootstrap",
+      "name": "bootstrap",
+      "head": {
+        "path": "bootstrap/bootstrap.d.ts",
+        "key": "bootstrap/bootstrap.d.ts-1efa27f49add3fcb68450f2c1cfa8fc581ec2506",
+        "solved": true
+      },
+      "history": []
+    }
+  ],
+  "written": {}
+}

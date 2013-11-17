@@ -20,7 +20,7 @@ describe('tsd', function () {
 		it('api module', function () {
 			assert.isObject(pkg, 'pkg');
 
-			assert.property(pkg, 'main', 'pkg.main');
+			assert.property(pkg, 'main', 'pkg.utf8');
 			assert.property(pkg.main, 'tsd', 'pkg.main');
 			assert.isFile(pkg.main.tsd, 'pkg.main');
 		});

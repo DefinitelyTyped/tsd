@@ -13,6 +13,37 @@ describe('Def', () => {
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
+	function assertIsDef(path:string, expectMatch:boolean = true) {
+		assert.isString(path, 'path');
+		if (expectMatch) {
+			assert(tsd.Def.isDefPath(path), 'expected "' + path + '" to be a Def path');
+
+			//double check
+			var def = tsd.Def.getFrom(path);
+			assert.instanceOf(def, tsd.Def);
+		}
+		else {
+			assert(!tsd.Def.isDefPath(path), 'expected "' + path + '" to not be a Def path');
+		}
+	}
+
+	function assertDefFrom(path:string, fields:any, trim:boolean) {
+		assert.isString(path, 'path');
+		assert.isObject(fields, 'fields');
+
+		var def = tsd.Def.getFrom(path, trim);
+		assert.isObject(def, 'def');
+		assert.strictEqual(def.project, fields.project, 'def.project');
+		assert.strictEqual(def.name, fields.name, 'def.name');
+
+		if (fields.semver) {
+			assert.strictEqual(def.semver, fields.semver, 'def.semver');
+		}
+		else {
+			assert.notOk(def.semver, 'def.semver');
+		}
+	}
+
 	describe('basics', () => {
 		it('is defined', () => {
 			assert.isFunction(tsd.Def, 'Def');
@@ -20,26 +51,10 @@ describe('Def', () => {
 	});
 
 	describe('isDef', () => {
-
 		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
-
 		after(() => {
 			data = null;
 		});
-
-		function assertIsDef(path:string, expectMatch:boolean = true) {
-			assert.isString(path, 'path');
-			if (expectMatch) {
-				assert(tsd.Def.isDefPath(path), 'expected "' + path + '" to be a Def path');
-
-				//double check
-				var def = tsd.Def.getFrom(path);
-				assert.instanceOf(def, tsd.Def);
-			}
-			else {
-				assert(!tsd.Def.isDefPath(path), 'expected "' + path + '" to not be a Def path');
-			}
-		}
 
 		xm.eachProp(data, (group, label) => {
 			describe(label, () => {
@@ -53,35 +68,33 @@ describe('Def', () => {
 	});
 
 	describe('getFrom', () => {
-
 		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
-
 		after(() => {
 			data = null;
 		});
 
-		function assertDefFrom(path:string, fields:any) {
-			assert.isString(path, 'path');
-			assert.isObject(fields, 'fields');
+		xm.eachProp(data, (group, label) => {
+			describe(label, () => {
+				xm.eachProp(group, (fields, path) => {
+					it('test "' + path + '"', () => {
+						assertDefFrom(path, fields, false);
+					});
+				});
+			});
+		});
+	});
 
-			var def = tsd.Def.getFrom(path);
-			assert.isObject(def, 'def');
-			assert.strictEqual(def.project, fields.project, 'def.project');
-			assert.strictEqual(def.name, fields.name, 'def.name');
-
-			if (fields.semver) {
-				assert.strictEqual(def.semver, fields.semver, 'def.semver');
-			}
-			else {
-				assert.notOk(def.semver, 'def.semver');
-			}
-		}
+	describe('getFrom trimmed', () => {
+		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path-trim.json'));
+		after(() => {
+			data = null;
+		});
 
 		xm.eachProp(data, (group, label) => {
 			describe(label, () => {
 				xm.eachProp(group, (fields, path) => {
-					it('test "' + path + '" to "' + fields.semver + '"', () => {
-						assertDefFrom(path, fields);
+					it('test "' + path + '"', () => {
+						assertDefFrom(path, fields, true);
 					});
 				});
 			});

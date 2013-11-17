@@ -58,7 +58,7 @@ describe('API', () => {
 		xm.FileUtil.writeJSONSync(tmp.testDump, test);
 		xm.FileUtil.writeJSONSync(tmp.selectorDump, selector);
 
-		api.debug = test.debug;
+		api.verbose = test.debug;
 
 		return tmp;
 	}
@@ -127,10 +127,9 @@ describe('API', () => {
 
 				return setupCase(api, test, name, info).then(() => {
 					return api.search(selector).then((result:tsd.APIResult) => {
-						helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
 						assert.instanceOf(result, tsd.APIResult, 'result');
 
-						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
+						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result, 2));
 
 						var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
 						helper.assertAPIResult(result, resultExpect, 'result');
@@ -156,11 +155,9 @@ describe('API', () => {
 
 				return setupCase(api, name, test, info).then(() => {
 					return api.install(selector).then((result:tsd.APIResult) => {
-						helper.assertUpdateStat(api.core.gitAPI.loader, 'api');
-						helper.assertUpdateStat(api.core.gitRaw.loader, 'raw');
 						assert.instanceOf(result, tsd.APIResult, 'result');
 
-						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result));
+						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result, 2));
 
 						var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
 						helper.assertAPIResult(result, resultExpect, 'result');

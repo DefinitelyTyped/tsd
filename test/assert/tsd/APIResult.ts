@@ -6,33 +6,34 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseAPIResult(result:tsd.APIResult):any {
+	export function serialiseAPIResult(result:tsd.APIResult, recursive:number = 0):any {
 		xm.assertVar(result, tsd.APIResult, 'result');
+
+		recursive -= 1;
 
 		var json:any = {};
 		if (result.error) {
 			json.error = result.error;
 		}
-
-		if (result.nameMatches) {
-			json.nameMatches = result.nameMatches.map((def:tsd.Def) => {
-				return helper.serialiseDef(def, false);
-			});
-		}
 		if (result.selection) {
 			json.selection = result.selection.map((file:tsd.DefVersion) => {
-				return helper.serialiseDefVersion(file, false);
+				return helper.serialiseDefVersion(file, recursive);
+			});
+		}
+		if (result.nameMatches) {
+			json.nameMatches = result.nameMatches.map((def:tsd.Def) => {
+				return helper.serialiseDef(def, recursive);
 			});
 		}
 		if (result.definitions) {
 			json.definitions = result.definitions.map((def:tsd.Def) => {
-				return helper.serialiseDef(def, false);
+				return helper.serialiseDef(def, recursive);
 			});
 		}
 		if (result.written) {
 			json.written = {};
 			result.written.keys().forEach((key:string) => {
-				json.written[key] = helper.serialiseDefVersion(result.written.get(key), false);
+				json.written[key] = helper.serialiseDefVersion(result.written.get(key), recursive);
 			});
 		}
 		return json;

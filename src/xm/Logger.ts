@@ -7,7 +7,6 @@
  * */
 
 /// <reference path="io/StyledOut.ts" />
-/// <reference path="EventLog.ts" />
 /// <reference path="stack.ts" />
 
 module xm {
@@ -42,10 +41,16 @@ module xm {
 				ret.push(util.inspect(value, <any>{showHidden: false, depth: 8}));
 			}
 			else {
+				value = String(value);
+				if (value.length === 0) {
+					continue;
+				}
 				ret.push(value);
 			}
 		}
-		logger.out.line(ret.join('; '));
+		if (ret.length > 0) {
+			logger.out.line(ret.join('; '));
+		}
 	}
 
 	//TODO should be createLogger as there is no storage
@@ -71,7 +76,6 @@ module xm {
 
 		var doLog = function (logger, args) {
 			if (args.length > 0) {
-				logger.out.span(' ');
 				writeMulti(logger, args);
 			}
 		};
@@ -90,35 +94,35 @@ module xm {
 		logger.ok = function (...args:any[]) {
 			if (logger.enabled) {
 				precall();
-				logger.out.span('-> ').success(label + 'ok');
+				logger.out.span('-> ').success(label + 'ok ');
 				doLog(logger, args);
 			}
 		};
 		logger.warn = function (...args:any[]) {
 			if (logger.enabled) {
 				precall();
-				logger.out.span('-> ').warning(label + 'warning');
+				logger.out.span('-> ').warning(label + 'warning ');
 				doLog(logger, args);
 			}
 		};
 		logger.error = function (...args:any[]) {
 			if (logger.enabled) {
 				precall();
-				logger.out.span('-> ').error(label + 'error');
+				logger.out.span('-> ').error(label + 'error ');
 				doLog(logger, args);
 			}
 		};
 		logger.debug = function (...args:any[]) {
 			if (logger.enabled) {
 				precall();
-				logger.out.span('-> ').accent(label + 'debug');
+				logger.out.span('-> ').accent(label + 'debug ');
 				doLog(logger, args);
 			}
 		};
 		logger.status = function (...args:any[]) {
 			if (logger.enabled) {
 				precall();
-				logger.out.accent('-> ').span(label);
+				logger.out.accent('-> ').span(label + ' ');
 				doLog(logger, args);
 			}
 		};

@@ -10,6 +10,7 @@
 ///<reference path="Logger.ts" />
 ///<reference path="inspect.ts" />
 ///<reference path="StatCounter.ts" />
+///<reference path="ObjectUtil.ts" />
 
 module xm {
 	'use strict';
@@ -78,9 +79,11 @@ module xm {
 
 		constructor(prefix:string = '', label:string = '', logger?:xm.Logger) {
 			this._label = label;
-			this._prefix = (prefix ? prefix + '-' : '');
-			this.logger = logger || (label ? xm.getLogger(this._label) : xm.log);
+			this._prefix = (prefix ? prefix + ':' : '');
+			this.logger = logger || (label ? xm.getLogger(this._label) : (xm.log || xm.getLogger()));
 			this._startAt = Date.now();
+
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		//many lazy wrappers
@@ -96,8 +99,8 @@ module xm {
 				return this.track(Level.resolve, type, message, data, promise);
 			}, (err) => {
 				return this.track(Level.reject, type, message, err, promise);
-			}, () => {
-				return this.track(Level.notify, type, message, data, promise);
+			}, (note) => {
+				return this.track(Level.notify, type, message, note, promise);
 			});
 			return this.track(Level.promise, type, message, data, promise);
 		}
@@ -154,7 +157,7 @@ module xm {
 			item.action = action;
 			item.message = message;
 			item.data = data;
-			item.time = (item.time - startTime);
+			item.time = (Date.now() - startTime);
 			item.group = group;
 			//fresh
 			Object.freeze(item);
@@ -173,7 +176,7 @@ module xm {
 
 		trim(all:boolean = false):void {
 			if (all) {
-				this._items.splice(0, this._items.length)
+				this._items.splice(0, this._items.length);
 			}
 			else if (this._trackLimit > 0 && this._items.length > this._trackLimit + this._trackPrune) {
 				this._items.splice(this._trackLimit, this._items.length - this._trackPrune);
@@ -194,14 +197,21 @@ module xm {
 		}
 
 		getItemString(item:EventLogItem):string {
-			var msg = item.type + ' ' + (this._label ? this._label + ': ' : '');
-			return padL(item.time, 8, '0') + ' ' + msg + ' ' + xm.trimWrap(item.message, 80, true) + ' : ' + xm.toValueStrim(item.data);
+			var msg = padL(item.index, 6, '0') + ' ' + item.action + ' -> ' + item.type;
+			//msg += ' ' + (this._label ? +': ' + this._label : '');
+			if (xm.isValid(item.message) && item.message.length > 0) {
+				msg += ': ' + xm.trimWrap(item.message, 200, true);
+			}
+			if (xm.isValid(item.data)) {
+				msg += ': ' + xm.toValueStrim(item.data, 4, 200);
+			}
+			return msg;
 		}
 
 		getHistory():string {
 			var memo = [];
 			if (this._label) {
-				memo.push(this._label + '(' + this._items.length + ')' + '\n');
+				memo.push(this._label + '(' + this._items.length + ')');
 			}
 			return this._items.reduce((memo:string[], item:EventLogItem) => {
 				memo.push(this.getItemString(item));
@@ -244,7 +254,7 @@ module xm {
 		}
 
 		toString():string {
-			return this.type + ' #' + this.index;
+			return this.action + ':' + this.type + ' #' + this.index;
 		}
 	}
 }

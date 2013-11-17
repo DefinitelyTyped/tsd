@@ -6,21 +6,23 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDef(def:tsd.Def, recursive:boolean):any {
+	export function serialiseDef(def:tsd.Def, recursive:number = 0):any {
 		xm.assertVar(def, tsd.Def, 'def');
+		recursive -= 1;
 
 		var json:any = {};
 		json.path = def.path;
 		json.project = def.project;
 		json.name = def.name;
 		json.semver = def.semver;
-
-		json.head = helper.serialiseDefVersion(def.head, false);
-		json.history = [];
+		if (recursive >= 0) {
+			json.head = helper.serialiseDefVersion(def.head, recursive);
+		}
 		//version from the DefIndex commit +tree (may be not our edit)
-		if (def.history && recursive) {
+		if (def.history && recursive >= 0) {
+			json.history = [];
 			def.history.forEach((file:tsd.DefVersion) => {
-				json.history.push(helper.serialiseDefVersion(file, false));
+				json.history.push(helper.serialiseDefVersion(file, recursive));
 			});
 		}
 		return json;
@@ -44,12 +46,12 @@ module helper {
 			helper.propStrictEqual(def, values, 'pathTerm', message);
 		}
 		if (values.head) {
-			helper.assertDefVersion(def.head, values.head, false, message + '.head');
+			helper.assertDefVersion(def.head, values.head, message + '.head');
 		}
 		if (values.history) {
 			//exactly this order
 			for (var i = 0, ii = values.history.length; i < ii; i++) {
-				helper.assertDefVersion(def.history[i], values.history[i], false, '#' + i);
+				helper.assertDefVersion(def.history[i], values.history[i], '#' + i);
 			}
 			helper.propStrictEqual(def.history, values.history, 'length', message);
 		}

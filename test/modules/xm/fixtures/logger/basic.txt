@@ -1,9 +1,9 @@
 [plain|aa]
 [plain|bb]
-[plain|-> ][success|ok][plain| ][plain|cc]
-[plain|-> ][warning|warning][plain| ][plain|dd]
-[plain|-> ][error|error][plain| ][plain|ee]
-[plain|-> ][accent|debug][plain| ][plain|ff]
+[plain|-> ][success|ok ][plain|cc]
+[plain|-> ][warning|warning ][plain|dd]
+[plain|-> ][error|error ][plain|ee]
+[plain|-> ][accent|debug ][plain|ff]
 [plain|-> ][plain|{ a: [Object] }]
 [plain|-> ][plain|{ a: { b: 2 } }]
 [plain|-> ][plain|{

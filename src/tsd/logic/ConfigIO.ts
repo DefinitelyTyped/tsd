@@ -6,6 +6,9 @@ module tsd {
 	'use strict';
 
 	var Q = require('q');
+	var fs = require('fs');
+	var path = require('path');
+	var FS:typeof QioFS = require('q-io/fs');
 	var pointer = require('json-pointer');
 
 	export class ConfigIO extends tsd.SubCore {
@@ -20,18 +23,21 @@ module tsd {
 		 */
 		readConfig(optional:boolean = false):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
+			var target = this.core.context.paths.configFile;
 
-			FS.exists(this.core.context.paths.configFile).then((exists:boolean) => {
+			this.track.promise(d.promise, 'config_read', target);
+
+			FS.exists(target).then((exists:boolean) => {
 				if (!exists) {
 					if (!optional) {
-						d.reject(new Error('cannot locate file: ' + this.core.context.paths.configFile));
+						d.reject(new Error('cannot locate file: ' + target));
 					}
 					else {
 						d.resolve(null);
 					}
 					return;
 				}
-				return xm.FileUtil.readJSONPromise(this.core.context.paths.configFile).then((json) => {
+				return xm.FileUtil.readJSONPromise(target).then((json) => {
 					this.core.context.config.parseJSON(json);
 					d.resolve(null);
 				});
@@ -50,11 +56,13 @@ module tsd {
 			var target = this.core.context.paths.configFile;
 			var dir = path.dirname(target);
 
+			this.track.promise(d.promise, 'config_save', target);
+
 			var obj = this.core.context.config.toJSON();
 			if (!obj) {
 				return Q.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
 			}
-			var json = JSON.stringify(this.core.context.config.toJSON(), null, 2);
+			var json = JSON.stringify(obj, null, 2);
 			if (!json) {
 				return Q.reject(new Error('config could not be serialised to JSON'));
 			}

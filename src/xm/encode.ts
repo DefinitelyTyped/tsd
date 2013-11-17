@@ -142,6 +142,7 @@ module xm {
 	}
 
 	export function trimWrap(value:string, cutoff:number = 60, double?:boolean):string {
+		value = String(value);
 		if (cutoff && value.length > cutoff) {
 			return xm.wrapQuotes(value.substr(0, cutoff), double) + '...';
 		}
@@ -180,7 +181,7 @@ module xm {
 				}
 				//return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 				return jsesc(a, jsonNW);
-			})
+			});
 		}
 		return str;
 	}

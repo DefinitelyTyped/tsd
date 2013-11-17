@@ -19,7 +19,8 @@ module.exports = function (grunt) {
 		'grunt-execute',
 		'grunt-todos',
 		'grunt-shell',
-		'grunt-mocha-test'
+		'grunt-mocha-test',
+		'mocha-unfunk-reporter'
 	]);
 	// gtx.autoNpmPkg();
 	// gtx.autoNpm();
@@ -75,6 +76,13 @@ module.exports = function (grunt) {
 			},
 			integrity: ['test/integrity.js']
 		},
+		mocha_unfunk: {
+			dev: {
+				options : {
+					stackFilter: true
+				}
+			}
+		},
 		ts: {
 			options: {
 				module: 'commonjs',
@@ -127,7 +135,13 @@ module.exports = function (grunt) {
 		execute: {
 			dev: {
 				before: function (grunt) {
-					grunt.log.writeln('devdevedvedv');
+					grunt.log.writeln('start dev');
+				},
+				options: {
+					module: true
+				},
+				after: function (grunt) {
+					grunt.log.writeln('end dev');
 				},
 				src: ['tmp/dev.js']
 			}
@@ -151,10 +165,11 @@ module.exports = function (grunt) {
 			macro.newTask('connect', {
 				options: {
 					port: macro.getParam('http'),
-					base: testPath + 'tmp/'
+					base: testPath + 'www/'
 				}
 			});
 		}
+		macro.runTask('mocha_unfunk:dev');
 		macro.newTask('mochaTest', {
 			options: {
 				timeout: macro.getParam('timeout', 3000)
@@ -176,14 +191,15 @@ module.exports = function (grunt) {
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
 	gtx.create('http', 'moduleTest', {
 		timeout: longTimer,
-		http: 9797
+		http: 0
 	}, 'lib');
 
 	// assemble!
 	gtx.alias('prep', [
 		'clean:tmp',
 		'jshint:support',
-		'jshint:fixtures'
+		'jshint:fixtures',
+		'mocha_unfunk:dev'
 	]);
 	gtx.alias('build', [
 		'clean:build',
@@ -217,8 +233,8 @@ module.exports = function (grunt) {
 	gtx.alias('edit_04', 'gtx:core');
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
-	gtx.alias('edit_07', 'ts:blobSha');
-	gtx.alias('edit_08', 'gtx:http');
+	gtx.alias('edit_07', 'gtx:http');
+	gtx.alias('edit_08', 'ts:blobSha');
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();

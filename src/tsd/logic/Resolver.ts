@@ -54,7 +54,7 @@ module tsd {
 
 			})).then(() => {
 				d.resolve(list);
-			},(err) => {
+			}, (err) => {
 				d.reject(err);
 			}).done();
 
@@ -68,7 +68,7 @@ module tsd {
 		resolveDeps(file:tsd.DefVersion):Q.Promise<tsd.DefVersion> {
 			if (file.solved) {
 				this.track.skip(Resolver.solved);
-				return Q(file)(file)
+				return Q(file)(file);
 			}
 			if (this._stash.has(file.key)) {
 				this.track.skip(Resolver.active);
@@ -88,13 +88,13 @@ module tsd {
 			Q.all([
 				this.core.index.getIndex(),
 				this.core.content.loadContent(file)
-			]).spread((index:tsd.DefIndex, blob:tsd.DefBlob) => {
+			]).spread((index:tsd.DefIndex, file:tsd.DefVersion) => {
 				this.track.event(Resolver.parse);
 
 				//force empty for robustness
 				file.dependencies.splice(0, file.dependencies.length);
 
-				var queued:Q.Promise<tsd.DefVersion>[] = this.applyResolution(index, file, blob.content.toString(blob.encoding));
+				var queued:Q.Promise<tsd.DefVersion>[] = this.applyResolution(index, file, file.blob.content.toString(file.blob.encoding));
 
 				//keep
 				file.solved = true;
@@ -106,6 +106,7 @@ module tsd {
 				else {
 					this.track.skip(Resolver.subload);
 				}
+				return null;
 			}).then(() => {
 				cleanup();
 				d.resolve(file);
@@ -120,7 +121,7 @@ module tsd {
 		applyResolution(index:tsd.DefIndex, file:tsd.DefVersion, content:string):Q.Promise<tsd.DefVersion>[] {
 			var refs:string[] = this.extractPaths(file, content);
 
-			return refs.reduce((memo:Q.Promise<tsd.DefVersion>[], refPath:string) => {
+			return refs.reduce((memo:any[], refPath:string) => {
 				if (index.hasDef(refPath)) {
 					//use .head (could use same commit but that would be version hell with interdependent definitions)
 					var dep:tsd.Def = index.getDef(refPath);
@@ -134,13 +135,14 @@ module tsd {
 						//xm.log('recurse ' + dep.toString());
 
 						//lets go deeper
-						memo.push(this.resolveDeps(dep.head));
+						var p:Q.Promise<tsd.DefVersion> = this.resolveDeps(dep.head);
+						memo.push(p);
 					}
 				}
 				else {
 					this.track.warning(Resolver.dep_missing);
 					xm.log.warn('path reference not in index: ' + refPath);
-					//TODO weird: could be removed a file; add it? beh?
+					//TODO weird: could be removed file; add it? beh?
 				}
 				return memo;
 			}, []);
@@ -155,7 +157,7 @@ module tsd {
 				if (refPath.indexOf('/') < 0) {
 					refPath = file.def.project + '/' + refPath;
 				}
-				if (tsd.Def.isDefPath(refPath)) {
+				if (tsd.Def.isDefPath(refPath) && memo.indexOf(refPath) < 0) {
 					memo.push(refPath);
 				}
 				else {

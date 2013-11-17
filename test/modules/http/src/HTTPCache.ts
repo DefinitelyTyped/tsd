@@ -1,5 +1,8 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../helper.ts" />
+///<reference path="../../../../src/xm/iterate.ts" />
+///<reference path="../../../../src/xm/assertVar.ts" />
+///<reference path="../../../../src/xm/encode.ts" />
 
 module helper {
 
@@ -29,14 +32,14 @@ describe('xm.http', () => {
 		info.storeTmpDir = path.join(helper.getDirNameTmp(), name);
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
 		info.wwwHTTP = 'http://localhost:9797/';
-		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..',  'www');
-		return null;
+		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
+		return info;
 	}
 
 	var cache:xm.http.HTTPCache;
-	var opts:xm.http.HTTPCacheOpts;
-	var object:xm.http.HTTPCacheObject;
-	var request:xm.http.HTTPRequest;
+	var opts:xm.http.CacheOpts;
+	var object:xm.http.CacheObject;
+	var request:xm.http.Request;
 
 	afterEach(() => {
 		cache = null;
@@ -49,15 +52,15 @@ describe('xm.http', () => {
 		//TODO add more
 		it('should exist', () => {
 			assert.isFunction(xm.http.HTTPCache, 'cache');
-			assert.isFunction(xm.http.HTTPCacheOpts, 'opts');
-			assert.isFunction(xm.http.HTTPCacheObject, 'object');
-			assert.isFunction(xm.http.HTTPRequest, 'request');
+			assert.isFunction(xm.http.CacheOpts, 'opts');
+			assert.isFunction(xm.http.CacheObject, 'object');
+			assert.isFunction(xm.http.Request, 'request');
 		});
 	});
 
-	describe('HTTPCacheOpts', () => {
+	describe('CacheOpts', () => {
 		it('should have default values', () => {
-			var opts = new xm.http.HTTPCacheOpts();
+			var opts = new xm.http.CacheOpts();
 			assert.isTrue(opts.remoteRead, 'remoteRead');
 
 			assert.isTrue(opts.cacheRead, 'cacheRead');
@@ -67,25 +70,58 @@ describe('xm.http', () => {
 			assert.strictEqual(opts.splitKeyDir, 0, 'splitKeyDir');
 		});
 	});
-
 	describe('cache', () => {
 		describe('simple http get', () => {
 			var test:helper.HttpTest = getInfo('simple');
 
-			it.eventually('should get a file', () => {
-				opts = new xm.http.HTTPCacheOpts();
-				opts.cacheRead = false;
-				opts.cacheWrite = false;
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+			beforeEach(() => {
+				var url = 'http://localhost:63342/tsd-origin/test/modules/http/www/';
+				//url = test.wwwHTTP;
 
-				request = new xm.http.HTTPRequest(test.wwwHTTP + 'lorem.txt', {}, 'txt');
+				request = new xm.http.Request(url + 'lorem.txt', {});
 				request.lock();
+			});
 
-				return cache.getObject(request).then((obj:xm.http.HTTPCacheObject) => {
-					assert.instanceOf(obj, xm.http.HTTPCacheObject, 'obj');
+			it.eventually('should get a file', () => {
+				opts = new xm.http.CacheOpts();
+				opts.cacheRead = false;
+				opts.cacheWrite = true;
+
+				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+				//cache.verbose = true;
+
+				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
+					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
 					assert.ok(obj.info);
 
-					var content = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'));
+					assert.instanceOf(obj.body, Buffer, '');
+
+					var expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+					assert.isString(expected, 'expected');
+
+					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
+
+				});
+			});
+			it.eventually('should get a file from cache', () => {
+				opts = new xm.http.CacheOpts();
+				opts.cacheRead = true;
+				opts.cacheWrite = false;
+				opts.remoteRead = false;
+
+				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+				//cache.verbose = true;
+
+				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
+					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
+					assert.ok(obj.info);
+
+					assert.instanceOf(obj.body, Buffer, '');
+
+					var expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+					assert.isString(expected, 'expected');
+
+					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 				});
 			});
 		});

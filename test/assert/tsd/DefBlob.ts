@@ -5,12 +5,13 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function serialiseDefBlob(blob:tsd.DefBlob, recursive:boolean):any {
+	export function serialiseDefBlob(blob:tsd.DefBlob, recursive:number = 0):any {
 		xm.assertVar(blob, tsd.DefBlob, 'blob');
+		recursive -= 1;
 
 		var json:any = {};
 		json.sha = blob.sha;
-		if (blob.content && recursive) {
+		if (blob.content && recursive >= 0) {
 			json.content = blob.content.toString('base64');
 		}
 		return json;

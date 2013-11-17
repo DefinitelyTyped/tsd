@@ -20,8 +20,10 @@ function copyTo(source, target) {
 	}
 	return target;
 }
+
 function extend(source) {
 	'use strict';
+
 	var ret = Array.isArray(source) ? [] : {};
 	copyTo(source, ret);
 	for (var i = 1, ii = arguments.length; i < ii; i++) {
@@ -29,6 +31,7 @@ function extend(source) {
 	}
 	return ret;
 }
+
 /*jshint +W003*/
 module.exports = {
 	copyTo: copyTo,
