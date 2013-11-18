@@ -1,0 +1,9 @@
+{
+  "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/git/trees/dfe3c44610fc4c3bf3ac881cbf7c9e9c6d7092b0?recursive=1",
+  "key": "6e6bb4ea65e0e65c1a8102f676fe3aeeaafb49a8",
+  "contentType": "application/json; charset=utf-8",
+  "httpETag": "\"e6a3af281b10add28b955eda3e9970e5\"",
+  "httpModified": "2013-11-18T04:18:01.000Z",
+  "cacheCreated": "2013-11-18T05:35:13.721Z",
+  "contentChecksum": "5524084c9b440f53e27e831cdd04a14bd7994b1e"
+}

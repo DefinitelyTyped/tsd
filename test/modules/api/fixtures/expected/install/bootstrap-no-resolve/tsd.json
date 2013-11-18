@@ -5,7 +5,7 @@
   "ref": "master",
   "installed": {
     "bootstrap/bootstrap.d.ts": {
-      "commit": "1efa27f49add3fcb68450f2c1cfa8fc581ec2506"
+      "commit": "2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f"
     }
   }
 }

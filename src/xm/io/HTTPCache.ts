@@ -332,7 +332,7 @@ module xm {
 				//TODO apply cache opts (splitKeyDir)
 				//this.object.storeDir = path.join(this.cache.storeDir, this.request.key.charAt(0), this.request.key.charAt(1));
 				this.object.storeDir = this.cache.storeDir;
-				this.object.bodyFile = path.join(this.object.storeDir, this.request.key);
+				this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
 				this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
 				this.track = new xm.EventLog('http_load', 'CacheLoader');
