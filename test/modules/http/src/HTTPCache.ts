@@ -31,10 +31,12 @@ describe('xm.http', () => {
 		var info = new helper.HttpTest();
 		info.storeTmpDir = path.join(helper.getDirNameTmp(), name);
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
-		info.wwwHTTP = 'http://localhost:9797/';
+		info.wwwHTTP = helper.getProjectDevURL() + '/test/modules/http/www/';
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
 		return info;
 	}
+	//'http://localhost:' + port + '/tsd-origin/test/modules/http/www/';
+	//'/test/modules/http/www/';
 
 	var cache:xm.http.HTTPCache;
 	var opts:xm.http.CacheOpts;
@@ -75,8 +77,7 @@ describe('xm.http', () => {
 			var test:helper.HttpTest = getInfo('simple');
 
 			beforeEach(() => {
-				var url = 'http://localhost:63342/tsd-origin/test/modules/http/www/';
-				//url = test.wwwHTTP;
+				var url = test.wwwHTTP;
 
 				request = new xm.http.Request(url + 'lorem.txt', {});
 				request.lock();
@@ -103,6 +104,7 @@ describe('xm.http', () => {
 
 				});
 			});
+
 			it.eventually('should get a file from cache', () => {
 				opts = new xm.http.CacheOpts();
 				opts.cacheRead = true;
@@ -116,7 +118,7 @@ describe('xm.http', () => {
 					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
 					assert.ok(obj.info);
 
-					assert.instanceOf(obj.body, Buffer, '');
+					assert.instanceOf(obj.body, Buffer, 'obj.body');
 
 					var expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
 					assert.isString(expected, 'expected');

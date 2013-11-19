@@ -1,30 +1,30 @@
+/*jshint -W098 */
+
 module.exports = function (grunt) {
 	'use strict';
 
+	var path = require('path');
+	var util = require('util');
+
+	var isTravis = (process.env.TRAVIS === 'true');
 	var isVagrant = (process.env.PWD === '/vagrant');
 	if (isVagrant) {
 		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
 	}
-	//var cpuCores = require('os').cpus().length;
+	var cpuCores = require('os').cpus().length;
+	var devServer = {
+		name: 'localhost',
+		port: 63342
+	};
+	process.env['PROJECT_DEV_URL'] = 'http://' + devServer.name + ':' + devServer.port + '/tsd-origin';
+
+	//grunt.log.writeln(util.inspect(process.env));
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
-
+	gtx.autoLoad();
 	gtx.loadNpm([
-		'grunt-contrib-jshint',
-		'grunt-contrib-copy',
-		'grunt-contrib-clean',
-		'grunt-contrib-connect',
-		'grunt-tslint',
-		'grunt-ts',
-		'grunt-execute',
-		'grunt-todos',
-		'grunt-shell',
-		'grunt-mocha-test',
 		'mocha-unfunk-reporter'
 	]);
-	// gtx.autoNpmPkg();
-	// gtx.autoNpm();
-	// gtx.loadTasks('tasks');
 
 	//defaults and one-off tasks
 	gtx.addConfig({
@@ -78,7 +78,7 @@ module.exports = function (grunt) {
 		},
 		mocha_unfunk: {
 			dev: {
-				options : {
+				options: {
 					stackFilter: true
 				}
 			}
@@ -161,14 +161,14 @@ module.exports = function (grunt) {
 		macro.newTask('tslint', {
 			src: [testPath + 'src/**/*.ts']
 		});
-		if (macro.getParam('http', 0)) {
+		/*if (macro.getParam('http', 0) > 0) {
 			macro.newTask('connect', {
 				options: {
 					port: macro.getParam('http'),
 					base: testPath + 'www/'
 				}
 			});
-		}
+		}*/
 		macro.runTask('mocha_unfunk:dev');
 		macro.newTask('mochaTest', {
 			options: {
@@ -189,10 +189,11 @@ module.exports = function (grunt) {
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	/* //waiting for fix in grunt-contrib-connect + node-exit
 	gtx.create('http', 'moduleTest', {
 		timeout: longTimer,
 		http: 0
-	}, 'lib');
+	}, 'lib');*/
 
 	// assemble!
 	gtx.alias('prep', [

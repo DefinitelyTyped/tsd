@@ -37,7 +37,8 @@ Global options
 --------                 ----  --------                                                                
       --help              -h    : Display usage help (flag)                                            
       --version           -V    : Display version information (flag)                                   
-      --color <name>              no,plain,ansi,html,css,dev                                           
+      --color <name>            : Specify CLI color mode (string)                                      
+                                  no,plain,ansi,html,css,dev                                           
       --dev                     : Development mode (flag)                                              
       --timeout <ms>            : Set operation timeout in milliseconds, 0 = unlimited (int)           
                                   <not implemented>                                                    

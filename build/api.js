@@ -4214,7 +4214,7 @@ var xm;
                 this.object = new CacheObject(request);
 
                 this.object.storeDir = this.cache.storeDir;
-                this.object.bodyFile = path.join(this.object.storeDir, this.request.key);
+                this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
                 this.track = new xm.EventLog('http_load', 'CacheLoader');
@@ -4242,21 +4242,6 @@ var xm;
                 };
 
                 this.cacheRead().progress(this._defer.notify).then(function () {
-                    if (_this.object.body) {
-                        try  {
-                            _this.cacheValidator.assert(_this.object);
-
-                            _this.track.event(CacheLoader.local_cache_hit);
-                            _this._defer.resolve(_this.object);
-                            return;
-                        } catch (err) {
-                            _this.track.logger.error('cache invalid');
-                            _this.track.logger.inspect(err);
-                            _this.object.body = null;
-                            _this.object.bodyChecksum = null;
-                        }
-                    }
-
                     return _this.httpLoad(true).progress(_this._defer.notify).then(function () {
                         if (!xm.isValid(_this.object.body)) {
                             throw new Error('no result body: ' + _this.object.request.url);
@@ -4283,19 +4268,35 @@ var xm;
 
                 this.readInfo().then(function () {
                     if (!_this.object.info) {
-                        return null;
+                        throw new Error('no or invalid info object');
                     }
 
                     return FS.read(_this.object.bodyFile, { flags: 'rb' }).then(function (buffer) {
                         if (buffer.length === 0) {
-                            return null;
+                            throw new Error('empty body file');
                         }
                         _this.object.bodyChecksum = xm.sha1(buffer);
                         _this.object.body = buffer;
                     });
                 }).then(function () {
-                    d.resolve();
-                }, d.reject).done();
+                    if (_this.object.body) {
+                        try  {
+                            _this.cacheValidator.assert(_this.object);
+
+                            _this.track.event(CacheLoader.local_cache_hit);
+                            _this._defer.resolve(_this.object);
+                            return;
+                        } catch (err) {
+                            _this.track.logger.error('cache invalid');
+                            _this.track.logger.inspect(err);
+                            _this.object.body = null;
+                            _this.object.bodyChecksum = null;
+                            throw err;
+                        }
+                    }
+                }).fail(function (err) {
+                    return _this.cacheRemove().then(d.resolve, d.reject);
+                }).done();
 
                 return d.promise;
             };
@@ -4462,6 +4463,47 @@ var xm;
                 return d.promise;
             };
 
+            CacheLoader.prototype.cacheRemove = function () {
+                var _this = this;
+                if (!this.canUpdate()) {
+                    return Q.resolve(null);
+                }
+                return Q.all([
+                    this.removeFile(this.object.infoFile),
+                    this.removeFile(this.object.bodyFile)
+                ]).then(function () {
+                    _this.track.event(CacheLoader.cache_remove, _this.request.url);
+                });
+            };
+
+            CacheLoader.prototype.canUpdate = function () {
+                if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
+                    return true;
+                }
+                return false;
+            };
+
+            CacheLoader.prototype.removeFile = function (target) {
+                var _this = this;
+                var d = Q.defer();
+                FS.exists(target).then(function (exists) {
+                    if (!exists) {
+                        d.resolve();
+                        return;
+                    }
+                    return FS.isFile(target).then(function (isFile) {
+                        if (!isFile) {
+                            throw new Error('not a file: ' + target);
+                        }
+                        _this.track.event(CacheLoader.cache_remove, target);
+                        return FS.remove(target).then(function () {
+                            d.resolve();
+                        });
+                    });
+                }).fail(d.reject).done();
+                return d.promise;
+            };
+
             CacheLoader.prototype.toString = function () {
                 return this.request ? this.request.url : '<no request>';
             };
@@ -4469,6 +4511,7 @@ var xm;
             CacheLoader.info_read = 'info_read';
             CacheLoader.cache_read = 'cache_read';
             CacheLoader.cache_write = 'cache_write';
+            CacheLoader.cache_remove = 'cache_remove';
             CacheLoader.http_load = 'http_load';
             CacheLoader.local_cache_hit = 'local_cache_hit';
             CacheLoader.http_cache_hit = 'http_cache_hit';
@@ -7316,6 +7359,7 @@ var xm;
                     commands.cell('two', desc);
 
                     if (option.enum.length > 0) {
+                        commands.newRow();
                         commands.cell('two', '   ' + option.enum.map(function (value) {
                             if (xm.isNumber(value)) {
                                 return value;

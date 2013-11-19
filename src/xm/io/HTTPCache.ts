@@ -311,6 +311,7 @@ module xm {
 			static info_read = 'info_read';
 			static cache_read = 'cache_read';
 			static cache_write = 'cache_write';
+			static cache_remove = 'cache_remove';
 			static http_load = 'http_load';
 			static local_cache_hit = 'local_cache_hit';
 			static http_cache_hit = 'http_cache_hit';
@@ -363,22 +364,6 @@ module xm {
 
 				//logic flow
 				this.cacheRead().progress(this._defer.notify).then(() => {
-					if (this.object.body) {
-						try {
-							this.cacheValidator.assert(this.object);
-							//valid local cache hit
-							this.track.event(CacheLoader.local_cache_hit);
-							this._defer.resolve(this.object);
-							return;
-						}
-						catch (err) {
-							this.track.logger.error('cache invalid');
-							this.track.logger.inspect(err);
-							this.object.body = null;
-							this.object.bodyChecksum = null;
-						}
-					}
-
 					return this.httpLoad(true).progress(this._defer.notify).then(() => {
 						if (!xm.isValid(this.object.body)) {
 							throw new Error('no result body: ' + this.object.request.url);
@@ -404,20 +389,38 @@ module xm {
 
 				this.readInfo().then(() => {
 					if (!this.object.info) {
-						//TODO add auto-clean options
-						return null;
+						throw new Error('no or invalid info object');
 					}
 
 					return FS.read(this.object.bodyFile, {flags: 'rb'}).then((buffer:NodeBuffer) => {
 						if (buffer.length === 0) {
-							return null;
+							throw new Error('empty body file');
 						}
 						this.object.bodyChecksum = xm.sha1(buffer);
 						this.object.body = buffer;
 					});
 				}).then(() => {
-					d.resolve();
-				}, d.reject).done();
+					//validate it
+					if (this.object.body) {
+						try {
+							this.cacheValidator.assert(this.object);
+							//valid local cache hit
+							this.track.event(CacheLoader.local_cache_hit);
+							this._defer.resolve(this.object);
+							return;
+						}
+						catch (err) {
+							this.track.logger.error('cache invalid');
+							this.track.logger.inspect(err);
+							this.object.body = null;
+							this.object.bodyChecksum = null;
+							throw err;
+						}
+					}
+				}).fail((err) => {
+					//clean up bad cache
+					return this.cacheRemove().then(d.resolve, d.reject);
+				}).done();
 
 				return d.promise;
 			}
@@ -439,7 +442,6 @@ module xm {
 							xm.assert((info.url === this.request.url), 'info.url {a} is not {e}', info.url, this.request.url);
 
 							this.object.info = info;
-							//TODO add auto-clean options
 						});
 					});
 				}).then(() => {
@@ -460,12 +462,13 @@ module xm {
 				Object.keys(this.request.headers).forEach((key) => {
 					req.headers[key] = this.request.headers[key];
 				});
-				//TODO add cache headers
+				//TODO verify cache headers
 				if (this.object.info && httpCache) {
 					if (this.object.info.httpETag) {
 						req.headers['etag'] = this.object.info.httpETag;
 					}
 					if (this.object.info.httpModified) {
+						//TODO this seems oddd
 						req.headers['last-modified'] = new Date(this.object.info.httpModified);
 					}
 				}
@@ -583,6 +586,45 @@ module xm {
 					});
 				}).then(d.resolve, d.reject).done();
 
+				return d.promise;
+			}
+
+			private cacheRemove():Q.Promise<void> {
+				if (!this.canUpdate()) {
+					return Q.resolve(null);
+				}
+				return Q.all([
+					this.removeFile(this.object.infoFile),
+					this.removeFile(this.object.bodyFile),
+				]).then(() => {
+					this.track.event(CacheLoader.cache_remove, this.request.url);
+				});
+			}
+
+			private canUpdate():boolean {
+				if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
+					return true;
+				}
+				return false;
+			}
+
+			private removeFile(target:string):Q.Promise<void> {
+				var d:Q.Deferred<void> = Q.defer();
+				FS.exists(target).then((exists) => {
+					if (!exists) {
+						d.resolve();
+						return;
+					}
+					return FS.isFile(target).then((isFile) => {
+						if (!isFile) {
+							throw new Error('not a file: ' + target);
+						}
+						this.track.event(CacheLoader.cache_remove, target);
+						return FS.remove(target).then(() => {
+							d.resolve();
+						});
+					});
+				}).fail(d.reject).done();
 				return d.promise;
 			}
 

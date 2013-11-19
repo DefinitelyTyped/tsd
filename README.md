@@ -4,15 +4,13 @@
 
 > TypeScript Definition Package Manager
 
-TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package manager. Easily search and install community contributed definition files directly from the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository.
+TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package manager. Easily search and install community contributed definition files directly from the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. Use it as a CLI command `$ tsd` similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module. 
 
-:bangbang: Version `0.5.x` is functional but still heavily in development and not ready for production-critical use. It might just work fine though.
+*Note:* the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated users. To keep below this limit TSD employs both local and http caching layers. The actual definition files are downloaded over the Github RAW service (also with local and http cache). We are looking into a API proxy service for the incidental rate-limit overflow.
+
+:bangbang: Version `0.5.x` is functional but still heavily in development.
 
 :warning: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
-
-TSD is used as a CLI command `$ tsd` similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module. 
-
-Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated users so TSD employs a caching layer to minimise API requests. In regular use you likely will never hit the limit, as the actual definition files are downloaded over the non-limited Github RAW service. We are looking into a API proxy service for the incidental overflow.
 
 ### Usage as CLI command
 
@@ -32,18 +30,31 @@ Note: the Github API has a 60 requests-per-hour [rate-limit](http://developer.gi
 
 #### Call CLI
 
-Global `tsd` binary
+Global `tsd` binary, view the help:
 
 	$ tsd	
 	$ tsd -h
 
-:wrench: For development run from a local install/checkout
+:wrench: For development from a local install/checkout:
 
 	$ node ./build/cli.js -h
+
+#### Examples:
+
+Minimal search for 'bootstrap'
+		
+	$ tsd search bootstrap
+	
+Install 'bootstrap' definitions, resolve and install the reference to 'jquery', overwrite existing files and save to the tsd.config
+
+	$ tsd install bootstrap --resolve --overwrite --save
+	$ tsd install bootstrap -r -o -s
+
 
 #### Commands
 
 :bangbang: Possibly outdated method list
+
 
 	$ tsd search <selector>
 	$ tsd info <selector>
@@ -53,10 +64,11 @@ Global `tsd` binary
 	...
 	$ tsd help
 
-### Selector
+The commands using selector's will be folded into one command using a action --option for convenience at a later date (as a usability thing).
+
+### Selector explained
 
 :bangbang: Currently semver selection and ranking is not implemented (a case is the node.js 0.8 definition)
-
 
 TSD uses selectors to query the definition list:
 

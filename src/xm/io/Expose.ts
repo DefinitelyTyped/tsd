@@ -656,6 +656,7 @@ module xm {
 					commands.cell('two', desc);
 
 					if (option.enum.length > 0) {
+						commands.newRow();
 						commands.cell('two', '   ' + option.enum.map((value:any) => {
 							if (xm.isNumber(value)) {
 								return value;
