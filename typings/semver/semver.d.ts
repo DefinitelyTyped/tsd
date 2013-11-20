@@ -3,7 +3,7 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-declare module Semver {
+declare module SemverModule {
 
 	function valid(v:string, loose?:boolean):string; // Return the parsed version, or null if it's not valid.
 	//TODO maybe add an enum for release?
@@ -27,8 +27,46 @@ declare module Semver {
 	function gtr(version:string, range:string, loose?:boolean):boolean; // Return true if version is greater than all the versions possible in the range.
 	function ltr(version:string, range:string, loose?:boolean):boolean; // Return true if version is less than all the versions possible in the range.
 	function outside(version:string, range:string, hilo:string, loose?:boolean):boolean; // Return true if the version is outside the bounds of the range in either the high or low direction. The hilo argument must be either the string '>' or '<'. (This is the function called by gtr and ltr.)
-}
 
+	interface SemverBase {
+		raw:string;
+		loose:boolean;
+		format():string;
+		inspect():string;
+		toString():string;
+	}
+
+	interface Semver extends SemverBase {
+		new(version:string, loose?:boolean):Semver;
+		major:number;
+		minor:number;
+		patch:number;
+		version:string;
+		build:string[];
+		prerelease:string[];
+
+		compare(other:Semver):number;
+		compareMain(other:Semver):number;
+		comparePre(other:Semver):number;
+		inc(release:string):Semver;
+	}
+
+	interface Comparator extends SemverBase {
+		new(comp:string, loose?:boolean):Comparator;
+		semver:Semver;
+		operator:string;
+		value:boolean;
+		parse(comp) :void;
+		test(version):boolean;
+	}
+	interface Range extends SemverBase {
+		new(range:string, loose?:boolean):Range;
+		set:Comparator[][];
+		parseRange(range):Comparator[];
+		//	return set;
+		test(version):boolean;
+	}
+}
 declare module "semver" {
-export = Semver;
+export = SemverModule;
 }

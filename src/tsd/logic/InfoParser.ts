@@ -22,7 +22,7 @@ module tsd {
 			this.track.promise(d.promise, 'parse', file.key);
 
 			this.core.content.loadContent(file).progress(d.notify).then((file:tsd.DefVersion) => {
-				var parser = new tsd.DefInfoParser(this.core.context.verbose);
+				var parser = new tsd.DefInfoParser();
 				if (file.info) {
 					//TODO why not do an early bail? skip reparse?
 					file.info.resetFields();

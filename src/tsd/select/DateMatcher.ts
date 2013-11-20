@@ -48,9 +48,24 @@ module tsd {
 			}
 		}
 
+		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			return list.filter(this.getFilterFunc());
+		}
+
+		best(list:tsd.DefVersion[]):tsd.DefVersion {
+			return this.latest(list);
+		}
+
+		latest(list:tsd.DefVersion[]):tsd.DefVersion {
+			var list = this.filter(list).sort(tsd.DefUtil.fileCommitCompare);
+			if (list.length > 0) {
+				return list[list.length - 1];
+			}
+			return null;
+		}
+
 		extractSelector(selector:string) {
-			xm.assertVar(selector, 'string', 'selector'
-			);
+			xm.assertVar(selector, 'string', 'selector');
 			this.comparators = [];
 			if (!selector) {
 				return;
@@ -61,11 +76,10 @@ module tsd {
 			var match;
 			while ((match = termExp.exec(selector))) {
 				termExp.lastIndex = match.index + match[0].length;
-				xm.log.inspect(match, 1, 'match');
-
 				xm.assert(xm.hasOwnProp(comparators, match[1]), 'not a valid date comparator in filter {a}', match[0]);
 
 				var comp = new DateComp();
+				//cleanup
 				comp.date = new Date(match[2].replace(/;_/g, ' '));
 				if (!comp.date) {
 					xm.throwAssert('not a valid date in filter {a}', match[0]);
@@ -74,11 +88,6 @@ module tsd {
 				comp.comparator = comparators[match[1]];
 				this.comparators.push(comp);
 			}
-			xm.log.inspect(this.comparators, 2, 'comparators');
-		}
-
-		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
-			return list.filter(this.getFilterFunc());
 		}
 
 		private getFilterFunc():(file:tsd.DefVersion) => boolean {
@@ -86,14 +95,11 @@ module tsd {
 			return (file:tsd.DefVersion) => {
 				var date:Date = file.commit.changeDate;
 				if (!date) {
-					xm.log('no changeDate?');
 					//wyrd
 					return false;
 				}
 				for (var i = 0; i < len; i++) {
-					xm.log('comp', i, this.comparators[i]);
 					if (!this.comparators[i].satisfies(date)) {
-						xm.log('not satisfy');
 						return false;
 					}
 				}

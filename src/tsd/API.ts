@@ -147,6 +147,7 @@ module tsd {
 			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
 				var files:tsd.DefVersion[] = res.selection;
 
+				//
 				files = tsd.DefUtil.mergeDependencies(files);
 
 				return this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).progress(d.notify).then((written:xm.IKeyValueMap) => {
@@ -215,7 +216,6 @@ module tsd {
 
 			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
-				res.definitions = tsd.DefUtil.getDefs(res.selection);
 
 				//TODO limit history to Selector date filter?
 				return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {

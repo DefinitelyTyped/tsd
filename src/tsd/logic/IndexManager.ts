@@ -36,6 +36,7 @@ module tsd {
 				//bypass notify
 				var d = Q.defer<tsd.DefIndex>();
 				this._defer.promise.then(d.resolve, d.reject);
+				return this._defer.promise;
 			}
 			var index = new tsd.DefIndex();
 

@@ -25,7 +25,9 @@ module tsd {
 			}
 			else {
 				this.range = semver.validRange(range, true);
-				xm.assert(!!this.range, 'expected {a} to be a valid semver-range', range);
+				if (!this.range) {
+					xm.throwAssert('expected {a} to be a valid semver-range', range);
+				}
 			}
 		}
 

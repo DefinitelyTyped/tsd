@@ -100,15 +100,26 @@ module tsd {
 					if (selector.versionMatcher) {
 						res.definitions = selector.versionMatcher.filter(matches);
 					}
+
+					if (selector.minMatches > 0 && res.definitions.length < selector.minMatches) {
+						throw new Error('expected more matches: ' + res.definitions.length + ' < ' + selector.minMatches);
+					}
+					if (selector.maxMatches > 0 && res.definitions.length > selector.maxMatches) {
+						throw new Error('expected less matches: ' + res.definitions.length + ' > ' + selector.maxMatches);
+					}
+
 				}).then(() => {
 					if (selector.dateMatcher) {
+						if (selector.limitApi > 0 && res.definitions.length > selector.limitApi) {
+							throw new Error('match count ' + res.definitions.length + ' over api limit ' + selector.limitApi);
+						}
 						return this.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
 							//crude reset
 							res.selection = [];
 							res.definitions.forEach((def:tsd.Def) => {
-								var list = selector.dateMatcher.filter(def.history).sort(tsd.DefUtil.fileCommitCompare);
-								if (list.length > 0) {
-									res.selection.push(list[list.length - 1]);
+								var file:tsd.DefVersion = selector.dateMatcher.best(def.history);
+								if (file) {
+									res.selection.push(file);
 								}
 							});
 							res.definitions = tsd.DefUtil.getDefs(res.selection);
@@ -119,6 +130,7 @@ module tsd {
 					return null;
 				}).then(() => {
 					if (selector.resolveDependencies) {
+						//TODO use dateMatcher?
 						return this.resolver.resolveBulk(res.selection).progress(d.notify);
 					}
 					return null;

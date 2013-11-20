@@ -96,7 +96,7 @@ module xm {
 
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
 			promise.then(() => {
-				//this.track(Level.resolve, type, message, data, promise);
+				this.track(Level.resolve, type, message, data, promise);
 			}, (err) => {
 				this.track(Level.reject, type, message, err, promise);
 			}, (note) => {

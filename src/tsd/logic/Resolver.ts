@@ -54,9 +54,7 @@ module tsd {
 
 			})).then(() => {
 				d.resolve(list);
-			}, (err) => {
-				d.reject(err);
-			}).done();
+			}, d.reject).done();
 
 			return d.promise;
 		}
@@ -77,7 +75,7 @@ module tsd {
 			// it is not solved and not in the active list so lets load it
 
 			var d:Q.Deferred<tsd.DefVersion> = this._stash.defer(file.key);
-			this.track.start(Resolver.resolve);
+			this.track.start(Resolver.resolve, file.key);
 
 			var cleanup = () => {
 				//remove solved promise
@@ -124,6 +122,8 @@ module tsd {
 
 		applyResolution(index:tsd.DefIndex, file:tsd.DefVersion, content:string):Q.Promise<tsd.DefVersion>[] {
 			var refs:string[] = this.extractPaths(file, content);
+
+			xm.log.inspect(refs, 1, 'resolver');
 
 			return refs.reduce((memo:any[], refPath:string) => {
 				if (index.hasDef(refPath)) {

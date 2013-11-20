@@ -7,6 +7,8 @@
 ///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="select/Selector.ts" />
+///<reference path="cli/options.ts" />
+///<reference path="cli/const.ts" />
 
 module tsd {
 	'use strict';
@@ -17,9 +19,16 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	var Opt = tsd.cli.Opt;
+	var Group = tsd.cli.Group;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	var output = new xm.StyledOut();
 
-	var styleMap = new xm.KeyValueMap<(ctx:xm.ExposeContext) => void>();
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	export var styleMap = new xm.KeyValueMap<(ctx:xm.ExposeContext) => void>();
 
 	styleMap.set('no', (ctx:xm.ExposeContext) => {
 		output.useStyler(new xm.styler.NoStyler());
@@ -40,7 +49,7 @@ module tsd {
 		output.useStyler(new xm.styler.DevStyler());
 	});
 
-	function useColor(color:string, ctx:xm.ExposeContext) {
+	export function useColor(color:string, ctx:xm.ExposeContext) {
 		if (styleMap.has(color)) {
 			styleMap.get(color)(ctx);
 		}
@@ -101,13 +110,13 @@ module tsd {
 	function getContext(ctx:xm.ExposeContext):tsd.Context {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-		var context = new tsd.Context(ctx.getArg(Opt.config), ctx.getArg('verbose'));
+		var context = new tsd.Context(ctx.getArg(Opt.config), ctx.getArg(Opt.verbose));
 
-		if (ctx.getArg('dev')) {
+		if (ctx.getArg(Opt.dev)) {
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
-		else if (ctx.hasArg('cacheDir')) {
-			context.paths.cacheDir = path.resolve(ctx.getArg('cacheDir'));
+		else if (ctx.hasArg(Opt.cacheDir)) {
+			context.paths.cacheDir = path.resolve(ctx.getArg(Opt.cacheDir));
 		}
 		else {
 			context.paths.cacheDir = tsd.Paths.getUserCacheDir();
@@ -238,26 +247,10 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export class Opt {
-		static version = 'version';
-		static verbose = 'verbose';
-		static color = 'color';
-		static dev = 'dev';
-		static config = 'config';
-		static cacheDir = 'cacheDir';
-		static resolve = 'resolve';
-		static save = 'save';
-		static overwrite = 'overwrite';
-		static min = 'min';
-		static max = 'max =';
-		static limit = 'limit';
-		static timeout = 'timeout';
-		static commit = 'commit';
-		static semver = 'semver';
-		static date = 'date';
-		static progress = 'progress';
+	//very basic (async) init stuff
+	function init(ctx:xm.ExposeContext):Q.Promise<void> {
+		return loadPleonasm();
 	}
-	xm.ObjectUtil.lockPrimitives(Opt);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -274,11 +267,6 @@ module tsd {
 		api:tsd.API;
 		context:tsd.Context;
 		selector:Selector;
-	}
-
-	//very basic (async) init stuff
-	function init(ctx:xm.ExposeContext):Q.Promise<void> {
-		return loadPleonasm();
 	}
 
 	//get a API with a Context and parse basic arguments
@@ -344,7 +332,9 @@ module tsd {
 			job.selector.overwriteFiles = ctx.getArg(Opt.overwrite);
 			job.selector.resolveDependencies = ctx.getArg(Opt.resolve);
 
-			xm.log.inspect(job.selector, 3, 'CLI job.selector');
+			if (ctx.getArgAs(Opt.verbose, 'boolean')) {
+				xm.log.inspect(job.selector, 3, 'CLI job.selector');
+			}
 			return job;
 		}).then(d.resolve, d.reject);
 
@@ -354,7 +344,7 @@ module tsd {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function getExpose():xm.Expose {
-		//xm.PackageJSON.getLocal().getNameVersion()
+
 		var expose = new xm.Expose('', output);
 
 		function getProgress(ctx) {
@@ -366,26 +356,30 @@ module tsd {
 			return undefined;
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		expose.before = (cmd:xm.ExposeCommand, ctx:xm.ExposeContext) => {
 			return printPreviewNotice();
 		};
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		expose.defineGroup((group:xm.ExposeGroup) => {
-			group.name = 'command';
+			group.name = Group.query;
 			group.label = 'Main commands';
 			group.options = [Opt.date, Opt.semver, Opt.commit, Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
 			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
 				var sort:number;
 				//TODO sane-ify sorting groups
-				sort = xm.exposeSortHasElem(one.groups, two.groups, 'primary');
+				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.query);
 				if (sort !== 0) {
 					return sort;
 				}
-				sort = xm.exposeSortHasElem(one.groups, two.groups, 'local');
+				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.support);
 				if (sort !== 0) {
 					return sort;
 				}
-				sort = xm.exposeSortHasElem(one.groups, two.groups, 'info');
+				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.help);
 				if (sort !== 0) {
 					return sort;
 				}
@@ -394,170 +388,20 @@ module tsd {
 		});
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
-			group.name = 'help';
+			group.name = Group.support;
+			group.label = 'Support commands';
+			group.options = [Opt.config, Opt.cacheDir];
+		});
+
+		expose.defineGroup((group:xm.ExposeGroup) => {
+			group.name = Group.help;
 			group.label = 'Help commands';
 		});
 
-		// ---------
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//predefine
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.version;
-			opt.short = 'V';
-			opt.description = 'Display version information';
-			opt.type = 'flag';
-			opt.command = 'version';
-			opt.global = true;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.verbose;
-			opt.description = 'Verbose output';
-			opt.type = 'flag';
-			opt.default = false;
-			opt.global = true;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.color;
-			opt.description = 'Specify CLI color mode';
-			opt.type = 'string';
-			opt.placeholder = 'name';
-			opt.global = true;
-			opt.enum = styleMap.keys();
-			opt.apply = (value, argv) => {
-				useColor(value, argv);
-			};
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.dev;
-			opt.description = 'Development mode';
-			opt.type = 'flag';
-			opt.global = true;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.progress;
-			opt.short = 'p';
-			opt.description = 'Display progress notifications';
-			opt.type = 'flag';
-			opt.default = false;
-			opt.global = true;
-			opt.note = ['experimental'];
-		});
-
-		// ---------
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.config;
-			opt.description = 'Path to config file';
-			opt.type = 'string';
-			opt.placeholder = 'path';
-			opt.global = false;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.cacheDir;
-			opt.description = 'Path to cache directory';
-			opt.type = 'string';
-			opt.placeholder = 'path';
-			opt.global = false;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.save;
-			opt.short = 's';
-			opt.description = 'Save to config file';
-			opt.type = 'flag';
-			opt.default = false;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.overwrite;
-			opt.short = 'o';
-			opt.description = 'Overwrite existing definitions';
-			opt.type = 'flag';
-			opt.default = false;
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.limit;
-			opt.short = 'l';
-			opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
-			opt.type = 'int';
-			opt.default = 3;
-			opt.placeholder = 'num';
-			opt.note = ['not implemented'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.max;
-			opt.description = 'Enforce a maximum amount of results, 0 = unlimited';
-			opt.type = 'int';
-			opt.default = 0;
-			opt.placeholder = 'num';
-			opt.note = ['not implemented'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.min;
-			opt.description = 'Enforce a minimum amount of results';
-			opt.type = 'int';
-			opt.default = 0;
-			opt.placeholder = 'num';
-			opt.note = ['not implemented'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.timeout;
-			opt.description = 'Set operation timeout in milliseconds, 0 = unlimited';
-			opt.type = 'int';
-			opt.default = 0;
-			opt.global = true;
-			opt.placeholder = 'ms';
-			opt.note = ['not implemented'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.semver;
-			opt.short = 'v';
-			opt.description = 'Filter on version postfix';
-			opt.type = 'string';
-			opt.placeholder = 'semver-range | \'latest\' | \'all\'';
-			opt.global = false;
-			opt.default = 'latest';
-			opt.note = ['experimental'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.date;
-			opt.short = 'd';
-			opt.description = 'Filter on commit date';
-			opt.type = 'string';
-			opt.placeholder = 'date-range';
-			opt.global = false;
-			opt.note = ['experimental'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.commit;
-			opt.short = 'c';
-			opt.description = 'Commit hash';
-			opt.type = 'string';
-			opt.placeholder = 'sha1';
-			opt.global = false;
-			opt.note = ['partially implemented'];
-		});
-
-		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = Opt.resolve;
-			opt.short = 'r';
-			opt.description = 'Include reference dependencies';
-			opt.type = 'flag';
-			opt.global = false;
-			opt.default = false;
-		});
+		// bulk add options
+		tsd.cli.addOptions(expose);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -574,7 +418,7 @@ module tsd {
 			cmd.name = 'init';
 			cmd.label = 'Create empty config file';
 			cmd.options = [Opt.config, Opt.overwrite];
-			cmd.groups = ['support'];
+			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
 					return job.api.initConfig(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then((target:string) => {
@@ -592,7 +436,7 @@ module tsd {
 			cmd.name = 'settings';
 			cmd.label = 'Display config settings';
 			cmd.options = [Opt.config, Opt.cacheDir];
-			cmd.groups = ['support'];
+			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
 					return job.api.context.logInfo(true);
@@ -607,7 +451,7 @@ module tsd {
 			cmd.name = 'search';
 			cmd.label = 'Search definitions';
 			cmd.variadic = ['selector'];
-			cmd.groups = ['command', 'primary', 'query'];
+			cmd.groups = [Group.query];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
 					return job.api.search(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
@@ -631,7 +475,7 @@ module tsd {
 			cmd.label = 'Install definitions';
 			cmd.options = [Opt.overwrite, Opt.save, Opt.resolve];
 			cmd.variadic = ['selector'];
-			cmd.groups = ['command', 'primary', 'write'];
+			cmd.groups = [Group.query];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
 					return job.api.install(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
@@ -655,7 +499,7 @@ module tsd {
 			cmd.label = 'Display definition info';
 			cmd.variadic = ['selector'];
 			cmd.options = [Opt.resolve];
-			cmd.groups = ['command', 'primary', 'query'];
+			cmd.groups = [Group.query];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
 					return job.api.info(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
@@ -676,7 +520,7 @@ module tsd {
 			cmd.name = 'history';
 			cmd.label = 'Display definition history';
 			cmd.variadic = ['selector'];
-			cmd.groups = ['command', 'primary', 'query'];
+			cmd.groups = [Group.query];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
 					return job.api.history(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
@@ -698,11 +542,13 @@ module tsd {
 			};
 		});
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
 			cmd.label = 'Re-install definitions from config';
 			cmd.options = [Opt.overwrite];
-			cmd.groups = ['command', 'local', 'write'];
+			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
 					return job.api.reinstall(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then((result:APIResult) => {

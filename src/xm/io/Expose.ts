@@ -25,10 +25,12 @@ module xm {
 	var optimist = require('optimist');
 	var jsesc = require('jsesc');
 	var Q:typeof Q = require('q');
+	//TODO ditch node-exit if node ever get fixed..
 	var exitProcess:(code:number) => void = require('exit');
 	//TODO ditch easy-table
 	var Table:EasyTableStatic = require('easy-table');
 
+	//TODO extract converStringMap to own file
 	export var converStringMap:any = Object.create(null);
 
 	var splitSV = /[\t ]*[,][\t ]*/g;
@@ -57,7 +59,7 @@ module xm {
 			case 'null':
 			case 'nan':
 			case 'undefined':
-				//language
+			//language
 			case 'no':
 			case 'off':
 			case 'disabled':
@@ -697,11 +699,12 @@ module xm {
 				//commands.newRow();
 			};
 
-			var addNote = (note:any) => {
+			var addNote = (note:string[]) => {
 				if (note && note.length > 0) {
-					commands.cell('one', '');
-					commands.cell('two', '   <' + (xm.isArray(note) ? note.join('>/n<') : note) + '>');
-					commands.newRow();
+					note.forEach((note:string) => {
+						commands.cell('two', '   <' + note + '>');
+						commands.newRow();
+					});
 				}
 			};
 
@@ -743,7 +746,6 @@ module xm {
 					if (group.options.length > 0) {
 						addDivider();
 						group.options.sort(sortOptionName).forEach((name:string) => {
-							var option = this.options.get(name);
 							if (commandOptNames.indexOf(name) < 0) {
 								addOption(name);
 							}
