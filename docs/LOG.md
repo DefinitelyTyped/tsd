@@ -10,4 +10,3 @@
 	* Always work in branch, never master (needed?)
 	* Clean headers 
 
-# Cache flow

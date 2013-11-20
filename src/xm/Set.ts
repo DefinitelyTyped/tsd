@@ -24,6 +24,7 @@ module xm {
 	/*
 	 Set: yer basic set: unordered but unique values
 	 */
+	//TODO ditch for ES6 Set's
 	export class Set<T> implements ISet<T> {
 
 		private _content:T[] = [];

@@ -8,6 +8,6 @@
 ///<reference path="../tsd/util/util.ts" />
 
 ///<reference path="context/Context.ts" />
-///<reference path="select/Selector.ts" />
+///<reference path="select/Query.ts" />
 
 ///<reference path="API.ts" />

@@ -23,10 +23,17 @@ module tsd {
 			export var semver = 'semver';
 			export var date = 'date';
 			export var progress = 'progress';
+
+
+			export var action = 'action';
+			export var info = 'info';
+			export var history = 'history';
+			export var detail = 'detail';
 		}
 		xm.ObjectUtil.lockPrimitives(Opt);
 
 		export module Group {
+			export var primary = 'primary';
 			export var query = 'query';
 			export var support = 'support';
 			export var help = 'help';

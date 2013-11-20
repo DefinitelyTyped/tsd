@@ -21,7 +21,7 @@ module tsd {
 		packageInfo:xm.PackageJSON;
 		verbose:boolean;
 
-		//TODO use more of this log? (xm.log is pretty global already)
+		//TODO remove or use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
 		configSchema:any;
 

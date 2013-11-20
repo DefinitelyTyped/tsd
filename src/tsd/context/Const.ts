@@ -14,7 +14,6 @@ module tsd {
 
 		shaShorten: 6
 	 };
-	//TODO add deepFreeze for safety
-	//proper const
+	// brrrrr
 	Object.freeze(Const);
 }

@@ -48,7 +48,7 @@ Basics commands
 
 * :m:	Add **help** (show commands) 
 * :m:	Add **version** (show version)
-* :x:	Add **init** (new json with repo/branch)
+* :m:	Add **init** (new json with repo/branch)
 * :m:	Add **settings** (show config info)
 * :m:	Add **reinstall** (from config)
 * :b:	Add **index** (list definition overview) (use search * for now)
@@ -89,25 +89,26 @@ Cache commands
 Selector
 
 * :x:	Improve globbing/RegExp (clean and more then just wrapping) :zap:
-* :x:	Add support for semver :zap:
-* :x:	Add support for multiple Selectors (blend results in select()) :zap:
+* :m:	Add support for semver :zap:
+* :m:	Add support for multiple Selectors (blend results in select()) :zap:
 * :x:	Add InfoMatcher to Selector / select() :zap:
-* :o:	Add search-by-date to history-command, add as DateMatcher to Selector / select()
+* :m:	Add search-by-date to history-command, add as DateMatcher to Selector / select()
 
 Command options
 
-* :b:   Plan options and unify the names (both for CLI as API)
+* :m:   Plan options and unify the names (both for CLI as API)
 * :m:	Add option for file overwrite (always on now) `--overwrite`
-* :b:	Add a compact vs detailed option (for search listings or history)
+* :b:	Add a compact vs detailed option (for search listings or history) `--detail`
 * :m:	Add option for dependency install (always on now) `--resolve`
-* :a:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
+* :m:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
+* :m:	Implement `--min` / `--max` option to define expected result amount
 * :o:	.... more
 
 Functionality
 
 * :o2:	Handle rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* :id:	Add fancy promise progress events + CLI display (install etc)
+* :b:	Add fancy promise progress events + CLI display (install etc)
 
 CLI
 
@@ -127,9 +128,9 @@ API
 
 Data model/repo
 
-* :o:	Harden JSON import
-* :a:	Consider decoupling from Github json format (abstract service)
-* :ab:	Consider adapting to work from a git-checkout (abstract service)
+* :x:	Harden JSON import
+* :id:	Consider decoupling from Github json format (abstract service)
+* :id:	Consider adapting to work from a git-checkout (abstract service)
 
 Info
 
@@ -138,14 +139,14 @@ Info
 
 Config
 
-* :o2:	Improve config JSON-Schema (RegExp)
-	* Improve flexibility
-	* Update tsd tests to verify changes
-	* Update ~~typingsPath~~ ('path' now): should be 1 length
-	* Update commit: should be (7-40) length (as per git convention)
-	* ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit
-* :a:	Validate config save-data before writing to diskk, catch invalid json
-* :o:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
+* :m:	Improve config JSON-Schema (RegExp)
+	* :m: Improve flexibility
+	* :ab: Update tsd tests to verify changes
+	* :m: Update ~~typingsPath~~ ('path' now): should be 1 length
+	* :m: Update commit: should be (7-40) length (as per git convention)
+	* :ng: ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit
+* :m:	Validate config save-data before writing to diskk, catch invalid json
+* :m:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
 * :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
 
 Cache
@@ -153,33 +154,34 @@ Cache
 * :m:	Decide on user caching directory: home / AppData like npm
 * :m:	Decide on cache folder version naming scheme
 * :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
-* :a:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate limit timeout info)
-* :b:	Add periodic automated cache purge/flush
+* :m:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate limit timeout info)
+* :a:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
-* :o:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
-* :vs:	Consider g-zip for caches
+* :id:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
+* :ab:	Consider g-zip for caches
 
 Internals
 
-* :a:	Try recalculating sha1 hash from content (fix: weird error in #master `$ tsd install chai` (fixed by forced line-ends?)
-* :b:	Add local-changes detector using the hash / sha
+* :ng:	~~Try recalculating sha1 hash from content~~ Not practical
+* :ng:	Add local-changes detector using the hash / sha
 * :m:	Change Context objects to use `Q`/`Q-io` and not auto-create folders at init
-* :vs:	Decide if API, Core etc need(more) race condition hardening
-* :vs:	Consider if API and/or Core need to be split into command classes.
-* :vs:	Consider adding timeout
-* :id:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
+* :m:	Decide if API, Core etc need(more) race condition hardening
+* :m:	Consider if API and/or Core need to be split into command classes `/tsd/logics`
+* :vs:	Consider adding timeout (with option)
+* :m:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :id:	Consider moving to class model with promise-based methods
 * :id:	Consider adding class based façade to model, with promise-based methods
 * :id:	Consider global store for JSON pointers and RegExps etc
-* :o:	Add xm interface for debug/log/event tracking (`xm.EventLog`)
-* :cl:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
+* :m:	Add xm ~~interface~~ class for debug/log/event tracking (`xm.EventLog`)
+* :ab:	Use promise notifiy/progress for event tracking
+* :m:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
 Technical
 
 * :m:	Move to TS 0.9 generics definition of Q promises
-* :cl:	Expand property / const immutability: Object.freeze()
-* :cl:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
-* :cl:	Change some utils from static class members to module functions
+* :id:	Expand property / const immutability: Object.freeze()
+* :id:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
+* :id:	Change some utils from static class members to module functions
 
 Cleanup
 
@@ -188,7 +190,8 @@ Cleanup
 * :cl:	Sweep used modules: `require()` and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
-* :m:	Verify "use strict" (needed in node?)
+* :cl:	Verify "use strict" (needed in node?)
+* :id:	Lint TypeScript JS output (using JSHint or ESlint)
 
 Publishing
 

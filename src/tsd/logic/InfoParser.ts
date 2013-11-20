@@ -24,7 +24,7 @@ module tsd {
 			this.core.content.loadContent(file).progress(d.notify).then((file:tsd.DefVersion) => {
 				var parser = new tsd.DefInfoParser();
 				if (file.info) {
-					//TODO why not do an early bail? skip reparse?
+					//TODO why not do an early bail and skip reparse?
 					file.info.resetFields();
 				}
 				else {

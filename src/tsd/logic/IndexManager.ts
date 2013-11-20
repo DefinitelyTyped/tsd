@@ -33,7 +33,8 @@ module tsd {
 		getIndex():Q.Promise<tsd.DefIndex> {
 			if (this._defer) {
 				this.track.skip(IndexManager.init);
-				//bypass notify
+				//TODO fix progress properly and remove hack
+				// lame bypass notify
 				var d = Q.defer<tsd.DefIndex>();
 				this._defer.promise.then(d.resolve, d.reject);
 				return this._defer.promise;

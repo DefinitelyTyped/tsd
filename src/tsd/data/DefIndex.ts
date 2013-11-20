@@ -15,7 +15,7 @@ module tsd {
 
 	 for now loosely coupled to the github api version, might be possible to de-couple, at least from the format version (but not really worth it?)
 	 */
-	//TODO consider cutting coupling with github api fomat or at least verify more
+	//TODO consider de-coupling with github api fomat or at least verify more
 	export class DefIndex {
 
 		private _branchName:string = null;

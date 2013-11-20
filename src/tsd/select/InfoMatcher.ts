@@ -8,6 +8,8 @@ module tsd {
 	 */
 	//TODO implement InfoMatcher
 	export class InfoMatcher {
-
+		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			return list;
+		}
 	}
 }

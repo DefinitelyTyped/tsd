@@ -187,8 +187,8 @@ module xm {
 						log('multi match line');
 						log('using ' + choice[0].parser.id);
 						//console.log(choice[0].match);
-						//TODO pick one!
 
+						//TODO pick one!
 						//why not first?
 						res.push(choice[0]);
 						possibles = choice[0].parser.next;

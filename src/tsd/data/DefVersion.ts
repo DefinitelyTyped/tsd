@@ -12,6 +12,7 @@ module tsd {
 
 	 NOTE: for practical reasons linked to a commit (tree) instead of a blob
 	 */
+	//TODO rename DefVersion to DefRevision / DefRev
 	export class DefVersion {
 		//TODO swap for non-writable properties?
 		private _def:tsd.Def = null;

@@ -1,7 +1,7 @@
 ///<reference path="_ref.ts" />
 ///<reference path="Core.ts" />
 ///<reference path="context/Context.ts" />
-///<reference path="select/Selector.ts" />
+///<reference path="select/Query.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 
 module tsd {
@@ -19,59 +19,27 @@ module tsd {
 	//TODO add useful methods to result (wrap some helpers from DefUtils)
 	export class APIResult {
 
-		error:string;
+		error:any;
 		nameMatches:tsd.Def[];
 		definitions:tsd.Def[];
 		selection:tsd.DefVersion[];
 		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
-		constructor(public selector:tsd.Selector = null) {
-			xm.assertVar(selector, tsd.Selector, 'selector', true);
+		constructor(public query:tsd.Query = null) {
+			xm.assertVar(query, tsd.Query, 'query', true);
 		}
 	}
 
-	export class APIMessage {
-		message:string;
-		tag:string;
+	export class InstallResult {
 
-		constructor(message:string, tag:string) {
-			this.message = message;
-			this.tag = tag;
-		}
+		options:tsd.Options;
+		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
+		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
-		toString() {
-			return this.tag + ':' + this.message;
-		}
-	}
-
-	export class APIProgress extends APIMessage {
-		total:number;
-		current:number;
-
-		constructor(message:string, code:string, total:number = 0, current:number = 0) {
-			super(message, code);
-			this.total = total;
-			this.current = current;
-		}
-
-		getRatio():number {
-			if (this.total > 0) {
-				return Math.min(Math.max(0, this.current), this.total) / this.total;
-			}
-			return 0;
-		}
-
-		getPerc():string {
-			return Math.round(this.getRatio() * 100) + '%';
-		}
-
-		getOf():string {
-			return this.current + '/' + this.total;
-		}
-
-		toString() {
-			return super.toString() + ':';
+		constructor(options:tsd.Options) {
+			xm.assertVar(options, tsd.Options, 'options');
+			this.options = options;
 		}
 	}
 
@@ -81,8 +49,8 @@ module tsd {
 	 */
 	export class API {
 
-		public core:tsd.Core;
-		public track:xm.EventLog;
+		core:tsd.Core;
+		track:xm.EventLog;
 
 		constructor(public context:tsd.Context) {
 			xm.assertVar(context, tsd.Context, 'context');
@@ -99,7 +67,7 @@ module tsd {
 		 create default config file
 		 */
 		//TODO add some more options
-		initConfig(overwrite:boolean = false):Q.Promise<string> {
+		initConfig(overwrite:boolean):Q.Promise<string> {
 			var p = this.core.config.initConfig(overwrite);
 			this.track.promise(p, 'config_init');
 			return p;
@@ -108,6 +76,7 @@ module tsd {
 		/*
 		 read the config from Context.path.configFile
 		 */
+		//TODO add some more options
 		readConfig(optional:boolean):Q.Promise<void> {
 			var p = this.core.config.readConfig(optional);
 			this.track.promise(p, 'config_read');
@@ -124,104 +93,47 @@ module tsd {
 		}
 
 		/*
-		 list files matching selector
+		 list files matching query
 		 */
-		search(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var p = this.core.select(selector);
-			this.track.promise(p, 'config_search');
+		select(query:tsd.Query, options?:tsd.Options):Q.Promise<tsd.Selection> {
+			xm.assertVar(query, tsd.Query, 'query');
+			xm.assertVar(options, tsd.Options, 'options', true);
+			options = options || Options.main;
+
+			var p = this.core.selector.select(query, options);
+			this.track.promise(p, 'config_select');
 			return p;
 		}
 
 		/*
-		 install all files matching selector
+		 install all files matching query
 		 */
-		install(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
+		install(selection:tsd.Selection, options?:tsd.Options):Q.Promise<tsd.InstallResult> {
+			xm.assertVar(selection, tsd.Selection, 'selection');
+			xm.assertVar(options, tsd.Options, 'options', true);
+			options = options || Options.main;
+
+			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
 			this.track.promise(d.promise, 'install');
 
-			//hardcode for now
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
-			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
-				var files:tsd.DefVersion[] = res.selection;
+			var res = new tsd.InstallResult(options);
+			var files:tsd.DefVersion[] = tsd.DefUtil.mergeDependencies(selection.selection);
 
-				//
-				files = tsd.DefUtil.mergeDependencies(files);
-
-				return this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).progress(d.notify).then((written:xm.IKeyValueMap) => {
-					if (!written) {
-						throw new Error('expected install paths');
-					}
-					res.written = written;
-					if (selector.saveToConfig) {
-						return this.core.config.saveConfig().progress(d.notify).then(() => {
-							d.resolve(res);
-						});
-					}
-					d.resolve(res);
-				});
-			}).fail(d.reject).done();
-
-			return d.promise;
-		}
-
-		/*
-		 direct install from partial commitSha
-		 */
-		//TODO move into selector? meh?
-		installFragment(path:string, commitShaFragment:string):Q.Promise<APIResult> {
-			xm.assertVar(path, 'string', 'path');
-			var d:Q.Deferred<APIResult> = Q.defer();
-			this.track.promise(d.promise, 'install_fragment');
-
-			var res = new tsd.APIResult(null);
-
-			this.core.index.findFile(path, commitShaFragment).progress(d.notify).then((file:tsd.DefVersion) => {
-				return this.core.installer.installFile(file).progress(d.notify).then((targetPath:string) => {
-					res.written.set(targetPath, file);
-					d.resolve(res);
-				});
-			}).fail(d.reject).done();
-
-			return d.promise;
-		}
-
-		/*
-		 download selection and parse and display header info
-		 */
-		info(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
-			this.track.promise(d.promise, 'info');
-
-			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
-				//nest for scope
-				return this.core.parser.parseDefInfoBulk(res.selection).progress(d.notify).then(() => {
-					d.resolve(res);
-				});
-			}).fail(d.reject).done();
-
-			return d.promise;
-		}
-
-		/*
-		 load commit history
-		 */
-		history(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
-			this.track.promise(d.promise, 'history');
-
-			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
-				// filter Defs from all selected versions
-
-				//TODO limit history to Selector date filter?
-				return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
-					d.resolve(res);
-				});
-			}).fail(d.reject).done();
+			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles).progress(d.notify).then((written:xm.IKeyValueMap) => {
+				if (!written) {
+					throw new Error('expected install paths');
+				}
+				res.written = written;
+			}).then(() => {
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig().progress(d.notify);
+				}
+				return null;
+			}).then(() => {
+				d.resolve(res);
+			}, d.reject).done();
 
 			return d.promise;
 		}
@@ -229,13 +141,19 @@ module tsd {
 		/*
 		 re-install from config
 		 */
-		reinstall(overwrite:boolean = false):Q.Promise<APIResult> {
-			var res = new tsd.APIResult(null);
-			var d:Q.Deferred<APIResult> = Q.defer();
+		reinstall(options?:tsd.Options):Q.Promise<tsd.InstallResult> {
+			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
 			this.track.promise(d.promise, 'reinstall');
 
-			this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).progress(d.notify).then((map:xm.IKeyValueMap) => {
+			var res = new tsd.InstallResult(options);
+
+			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles).progress(d.notify).then((map:xm.IKeyValueMap) => {
 				res.written = map;
+			}).then(() => {
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig().progress(d.notify);
+				}
+				return null;
 			}).then(() => {
 				d.resolve(res);
 			}, d.reject).done();
@@ -247,8 +165,8 @@ module tsd {
 		 compare repo data with local installed file and check for changes
 		 */
 		//TODO implement compare() command
-		compare(selector:tsd.Selector):Q.Promise<APIResult> {
-			xm.assertVar(selector, tsd.Selector, 'selector');
+		compare(query:tsd.Query):Q.Promise<APIResult> {
+			xm.assertVar(query, tsd.Query, 'query');
 			var d:Q.Deferred<APIResult> = Q.defer();
 			this.track.promise(d.promise, 'compare');
 			d.reject(new Error('not implemented yet'));

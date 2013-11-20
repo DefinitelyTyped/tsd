@@ -3,6 +3,7 @@
 
 ///<reference path="context/Config.ts" />
 
+///<reference path="Options.ts" />
 ///<reference path="logic/SubCore.ts" />
 ///<reference path="logic/Resolver.ts" />
 ///<reference path="logic/IndexManager.ts" />
@@ -11,6 +12,8 @@
 ///<reference path="logic/Installer.ts" />
 ///<reference path="logic/InfoParser.ts" />
 ///<reference path="logic/ContentLoader.ts" />
+///<reference path="logic/SelectorQuery.ts" />
+///<reference path="select/Query.ts" />
 
 ///<reference path="API.ts" />
 
@@ -21,18 +24,22 @@ module tsd {
 	var FS:typeof QioFS = require('q-io/fs');
 	var path = require('path');
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	var leadingExp = /^\.\.\//;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	/*
 	 Core: operational core logics
 	 */
-	//TODO split over files? why bother?
-	//TODO add more evnt logs, like in xm.CachedLoader
 	export class Core {
 
 		context:tsd.Context;
 		repo:git.GithubRepo;
 
 		index:tsd.IndexManager;
+		selector:tsd.SelectorQuery;
 		config:tsd.ConfigIO;
 		content:tsd.ContentLoader;
 		parser:tsd.InfoParser;
@@ -53,6 +60,7 @@ module tsd {
 
 				this.index = new tsd.IndexManager(this),
 				this.config = new tsd.ConfigIO(this),
+				this.selector = new tsd.SelectorQuery(this),
 				this.content = new tsd.ContentLoader(this),
 				this.parser = new tsd.InfoParser(this),
 				this.installer = new tsd.Installer(this),
@@ -67,79 +75,11 @@ module tsd {
 			this.verbose = this.context.verbose;
 
 			xm.ObjectUtil.lockProps(this, Object.keys(this));
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		getInstallPath(def:tsd.Def):string {
 			return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
-		}
-
-		/*
-		 run a selector against a DefIndex
-		 promise: ApiResult
-		 */
-		//TODO move to SubCore?
-		select(selector:Selector):Q.Promise<APIResult> {
-			var d:Q.Deferred<APIResult> = Q.defer();
-
-			this.track.promise(d.promise, 'select');
-
-			var res = new APIResult(selector);
-
-			this.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
-				return Q().then(() => {
-					var matches:tsd.Def[] = [];
-					selector.patterns.forEach((names:NameMatcher) => {
-						names.filter(index.list, matches).forEach((def:tsd.Def) => {
-							if (!tsd.DefUtil.containsDef(matches, def)) {
-								matches.push(def);
-							}
-						});
-					});
-					res.nameMatches = matches;
-					res.definitions = matches.slice(0);
-					if (selector.versionMatcher) {
-						res.definitions = selector.versionMatcher.filter(matches);
-					}
-
-					if (selector.minMatches > 0 && res.definitions.length < selector.minMatches) {
-						throw new Error('expected more matches: ' + res.definitions.length + ' < ' + selector.minMatches);
-					}
-					if (selector.maxMatches > 0 && res.definitions.length > selector.maxMatches) {
-						throw new Error('expected less matches: ' + res.definitions.length + ' > ' + selector.maxMatches);
-					}
-
-				}).then(() => {
-					if (selector.dateMatcher) {
-						if (selector.limitApi > 0 && res.definitions.length > selector.limitApi) {
-							throw new Error('match count ' + res.definitions.length + ' over api limit ' + selector.limitApi);
-						}
-						return this.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
-							//crude reset
-							res.selection = [];
-							res.definitions.forEach((def:tsd.Def) => {
-								var file:tsd.DefVersion = selector.dateMatcher.best(def.history);
-								if (file) {
-									res.selection.push(file);
-								}
-							});
-							res.definitions = tsd.DefUtil.getDefs(res.selection);
-						});
-					}
-					// default to all heads
-					res.selection = tsd.DefUtil.getHeads(res.definitions);
-					return null;
-				}).then(() => {
-					if (selector.resolveDependencies) {
-						//TODO use dateMatcher?
-						return this.resolver.resolveBulk(res.selection).progress(d.notify);
-					}
-					return null;
-				});
-			}).then(() => {
-				d.resolve(res);
-			}, d.reject).done();
-
-			return d.promise;
 		}
 
 		set verbose(verbose:boolean) {
@@ -147,6 +87,8 @@ module tsd {
 			this._components.verbose = verbose;
 		}
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export interface ITrackable {
 		track:xm.EventLog;

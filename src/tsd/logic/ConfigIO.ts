@@ -1,5 +1,7 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="../../tsd/data/DefIndex.ts" />
+///<reference path="../Core.ts" />
+///<reference path="../Options.ts" />
 ///<reference path="SubCore.ts" />
 
 module tsd {
@@ -24,7 +26,7 @@ module tsd {
 		 load the current configFile, optional to not throw error on missing file
 		 promise: path of config file
 		 */
-		initConfig(overwrite:boolean = false):Q.Promise<string> {
+		initConfig(overwrite:boolean):Q.Promise<string> {
 			var d:Q.Deferred<string> = Q.defer();
 			var target = this.core.context.paths.configFile;
 

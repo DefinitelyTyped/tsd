@@ -475,6 +475,20 @@ module xm {
 					optimist.default(option.name, option.default);
 				}
 			});
+
+			this.groups.values().forEach((group:xm.ExposeGroup) => {
+				this.validateOptions(group.options);
+			});
+
+			this.commands.values().forEach((cmd:xm.ExposeCommand) => {
+				this.validateOptions(cmd.options);
+			});
+		}
+
+		validateOptions(opts:string[]):void {
+			opts.forEach((name:string) => {
+				xm.assert(this.options.has(name), 'undefined option {a}', name);
+			});
 		}
 
 		exit(code:number):void {
@@ -691,7 +705,6 @@ module xm {
 				addNote(cmd.note);
 
 				cmd.options.sort(sortOptionName).forEach((name:string) => {
-					var option:ExposeOption = this.options.get(name);
 					if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
 						addOption(name);
 					}

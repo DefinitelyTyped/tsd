@@ -1,5 +1,4 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../xm/RegExpGlue.ts" />
 ///<reference path="NameMatcher.ts" />
 ///<reference path="InfoMatcher.ts" />
 ///<reference path="DateMatcher.ts" />
@@ -7,10 +6,11 @@
 
 module tsd {
 	'use strict';
+
 	/*
-	 Selector: bundles the various selector options
+	 Query: bundles the various selector options
 	 */
-	export class Selector {
+	export class Query {
 
 		patterns:NameMatcher[] = [];
 
@@ -18,19 +18,11 @@ module tsd {
 		dateMatcher:DateMatcher;
 		infoMatcher:InfoMatcher;
 
+		parseInfo:boolean = false;
+		loadHistory:boolean = false;
+
 		//TODO implement this
 		commitSha:string;
-
-		//TODO implement these (limitless powerr!)
-		timeout:number = 10000;
-		minMatches:number = 0;
-		maxMatches:number = 0;
-		limitApi:number = 0;
-
-		//move to options?
-		overwriteFiles:boolean = false;
-		resolveDependencies:boolean = false;
-		saveToConfig:boolean = false;
 
 		constructor(pattern?:string) {
 			xm.assertVar(pattern, 'string', 'pattern', true);
@@ -45,11 +37,11 @@ module tsd {
 		}
 
 		get requiresSource():boolean {
-			return !!(this.resolveDependencies || this.infoMatcher);
+			return !!(this.infoMatcher || this.parseInfo);
 		}
 
 		get requiresHistory():boolean {
-			return !!(this.dateMatcher || this.commitSha);
+			return !!(this.dateMatcher || this.commitSha || this.loadHistory);
 		}
 
 		toString():string {

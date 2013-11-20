@@ -18,7 +18,7 @@ module tsd {
 	/*
 	 DefUtil: static helpers
 	 */
-	//TODO why is DefUtil not global functions instead?
+	//TODO why is DefUtil not a module with global functions instead?
 	export class DefUtil {
 
 		static getDefs(list:tsd.DefVersion[]):tsd.Def[] {

@@ -18,6 +18,7 @@ module tsd {
 			this.track = new xm.EventLog(track, label);
 
 			xm.ObjectUtil.lockProps(this, ['core', 'track']);
+			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		set verbose(verbose:boolean) {

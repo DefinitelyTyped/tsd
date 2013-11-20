@@ -13,7 +13,6 @@
  */
 module xm {
 
-	//TODO ditch wrap and hardcode or auto-compile style table lookups (for sanity) <partially implemented>
 	export module styler {
 
 		export function clean(str:string):string {

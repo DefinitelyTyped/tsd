@@ -42,39 +42,44 @@ module tsd {
 
 		comparators:DateComp[] = [];
 
-		constructor(selector?:string) {
-			if (selector) {
-				this.extractSelector(selector);
+		constructor(pattern?:string) {
+			if (pattern) {
+				this.extractSelector(pattern);
 			}
 		}
 
 		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
+			if (this.comparators.length === 0) {
+				return list;
+			}
 			return list.filter(this.getFilterFunc());
 		}
 
 		best(list:tsd.DefVersion[]):tsd.DefVersion {
-			return this.latest(list);
+			return this.latest(this.filter(list));
 		}
 
 		latest(list:tsd.DefVersion[]):tsd.DefVersion {
-			var list = this.filter(list).sort(tsd.DefUtil.fileCommitCompare);
-			if (list.length > 0) {
-				return list[list.length - 1];
+			if (this.comparators.length > 0) {
+				var list = this.filter(list).sort(tsd.DefUtil.fileCommitCompare);
+				if (list.length > 0) {
+					return list[list.length - 1];
+				}
 			}
 			return null;
 		}
 
-		extractSelector(selector:string) {
-			xm.assertVar(selector, 'string', 'selector');
+		extractSelector(pattern:string) {
+			xm.assertVar(pattern, 'string', 'pattern');
 			this.comparators = [];
-			if (!selector) {
+			if (!pattern) {
 				return;
 			}
 			//this.beforeDate = beforeDate;
 			//this.afterDate = afterDate;
 			termExp.lastIndex = 0;
 			var match;
-			while ((match = termExp.exec(selector))) {
+			while ((match = termExp.exec(pattern))) {
 				termExp.lastIndex = match.index + match[0].length;
 				xm.assert(xm.hasOwnProp(comparators, match[1]), 'not a valid date comparator in filter {a}', match[0]);
 

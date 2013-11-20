@@ -37,13 +37,13 @@ module tsd {
 			this.path = path;
 		}
 
+		toString():string {
+			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
+		}
+
 		//TODO test
 		get pathTerm():string {
 			return this.path.replace(/\.d\.ts$/, '');
-		}
-
-		toString():string {
-			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
 		//TODO test

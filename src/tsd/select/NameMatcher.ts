@@ -20,7 +20,7 @@ module tsd {
 		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 	}
 	/*
-	 NameMatcher: match name selector (globs etc)
+	 NameMatcher: match name pattern (globs etc)
 	 */
 	//TODO use minimatch or replace RegExpGlue with XRegExp
 	//TODO add negation

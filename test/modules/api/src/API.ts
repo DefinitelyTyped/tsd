@@ -1,7 +1,7 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/tsd/API.ts" />
-///<reference path="../../../../src/tsd/select/Selector.ts" />
+///<reference path="../../../../src/tsd/select/Query.ts" />
 ///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 
@@ -50,13 +50,13 @@ describe('API', () => {
 		return api;
 	}
 
-	function applyTestInfo(group:string, name:string, test:any, selector:tsd.Selector):helper.TestInfo {
+	function applyTestInfo(group:string, name:string, test:any, query:tsd.Query):helper.TestInfo {
 		var tmp = helper.getTestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
 
 		xm.FileUtil.writeJSONSync(tmp.testDump, test);
-		xm.FileUtil.writeJSONSync(tmp.selectorDump, selector);
+		xm.FileUtil.writeJSONSync(tmp.selectorDump, query);
 
 		api.verbose = test.debug;
 
@@ -67,12 +67,12 @@ describe('API', () => {
 		assert.property(test, 'selector');
 		assert.property(test.selector, 'pattern');
 
-		var selector = new tsd.Selector(test.selector.pattern);
-		selector.saveToConfig = test.save;
-		selector.overwriteFiles = test.overwrite;
-		selector.resolveDependencies = test.resolve;
+		var query = new tsd.Query(test.query.pattern);
+		query.saveToConfig = test.save;
+		query.overwriteFiles = test.overwrite;
+		query.resolveDependencies = test.resolve;
 
-		return selector;
+		return query;
 	}
 
 	function setupCase(api:tsd.API, name:string, test:any, info:helper.TestInfo):Q.Promise<any> {

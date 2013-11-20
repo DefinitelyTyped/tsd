@@ -27,6 +27,13 @@ module tsd {
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.dev;
+				opt.description = 'Development mode';
+				opt.type = 'flag';
+				opt.global = true;
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.color;
 				opt.description = 'Specify CLI color mode';
 				opt.type = 'string';
@@ -38,12 +45,7 @@ module tsd {
 				};
 			});
 
-			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.dev;
-				opt.description = 'Development mode';
-				opt.type = 'flag';
-				opt.global = true;
-			});
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.progress;
@@ -55,7 +57,70 @@ module tsd {
 				opt.note = ['experimental'];
 			});
 
-			// ---------
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.detail;
+				opt.description = 'Modify reporting detail level';
+				opt.type = 'string';
+				opt.global = true;
+				opt.default = 'mid';
+				opt.enum = ['low', 'mid', 'high'];
+				opt.note = ['partially implemented'];
+			});
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.semver;
+				opt.short = 'v';
+				opt.description = 'Filter on version postfix';
+				opt.type = 'string';
+				opt.placeholder = 'range';
+				opt.default = 'latest';
+				opt.note = ['semver-range | \'latest\' | \'all\''];
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.date;
+				opt.short = 'd';
+				opt.description = 'Filter on commit date';
+				opt.type = 'string';
+				opt.placeholder = 'date-range';
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.commit;
+				opt.short = 'c';
+				opt.description = 'Commit hash';
+				opt.type = 'string';
+				opt.placeholder = 'sha1';
+				opt.note = ['partially implemented'];
+			});
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.info;
+				opt.short = 'i';
+				opt.description = 'Display definition info';
+				opt.type = 'flag';
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.history;
+				opt.short = 'h';
+				opt.description = 'Display definition commit history';
+				opt.type = 'flag';
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.resolve;
+				opt.short = 'r';
+				opt.description = 'Include reference dependencies';
+				opt.type = 'flag';
+				opt.default = false;
+			});
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.config;
@@ -71,14 +136,6 @@ module tsd {
 				opt.type = 'string';
 				opt.placeholder = 'path';
 				opt.global = false;
-			});
-
-			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.save;
-				opt.short = 's';
-				opt.description = 'Save to config file';
-				opt.type = 'flag';
-				opt.default = false;
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -124,44 +181,22 @@ module tsd {
 				opt.note = ['not implemented'];
 			});
 
-			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.semver;
-				opt.short = 'v';
-				opt.description = 'Filter on version postfix';
-				opt.type = 'string';
-				opt.placeholder = 'range';
-				opt.global = false;
-				opt.default = 'latest';
-				opt.note = ['semver-range | \'latest\' | \'all\'', 'experimental'];
-			});
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.date;
-				opt.short = 'd';
-				opt.description = 'Filter on commit date';
-				opt.type = 'string';
-				opt.placeholder = 'date-range';
-				opt.global = false;
-				opt.note = ['experimental'];
-			});
-
-			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.commit;
-				opt.short = 'c';
-				opt.description = 'Commit hash';
-				opt.type = 'string';
-				opt.placeholder = 'sha1';
-				opt.global = false;
-				opt.note = ['partially implemented'];
-			});
-
-			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.resolve;
-				opt.short = 'r';
-				opt.description = 'Include reference dependencies';
+				opt.name = Opt.save;
+				opt.short = 's';
+				opt.description = 'Save to config file';
 				opt.type = 'flag';
-				opt.global = false;
 				opt.default = false;
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.action;
+				opt.short = 'a';
+				opt.description = 'Run action';
+				opt.type = 'string';
+				opt.note = ['experimental'];
 			});
 		}
 	}

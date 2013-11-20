@@ -138,7 +138,7 @@ module xm {
 
 	// - - - - meta types
 
-	//TODO add more?
+	//TODO add more array-likes??
 	export function isArrayLike(obj:any):boolean {
 		return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
 	}

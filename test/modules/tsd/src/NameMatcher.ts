@@ -1,10 +1,10 @@
 ///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/tsd/select/Selector.ts" />
+///<reference path="../../../../src/tsd/select/Query.ts" />
 ///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 
 ///<reference path="../../../../src/tsd/data/Def.ts" />
-///<reference path="../../../../src/tsd/select/Selector.ts" />
+///<reference path="../../../../src/tsd/select/Query.ts" />
 ///<reference path="../../../../src/tsd/select/NameMatcher.ts" />
 
 describe('NameMatcher', () => {
