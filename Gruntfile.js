@@ -121,7 +121,7 @@ module.exports = function (grunt) {
 					'node',
 					'./build/cli.js',
 					'history',
-					'sync',
+					'angular',
 					'-s',
 					'-o',
 					'-r',

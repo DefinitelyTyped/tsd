@@ -23,6 +23,7 @@ module tsd {
 
 		//TODO use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
+		configSchema:any;
 
 		constructor(configFile:string = null, verbose:boolean = false) {
 			xm.assertVar(configFile, 'string', 'configFile', true);
@@ -35,9 +36,8 @@ module tsd {
 			if (configFile) {
 				this.paths.configFile = path.resolve(configFile);
 			}
-			var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
-
-			this.config = new Config(schema);
+			this.configSchema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+			this.config = new Config(this.configSchema);
 		}
 
 		getTypingsDir():string {

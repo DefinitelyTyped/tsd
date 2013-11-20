@@ -21,8 +21,8 @@ module tsd {
 
 		error:string;
 		nameMatches:tsd.Def[];
-		selection:tsd.DefVersion[];
 		definitions:tsd.Def[];
+		selection:tsd.DefVersion[];
 		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 		//removed:xm.KeyValueMap = new xm.KeyValueMap();
 
@@ -91,32 +91,36 @@ module tsd {
 			this.track = new xm.EventLog('api', 'API');
 
 			xm.ObjectUtil.lockProps(this, ['core', 'track']);
+
+			this.verbose = this.context.verbose;
+		}
+
+		/*
+		 create default config file
+		 */
+		//TODO add some more options
+		initConfig(overwrite:boolean = false):Q.Promise<string> {
+			var p = this.core.config.initConfig(overwrite);
+			this.track.promise(p, 'config_init');
+			return p;
 		}
 
 		/*
 		 read the config from Context.path.configFile
 		 */
 		readConfig(optional:boolean):Q.Promise<void> {
-			var d:Q.Deferred<void> = Q.defer();
-
-			this.core.config.readConfig(optional).then(() => {
-				d.resolve();
-			}, d.reject);
-
-			return d.promise;
+			var p = this.core.config.readConfig(optional);
+			this.track.promise(p, 'config_read');
+			return p;
 		}
 
 		/*
 		 save the config to Context.path.configFile
 		 */
-		saveConfig():Q.Promise<void> {
-			var d:Q.Deferred<void> = Q.defer();
-
-			this.core.config.saveConfig().then(() => {
-				d.resolve();
-			}, d.reject);
-
-			return d.promise;
+		saveConfig():Q.Promise<string> {
+			var p = this.core.config.saveConfig();
+			this.track.promise(p, 'config_save');
+			return p;
 		}
 
 		/*
@@ -124,11 +128,9 @@ module tsd {
 		 */
 		search(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
-			var d:Q.Deferred<APIResult> = Q.defer();
-
-			this.core.select(selector).then(d.resolve, d.reject);
-
-			return d.promise;
+			var p = this.core.select(selector);
+			this.track.promise(p, 'config_search');
+			return p;
 		}
 
 		/*
@@ -137,28 +139,29 @@ module tsd {
 		install(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'install');
 
 			//hardcode for now
 			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
-			this.core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
 				var files:tsd.DefVersion[] = res.selection;
 
 				files = tsd.DefUtil.mergeDependencies(files);
 
-				return this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then((written:xm.IKeyValueMap) => {
+				return this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).progress(d.notify).then((written:xm.IKeyValueMap) => {
 					if (!written) {
 						throw new Error('expected install paths');
 					}
 					res.written = written;
 					if (selector.saveToConfig) {
-						return this.core.config.saveConfig().then(() => {
+						return this.core.config.saveConfig().progress(d.notify).then(() => {
 							d.resolve(res);
 						});
 					}
 					d.resolve(res);
 				});
-			}).fail(d.reject);
+			}).fail(d.reject).done();
 
 			return d.promise;
 		}
@@ -170,15 +173,16 @@ module tsd {
 		installFragment(path:string, commitShaFragment:string):Q.Promise<APIResult> {
 			xm.assertVar(path, 'string', 'path');
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'install_fragment');
 
 			var res = new tsd.APIResult(null);
 
-			this.core.index.findFile(path, commitShaFragment).then((file:tsd.DefVersion) => {
-				return this.core.installer.installFile(file).then((targetPath:string) => {
+			this.core.index.findFile(path, commitShaFragment).progress(d.notify).then((file:tsd.DefVersion) => {
+				return this.core.installer.installFile(file).progress(d.notify).then((targetPath:string) => {
 					res.written.set(targetPath, file);
 					d.resolve(res);
 				});
-			}).fail(d.reject);
+			}).fail(d.reject).done();
 
 			return d.promise;
 		}
@@ -189,13 +193,14 @@ module tsd {
 		info(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'info');
 
-			this.core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
 				//nest for scope
-				return this.core.parser.parseDefInfoBulk(res.selection).then(() => {
+				return this.core.parser.parseDefInfoBulk(res.selection).progress(d.notify).then(() => {
 					d.resolve(res);
 				});
-			}).fail(d.reject);
+			}).fail(d.reject).done();
 
 			return d.promise;
 		}
@@ -206,16 +211,17 @@ module tsd {
 		history(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'history');
 
-			this.core.select(selector).then((res:tsd.APIResult) => {
+			this.core.select(selector).progress(d.notify).then((res:tsd.APIResult) => {
 				// filter Defs from all selected versions
 				res.definitions = tsd.DefUtil.getDefs(res.selection);
 
 				//TODO limit history to Selector date filter?
-				return this.core.content.loadHistoryBulk(res.definitions).then(() => {
+				return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
 					d.resolve(res);
 				});
-			}).fail(d.reject);
+			}).fail(d.reject).done();
 
 			return d.promise;
 		}
@@ -226,12 +232,13 @@ module tsd {
 		reinstall(overwrite:boolean = false):Q.Promise<APIResult> {
 			var res = new tsd.APIResult(null);
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'reinstall');
 
-			this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).then((map:xm.IKeyValueMap) => {
+			this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).progress(d.notify).then((map:xm.IKeyValueMap) => {
 				res.written = map;
 			}).then(() => {
-					d.resolve(res);
-				}, d.reject);
+				d.resolve(res);
+			}, d.reject).done();
 
 			return d.promise;
 		}
@@ -243,6 +250,7 @@ module tsd {
 		compare(selector:tsd.Selector):Q.Promise<APIResult> {
 			xm.assertVar(selector, tsd.Selector, 'selector');
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'compare');
 			d.reject(new Error('not implemented yet'));
 
 			return d.promise;
@@ -255,11 +263,14 @@ module tsd {
 		purge():Q.Promise<APIResult> {
 			// add proper safety checks (let's not accidentally rimraf too much)
 			var d:Q.Deferred<APIResult> = Q.defer();
+			this.track.promise(d.promise, 'purge');
 			d.reject(new Error('not implemented yet'));
 
 			return d.promise;
 		}
+
 		set verbose(verbose:boolean) {
+			this.track.logEnabled = verbose;
 			this.core.verbose = verbose;
 		}
 	}

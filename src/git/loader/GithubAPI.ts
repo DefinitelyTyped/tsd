@@ -80,9 +80,9 @@ module git {
 		 });
 		 }
 		 */
-		getPathCommits(sha:string, path:string):Q.Promise<any> {
+		getPathCommits(path:string):Q.Promise<any> {
 			//TODO implement result pagination
-			var url = this.repo.urls.apiPathCommits(sha, path);
+			var url = this.repo.urls.apiPathCommits(path);
 			var request = new xm.http.Request(url);
 			return this.getFile<any>(request, true);
 		}

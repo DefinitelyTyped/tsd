@@ -90,68 +90,69 @@ module xm {
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		start(type:string, message?:string, data?:any):EventLog {
+		start(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.start, type, message, data);
 		}
 
-		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLog {
+		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
 			promise.then(() => {
-				return this.track(Level.resolve, type, message, data, promise);
+				//this.track(Level.resolve, type, message, data, promise);
 			}, (err) => {
-				return this.track(Level.reject, type, message, err, promise);
+				this.track(Level.reject, type, message, err, promise);
 			}, (note) => {
-				return this.track(Level.notify, type, message, note, promise);
+				this.track(Level.notify, type, message, note, promise);
 			});
-			return this.track(Level.promise, type, message, data, promise);
+			//return this.track(Level.promise, type, message, data, promise);
+			return null;
 		}
 
-		complete(type:string, message?:string, data?:any):EventLog {
+		complete(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.complete, type, message, data);
 		}
 
-		failure(type:string, message?:string, data?:any):EventLog {
+		failure(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.complete, type, message, data);
 		}
 
-		event(type:string, message?:string, data?:any):EventLog {
+		event(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.event, type, message, data);
 		}
 
-		skip(type:string, message?:string, data?:any):EventLog {
+		skip(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.skip, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		error(type:string, message?:string, data?:any):EventLog {
+		error(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.error, type, message, data);
 		}
 
-		warning(type:string, message?:string, data?:any):EventLog {
+		warning(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.warning, type, message, data);
 		}
 
-		success(type:string, message?:string, data?:any):EventLog {
+		success(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.success, type, message, data);
 		}
 
-		status(type:string, message?:string, data?:any):EventLog {
+		status(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.status, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		log(type:string, message?:string, data?:any):EventLog {
+		log(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.log, type, message, data);
 		}
 
-		debug(type:string, message?:string, data?:any):EventLog {
+		debug(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.debug, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		track(action:string, type:string, message?:string, data?:any, group?:any):EventLog {
+		track(action:string, type:string, message?:string, data?:any, group?:any):EventLogItem {
 			var item = new EventLogItem();
 			item.type = this._prefix + type;
 			item.action = action;
@@ -167,9 +168,9 @@ module xm {
 				this.trim();
 			}
 			if (this.logEnabled) {
-				this.logger.status(this.getItemString(item));
+				this.logger.status(this.getItemString(item, true));
 			}
-			return this;
+			return item;
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -196,14 +197,14 @@ module xm {
 			this._trackPrune = (isNaN(prune) ? this._trackPrune : prune);
 		}
 
-		getItemString(item:EventLogItem):string {
+		getItemString(item:EventLogItem, multiline:boolean = false):string {
 			var msg = padL(item.index, 6, '0') + ' ' + item.action + ' -> ' + item.type;
 			//msg += ' ' + (this._label ? +': ' + this._label : '');
 			if (xm.isValid(item.message) && item.message.length > 0) {
-				msg += ': ' + xm.trimWrap(item.message, 200, true);
+				msg += (multiline ? '\n      ' : ': ') + trimWrap(item.message, 200, true);
 			}
 			if (xm.isValid(item.data)) {
-				msg += ': ' + xm.toValueStrim(item.data, 4, 200);
+				msg += (multiline ? '\n      ' : ': ') + xm.toValueStrim(item.data, 4, 200);
 			}
 			return msg;
 		}

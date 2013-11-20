@@ -21,7 +21,7 @@ module tsd {
 			var d:Q.Deferred<DefVersion> = Q.defer();
 			this.track.promise(d.promise, 'parse', file.key);
 
-			this.core.content.loadContent(file).then((file:tsd.DefVersion) => {
+			this.core.content.loadContent(file).progress(d.notify).then((file:tsd.DefVersion) => {
 				var parser = new tsd.DefInfoParser(this.core.context.verbose);
 				if (file.info) {
 					//TODO why not do an early bail? skip reparse?
@@ -54,11 +54,10 @@ module tsd {
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			Q.all(list.map((file:tsd.DefVersion) => {
-				return this.parseDefInfo(file);
-
+				return this.parseDefInfo(file).progress(d.notify);
 			})).then((list) => {
 				d.resolve(list);
-			}).fail(d.reject);
+			}, d.reject, d.notify);
 
 			return d.promise;
 		}

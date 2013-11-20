@@ -2,468 +2,6 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var hasProp = Object.prototype.hasOwnProperty;
-
-    var KeyValueMap = (function () {
-        function KeyValueMap(data) {
-            this._store = Object.create(null);
-            if (data) {
-                this.import(data);
-            }
-            Object.defineProperty(this, '_store', { enumerable: false, writable: false });
-        }
-        KeyValueMap.prototype.has = function (key) {
-            return hasProp.call(this._store, key);
-        };
-
-        KeyValueMap.prototype.get = function (key, alt) {
-            if (typeof alt === "undefined") { alt = null; }
-            if (typeof key !== 'string') {
-                throw new Error('key must be a string');
-            }
-            if (hasProp.call(this._store, key)) {
-                return this._store[key];
-            }
-            return alt;
-        };
-
-        KeyValueMap.prototype.set = function (key, value) {
-            this._store[key] = value;
-        };
-
-        KeyValueMap.prototype.remove = function (key) {
-            if (hasProp.call(this._store, key)) {
-                delete this._store[key];
-            }
-        };
-
-        KeyValueMap.prototype.keys = function () {
-            return Object.keys(this._store);
-        };
-
-        KeyValueMap.prototype.values = function () {
-            var ret = [];
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret.push(this._store[key]);
-                }
-            }
-            return ret;
-        };
-
-        KeyValueMap.prototype.clear = function () {
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    delete this._store[key];
-                }
-            }
-        };
-
-        KeyValueMap.prototype.import = function (data) {
-            if (!data || typeof data !== 'object' || Object.prototype.toString.call(data) === '[object Array]') {
-                return;
-            }
-            for (var key in data) {
-                if (hasProp.call(data, key)) {
-                    this._store[key] = data[key];
-                }
-            }
-        };
-
-        KeyValueMap.prototype.export = function () {
-            var ret = {};
-            for (var key in this._store) {
-                if (hasProp.call(this._store, key)) {
-                    ret[key] = this._store[key];
-                }
-            }
-            return ret;
-        };
-        return KeyValueMap;
-    })();
-    xm.KeyValueMap = KeyValueMap;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var Set = (function () {
-        function Set(values) {
-            this._content = [];
-            if (values) {
-                this.import(values);
-            }
-        }
-        Set.prototype.has = function (value) {
-            return this._content.indexOf(value) > -1;
-        };
-
-        Set.prototype.add = function (value) {
-            if (this._content.indexOf(value) < 0) {
-                this._content.push(value);
-            }
-        };
-
-        Set.prototype.remove = function (value) {
-            var i = this._content.indexOf(value);
-            if (i > -1) {
-                this._content.splice(i, 1);
-            }
-        };
-
-        Set.prototype.values = function () {
-            return this._content.slice(0);
-        };
-
-        Set.prototype.import = function (values) {
-            for (var i = 0, ii = values.length; i < ii; i++) {
-                this.add(values[i]);
-            }
-        };
-
-        Set.prototype.clear = function () {
-            this._content = [];
-        };
-
-        Set.prototype.count = function () {
-            return this._content.length;
-        };
-        return Set;
-    })();
-    xm.Set = Set;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    function callAsync(callback) {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            args[_i] = arguments[_i + 1];
-        }
-        process.nextTick(function () {
-            callback.apply(null, args);
-        });
-    }
-    xm.callAsync = callAsync;
-})(xm || (xm = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    tsd.Const = {
-        ident: 'tsd',
-        configFile: 'tsd.json',
-        typingsDir: 'typings',
-        cacheDir: 'tsd-cache',
-        configVersion: 'v4',
-        configSchemaFile: 'tsd-v4.json',
-        definitelyRepo: 'borisyankov/DefinitelyTyped',
-        mainBranch: 'master',
-        shaShorten: 6
-    };
-
-    Object.freeze(tsd.Const);
-})(tsd || (tsd = {}));
-var tsd;
-(function (tsd) {
-    'use strict';
-
-    function shaShort(sha) {
-        if (!sha) {
-            return '<no sha>';
-        }
-        return sha.substr(0, tsd.Const.shaShorten);
-    }
-    tsd.shaShort = shaShort;
-})(tsd || (tsd = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    var fs = require('fs');
-    var path = require('path');
-    var util = require('util');
-
-    var Q = require('q');
-    var FS = require('q-io/fs');
-    var mkdirp = require('mkdirp');
-
-    (function (FileUtil) {
-        function parseJson(text) {
-            var json;
-            try  {
-                json = JSON.parse(text);
-            } catch (err) {
-                if (err.name === 'SyntaxError') {
-                    xm.log.error(err);
-                    xm.log('---');
-                    xm.log(text);
-                    xm.log('---');
-                }
-
-                throw (err);
-            }
-            return json;
-        }
-
-        function doReadJSONSync(src) {
-            return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
-        }
-
-        function readJSONSync(src) {
-            var json;
-
-            json = doReadJSONSync(src);
-
-            return json;
-        }
-        FileUtil.readJSONSync = readJSONSync;
-
-        function readJSON(src, callback) {
-            fs.readFile(path.resolve(src), { encoding: 'utf8' }, function (err, text) {
-                if (err || typeof text !== 'string') {
-                    return callback(err, null);
-                }
-                var json = null;
-                try  {
-                    json = parseJson(text);
-                } catch (err) {
-                    return callback(err, null);
-                }
-                return callback(null, json);
-            });
-        }
-        FileUtil.readJSON = readJSON;
-
-        function readJSONPromise(src) {
-            return FS.read(src, { encoding: 'utf8' }).then(function (text) {
-                return parseJson(text);
-            });
-        }
-        FileUtil.readJSONPromise = readJSONPromise;
-
-        function writeJSONSync(dest, data) {
-            dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
-            fs.writeFileSync(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
-        }
-        FileUtil.writeJSONSync = writeJSONSync;
-
-        function writeJSONPromise(dest, data) {
-            var d = Q.defer();
-
-            dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
-                return FS.write(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
-            }).then(function () {
-                d.resolve(null);
-            }, d.reject);
-
-            return d.promise;
-        }
-        FileUtil.writeJSONPromise = writeJSONPromise;
-
-        function readFileSync(dest, encoding) {
-            if (typeof encoding === "undefined") { encoding = 'utf8'; }
-            return fs.readFileSync(dest, { encoding: encoding });
-        }
-        FileUtil.readFileSync = readFileSync;
-
-        function writeFileSync(dest, data, encoding) {
-            if (typeof encoding === "undefined") { encoding = 'utf8'; }
-            dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
-            fs.writeFileSync(dest, data, { encoding: encoding });
-        }
-        FileUtil.writeFileSync = writeFileSync;
-
-        function mkdirCheckSync(dir, writable, testWritable) {
-            if (typeof writable === "undefined") { writable = false; }
-            if (typeof testWritable === "undefined") { testWritable = false; }
-            dir = path.resolve(dir);
-            if (fs.existsSync(dir)) {
-                if (!fs.statSync(dir).isDirectory()) {
-                    throw (new Error('path exists but is not a directory: ' + dir));
-                }
-                if (writable) {
-                    fs.chmodSync(dir, '744');
-                }
-            } else {
-                if (writable) {
-                    mkdirp.sync(dir, '744');
-                } else {
-                    mkdirp.sync(dir);
-                }
-            }
-            if (testWritable) {
-                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-                try  {
-                    fs.writeFileSync(testFile, 'test');
-                    fs.unlinkSync(testFile);
-                } catch (e) {
-                    throw new Error('no write access to: ' + dir + ' -> ' + e);
-                }
-            }
-            return dir;
-        }
-        FileUtil.mkdirCheckSync = mkdirCheckSync;
-
-        function mkdirCheckQ(dir, writable, testWritable) {
-            if (typeof writable === "undefined") { writable = false; }
-            if (typeof testWritable === "undefined") { testWritable = false; }
-            dir = path.resolve(dir);
-
-            var d = Q.defer();
-
-            FS.exists(dir).then(function (exists) {
-                if (exists) {
-                    return FS.isDirectory(dir).then(function (isDir) {
-                        if (!isDir) {
-                            throw (new Error('path exists but is not a directory: ' + dir));
-                        }
-                        if (writable) {
-                            return FS.chmod(dir, '744');
-                        }
-                        return null;
-                    });
-                } else {
-                    if (writable) {
-                        return Q.nfcall(mkdirp, dir, '744');
-                    }
-                    return Q.nfcall(mkdirp, dir);
-                }
-            }).then(function () {
-                if (testWritable) {
-                    var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-
-                    return FS.write(testFile, 'test').then(function () {
-                        return FS.remove(testFile);
-                    }).catch(function (err) {
-                        throw new Error('no write access to: ' + dir + ' -> ' + err);
-                    });
-                }
-            }).then(function () {
-                d.resolve(dir);
-            });
-            return d.promise;
-        }
-        FileUtil.mkdirCheckQ = mkdirCheckQ;
-
-        function canWriteFile(targetPath, overwrite) {
-            return FS.exists(targetPath).then(function (exists) {
-                if (!exists) {
-                    return true;
-                }
-                return FS.isFile(targetPath).then(function (isFile) {
-                    if (isFile) {
-                        return overwrite;
-                    }
-
-                    return false;
-                });
-            });
-        }
-        FileUtil.canWriteFile = canWriteFile;
-    })(xm.FileUtil || (xm.FileUtil = {}));
-    var FileUtil = xm.FileUtil;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    function eachElem(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        for (var i = 0, ii = collection.length; i < ii; i++) {
-            if (callback.call(thisArg, collection[i], i, collection) === false) {
-                return;
-            }
-        }
-    }
-    xm.eachElem = eachElem;
-
-    function eachProp(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        for (var prop in collection) {
-            if (collection.hasOwnProperty(prop)) {
-                if (callback.call(thisArg, collection[prop], prop, collection) === false) {
-                    return;
-                }
-            }
-        }
-    }
-    xm.eachProp = eachProp;
-
-    function reduceArray(collection, memo, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        for (var i = 0, ii = collection.length; i < ii; i++) {
-            memo = callback.call(thisArg, memo, collection[i], i, collection);
-        }
-        return memo;
-    }
-    xm.reduceArray = reduceArray;
-
-    function reduceHash(collection, memo, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        for (var prop in collection) {
-            if (collection.hasOwnProperty(prop)) {
-                memo = callback.call(thisArg, memo, collection[prop], prop, collection);
-            }
-        }
-        return memo;
-    }
-    xm.reduceHash = reduceHash;
-
-    function mapArray(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        var map = [];
-        for (var i = 0, ii = collection.length; i < ii; i++) {
-            map[i] = callback.call(thisArg, collection[i], i, collection);
-        }
-        return map;
-    }
-    xm.mapArray = mapArray;
-
-    function mapHash(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        var map = {};
-        for (var prop in collection) {
-            if (collection.hasOwnProperty(prop)) {
-                map[prop] = callback.call(thisArg, collection[prop], prop, collection);
-            }
-        }
-        return map;
-    }
-    xm.mapHash = mapHash;
-
-    function filterArray(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        var map = [];
-        for (var i = 0, ii = collection.length; i < ii; i++) {
-            if (callback.call(thisArg, collection[i], i, collection)) {
-                map.push(collection[i]);
-            }
-        }
-        return map;
-    }
-    xm.filterArray = filterArray;
-
-    function filterHash(collection, callback, thisArg) {
-        if (typeof thisArg === "undefined") { thisArg = null; }
-        var res = {};
-        for (var prop in collection) {
-            if (collection.hasOwnProperty(prop) && callback.call(thisArg, collection[prop], prop, collection)) {
-                res[prop] = collection[prop];
-            }
-        }
-        return res;
-    }
-    xm.filterHash = filterHash;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
     var natives = {
         '[object Arguments]': 'arguments',
         '[object Array]': 'array',
@@ -713,6 +251,7 @@ var xm;
                 }
             }
         };
+
         ObjectUtil.hideProps = function (object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { enumerable: false });
@@ -729,6 +268,14 @@ var xm;
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { writable: false });
                 Object.freeze(object[property]);
+            });
+        };
+
+        ObjectUtil.lockPrimitives = function (object) {
+            Object.keys(object).forEach(function (property) {
+                if (xm.isPrimitive(object[property])) {
+                    Object.defineProperty(object, property, { writable: false });
+                }
             });
         };
 
@@ -2092,6 +1639,468 @@ var xm;
 (function (xm) {
     'use strict';
 
+    var hasProp = Object.prototype.hasOwnProperty;
+
+    var KeyValueMap = (function () {
+        function KeyValueMap(data) {
+            this._store = Object.create(null);
+            if (data) {
+                this.import(data);
+            }
+            Object.defineProperty(this, '_store', { enumerable: false, writable: false });
+        }
+        KeyValueMap.prototype.has = function (key) {
+            return hasProp.call(this._store, key);
+        };
+
+        KeyValueMap.prototype.get = function (key, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            if (typeof key !== 'string') {
+                throw new Error('key must be a string');
+            }
+            if (hasProp.call(this._store, key)) {
+                return this._store[key];
+            }
+            return alt;
+        };
+
+        KeyValueMap.prototype.set = function (key, value) {
+            this._store[key] = value;
+        };
+
+        KeyValueMap.prototype.remove = function (key) {
+            if (hasProp.call(this._store, key)) {
+                delete this._store[key];
+            }
+        };
+
+        KeyValueMap.prototype.keys = function () {
+            return Object.keys(this._store);
+        };
+
+        KeyValueMap.prototype.values = function () {
+            var ret = [];
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    ret.push(this._store[key]);
+                }
+            }
+            return ret;
+        };
+
+        KeyValueMap.prototype.clear = function () {
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    delete this._store[key];
+                }
+            }
+        };
+
+        KeyValueMap.prototype.import = function (data) {
+            if (!data || typeof data !== 'object' || Object.prototype.toString.call(data) === '[object Array]') {
+                return;
+            }
+            for (var key in data) {
+                if (hasProp.call(data, key)) {
+                    this._store[key] = data[key];
+                }
+            }
+        };
+
+        KeyValueMap.prototype.export = function () {
+            var ret = {};
+            for (var key in this._store) {
+                if (hasProp.call(this._store, key)) {
+                    ret[key] = this._store[key];
+                }
+            }
+            return ret;
+        };
+        return KeyValueMap;
+    })();
+    xm.KeyValueMap = KeyValueMap;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var Set = (function () {
+        function Set(values) {
+            this._content = [];
+            if (values) {
+                this.import(values);
+            }
+        }
+        Set.prototype.has = function (value) {
+            return this._content.indexOf(value) > -1;
+        };
+
+        Set.prototype.add = function (value) {
+            if (this._content.indexOf(value) < 0) {
+                this._content.push(value);
+            }
+        };
+
+        Set.prototype.remove = function (value) {
+            var i = this._content.indexOf(value);
+            if (i > -1) {
+                this._content.splice(i, 1);
+            }
+        };
+
+        Set.prototype.values = function () {
+            return this._content.slice(0);
+        };
+
+        Set.prototype.import = function (values) {
+            for (var i = 0, ii = values.length; i < ii; i++) {
+                this.add(values[i]);
+            }
+        };
+
+        Set.prototype.clear = function () {
+            this._content = [];
+        };
+
+        Set.prototype.count = function () {
+            return this._content.length;
+        };
+        return Set;
+    })();
+    xm.Set = Set;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function callAsync(callback) {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            args[_i] = arguments[_i + 1];
+        }
+        process.nextTick(function () {
+            callback.apply(null, args);
+        });
+    }
+    xm.callAsync = callAsync;
+})(xm || (xm = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    tsd.Const = {
+        ident: 'tsd',
+        configFile: 'tsd.json',
+        typingsDir: 'typings',
+        cacheDir: 'tsd-cache',
+        configVersion: 'v4',
+        configSchemaFile: 'tsd-v4.json',
+        definitelyRepo: 'borisyankov/DefinitelyTyped',
+        mainBranch: 'master',
+        shaShorten: 6
+    };
+
+    Object.freeze(tsd.Const);
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    function shaShort(sha) {
+        if (!sha) {
+            return '<no sha>';
+        }
+        return sha.substr(0, tsd.Const.shaShorten);
+    }
+    tsd.shaShort = shaShort;
+})(tsd || (tsd = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var fs = require('fs');
+    var path = require('path');
+    var util = require('util');
+
+    var Q = require('q');
+    var FS = require('q-io/fs');
+    var mkdirp = require('mkdirp');
+
+    (function (FileUtil) {
+        function parseJson(text) {
+            var json;
+            try  {
+                json = JSON.parse(text);
+            } catch (err) {
+                if (err.name === 'SyntaxError') {
+                    xm.log.error(err);
+                    xm.log('---');
+                    xm.log(text);
+                    xm.log('---');
+                }
+
+                throw (err);
+            }
+            return json;
+        }
+
+        function doReadJSONSync(src) {
+            return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
+        }
+
+        function readJSONSync(src) {
+            var json;
+
+            json = doReadJSONSync(src);
+
+            return json;
+        }
+        FileUtil.readJSONSync = readJSONSync;
+
+        function readJSON(src, callback) {
+            fs.readFile(path.resolve(src), { encoding: 'utf8' }, function (err, text) {
+                if (err || typeof text !== 'string') {
+                    return callback(err, null);
+                }
+                var json = null;
+                try  {
+                    json = parseJson(text);
+                } catch (err) {
+                    return callback(err, null);
+                }
+                return callback(null, json);
+            });
+        }
+        FileUtil.readJSON = readJSON;
+
+        function readJSONPromise(src) {
+            return FS.read(src, { encoding: 'utf8' }).then(function (text) {
+                return parseJson(text);
+            });
+        }
+        FileUtil.readJSONPromise = readJSONPromise;
+
+        function writeJSONSync(dest, data) {
+            dest = path.resolve(dest);
+            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+            fs.writeFileSync(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
+        }
+        FileUtil.writeJSONSync = writeJSONSync;
+
+        function writeJSONPromise(dest, data) {
+            var d = Q.defer();
+
+            dest = path.resolve(dest);
+            xm.FileUtil.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
+                return FS.write(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
+            }).then(function () {
+                d.resolve(null);
+            }, d.reject);
+
+            return d.promise;
+        }
+        FileUtil.writeJSONPromise = writeJSONPromise;
+
+        function readFileSync(dest, encoding) {
+            if (typeof encoding === "undefined") { encoding = 'utf8'; }
+            return fs.readFileSync(dest, { encoding: encoding });
+        }
+        FileUtil.readFileSync = readFileSync;
+
+        function writeFileSync(dest, data, encoding) {
+            if (typeof encoding === "undefined") { encoding = 'utf8'; }
+            dest = path.resolve(dest);
+            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+            fs.writeFileSync(dest, data, { encoding: encoding });
+        }
+        FileUtil.writeFileSync = writeFileSync;
+
+        function mkdirCheckSync(dir, writable, testWritable) {
+            if (typeof writable === "undefined") { writable = false; }
+            if (typeof testWritable === "undefined") { testWritable = false; }
+            dir = path.resolve(dir);
+            if (fs.existsSync(dir)) {
+                if (!fs.statSync(dir).isDirectory()) {
+                    throw (new Error('path exists but is not a directory: ' + dir));
+                }
+                if (writable) {
+                    fs.chmodSync(dir, '744');
+                }
+            } else {
+                if (writable) {
+                    mkdirp.sync(dir, '744');
+                } else {
+                    mkdirp.sync(dir);
+                }
+            }
+            if (testWritable) {
+                var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+                try  {
+                    fs.writeFileSync(testFile, 'test');
+                    fs.unlinkSync(testFile);
+                } catch (e) {
+                    throw new Error('no write access to: ' + dir + ' -> ' + e);
+                }
+            }
+            return dir;
+        }
+        FileUtil.mkdirCheckSync = mkdirCheckSync;
+
+        function mkdirCheckQ(dir, writable, testWritable) {
+            if (typeof writable === "undefined") { writable = false; }
+            if (typeof testWritable === "undefined") { testWritable = false; }
+            dir = path.resolve(dir);
+
+            var d = Q.defer();
+
+            FS.exists(dir).then(function (exists) {
+                if (exists) {
+                    return FS.isDirectory(dir).then(function (isDir) {
+                        if (!isDir) {
+                            throw (new Error('path exists but is not a directory: ' + dir));
+                        }
+                        if (writable) {
+                            return FS.chmod(dir, '744');
+                        }
+                        return null;
+                    });
+                } else {
+                    if (writable) {
+                        return Q.nfcall(mkdirp, dir, '744');
+                    }
+                    return Q.nfcall(mkdirp, dir);
+                }
+            }).then(function () {
+                if (testWritable) {
+                    var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
+
+                    return FS.write(testFile, 'test').then(function () {
+                        return FS.remove(testFile);
+                    }).catch(function (err) {
+                        throw new Error('no write access to: ' + dir + ' -> ' + err);
+                    });
+                }
+            }).then(function () {
+                d.resolve(dir);
+            });
+            return d.promise;
+        }
+        FileUtil.mkdirCheckQ = mkdirCheckQ;
+
+        function canWriteFile(targetPath, overwrite) {
+            return FS.exists(targetPath).then(function (exists) {
+                if (!exists) {
+                    return true;
+                }
+                return FS.isFile(targetPath).then(function (isFile) {
+                    if (isFile) {
+                        return overwrite;
+                    }
+
+                    return false;
+                });
+            });
+        }
+        FileUtil.canWriteFile = canWriteFile;
+    })(xm.FileUtil || (xm.FileUtil = {}));
+    var FileUtil = xm.FileUtil;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function eachElem(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        for (var i = 0, ii = collection.length; i < ii; i++) {
+            if (callback.call(thisArg, collection[i], i, collection) === false) {
+                return;
+            }
+        }
+    }
+    xm.eachElem = eachElem;
+
+    function eachProp(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        for (var prop in collection) {
+            if (xm.hasOwnProp(collection, prop)) {
+                if (callback.call(thisArg, collection[prop], prop, collection) === false) {
+                    return;
+                }
+            }
+        }
+    }
+    xm.eachProp = eachProp;
+
+    function reduceArray(collection, memo, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        for (var i = 0, ii = collection.length; i < ii; i++) {
+            memo = callback.call(thisArg, memo, collection[i], i, collection);
+        }
+        return memo;
+    }
+    xm.reduceArray = reduceArray;
+
+    function reduceHash(collection, memo, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        for (var prop in collection) {
+            if (xm.hasOwnProp(collection, prop)) {
+                memo = callback.call(thisArg, memo, collection[prop], prop, collection);
+            }
+        }
+        return memo;
+    }
+    xm.reduceHash = reduceHash;
+
+    function mapArray(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var map = [];
+        for (var i = 0, ii = collection.length; i < ii; i++) {
+            map[i] = callback.call(thisArg, collection[i], i, collection);
+        }
+        return map;
+    }
+    xm.mapArray = mapArray;
+
+    function mapHash(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var map = {};
+        for (var prop in collection) {
+            if (xm.hasOwnProp(collection, prop)) {
+                map[prop] = callback.call(thisArg, collection[prop], prop, collection);
+            }
+        }
+        return map;
+    }
+    xm.mapHash = mapHash;
+
+    function filterArray(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var map = [];
+        for (var i = 0, ii = collection.length; i < ii; i++) {
+            if (callback.call(thisArg, collection[i], i, collection)) {
+                map.push(collection[i]);
+            }
+        }
+        return map;
+    }
+    xm.filterArray = filterArray;
+
+    function filterHash(collection, callback, thisArg) {
+        if (typeof thisArg === "undefined") { thisArg = null; }
+        var res = {};
+        for (var prop in collection) {
+            if (xm.hasOwnProp(collection, prop) && callback.call(thisArg, collection[prop], prop, collection)) {
+                res[prop] = collection[prop];
+            }
+        }
+        return res;
+    }
+    xm.filterHash = filterHash;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
     var fs = require('fs');
     var path = require('path');
 
@@ -2199,6 +2208,109 @@ var xm;
     })();
     xm.PackageJSON = PackageJSON;
 })(xm || (xm = {}));
+var xm;
+(function (xm) {
+    var jsonpointer = require('json-pointer');
+
+    (function (tv4) {
+        function valueStrim(value, strimLimit) {
+            if (typeof strimLimit === "undefined") { strimLimit = 60; }
+            var t = typeof value;
+            if (t === 'function') {
+                return '[function]';
+            }
+            if (t === 'object') {
+                value = JSON.stringify(value);
+                if (value.length > strimLimit) {
+                    value = value.substr(0, strimLimit) + '...';
+                }
+                return value;
+            }
+            if (t === 'string') {
+                if (value.length > strimLimit) {
+                    return JSON.stringify(value.substr(0, strimLimit)) + '...';
+                }
+                return JSON.stringify(value);
+            }
+            return '' + value;
+        }
+
+        function extractSchemaLabel(schema, max) {
+            if (typeof max === "undefined") { max = 80; }
+            var label = '';
+            if (schema.id) {
+                label = schema.id;
+            }
+            if (schema.title) {
+                label += (label ? ' (' + schema.title + ')' : schema.title);
+            }
+            if (!label && schema.description) {
+                label = valueStrim(schema.description, max);
+            }
+            if (!label) {
+                label = valueStrim(schema, max);
+            }
+            return label;
+        }
+
+        function formatResult(into, error, data, schema, indent) {
+            var schemaValue;
+            var dataValue;
+            var schemaLabel;
+
+            into.push(indent + error.message);
+
+            schemaLabel = extractSchemaLabel(schema, 80);
+            if (schemaLabel) {
+                into.push(indent + '    schema: ' + schemaLabel);
+            }
+            if (error.schemaPath) {
+                schemaValue = jsonpointer.get(schema, error.schemaPath);
+                into.push(indent + '    rule:   ' + error.schemaPath + ' -> ' + valueStrim(schemaValue));
+            }
+            if (error.dataPath) {
+                dataValue = jsonpointer.get(data, error.dataPath);
+                into.push(indent + '    field:  ' + error.dataPath + ' -> ' + xm.typeOf(dataValue) + ': ' + valueStrim(dataValue));
+            }
+        }
+
+        function getReport(obj, schema, result) {
+            var label = extractSchemaLabel(schema, 30);
+
+            var details = [];
+            if (!result) {
+                details.push('no result matched: ' + label);
+            } else {
+                if (result.valid) {
+                    details.push('schema matched: ' + label);
+                } else {
+                    details.push('schema NOT matched: ' + label + ' -> ' + valueStrim(obj, 30));
+
+                    var indent = '      ';
+                    if (result.error) {
+                        details.push(formatResult(details, result.error, obj, schema, indent));
+                    } else if (result.errors) {
+                        result.errors.forEach(function (error) {
+                            details.push(formatResult(details, error, obj, schema, indent));
+                        });
+                    }
+                }
+
+                if (result.missing.length === 1) {
+                    details.push('missing 1 schema: ' + extractSchemaLabel(result.missing[0]));
+                } else if (result.missing.length > 0) {
+                    details.push('missing ' + result.missing.length + ' schemas:');
+                    result.missing.forEach(function (missing) {
+                        details.push(extractSchemaLabel(missing));
+                    });
+                }
+            }
+            return details;
+        }
+        tv4.getReport = getReport;
+    })(xm.tv4 || (xm.tv4 = {}));
+    var tv4 = xm.tv4;
+})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     'use strict';
@@ -2253,7 +2365,7 @@ var tsd;
                 if (semMatch.length > 2) {
                     sem += semMatch[2];
                 }
-                return semver.valid(sem);
+                return semver.valid(sem, true);
             }
             return false;
         };
@@ -2288,14 +2400,15 @@ var tsd;
                     sem += semMatch[2];
                 }
 
-                if (semver.valid(sem)) {
-                    file.semver = sem;
+                var valid = semver.valid(sem, true);
+                if (valid) {
+                    file.semver = valid;
                     file.name = file.name.substr(0, semMatch.index);
                 } else {
                 }
             }
 
-            xm.ObjectUtil.lockProps(file, ['path', 'project', 'name']);
+            xm.ObjectUtil.lockProps(file, ['path', 'project', 'name', 'semver']);
 
             return file;
         };
@@ -2391,13 +2504,7 @@ var tsd;
             if (!this.name) {
                 return false;
             }
-            if (this.authors.length === 0) {
-                return false;
-            }
 
-            if (!this.reposUrl) {
-                return false;
-            }
             return true;
         };
         return DefInfo;
@@ -2620,14 +2727,19 @@ var tsd;
 
             this._schema = schema;
 
-            this.path = tsd.Const.typingsDir;
-            this.version = tsd.Const.configVersion;
-            this.repo = tsd.Const.definitelyRepo;
-            this.ref = tsd.Const.mainBranch;
+            this.reset();
 
             xm.ObjectUtil.hidePrefixed(this);
             Object.defineProperty(this, 'log', { enumerable: false });
         }
+        Config.prototype.reset = function () {
+            this.path = tsd.Const.typingsDir;
+            this.version = tsd.Const.configVersion;
+            this.repo = tsd.Const.definitelyRepo;
+            this.ref = tsd.Const.mainBranch;
+            this._installed.clear();
+        };
+
         Config.prototype.resolveTypingsPath = function (relativeToDir) {
             var cfgFull = path.resolve(relativeToDir);
             var typings = this.path.replace(/[\\\/]/g, path.sep);
@@ -2724,9 +2836,10 @@ var tsd;
                     commit: file.commitSha
                 };
             });
+
             var res = tv4.validateResult(json, this._schema);
             if (!res.valid || res.missing.length > 0) {
-                this.log.warn(res.error.message);
+                this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
                 return null;
             }
             return json;
@@ -2736,18 +2849,13 @@ var tsd;
             var _this = this;
             xm.assertVar(json, 'object', 'json');
 
-            this._installed.clear();
-
             var res = tv4.validateResult(json, this._schema);
-
             if (!res.valid || res.missing.length > 0) {
-                this.log.error(res.error.message);
-                if (res.error.dataPath) {
-                    this.log.warn(res.error.dataPath);
-                }
-
-                throw (new Error('malformed config: doesn\'t comply with json-schema: ' + res.error.message + (res.error.dataPath ? ': ' + res.error.dataPath : '')));
+                this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
+                throw (new Error('malformed config: doesn\'t comply with schema'));
             }
+
+            this._installed.clear();
 
             this.path = json.path;
             this.version = json.version;
@@ -2820,9 +2928,8 @@ var tsd;
             if (configFile) {
                 this.paths.configFile = path.resolve(configFile);
             }
-            var schema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
-
-            this.config = new tsd.Config(schema);
+            this.configSchema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+            this.config = new tsd.Config(this.configSchema);
         }
         Context.prototype.getTypingsDir = function () {
             return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
@@ -2965,8 +3072,8 @@ var tsd;
             xm.assertVar(pattern, 'string', 'pattern');
             this.pattern = pattern;
         }
-        NameMatcher.prototype.filter = function (list) {
-            return list.filter(this.getFilterFunc());
+        NameMatcher.prototype.filter = function (list, current) {
+            return list.filter(this.getFilterFunc(current));
         };
 
         NameMatcher.prototype.toString = function () {
@@ -3060,7 +3167,7 @@ var tsd;
             }
         };
 
-        NameMatcher.prototype.getFilterFunc = function () {
+        NameMatcher.prototype.getFilterFunc = function (current) {
             var _this = this;
             this.compile();
 
@@ -3093,9 +3200,6 @@ var tsd;
     var InfoMatcher = (function () {
         function InfoMatcher() {
         }
-        InfoMatcher.prototype.test = function (info) {
-            return true;
-        };
         return InfoMatcher;
     })();
     tsd.InfoMatcher = InfoMatcher;
@@ -3104,9 +3208,184 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    require('date-utils');
+
+    var termExp = /(>=?|<=?|==) *(\d+[\d:;_ \-]+\d)/g;
+
+    var comparators = {
+        '<=': function (date1, date2) {
+            return date1.isBefore(date2) || date1.equals(date2);
+        },
+        '<': function (date1, date2) {
+            return date1.isBefore(date2);
+        },
+        '>=': function (date1, date2) {
+            return date1.isAfter(date2) || date1.equals(date2);
+        },
+        '>': function (date1, date2) {
+            return date1.isAfter(date2);
+        },
+        '==': function (date1, date2) {
+            return date1.equals(date2);
+        }
+    };
+
+    var DateComp = (function () {
+        function DateComp() {
+        }
+        DateComp.prototype.satisfies = function (date) {
+            return this.comparator(date, this.date);
+        };
+        return DateComp;
+    })();
+    tsd.DateComp = DateComp;
+
+    var DateMatcher = (function () {
+        function DateMatcher(selector) {
+            this.comparators = [];
+            if (selector) {
+                this.extractSelector(selector);
+            }
+        }
+        DateMatcher.prototype.extractSelector = function (selector) {
+            xm.assertVar(selector, 'string', 'selector');
+            this.comparators = [];
+            if (!selector) {
+                return;
+            }
+
+            termExp.lastIndex = 0;
+            var match;
+            while ((match = termExp.exec(selector))) {
+                termExp.lastIndex = match.index + match[0].length;
+                xm.log.inspect(match, 1, 'match');
+
+                if (xm.hasOwnProp(comparators, match[1])) {
+                    var comp = new DateComp();
+                    comp.date = new Date(match[2].replace(/;_/g, ' '));
+                    if (!comp.date) {
+                        xm.throwAssert('not a valid date in filter {a}', match[0]);
+                    }
+                    comp.comparator = comparators[match[1]];
+                    if (!comp.comparator) {
+                        xm.throwAssert('not a valid date comparator in filter {a}', match[0]);
+                    }
+                    this.comparators.push(comp);
+                }
+            }
+            xm.log.inspect(this.comparators, 2, 'comparators');
+        };
+
+        DateMatcher.prototype.filter = function (list) {
+            return list.filter(this.getFilterFunc());
+        };
+
+        DateMatcher.prototype.getFilterFunc = function () {
+            var _this = this;
+            var len = this.comparators.length;
+            return function (file) {
+                var date = file.commit.changeDate;
+                if (!date) {
+                    return false;
+                }
+                for (var i = 0; i < len; i++) {
+                    if (!_this.comparators[i].satisfies(date)) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+        };
+        return DateMatcher;
+    })();
+    tsd.DateMatcher = DateMatcher;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    var semver = require('semver');
+
+    var intMax = Math.pow(2, 53);
+    var semverMax = 'v' + intMax + '.' + intMax + '.' + intMax;
+    var semverMin = 'v' + 0 + '.' + 0 + '.' + 0;
+
+    var VersionMatcher = (function () {
+        function VersionMatcher(range) {
+            xm.log('VersionMatcher', 'range', range);
+
+            if (range === VersionMatcher.latest || range === VersionMatcher.all) {
+                this.range = range;
+            } else {
+                this.range = semver.validRange(range, true);
+                xm.assert(!!this.range, 'expected {a} to be a valid semver-range', range);
+            }
+            xm.log('VersionMatcher', 'range', this.range);
+        }
+        VersionMatcher.prototype.filter = function (list) {
+            var _this = this;
+            if (!this.range || this.range === VersionMatcher.all) {
+                return list.slice(0);
+            }
+
+            var map = list.reduce(function (map, def) {
+                var id = def.project + '/' + def.name;
+                if (id in map) {
+                    map[id].push(def);
+                } else {
+                    map[id] = [def];
+                }
+                return map;
+            }, Object.create(null));
+
+            if (this.range === VersionMatcher.latest) {
+                return Object.keys(map).map(function (key) {
+                    return _this.getLatest(map[key]);
+                });
+            }
+
+            return Object.keys(map).reduce(function (memo, key) {
+                map[key].forEach(function (def) {
+                    if (!def.semver) {
+                        if (semver.satisfies(semverMax, _this.range)) {
+                            memo.push(def);
+                        }
+                    } else if (semver.satisfies(def.semver, _this.range)) {
+                        memo.push(def);
+                    }
+                });
+                return memo;
+            }, []);
+        };
+
+        VersionMatcher.prototype.getLatest = function (list) {
+            var latest;
+            for (var i = 0, ii = list.length; i < ii; i++) {
+                var def = list[i];
+                if (!def.semver) {
+                    return def;
+                } else if (!latest) {
+                    latest = def;
+                } else if (semver.gt(def.semver, latest.semver)) {
+                    xm.log('VersionMatcher.filter', 'gt', def.semver, latest.semver);
+                    latest = def;
+                }
+            }
+            return latest;
+        };
+        VersionMatcher.latest = 'latest';
+        VersionMatcher.all = 'all';
+        return VersionMatcher;
+    })();
+    tsd.VersionMatcher = VersionMatcher;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
     var Selector = (function () {
         function Selector(pattern) {
-            if (typeof pattern === "undefined") { pattern = '*'; }
+            this.patterns = [];
             this.timeout = 10000;
             this.minMatches = 0;
             this.maxMatches = 0;
@@ -3114,19 +3393,37 @@ var tsd;
             this.overwriteFiles = false;
             this.resolveDependencies = false;
             this.saveToConfig = false;
-            xm.assertVar(pattern, 'string', 'pattern');
-            this.pattern = new tsd.NameMatcher(pattern);
+            xm.assertVar(pattern, 'string', 'pattern', true);
+            if (pattern) {
+                this.patterns.push(new tsd.NameMatcher(pattern));
+            }
         }
+        Selector.prototype.addNamePattern = function (pattern) {
+            xm.assertVar(pattern, 'string', 'pattern');
+            this.patterns.push(new tsd.NameMatcher(pattern));
+        };
+
+        Object.defineProperty(Selector.prototype, "requiresSource", {
+            get: function () {
+                return !!(this.resolveDependencies || this.infoMatcher);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         Object.defineProperty(Selector.prototype, "requiresHistory", {
             get: function () {
-                return !!(this.beforeDate || this.afterDate);
+                return !!(this.dateMatcher || this.commitSha);
             },
             enumerable: true,
             configurable: true
         });
 
         Selector.prototype.toString = function () {
-            return this.pattern.pattern;
+            return this.patterns.reduce(function (memo, matcher) {
+                memo.push(matcher.pattern);
+                return memo;
+            }, []).join(', ');
         };
         return Selector;
     })();
@@ -3223,7 +3520,7 @@ var git;
             this.addTemplate('apiBranch', this._api + '/branches/{branch}');
             this.addTemplate('apiBranches', this._api + '/branches');
             this.addTemplate('apiCommit', this._api + '/commits/{commit}');
-            this.addTemplate('apiPathCommits', this._api + '/commits?sha={commit}&path={path}');
+            this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
             this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
 
             xm.ObjectUtil.hidePrefixed(this);
@@ -3268,11 +3565,9 @@ var git;
             });
         };
 
-        GithubURLs.prototype.apiPathCommits = function (commit, path) {
-            xm.assertVar(commit, 'sha1', 'commit');
+        GithubURLs.prototype.apiPathCommits = function (path) {
             xm.assertVar(path, 'string', 'path');
             return this.getURL('apiPathCommits', {
-                commit: commit,
                 path: path
             });
         };
@@ -3501,13 +3796,13 @@ var xm;
         EventLog.prototype.promise = function (promise, type, message, data) {
             var _this = this;
             promise.then(function () {
-                return _this.track(xm.Level.resolve, type, message, data, promise);
             }, function (err) {
-                return _this.track(xm.Level.reject, type, message, err, promise);
+                _this.track(xm.Level.reject, type, message, err, promise);
             }, function (note) {
-                return _this.track(xm.Level.notify, type, message, note, promise);
+                _this.track(xm.Level.notify, type, message, note, promise);
             });
-            return this.track(xm.Level.promise, type, message, data, promise);
+
+            return null;
         };
 
         EventLog.prototype.complete = function (type, message, data) {
@@ -3566,9 +3861,9 @@ var xm;
                 this.trim();
             }
             if (this.logEnabled) {
-                this.logger.status(this.getItemString(item));
+                this.logger.status(this.getItemString(item, true));
             }
-            return this;
+            return item;
         };
 
         EventLog.prototype.trim = function (all) {
@@ -3593,14 +3888,15 @@ var xm;
             this._trackPrune = (isNaN(prune) ? this._trackPrune : prune);
         };
 
-        EventLog.prototype.getItemString = function (item) {
+        EventLog.prototype.getItemString = function (item, multiline) {
+            if (typeof multiline === "undefined") { multiline = false; }
             var msg = padL(item.index, 6, '0') + ' ' + item.action + ' -> ' + item.type;
 
             if (xm.isValid(item.message) && item.message.length > 0) {
-                msg += ': ' + xm.trimWrap(item.message, 200, true);
+                msg += (multiline ? '\n      ' : ': ') + xm.trimWrap(item.message, 200, true);
             }
             if (xm.isValid(item.data)) {
-                msg += ': ' + xm.toValueStrim(item.data, 4, 200);
+                msg += (multiline ? '\n      ' : ': ') + xm.toValueStrim(item.data, 4, 200);
             }
             return msg;
         };
@@ -3721,109 +4017,6 @@ var xm;
         return ident;
     }
     xm.jsonToIdentHash = jsonToIdentHash;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    var jsonpointer = require('json-pointer');
-
-    (function (tv4) {
-        function valueStrim(value, strimLimit) {
-            if (typeof strimLimit === "undefined") { strimLimit = 60; }
-            var t = typeof value;
-            if (t === 'function') {
-                return '[function]';
-            }
-            if (t === 'object') {
-                value = JSON.stringify(value);
-                if (value.length > strimLimit) {
-                    value = value.substr(0, strimLimit) + '...';
-                }
-                return value;
-            }
-            if (t === 'string') {
-                if (value.length > strimLimit) {
-                    return JSON.stringify(value.substr(0, strimLimit)) + '...';
-                }
-                return JSON.stringify(value);
-            }
-            return '' + value;
-        }
-
-        function extractSchemaLabel(schema, max) {
-            if (typeof max === "undefined") { max = 80; }
-            var label = '';
-            if (schema.id) {
-                label = schema.id;
-            }
-            if (schema.title) {
-                label += (label ? ' (' + schema.title + ')' : schema.title);
-            }
-            if (!label && schema.description) {
-                label = valueStrim(schema.description, max);
-            }
-            if (!label) {
-                label = valueStrim(schema, max);
-            }
-            return label;
-        }
-
-        function formatResult(into, error, data, schema, indent) {
-            var schemaValue;
-            var dataValue;
-            var schemaLabel;
-
-            into.push(indent + error.message);
-
-            schemaLabel = extractSchemaLabel(schema, 80);
-            if (schemaLabel) {
-                into.push(indent + '    schema: ' + schemaLabel);
-            }
-            if (error.schemaPath) {
-                schemaValue = jsonpointer.get(schema, error.schemaPath);
-                into.push(indent + '    rule:   ' + error.schemaPath + ' -> ' + valueStrim(schemaValue));
-            }
-            if (error.dataPath) {
-                dataValue = jsonpointer.get(data, error.dataPath);
-                into.push(indent + '    field:  ' + error.dataPath + ' -> ' + xm.typeOf(dataValue) + ': ' + valueStrim(dataValue));
-            }
-        }
-
-        function getReport(obj, schema, result) {
-            var label = extractSchemaLabel(schema, 30);
-
-            var details = [];
-            if (!result) {
-                details.push('no result matched: ' + label);
-            } else {
-                if (result.valid) {
-                    details.push('schema matched: ' + label);
-                } else {
-                    details.push('schema NOT matched: ' + label + ' -> ' + valueStrim(obj, 30));
-
-                    var indent = '      ';
-                    if (result.error) {
-                        details.push(formatResult(details, result.error, obj, schema, indent));
-                    } else if (result.errors) {
-                        result.errors.forEach(function (error) {
-                            details.push(formatResult(details, error, obj, schema, indent));
-                        });
-                    }
-                }
-
-                if (result.missing.length === 1) {
-                    details.push('missing 1 schema: ' + extractSchemaLabel(result.missing[0]));
-                } else if (result.missing.length > 0) {
-                    details.push('missing ' + result.missing.length + ' schemas:');
-                    result.missing.forEach(function (missing) {
-                        details.push(extractSchemaLabel(missing));
-                    });
-                }
-            }
-            return details;
-        }
-        tv4.getReport = getReport;
-    })(xm.tv4 || (xm.tv4 = {}));
-    var tv4 = xm.tv4;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -4097,7 +4290,7 @@ var xm;
                         job = _this.jobs.get(request.key);
                         _this.track.skip(HTTPCache.get_object);
 
-                        return job.getObject().progress(d.notify).then(d.resolve);
+                        return job.getObject().then(d.resolve);
                     } else {
                         job = new CacheLoader(_this, request);
                         _this.jobs.set(request.key, job);
@@ -4125,6 +4318,7 @@ var xm;
                     }
                     this.remove.set(key, setTimeout(function () {
                         _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
+                        _this.track.logger.status(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
                         _this.jobs.remove(key);
                     }, this.jobTimeout));
                 }
@@ -4241,8 +4435,15 @@ var xm;
                     _this._defer = null;
                 };
 
+                var checkHTTPCache = false;
+
                 this.cacheRead().progress(this._defer.notify).then(function () {
-                    return _this.httpLoad(true).progress(_this._defer.notify).then(function () {
+                    if (_this.object.body && !checkHTTPCache) {
+                        _this._defer.notify('using local cache: ' + _this.request.url);
+                        _this._defer.resolve(_this.object);
+                        return;
+                    }
+                    return _this.httpLoad(checkHTTPCache).progress(_this._defer.notify).then(function () {
                         if (!xm.isValid(_this.object.body)) {
                             throw new Error('no result body: ' + _this.object.request.url);
                         }
@@ -4284,7 +4485,7 @@ var xm;
                             _this.cacheValidator.assert(_this.object);
 
                             _this.track.event(CacheLoader.local_cache_hit);
-                            _this._defer.resolve(_this.object);
+                            d.resolve();
                             return;
                         } catch (err) {
                             _this.track.logger.error('cache invalid');
@@ -4614,8 +4815,8 @@ var git;
             return this.getFile(request, true);
         };
 
-        GithubAPI.prototype.getPathCommits = function (sha, path) {
-            var url = this.repo.urls.apiPathCommits(sha, path);
+        GithubAPI.prototype.getPathCommits = function (path) {
+            var url = this.repo.urls.apiPathCommits(path);
             var request = new xm.http.Request(url);
             return this.getFile(request, true);
         };
@@ -4796,6 +4997,8 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    require('date-utils');
+
     var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
     var leadingExp = /^\.\.\//;
@@ -4894,6 +5097,16 @@ var tsd;
             return false;
         };
 
+        DefUtil.containsDef = function (list, def) {
+            var p = def.path;
+            for (var i = 0, ii = list.length; i < ii; i++) {
+                if (list[i].path === p) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         DefUtil.mergeDependencies = function (list, target) {
             var ret = target || [];
             for (var i = 0, ii = list.length; i < ii; i++) {
@@ -4971,6 +5184,18 @@ var tsd;
 
             return -1;
         };
+
+        DefUtil.fileCommitCompare = function (aa, bb) {
+            var aaDate = aa.commit && aa.commit.changeDate;
+            var bbDate = bb.commit && bb.commit.changeDate;
+            if (!bbDate) {
+                return 1;
+            }
+            if (!aaDate) {
+                return -1;
+            }
+            return Date.compare(aaDate, bbDate);
+        };
         return DefUtil;
     })();
     tsd.DefUtil = DefUtil;
@@ -4999,7 +5224,7 @@ var tsd;
             list = tsd.DefUtil.uniqueDefVersion(list);
 
             Q.all(list.map(function (file) {
-                return _this.resolveDeps(file);
+                return _this.resolveDeps(file).progress(d.notify);
             })).then(function () {
                 d.resolve(list);
             }, function (err) {
@@ -5029,8 +5254,8 @@ var tsd;
             };
 
             Q.all([
-                this.core.index.getIndex(),
-                this.core.content.loadContent(file)
+                this.core.index.getIndex().progress(d.notify),
+                this.core.content.loadContent(file).progress(d.notify)
             ]).spread(function (index, file) {
                 _this.track.event(Resolver.parse);
 
@@ -5042,6 +5267,9 @@ var tsd;
 
                 if (queued.length > 0) {
                     _this.track.event(Resolver.subload);
+                    queued.forEach(function (p) {
+                        p.progress(d.notify);
+                    });
                     return Q.all(queued);
                 } else {
                     _this.track.skip(Resolver.subload);
@@ -5218,11 +5446,6 @@ var tsd;
             xm.assertVar(commit, 'object', 'commit');
             xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
-            xm.assert(!this.treeSha, 'already have tree {a}, {e}', this.treeSha, commit.sha);
-
-            this.treeSha = pointer.get(commit, '/commit/tree/sha');
-            xm.assertVar(this.treeSha, 'sha1', 'treeSha');
-
             this.hubAuthor = git.GithubUser.fromJSON(commit.author);
             this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
 
@@ -5232,7 +5455,7 @@ var tsd;
             this.message.parse(commit.commit.message);
             this.hasMeta = true;
 
-            xm.ObjectUtil.lockProps(this, ['treeSha', 'hasMeta']);
+            xm.ObjectUtil.lockProps(this, ['commitSha', 'hasMeta']);
         };
 
         DefCommit.prototype.hasMetaData = function () {
@@ -5364,8 +5587,9 @@ var tsd;
                     xm.log.inspect('weird: no commit for sha ' + json.sha);
                     throw new Error('huh?');
                 }
-                commit.parseJSON(json);
-
+                if (!commit.hasMeta) {
+                    commit.parseJSON(json);
+                }
                 def.history.push(_this.procureVersion(def, commit));
             });
         };
@@ -5563,7 +5787,9 @@ var tsd;
             var _this = this;
             if (this._defer) {
                 this.track.skip(IndexManager.init);
-                return this._defer.promise;
+
+                var d = Q.defer();
+                this._defer.promise.then(d.resolve, d.reject);
             }
             var index = new tsd.DefIndex();
 
@@ -5572,7 +5798,7 @@ var tsd;
             this.track.promise(this._defer.promise, IndexManager.init, this.core.context.config.repoRef);
             this.track.start(IndexManager.branch_get);
 
-            this.core.repo.api.getBranch(this.core.context.config.ref).then(function (branchData) {
+            this.core.repo.api.getBranch(this.core.context.config.ref).progress(this._defer.notify).then(function (branchData) {
                 _this.track.complete(IndexManager.branch_get);
 
                 if (!branchData) {
@@ -5584,7 +5810,7 @@ var tsd;
                 }
                 _this.track.start(IndexManager.tree_get);
 
-                return _this.core.repo.api.getTree(sha, true).then(function (data) {
+                return _this.core.repo.api.getTree(sha, true).progress(_this._defer.notify).then(function (data) {
                     _this.track.complete(IndexManager.tree_get);
 
                     index.init(branchData, data);
@@ -5602,54 +5828,43 @@ var tsd;
         };
 
         IndexManager.prototype.procureDef = function (path) {
-            var _this = this;
             var d = Q.defer();
 
-            this.getIndex().then(function (index) {
+            this.getIndex().progress(d.notify).then(function (index) {
                 var def = index.procureDef(path);
                 if (!def) {
                     throw new Error('cannot get def for path: ' + path);
                 }
                 d.resolve(def);
-            }).fail(function (err) {
-                _this.track.failure(IndexManager.procure_def, err.message, err);
-                d.reject(err);
-            }).done();
+            }).fail(d.reject).done();
 
             return d.promise;
         };
 
         IndexManager.prototype.procureFile = function (path, commitSha) {
-            var _this = this;
             var d = Q.defer();
 
-            this.getIndex().then(function (index) {
+            this.getIndex().progress(d.notify).then(function (index) {
                 var file = index.procureVersionFromSha(path, commitSha);
                 if (!file) {
                     throw new Error('cannot get file for path: ' + path);
                 }
                 d.resolve(file);
-            }).fail(function (err) {
-                _this.track.failure(IndexManager.procure_file, err.message, err);
-                d.reject(err);
-            }).done();
+            }).fail(d.reject).done();
+
             return d.promise;
         };
 
         IndexManager.prototype.procureCommit = function (commitSha) {
-            var _this = this;
             var d = Q.defer();
 
-            this.getIndex().then(function (index) {
+            this.getIndex().progress(d.notify).then(function (index) {
                 var commit = index.procureCommit(commitSha);
                 if (!commit) {
                     throw new Error('cannot commit def for commitSha: ' + commitSha);
                 }
                 d.resolve(commit);
-            }).fail(function (err) {
-                _this.track.failure(IndexManager.procure_commit, err.message, err);
-                d.reject(err);
-            }).done();
+            }).fail(d.reject).done();
 
             return d.promise;
         };
@@ -5686,13 +5901,39 @@ var tsd;
         function ConfigIO(core) {
             _super.call(this, core, 'config', 'ConfigIO');
         }
+        ConfigIO.prototype.initConfig = function (overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = false; }
+            var _this = this;
+            var d = Q.defer();
+            var target = this.core.context.paths.configFile;
+
+            this.track.promise(d.promise, ConfigIO.config_init, target);
+
+            FS.exists(target).then(function (exists) {
+                if (exists) {
+                    if (!overwrite) {
+                        throw new Error('cannot overwrite file: ' + target);
+                    }
+                    return FS.remove(target);
+                }
+                return null;
+            }).then(function () {
+                _this.core.context.config.reset();
+                return _this.saveConfig().then(function (target) {
+                    d.resolve(target);
+                });
+            }).fail(d.reject).done();
+
+            return d.promise;
+        };
+
         ConfigIO.prototype.readConfig = function (optional) {
             if (typeof optional === "undefined") { optional = false; }
             var _this = this;
             var d = Q.defer();
             var target = this.core.context.paths.configFile;
 
-            this.track.promise(d.promise, 'config_read', target);
+            this.track.promise(d.promise, ConfigIO.config_read, target);
 
             FS.exists(target).then(function (exists) {
                 if (!exists) {
@@ -5707,33 +5948,35 @@ var tsd;
                     _this.core.context.config.parseJSON(json);
                     d.resolve(null);
                 });
-            }).fail(d.reject);
+            }).fail(d.reject).done();
 
             return d.promise;
         };
 
-        ConfigIO.prototype.saveConfig = function () {
+        ConfigIO.prototype.saveConfig = function (target) {
             var d = Q.defer();
 
-            var target = this.core.context.paths.configFile;
+            target = target || this.core.context.paths.configFile;
             var dir = path.dirname(target);
 
-            this.track.promise(d.promise, 'config_save', target);
+            this.track.promise(d.promise, ConfigIO.config_save, target);
 
             var obj = this.core.context.config.toJSON();
             if (!obj) {
-                return Q.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
+                d.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
+                return d.promise;
             }
             var json = JSON.stringify(obj, null, 2);
             if (!json) {
-                return Q.reject(new Error('config could not be serialised to JSON'));
+                d.reject(new Error('config could not be serialised to JSON'));
+                return d.promise;
             }
 
             xm.FileUtil.mkdirCheckQ(dir, true).then(function () {
                 return FS.write(target, json).then(function () {
                     return FS.stat(target);
                 }).then(function () {
-                    return Q.delay(100);
+                    return Q.delay(50);
                 }).then(function () {
                     return FS.stat(target).then(function (stat) {
                         if (stat.size === 0) {
@@ -5743,10 +5986,13 @@ var tsd;
                 });
             }).then(function () {
                 d.resolve(target);
-            }, d.reject);
+            }, d.reject).done();
 
             return d.promise;
         };
+        ConfigIO.config_init = 'config_init';
+        ConfigIO.config_read = 'config_read';
+        ConfigIO.config_save = 'config_save';
         return ConfigIO;
     })(tsd.SubCore);
     tsd.ConfigIO = ConfigIO;
@@ -5774,7 +6020,7 @@ var tsd;
                 d.resolve(commit);
                 return;
             }
-            this.core.repo.api.getCommit(commit.commitSha).then(function (json) {
+            this.core.repo.api.getCommit(commit.commitSha).progress(d.notify).then(function (json) {
                 commit.parseJSON(json);
                 d.resolve(commit);
             }).fail(d.reject);
@@ -5792,8 +6038,8 @@ var tsd;
             var d = Q.defer();
             this.track.promise(d.promise, 'content_load', file.key);
 
-            this.core.index.getIndex().then(function (index) {
-                return _this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).then(function (content) {
+            this.core.index.getIndex().progress(d.notify).then(function (index) {
+                return _this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).progress(d.notify).then(function (content) {
                     if (file.blob) {
                         if (!file.blob.hasContent()) {
                             try  {
@@ -5802,7 +6048,6 @@ var tsd;
                                 xm.log.warn(err);
                                 xm.log.debug('path', file.def.path);
                                 xm.log.debug('commitSha', file.commit.commitSha);
-                                xm.log.debug('treeSha', file.commit.treeSha);
                                 xm.log.error('failed to set content');
 
                                 throw err;
@@ -5825,7 +6070,7 @@ var tsd;
 
             Q.all(list.map(function (file) {
                 return _this.loadContent(file);
-            })).then(function (list) {
+            })).progress(d.notify).then(function (list) {
                 d.resolve(list);
             }, d.reject);
 
@@ -5840,8 +6085,8 @@ var tsd;
             if (def.history.length > 0) {
                 return Q(def);
             }
-            this.core.index.getIndex().then(function (index) {
-                return _this.core.repo.api.getPathCommits(_this.core.context.config.ref, def.path).then(function (content) {
+            this.core.index.getIndex().progress(d.notify).then(function (index) {
+                return _this.core.repo.api.getPathCommits(def.path).progress(d.notify).then(function (content) {
                     index.setHistory(def, content);
                     d.resolve(def);
                 });
@@ -5861,7 +6106,7 @@ var tsd;
                 return _this.loadHistory(file);
             })).then(function (list) {
                 d.resolve(list);
-            }, d.reject);
+            }, d.reject, d.notify);
 
             return d.promise;
         };
@@ -5890,11 +6135,13 @@ var tsd;
             var d = Q.defer();
             this.track.promise(d.promise, 'file');
 
-            this.useFile(file, overwrite).then(function (targetPath) {
-                if (_this.core.context.config.hasFile(file.def.path)) {
-                    _this.core.context.config.getFile(file.def.path).update(file);
-                } else if (addToConfig) {
-                    _this.core.context.config.addFile(file);
+            this.useFile(file, overwrite).progress(d.notify).then(function (targetPath) {
+                if (targetPath) {
+                    if (_this.core.context.config.hasFile(file.def.path)) {
+                        _this.core.context.config.getFile(file.def.path).update(file);
+                    } else if (addToConfig) {
+                        _this.core.context.config.addFile(file);
+                    }
                 }
                 d.resolve(targetPath);
             }).fail(d.reject);
@@ -5912,14 +6159,14 @@ var tsd;
             var written = new xm.KeyValueMap();
 
             Q.all(list.map(function (file) {
-                return _this.installFile(file, addToConfig, overwrite).then(function (targetPath) {
+                return _this.installFile(file, addToConfig, overwrite).progress(d.notify).then(function (targetPath) {
                     if (targetPath) {
                         written.set(file.def.path, file);
                     }
                 });
             })).then(function () {
                 d.resolve(written);
-            }, d.reject);
+            }, d.reject, d.notify);
 
             return d.promise;
         };
@@ -5933,9 +6180,11 @@ var tsd;
             var written = new xm.KeyValueMap();
 
             Q.all(list.map(function (installed) {
-                return _this.core.index.procureFile(installed.path, installed.commitSha).then(function (file) {
-                    return _this.installFile(file, overwrite).then(function (targetPath) {
-                        written.set(file.def.path, file);
+                return _this.core.index.procureFile(installed.path, installed.commitSha).progress(d.notify).then(function (file) {
+                    return _this.installFile(file, true, overwrite).progress(d.notify).then(function (targetPath) {
+                        if (targetPath) {
+                            written.set(file.def.path, file);
+                        }
                         return file;
                     });
                 });
@@ -5955,12 +6204,14 @@ var tsd;
 
             xm.FileUtil.canWriteFile(targetPath, overwrite).then(function (canWrite) {
                 if (!canWrite) {
-                    xm.log.out.warning('skipped existing file: ' + file.def.path).line();
+                    if (!overwrite) {
+                        d.notify('skipped existing file: ' + file.def.path);
+                    }
                     d.resolve(null);
                     return;
                 }
 
-                return _this.core.content.loadContent(file).then(function () {
+                return _this.core.content.loadContent(file).progress(d.notify).then(function () {
                     return FS.exists(targetPath);
                 }).then(function (exists) {
                     if (exists) {
@@ -5988,8 +6239,10 @@ var tsd;
             var written = new xm.KeyValueMap();
 
             Q.all(list.map(function (file) {
-                return _this.useFile(file, overwrite).then(function (targetPath) {
-                    written.set(file.def.path, file);
+                return _this.useFile(file, overwrite).progress(d.notify).then(function (targetPath) {
+                    if (targetPath) {
+                        written.set(file.def.path, file);
+                    }
                 });
             })).then(function () {
                 d.resolve(written);
@@ -6433,7 +6686,7 @@ var tsd;
             var d = Q.defer();
             this.track.promise(d.promise, 'parse', file.key);
 
-            this.core.content.loadContent(file).then(function (file) {
+            this.core.content.loadContent(file).progress(d.notify).then(function (file) {
                 var parser = new tsd.DefInfoParser(_this.core.context.verbose);
                 if (file.info) {
                     file.info.resetFields();
@@ -6459,10 +6712,10 @@ var tsd;
             list = tsd.DefUtil.uniqueDefVersion(list);
 
             Q.all(list.map(function (file) {
-                return _this.parseDefInfo(file);
+                return _this.parseDefInfo(file).progress(d.notify);
             })).then(function (list) {
                 d.resolve(list);
-            }).fail(d.reject);
+            }, d.reject, d.notify);
 
             return d.promise;
         };
@@ -6513,22 +6766,47 @@ var tsd;
 
             this.track.promise(d.promise, 'select');
 
-            this.index.getIndex().then(function (index) {
-                var res = new tsd.APIResult(selector);
+            var res = new tsd.APIResult(selector);
 
-                res.nameMatches = selector.pattern.filter(index.list);
-
-                res.selection = tsd.DefUtil.getHeads(res.nameMatches);
-
+            this.index.getIndex().progress(d.notify).then(function (index) {
                 return Q().then(function () {
-                    if (selector.resolveDependencies) {
-                        return _this.resolver.resolveBulk(res.selection);
+                    var matches = [];
+                    selector.patterns.forEach(function (names) {
+                        names.filter(index.list, matches).forEach(function (def) {
+                            if (!tsd.DefUtil.containsDef(matches, def)) {
+                                matches.push(def);
+                            }
+                        });
+                    });
+                    res.nameMatches = matches;
+                    res.definitions = matches.slice(0);
+                    if (selector.versionMatcher) {
+                        res.definitions = selector.versionMatcher.filter(matches);
                     }
-                    return;
                 }).then(function () {
-                    d.resolve(res);
+                    if (selector.dateMatcher) {
+                        return _this.content.loadHistoryBulk(res.definitions).progress(d.notify).then(function () {
+                            res.selection = [];
+                            res.definitions.forEach(function (def) {
+                                var list = selector.dateMatcher.filter(def.history).sort(tsd.DefUtil.fileCommitCompare);
+                                if (list.length > 0) {
+                                    res.selection.push(list[list.length - 1]);
+                                }
+                            });
+                        });
+                    }
+
+                    res.selection = tsd.DefUtil.getHeads(res.definitions);
+                    return null;
+                }).then(function () {
+                    if (selector.resolveDependencies) {
+                        return _this.resolver.resolveBulk(res.selection).progress(d.notify);
+                    }
+                    return null;
                 });
-            }).fail(d.reject);
+            }).then(function () {
+                d.resolve(res);
+            }, d.reject).done();
 
             return d.promise;
         };
@@ -6646,59 +6924,59 @@ var tsd;
             this.track = new xm.EventLog('api', 'API');
 
             xm.ObjectUtil.lockProps(this, ['core', 'track']);
+
+            this.verbose = this.context.verbose;
         }
+        API.prototype.initConfig = function (overwrite) {
+            if (typeof overwrite === "undefined") { overwrite = false; }
+            var p = this.core.config.initConfig(overwrite);
+            this.track.promise(p, 'config_init');
+            return p;
+        };
+
         API.prototype.readConfig = function (optional) {
-            var d = Q.defer();
-
-            this.core.config.readConfig(optional).then(function () {
-                d.resolve();
-            }, d.reject);
-
-            return d.promise;
+            var p = this.core.config.readConfig(optional);
+            this.track.promise(p, 'config_read');
+            return p;
         };
 
         API.prototype.saveConfig = function () {
-            var d = Q.defer();
-
-            this.core.config.saveConfig().then(function () {
-                d.resolve();
-            }, d.reject);
-
-            return d.promise;
+            var p = this.core.config.saveConfig();
+            this.track.promise(p, 'config_save');
+            return p;
         };
 
         API.prototype.search = function (selector) {
             xm.assertVar(selector, tsd.Selector, 'selector');
-            var d = Q.defer();
-
-            this.core.select(selector).then(d.resolve, d.reject);
-
-            return d.promise;
+            var p = this.core.select(selector);
+            this.track.promise(p, 'config_search');
+            return p;
         };
 
         API.prototype.install = function (selector) {
             var _this = this;
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
+            this.track.promise(d.promise, 'install');
 
-            this.core.select(selector).then(function (res) {
+            this.core.select(selector).progress(d.notify).then(function (res) {
                 var files = res.selection;
 
                 files = tsd.DefUtil.mergeDependencies(files);
 
-                return _this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).then(function (written) {
+                return _this.core.installer.installFileBulk(files, selector.saveToConfig, selector.overwriteFiles).progress(d.notify).then(function (written) {
                     if (!written) {
                         throw new Error('expected install paths');
                     }
                     res.written = written;
                     if (selector.saveToConfig) {
-                        return _this.core.config.saveConfig().then(function () {
+                        return _this.core.config.saveConfig().progress(d.notify).then(function () {
                             d.resolve(res);
                         });
                     }
                     d.resolve(res);
                 });
-            }).fail(d.reject);
+            }).fail(d.reject).done();
 
             return d.promise;
         };
@@ -6707,15 +6985,16 @@ var tsd;
             var _this = this;
             xm.assertVar(path, 'string', 'path');
             var d = Q.defer();
+            this.track.promise(d.promise, 'install_fragment');
 
             var res = new tsd.APIResult(null);
 
-            this.core.index.findFile(path, commitShaFragment).then(function (file) {
-                return _this.core.installer.installFile(file).then(function (targetPath) {
+            this.core.index.findFile(path, commitShaFragment).progress(d.notify).then(function (file) {
+                return _this.core.installer.installFile(file).progress(d.notify).then(function (targetPath) {
                     res.written.set(targetPath, file);
                     d.resolve(res);
                 });
-            }).fail(d.reject);
+            }).fail(d.reject).done();
 
             return d.promise;
         };
@@ -6724,12 +7003,13 @@ var tsd;
             var _this = this;
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
+            this.track.promise(d.promise, 'info');
 
-            this.core.select(selector).then(function (res) {
-                return _this.core.parser.parseDefInfoBulk(res.selection).then(function () {
+            this.core.select(selector).progress(d.notify).then(function (res) {
+                return _this.core.parser.parseDefInfoBulk(res.selection).progress(d.notify).then(function () {
                     d.resolve(res);
                 });
-            }).fail(d.reject);
+            }).fail(d.reject).done();
 
             return d.promise;
         };
@@ -6738,14 +7018,15 @@ var tsd;
             var _this = this;
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
+            this.track.promise(d.promise, 'history');
 
-            this.core.select(selector).then(function (res) {
+            this.core.select(selector).progress(d.notify).then(function (res) {
                 res.definitions = tsd.DefUtil.getDefs(res.selection);
 
-                return _this.core.content.loadHistoryBulk(res.definitions).then(function () {
+                return _this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(function () {
                     d.resolve(res);
                 });
-            }).fail(d.reject);
+            }).fail(d.reject).done();
 
             return d.promise;
         };
@@ -6754,12 +7035,13 @@ var tsd;
             if (typeof overwrite === "undefined") { overwrite = false; }
             var res = new tsd.APIResult(null);
             var d = Q.defer();
+            this.track.promise(d.promise, 'reinstall');
 
-            this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).then(function (map) {
+            this.core.installer.reinstallBulk(this.context.config.getInstalled(), overwrite).progress(d.notify).then(function (map) {
                 res.written = map;
             }).then(function () {
                 d.resolve(res);
-            }, d.reject);
+            }, d.reject).done();
 
             return d.promise;
         };
@@ -6767,6 +7049,7 @@ var tsd;
         API.prototype.compare = function (selector) {
             xm.assertVar(selector, tsd.Selector, 'selector');
             var d = Q.defer();
+            this.track.promise(d.promise, 'compare');
             d.reject(new Error('not implemented yet'));
 
             return d.promise;
@@ -6774,12 +7057,15 @@ var tsd;
 
         API.prototype.purge = function () {
             var d = Q.defer();
+            this.track.promise(d.promise, 'purge');
             d.reject(new Error('not implemented yet'));
 
             return d.promise;
         };
+
         Object.defineProperty(API.prototype, "verbose", {
             set: function (verbose) {
+                this.track.logEnabled = verbose;
                 this.core.verbose = verbose;
             },
             enumerable: true,
@@ -6936,7 +7222,7 @@ var xm;
                 if (this.expose.options.has(name)) {
                     var option = this.expose.options.get(name);
                     var value = this.getArg(name);
-                    if (option.enum.indexOf(value) > -1) {
+                    if (option.enum && option.enum.indexOf(value) > -1) {
                         return value;
                     }
                 }
@@ -7553,7 +7839,7 @@ var tsd;
     function getContext(ctx) {
         xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-        var context = new tsd.Context(ctx.getArg('config'), ctx.getArg('verbose'));
+        var context = new tsd.Context(ctx.getArg(Opt.config), ctx.getArg('verbose'));
 
         if (ctx.getArg('dev')) {
             context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
@@ -7576,7 +7862,7 @@ var tsd;
     }
 
     function reportProgress(obj) {
-        output.accent('progress').space().inspect(obj, 3);
+        output.accent(output.nibs.arrow).inspect(obj, 3);
     }
 
     function reportSucces(result) {
@@ -7674,7 +7960,32 @@ var tsd;
         }
     }
 
-    var defaultJobOptions = ['config'];
+    var Opt = (function () {
+        function Opt() {
+        }
+        Opt.version = 'version';
+        Opt.verbose = 'verbose';
+        Opt.color = 'color';
+        Opt.dev = 'dev';
+        Opt.config = 'config';
+        Opt.cacheDir = 'cacheDir';
+        Opt.resolve = 'resolve';
+        Opt.save = 'save';
+        Opt.overwrite = 'overwrite';
+        Opt.min = 'min';
+        Opt.max = 'max =';
+        Opt.limit = 'limit';
+        Opt.timeout = 'timeout';
+        Opt.commit = 'commit';
+        Opt.semver = 'semver';
+        Opt.date = 'date';
+        Opt.progress = 'progress';
+        return Opt;
+    })();
+    tsd.Opt = Opt;
+    xm.ObjectUtil.lockPrimitives(Opt);
+
+    var defaultJobOptions = [Opt.config];
 
     function jobOptions(merge) {
         if (typeof merge === "undefined") { merge = []; }
@@ -7695,10 +8006,10 @@ var tsd;
         var d = Q.defer();
 
         init(ctx).then(function () {
-            if (ctx.hasArg('config')) {
-                return FS.isFile(ctx.getArg('config')).then(function (isFile) {
+            if (ctx.hasArg(Opt.config)) {
+                return FS.isFile(ctx.getArg(Opt.config)).then(function (isFile) {
                     if (!isFile) {
-                        throw new Error('specified --config is not a file: ' + ctx.getArg('config'));
+                        throw new Error('specified --config is not a file: ' + ctx.getArg(Opt.config));
                     }
                     return null;
                 });
@@ -7709,9 +8020,9 @@ var tsd;
             job.context = getContext(ctx);
             job.api = new tsd.API(job.context);
 
-            var required = ctx.hasArg('config');
+            var required = ctx.hasArg(Opt.config);
 
-            return job.api.readConfig(!required).then(function () {
+            return job.api.readConfig(!required).progress(d.notify).then(function () {
                 d.resolve(job);
             });
         }).fail(d.reject);
@@ -7720,30 +8031,52 @@ var tsd;
     }
 
     function getSelectorJob(ctx) {
-        return getAPIJob(ctx).then(function (job) {
-            if (ctx.numArgs !== 1) {
-                throw new Error('pass one selector pattern');
+        var d = Q.defer();
+
+        getAPIJob(ctx).progress(d.notify).then(function (job) {
+            if (ctx.numArgs < 1) {
+                throw new Error('pass at least one selector pattern');
+            }
+            job.selector = new tsd.Selector();
+            for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
+                job.selector.addNamePattern(ctx.getArgAt(i));
+            }
+            job.selector.commitSha = ctx.getArg(Opt.commit);
+
+            if (ctx.hasArg(Opt.semver)) {
+                job.selector.versionMatcher = new tsd.VersionMatcher(ctx.getArg(Opt.semver));
+            }
+            if (ctx.hasArg(Opt.date)) {
+                job.selector.dateMatcher = new tsd.DateMatcher(ctx.getArg(Opt.date));
             }
 
-            job.selector = new tsd.Selector(ctx.getArgAt(0));
-            job.selector.blobSha = ctx.getArg('blob');
-            job.selector.commitSha = ctx.getArg('commit');
+            job.selector.timeout = ctx.getArg(Opt.timeout);
+            job.selector.limitApi = ctx.getArg(Opt.limit);
+            job.selector.minMatches = ctx.getArg(Opt.min);
+            job.selector.maxMatches = ctx.getArg(Opt.max);
 
-            job.selector.timeout = ctx.getArg('timeout');
-            job.selector.limitApi = ctx.getArg('limit');
-            job.selector.minMatches = ctx.getArg('min');
-            job.selector.maxMatches = ctx.getArg('max');
+            job.selector.saveToConfig = ctx.getArg(Opt.save);
+            job.selector.overwriteFiles = ctx.getArg(Opt.overwrite);
+            job.selector.resolveDependencies = ctx.getArg(Opt.resolve);
 
-            job.selector.saveToConfig = ctx.getArg('save');
-            job.selector.overwriteFiles = ctx.getArg('overwrite');
-            job.selector.resolveDependencies = ctx.getArg('resolve');
-
+            xm.log.inspect(job.selector, 3, 'CLI job.selector');
             return job;
-        });
+        }).then(d.resolve, d.reject);
+
+        return d.promise;
     }
 
     function getExpose() {
         var expose = new xm.Expose('', output);
+
+        function getProgress(ctx) {
+            if (ctx.getArg(Opt.progress)) {
+                return function (note) {
+                    reportProgress(note);
+                };
+            }
+            return undefined;
+        }
 
         expose.before = function (cmd, ctx) {
             return printPreviewNotice();
@@ -7752,7 +8085,7 @@ var tsd;
         expose.defineGroup(function (group) {
             group.name = 'command';
             group.label = 'Main commands';
-            group.options = ['config', 'commit', 'cacheDir', 'min', 'max', 'limit'];
+            group.options = [Opt.date, Opt.semver, Opt.commit, Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
             group.sorter = function (one, two) {
                 var sort;
 
@@ -7778,7 +8111,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'version';
+            opt.name = Opt.version;
             opt.short = 'V';
             opt.description = 'Display version information';
             opt.type = 'flag';
@@ -7787,7 +8120,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'verbose';
+            opt.name = Opt.verbose;
             opt.description = 'Verbose output';
             opt.type = 'flag';
             opt.default = false;
@@ -7795,7 +8128,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'color';
+            opt.name = Opt.color;
             opt.description = 'Specify CLI color mode';
             opt.type = 'string';
             opt.placeholder = 'name';
@@ -7807,14 +8140,24 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'dev';
+            opt.name = Opt.dev;
             opt.description = 'Development mode';
             opt.type = 'flag';
             opt.global = true;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'config';
+            opt.name = Opt.progress;
+            opt.short = 'p';
+            opt.description = 'Display progress notifications';
+            opt.type = 'flag';
+            opt.default = false;
+            opt.global = true;
+            opt.note = ['experimental'];
+        });
+
+        expose.defineOption(function (opt) {
+            opt.name = Opt.config;
             opt.description = 'Path to config file';
             opt.type = 'string';
             opt.placeholder = 'path';
@@ -7822,7 +8165,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'cacheDir';
+            opt.name = Opt.cacheDir;
             opt.description = 'Path to cache directory';
             opt.type = 'string';
             opt.placeholder = 'path';
@@ -7830,7 +8173,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'save';
+            opt.name = Opt.save;
             opt.short = 's';
             opt.description = 'Save to config file';
             opt.type = 'flag';
@@ -7838,7 +8181,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'overwrite';
+            opt.name = Opt.overwrite;
             opt.short = 'o';
             opt.description = 'Overwrite existing definitions';
             opt.type = 'flag';
@@ -7846,7 +8189,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'limit';
+            opt.name = Opt.limit;
             opt.short = 'l';
             opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
             opt.type = 'int';
@@ -7856,7 +8199,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'max';
+            opt.name = Opt.max;
             opt.description = 'Enforce a maximum amount of results, 0 = unlimited';
             opt.type = 'int';
             opt.default = 0;
@@ -7865,7 +8208,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'min';
+            opt.name = Opt.min;
             opt.description = 'Enforce a minimum amount of results';
             opt.type = 'int';
             opt.default = 0;
@@ -7874,7 +8217,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'timeout';
+            opt.name = Opt.timeout;
             opt.description = 'Set operation timeout in milliseconds, 0 = unlimited';
             opt.type = 'int';
             opt.default = 0;
@@ -7884,16 +8227,28 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'blob';
-            opt.short = 'b';
-            opt.description = 'Blob hash';
+            opt.name = Opt.semver;
+            opt.short = 'v';
+            opt.description = 'Filter on version postfix';
             opt.type = 'string';
-            opt.placeholder = 'sha1';
+            opt.placeholder = 'semver-range | \'latest\' | \'all\'';
             opt.global = false;
+            opt.default = 'latest';
+            opt.note = ['experimental'];
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'commit';
+            opt.name = Opt.date;
+            opt.short = 'd';
+            opt.description = 'Filter on commit date';
+            opt.type = 'string';
+            opt.placeholder = 'date-range';
+            opt.global = false;
+            opt.note = ['experimental'];
+        });
+
+        expose.defineOption(function (opt) {
+            opt.name = Opt.commit;
             opt.short = 'c';
             opt.description = 'Commit hash';
             opt.type = 'string';
@@ -7903,7 +8258,7 @@ var tsd;
         });
 
         expose.defineOption(function (opt) {
-            opt.name = 'resolve';
+            opt.name = Opt.resolve;
             opt.short = 'r';
             opt.description = 'Include reference dependencies';
             opt.type = 'flag';
@@ -7916,21 +8271,37 @@ var tsd;
             cmd.label = 'Display version';
             cmd.groups = ['help'];
             cmd.execute = (function (ctx) {
-                output.line(xm.PackageJSON.getLocal().version);
-                return null;
+                return output.line(xm.PackageJSON.getLocal().version);
             });
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'init';
+            cmd.label = 'Create empty config file';
+            cmd.options = [Opt.config, Opt.overwrite];
+            cmd.groups = ['support'];
+            cmd.execute = function (ctx) {
+                return getAPIJob(ctx).then(function (job) {
+                    return job.api.initConfig(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then(function (target) {
+                        reportSucces(null);
+                        output.span(output.nibs.arrow).success('written ').span(target).clear();
+                    }, function (err) {
+                        output.span(output.nibs.arrow).error('error ').span(err.message).clear();
+                        throw (err);
+                    });
+                }, reportError, getProgress(ctx));
+            };
         });
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'settings';
             cmd.label = 'Display config settings';
-            cmd.options = ['config', 'cacheDir'];
+            cmd.options = [Opt.config, Opt.cacheDir];
             cmd.groups = ['support'];
             cmd.execute = function (ctx) {
                 return getAPIJob(ctx).then(function (job) {
-                    job.api.context.logInfo(true);
-                    return null;
-                });
+                    return job.api.context.logInfo(true);
+                }, reportError, getProgress(ctx));
             };
         });
 
@@ -7941,7 +8312,7 @@ var tsd;
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (ctx) {
                 return getSelectorJob(ctx).then(function (job) {
-                    return job.api.search(job.selector).then(function (result) {
+                    return job.api.search(job.selector).progress(getProgress(ctx)).then(function (result) {
                         reportSucces(null);
 
                         result.selection.forEach(function (file) {
@@ -7949,19 +8320,19 @@ var tsd;
                             output.line();
                         });
                     });
-                }, reportError);
+                }, reportError, getProgress(ctx));
             };
         });
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'install';
             cmd.label = 'Install definitions';
-            cmd.options = ['overwrite', 'save', 'resolve'];
+            cmd.options = [Opt.overwrite, Opt.save, Opt.resolve];
             cmd.variadic = ['selector'];
             cmd.groups = ['command', 'primary', 'write'];
             cmd.execute = function (ctx) {
                 return getSelectorJob(ctx).then(function (job) {
-                    return job.api.install(job.selector).then(function (result) {
+                    return job.api.install(job.selector).progress(getProgress(ctx)).then(function (result) {
                         reportSucces(null);
 
                         result.written.keys().sort().forEach(function (path) {
@@ -7969,7 +8340,7 @@ var tsd;
                             output.line(file.toString());
                         });
                     });
-                }, reportError);
+                }, reportError, getProgress(ctx));
             };
         });
 
@@ -7977,11 +8348,11 @@ var tsd;
             cmd.name = 'info';
             cmd.label = 'Display definition info';
             cmd.variadic = ['selector'];
-            cmd.options = ['resolve'];
+            cmd.options = [Opt.resolve];
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (ctx) {
                 return getSelectorJob(ctx).then(function (job) {
-                    return job.api.info(job.selector).then(function (result) {
+                    return job.api.info(job.selector).progress(getProgress(ctx)).then(function (result) {
                         reportSucces(null);
 
                         result.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file) {
@@ -7991,7 +8362,7 @@ var tsd;
                             printDependencies(file);
                         });
                     });
-                }, reportError, reportProgress);
+                }, reportError, getProgress(ctx));
             };
         });
 
@@ -8002,7 +8373,7 @@ var tsd;
             cmd.groups = ['command', 'primary', 'query'];
             cmd.execute = function (ctx) {
                 return getSelectorJob(ctx).then(function (job) {
-                    return job.api.history(job.selector).then(function (result) {
+                    return job.api.history(job.selector).progress(getProgress(ctx)).then(function (result) {
                         reportSucces(null);
 
                         result.definitions.sort(tsd.DefUtil.defCompare).forEach(function (def) {
@@ -8017,30 +8388,26 @@ var tsd;
                             });
                         });
                     });
-                }, reportError, reportProgress);
+                }, reportError, getProgress(ctx));
             };
         });
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'reinstall';
             cmd.label = 'Re-install definitions from config';
-            cmd.options = ['overwrite'];
+            cmd.options = [Opt.overwrite];
             cmd.groups = ['command', 'local', 'write'];
             cmd.execute = function (ctx) {
                 return getAPIJob(ctx).then(function (job) {
-                    return job.api.reinstall(ctx.getArg('option')).then(function (result) {
+                    return job.api.reinstall(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then(function (result) {
                         reportSucces(null);
-
-                        output.line();
 
                         result.written.keys().sort().forEach(function (path) {
                             var file = result.written.get(path);
                             output.line(file.toString());
-
-                            output.line();
                         });
                     });
-                }, reportError, reportProgress);
+                }, reportError, getProgress(ctx));
             };
         });
 

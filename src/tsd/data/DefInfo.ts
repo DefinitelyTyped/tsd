@@ -65,13 +65,13 @@ module tsd {
 			if (!this.name) {
 				return false;
 			}
-			if (this.authors.length === 0) {
+			/*if (this.authors.length === 0) {
 				return false;
 			}
 			//!this.reposName ||
 			if (!this.reposUrl) {
 				return false;
-			}
+			}*/
 			return true;
 		}
 	}

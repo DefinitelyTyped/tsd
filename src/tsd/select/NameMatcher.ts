@@ -23,7 +23,7 @@ module tsd {
 	 NameMatcher: match name selector (globs etc)
 	 */
 	//TODO use minimatch or replace RegExpGlue with XRegExp
-	//TODO use semver-postfix?
+	//TODO add negation
 	export class NameMatcher {
 
 		pattern:string;
@@ -35,8 +35,8 @@ module tsd {
 			this.pattern = pattern;
 		}
 
-		filter(list:tsd.Def[]):tsd.Def[] {
-			return list.filter(this.getFilterFunc());
+		filter(list:tsd.Def[], current:tsd.Def[]):tsd.Def[] {
+			return list.filter(this.getFilterFunc(current));
 		}
 
 		toString():string {
@@ -139,7 +139,7 @@ module tsd {
 		}
 
 		//TODO (auto) cache compile result
-		private getFilterFunc():(file:tsd.Def) => boolean {
+		private getFilterFunc(current:tsd.Def[]):(file:tsd.Def) => boolean {
 			this.compile();
 
 			// get an efficient filter function

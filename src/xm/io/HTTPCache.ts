@@ -209,7 +209,7 @@ module xm {
 						job = this.jobs.get(request.key);
 						this.track.skip(HTTPCache.get_object);
 
-						return job.getObject().progress(d.notify).then(d.resolve);
+						return job.getObject().then(d.resolve);
 					}
 					else {
 						job = new CacheLoader(this, request);
@@ -238,6 +238,7 @@ module xm {
 					}
 					this.remove.set(key, setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
+						this.track.logger.status(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 						this.jobs.remove(key);
 					}, this.jobTimeout));
 				}
@@ -362,9 +363,16 @@ module xm {
 					this._defer = null;
 				};
 
+				var checkHTTPCache = false;
+
 				//logic flow
 				this.cacheRead().progress(this._defer.notify).then(() => {
-					return this.httpLoad(true).progress(this._defer.notify).then(() => {
+					if (this.object.body && !checkHTTPCache) {
+						this._defer.notify('using local cache: ' + this.request.url);
+						this._defer.resolve(this.object);
+						return;
+					}
+					return this.httpLoad(checkHTTPCache).progress(this._defer.notify).then(() => {
 						if (!xm.isValid(this.object.body)) {
 							throw new Error('no result body: ' + this.object.request.url);
 						}
@@ -406,7 +414,7 @@ module xm {
 							this.cacheValidator.assert(this.object);
 							//valid local cache hit
 							this.track.event(CacheLoader.local_cache_hit);
-							this._defer.resolve(this.object);
+							d.resolve();
 							return;
 						}
 						catch (err) {

@@ -4,6 +4,7 @@
 ///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="../../xm/Logger.ts" />
 ///<reference path="../../xm/data/PackageJSON.ts" />
+///<reference path="../../xm/tv4Tool.ts" />
 ///<reference path="../data/DefVersion.ts" />
 
 module tsd {
@@ -67,13 +68,19 @@ module tsd {
 			this._schema = schema;
 
 			//import defaults
+			this.reset();
+
+			xm.ObjectUtil.hidePrefixed(this);
+			Object.defineProperty(this, 'log', {enumerable: false});
+		}
+
+		reset():void {
+			//import defaults
 			this.path = tsd.Const.typingsDir;
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
 			this.ref = tsd.Const.mainBranch;
-
-			xm.ObjectUtil.hidePrefixed(this);
-			Object.defineProperty(this, 'log', {enumerable: false});
+			this._installed.clear();
 		}
 
 		resolveTypingsPath(relativeToDir:string):string {
@@ -144,7 +151,6 @@ module tsd {
 			});
 		}
 
-		//TODO unit test this against JSON-Schema (maybe always?)
 		toJSON():any {
 			var json = {
 				path: this.path,
@@ -160,10 +166,11 @@ module tsd {
 					//what more?
 				};
 			});
+			//self-test (no corruption)
 			var res = tv4.validateResult(json, this._schema);
 			if (!res.valid || res.missing.length > 0) {
 				//this is messed up: internal checks and schema not equivalent
-				this.log.warn(res.error.message);
+				this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
 				return null;
 			}
 			return json;
@@ -172,23 +179,15 @@ module tsd {
 		parseJSON(json:any) {
 			xm.assertVar(json, 'object', 'json');
 
+			var res = tv4.validateResult(json, this._schema);
+			if (!res.valid || res.missing.length > 0) {
+				this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
+				throw (new Error('malformed config: doesn\'t comply with schema'));
+			}
+			//TODO harden validation besides schema
+
 			this._installed.clear();
 
-			var res = tv4.validateResult(json, this._schema);
-
-			//TODO improve formatting (could bundle it in tv4?)
-			if (!res.valid || res.missing.length > 0) {
-				this.log.error(res.error.message);
-				if (res.error.dataPath) {
-					this.log.warn(res.error.dataPath);
-				}
-				/*if (res.error.schemaPath) {
-				 xm.log.error(res.error.schemaPath);
-				 }*/
-				throw (new Error('malformed config: doesn\'t comply with json-schema: ' + res.error.message + (res.error.dataPath ? ': ' + res.error.dataPath : '')));
-			}
-
-			//TODO harden validation besides schema
 			this.path = json.path;
 			this.version = json.version;
 			this.repo = json.repo;

@@ -3,7 +3,10 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-declare var Date:{
+//should be like
+// declare var Date: {
+//interface DateStatic {
+declare var Date: {
 	today():Date; // today, 00:00:00
 	yesterday():Date; // yesterday, 00:00:00
 	tomorrow():Date; // tomorrow, 00:00:00
@@ -52,26 +55,26 @@ interface Date {
 	// P    - am or pm
 	toYMD(separator:string):string; // returns YYYY-MM-DD by default, separator changes delimiter
 
-	between(date1:Date, date2:Date):number; // true/false if the date/time is between date1 and date2
+	between(date1:Date, date2:Date):boolean; // true/false if the date/time is between date1 and date2
 	compareTo(date:Date):number; // -1 if date is smaller than this, 0 if equal, 1 if date is larger than this
-	equals(date:Date):number; // true/false, true if dates are equal
-	isBefore(date:Date):number; // true/false, true if this is before date passed
-	isAfter(date:Date):number; // true/false, true if this is after date passed
+	equals(date:Date):boolean; // true/false, true if dates are equal
+	isBefore(date:Date):boolean; // true/false, true if this is before date passed
+	isAfter(date:Date):boolean; // true/false, true if this is after date passed
 	getDaysBetween(date:Date):number; // returns number of full days between this and passed
 	getHoursBetween(date:Date):number; // returns number of hours days between this and passed
 	getMinutesBetween(date:Date):number; // returns number of full minutes between this and passed
 	getSecondsBetween(date:Date):number; // returns number of full seconds between this and passed
-	/* {
-		 milliseconds: 30,
-		 minutes: 1,
-		 hours: 4,
-		 seconds: 30,
-		 days: 2,
-		 weeks: 1,
-		 months: 3,
-		 years: 2
-	 } */
 	add(map:any):void; // adds time to existing time
+	/* {
+	 milliseconds: 30,
+	 minutes: 1,
+	 hours: 4,
+	 seconds: 30,
+	 days: 2,
+	 weeks: 1,
+	 months: 3,
+	 years: 2
+	 } */
 	addMilliseconds(amount:number):void; // add milliseconds to existing time
 	addSeconds(amount:number):void; // add seconds to existing time
 	addMinutes(amount:number):void; // add minutes to existing time

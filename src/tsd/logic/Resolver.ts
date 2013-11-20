@@ -50,7 +50,7 @@ module tsd {
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			Q.all(list.map((file:tsd.DefVersion) => {
-				return this.resolveDeps(file);
+				return this.resolveDeps(file).progress(d.notify);
 
 			})).then(() => {
 				d.resolve(list);
@@ -86,8 +86,9 @@ module tsd {
 			};
 
 			Q.all([
-				this.core.index.getIndex(),
-				this.core.content.loadContent(file)
+				this.core.index.getIndex().progress(d.notify),
+				this.core.content.loadContent(file).progress(d.notify)
+
 			]).spread((index:tsd.DefIndex, file:tsd.DefVersion) => {
 				this.track.event(Resolver.parse);
 
@@ -101,6 +102,9 @@ module tsd {
 
 				if (queued.length > 0) {
 					this.track.event(Resolver.subload);
+					queued.forEach((p:Q.Promise) => {
+						p.progress(d.notify);
+					});
 					return Q.all(queued);
 				}
 				else {

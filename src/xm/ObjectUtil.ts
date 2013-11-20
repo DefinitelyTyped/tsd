@@ -43,6 +43,7 @@ module xm {
 				}
 			}
 		}
+
 		static hideProps(object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {enumerable: false});
@@ -59,6 +60,14 @@ module xm {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 				Object.freeze(object[property]);
+			});
+		}
+
+		static lockPrimitives(object) {
+			Object.keys(object).forEach((property:string) => {
+				if (xm.isPrimitive(object[property])) {
+					Object.defineProperty(object, property, {writable: false});
+				}
 			});
 		}
 

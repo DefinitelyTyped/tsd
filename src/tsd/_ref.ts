@@ -1,5 +1,6 @@
 ///<reference path="../_ref.d.ts" />
 
+///<reference path="../xm/Logger.ts" />
 ///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/Set.ts" />
 ///<reference path="../xm/callAsync.ts" />

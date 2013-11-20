@@ -11,25 +11,13 @@ module tsd {
 	 */
 	export class Def {
 
-		//static nameExp = /^([a-z](?:[\._\-]*[a-z0-9]+)*)\/([a-z](?:[\._\-]*[a-z0-9]+)*)\.d\.ts$/i;
-		//static nameExpEnd = /([a-z](?:[\._\-]*[a-z0-9]+)*)\/([a-z](?:[\._\-]*[a-z0-9]+)*)\.d\.ts$/i;
-		//^([A-Za-z](?:[\._-]*[A-Za-z0-9]+)*)\/([A-Za-z](?:[\._-]*[A-Za-z0-9]+)*)(?:-v?(\d+(?:\.\d+)*-([A-Za-z](?:[\._-]*[A-Za-z0-9]+)*)+)?(?:\.\d+)*)?\.d\.ts$
-
-		//static namePart = /([A-Za-z](?:[\._-]*[A-Za-z0-9]+)*)/;
-		//static semverPart = /(-v?(\d+(?:\.\d+)*-([A-Za-z](?:[\._-]*[A-Za-z0-9]+)*)+)?(?:\.\d+)*)?/;
-
-		//static nameExp = /^([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
-		//static nameExpEnd = /([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\/([a-z](?:[a-z0-9\._-]*?[a-z0-9])?)\.d\.ts$/i;
-
-		//simpler is better? (enforce in repo)
-		//^([\w\.-]+)\/([\w\.-]+?)(?:-v?)?(\d+(?:\.\d+)*(?:-[\w]+)?)?\.d\.ts$
 		static nameExp = /^([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
 		static nameExpEnd = /([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
 
 		static versionEnd = /(?:-v?)(\d+(?:\.\d+)*)((?:-[a-z]+)?)$/i;
 		static twoNums = /^\d+\.\d+$/;
 
-		// unique identifier: 'project/name' (should support 'project/name-v0.1.3-alpha')
+		// unique identifier: 'project/name-v0.1.3-alpha.d.ts'
 		path:string;
 
 		// split
@@ -89,7 +77,7 @@ module tsd {
 				if (semMatch.length > 2) {
 					sem += semMatch[2];
 				}
-				return semver.valid(sem);
+				return semver.valid(sem, true);
 			}
 			return false;
 		}
@@ -123,8 +111,9 @@ module tsd {
 					sem += semMatch[2];
 				}
 
-				if (semver.valid(sem)) {
-					file.semver = sem;
+				var valid = semver.valid(sem, true);
+				if (valid) {
+					file.semver = valid;
 					file.name = file.name.substr(0, semMatch.index);
 				}
 				else {
@@ -132,9 +121,7 @@ module tsd {
 				}
 			}
 
-			xm.ObjectUtil.lockProps(file, ['path', 'project', 'name']);
-
-			//TODO support semver postfix 'project/name-v0.1.3-alpha'
+			xm.ObjectUtil.lockProps(file, ['path', 'project', 'name', 'semver']);
 
 			return file;
 		}

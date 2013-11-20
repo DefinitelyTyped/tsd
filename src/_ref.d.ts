@@ -5,4 +5,6 @@
 ///<reference path="../typings/async/async.d.ts" />
 ///<reference path="../typings/underscore/underscore.d.ts" />
 ///<reference path="../typings/colors/colors.d.ts" />
+///<reference path="../typings/date-utils/date-utils.d.ts" />
+///<reference path="../typings/semver/semver.d.ts" />
 ///<reference path="../typings/fixes.d.ts" />

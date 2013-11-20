@@ -1,7 +1,14 @@
 ///<reference path="../_ref.ts" />
 
+//TODO remove inlined def (weird priority failure)
+declare var Date:{
+	compare(date1:Date, date2:Date):number; // -1 if date1 is smaller than date2, 0 if equal, 1 if date2 is smaller than date1
+};
+
 module tsd {
 	'use strict';
+
+	require('date-utils');
 
 	//TODO replace reference node RegExp with a xml parser (tony the pony)
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
@@ -103,6 +110,16 @@ module tsd {
 			return false;
 		}
 
+		static containsDef(list:tsd.Def[], def:tsd.Def):boolean {
+			var p = def.path;
+			for (var i = 0, ii = list.length; i < ii; i++) {
+				if (list[i].path === p) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		static mergeDependencies(list:tsd.DefVersion[], target?:tsd.DefVersion[]):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = target || [];
 			for (var i = 0, ii = list.length; i < ii; i++) {
@@ -128,18 +145,18 @@ module tsd {
 		}
 
 		/*static extractDependencies(list:tsd.DefVersion[]):tsd.DefVersion[] {
-			var ret:tsd.DefVersion[] = [];
-			for (var i = 0, ii = list.length; i < ii; i++) {
-				var file = list[i];
-				for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
-					var tmp = file.dependencies[j];
-					if (!DefUtil.contains(ret, tmp) && !DefUtil.contains(list, tmp)) {
-						ret.push(tmp);
-					}
-				}
-			}
-			return ret;
-		}*/
+		 var ret:tsd.DefVersion[] = [];
+		 for (var i = 0, ii = list.length; i < ii; i++) {
+		 var file = list[i];
+		 for (var j = 0, jj = file.dependencies.length; j < jj; j++) {
+		 var tmp = file.dependencies[j];
+		 if (!DefUtil.contains(ret, tmp) && !DefUtil.contains(list, tmp)) {
+		 ret.push(tmp);
+		 }
+		 }
+		 }
+		 return ret;
+		 }*/
 
 		static matchCommit(list:tsd.DefVersion[], commitSha:string):tsd.DefVersion[] {
 			var ret:tsd.DefVersion[] = [];
@@ -195,6 +212,18 @@ module tsd {
 			}
 			//hmm.. now what?
 			return -1;
+		}
+
+		static fileCommitCompare(aa:tsd.DefVersion, bb:tsd.DefVersion):number {
+			var aaDate = aa.commit && aa.commit.changeDate;
+			var bbDate = bb.commit && bb.commit.changeDate;
+			if (!bbDate) {
+				return 1;
+			}
+			if (!aaDate) {
+				return -1;
+			}
+			return Date.compare(aaDate, bbDate);
 		}
 	}
 }

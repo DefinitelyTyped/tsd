@@ -78,30 +78,54 @@ module tsd {
 		 promise: ApiResult
 		 */
 		//TODO move to SubCore?
-		//TODO why promise APIResult here?
 		select(selector:Selector):Q.Promise<APIResult> {
 			var d:Q.Deferred<APIResult> = Q.defer();
 
 			this.track.promise(d.promise, 'select');
 
-			this.index.getIndex().then((index:tsd.DefIndex) => {
-				var res = new APIResult(selector);
+			var res = new APIResult(selector);
 
-				res.nameMatches = selector.pattern.filter(index.list);
-				// default to all heads
-				res.selection = tsd.DefUtil.getHeads(res.nameMatches);
-				//res.definitions = res.nameMatches.slice(0);
-
+			this.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
 				return Q().then(() => {
-					//TODO apply some more filters in steps? or find better selection model (no god-method but iterative)
-					if (selector.resolveDependencies) {
-						return this.resolver.resolveBulk(res.selection);
+					var matches:tsd.Def[] = [];
+					selector.patterns.forEach((names:NameMatcher) => {
+						names.filter(index.list, matches).forEach((def:tsd.Def) => {
+							if (!tsd.DefUtil.containsDef(matches, def)) {
+								matches.push(def);
+							}
+						});
+					});
+					res.nameMatches = matches;
+					res.definitions = matches.slice(0);
+					if (selector.versionMatcher) {
+						res.definitions = selector.versionMatcher.filter(matches);
 					}
-					return;
 				}).then(() => {
-					d.resolve(res);
+					if (selector.dateMatcher) {
+						return this.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
+							//crude reset
+							res.selection = [];
+							res.definitions.forEach((def:tsd.Def) => {
+								var list = selector.dateMatcher.filter(def.history).sort(tsd.DefUtil.fileCommitCompare);
+								if (list.length > 0) {
+									res.selection.push(list[list.length - 1]);
+								}
+							});
+							res.definitions = tsd.DefUtil.getDefs(res.selection);
+						});
+					}
+					// default to all heads
+					res.selection = tsd.DefUtil.getHeads(res.definitions);
+					return null;
+				}).then(() => {
+					if (selector.resolveDependencies) {
+						return this.resolver.resolveBulk(res.selection).progress(d.notify);
+					}
+					return null;
 				});
-			}).fail(d.reject);
+			}).then(() => {
+				d.resolve(res);
+			}, d.reject).done();
 
 			return d.promise;
 		}

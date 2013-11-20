@@ -4,20 +4,22 @@
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/StyledOut.ts" />
 ///<reference path="../xm/DateUtil.ts" />
+///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="context/Context.ts" />
+///<reference path="select/Selector.ts" />
 
 module tsd {
 	'use strict';
 
 	var path = require('path');
-	var Q:typeof Q = require('q');
+	var Q = require('q');
 	var FS:typeof QioFS = require('q-io/fs');
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var output = new xm.StyledOut();
 
-	var styleMap = new xm.KeyValueMap<(ctx: xm.ExposeContext) => void>();
+	var styleMap = new xm.KeyValueMap<(ctx:xm.ExposeContext) => void>();
 
 	styleMap.set('no', (ctx:xm.ExposeContext) => {
 		output.useStyler(new xm.styler.NoStyler());
@@ -99,7 +101,7 @@ module tsd {
 	function getContext(ctx:xm.ExposeContext):tsd.Context {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-		var context = new tsd.Context(ctx.getArg('config'), ctx.getArg('verbose'));
+		var context = new tsd.Context(ctx.getArg(Opt.config), ctx.getArg('verbose'));
 
 		if (ctx.getArg('dev')) {
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
@@ -129,7 +131,7 @@ module tsd {
 	}
 
 	function reportProgress(obj:any) {
-		output.accent('progress').space().inspect(obj, 3);
+		output.accent(output.nibs.arrow).inspect(obj, 3);
 	}
 
 	function reportSucces(result:tsd.APIResult) {
@@ -236,9 +238,32 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	export class Opt {
+		static version = 'version';
+		static verbose = 'verbose';
+		static color = 'color';
+		static dev = 'dev';
+		static config = 'config';
+		static cacheDir = 'cacheDir';
+		static resolve = 'resolve';
+		static save = 'save';
+		static overwrite = 'overwrite';
+		static min = 'min';
+		static max = 'max =';
+		static limit = 'limit';
+		static timeout = 'timeout';
+		static commit = 'commit';
+		static semver = 'semver';
+		static date = 'date';
+		static progress = 'progress';
+	}
+	xm.ObjectUtil.lockPrimitives(Opt);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	//dry helpers: reuse / bundle init and arg parsing for selector based commands
 
-	var defaultJobOptions = ['config'];
+	var defaultJobOptions = [Opt.config];
 
 	function jobOptions(merge:string[] = []):string[] {
 		return defaultJobOptions.concat(merge);
@@ -263,10 +288,10 @@ module tsd {
 		// callback for easy error reporting
 		init(ctx).then(() => {
 			//verify valid path
-			if (ctx.hasArg('config')) {
-				return FS.isFile(ctx.getArg('config')).then((isFile:boolean) => {
+			if (ctx.hasArg(Opt.config)) {
+				return FS.isFile(ctx.getArg(Opt.config)).then((isFile:boolean) => {
 					if (!isFile) {
-						throw new Error('specified --config is not a file: ' + ctx.getArg('config'));
+						throw new Error('specified --config is not a file: ' + ctx.getArg(Opt.config));
 					}
 					return null;
 				});
@@ -279,9 +304,9 @@ module tsd {
 
 			//TODO parse more standard options from args
 
-			var required:boolean = ctx.hasArg('config');
+			var required:boolean = ctx.hasArg(Opt.config);
 
-			return job.api.readConfig(!required).then(() => {
+			return job.api.readConfig(!required).progress(d.notify).then(() => {
 				d.resolve(job);
 			});
 		}).fail(d.reject);
@@ -290,28 +315,40 @@ module tsd {
 	}
 
 	function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
+		var d:Q.Deferred<Job> = Q.defer();
+
 		// callback for easy error reporting
-		return getAPIJob(ctx).then((job:Job) => {
-			if (ctx.numArgs !== 1) {
-				throw new Error('pass one selector pattern');
+		getAPIJob(ctx).progress(d.notify).then((job:Job) => {
+			if (ctx.numArgs < 1) {
+				throw new Error('pass at least one selector pattern');
+			}
+			job.selector = new Selector();
+			for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
+				job.selector.addNamePattern(ctx.getArgAt(i));
+			}
+			job.selector.commitSha = ctx.getArg(Opt.commit);
+
+			if (ctx.hasArg(Opt.semver)) {
+				job.selector.versionMatcher = new tsd.VersionMatcher(ctx.getArg(Opt.semver));
+			}
+			if (ctx.hasArg(Opt.date)) {
+				job.selector.dateMatcher = new tsd.DateMatcher(ctx.getArg(Opt.date));
 			}
 
-			//TODO support multiple selectors
-			job.selector = new Selector(ctx.getArgAt(0));
-			job.selector.blobSha = ctx.getArg('blob');
-			job.selector.commitSha = ctx.getArg('commit');
+			job.selector.timeout = ctx.getArg(Opt.timeout);
+			job.selector.limitApi = ctx.getArg(Opt.limit);
+			job.selector.minMatches = ctx.getArg(Opt.min);
+			job.selector.maxMatches = ctx.getArg(Opt.max);
 
-			job.selector.timeout = ctx.getArg('timeout');
-			job.selector.limitApi = ctx.getArg('limit');
-			job.selector.minMatches = ctx.getArg('min');
-			job.selector.maxMatches = ctx.getArg('max');
+			job.selector.saveToConfig = ctx.getArg(Opt.save);
+			job.selector.overwriteFiles = ctx.getArg(Opt.overwrite);
+			job.selector.resolveDependencies = ctx.getArg(Opt.resolve);
 
-			job.selector.saveToConfig = ctx.getArg('save');
-			job.selector.overwriteFiles = ctx.getArg('overwrite');
-			job.selector.resolveDependencies = ctx.getArg('resolve');
-
+			xm.log.inspect(job.selector, 3, 'CLI job.selector');
 			return job;
-		});
+		}).then(d.resolve, d.reject);
+
+		return d.promise;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -320,6 +357,15 @@ module tsd {
 		//xm.PackageJSON.getLocal().getNameVersion()
 		var expose = new xm.Expose('', output);
 
+		function getProgress(ctx) {
+			if (ctx.getArg(Opt.progress)) {
+				return function (note) {
+					reportProgress(note);
+				};
+			}
+			return undefined;
+		}
+
 		expose.before = (cmd:xm.ExposeCommand, ctx:xm.ExposeContext) => {
 			return printPreviewNotice();
 		};
@@ -327,7 +373,7 @@ module tsd {
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = 'command';
 			group.label = 'Main commands';
-			group.options = ['config', 'commit', 'cacheDir', 'min', 'max', 'limit'];
+			group.options = [Opt.date, Opt.semver, Opt.commit, Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
 			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
 				var sort:number;
 				//TODO sane-ify sorting groups
@@ -355,9 +401,8 @@ module tsd {
 		// ---------
 
 		//predefine
-		//TODO fold options delcaration into a callback (same pattern as the commands)
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'version';
+			opt.name = Opt.version;
 			opt.short = 'V';
 			opt.description = 'Display version information';
 			opt.type = 'flag';
@@ -366,7 +411,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'verbose';
+			opt.name = Opt.verbose;
 			opt.description = 'Verbose output';
 			opt.type = 'flag';
 			opt.default = false;
@@ -374,7 +419,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'color';
+			opt.name = Opt.color;
 			opt.description = 'Specify CLI color mode';
 			opt.type = 'string';
 			opt.placeholder = 'name';
@@ -386,16 +431,26 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'dev';
+			opt.name = Opt.dev;
 			opt.description = 'Development mode';
 			opt.type = 'flag';
 			opt.global = true;
 		});
 
+		expose.defineOption((opt:xm.ExposeOption) => {
+			opt.name = Opt.progress;
+			opt.short = 'p';
+			opt.description = 'Display progress notifications';
+			opt.type = 'flag';
+			opt.default = false;
+			opt.global = true;
+			opt.note = ['experimental'];
+		});
+
 		// ---------
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'config';
+			opt.name = Opt.config;
 			opt.description = 'Path to config file';
 			opt.type = 'string';
 			opt.placeholder = 'path';
@@ -403,7 +458,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'cacheDir';
+			opt.name = Opt.cacheDir;
 			opt.description = 'Path to cache directory';
 			opt.type = 'string';
 			opt.placeholder = 'path';
@@ -411,7 +466,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'save';
+			opt.name = Opt.save;
 			opt.short = 's';
 			opt.description = 'Save to config file';
 			opt.type = 'flag';
@@ -419,7 +474,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'overwrite';
+			opt.name = Opt.overwrite;
 			opt.short = 'o';
 			opt.description = 'Overwrite existing definitions';
 			opt.type = 'flag';
@@ -427,7 +482,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'limit';
+			opt.name = Opt.limit;
 			opt.short = 'l';
 			opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
 			opt.type = 'int';
@@ -437,7 +492,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'max';
+			opt.name = Opt.max;
 			opt.description = 'Enforce a maximum amount of results, 0 = unlimited';
 			opt.type = 'int';
 			opt.default = 0;
@@ -446,7 +501,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'min';
+			opt.name = Opt.min;
 			opt.description = 'Enforce a minimum amount of results';
 			opt.type = 'int';
 			opt.default = 0;
@@ -455,7 +510,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'timeout';
+			opt.name = Opt.timeout;
 			opt.description = 'Set operation timeout in milliseconds, 0 = unlimited';
 			opt.type = 'int';
 			opt.default = 0;
@@ -465,16 +520,28 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'blob';
-			opt.short = 'b';
-			opt.description = 'Blob hash';
+			opt.name = Opt.semver;
+			opt.short = 'v';
+			opt.description = 'Filter on version postfix';
 			opt.type = 'string';
-			opt.placeholder = 'sha1';
+			opt.placeholder = 'semver-range | \'latest\' | \'all\'';
 			opt.global = false;
+			opt.default = 'latest';
+			opt.note = ['experimental'];
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			opt.name = 'commit';
+			opt.name = Opt.date;
+			opt.short = 'd';
+			opt.description = 'Filter on commit date';
+			opt.type = 'string';
+			opt.placeholder = 'date-range';
+			opt.global = false;
+			opt.note = ['experimental'];
+		});
+
+		expose.defineOption((opt:xm.ExposeOption) => {
+			opt.name = Opt.commit;
 			opt.short = 'c';
 			opt.description = 'Commit hash';
 			opt.type = 'string';
@@ -484,8 +551,7 @@ module tsd {
 		});
 
 		expose.defineOption((opt:xm.ExposeOption) => {
-			//TODO rename deps flag to solve? refer?
-			opt.name = 'resolve';
+			opt.name = Opt.resolve;
 			opt.short = 'r';
 			opt.description = 'Include reference dependencies';
 			opt.type = 'flag';
@@ -500,21 +566,38 @@ module tsd {
 			cmd.label = 'Display version';
 			cmd.groups = ['help'];
 			cmd.execute = ((ctx:xm.ExposeContext) => {
-				output.line(xm.PackageJSON.getLocal().version);
-				return null;
+				return output.line(xm.PackageJSON.getLocal().version);
 			});
+		});
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'init';
+			cmd.label = 'Create empty config file';
+			cmd.options = [Opt.config, Opt.overwrite];
+			cmd.groups = ['support'];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				return getAPIJob(ctx).then((job:Job) => {
+					return job.api.initConfig(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then((target:string) => {
+						reportSucces(null);
+						output.span(output.nibs.arrow).success('written ').span(target).clear();
+					}, (err) => {
+						output.span(output.nibs.arrow).error('error ').span(err.message).clear();
+						throw(err);
+					});
+				}, reportError, getProgress(ctx));
+			};
 		});
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'settings';
 			cmd.label = 'Display config settings';
-			cmd.options = ['config', 'cacheDir'];
+			cmd.options = [Opt.config, Opt.cacheDir];
 			cmd.groups = ['support'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
-					job.api.context.logInfo(true);
-					return null;
-				});
+					return job.api.context.logInfo(true);
+
+				}, reportError, getProgress(ctx));
 			};
 		});
 
@@ -527,7 +610,7 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
-					return job.api.search(job.selector).then((result:APIResult) => {
+					return job.api.search(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
 						reportSucces(null);
 
 						//TODO report on overwrite
@@ -539,19 +622,19 @@ module tsd {
 							//printFileCommit(file);
 						});
 					});
-				}, reportError);
+				}, reportError, getProgress(ctx));
 			};
 		});
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'install';
 			cmd.label = 'Install definitions';
-			cmd.options = ['overwrite', 'save', 'resolve'];
+			cmd.options = [Opt.overwrite, Opt.save, Opt.resolve];
 			cmd.variadic = ['selector'];
 			cmd.groups = ['command', 'primary', 'write'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
-					return job.api.install(job.selector).then((result:APIResult) => {
+					return job.api.install(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
 						reportSucces(null);
 
 						//TODO report on written/skipped
@@ -563,7 +646,7 @@ module tsd {
 							//output.line();
 						});
 					});
-				}, reportError);
+				}, reportError, getProgress(ctx));
 			};
 		});
 
@@ -571,11 +654,11 @@ module tsd {
 			cmd.name = 'info';
 			cmd.label = 'Display definition info';
 			cmd.variadic = ['selector'];
-			cmd.options = ['resolve'];
+			cmd.options = [Opt.resolve];
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
-					return job.api.info(job.selector).then((result:APIResult) => {
+					return job.api.info(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
 						reportSucces(null);
 
 						result.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion) => {
@@ -585,7 +668,7 @@ module tsd {
 							printDependencies(file);
 						});
 					});
-				}, reportError, reportProgress);
+				}, reportError, getProgress(ctx));
 			};
 		});
 
@@ -596,7 +679,7 @@ module tsd {
 			cmd.groups = ['command', 'primary', 'query'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getSelectorJob(ctx).then((job:Job) => {
-					return job.api.history(job.selector).then((result:APIResult) => {
+					return job.api.history(job.selector).progress(getProgress(ctx)).then((result:APIResult) => {
 						reportSucces(null);
 
 						result.definitions.sort(tsd.DefUtil.defCompare).forEach((def:tsd.Def) => {
@@ -611,31 +694,28 @@ module tsd {
 							});
 						});
 					});
-				}, reportError, reportProgress);
+				}, reportError, getProgress(ctx));
 			};
 		});
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
 			cmd.label = 'Re-install definitions from config';
-			cmd.options = ['overwrite'];
+			cmd.options = [Opt.overwrite];
 			cmd.groups = ['command', 'local', 'write'];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.reinstall(ctx.getArg('option')).then((result:APIResult) => {
+					return job.api.reinstall(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then((result:APIResult) => {
 						reportSucces(null);
 						//TODO report on written/skipped
-
-						output.line();
 
 						result.written.keys().sort().forEach((path:string) => {
 							var file:tsd.DefVersion = result.written.get(path);
 							output.line(file.toString());
 							//output.line('    ' + path);
-							output.line();
 						});
 					});
-				}, reportError, reportProgress);
+				}, reportError, getProgress(ctx));
 			};
 		});
 

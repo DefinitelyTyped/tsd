@@ -25,12 +25,14 @@ module tsd {
 			var d:Q.Deferred<string> = Q.defer();
 			this.track.promise(d.promise, 'file');
 
-			this.useFile(file, overwrite).then((targetPath:string) => {
-				if (this.core.context.config.hasFile(file.def.path)) {
-					this.core.context.config.getFile(file.def.path).update(file);
-				}
-				else if (addToConfig) {
-					this.core.context.config.addFile(file);
+			this.useFile(file, overwrite).progress(d.notify).then((targetPath:string) => {
+				if (targetPath) {
+					if (this.core.context.config.hasFile(file.def.path)) {
+						this.core.context.config.getFile(file.def.path).update(file);
+					}
+					else if (addToConfig) {
+						this.core.context.config.addFile(file);
+					}
 				}
 				d.resolve(targetPath);
 			}).fail(d.reject);
@@ -49,14 +51,14 @@ module tsd {
 			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 			Q.all(list.map((file:tsd.DefVersion) => {
-				return this.installFile(file, addToConfig, overwrite).then((targetPath:string) => {
+				return this.installFile(file, addToConfig, overwrite).progress(d.notify).then((targetPath:string) => {
 					if (targetPath) {
 						written.set(file.def.path, file);
 					}
 				});
 			})).then(() => {
 				d.resolve(written);
-			}, d.reject);
+			}, d.reject, d.notify);
 
 			return d.promise;
 		}
@@ -72,9 +74,11 @@ module tsd {
 			var written = new xm.KeyValueMap();
 
 			Q.all(list.map((installed:tsd.InstalledDef) => {
-				return this.core.index.procureFile(installed.path, installed.commitSha).then((file:tsd.DefVersion)=> {
-					return this.installFile(file, overwrite).then((targetPath:string) => {
-						written.set(file.def.path, file);
+				return this.core.index.procureFile(installed.path, installed.commitSha).progress(d.notify).then((file:tsd.DefVersion)=> {
+					return this.installFile(file, true, overwrite).progress(d.notify).then((targetPath:string) => {
+						if (targetPath) {
+							written.set(file.def.path, file);
+						}
 						return file;
 					});
 				});
@@ -97,12 +101,14 @@ module tsd {
 
 			xm.FileUtil.canWriteFile(targetPath, overwrite).then((canWrite:boolean) => {
 				if (!canWrite) {
-					xm.log.out.warning('skipped existing file: ' + file.def.path).line();
+					if (!overwrite) {
+						d.notify('skipped existing file: ' + file.def.path);
+					}
 					d.resolve(null);
 					return;
 				}
 				//write
-				return this.core.content.loadContent(file).then(() => {
+				return this.core.content.loadContent(file).progress(d.notify).then(() => {
 					//check again? (race?)
 					return FS.exists(targetPath);
 				}).then((exists) => {
@@ -135,8 +141,10 @@ module tsd {
 			var written:xm.IKeyValueMap<DefVersion> = new xm.KeyValueMap();
 
 			Q.all(list.map((file:tsd.DefVersion) => {
-				return this.useFile(file, overwrite).then((targetPath:string) => {
-					written.set(file.def.path, file);
+				return this.useFile(file, overwrite).progress(d.notify).then((targetPath:string) => {
+					if (targetPath) {
+						written.set(file.def.path, file);
+					}
 				});
 			})).then(() => {
 				d.resolve(written);

@@ -35,8 +35,6 @@ describe('xm.http', () => {
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
 		return info;
 	}
-	//'http://localhost:' + port + '/tsd-origin/test/modules/http/www/';
-	//'/test/modules/http/www/';
 
 	var cache:xm.http.HTTPCache;
 	var opts:xm.http.CacheOpts;

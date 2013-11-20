@@ -29,7 +29,7 @@ module tsd {
 				d.resolve(commit);
 				return;
 			}
-			this.core.repo.api.getCommit(commit.commitSha).then((json:any) => {
+			this.core.repo.api.getCommit(commit.commitSha).progress(d.notify).then((json:any) => {
 				commit.parseJSON(json);
 				d.resolve(commit);
 			}).fail(d.reject);
@@ -50,8 +50,8 @@ module tsd {
 			var d:Q.Deferred<DefVersion> = Q.defer();
 			this.track.promise(d.promise, 'content_load', file.key);
 
-			this.core.index.getIndex().then((index:tsd.DefIndex) => {
-				return this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).then((content:NodeBuffer) => {
+			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
+				return this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).progress(d.notify).then((content:NodeBuffer) => {
 					if (file.blob) {
 						// race
 						if (!file.blob.hasContent()) {
@@ -62,7 +62,6 @@ module tsd {
 								xm.log.warn(err);
 								xm.log.debug('path', file.def.path);
 								xm.log.debug('commitSha', file.commit.commitSha);
-								xm.log.debug('treeSha', file.commit.treeSha);
 								xm.log.error('failed to set content');
 								//throw new Error('failed to set content');
 								throw err;
@@ -89,7 +88,7 @@ module tsd {
 
 			Q.all(list.map((file:DefVersion) => {
 				return this.loadContent(file);
-			})).then((list) => {
+			})).progress(d.notify).then((list) => {
 				d.resolve(list);
 			}, d.reject);
 
@@ -107,8 +106,8 @@ module tsd {
 			if (def.history.length > 0) {
 				return Q(def);
 			}
-			this.core.index.getIndex().then((index:tsd.DefIndex) => {
-				return this.core.repo.api.getPathCommits(this.core.context.config.ref, def.path).then((content:any[]) => {
+			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
+				return this.core.repo.api.getPathCommits(def.path).progress(d.notify).then((content:any[]) => {
 					//this.log.inspect(content, null, 2);
 					//TODO add pagination support (see github api docs)
 					index.setHistory(def, content);
@@ -133,10 +132,9 @@ module tsd {
 				return this.loadHistory(file);
 			})).then((list) => {
 				d.resolve(list);
-			}, d.reject);
+			}, d.reject, d.notify);
 
 			return d.promise;
 		}
-
 	}
 }

@@ -38,7 +38,7 @@ module git {
 			this.addTemplate('apiBranch', this._api + '/branches/{branch}');
 			this.addTemplate('apiBranches', this._api + '/branches');
 			this.addTemplate('apiCommit', this._api + '/commits/{commit}');
-			this.addTemplate('apiPathCommits', this._api + '/commits?sha={commit}&path={path}');
+			this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
 			this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
 
 			xm.ObjectUtil.hidePrefixed(this);
@@ -84,11 +84,9 @@ module git {
 			});
 		}
 
-		apiPathCommits(commit:string, path:string):string {
-			xm.assertVar(commit, 'sha1', 'commit');
+		apiPathCommits(path:string):string {
 			xm.assertVar(path, 'string', 'path');
 			return this.getURL('apiPathCommits', {
-				commit: commit,
 				path: path
 			});
 		}

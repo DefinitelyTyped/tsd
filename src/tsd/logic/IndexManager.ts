@@ -33,7 +33,9 @@ module tsd {
 		getIndex():Q.Promise<tsd.DefIndex> {
 			if (this._defer) {
 				this.track.skip(IndexManager.init);
-				return this._defer.promise;
+				//bypass notify
+				var d = Q.defer<tsd.DefIndex>();
+				this._defer.promise.then(d.resolve, d.reject);
 			}
 			var index = new tsd.DefIndex();
 
@@ -42,7 +44,7 @@ module tsd {
 			this.track.promise(this._defer.promise, IndexManager.init, this.core.context.config.repoRef);
 			this.track.start(IndexManager.branch_get);
 
-			this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData:any) => {
+			this.core.repo.api.getBranch(this.core.context.config.ref).progress(this._defer.notify).then((branchData:any) => {
 				this.track.complete(IndexManager.branch_get);
 
 				if (!branchData) {
@@ -54,7 +56,7 @@ module tsd {
 				}
 				this.track.start(IndexManager.tree_get);
 
-				return this.core.repo.api.getTree(sha, true).then((data:any) => {
+				return this.core.repo.api.getTree(sha, true).progress(this._defer.notify).then((data:any) => {
 					this.track.complete(IndexManager.tree_get);
 
 					index.init(branchData, data);
@@ -78,16 +80,13 @@ module tsd {
 		procureDef(path:string):Q.Promise<Def> {
 			var d:Q.Deferred<Def> = Q.defer();
 
-			this.getIndex().then((index:tsd.DefIndex) => {
+			this.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
 				var def:tsd.Def = index.procureDef(path);
 				if (!def) {
 					throw new Error('cannot get def for path: ' + path);
 				}
 				d.resolve(def);
-			}).fail((err) => {
-				this.track.failure(IndexManager.procure_def, err.message, err);
-				d.reject(err);
-			}).done();
+			}).fail(d.reject).done();
 
 			return d.promise;
 		}
@@ -99,16 +98,14 @@ module tsd {
 		procureFile(path:string, commitSha:string):Q.Promise<DefVersion> {
 			var d:Q.Deferred<DefVersion> = Q.defer();
 
-			this.getIndex().then((index:tsd.DefIndex) => {
+			this.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
 				var file:tsd.DefVersion = index.procureVersionFromSha(path, commitSha);
 				if (!file) {
 					throw new Error('cannot get file for path: ' + path);
 				}
 				d.resolve(file);
-			}).fail((err) => {
-				this.track.failure(IndexManager.procure_file, err.message, err);
-				d.reject(err);
-			}).done();
+			}).fail(d.reject).done();
+
 			return d.promise;
 		}
 
@@ -119,16 +116,14 @@ module tsd {
 		procureCommit(commitSha:string):Q.Promise<DefCommit> {
 			var d:Q.Deferred<DefCommit> = Q.defer();
 
-			this.getIndex().then((index:tsd.DefIndex) => {
+			this.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
 				var commit:tsd.DefCommit = index.procureCommit(commitSha);
 				if (!commit) {
 					throw new Error('cannot commit def for commitSha: ' + commitSha);
 				}
 				d.resolve(commit);
-			}).fail((err) => {
-				this.track.failure(IndexManager.procure_commit, err.message, err);
-				d.reject(err);
-			}).done();
+			}).fail(d.reject).done();
+
 
 			return d.promise;
 		}

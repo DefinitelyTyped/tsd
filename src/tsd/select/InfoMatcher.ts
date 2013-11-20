@@ -4,14 +4,10 @@
 module tsd {
 	'use strict';
 	/*
-	 DefInfoMatcher: test against DefInfo
+	 InfoMatcher: test against DefInfo
 	 */
-	//TODO implement InfoMatcher (something like NameMatcher)
+	//TODO implement InfoMatcher
 	export class InfoMatcher {
 
-		//return result object for uix report?
-		test(info:DefInfo):boolean {
-			return true;
-		}
 	}
 }

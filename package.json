@@ -1,7 +1,7 @@
 {
   "name": "tsd",
   "description": "TypeScript definition package manager.",
-  "version": "0.5.1-alpha.3",
+  "version": "0.5.1-alpha.4",
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
     "type": "git",
@@ -54,7 +54,8 @@
     "source-map-support": "0.2.3",
     "xregexp": "~2.0.0",
     "jsesc": "~0.4.3",
-    "json-pointer": "0.0.4"
+    "json-pointer": "0.0.4",
+    "date-utils": "~1.2.14"
   },
   "devDependencies": {
     "grunt": "git://github.com/gruntjs/grunt/#d7f4bf671e8d551f9c9b3efe90af844bd51b5393",
@@ -82,7 +83,6 @@
     "grunt-ts": "~1.4.0",
     "grunt-shell": "~0.5.0",
     "ansidiff": "~1.0.0",
-    "grunt-contrib-connect": "~0.5.0",
-    "date-utils": "~1.2.14"
+    "grunt-contrib-connect": "~0.5.0"
   }
 }

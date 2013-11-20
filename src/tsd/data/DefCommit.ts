@@ -16,7 +16,6 @@ module tsd {
 		//NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
 
 		commitSha:string;
-		treeSha:string;
 		hasMeta:boolean = false;
 
 		message:git.GitCommitMessage = new git.GitCommitMessage();
@@ -42,12 +41,6 @@ module tsd {
 			xm.assertVar(commit, 'object', 'commit');
 			xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
-			xm.assert(!this.treeSha, 'already have tree {a}, {e}', this.treeSha, commit.sha);
-
-			//TODO verify it is valid object
-			this.treeSha = pointer.get(commit, '/commit/tree/sha');
-			xm.assertVar(this.treeSha, 'sha1', 'treeSha');
-
 			//TODO add a bit of checking? error? beh?
 			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
 			this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
@@ -58,7 +51,7 @@ module tsd {
 			this.message.parse(commit.commit.message);
 			this.hasMeta = true;
 
-			xm.ObjectUtil.lockProps(this, ['treeSha', 'hasMeta']);
+			xm.ObjectUtil.lockProps(this, ['commitSha', 'hasMeta']);
 		}
 
 		hasMetaData():boolean {

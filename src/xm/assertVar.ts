@@ -74,7 +74,7 @@ module xm {
 		throw new AssertionError(message, {actual: actual, expected: expected, showDiff: showDiff}, ssf);
 	}
 
-	export function throwAssert(message:string, actual:any, expected:any, showDiff:boolean = true, ssf?:any):void {
+	export function throwAssert(message:string, actual?:any, expected?:any, showDiff:boolean = true, ssf?:any):void {
 		xm.assert(false, message, actual, expected, showDiff, ssf);
 	}
 

@@ -99,7 +99,7 @@ module xm {
 	/*
 	 ExposeContext: access the parameters of a single call
 	 */
-	//TODO Expose should have a reject/reolve method
+	//TODO ExposeContext should have a reject/resolve method
 	export class ExposeContext {
 
 		expose:Expose;
@@ -178,7 +178,7 @@ module xm {
 				if (this.expose.options.has(name)) {
 					var option = this.expose.options.get(name);
 					var value = this.getArg(name);
-					if (option.enum.indexOf(value) > -1) {
+					if (option.enum && option.enum.indexOf(value) > -1) {
 						return value;
 					}
 				}

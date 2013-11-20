@@ -118,8 +118,9 @@ module tsd {
 					xm.log.inspect('weird: no commit for sha ' + json.sha);
 					throw new Error('huh?');
 				}
-				commit.parseJSON(json);
-
+				if (!commit.hasMeta) {
+					commit.parseJSON(json);
+				}
 				def.history.push(this.procureVersion(def, commit));
 			});
 		}

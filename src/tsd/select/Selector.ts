@@ -2,6 +2,8 @@
 ///<reference path="../../xm/RegExpGlue.ts" />
 ///<reference path="NameMatcher.ts" />
 ///<reference path="InfoMatcher.ts" />
+///<reference path="DateMatcher.ts" />
+///<reference path="VersionMatcher.ts" />
 
 module tsd {
 	'use strict';
@@ -10,15 +12,16 @@ module tsd {
 	 */
 	export class Selector {
 
-		pattern:NameMatcher;
+		patterns:NameMatcher[] = [];
 
-		//TODO implement something like DateMatcher / InfoMatcher?
-		//dateMatcher:DateMatcher;
+		versionMatcher:VersionMatcher;
+		dateMatcher:DateMatcher;
 		infoMatcher:InfoMatcher;
-		beforeDate:Date;
-		afterDate:Date;
+
+		//TODO implement this
 		commitSha:string;
-		blobSha:string;
+
+		//TODO implement these (limitless powerr!)
 		timeout:number = 10000;
 		minMatches:number = 0;
 		maxMatches:number = 0;
@@ -29,21 +32,31 @@ module tsd {
 		resolveDependencies:boolean = false;
 		saveToConfig:boolean = false;
 
-		constructor(pattern:string = '*') {
-			xm.assertVar(pattern, 'string', 'pattern');
-			this.pattern = new tsd.NameMatcher(pattern);
+		constructor(pattern?:string) {
+			xm.assertVar(pattern, 'string', 'pattern', true);
+			if (pattern) {
+				this.patterns.push(new tsd.NameMatcher(pattern));
+			}
 		}
 
-		/*get requiresSource():boolean {
+		addNamePattern(pattern:string):void {
+			xm.assertVar(pattern, 'string', 'pattern');
+			this.patterns.push(new tsd.NameMatcher(pattern));
+		}
+
+		get requiresSource():boolean {
 			return !!(this.resolveDependencies || this.infoMatcher);
-		}*/
+		}
 
 		get requiresHistory():boolean {
-			return !!(this.beforeDate || this.afterDate);
+			return !!(this.dateMatcher || this.commitSha);
 		}
 
 		toString():string {
-			return this.pattern.pattern;
+			return this.patterns.reduce((memo:string[], matcher:NameMatcher) => {
+				memo.push(matcher.pattern);
+				return memo;
+			}, []).join(', ');
 		}
 	}
 }

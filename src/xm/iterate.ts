@@ -6,6 +6,7 @@
  * License: MIT - 2013
  * */
 
+/// <reference path="typeOf.ts" />
 module xm {
 	'use strict';
 	/*
@@ -23,7 +24,7 @@ module xm {
 
 	export function eachProp(collection:any, callback:(value:any, prop:string, collection:Object) => void, thisArg:any = null) {
 		for (var prop in collection) {
-			if (collection.hasOwnProperty(prop)) {
+			if (xm.hasOwnProp(collection, prop)) {
 				if (callback.call(thisArg, collection[prop], prop, collection) === false) {
 					return;
 				}
@@ -40,7 +41,7 @@ module xm {
 
 	export function reduceHash(collection:any, memo:any, callback:(memo:any, value:any, prop:string, collection:Object) => void, thisArg:any = null):any {
 		for (var prop in collection) {
-			if (collection.hasOwnProperty(prop)) {
+			if (xm.hasOwnProp(collection, prop)) {
 				memo = callback.call(thisArg, memo, collection[prop], prop, collection);
 			}
 		}
@@ -58,7 +59,7 @@ module xm {
 	export function mapHash(collection:any, callback:(value:any, prop:string, collection:Object) => void, thisArg:any = null):any {
 		var map:any = {};
 		for (var prop in collection) {
-			if (collection.hasOwnProperty(prop)) {
+			if (xm.hasOwnProp(collection, prop)) {
 				map[prop] = callback.call(thisArg, collection[prop], prop, collection);
 			}
 		}
@@ -78,7 +79,7 @@ module xm {
 	export function filterHash(collection:any, callback:(value:any, prop:string, collection:Object) => boolean, thisArg:any = null):any {
 		var res:any = {};
 		for (var prop in collection) {
-			if (collection.hasOwnProperty(prop) && callback.call(thisArg, collection[prop], prop, collection)) {
+			if (xm.hasOwnProp(collection, prop) && callback.call(thisArg, collection[prop], prop, collection)) {
 				res[prop] = collection[prop];
 			}
 		}
