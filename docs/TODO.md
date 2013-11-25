@@ -106,7 +106,7 @@ Command options
 
 Functionality
 
-* :o2:	Handle rate-limit properly
+* :o2:	Report rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * :b:	Add fancy promise progress events + CLI display (install etc)
 

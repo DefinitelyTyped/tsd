@@ -4,7 +4,44 @@
 
 module xm {
 
+	//TODO add interesting helpers based on weak-map
+
 	var Q = require('q');
+
+	export class ActionMap<T> extends xm.KeyValueMap<T> {
+
+		constructor(data?:any) {
+			super(data);
+		}
+
+		run(id:string, call:(value:T) => any, optional:boolean = false):Q.Promise<T> {
+			if (this.has(id)) {
+				//cast as any
+				return Q(call(this.get(id)));
+			}
+			else if (!optional) {
+				return Q.reject(new Error('missing action: ' + id));
+			}
+			return Q();
+		}
+
+		//TODO verify progress/notify bubbles correctly
+		runSerial(ids:string[], call:(value:T) => any, optional:boolean = false):Q.Promise<T> {
+			var queue = ids.slice(0);
+
+			var defer:Q.Deferred<T> = Q.defer();
+
+			var runOne = (value?:T) => {
+				if (queue.length > 0) {
+					return this.run(queue.pop(), call, optional).progress(defer.notify).then(runOne);
+				}
+				return defer.resolve(value);
+			};
+			Q(runOne()).progress(defer.notify).fail(defer.reject);
+
+			return defer.promise;
+		}
+	}
 
 	export class PromiseHandle<T> {
 
@@ -26,14 +63,14 @@ module xm {
 		}
 
 		/*getHandle(key:string, fresh?:string):xm.PromiseHandle<T> {
-			if (fresh) {
-				this.remove(key);
-			}
-			else if (this.has(key)) {
-				return new xm.PromiseHandle<T>(null, this.promise(key));
-			}
-			return new xm.PromiseHandle<T>(this.defer(key));
-		}*/
+		 if (fresh) {
+		 this.remove(key);
+		 }
+		 else if (this.has(key)) {
+		 return new xm.PromiseHandle<T>(null, this.promise(key));
+		 }
+		 return new xm.PromiseHandle<T>(this.defer(key));
+		 }*/
 
 		has(key:string):boolean {
 			return this._stash.has(key);

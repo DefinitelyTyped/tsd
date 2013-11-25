@@ -52,7 +52,7 @@ module xm {
 			throw (new Error('jsonToIdent: cannot serialise: ' + type));
 		}
 		else if (type === 'date') {
-			// funky to be unique type and include get milliseconds
+			// funky to be unique type
 			ret += '<Date>' + obj.getTime() + sep;
 		}
 		else if (type === 'array') {

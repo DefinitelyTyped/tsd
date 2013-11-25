@@ -2,6 +2,8 @@
 
 > Technical stuff
 
+:point_right: This info might be outdated.
+
 See also:
 
 * Main [readme](../README.md)
@@ -17,22 +19,20 @@ Depends heavily on Promise's for async operation (using the excellent [kriskowal
  
 ### Source
 
+
 Code in `/src`, also contains the 2 main files to compile to `/build` (`cli` and `api`)
 
 Code modules: (short names, because lazy :)
 
 `/tsd` - all TSD specific code
 `/git` - holds Git and Github specific code (not coupled to TSD) 
-`/xm` - general utils and helpers (not coupled to TSD) 
+`/xm` - general utils and helpers (breeding code for my `typescript-xm` lib) (not coupled to TSD) 
 
 Main modules in `/tsd`
 
 * `API` end-user module for code-based usage
 * `CLI` code exposing `API` as cli commands
-* `Core` has the reusable functionality used to compose main features (used by itself and `API` etc)
-	*  :point_right: Most of the interesting functionality is created here :point_left:
-	* Also holds the central `DefIndex`
-	* Some sub routines split-of from `Core` into `/tsd/logic`
+* `Core` has the reusable logic
 
 Data structure files in `/tsd/data`
 
@@ -56,8 +56,6 @@ Context and config model in `/tsd/context`
 * `Context` bundles all settings sub-objects (very handy with testing).
 
 Logical building blocks in `/tsd/logic`
-
-* `Resolver` finds dependencies by parsing &lt;reference&gt; source files.
 
 Selector stuff `/tsd/select`
 

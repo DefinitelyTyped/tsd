@@ -55,7 +55,7 @@ module xm {
 
 		// - - - - - core (line end) - - - - -
 
-		line(str:any = ''):StyledOut {
+		line(str:any):StyledOut {
 			this._writer.writeln(this._styler.plain(str));
 			return this;
 		}
@@ -176,6 +176,16 @@ module xm {
 			return this;
 		}
 
+		alt(str:any, alt:any):StyledOut {
+			if (xm.isValid(str) && !/^\s$/.test(str)) {
+				this._writer.write(this._styler.plain(str));
+			}
+			else if (arguments.length > 1) {
+				this._writer.write(this._styler.plain(alt));
+			}
+			return this;
+		}
+
 		inspect(value:any, depth:number = 4, showHidden:boolean = false):StyledOut {
 			this._writer.writeln(this._styler.plain(util.inspect(value, <any>{showHidden: showHidden, depth: depth})));
 			return this;
@@ -185,6 +195,14 @@ module xm {
 		stringWrap(str:string):StyledOut {
 			this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
 			return this;
+		}
+
+		glue(out:StyledOut):StyledOut {
+			return this;
+		}
+
+		swap(out:StyledOut):StyledOut {
+			return out;
 		}
 
 		// - - - - - extra api - - - - -
@@ -202,8 +220,13 @@ module xm {
 		}
 
 		//TODO add test?
-		bullet():StyledOut {
-			this._writer.write(this._styler.accent(this.nibs.bullet));
+		bullet(accent:boolean = false):StyledOut {
+			if (accent) {
+				this._writer.write(this._styler.accent(this.nibs.bullet));
+			}
+			else {
+				this._writer.write(this._styler.plain(this.nibs.bullet));
+			}
 			return this;
 		}
 

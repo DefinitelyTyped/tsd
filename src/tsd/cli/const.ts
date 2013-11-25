@@ -39,5 +39,13 @@ module tsd {
 			export var help = 'help';
 		}
 		xm.ObjectUtil.lockPrimitives(Group);
+
+		export module Action {
+			export var install = 'install';
+			export var open = 'open';
+			export var compare = 'compare';
+			export var update = 'update';
+		}
+		xm.ObjectUtil.lockPrimitives(Action);
 	}
 }

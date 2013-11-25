@@ -19,14 +19,6 @@ module tsd {
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.verbose;
-				opt.description = 'Verbose output';
-				opt.type = 'flag';
-				opt.default = false;
-				opt.global = true;
-			});
-
-			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.dev;
 				opt.description = 'Development mode';
 				opt.type = 'flag';
@@ -40,6 +32,7 @@ module tsd {
 				opt.placeholder = 'name';
 				opt.global = true;
 				opt.enum = tsd.styleMap.keys();
+				opt.default = 'ansi';
 				opt.apply = (value, ctx:xm.ExposeContext) => {
 					tsd.useColor(value, ctx);
 				};
@@ -52,9 +45,15 @@ module tsd {
 				opt.short = 'p';
 				opt.description = 'Display progress notifications';
 				opt.type = 'flag';
-				opt.default = false;
 				opt.global = true;
 				opt.note = ['experimental'];
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.verbose;
+				opt.description = 'Verbose output';
+				opt.type = 'flag';
+				opt.global = true;
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -76,7 +75,7 @@ module tsd {
 				opt.type = 'string';
 				opt.placeholder = 'range';
 				opt.default = 'latest';
-				opt.note = ['semver-range | \'latest\' | \'all\''];
+				opt.note = ['semver-range | latest | all'];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -84,16 +83,17 @@ module tsd {
 				opt.short = 'd';
 				opt.description = 'Filter on commit date';
 				opt.type = 'string';
-				opt.placeholder = 'date-range';
+				opt.placeholder = 'range';
+				opt.note = ['example: ">2012-12-31"'];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.commit;
 				opt.short = 'c';
-				opt.description = 'Commit hash';
+				opt.description = 'Filter on commit hash';
 				opt.type = 'string';
 				opt.placeholder = 'sha1';
-				opt.note = ['partially implemented'];
+				opt.note = ['status unknown'];
 			});
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -117,7 +117,6 @@ module tsd {
 				opt.short = 'r';
 				opt.description = 'Include reference dependencies';
 				opt.type = 'flag';
-				opt.default = false;
 			});
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -141,9 +140,8 @@ module tsd {
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.overwrite;
 				opt.short = 'o';
-				opt.description = 'Overwrite existing definitions';
+				opt.description = 'Overwrite existing files';
 				opt.type = 'flag';
-				opt.default = false;
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -151,7 +149,7 @@ module tsd {
 				opt.short = 'l';
 				opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
 				opt.type = 'int';
-				opt.default = 3;
+				opt.default = 2;
 				opt.placeholder = 'num';
 			});
 
@@ -194,9 +192,11 @@ module tsd {
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.action;
 				opt.short = 'a';
-				opt.description = 'Run action';
+				opt.description = 'Run action on selection';
 				opt.type = 'string';
-				opt.note = ['experimental'];
+				opt.placeholder = 'name';
+				opt.enum = [Action.install, Action.compare, Action.update, Action.open];
+				opt.note = ['partially implemented'];
 			});
 		}
 	}

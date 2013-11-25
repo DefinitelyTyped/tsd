@@ -12,6 +12,7 @@
 ///<reference path="../iterate.ts" />
 ///<reference path="../callAsync.ts" />
 ///<reference path="../assertVar.ts" />
+///<reference path="../typeOf.ts" />
 ///<reference path="../ObjectUtil.ts" />
 ///<reference path="../Logger.ts" />
 ///<reference path="StyledOut.ts" />
@@ -101,7 +102,8 @@ module xm {
 	/*
 	 ExposeContext: access the parameters of a single call
 	 */
-	//TODO ExposeContext should have a reject/resolve method
+	//TODO should have a reject/resolve method
+	//TODO add assertion mode (hardcore verification for dev/test)
 	export class ExposeContext {
 
 		expose:Expose;
@@ -116,35 +118,78 @@ module xm {
 			this.out = this.expose.output;
 		}
 
-		hasArg(name:string):any {
-			return xm.hasOwnProp(this.argv, name);
+		hasOpt(name:string, strict:boolean = false):any {
+			if (xm.hasOwnProp(this.argv, name)) {
+				if (strict && !this.expose.options.has(name)) {
+					return false;
+				}
+				return true;
+			}
+			return false;
 		}
 
-		getArgRaw(name:string, alt?:any):any {
+		getOptRaw(name:string, alt?:any):any {
 			if (xm.hasOwnProp(this.argv, name)) {
 				return this.argv[name];
 			}
 			return alt;
 		}
 
-		getArg(name:string, alt?:any):any {
-			if (xm.hasOwnProp(this.argv, name)) {
-				if (this.expose.options.has(name)) {
-					var option = this.expose.options.get(name);
+		getOpt(name:string, alt?:any):any {
+			if (this.hasOpt(name)) {
+				var option = this.expose.options.get(name);
+				if (option && !xm.isUndefined(option.default)) {
 					if (option.type) {
 						return xm.convertStringTo(this.argv[name], option.type);
 					}
 				}
 				return this.argv[name];
 			}
+			return this.getDefault(name, alt);
+		}
+
+		getOptAs(name:string, type:string, alt?:any):any {
+			if (this.hasOpt(name)) {
+				return xm.convertStringTo(this.argv[name], type);
+			}
+			return this.getDefault(name, alt);
+		}
+
+		getOptNames(strict:boolean = false):string[] {
+			return Object.keys(this.argv).filter((name:string) => {
+				return (name !== '_' && this.hasOpt(name, strict));
+			});
+		}
+
+		getOptEnum(name:string, alt?:any):any {
+			if (this.hasOpt(name)) {
+				if (this.expose.options.has(name)) {
+					var option = this.expose.options.get(name);
+					var value = this.getOpt(name);
+					if (option.enum && option.enum.indexOf(value) > -1) {
+						return value;
+					}
+				}
+			}
 			return alt;
 		}
 
-		getArgAs(name:string, type:string, alt?:any):any {
-			if (xm.hasOwnProp(this.argv, name)) {
-				return xm.convertStringTo(this.argv[name], type);
+		getDefault(name:string, alt?:any):any {
+			var option = this.expose.options.get(name);
+			if (option && !xm.isUndefined(option.default)) {
+				return option.default;
 			}
 			return alt;
+		}
+
+		isDefault(name:string):boolean {
+			if (this.hasOpt(name, true)) {
+				var def = this.expose.options.get(name).default;
+				if (!xm.isUndefined(def)) {
+					return (def === this.getOpt(name));
+				}
+			}
+			return false;
 		}
 
 		getArgAt(index:number, alt?:any):any {
@@ -169,25 +214,6 @@ module xm {
 			});
 		}
 
-		getArgNames():string[] {
-			return Object.keys(this.argv).filter((name:string) => {
-				return (name !== '_');
-			});
-		}
-
-		getEnum(name:string, alt?:any):any {
-			if (xm.hasOwnProp(this.argv, name)) {
-				if (this.expose.options.has(name)) {
-					var option = this.expose.options.get(name);
-					var value = this.getArg(name);
-					if (option.enum && option.enum.indexOf(value) > -1) {
-						return value;
-					}
-				}
-			}
-			return alt;
-		}
-
 		shiftArg(alt?:string):any {
 			if (this.argv._.length > 0) {
 				return this.argv._.shift();
@@ -198,6 +224,13 @@ module xm {
 		shiftArgAs(type:string, alt?:string):any {
 			if (this.argv._.length > 0) {
 				return xm.convertStringTo(this.argv._.shift(), type);
+			}
+			return alt;
+		}
+
+		getArgs(alt?:string):any {
+			if (this.argv._.length > 0) {
+				return this.argv._.shift();
 			}
 			return alt;
 		}
@@ -219,8 +252,9 @@ module xm {
 		(cmd:ExposeCommand, ctx:ExposeContext):any;
 	}
 
+	//TODO add ExposeCommand/ExposeContext (like ExposeHook)?
 	export interface ExposeOptionApply {
-		(value:any, option:any):void;
+		(value:any, ctx:ExposeContext):void;
 	}
 
 	export interface ExposeResult {
@@ -229,6 +263,7 @@ module xm {
 		error:ExposeError;
 	}
 
+	//TODO add some extra properties?
 	export interface ExposeError extends Error {
 	}
 
@@ -326,6 +361,7 @@ module xm {
 		variadic:string[] = [];
 		groups:string[] = [];
 		note:string[] = [];
+		internal:boolean;
 
 		constructor() {
 		}
@@ -351,9 +387,12 @@ module xm {
 		default:any;
 		command:string;
 		global:boolean = false;
+		//TODO implement optional
 		optional:boolean = true;
 		enum:any[] = [];
 		note:string[] = [];
+		//TODO implement example
+		example:string[] = [];
 		apply:ExposeOptionApply;
 	}
 
@@ -411,6 +450,10 @@ module xm {
 			var opt = new ExposeOption();
 			build(opt);
 
+			if (opt.type === 'flag' && xm.isUndefined(opt.default)) {
+				opt.default = false;
+			}
+
 			xm.assertVar(opt.name, 'string', 'opt.name');
 
 			if (this.options.has(opt.name)) {
@@ -449,12 +492,10 @@ module xm {
 			argv = optimist.parse(argv);
 			var ctx = new ExposeContext(this, argv, null);
 
-			Object.keys(argv).forEach((name:string) => {
-				if (name !== '_' && this.options.has(name)) {
-					var opt = this.options.get(name);
-					if (opt.apply) {
-						opt.apply(ctx.getArg(name), argv);
-					}
+			ctx.getOptNames(true).forEach((name:string) => {
+				var opt = this.options.get(name);
+				if (opt.apply) {
+					opt.apply(ctx.getOpt(name), ctx);
 				}
 			});
 			return ctx;
@@ -471,9 +512,18 @@ module xm {
 				if (option.short) {
 					optimist.alias(option.name, option.short);
 				}
-				if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
+				//TODO get rid of optimist's defaults
+				/*if (!xm.isUndefined(option.default)) {
 					optimist.default(option.name, option.default);
 				}
+				else {
+					if (option.type === 'flag') {
+						optimist.default(option.name, false);
+					}
+					else {
+						optimist.default(option.name, null);
+					}
+				}*/
 			});
 
 			this.groups.values().forEach((group:xm.ExposeGroup) => {
@@ -493,12 +543,12 @@ module xm {
 
 		exit(code:number):void {
 			if (code !== 0) {
-				this.output.line().error('Closing with exit code ' + code).clear();
-				//this.output.line().fail('error');
+				this.output.ln().error('Closing with exit code ' + code).clear();
+				//this.output.ln().fail('error');
 			}
 			else {
-				//this.output.line().success('Closing with exit code ' + code).clear();
-				this.output.line().ok('bye!');
+				//this.output.ln().success('Closing with exit code ' + code).clear();
+				//this.output.ln().ok('bye!');
 			}
 			exitProcess(code);
 		}
@@ -544,7 +594,7 @@ module xm {
 			//command options (option that takes priority, like --version etc)
 			for (i = 0, ii = options.length; i < ii; i++) {
 				opt = options[i];
-				if (opt.command && ctx.hasArg(opt.name)) {
+				if (opt.command && ctx.hasOpt(opt.name, true)) {
 					return this.executeCommand(opt.command, ctx);
 				}
 			}
@@ -554,7 +604,6 @@ module xm {
 			var cmd = ctx.shiftArg();
 			//script
 			cmd = ctx.shiftArg();
-
 			if (ctx.numArgs === 0) {
 				//this.output.warning('undefined command').clear();
 				return this.executeCommand(alt, ctx);
@@ -566,7 +615,7 @@ module xm {
 				return this.executeCommand(cmd, ctx);
 			}
 			else {
-				this.output.line().warning('command not found: ' + cmd).clear();
+				this.output.ln().warning('command not found: ' + cmd).clear();
 				return this.executeCommand('help', ctx);
 			}
 		}

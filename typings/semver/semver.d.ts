@@ -63,7 +63,6 @@ declare module SemverModule {
 		new(range:string, loose?:boolean):Range;
 		set:Comparator[][];
 		parseRange(range):Comparator[];
-		//	return set;
 		test(version):boolean;
 	}
 }

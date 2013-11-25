@@ -4,13 +4,16 @@
  MIT
  */
 /*
- color codes taken from:
+ original color codes taken from:
  colors.js
  Copyright (c) 2010
  Marak Squires & Alexis Sellier (cloudhead)
  https://github.com/marak/colors.js/
  MIT
  */
+//TODO support more ANSI codes (light/bold etc)
+// http://www.linux.org.tw/CLDP/OLD/HOWTO/Bash-Prompt-HOWTO-6.html
+// http://stackoverflow.com/questions/9158150/colored-output-in-c
 module xm {
 
 	export module styler {
@@ -145,16 +148,16 @@ module xm {
 			'underline': ['\033[4m', '\033[24m'],
 			'inverse': ['\033[7m', '\033[27m'],
 			//grayscale
-			'white': ['\033[37m', '\033[39m'],
-			'grey': ['\033[90m', '\033[39m'],
-			'black': ['\033[30m', '\033[39m'],
+			'white': ['\033[37m', '\033[0m'],
+			'grey': ['\033[90m', '\033[0m'],
+			'black': ['\033[30m', '\033[0m'],
 			//colors
-			'blue': ['\033[34m', '\033[39m'],
-			'cyan': ['\033[36m', '\033[39m'],
-			'green': ['\033[32m', '\033[39m'],
-			'magenta': ['\033[35m', '\033[39m'],
-			'red': ['\033[31m', '\033[39m'],
-			'yellow': ['\033[33m', '\033[39m']
+			'blue': ['\033[34m', '\033[0m'],
+			'cyan': ['\033[36m', '\033[0m'],
+			'green': ['\033[32m', '\033[0m'],
+			'magenta': ['\033[35m', '\033[0m'],
+			'red': ['\033[31m', '\033[0m'],
+			'yellow': ['\033[33m', '\033[0m']
 		};
 
 		export class ANSIWrapStyler extends WrapStyler {
@@ -168,31 +171,31 @@ module xm {
 		export class ANSIStyler implements Styler {
 
 			ok(str:string):string {
-				return '\033[32m' + clean(str) + '\033[39m';
+				return '\033[32m' + clean(str) + '\033[0m';
 			}
 
 			fail(str:string):string {
-				return '\033[31m' + clean(str) + '\033[39m';
+				return '\033[31m' + clean(str) + '\033[0m';
 			}
 
 			warn(str:string):string {
-				return '\033[33m' + clean(str) + '\033[39m';
+				return '\033[33m' + clean(str) + '\033[0m';
 			}
 
 			error(str:string):string {
-				return '\033[31m' + clean(str) + '\033[39m';
+				return '\033[31m' + clean(str) + '\033[0m';
 			}
 
 			warning(str:string):string {
-				return '\033[33m' + clean(str) + '\033[39m';
+				return '\033[33m' + clean(str) + '\033[0m';
 			}
 
 			success(str:string):string {
-				return '\033[32m' + clean(str) + '\033[39m';
+				return '\033[32m' + clean(str) + '\033[0m';
 			}
 
 			accent(str:string):string {
-				return '\033[36m' + clean(str) + '\033[39m';
+				return '\033[36m' + clean(str) + '\033[0m';
 			}
 
 			plain(str:string):string {

@@ -5,6 +5,7 @@
 ///<reference path="../xm/io/StyledOut.ts" />
 ///<reference path="../xm/DateUtil.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
+///<reference path="../xm/promise.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="select/Query.ts" />
 ///<reference path="cli/options.ts" />
@@ -21,6 +22,7 @@ module tsd {
 
 	var Opt = tsd.cli.Opt;
 	var Group = tsd.cli.Group;
+	var Action = tsd.cli.Action;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -63,11 +65,10 @@ module tsd {
 	function printPreviewNotice():Q.Promise<void> {
 		var pkg = xm.PackageJSON.getLocal();
 
-		output.line()
-		.span('->').space().span(pkg.getNameVersion())
-		.space().accent('(preview)').line()
-			//.clear().span(pkg.getHomepage(true)).line()
-		.ruler().line();
+		output.ln()
+		.report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln()
+			//.clear().span(pkg.getHomepage(true)).ln()
+		.ruler().ln();
 		//TODO implement version check / news service
 		return Q.resolve();
 	}
@@ -110,13 +111,13 @@ module tsd {
 	function getContext(ctx:xm.ExposeContext):tsd.Context {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-		var context = new tsd.Context(ctx.getArg(Opt.config), ctx.getArg(Opt.verbose));
+		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-		if (ctx.getArg(Opt.dev)) {
+		if (ctx.getOpt(Opt.dev)) {
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
-		else if (ctx.hasArg(Opt.cacheDir)) {
-			context.paths.cacheDir = path.resolve(ctx.getArg(Opt.cacheDir));
+		else if (ctx.hasOpt(Opt.cacheDir)) {
+			context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
 		}
 		else {
 			context.paths.cacheDir = tsd.Paths.getUserCacheDir();
@@ -128,23 +129,23 @@ module tsd {
 
 	//TODO further unify reporting format (consistent details and don't rely on toString()'s) (See TODO.md)
 
-	function reportError(err:any) {
-		output.error('-> ' + 'an error occured!').clear();
+	function reportError(err:any, head:boolean = true):xm.StyledOut {
+		if (head) {
+			output.info().error('an error occured!').clear();
+		}
 
 		if (err.stack) {
-			output.block(err.stack);
+			return output.block(err.stack);
 		}
-		else {
-			output.line(err);
-		}
+		return output.line(err);
 	}
 
-	function reportProgress(obj:any) {
-		output.accent(output.nibs.arrow).inspect(obj, 3);
+	function reportProgress(obj:any):xm.StyledOut {
+		return output.info().inspect(obj, 3);
 	}
 
-	function reportSucces(result:tsd.APIResult) {
-		//output.ln().span('->').space().success('success!').clear();
+	function reportSucces(result:tsd.APIResult):xm.StyledOut {
+		//output.ln().info().success('success!').clear();
 		if (result) {
 			result.selection.forEach((def:tsd.DefVersion) => {
 				output.line(def.toString());
@@ -154,130 +155,140 @@ module tsd {
 				}
 			});
 		}
+		return output;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function formatFile(file:tsd.DefVersion) {
-		var sep = '  |' +
-		'  ';
-		var str = '';
+	function printFile(file:tsd.DefVersion, sep:string = ' : '):xm.StyledOut {
 		if (file.def) {
-			str += file.def.path;
+			output.span(file.def.path);
 		}
 		else {
-			str += '<no def>';
+			output.accent('<no def>');
 		}
-		str += sep + formatFileEnd(file, sep);
-		return str;
+		return output.accent(sep).glue(printFileEnd(file, sep));
 	}
 
-
-	function formatFileEnd(file:tsd.DefVersion, sep:string) {
-		var str = '';
+	function printFileEnd(file:tsd.DefVersion, sep:string = ' | '):xm.StyledOut {
 		if (file.def && file.def.head === file) {
-			str += '<head>';
+			output.span('<head>');
 			if (file.commit.changeDate) {
-				str += sep + xm.DateUtil.toNiceUTC(file.commit.changeDate);
+				output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
 			}
 		}
 		else {
 			if (file.commit) {
-				str += file.commit.commitShort;
+				output.span(file.commit.commitShort);
 				if (file.commit.changeDate) {
-					str += sep + xm.DateUtil.toNiceUTC(file.commit.changeDate);
+					output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
 				}
 			}
 			else {
-				str += sep + '<no commit>';
+				output.accent(sep).accent('<no commit>');
 			}
 		}
 		/*if (file.blob) {
-		 str += sep + file.blob.shaShort;
+		 output.span(sep).span(file.blob.shaShort);
 		 }*/
-		return str;
+		return output;
 	}
 
-	function printFileCommit(file:tsd.DefVersion, skipNull:boolean = false) {
-		var sep = '  |  ';
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	function printFileCommit(file:tsd.DefVersion, skipNull:boolean = false):xm.StyledOut {
+		var sep = '  |  ';
 		if (file.commit) {
-			var str = '   ';
-			str += formatFileEnd(file, sep);
-			str += sep + file.commit.gitAuthor.name;
+			output.indent().glue(printFileEnd(file, sep));
+			output.accent(sep).span(file.commit.gitAuthor.name);
 			if (file.commit.hubAuthor) {
-				str += '  @  ' + file.commit.hubAuthor.login;
+				output.accent('  @  ').span(file.commit.hubAuthor.login);
 			}
-			output.line(str);
+			output.clear();
 
 			//TODO full indent message
-			output.line();
-			output.line('   ' + file.commit.message.subject);
-			output.ruler2();
+			output.indent().line(file.commit.message.subject);
+			output.ln();
 		}
 		else if (!skipNull) {
-			output.line('   ' + '<no commmit>');
-			output.ruler2();
+			output.indent().accent('<no commmit>');
+			output.ln();
 		}
+		return output;
 	}
 
-	function printSubHead(text:string) {
-		output.line(' ' + text);
-		output.ruler2();
+	function printSubHead(text:string):xm.StyledOut {
+		return output.line(' ' + text).ln();
 	}
 
-	function printDefHead(def:tsd.Def) {
-		output.line(def.toString());
-		output.ruler2();
+	function printDefHead(def:tsd.Def):xm.StyledOut {
+		return output.line(def.toString()).ln();
 	}
 
-	function printFileHead(file:tsd.DefVersion) {
-		printFile(file);
-		output.ruler2();
+	function printFileHead(file:tsd.DefVersion):xm.StyledOut {
+		return output.info(true).glue(printFile(file)).ln().ln();
 	}
 
-	function printFile(file:tsd.DefVersion) {
-		output.line(formatFile(file));
-	}
-
-	function printFileInfo(file:tsd.DefVersion, skipNull:boolean = false) {
+	function printFileInfo(file:tsd.DefVersion, skipNull:boolean = false):xm.StyledOut {
 		if (file.info) {
 			if (file.info.isValid()) {
-				output.line('   ' + file.info.toString());
-				output.line('      ' + file.info.projectUrl);
+				output.indent().line(file.info.toString());
+				output.indent().indent().line(file.info.projectUrl);
 				file.info.authors.forEach((author:xm.AuthorInfo) => {
-					output.line('      ' + author.toString());
+					output.indent().indent().line(author.toString());
 				});
-				output.ruler2();
+				output.ln();
 			}
 			else {
-				output.line('   ' + '<invalid info>');
-				output.ruler2();
+				output.indent().accent('<invalid info>');
+				output.clear();
 			}
 		}
 		else if (!skipNull) {
-			output.line('   ' + '<no info>');
-			output.ruler2();
+			output.indent().accent('<no info>');
+			output.clear();
 		}
+		return output;
 	}
 
-	function printDependencies(file:tsd.DefVersion) {
+	function printDependencies(file:tsd.DefVersion):xm.StyledOut {
 		if (file.dependencies.length > 0) {
 
 			tsd.DefUtil.mergeDependenciesOf(file.dependencies).filter((refer:tsd.DefVersion) => {
 				return refer.def.path !== file.def.path;
 			}).sort(tsd.DefUtil.fileCompare).forEach((refer:tsd.DefVersion) => {
-				output.line(' - ' + refer.toString());
+				output.indent().report(true).glue(printFile(refer)).ln();
 
 				if (refer.dependencies.length > 0) {
-					refer.dependencies.sort(tsd.DefUtil.defCompare).forEach((refer:tsd.Def) => {
-						output.line('    - ' + refer.path);
+					refer.dependencies.sort(tsd.DefUtil.defCompare).forEach((dep:tsd.Def) => {
+						output.indent().indent().report(true).line(dep.path);
 					});
 				}
 			});
-			output.ruler2();
-
+			output.ln();
 		}
+		return output;
+	}
+
+	function printInstallResult(result:tsd.InstallResult):xm.StyledOut {
+		//TODO fix pluralised reporting
+		if (result.written.keys().length === 0) {
+			output.ln().report(true).span('written ').accent('zero').span(' files').ln();
+		}
+		else if (result.written.keys().length === 1) {
+			output.ln().report(true).span('written ').accent(result.written.keys().length).span(' file:').clear();
+		}
+		else {
+			output.ln().report(true).span('written ').accent(result.written.keys().length).span(' files:').clear();
+		}
+
+		//TODO report on written/skipped
+		result.written.keys().sort().forEach((path:string) => {
+			var file:tsd.DefVersion = result.written.get(path);
+			output.bullet(true).glue(printFile(file)).ln();
+		});
+		output.ln().report().span('install').space().success('success!').ln();
+		return output;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -298,24 +309,29 @@ module tsd {
 	}
 
 	//bundle some data
-	class Job {
+	export class Job {
 		api:tsd.API;
 		context:tsd.Context;
 		query:Query;
 		options:Options;
 	}
 
+	//hah!
+	export interface JobSelectionAction {
+		(ctx:xm.ExposeContext, job:Job, selection:tsd.Selection):Q.Promise<any>;
+	}
+
+
 	//get a API with a Context and parse basic arguments
 	function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
-		// callback for easy error reporting
 		init(ctx).then(() => {
 			//verify valid path
-			if (ctx.hasArg(Opt.config)) {
-				return FS.isFile(ctx.getArg(Opt.config)).then((isFile:boolean) => {
+			if (ctx.hasOpt(Opt.config, true)) {
+				return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
 					if (!isFile) {
-						throw new Error('specified --config is not a file: ' + ctx.getArg(Opt.config));
+						throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
 					}
 					return null;
 				});
@@ -328,16 +344,16 @@ module tsd {
 
 			job.options = new tsd.Options();
 
-			job.options.timeout = ctx.getArg(Opt.timeout);
-			job.options.limitApi = ctx.getArg(Opt.limit);
-			job.options.minMatches = ctx.getArg(Opt.min);
-			job.options.maxMatches = ctx.getArg(Opt.max);
+			job.options.timeout = ctx.getOpt(Opt.timeout);
+			job.options.limitApi = ctx.getOpt(Opt.limit);
+			job.options.minMatches = ctx.getOpt(Opt.min);
+			job.options.maxMatches = ctx.getOpt(Opt.max);
 
-			job.options.saveToConfig = ctx.getArg(Opt.save);
-			job.options.overwriteFiles = ctx.getArg(Opt.overwrite);
-			job.options.resolveDependencies = ctx.getArg(Opt.resolve);
+			job.options.saveToConfig = ctx.getOpt(Opt.save);
+			job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+			job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-			var required:boolean = ctx.hasArg(Opt.config);
+			var required:boolean = ctx.hasOpt(Opt.config);
 
 			return job.api.readConfig(!required).progress(d.notify).then(() => {
 				d.resolve(job);
@@ -347,6 +363,7 @@ module tsd {
 		return d.promise;
 	}
 
+	//get a API and parse selector options
 	function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
@@ -359,20 +376,20 @@ module tsd {
 			for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
 				job.query.addNamePattern(ctx.getArgAt(i));
 			}
-			job.query.commitSha = ctx.getArg(Opt.commit);
+			job.query.commitSha = ctx.getOpt(Opt.commit);
 
-			if (ctx.hasArg(Opt.semver)) {
-				job.query.versionMatcher = new tsd.VersionMatcher(ctx.getArg(Opt.semver));
+			if (ctx.hasOpt(Opt.semver)) {
+				job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
 			}
-			if (ctx.hasArg(Opt.date)) {
-				job.query.dateMatcher = new tsd.DateMatcher(ctx.getArg(Opt.date));
+			if (ctx.hasOpt(Opt.date)) {
+				job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
 			}
 
-			job.query.parseInfo = ctx.getArg(Opt.info);
-			job.query.loadHistory = ctx.getArg(Opt.history);
+			job.query.parseInfo = ctx.getOpt(Opt.info);
+			job.query.loadHistory = ctx.getOpt(Opt.history);
 
-			if (ctx.getArgAs(Opt.verbose, 'boolean')) {
-				xm.log.inspect(job.query, 3, 'CLI job.query');
+			if (ctx.getOptAs(Opt.verbose, 'boolean')) {
+				output.span('CLI job.query').info().inspect(job.query, 3);
 			}
 			return job;
 		}).then(d.resolve, d.reject);
@@ -387,7 +404,7 @@ module tsd {
 		var expose = new xm.Expose('', output);
 
 		function getProgress(ctx) {
-			if (ctx.getArg(Opt.progress)) {
+			if (ctx.getOpt(Opt.progress)) {
 				return function (note) {
 					reportProgress(note);
 				};
@@ -460,11 +477,10 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.initConfig(ctx.getArg(Opt.overwrite)).progress(getProgress(ctx)).then((target:string) => {
-						reportSucces(null);
-						output.span(output.nibs.arrow).success('written ').span(target).clear();
+					return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(getProgress(ctx)).then((target:string) => {
+						output.info().success('written ').span(target).clear();
 					}, (err) => {
-						output.span(output.nibs.arrow).error('error ').span(err.message).clear();
+						output.info().error('error ').span(err.message).clear();
 						throw(err);
 					});
 				}, reportError, getProgress(ctx));
@@ -478,7 +494,7 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.context.logInfo(true);
+					return <any> job.api.context.logInfo(true);
 
 				}, reportError, getProgress(ctx));
 			};
@@ -486,33 +502,73 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+		//TODO abstractify this
+		var queryActions = new xm.ActionMap<tsd.JobSelectionAction>();
+		queryActions.set(Action.install, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
+			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {
+				printInstallResult(result);
+			});
+		});
+		/*queryActions.set(Action.open, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
+		 return job.api.install(selection);
+		 });*/
+
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';
 			cmd.label = 'Search definitions';
 			cmd.variadic = ['pattern'];
 			cmd.groups = [Group.primary, Group.query];
-			cmd.options = [Opt.date, Opt.semver, Opt.commit,
-				Opt.action, Opt.info, Opt.history, Opt.resolve];
+			cmd.options = [
+				Opt.info, Opt.history,
+				Opt.semver, Opt.date, Opt.commit,
+				Opt.action,
+				Opt.resolve, Opt.overwrite, Opt.save
+			];
 			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
 				return getSelectorJob(ctx).then((job:Job) => {
-					return job.api.select(job.query, job.options).progress(getProgress(ctx)).then((result:tsd.Selection) => {
-						reportSucces(null);
+					return job.api.select(job.query, job.options).progress(notify).then((selection:tsd.Selection) => {
+						if (selection.selection.length === 0) {
+							output.ln().report().warning('zero results').clear();
+						} else {
+							//TODO report on written/skipped
+							selection.selection.forEach((file:tsd.DefVersion) => {
+								//printFile(file, true);
+								printFileHead(file);
+								printFileInfo(file, true);
 
-						//TODO report on written/skipped
-						result.selection.forEach((file:tsd.DefVersion) => {
-							//printFile(file, true);
-							printFileHead(file);
-							printFileInfo(file, true);
+								printDependencies(file);
 
-							printDependencies(file);
-
-							file.def.history.slice(0).forEach((file:tsd.DefVersion) => {
-								printFileCommit(file);
+								file.def.history.slice(0).forEach((file:tsd.DefVersion) => {
+									printFileCommit(file);
+								});
 							});
-							output.line();
-						});
+
+							//run actions
+							return Q().then(() => {
+								//get as arg
+								var action = ctx.getOpt(Opt.action);
+								if (!action) {
+									//output.ln().report().warning('no action').ln();
+									return;
+								}
+								if (!queryActions.has(action)) {
+									output.ln().report().warning('unknown action:').space().span(action).ln();
+									return;
+								}
+								output.ln().info().span('running:').space().accent(action).ln();
+								return queryActions.run(action, (run:tsd.JobSelectionAction) =>  {
+									return run(ctx, job, selection).progress(notify);
+								}, true).then(() => {
+									//whut?
+								}, (err) => {
+									output.ln().report().span(action).space().error('error!').ln();
+									reportError(err, false);
+								}, getProgress(ctx));
+							});
+						}
 					});
-				}, reportError, getProgress(ctx));
+				}, reportError, notify);
 			};
 		});
 
@@ -526,14 +582,7 @@ module tsd {
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				return getAPIJob(ctx).then((job:Job) => {
 					return job.api.reinstall(job.options).progress(getProgress(ctx)).then((result:tsd.InstallResult) => {
-						reportSucces(null);
-
-						//TODO report on written/skipped
-						result.written.keys().sort().forEach((path:string) => {
-							var file:tsd.DefVersion = result.written.get(path);
-							output.line(file.toString());
-							//output.line('    ' + path);
-						});
+						printInstallResult(result);
 					});
 				}, reportError, getProgress(ctx));
 			};

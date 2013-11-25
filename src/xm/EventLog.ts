@@ -25,13 +25,12 @@ module xm {
 	}
 
 	export function valueMap(data:any):any {
-		var out = Object.keys(data).reduce((memo:any, key:string) => {
+		return Object.keys(data).reduce((memo:any, key:string) => {
 			if (xm.isValueType(data[key])) {
 				memo[key] = data[key];
 			}
 			return memo;
 		}, Object.create(null));
-		return out;
 	}
 
 	//some standard levels
@@ -94,6 +93,7 @@ module xm {
 			return this.track(Level.start, type, message, data);
 		}
 
+		//TODO rethink arguments and add type-filtering
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
 			promise.then(() => {
 				this.track(Level.resolve, type, message, data, promise);
@@ -191,6 +191,7 @@ module xm {
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+		//TODO fix odd isNaN default param
 		setTrack(enabled:boolean, limit:number = NaN, prune:number = NaN):void {
 			this._trackEnabled = enabled;
 			this._trackLimit = (isNaN(limit) ? this._trackLimit : limit);
