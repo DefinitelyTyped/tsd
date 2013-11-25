@@ -12,6 +12,11 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 
 :warning: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
 
+### API change
+
+* First versions of `0.5.x` has similar CLI commands to older version of TSD by having separate search/install commands
+* From `> 0.5.2` all CLI search-based features are bundled under the `query` command (see below)
+
 ### Usage as CLI command
 
 :x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
@@ -43,36 +48,31 @@ Global `tsd` binary, view the help:
 
 Minimal search for 'bootstrap'
 		
-	$ tsd search bootstrap
+	$ tsd query bootstrap
+
+Get some info
+		
+	$ tsd query bootstrap --info --history --resolve
+	$ tsd query bootstrap -i -h -r
 	
-Install 'bootstrap' definitions, resolve and install the reference to 'jquery', overwrite existing files and save to the tsd.config
+Install 'bootstrap' definitions:
 
-	$ tsd install bootstrap --resolve --overwrite --save
-	$ tsd install bootstrap -r -o -s
+	$ tsd query bootstrap --action install
 
+Install and install the reference to 'jquery', overwrite existing files and save to the tsd.config
 
-#### Commands
+	$ tsd query bootstrap --resolve --overwrite --save --action install
+	$ tsd query bootstrap -r -o -s -a install
 
-:bangbang: Possibly outdated method list
-
-
-	$ tsd search <selector>
-	$ tsd info <selector>
-	$ tsd history <selector>
-	$ tsd install <selector>
-	$ tsd reinstall
-	...
-	$ tsd help
-
-The commands using selector's will be folded into one command using a action --option for convenience at a later date (as a usability thing).
+Search search for jquery plugins:
+		
+	$ tsd query */jquery.*
 
 ### Selector explained
 
-:bangbang: Currently semver selection and ranking is not implemented (a case is the node.js 0.8 definition)
-
 TSD uses selectors to query the definition list:
 
-	$ tsd install project/module
+	$ tsd query project/module
 
 Consider these definitions:
 	
@@ -116,17 +116,26 @@ The selector also supports globbing, for example:
 	*/module-*
 	*/*plugin
 
-:x: Not yet. Note: the semver postfix is expected to be separated by a dash and possibly a `'v'`
+Note: the semver postfix is expected to be separated by a dash and possibly a `'v'`
 
 	module-0.1.2
 	module-0.1.2-alpha
+	module-0.1.2-alpha
 	module-v0.1.2
 
-:x: Not yet. ~~If there are multiple matches with same module name they will be prioritised:~~
+If there are multiple matches with same module name they will be prioritised:
 
-1.	~~The unversioned name is considered being most recent.~~
-2.	~~Then versions are compared as expected following these [comparison](https://github.com/isaacs/node-semver#comparison) rules.~~
+:bangbang: This is experimental
 
+1.	The unversioned name is considered being most recent.
+2.	Then versions are compared as expected following these [comparison](https://github.com/isaacs/node-semver#comparison) rules.
+3.	Use the `--version` argument to supply a semver-range:
+	
+````
+$ tsd query node -v latest
+$ tsd query node -v all
+$ tsd query node -v ">=0.8 <0.10"
+````
 ## Use as module
 
 Include TSD as any npm dependency in your project and create instances of the API class. The internal API use to implement the CLI is exposed. 
