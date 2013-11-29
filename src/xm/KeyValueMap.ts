@@ -28,7 +28,7 @@ module xm {
 	/*
 	 KeyValueMap: yer basic string key-value map, safe from prototype interference
 	 */
-	//TODO ditch for ES6 Map's
+	//TODO ditch for ES6 Set's
 	//TODO remove hasProp/hasOwnProperty once tslint can temporarily disable the for-in rules
 	//     see (use with dict-pattern object(
 	export class KeyValueMap<T> implements IKeyValueMap<T> {

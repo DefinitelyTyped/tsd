@@ -9,17 +9,15 @@ describe('xm.StyledOut', () => {
 	var assert:Chai.Assert = require('chai').assert;
 	var path = require('path');
 
-	var writer:xm.writer.BufferWriter;
-	var styler:xm.styler.Styler;
+	var miniwrite = <typeof MiniWrite> require('miniwrite');
+	var ministyle = <typeof MiniStyle> require('ministyle');
+
 	var output:xm.StyledOut;
 
 	beforeEach(() => {
-		styler = new xm.styler.DevStyler();
 	});
 
 	afterEach(() => {
-		writer = null;
-		styler = null;
 		output = null;
 	});
 
@@ -30,11 +28,12 @@ describe('xm.StyledOut', () => {
 	var testPath = path.resolve('test', 'modules', 'xm');
 
 	function getOutput(call:(output:xm.StyledOut) => xm.StyledOut):string {
-		var writer = new xm.writer.BufferWriter();
-		var output = new xm.StyledOut(writer, styler);
+		var write = miniwrite.buffer();
+		var output = new xm.StyledOut(write, ministyle.dev());
 		var ret = call(output);
 		assert.strictEqual(output, ret, 'chained');
-		return writer.buffer;
+		output.getWrite().writeln('<end>');
+		return write.concat();
 	}
 
 	function assertOutput(value, name) {
@@ -47,7 +46,7 @@ describe('xm.StyledOut', () => {
 			return output.line(value);
 		});
 		data.line_opt = getOutput((output:xm.StyledOut) => {
-			return output.line();
+			return output.line(undefined);
 		});
 		data.ln = getOutput((output:xm.StyledOut) => {
 			return output.ln();
@@ -90,15 +89,6 @@ describe('xm.StyledOut', () => {
 		});
 		data.error = getOutput((output:xm.StyledOut) => {
 			return output.error(value);
-		});
-		data.ok = getOutput((output:xm.StyledOut) => {
-			return output.ok(value);
-		});
-		data.warn = getOutput((output:xm.StyledOut) => {
-			return output.warn(value);
-		});
-		data.fail = getOutput((output:xm.StyledOut) => {
-			return output.fail(value);
 		});
 		data.cond = getOutput((output:xm.StyledOut) => {
 			return output.cond(true, value);

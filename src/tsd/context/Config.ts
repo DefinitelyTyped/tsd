@@ -4,7 +4,6 @@
 ///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="../../xm/Logger.ts" />
 ///<reference path="../../xm/data/PackageJSON.ts" />
-///<reference path="../../xm/tv4Tool.ts" />
 ///<reference path="../data/DefVersion.ts" />
 
 module tsd {
@@ -15,6 +14,7 @@ module tsd {
 	var util = require('util');
 	var AssertionError = require('assertion-error');
 	var tv4:TV4 = require('tv4');
+	var reporter = require('tv4-reporter');
 
 	/*
 	 InstalledDef: single installed file in Config
@@ -167,23 +167,16 @@ module tsd {
 				};
 			});
 			//self-test (no corruption)
-			var res = tv4.validateResult(json, this._schema);
-			if (!res.valid || res.missing.length > 0) {
-				//this is messed up: internal checks and schema not equivalent
-				this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
-				return null;
-			}
+			this.validateJSON(json, this._schema);
+
 			return json;
 		}
 
-		parseJSON(json:any) {
+		parseJSON(json:any, label?:string) {
 			xm.assertVar(json, 'object', 'json');
 
-			var res = tv4.validateResult(json, this._schema);
-			if (!res.valid || res.missing.length > 0) {
-				this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
-				throw (new Error('malformed config: doesn\'t comply with schema'));
-			}
+			this.validateJSON(json, this._schema, label);
+
 			//TODO harden validation besides schema
 
 			this._installed.clear();
@@ -196,13 +189,24 @@ module tsd {
 			if (json.installed) {
 				xm.eachProp(json.installed, (data:any, filePath:string) => {
 					var installed = new tsd.InstalledDef(filePath);
-					//TODO move to class
 					//TODO validate some more
 					installed.commitSha = data.commit;
-
 					this._installed.set(filePath, installed);
 				});
 			}
+		}
+
+		validateJSON(json:any, schema:any, label?:string) {
+			label = (label || '<config json>');
+			var res = tv4.validateMultiple(json, schema);
+			if (!res.valid || res.missing.length > 0) {
+				xm.log.out.ln();
+				var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+				report.reportResult(report.createTest(schema, json, label, res, true), '   ');
+				xm.log.out.ln();
+				throw (new Error('malformed config: doesn\'t comply with schema'));
+			}
+			return json;
 		}
 	}
 }

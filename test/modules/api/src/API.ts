@@ -2,6 +2,7 @@
 ///<reference path="../../../tsdHelper.ts" />
 ///<reference path="../../../../src/tsd/API.ts" />
 ///<reference path="../../../../src/tsd/select/Query.ts" />
+///<reference path="../../../../src/tsd/Options.ts" />
 ///<reference path="../../../../src/xm/hash.ts" />
 ///<reference path="../../../../src/git/GitUtil.ts" />
 
@@ -50,42 +51,51 @@ describe('API', () => {
 		return api;
 	}
 
-	function applyTestInfo(group:string, name:string, test:any, query:tsd.Query):helper.TestInfo {
+	function applyTestInfo(group:string, name:string, test:any, query:tsd.Query, opt:tsd.Options):helper.TestInfo {
 		var tmp = helper.getTestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
 
 		xm.FileUtil.writeJSONSync(tmp.testDump, test);
-		xm.FileUtil.writeJSONSync(tmp.selectorDump, query);
+		xm.FileUtil.writeJSONSync(tmp.queryDump, query);
+		xm.FileUtil.writeJSONSync(tmp.optionsDump, opt);
 
 		api.verbose = test.debug;
 
 		return tmp;
 	}
 
-	function getSelector(test:any) {
-		assert.property(test, 'selector');
-		assert.property(test.selector, 'pattern');
+	function getQuery(test:any):tsd.Query {
+		assert.property(test.query, 'query');
 
 		var query = new tsd.Query(test.query.pattern);
-		query.saveToConfig = test.save;
-		query.overwriteFiles = test.overwrite;
-		query.resolveDependencies = test.resolve;
 
 		return query;
 	}
 
+	function getOptions(test:any):tsd.Options {
+		assert.property(test, 'query');
+
+		var opts = new tsd.Options();
+		opts.saveToConfig = test.save;
+		opts.overwriteFiles = test.overwrite;
+		opts.resolveDependencies = test.resolve;
+
+		return opts;
+	}
+/*
 	function setupCase(api:tsd.API, name:string, test:any, info:helper.TestInfo):Q.Promise<any> {
 		if (test.modify) {
 			var before = test.modify.before;
 
-			var runModifySelector = function ():Q.Promise<any> {
-				if (before.selector) {
-					var selector = getSelector(before);
+			var runModifyQuery = function ():Q.Promise<any> {
+				if (before.query) {
+					var query = getQuery(before);
+					var opts = getOptions(before);
 					if (test.debug) {
-						xm.log.debug('skip modify selector of ' + name);
+						xm.log.debug('skip modify query of ' + name);
 					}
-					return api.install(selector).then((result:tsd.APIResult) => {
+					return api.install(query, opts).then((result:tsd.InstallResult) => {
 
 					});
 				}
@@ -106,11 +116,11 @@ describe('API', () => {
 				return Q.resolve();
 			};
 
-			return runModifySelector().then(runModifyContent);
+			return runModifyQuery().then(runModifyContent);
 		}
 		return Q.resolve();
-	}
-
+	}*/
+/*
 	describe('search', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
 
@@ -119,14 +129,14 @@ describe('API', () => {
 				return;
 			}
 
-			it.eventually('selector "' + name + '"', () => {
+			it.eventually('query "' + name + '"', () => {
 				api = getAPI(context);
 
-				var selector = getSelector(test);
-				var info = applyTestInfo('search', name, test, selector);
+				var query = getQuery(test);
+				var info = applyTestInfo('search', name, test, query);
 
 				return setupCase(api, test, name, info).then(() => {
-					return api.search(selector).then((result:tsd.APIResult) => {
+					return api.search(query).then((result:tsd.APIResult) => {
 						assert.instanceOf(result, tsd.APIResult, 'result');
 
 						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result, 2));
@@ -150,11 +160,11 @@ describe('API', () => {
 			it.eventually('test "' + name + '"', () => {
 				api = getAPI(context);
 
-				var selector = getSelector(test);
-				var info = applyTestInfo('install', name, test, selector);
+				var query = getQuery(test);
+				var info = applyTestInfo('install', name, test, query);
 
 				return setupCase(api, name, test, info).then(() => {
-					return api.install(selector).then((result:tsd.APIResult) => {
+					return api.install(query).then((result:tsd.APIResult) => {
 						assert.instanceOf(result, tsd.APIResult, 'result');
 
 						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseAPIResult(result, 2));
@@ -186,5 +196,5 @@ describe('API', () => {
 				});
 			});
 		});
-	});
+	});*/
 });

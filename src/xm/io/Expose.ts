@@ -140,6 +140,10 @@ module xm {
 				var option = this.expose.options.get(name);
 				if (option && !xm.isUndefined(option.default)) {
 					if (option.type) {
+						// unhack optimist flags
+						if (typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
+							return this.getDefault(name, xm.convertStringTo(this.argv[name], option.type));
+						}
 						return xm.convertStringTo(this.argv[name], option.type);
 					}
 				}
@@ -514,16 +518,16 @@ module xm {
 				}
 				//TODO get rid of optimist's defaults
 				/*if (!xm.isUndefined(option.default)) {
-					optimist.default(option.name, option.default);
-				}
-				else {
-					if (option.type === 'flag') {
-						optimist.default(option.name, false);
-					}
-					else {
-						optimist.default(option.name, null);
-					}
-				}*/
+				 optimist.default(option.name, option.default);
+				 }
+				 else {
+				 if (option.type === 'flag') {
+				 optimist.default(option.name, false);
+				 }
+				 else {
+				 optimist.default(option.name, null);
+				 }
+				 }*/
 			});
 
 			this.groups.values().forEach((group:xm.ExposeGroup) => {

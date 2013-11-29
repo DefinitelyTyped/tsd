@@ -657,497 +657,15 @@ var xm;
     }
     xm.assertVar = assertVar;
 })(xm || (xm = {}));
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var xm;
-(function (xm) {
-    (function (styler) {
-        function clean(str) {
-            return '' + str;
-        }
-        styler.clean = clean;
-
-        var NoStyler = (function () {
-            function NoStyler() {
-            }
-            NoStyler.prototype.ok = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.fail = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.warn = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.error = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.warning = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.success = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.accent = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.plain = function (str) {
-                return clean(str);
-            };
-
-            NoStyler.prototype.zero = function () {
-                return '';
-            };
-            return NoStyler;
-        })();
-        styler.NoStyler = NoStyler;
-
-        var PlainStyler = (function (_super) {
-            __extends(PlainStyler, _super);
-            function PlainStyler() {
-                _super.apply(this, arguments);
-            }
-            PlainStyler.prototype.ok = function (str) {
-                return clean(str).toLocaleUpperCase();
-            };
-
-            PlainStyler.prototype.warn = function (str) {
-                return clean(str).toLocaleUpperCase();
-            };
-
-            PlainStyler.prototype.fail = function (str) {
-                return clean(str).toLocaleUpperCase();
-            };
-            return PlainStyler;
-        })(NoStyler);
-        styler.PlainStyler = PlainStyler;
-
-        var WrapStyler = (function () {
-            function WrapStyler() {
-                this.styles = {};
-            }
-            WrapStyler.prototype.ok = function (str) {
-                return this.success(clean(str));
-            };
-
-            WrapStyler.prototype.warn = function (str) {
-                return this.warning(clean(str));
-            };
-
-            WrapStyler.prototype.fail = function (str) {
-                return this.error(clean(str));
-            };
-
-            WrapStyler.prototype.error = function (str) {
-                return this.wrap(clean(str), 'red');
-            };
-
-            WrapStyler.prototype.warning = function (str) {
-                return this.wrap(clean(str), 'yellow');
-            };
-
-            WrapStyler.prototype.success = function (str) {
-                return this.wrap(clean(str), 'green');
-            };
-
-            WrapStyler.prototype.accent = function (str) {
-                return this.wrap(clean(str), 'cyan');
-            };
-
-            WrapStyler.prototype.plain = function (str) {
-                return clean(str);
-            };
-
-            WrapStyler.prototype.zero = function () {
-                return '';
-            };
-
-            WrapStyler.prototype.wrap = function (str, style) {
-                if (!this.styles.hasOwnProperty(style)) {
-                    return clean(str);
-                }
-                var tmp = this.styles[style];
-                return tmp[0] + clean(str) + tmp[1];
-            };
-            return WrapStyler;
-        })();
-        styler.WrapStyler = WrapStyler;
-
-        styler.ansiWrapTable = {
-            'bold': ['\033[1m', '\033[22m'],
-            'italic': ['\033[3m', '\033[23m'],
-            'underline': ['\033[4m', '\033[24m'],
-            'inverse': ['\033[7m', '\033[27m'],
-            'white': ['\033[37m', '\033[39m'],
-            'grey': ['\033[90m', '\033[39m'],
-            'black': ['\033[30m', '\033[39m'],
-            'blue': ['\033[34m', '\033[39m'],
-            'cyan': ['\033[36m', '\033[39m'],
-            'green': ['\033[32m', '\033[39m'],
-            'magenta': ['\033[35m', '\033[39m'],
-            'red': ['\033[31m', '\033[39m'],
-            'yellow': ['\033[33m', '\033[39m']
-        };
-
-        var ANSIWrapStyler = (function (_super) {
-            __extends(ANSIWrapStyler, _super);
-            function ANSIWrapStyler() {
-                _super.call(this);
-                this.styles = styler.ansiWrapTable;
-            }
-            return ANSIWrapStyler;
-        })(WrapStyler);
-        styler.ANSIWrapStyler = ANSIWrapStyler;
-
-        var ANSIStyler = (function () {
-            function ANSIStyler() {
-            }
-            ANSIStyler.prototype.ok = function (str) {
-                return '\033[32m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.fail = function (str) {
-                return '\033[31m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.warn = function (str) {
-                return '\033[33m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.error = function (str) {
-                return '\033[31m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.warning = function (str) {
-                return '\033[33m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.success = function (str) {
-                return '\033[32m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.accent = function (str) {
-                return '\033[36m' + clean(str) + '\033[39m';
-            };
-
-            ANSIStyler.prototype.plain = function (str) {
-                return clean(str);
-            };
-
-            ANSIStyler.prototype.zero = function () {
-                return '';
-            };
-            return ANSIStyler;
-        })();
-        styler.ANSIStyler = ANSIStyler;
-
-        styler.htmlWrapTable = {
-            'bold': ['<b>', '</b>'],
-            'italic': ['<i>', '</i>'],
-            'underline': ['<u>', '</u>'],
-            'inverse': ['<span style="background-color:black;color:white;">', '</span>'],
-            'white': ['<span style="color:white;">', '</span>'],
-            'grey': ['<span style="color:grey;">', '</span>'],
-            'black': ['<span style="color:black;">', '</span>'],
-            'blue': ['<span style="color:blue;">', '</span>'],
-            'cyan': ['<span style="color:cyan;">', '</span>'],
-            'green': ['<span style="color:green;">', '</span>'],
-            'magenta': ['<span style="color:magenta;">', '</span>'],
-            'red': ['<span style="color:red;">', '</span>'],
-            'yellow': ['<span style="color:yellow;">', '</span>']
-        };
-
-        var HTMLWrapStyler = (function (_super) {
-            __extends(HTMLWrapStyler, _super);
-            function HTMLWrapStyler() {
-                _super.call(this);
-                this.styles = styler.htmlWrapTable;
-            }
-            return HTMLWrapStyler;
-        })(WrapStyler);
-        styler.HTMLWrapStyler = HTMLWrapStyler;
-
-        var CSSStyler = (function (_super) {
-            __extends(CSSStyler, _super);
-            function CSSStyler(prefix) {
-                _super.call(this);
-                if (typeof prefix === 'string') {
-                    this.prefix = prefix;
-                } else {
-                    this.prefix = 'styler-';
-                }
-            }
-            CSSStyler.prototype.ok = function (str) {
-                return this.wrap(str, 'ok');
-            };
-
-            CSSStyler.prototype.warn = function (str) {
-                return this.wrap(str, 'warn');
-            };
-
-            CSSStyler.prototype.fail = function (str) {
-                return this.wrap(str, 'fail');
-            };
-
-            CSSStyler.prototype.error = function (str) {
-                return this.wrap(str, 'error');
-            };
-
-            CSSStyler.prototype.warning = function (str) {
-                return this.wrap(str, 'warning');
-            };
-
-            CSSStyler.prototype.success = function (str) {
-                return this.wrap(str, 'success');
-            };
-
-            CSSStyler.prototype.accent = function (str) {
-                return this.wrap(str, 'accent');
-            };
-
-            CSSStyler.prototype.plain = function (str) {
-                return this.wrap(str, 'plain');
-            };
-
-            CSSStyler.prototype.wrap = function (str, style) {
-                return '<span class="' + this.prefix + style + '">' + clean(str) + '</span>';
-            };
-            return CSSStyler;
-        })(WrapStyler);
-        styler.CSSStyler = CSSStyler;
-
-        var DevStyler = (function () {
-            function DevStyler() {
-            }
-            DevStyler.prototype.ok = function (str) {
-                return '[ok|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.fail = function (str) {
-                return '[fail|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.warn = function (str) {
-                return '[warn|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.error = function (str) {
-                return '[error|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.warning = function (str) {
-                return '[warning|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.success = function (str) {
-                return '[success|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.accent = function (str) {
-                return '[accent|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.plain = function (str) {
-                return '[plain|' + clean(str) + ']';
-            };
-
-            DevStyler.prototype.zero = function () {
-                return '[zero]';
-            };
-            return DevStyler;
-        })();
-        styler.DevStyler = DevStyler;
-    })(xm.styler || (xm.styler = {}));
-    var styler = xm.styler;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    (function (writer) {
-        var lineBreak = /\r?\n/;
-
-        var LineWriter = (function () {
-            function LineWriter() {
-                this.textBuffer = '';
-            }
-            LineWriter.prototype.start = function () {
-                this.textBuffer = '';
-            };
-
-            LineWriter.prototype.finalise = function () {
-                this.flushLineBuffer();
-            };
-
-            LineWriter.prototype.write = function (str) {
-                if (str === '') {
-                    return;
-                }
-                this.textBuffer += str;
-
-                var arr = this.textBuffer.split(lineBreak);
-                var len = arr.length;
-                if (len > 0) {
-                    for (var i = 0; i < len - 1; i++) {
-                        this.flushLine(arr[i]);
-                    }
-                    this.textBuffer = arr[len - 1];
-                }
-            };
-
-            LineWriter.prototype.writeln = function (str) {
-                if (arguments.length === 0 || (this.textBuffer === '' && str === '')) {
-                    this.flushLine('');
-                    return;
-                }
-                this.textBuffer += str;
-
-                var arr = this.textBuffer.split(lineBreak);
-                var len = arr.length;
-                if (len > 0) {
-                    for (var i = 0; i < len; i++) {
-                        this.flushLine(arr[i]);
-                    }
-                    this.textBuffer = '';
-                }
-            };
-
-            LineWriter.prototype.flushLine = function (str) {
-            };
-
-            LineWriter.prototype.flushLineBuffer = function () {
-                if (this.textBuffer.length > 0) {
-                    var arr = this.textBuffer.split(lineBreak);
-                    var len = arr.length;
-                    if (len > 0) {
-                        for (var i = 0; i < len; i++) {
-                            this.flushLine(arr[i]);
-                        }
-                        this.textBuffer = '';
-                    }
-                }
-            };
-            return LineWriter;
-        })();
-        writer.LineWriter = LineWriter;
-
-        var ConsoleLineWriter = (function (_super) {
-            __extends(ConsoleLineWriter, _super);
-            function ConsoleLineWriter() {
-                _super.apply(this, arguments);
-            }
-            ConsoleLineWriter.prototype.flushLine = function (str) {
-                console.log(str);
-            };
-            return ConsoleLineWriter;
-        })(LineWriter);
-        writer.ConsoleLineWriter = ConsoleLineWriter;
-
-        var BufferWriter = (function () {
-            function BufferWriter(seperator) {
-                if (typeof seperator !== 'string') {
-                    this.seperator = '\n';
-                } else {
-                    this.seperator = seperator;
-                }
-            }
-            BufferWriter.prototype.start = function () {
-                this.buffer = '';
-            };
-
-            BufferWriter.prototype.write = function (str) {
-                if (str) {
-                    this.buffer += str;
-                }
-            };
-
-            BufferWriter.prototype.writeln = function (str) {
-                if (arguments.length > 0 && str.length > 0) {
-                    this.buffer += str + this.seperator;
-                } else {
-                    this.buffer += this.seperator;
-                }
-            };
-
-            BufferWriter.prototype.finalise = function () {
-            };
-            return BufferWriter;
-        })();
-        writer.BufferWriter = BufferWriter;
-
-        var ConsoleBufferWriter = (function (_super) {
-            __extends(ConsoleBufferWriter, _super);
-            function ConsoleBufferWriter() {
-                _super.apply(this, arguments);
-            }
-            ConsoleBufferWriter.prototype.finalise = function () {
-                if (this.buffer.length > 0) {
-                    console.log(this.buffer);
-                }
-                this.buffer = '';
-            };
-            return ConsoleBufferWriter;
-        })(BufferWriter);
-        writer.ConsoleBufferWriter = ConsoleBufferWriter;
-
-        var WritableStreamWriter = (function (_super) {
-            __extends(WritableStreamWriter, _super);
-            function WritableStreamWriter(stream) {
-                _super.call(this);
-                this.stream = stream;
-            }
-            WritableStreamWriter.prototype.start = function () {
-            };
-
-            WritableStreamWriter.prototype.finalise = function () {
-            };
-
-            WritableStreamWriter.prototype.flushLine = function (str) {
-                if (str.length > 0) {
-                    this.stream.write(str + '\n', 'utf8');
-                }
-            };
-            return WritableStreamWriter;
-        })(LineWriter);
-        writer.WritableStreamWriter = WritableStreamWriter;
-
-        var NullWriter = (function () {
-            function NullWriter() {
-            }
-            NullWriter.prototype.start = function () {
-            };
-
-            NullWriter.prototype.finalise = function () {
-            };
-
-            NullWriter.prototype.write = function (str) {
-            };
-
-            NullWriter.prototype.writeln = function (str) {
-            };
-            return NullWriter;
-        })();
-        writer.NullWriter = NullWriter;
-    })(xm.writer || (xm.writer = {}));
-    var writer = xm.writer;
-})(xm || (xm = {}));
 var xm;
 (function (xm) {
     var util = require('util');
 
+    var miniwrite = require('miniwrite');
+    var ministyle = require('ministyle');
+
     var StyledOut = (function () {
-        function StyledOut(writer, styler) {
-            if (typeof writer === "undefined") { writer = null; }
-            if (typeof styler === "undefined") { styler = null; }
+        function StyledOut(write, style) {
             this.nibs = {
                 arrow: '-> ',
                 double: '>> ',
@@ -1155,126 +673,133 @@ var xm;
                 edge: ' | ',
                 none: '   '
             };
-            this._writer = (writer || new xm.writer.ConsoleLineWriter());
-            this._styler = (styler || new xm.styler.ANSIStyler());
-
-            this._writer.start();
-
+            if (style) {
+                ministyle.assertMiniStyle(style);
+            }
+            if (write) {
+                miniwrite.assertMiniWrite(write);
+            }
+            this._style = (style || ministyle.ansi());
+            this._line = miniwrite.chars((write || miniwrite.log()));
             xm.ObjectUtil.hidePrefixed(this);
         }
         StyledOut.prototype.write = function (str) {
-            this._writer.write(this._styler.plain(str));
+            this._line.write(this._style.plain(str));
             return this;
         };
 
         StyledOut.prototype.line = function (str) {
-            this._writer.writeln(this._styler.plain(str));
+            if (arguments.length < 1 || typeof str === 'undefined') {
+                this._line.writeln('');
+            } else {
+                this._line.writeln(this._style.plain(str));
+            }
             return this;
         };
 
         StyledOut.prototype.ln = function () {
-            this._writer.writeln(this._styler.zero());
+            this._line.writeln('');
             return this;
         };
 
         StyledOut.prototype.span = function (str) {
-            this._writer.write(this._styler.plain(str));
+            this._line.write(this._style.plain(str));
             return this;
         };
 
         StyledOut.prototype.block = function (str) {
-            this._writer.writeln(this._styler.plain(str));
+            this._line.writeln(this._style.plain(str));
             return this;
         };
 
         StyledOut.prototype.clear = function () {
-            this._writer.writeln(this._styler.zero());
-            this._writer.writeln(this._styler.zero());
+            this._line.writeln('');
+            this._line.writeln('');
             return this;
         };
 
         StyledOut.prototype.ruler = function () {
-            this._writer.writeln('--------');
+            this._line.writeln('--------');
             return this;
         };
 
         StyledOut.prototype.ruler2 = function () {
-            this._writer.writeln('----');
+            this._line.writeln('----');
             return this;
         };
 
         StyledOut.prototype.h1 = function (str) {
-            this._writer.writeln(this._styler.accent(str));
+            this._line.writeln(this._style.accent(str));
             this.ruler();
-            this._writer.writeln();
+            this._line.writeln('');
             return this;
         };
 
         StyledOut.prototype.h2 = function (str) {
-            this._writer.writeln(this._styler.accent(str));
+            this._line.writeln(this._style.accent(str));
             this.ruler();
             return this;
         };
 
         StyledOut.prototype.plain = function (str) {
-            this._writer.writeln(this._styler.plain(str));
+            this._line.writeln(this._style.plain(str));
             return this;
         };
 
         StyledOut.prototype.accent = function (str) {
-            this._writer.write(this._styler.accent(str));
+            this._line.write(this._style.accent(str));
             return this;
         };
 
         StyledOut.prototype.space = function () {
-            this._writer.write(this._styler.plain(' '));
+            this._line.write(this._style.plain(' '));
             return this;
         };
 
         StyledOut.prototype.success = function (str) {
-            this._writer.write(this._styler.success(str));
+            this._line.write(this._style.success(str));
             return this;
         };
 
         StyledOut.prototype.warning = function (str) {
-            this._writer.write(this._styler.warning(str));
+            this._line.write(this._style.warning(str));
             return this;
         };
 
         StyledOut.prototype.error = function (str) {
-            this._writer.write(this._styler.error(str));
+            this._line.write(this._style.error(str));
             return this;
         };
 
         StyledOut.prototype.ok = function (str) {
-            this._writer.writeln(this._styler.ok(str));
+            this._line.writeln(this._style.success(str));
             return this;
         };
 
         StyledOut.prototype.warn = function (str) {
-            this._writer.writeln(this._styler.warn(str));
+            this._line.writeln(this._style.warning(str));
             return this;
         };
 
         StyledOut.prototype.fail = function (str) {
-            this._writer.writeln(this._styler.fail(str));
+            this._line.writeln(this._style.error(str));
             return this;
         };
 
         StyledOut.prototype.cond = function (condition, str, alt) {
             if (condition) {
-                this._writer.write(this._styler.plain(str));
+                this._line.write(this._style.plain(str));
             } else if (arguments.length > 2) {
-                this._writer.write(this._styler.plain(alt));
+                this._line.write(this._style.plain(alt));
             }
             return this;
         };
 
         StyledOut.prototype.alt = function (str, alt) {
             if (xm.isValid(str) && !/^\s$/.test(str)) {
-                this._writer.write(this._styler.plain(str));
+                this._line.write(this._style.plain(str));
             } else if (arguments.length > 1) {
-                this._writer.write(this._styler.plain(alt));
+                this._line.write(this._style.plain(alt));
             }
             return this;
         };
@@ -1282,12 +807,12 @@ var xm;
         StyledOut.prototype.inspect = function (value, depth, showHidden) {
             if (typeof depth === "undefined") { depth = 4; }
             if (typeof showHidden === "undefined") { showHidden = false; }
-            this._writer.writeln(this._styler.plain(util.inspect(value, { showHidden: showHidden, depth: depth })));
+            this._line.writeln(this._style.plain(util.inspect(value, { showHidden: showHidden, depth: depth })));
             return this;
         };
 
         StyledOut.prototype.stringWrap = function (str) {
-            this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
+            this._line.write(this._style.plain(xm.wrapIfComplex(str)));
             return this;
         };
 
@@ -1300,36 +825,36 @@ var xm;
         };
 
         StyledOut.prototype.label = function (label) {
-            this._writer.write(this._styler.plain(xm.wrapIfComplex(label) + ': '));
+            this._line.write(this._style.plain(xm.wrapIfComplex(label) + ': '));
             return this;
         };
 
         StyledOut.prototype.indent = function () {
-            this._writer.write(this.nibs.none);
+            this._line.write(this.nibs.none);
             return this;
         };
 
         StyledOut.prototype.bullet = function (accent) {
             if (typeof accent === "undefined") { accent = false; }
             if (accent) {
-                this._writer.write(this._styler.accent(this.nibs.bullet));
+                this._line.write(this._style.accent(this.nibs.bullet));
             } else {
-                this._writer.write(this._styler.plain(this.nibs.bullet));
+                this._line.write(this._style.plain(this.nibs.bullet));
             }
             return this;
         };
 
         StyledOut.prototype.index = function (num) {
-            this._writer.write(this._styler.plain(String(num) + +': '));
+            this._line.write(this._style.plain(String(num) + +': '));
             return this;
         };
 
         StyledOut.prototype.info = function (accent) {
             if (typeof accent === "undefined") { accent = false; }
             if (accent) {
-                this._writer.write(this._styler.accent(this.nibs.arrow));
+                this._line.write(this._style.accent(this.nibs.arrow));
             } else {
-                this._writer.write(this._styler.plain(this.nibs.arrow));
+                this._line.write(this._style.plain(this.nibs.arrow));
             }
             return this;
         };
@@ -1337,51 +862,42 @@ var xm;
         StyledOut.prototype.report = function (accent) {
             if (typeof accent === "undefined") { accent = false; }
             if (accent) {
-                this._writer.write(this._styler.accent(this.nibs.double));
+                this._line.write(this._style.accent(this.nibs.double));
             } else {
-                this._writer.write(this._styler.plain(this.nibs.double));
+                this._line.write(this._style.plain(this.nibs.double));
             }
             return this;
         };
 
         StyledOut.prototype.unfunk = function () {
-            this.useStyler(new xm.styler.NoStyler());
+            this._line.flush();
+            this._style = ministyle.plain();
             return this;
         };
 
         StyledOut.prototype.finalise = function () {
-            this._writer.finalise();
+            this._line.flush();
         };
 
-        StyledOut.prototype.useWriter = function (writer) {
-            xm.assertVar(writer, 'object', 'writer');
-            this._writer.finalise();
-            this._writer = writer;
-            this._writer.start();
+        StyledOut.prototype.useStyle = function (mini) {
+            ministyle.assertMiniStyle(mini);
+            this._style = mini;
             return this;
         };
 
-        StyledOut.prototype.useStyler = function (styler) {
-            xm.assertVar(styler, 'object', 'styler');
-            this._styler = styler;
+        StyledOut.prototype.useWrite = function (mini) {
+            miniwrite.assertMiniWrite(mini);
+            this._line.useTarget(mini);
             return this;
         };
 
-        Object.defineProperty(StyledOut.prototype, "writer", {
-            get: function () {
-                return this._writer;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        StyledOut.prototype.getWrite = function () {
+            return this._line;
+        };
 
-        Object.defineProperty(StyledOut.prototype, "styler", {
-            get: function () {
-                return this._styler;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        StyledOut.prototype.getStyle = function () {
+            return this._style;
+        };
         return StyledOut;
     })();
     xm.StyledOut = StyledOut;
@@ -2229,109 +1745,6 @@ var xm;
     })();
     xm.PackageJSON = PackageJSON;
 })(xm || (xm = {}));
-var xm;
-(function (xm) {
-    var jsonpointer = require('json-pointer');
-
-    (function (tv4) {
-        function valueStrim(value, strimLimit) {
-            if (typeof strimLimit === "undefined") { strimLimit = 60; }
-            var t = typeof value;
-            if (t === 'function') {
-                return '[function]';
-            }
-            if (t === 'object') {
-                value = JSON.stringify(value);
-                if (value.length > strimLimit) {
-                    value = value.substr(0, strimLimit) + '...';
-                }
-                return value;
-            }
-            if (t === 'string') {
-                if (value.length > strimLimit) {
-                    return JSON.stringify(value.substr(0, strimLimit)) + '...';
-                }
-                return JSON.stringify(value);
-            }
-            return '' + value;
-        }
-
-        function extractSchemaLabel(schema, max) {
-            if (typeof max === "undefined") { max = 80; }
-            var label = '';
-            if (schema.id) {
-                label = schema.id;
-            }
-            if (schema.title) {
-                label += (label ? ' (' + schema.title + ')' : schema.title);
-            }
-            if (!label && schema.description) {
-                label = valueStrim(schema.description, max);
-            }
-            if (!label) {
-                label = valueStrim(schema, max);
-            }
-            return label;
-        }
-
-        function formatResult(into, error, data, schema, indent) {
-            var schemaValue;
-            var dataValue;
-            var schemaLabel;
-
-            into.push(indent + error.message);
-
-            schemaLabel = extractSchemaLabel(schema, 80);
-            if (schemaLabel) {
-                into.push(indent + '    schema: ' + schemaLabel);
-            }
-            if (error.schemaPath) {
-                schemaValue = jsonpointer.get(schema, error.schemaPath);
-                into.push(indent + '    rule:   ' + error.schemaPath + ' -> ' + valueStrim(schemaValue));
-            }
-            if (error.dataPath) {
-                dataValue = jsonpointer.get(data, error.dataPath);
-                into.push(indent + '    field:  ' + error.dataPath + ' -> ' + xm.typeOf(dataValue) + ': ' + valueStrim(dataValue));
-            }
-        }
-
-        function getReport(obj, schema, result) {
-            var label = extractSchemaLabel(schema, 30);
-
-            var details = [];
-            if (!result) {
-                details.push('no result matched: ' + label);
-            } else {
-                if (result.valid) {
-                    details.push('schema matched: ' + label);
-                } else {
-                    details.push('schema NOT matched: ' + label + ' -> ' + valueStrim(obj, 30));
-
-                    var indent = '      ';
-                    if (result.error) {
-                        details.push(formatResult(details, result.error, obj, schema, indent));
-                    } else if (result.errors) {
-                        result.errors.forEach(function (error) {
-                            details.push(formatResult(details, error, obj, schema, indent));
-                        });
-                    }
-                }
-
-                if (result.missing.length === 1) {
-                    details.push('missing 1 schema: ' + extractSchemaLabel(result.missing[0]));
-                } else if (result.missing.length > 0) {
-                    details.push('missing ' + result.missing.length + ' schemas:');
-                    result.missing.forEach(function (missing) {
-                        details.push(extractSchemaLabel(missing));
-                    });
-                }
-            }
-            return details;
-        }
-        tv4.getReport = getReport;
-    })(xm.tv4 || (xm.tv4 = {}));
-    var tv4 = xm.tv4;
-})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     'use strict';
@@ -2714,6 +2127,7 @@ var tsd;
     var util = require('util');
     var AssertionError = require('assertion-error');
     var tv4 = require('tv4');
+    var reporter = require('tv4-reporter');
 
     var InstalledDef = (function () {
         function InstalledDef(path) {
@@ -2858,23 +2272,16 @@ var tsd;
                 };
             });
 
-            var res = tv4.validateResult(json, this._schema);
-            if (!res.valid || res.missing.length > 0) {
-                this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
-                return null;
-            }
+            this.validateJSON(json, this._schema);
+
             return json;
         };
 
-        Config.prototype.parseJSON = function (json) {
+        Config.prototype.parseJSON = function (json, label) {
             var _this = this;
             xm.assertVar(json, 'object', 'json');
 
-            var res = tv4.validateResult(json, this._schema);
-            if (!res.valid || res.missing.length > 0) {
-                this.log.warn(xm.tv4.getReport(json, this._schema, res).join('\n'));
-                throw (new Error('malformed config: doesn\'t comply with schema'));
-            }
+            this.validateJSON(json, this._schema, label);
 
             this._installed.clear();
 
@@ -2888,10 +2295,22 @@ var tsd;
                     var installed = new tsd.InstalledDef(filePath);
 
                     installed.commitSha = data.commit;
-
                     _this._installed.set(filePath, installed);
                 });
             }
+        };
+
+        Config.prototype.validateJSON = function (json, schema, label) {
+            label = (label || '<config json>');
+            var res = tv4.validateMultiple(json, schema);
+            if (!res.valid || res.missing.length > 0) {
+                xm.log.out.ln();
+                var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+                report.reportResult(report.createTest(schema, json, label, res, true), '   ');
+                xm.log.out.ln();
+                throw (new Error('malformed config: doesn\'t comply with schema'));
+            }
+            return json;
         };
         return Config;
     })();
@@ -3523,6 +2942,12 @@ var xm;
     })();
     xm.URLManager = URLManager;
 })(xm || (xm = {}));
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var git;
 (function (git) {
     'use strict';
@@ -3653,7 +3078,7 @@ var xm;
                 }
                 return defer.resolve(value);
             };
-            Q(runOne()).progress(defer.notify).fail(defer.notify);
+            Q(runOne()).progress(defer.notify).fail(defer.reject);
 
             return defer.promise;
         };
@@ -4093,8 +3518,7 @@ var xm;
     var fs = require('fs');
     var path = require('path');
     var tv4 = require('tv4');
-
-    xm.assertVar(xm.tv4.getReport, 'function', 'xm.tv4.getReport');
+    var reporter = require('tv4-reporter');
 
     var StringKoder = (function () {
         function StringKoder(encoding) {
@@ -4173,7 +3597,9 @@ var xm;
             if (this.schema) {
                 var res = tv4.validateResult(value, this.schema);
                 if (!res.valid || res.missing.length > 0) {
-                    throw new Error(xm.tv4.getReport(value, this.schema, res).join('\n'));
+                    var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+                    report.reportError(report.createTest(this.schema, value, null, res, true));
+                    throw res.error;
                 }
             }
         };
@@ -4618,6 +4044,11 @@ var xm;
                 }
                 req = HTTP.normalizeRequest(req);
 
+                if (this.track.logEnabled) {
+                    this.track.logger.inspect(this.request);
+                    this.track.logger.inspect(req);
+                }
+
                 this.track.start(CacheLoader.http_load);
 
                 d.notify('loading: ' + this.request.url);
@@ -4808,7 +4239,7 @@ var git;
             if (lock) {
                 xm.ObjectUtil.lockProps(this, lock);
             }
-            this.headers['User-Agent'] = this.label + '-' + this.formatVersion;
+            this.headers['User-Agent'] = 'gidorrah';
         };
 
         Object.defineProperty(GithubLoader.prototype, "verbose", {
@@ -6028,7 +5459,7 @@ var tsd;
                     return;
                 }
                 return xm.FileUtil.readJSONPromise(target).then(function (json) {
-                    _this.core.context.config.parseJSON(json);
+                    _this.core.context.config.parseJSON(json, target);
                     d.resolve(null);
                 });
             }).fail(d.reject).done();
@@ -7253,6 +6684,9 @@ var xm;
                 var option = this.expose.options.get(name);
                 if (option && !xm.isUndefined(option.default)) {
                     if (option.type) {
+                        if (typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
+                            return this.getDefault(name, xm.convertStringTo(this.argv[name], option.type));
+                        }
                         return xm.convertStringTo(this.argv[name], option.type);
                     }
                 }
@@ -8129,40 +7563,48 @@ var tsd;
 
     var path = require('path');
     var Q = require('q');
-    var FS = require('q-io/fs');
+    var FS = (require('q-io/fs'));
+
+    var miniwrite = require('miniwrite');
+    var ministyle = require('ministyle');
+    var miniio = require('../lib/miniwrite-io/miniio');
+    var minihtml = require('../lib/miniwrite-io/html');
 
     var Opt = tsd.cli.Opt;
     var Group = tsd.cli.Group;
     var Action = tsd.cli.Action;
 
     var output = new xm.StyledOut();
+    xm.log.out = output;
 
     tsd.styleMap = new xm.KeyValueMap();
 
     tsd.styleMap.set('no', function (ctx) {
-        output.useStyler(new xm.styler.NoStyler());
+        output.useStyle(ministyle.plain());
     });
     tsd.styleMap.set('plain', function (ctx) {
-        output.useStyler(new xm.styler.PlainStyler());
+        output.useStyle(ministyle.plain());
     });
     tsd.styleMap.set('ansi', function (ctx) {
-        output.useStyler(new xm.styler.ANSIStyler());
+        output.useStyle(ministyle.ansi());
     });
     tsd.styleMap.set('html', function (ctx) {
-        output.useStyler(new xm.styler.HTMLWrapStyler());
+        output.useStyle(ministyle.html(true));
+        output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
     });
     tsd.styleMap.set('css', function (ctx) {
-        output.useStyler(new xm.styler.CSSStyler());
+        output.useStyle(ministyle.css('', true));
+        output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
     });
     tsd.styleMap.set('dev', function (ctx) {
-        output.useStyler(new xm.styler.DevStyler());
+        output.useStyle(ministyle.dev());
     });
 
     function useColor(color, ctx) {
         if (tsd.styleMap.has(color)) {
             tsd.styleMap.get(color)(ctx);
         } else {
-            tsd.styleMap.get('no')(ctx);
+            tsd.styleMap.get('plain')(ctx);
         }
     }
     tsd.useColor = useColor;
@@ -8173,26 +7615,6 @@ var tsd;
         output.ln().report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln().ruler().ln();
 
         return Q.resolve();
-    }
-
-    var pleonasm;
-    var pleonasmPromise;
-
-    function loadPleonasm() {
-        if (pleonasmPromise) {
-            return pleonasmPromise;
-        }
-
-        return Q.resolve();
-    }
-
-    function pleo(input) {
-        input = input.substring(0, 6);
-        if (pleonasm) {
-            return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
-        } else {
-            return input;
-        }
     }
 
     function getContext(ctx) {
@@ -8359,7 +7781,7 @@ var tsd;
     }
 
     function init(ctx) {
-        return loadPleonasm();
+        return Q.resolve();
     }
 
     var defaultJobOptions = [Opt.config];
@@ -8460,7 +7882,9 @@ var tsd;
         }
 
         expose.before = function (cmd, ctx) {
-            return printPreviewNotice();
+            return Q.all([
+                printPreviewNotice()
+            ]);
         };
 
         expose.defineGroup(function (group) {
@@ -8631,6 +8055,8 @@ var tsd;
     Q.longStackSupport = true;
 
     require('source-map-support').install();
+
+    require('es6-shim');
 
     process.setMaxListeners(20);
 })(tsd || (tsd = {}));

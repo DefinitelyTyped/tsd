@@ -1,17 +1,19 @@
+/// <reference path="../../../typings/miniwrite/miniwrite.d.ts" />
+/// <reference path="../../../typings/ministyle/ministyle.d.ts" />
 /// <reference path="../ObjectUtil.ts" />
 /// <reference path="../assertVar.ts" />
-/// <reference path="../styler.ts" />
 /// <reference path="../encode.ts" />
-/// <reference path="writer.ts" />
 
 module xm {
 
 	var util = require('util');
 
-	/*
-	 StyledOut: composite log text writer with semantic chainable api and swappable components (unfunkable)
+	var miniwrite = <typeof MiniWrite> require('miniwrite');
+	var ministyle = <typeof MiniStyle> require('ministyle');
 
-	 wraps any xm.styler.Styler and xm.writer.TextWriter
+	/*
+	 StyledOut: composite text writer with semantic chainable api and swappable components (unfunkable)
+
 	 */
 	//TODO implement sub printer flow controls (indents, buffers, tables etc)
 	//TODO leverage (yet unimplemented) LineWriter indent-level and word wrap
@@ -26,8 +28,8 @@ module xm {
 	//TODO split further into semantics and structure
 	export class StyledOut {
 
-		private _styler:xm.styler.Styler;
-		private _writer:xm.writer.TextWriter;
+		private _style:MiniStyle.Style;
+		private _line:MiniWrite.Chars;
 
 		nibs = {
 			arrow: '-> ',
@@ -37,72 +39,80 @@ module xm {
 			none: '   '
 		};
 
-		constructor(writer:xm.writer.TextWriter = null, styler:xm.styler.Styler = null) {
-			this._writer = (writer || new xm.writer.ConsoleLineWriter());
-			this._styler = (styler || new xm.styler.ANSIStyler());
-
-			this._writer.start();
-
+		constructor(write?:MiniWrite.Line, style?:MiniStyle.Style) {
+			if (style) {
+				ministyle.assertMiniStyle(style);
+			}
+			if (write) {
+				miniwrite.assertMiniWrite(write);
+			}
+			this._style = (style || ministyle.ansi());
+			this._line = miniwrite.chars((write || miniwrite.log()));
 			xm.ObjectUtil.hidePrefixed(this);
 		}
 
 		// - - - - - core (inline) - - - - -
 
 		write(str:any):StyledOut {
-			this._writer.write(this._styler.plain(str));
+			this._line.write(this._style.plain(str));
 			return this;
 		}
 
 		// - - - - - core (line end) - - - - -
 
-		line(str:any):StyledOut {
-			this._writer.writeln(this._styler.plain(str));
+		line(str?:any):StyledOut {
+			if (arguments.length < 1 || typeof str === 'undefined') {
+				this._line.writeln('');
+			}
+			else {
+				this._line.writeln(this._style.plain(str));
+			}
 			return this;
 		}
 
 		//short sugar
 		ln():StyledOut {
-			this._writer.writeln(this._styler.zero());
+			this._line.writeln('');
 			return this;
 		}
 
 		// - - - - - semantic wrappers - - - - -
 
 		span(str:any):StyledOut {
-			this._writer.write(this._styler.plain(str));
+			this._line.write(this._style.plain(str));
 			return this;
 		}
 
 		block(str:any):StyledOut {
-			this._writer.writeln(this._styler.plain(str));
+			this._line.writeln(this._style.plain(str));
 			return this;
 		}
 
 		clear():StyledOut {
-			this._writer.writeln(this._styler.zero());
-			this._writer.writeln(this._styler.zero());
+			this._line.writeln('');
+			this._line.writeln('');
 			return this;
 		}
 
 		ruler():StyledOut {
-			this._writer.writeln('--------');
+			this._line.writeln('--------');
 			return this;
 		}
 
 		ruler2():StyledOut {
-			this._writer.writeln('----');
+			this._line.writeln('----');
 			return this;
 		}
 
 		h1(str:any):StyledOut {
-			this._writer.writeln(this._styler.accent(str));
+			this._line.writeln(this._style.accent(str));
 			this.ruler();
-			this._writer.writeln();
+			this._line.writeln('');
 			return this;
 		}
 
 		h2(str:any):StyledOut {
-			this._writer.writeln(this._styler.accent(str));
+			this._line.writeln(this._style.accent(str));
 			this.ruler();
 			return this;
 		}
@@ -110,12 +120,12 @@ module xm {
 		// - - - - - decoration styling (inline) - - - - -
 
 		plain(str:any):StyledOut {
-			this._writer.writeln(this._styler.plain(str));
+			this._line.writeln(this._style.plain(str));
 			return this;
 		}
 
 		accent(str:any):StyledOut {
-			this._writer.write(this._styler.accent(str));
+			this._line.write(this._style.accent(str));
 			return this;
 		}
 
@@ -123,24 +133,24 @@ module xm {
 
 		// entering the sanity/insanity twilight zone (lets push it, see what happens)
 		space():StyledOut {
-			this._writer.write(this._styler.plain(' '));
+			this._line.write(this._style.plain(' '));
 			return this;
 		}
 
 		// - - - - - status styling (inline) - - - - -
 
 		success(str:any):StyledOut {
-			this._writer.write(this._styler.success(str));
+			this._line.write(this._style.success(str));
 			return this;
 		}
 
 		warning(str:any):StyledOut {
-			this._writer.write(this._styler.warning(str));
+			this._line.write(this._style.warning(str));
 			return this;
 		}
 
 		error(str:any):StyledOut {
-			this._writer.write(this._styler.error(str));
+			this._line.write(this._style.error(str));
 			return this;
 		}
 
@@ -148,19 +158,19 @@ module xm {
 
 		//like success() but with emphasis and newline
 		ok(str:any):StyledOut {
-			this._writer.writeln(this._styler.ok(str));
+			this._line.writeln(this._style.success(str));
 			return this;
 		}
 
 		//like warning() but with emphasis and newline
 		warn(str:any):StyledOut {
-			this._writer.writeln(this._styler.warn(str));
+			this._line.writeln(this._style.warning(str));
 			return this;
 		}
 
 		//like error() but with emphasis and newline
 		fail(str:any):StyledOut {
-			this._writer.writeln(this._styler.fail(str));
+			this._line.writeln(this._style.error(str));
 			return this;
 		}
 
@@ -168,32 +178,32 @@ module xm {
 
 		cond(condition:boolean, str:any, alt?:any):StyledOut {
 			if (condition) {
-				this._writer.write(this._styler.plain(str));
+				this._line.write(this._style.plain(str));
 			}
 			else if (arguments.length > 2) {
-				this._writer.write(this._styler.plain(alt));
+				this._line.write(this._style.plain(alt));
 			}
 			return this;
 		}
 
 		alt(str:any, alt:any):StyledOut {
 			if (xm.isValid(str) && !/^\s$/.test(str)) {
-				this._writer.write(this._styler.plain(str));
+				this._line.write(this._style.plain(str));
 			}
 			else if (arguments.length > 1) {
-				this._writer.write(this._styler.plain(alt));
+				this._line.write(this._style.plain(alt));
 			}
 			return this;
 		}
 
 		inspect(value:any, depth:number = 4, showHidden:boolean = false):StyledOut {
-			this._writer.writeln(this._styler.plain(util.inspect(value, <any>{showHidden: showHidden, depth: depth})));
+			this._line.writeln(this._style.plain(util.inspect(value, <any>{showHidden: showHidden, depth: depth})));
 			return this;
 		}
 
 		//TODO add test?
 		stringWrap(str:string):StyledOut {
-			this._writer.write(this._styler.plain(xm.wrapIfComplex(str)));
+			this._line.write(this._style.plain(xm.wrapIfComplex(str)));
 			return this;
 		}
 
@@ -209,40 +219,40 @@ module xm {
 
 		//TODO add test/
 		label(label:string):StyledOut {
-			this._writer.write(this._styler.plain(xm.wrapIfComplex(label) + ': '));
+			this._line.write(this._style.plain(xm.wrapIfComplex(label) + ': '));
 			return this;
 		}
 
 		//TODO add test?
 		indent():StyledOut {
-			this._writer.write(this.nibs.none);
+			this._line.write(this.nibs.none);
 			return this;
 		}
 
 		//TODO add test?
 		bullet(accent:boolean = false):StyledOut {
 			if (accent) {
-				this._writer.write(this._styler.accent(this.nibs.bullet));
+				this._line.write(this._style.accent(this.nibs.bullet));
 			}
 			else {
-				this._writer.write(this._styler.plain(this.nibs.bullet));
+				this._line.write(this._style.plain(this.nibs.bullet));
 			}
 			return this;
 		}
 
 		//TODO add test?
 		index(num:any):StyledOut {
-			this._writer.write(this._styler.plain(String(num) + +': '));
+			this._line.write(this._style.plain(String(num) + +': '));
 			return this;
 		}
 
 		//TODO add test?
 		info(accent:boolean = false):StyledOut {
 			if (accent) {
-				this._writer.write(this._styler.accent(this.nibs.arrow));
+				this._line.write(this._style.accent(this.nibs.arrow));
 			}
 			else {
-				this._writer.write(this._styler.plain(this.nibs.arrow));
+				this._line.write(this._style.plain(this.nibs.arrow));
 			}
 			return this;
 		}
@@ -250,10 +260,10 @@ module xm {
 		//TODO add test?
 		report(accent:boolean = false):StyledOut {
 			if (accent) {
-				this._writer.write(this._styler.accent(this.nibs.double));
+				this._line.write(this._style.accent(this.nibs.double));
 			}
 			else {
-				this._writer.write(this._styler.plain(this.nibs.double));
+				this._line.write(this._style.plain(this.nibs.double));
 			}
 			return this;
 		}
@@ -262,39 +272,35 @@ module xm {
 
 		//activate super-plain mode
 		unfunk():StyledOut {
-			this.useStyler(new xm.styler.NoStyler());
+			this._line.flush();
+			this._style = ministyle.plain();
 			return this;
 		}
 
 		//flush writer
 		//TODO drop finalise() cargo-cult artifact? (could be usefull although migt as well go through .writer reference)
 		finalise():void {
-			this._writer.finalise();
-			//this._writer.start();
+			this._line.flush();
 		}
 
-		useWriter(writer:xm.writer.TextWriter):xm.StyledOut {
-			//beh, no interface check
-			xm.assertVar(writer, 'object', 'writer');
-			this._writer.finalise();
-			this._writer = writer;
-			this._writer.start();
+		useStyle(mini:MiniStyle.Style):xm.StyledOut {
+			ministyle.assertMiniStyle(mini);
+			this._style = mini;
 			return this;
 		}
 
-		useStyler(styler:xm.styler.Styler):xm.StyledOut {
-			//beh, no interface check
-			xm.assertVar(styler, 'object', 'styler');
-			this._styler = styler;
+		useWrite(mini:MiniWrite.Line):xm.StyledOut {
+			miniwrite.assertMiniWrite(mini);
+			this._line.useTarget(mini);
 			return this;
 		}
 
-		get writer():xm.writer.TextWriter {
-			return this._writer;
+		getWrite():MiniWrite.Chars {
+			return this._line;
 		}
 
-		get styler():xm.styler.Styler {
-			return this._styler;
+		getStyle():MiniStyle.Style {
+			return this._style;
 		}
 	}
 }

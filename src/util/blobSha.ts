@@ -33,7 +33,7 @@ module git {
 
 				return FS.read(filePath, {flags: 'rb'}).then((buffer:NodeBuffer) => {
 					if (buffer.length === 0) {
-						ctx.out.indent().error('empty file').line();
+						ctx.out.indent().error('empty file').ln();
 
 					}
 					var raw = buffer.toString('utf8');
@@ -42,18 +42,18 @@ module git {
 					var shaNormal = git.GitUtil.blobShaHex(new Buffer(normalised, 'utf8'), 'utf8');
 
 					if (shaRaw !== shaNormal) {
-						ctx.out.indent().success(shaRaw).line();
-						ctx.out.indent().error(shaNormal).line();
+						ctx.out.indent().success(shaRaw).ln();
+						ctx.out.indent().error(shaNormal).ln();
 						ctx.out.line(ansidiff.chars(xm.escapeControl(raw, true), xm.escapeControl(normalised, true)));
 					}
 					else {
-						ctx.out.indent().success(shaRaw).line();
-						ctx.out.indent().success(xm.escapeControl(raw, true)).line();
+						ctx.out.indent().success(shaRaw).ln();
+						ctx.out.indent().success(xm.escapeControl(raw, true)).ln();
 					}
 
 				});
 			})).then(() => {
-				ctx.out.info().ok('done!');
+				ctx.out.info().success('done!').ln();
 			}, (err) => {
 				ctx.out.info().error('error').inspect(err);
 			});

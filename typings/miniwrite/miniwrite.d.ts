@@ -2,69 +2,72 @@
 // Project: https://github.com/Bartvds/miniwrite/
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
+declare module MiniWrite {
 
-interface MiniWriteLine {
-	writeln(line:string):void;
-}
-interface MiniWriteEnable extends MiniWriteLine {
-	enabled:boolean;
-}
-interface MiniWriteChars extends MiniWriteEnable {
-	write(str:string):void;
-	flush(linesOnly?:boolean):void;
-	has():boolean;
-	textBuffer:string;
-	lineExp:RegExp;
-	useTarget:(write:MiniWriteLine):void
-	clear();
-}
-interface MiniWriteSplitter extends MiniWriteLine {
-	targets:MiniWriteLine[];
-}
-interface MiniWriteBuffer extends MiniWriteLine {
-	lines:string[];
-	concat(seperator?:string, indent?:string):string;
-	toString():string;
-	clear();
-}
-interface MiniWriteMulti extends MiniWriteEnable {
-	targets:MiniWriteLine[];
-}
-interface MiniWriteToggle extends MiniWriteEnable {
-	main:MiniWriteLine;
-	alt:MiniWriteLine;
-	active:MiniWriteLine;
-	swap():void;
-}
-interface MiniWritePeekCallback {
-	(line:string, mw:MiniWriteLine):string;
-}
-interface MiniWritePeek extends MiniWriteEnable {
-	target:MiniWriteLine;
-	callback:MiniWritePeekCallback;
-}
-declare module MiniWriteModule {
+	interface Line {
+		writeln(line:string):void;
+	}
+	interface Enable extends Line {
+		enabled:boolean;
+	}
+
+	interface Chars extends Enable {
+		write(str:string):void;
+		flush(linesOnly?:boolean):void;
+		has():boolean;
+		textBuffer:string;
+		lineExp:RegExp;
+		useTarget(write:Line):void;
+		clear();
+	}
+	interface Splitter extends Line {
+		targets:Line[];
+	}
+	interface Buffer extends Line {
+		lines:string[];
+		concat(seperator?:string, indent?:string):string;
+		toString():string;
+		clear();
+	}
+	interface Multi extends Enable {
+		targets:Line[];
+	}
+	interface Toggle extends Enable {
+		main:Line;
+		alt:Line;
+		active:Line;
+		swap():void;
+	}
+
+	interface PeekCallback {
+		(line:string, mw:Line):string;
+	}
+	interface Peek extends Enable {
+		target:Line;
+		callback:PeekCallback;
+	}
+
 	function assertMiniWrite(obj:any):void;
 	function isMiniWrite(obj:any):boolean;
 
 	function setBase(obj:any):void
 
-	function base():MiniWriteLine;
-	function chars(target:MiniWriteLine):MiniWriteChars;
-	function splitter(target:MiniWriteLine):MiniWriteSplitter;
+	function base():Line;
+	function chars(target:Line):Chars;
+	function splitter(target:Line):Splitter;
 
-	function buffer(patch?:any):MiniWriteBuffer;
-	function log(patch?:any):MiniWriteLine;
+	function buffer(patch?:any):Buffer;
+	function log(patch?:any):Line;
 
 	//TODO what to do with node stream?
-	function stream(nodeStream:any):MiniWriteLine;
+	function stream(nodeStream:any):Line;
 
-	function toggle(main:MiniWriteLine, alt?:MiniWriteLine):MiniWriteToggle;
-	function multi(targets?:MiniWriteLine[]):MiniWriteMulti;
-	function peek(target:MiniWriteLine, callback:MiniWritePeekCallback):MiniWritePeek;
+	function toggle(main:Line, alt?:Line):Toggle;
+	function multi(targets?:Line[]):Multi;
+	function peek(target:Line, callback:PeekCallback):Peek;
 
-	function grunt(grunt:any, verbose?:boolean, patch?:any):MiniWriteLine;
+	function grunt(grunt:any, verbose?:boolean, patch?:any):Line;
 }
 declare module "miniwrite" {
-export = MiniWriteModule;
+export = MiniWrite;
 }

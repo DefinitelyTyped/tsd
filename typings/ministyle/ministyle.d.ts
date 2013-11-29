@@ -3,62 +3,64 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-interface MiniStyle {
-	success(str:string):string;
-	accent(str:string):string;
-	warning(str:string):string;
-	error(str:string):string;
-	muted(str:string):string;
-	plain(str:string):string;
-}
-interface MiniStyleToggle {
-	enabled:boolean;
-	main:MiniStyle;
-	alt:MiniStyle;
-	active:MiniStyle;
-	swap():void;
-}
-interface MiniStyleStack {
-	enabled:boolean;
-	stack:MiniStyle[];
-}
-interface MiniStyleCSS {
-	prefix:string;
-}
-interface MiniStylePeek {
-	enabled:boolean;
-	stack:MiniStyle[];
-	main:MiniStyle;
-	alt:MiniStyle;
-	callback:MiniStylPeekCallback;
-}
-interface MiniStylPeekCallback {
-	(str , def , type, main, alt):string
-}
-declare module MiniStyleModule {
+declare module MiniStyle {
+	interface Style {
+		success(str:string):string;
+		accent(str:string):string;
+		warning(str:string):string;
+		error(str:string):string;
+		muted(str:string):string;
+		plain(str:string):string;
+	}
+
+	interface StyleEnable extends Style {
+		enabled:boolean;
+	}
+
+	interface StyleToggle extends StyleEnable {
+		main:Style;
+		alt:Style;
+		active:Style;
+		swap():void;
+	}
+	interface StyleStack extends StyleEnable {
+		stack:Style[];
+	}
+	interface StyleCSS extends StyleEnable {
+		prefix:string;
+	}
+	interface StylePeek extends StyleEnable {
+		main:Style;
+		alt:Style;
+		callback:StylePeekCallback;
+	}
+	interface StylePeekCallback {
+		(str:string , def:(str:string) => string , type:string, main:Style, alt:Style):string
+	}
+
 	function assertMiniStyle(obj:any):void;
 	function checkMiniStyle(obj:any):string[];
-	function isMiniStyle(obj:any):boolean;
+	function isSMiniStyle(obj:any):boolean;
 	function getStyleNames():string[];
 	function setBase(obj:any):void;
 	function escapeHTML(str:string):string;
 
-	function base(str:string):MiniStyle;
-	function plain(str:string):MiniStyle;
-	function ansi(str:string):MiniStyle;
-	function html(str:string):MiniStyle;
-	function css(str:string):MiniStyleCSS;
-	function dev(str:string):MiniStyle;
-	function empty(str:string):MiniStyle;
+	function base():Style;
+	function plain():Style;
+	function ansi():Style;
+	function html(escape?:boolean):Style;
+	function css(classPrefix?:string, escape?:boolean):StyleCSS;
+	function dev():Style;
+	function empty():Style;
 
-	function toggle():MiniStyleToggle;
-	function stack(items:MiniStyle[]):MiniStyleStack;
-	function peek(callback:MiniStylPeekCallback, main, alt):MiniStylePeek;
+	function toggle():StyleToggle;
+	function stack(items:Style[]):StyleStack;
+	function peek(callback:StylePeekCallback, main, alt):StylePeek;
 
-	function colorjs():MiniStyle;
-	function grunt():MiniStyle;
+	function colorjs():Style;
+	function grunt():Style;
 
 }
 declare module "ministyle" {
-export = MiniStyleModule;
+export = MiniStyle;
 }

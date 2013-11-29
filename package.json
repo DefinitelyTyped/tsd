@@ -49,25 +49,27 @@
     "optimist": "0.6.0",
     "colors": "0.6.1",
     "easy-table": "0.2.0",
-    "pleonasm": "1.0.0",
     "assertion-error": "~1.0.0",
     "source-map-support": "0.2.3",
     "jsesc": "~0.4.3",
     "json-pointer": "0.0.4",
     "date-utils": "~1.2.14",
     "weak-map": "~1.0.0",
-    "miniwrite": "git://github.com/Bartvds/miniwrite/#00ca8f7fd73946d249740e9f793715cf6c5a049b",
-    "tv4-reporter": "git://github.com/Bartvds/tv4-reporter/#09ac4b50ae2a300031e710d1cd41cd0fa5e3ecb3"
+    "ministyle": "0.1.0",
+    "miniwrite": "0.1.0",
+    "tv4-reporter": "0.0.2",
+    "es6-shim": "~0.9.1"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
+    "grunt": "~0.4.2",
     "grunt-cli": "0.1.9",
-    "gruntfile-gtx": "0.0.8",
+    "gruntfile-gtx": "git://github.com/Bartvds/gruntfile-gtx/#6de5afcd001525c07ef4691f51f160bd8b8389cb",
     "grunt-contrib-clean": "0.5.0",
     "grunt-contrib-copy": "0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
     "jshint-path-reporter": "0.1",
     "grunt-mocha-test": "~0.7.0",
+    "grunt-contrib-connect": "~0.5.0",
     "grunt-concurrent": "0.4.0",
     "grunt-tslint": "~0.3.2",
     "tslint-path-formatter": "0.1",
@@ -85,6 +87,6 @@
     "grunt-ts": "~1.4.0",
     "grunt-shell": "~0.5.0",
     "ansidiff": "~1.0.0",
-    "grunt-contrib-connect": "~0.5.0"
+    "time-grunt": "~0.2.3"
   }
 }

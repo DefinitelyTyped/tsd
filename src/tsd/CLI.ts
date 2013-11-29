@@ -16,7 +16,12 @@ module tsd {
 
 	var path = require('path');
 	var Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
+	var FS = (<typeof QioFS> require('q-io/fs'));
+
+	var miniwrite = <typeof MiniWrite> require('miniwrite');
+	var ministyle = <typeof MiniStyle> require('ministyle');
+	var miniio = require('../lib/miniwrite-io/miniio');
+	var minihtml = require('../lib/miniwrite-io/html');
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -27,28 +32,31 @@ module tsd {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var output = new xm.StyledOut();
+	xm.log.out = output;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export var styleMap = new xm.KeyValueMap<(ctx:xm.ExposeContext) => void>();
 
 	styleMap.set('no', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.NoStyler());
+		output.useStyle(ministyle.plain());
 	});
 	styleMap.set('plain', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.PlainStyler());
+		output.useStyle(ministyle.plain());
 	});
 	styleMap.set('ansi', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.ANSIStyler());
+		output.useStyle(ministyle.ansi());
 	});
 	styleMap.set('html', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.HTMLWrapStyler());
+		output.useStyle(ministyle.html(true));
+		output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 	});
 	styleMap.set('css', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.CSSStyler());
+		output.useStyle(ministyle.css('', true));
+		output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 	});
 	styleMap.set('dev', (ctx:xm.ExposeContext) => {
-		output.useStyler(new xm.styler.DevStyler());
+		output.useStyle(ministyle.dev());
 	});
 
 	export function useColor(color:string, ctx:xm.ExposeContext) {
@@ -56,7 +64,7 @@ module tsd {
 			styleMap.get(color)(ctx);
 		}
 		else {
-			styleMap.get('no')(ctx);
+			styleMap.get('plain')(ctx);
 		}
 	}
 
@@ -71,39 +79,6 @@ module tsd {
 		.ruler().ln();
 		//TODO implement version check / news service
 		return Q.resolve();
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	var pleonasm;
-	var pleonasmPromise;
-
-	function loadPleonasm():Q.Promise<void> {
-		if (pleonasmPromise) {
-			return pleonasmPromise;
-		}
-
-		return Q.resolve();
-
-		/*var d:Q.Deferred<void> = Q.defer();
-		 pleonasmPromise = d.promise;
-
-		 pleonasm = require('pleonasm');
-		 pleonasm.onload = () => {
-		 xm.log('pleonasm.onload');
-		 d.resolve();
-		 };
-		 return d.promise;*/
-	}
-
-	function pleo(input) {
-		input = input.substring(0, 6);
-		if (pleonasm) {
-			return '\'' + pleonasm.encode(input, '_', '_').code + '\'';
-		}
-		else {
-			return input;
-		}
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -295,7 +270,7 @@ module tsd {
 
 	//very basic (async) init stuff
 	function init(ctx:xm.ExposeContext):Q.Promise<void> {
-		return loadPleonasm();
+		return Q.resolve();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -415,7 +390,9 @@ module tsd {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.before = (cmd:xm.ExposeCommand, ctx:xm.ExposeContext) => {
-			return printPreviewNotice();
+			return Q.all([
+				printPreviewNotice()
+			]);
 		};
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -557,7 +534,7 @@ module tsd {
 									return;
 								}
 								output.ln().info().span('running:').space().accent(action).ln();
-								return queryActions.run(action, (run:tsd.JobSelectionAction) =>  {
+								return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 									return run(ctx, job, selection).progress(notify);
 								}, true).then(() => {
 									//whut?

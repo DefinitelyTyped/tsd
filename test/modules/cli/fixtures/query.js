@@ -3,14 +3,14 @@ var lib = require('../../../lib/lib');
 
 var tests = {
 	'async': {
-		//debug: true,
-		selector: {
+		debug: true,
+		query: {
 			pattern: 'async'
 		}
 	}
 };
 
 module.exports = {
-	command: ['search'],
+	command: ['query'],
 	tests: tests
 };

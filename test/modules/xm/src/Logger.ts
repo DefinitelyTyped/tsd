@@ -1,6 +1,5 @@
 ///<reference path="../../../globals.ts" />
 ///<reference path="../../../../src/xm/StatCounter.ts" />
-///<reference path="../../../../src/xm/styler.ts" />
 ///<reference path="../../../../src/xm/io/FileUtil.ts" />
 
 describe('xm.Logger', () => {
@@ -8,6 +7,9 @@ describe('xm.Logger', () => {
 
 	var assert:Chai.Assert = require('chai').assert;
 	var path = require('path');
+
+	var miniwrite = <typeof MiniWrite> require('miniwrite');
+	var ministyle = <typeof MiniStyle>  require('ministyle');
 
 	var testPath = path.resolve('test', 'modules', 'xm');
 
@@ -58,42 +60,39 @@ describe('xm.Logger', () => {
 
 		it('disabled', () => {
 			var log = xm.getLogger();
-			var buffer = new xm.writer.BufferWriter();
-			log.out = new xm.StyledOut(buffer, new xm.styler.DevStyler());
+			var buffer = miniwrite.buffer();
+			log.out = new xm.StyledOut(buffer, ministyle.dev());
 			log.enabled = false;
 
 			writeStandard(log);
 
-			assertLoggerBuffer('disabled', buffer.buffer);
+			assertLoggerBuffer('disabled', buffer.concat('\n'));
 		});
 
 		it('basic', () => {
 			var log = xm.getLogger();
-			var buffer = new xm.writer.BufferWriter();
-			log.out = new xm.StyledOut(buffer, new xm.styler.DevStyler());
+			var buffer = miniwrite.buffer();
+			log.out = new xm.StyledOut(buffer, ministyle.dev());
 
 			writeStandard(log);
 
-			assertLoggerBuffer('basic', buffer.buffer);
+			assertLoggerBuffer('basic', buffer.concat('\n'));
 		});
 
 		it('label', () => {
 			var log = xm.getLogger('x y z');
-			var buffer = new xm.writer.BufferWriter();
-			log.out = new xm.StyledOut(buffer, new xm.styler.DevStyler());
+			var buffer = miniwrite.buffer();
+			log.out = new xm.StyledOut(buffer, ministyle.dev());
 
 			writeStandard(log);
 
-			assertLoggerBuffer('label', buffer.buffer);
+			assertLoggerBuffer('label', buffer.concat('\n'));
 		});
 
 		it('multi', () => {
 			var log = xm.getLogger();
-			var buffer = new xm.writer.BufferWriter();
-			log.out = new xm.StyledOut(buffer, new xm.styler.DevStyler());
-			var expected = [
-				'aa'
-			].join('\n') + '\n';
+			var buffer = miniwrite.buffer();
+			log.out = new xm.StyledOut(buffer, ministyle.dev());
 
 			log('aa', 1, 2);
 			log.log('bb', 1, 2);
@@ -104,7 +103,7 @@ describe('xm.Logger', () => {
 			log.inspect({a: {b: 2}}, 0, 'foo');
 			log.inspect({a: {b: 2}}, 1, 'foo');
 
-			assertLoggerBuffer('multi', buffer.buffer);
+			assertLoggerBuffer('multi', buffer.concat('\n'));
 		});
 	});
 });

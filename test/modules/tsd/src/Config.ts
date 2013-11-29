@@ -26,19 +26,27 @@ describe('Config', () => {
 	describe('schema-validate own toJSON()', () => {
 		it('return null on bad ref', () => {
 			config.ref = '$$$$$';
-			assert.isNull(config.toJSON());
+			assert.throws(() => {
+				config.toJSON();
+			});
 		});
 		it('return null on bad path', () => {
 			config.path = '';
-			assert.isNull(config.toJSON());
+			assert.throws(() => {
+				config.toJSON();
+			});
 		});
 		it('return null on bad version', () => {
 			config.version = '321xyz';
-			assert.isNull(config.toJSON());
+			assert.throws(() => {
+				config.toJSON();
+			});
 		});
 		it('return null on bad repo', () => {
 			config.repo = 'X ^ _ ^  X';
-			assert.isNull(config.toJSON());
+			assert.throws(() => {
+				config.toJSON();
+			});
 		});
 	});
 
@@ -55,7 +63,7 @@ describe('Config', () => {
 				it('parses "' + name + '"', () => {
 					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + name + '.json');
 
-					config.parseJSON(json);
+					config.parseJSON(json, name);
 					helper.assertConfig(config, json, name);
 				});
 			});
@@ -79,7 +87,7 @@ describe('Config', () => {
 					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 					assert.throws(() => {
 						//xm.log(json);
-						config.parseJSON(json);
+						config.parseJSON(json, (<string>tuple[0]));
 
 						//borky cast
 					}, (<string>tuple[1]));

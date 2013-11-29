@@ -8,3 +8,5 @@
 ///<reference path="../typings/date-utils/date-utils.d.ts" />
 ///<reference path="../typings/semver/semver.d.ts" />
 ///<reference path="../typings/fixes.d.ts" />
+///<reference path="../typings/miniwrite/miniwrite.d.ts" />
+///<reference path="../typings/ministyle/ministyle.d.ts" />

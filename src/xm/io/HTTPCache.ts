@@ -482,6 +482,12 @@ module xm {
 				}
 				req = HTTP.normalizeRequest(req);
 
+
+				if (this.track.logEnabled) {
+					this.track.logger.inspect(this.request);
+					this.track.logger.inspect(req);
+				}
+
 				this.track.start(CacheLoader.http_load);
 
 				d.notify('loading: ' + this.request.url);

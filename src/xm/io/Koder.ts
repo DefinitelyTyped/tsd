@@ -5,7 +5,6 @@
 ///<reference path="../hash.ts" />
 ///<reference path="../typeOf.ts" />
 ///<reference path="FileUtil.ts" />
-///<reference path="../tv4Tool.ts" />
 /*
  * imported from typescript-xm package
  *
@@ -20,9 +19,8 @@ module xm {
 	var fs = require('fs');
 	var path = require('path');
 	var tv4:TV4 = require('tv4');
+	var reporter = require('tv4-reporter');
 
-	//don't loose buried function (refactoring)
-	xm.assertVar(xm.tv4.getReport, 'function', 'xm.tv4.getReport');
 
 	export interface IContentKoder<T> {
 		decode(content:NodeBuffer):Q.Promise<T>;
@@ -106,7 +104,9 @@ module xm {
 				//validate schema
 				var res:TV4SingleResult = tv4.validateResult(value, this.schema);
 				if (!res.valid || res.missing.length > 0) {
-					throw new Error(xm.tv4.getReport(value, this.schema, res).join('\n'));
+					var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+					report.reportError(report.createTest(this.schema, value, null, res, true));
+					throw res.error;
 				}
 			}
 		}

@@ -33,17 +33,17 @@ describe('CLI Query', () => {
 			args.push.apply(args, data.command);
 		}
 
-		if (test.selector) {
-			if (test.selector.pattern) {
-				args.push(test.selector.pattern);
+		if (test.query) {
+			if (test.query.pattern) {
+				args.push(test.query.pattern);
 			}
-			if (test.selector.overwrite) {
+			if (test.query.overwrite) {
 				args.push('--overwrite');
 			}
-			if (test.selector.resolve) {
+			if (test.query.resolve) {
 				args.push('--resolve');
 			}
-			if (test.selector.save) {
+			if (test.query.save) {
 				args.push('--save');
 			}
 		}
@@ -123,8 +123,8 @@ describe('CLI Query', () => {
 		});
 	});
 
-	describe('search', () => {
-		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
+	describe('query', () => {
+		var data = require(path.join(helper.getDirNameFixtures(), 'query'));
 
 		xm.eachProp(data.tests, (test, name) => {
 			var debug = test.debug;
@@ -133,7 +133,7 @@ describe('CLI Query', () => {
 			}
 
 			it.eventually('test "' + name + '"', () => {
-				var info = applyTestInfo('search', name, data);
+				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 
 				return helper.runCLI(info.modBuildCLI, args, debug).then((result:helper.RunCLIResult) => {

@@ -6,6 +6,9 @@ module tsd {
 
 	require('source-map-support').install();
 
+	// future is now
+	require('es6-shim');
+
 	//TODO verify process.setMaxListeners() still needs to be this high
 	process.setMaxListeners(20);
 }

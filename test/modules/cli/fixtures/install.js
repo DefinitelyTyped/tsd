@@ -8,20 +8,20 @@ var installOpts = {
 };
 
 var tests = {
-	'async': lib.extend(installOpts, {
+	/*'async': lib.extend(installOpts, {
 		save: true,
-		selector: {
+	    query: {
 			pattern: 'async'
 		}
 	}),
 	'async-async': lib.extend(installOpts, {
-		selector: {
+		query: {
 			pattern: 'async/async'
 		}
-	})
+	})*/
 };
 
 module.exports = {
-	command: ['install'],
+	command: ['query'],
 	tests: tests
 };

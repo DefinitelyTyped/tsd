@@ -1,0 +1,6 @@
+
+>> tsd 0.5.2-alpha.5 (preview)
+--------
+
+-> async/async.d.ts : <head> : 2013-11-18 04:17
+

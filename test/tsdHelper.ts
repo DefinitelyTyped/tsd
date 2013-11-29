@@ -66,7 +66,8 @@ module helper {
 		stderrFile:string;
 
 		testDump:string;
-		selectorDump:string;
+		queryDump:string;
+		optionsDump:string;
 		argsDump:string;
 
 		resultExpect:string;
@@ -122,7 +123,8 @@ module helper {
 
 		info.testDump = path.join(dumpDir, 'test.json');
 		info.argsDump = path.join(dumpDir, 'args.json');
-		info.selectorDump = path.join(dumpDir, 'selector.json');
+		info.queryDump = path.join(dumpDir, 'query.json');
+		info.optionsDump = path.join(dumpDir, 'options.json');
 
 		info.modBuildDir = modBuildDir;
 		//TODO decide to assert these?

@@ -37,7 +37,7 @@ module git {
 			if (lock) {
 				xm.ObjectUtil.lockProps(this, lock);
 			}
-			this.headers['User-Agent'] = this.label + '-' + this.formatVersion;
+			this.headers['User-Agent'] = 'gidorrah'; //this.label + '-' + this.formatVersion;
 		}
 
 		set verbose(verbose:boolean) {

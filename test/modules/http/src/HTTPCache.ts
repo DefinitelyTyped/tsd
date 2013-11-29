@@ -31,7 +31,7 @@ describe('xm.http', () => {
 		var info = new helper.HttpTest();
 		info.storeTmpDir = path.join(helper.getDirNameTmp(), name);
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
-		info.wwwHTTP = helper.getProjectDevURL() + '/test/modules/http/www/';
+		info.wwwHTTP = 'http://localhost:9090/';
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
 		return info;
 	}
@@ -87,7 +87,7 @@ describe('xm.http', () => {
 				opts.cacheWrite = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				cache.verbose = true;
 
 				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
 					assert.instanceOf(obj, xm.http.CacheObject, 'obj');

@@ -12,22 +12,16 @@ module.exports = function (grunt) {
 		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
 	}
 	var cpuCores = require('os').cpus().length;
-	var devServer = {
-		name: 'localhost',
-		port: 63342
-	};
-	process.env['PROJECT_DEV_URL'] = 'http://' + devServer.name + ':' + devServer.port + '/tsd-origin';
-
 	//grunt.log.writeln(util.inspect(process.env));
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
-	gtx.autoLoad();
+	gtx.loadAuto();
 	gtx.loadNpm([
 		'mocha-unfunk-reporter'
 	]);
 
 	//defaults and one-off tasks
-	gtx.addConfig({
+	gtx.config({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
@@ -61,6 +55,7 @@ module.exports = function (grunt) {
 		},
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
+			dump: ['test/modules/**/dump'],
 			build: ['build/*.js', 'build/*.js.map']
 		},
 		copy: {
@@ -74,7 +69,9 @@ module.exports = function (grunt) {
 				reporter: 'mocha-unfunk-reporter',
 				timeout: 3000
 			},
-			integrity: ['test/integrity.js']
+			integrity: ['test/integrity.js'],
+			// some extra js tests
+			specs: ['test/specs/*.js']
 		},
 		mocha_unfunk: {
 			dev: {
@@ -94,7 +91,7 @@ module.exports = function (grunt) {
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},
-			blobSha: {
+			specjsblobSha: {
 				src: ['src/util/blobSha.ts'],
 				out: 'util/blobSha.js'
 			},
@@ -107,9 +104,20 @@ module.exports = function (grunt) {
 		shell: {
 			demo_help: {
 				command: [
-					'node',
-					'./build/cli.js',
-					'-h'
+					'node', './build/cli.js',
+					'-h',
+					'--capture'
+				].join(' '),
+				options: {
+					stdout: true
+				}
+			},
+			demo_html: {
+				command: [
+					'node', './build/cli.js',
+					'-h',,
+					'--capture', './media/demo-help.html',
+					'--color', 'html'
 				].join(' '),
 				options: {
 					stdout: true
@@ -118,13 +126,11 @@ module.exports = function (grunt) {
 			//use this to test stuff
 			dev_hist: {
 				command: [
-					'node',
-					'./build/cli.js',
-					'history',
+					'node', './build/cli.js',
+					'query',
 					'angular',
-					'-s',
-					'-o',
-					'-r',
+					'--history',
+					'--resolve',
 					'--dev'
 				].join(' '),
 				options: {
@@ -152,32 +158,33 @@ module.exports = function (grunt) {
 	gtx.define('moduleTest', function (macro, id) {
 		var testPath = 'test/modules/' + id + '/';
 
-		macro.newTask('clean', [testPath + 'tmp/**/*']);
-		macro.newTask('ts', {
+		macro.add('clean', [testPath + 'tmp/**/*']);
+		macro.add('ts', {
 			options: {},
 			src: [testPath + 'src/**/*.ts'],
 			out: testPath + 'tmp/' + id + '.test.js'
 		});
-		macro.newTask('tslint', {
+		macro.add('tslint', {
 			src: [testPath + 'src/**/*.ts']
 		});
-		/*if (macro.getParam('http', 0) > 0) {
-			macro.newTask('connect', {
+		if (macro.getParam('http', 0) > 0) {
+			macro.add('connect', {
 				options: {
 					port: macro.getParam('http'),
 					base: testPath + 'www/'
 				}
 			});
-		}*/
-		macro.runTask('mocha_unfunk:dev');
-		macro.newTask('mochaTest', {
+		}
+		macro.run('mocha_unfunk:dev');
+		macro.add('mochaTest', {
 			options: {
 				timeout: macro.getParam('timeout', 3000)
 			},
 			src: [testPath + 'tmp/**/*.test.js']
 		});
 		macro.tag('module');
-		//TODO expand gruntfile-gtx to support a run-once dependency (like tslint:source or tslint:helper)
+
+		//TODO implements new gruntfile-gtx once() feature (run-once dependencies, like tslint:source or tslint:helper)
 	}, {
 		concurrent: 1 //cpuCores
 	});
@@ -189,11 +196,11 @@ module.exports = function (grunt) {
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
-	/* //waiting for fix in grunt-contrib-connect + node-exit
+	//waiting for fix in grunt-contrib-connect + node-exit
 	gtx.create('http', 'moduleTest', {
 		timeout: longTimer,
-		http: 0
-	}, 'lib');*/
+		http: 9090
+	}, 'lib');
 
 	// assemble!
 	gtx.alias('prep', [
@@ -227,6 +234,8 @@ module.exports = function (grunt) {
 	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
 	gtx.alias('run', ['build', 'shell:dev_hist']);
 
+	gtx.alias('specjs', ['mochaTest:specs']);
+
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');
 	gtx.alias('edit_02', 'gtx:api');
@@ -235,7 +244,7 @@ module.exports = function (grunt) {
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
 	gtx.alias('edit_07', 'gtx:http');
-	gtx.alias('edit_08', 'ts:blobSha');
+	gtx.alias('edit_08', 'specjs');
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();
