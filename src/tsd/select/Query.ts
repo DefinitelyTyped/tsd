@@ -3,6 +3,7 @@
 ///<reference path="InfoMatcher.ts" />
 ///<reference path="DateMatcher.ts" />
 ///<reference path="VersionMatcher.ts" />
+///<reference path="CommitMatcher.ts" />
 
 module tsd {
 	'use strict';
@@ -17,12 +18,10 @@ module tsd {
 		versionMatcher:VersionMatcher;
 		dateMatcher:DateMatcher;
 		infoMatcher:InfoMatcher;
+		commitMatcher:CommitMatcher;
 
 		parseInfo:boolean = false;
 		loadHistory:boolean = false;
-
-		//TODO implement this
-		commitSha:string;
 
 		constructor(pattern?:string) {
 			xm.assertVar(pattern, 'string', 'pattern', true);
@@ -41,7 +40,7 @@ module tsd {
 		}
 
 		get requiresHistory():boolean {
-			return !!(this.dateMatcher || this.commitSha || this.loadHistory);
+			return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
 		}
 
 		toString():string {

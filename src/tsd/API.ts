@@ -57,6 +57,7 @@ module tsd {
 
 			this.core = new tsd.Core(this.context);
 			this.track = new xm.EventLog('api', 'API');
+			this.track.unmuteActions([xm.Level.notify]);
 
 			xm.ObjectUtil.lockProps(this, ['core', 'track']);
 
@@ -159,6 +160,15 @@ module tsd {
 			}, d.reject).done();
 
 			return d.promise;
+		}
+
+		/*
+		 get rate-info
+		 */
+		getRateInfo():Q.Promise<git.GitRateInfo> {
+			var p = this.core.repo.api.getRateInfo();
+			this.track.promise(p, 'rate_info');
+			return p;
 		}
 
 		/*

@@ -20,8 +20,8 @@ module git {
 
 		cache:xm.http.HTTPCache;
 
-		label:string = 'GithubLoader';
-		formatVersion:string = '0.0.1';
+		label:string = 'github-loader';
+		formatVersion:string = '0.0.0';
 
 		headers = {};
 
@@ -37,7 +37,15 @@ module git {
 			if (lock) {
 				xm.ObjectUtil.lockProps(this, lock);
 			}
-			this.headers['User-Agent'] = 'gidorrah'; //this.label + '-' + this.formatVersion;
+			// required to have some header
+			this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+		}
+
+		copyHeadersTo(target:any, source?:any) {
+			source = (source || this.headers);
+			Object.keys(source).forEach((name) => {
+				target[name] = source[name];
+			});
 		}
 
 		set verbose(verbose:boolean) {

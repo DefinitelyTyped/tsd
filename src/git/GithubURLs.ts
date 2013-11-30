@@ -15,6 +15,7 @@ module git {
 	export class GithubURLs extends xm.URLManager {
 
 		private _base:string = 'https://github.com/{owner}/{project}';
+		private _apiBase:string = 'https://api.github.com';
 		private _api:string = 'https://api.github.com/repos/{owner}/{project}';
 		private _raw:string = 'https://raw.github.com/{owner}/{project}';
 
@@ -40,6 +41,7 @@ module git {
 			this.addTemplate('apiCommit', this._api + '/commits/{commit}');
 			this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
 			this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
+			this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
 
 			xm.ObjectUtil.hidePrefixed(this);
 		}
@@ -104,6 +106,10 @@ module git {
 			return this.getURL('apiBlob', {
 				blob: sha
 			});
+		}
+
+		rateLimit():string {
+			return this.getURL('rateLimit');
 		}
 	}
 }

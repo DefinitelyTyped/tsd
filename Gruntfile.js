@@ -115,8 +115,7 @@ module.exports = function (grunt) {
 			demo_html: {
 				command: [
 					'node', './build/cli.js',
-					'-h',,
-					'--capture', './media/demo-help.html',
+					'-h',
 					'--color', 'html'
 				].join(' '),
 				options: {
@@ -184,7 +183,7 @@ module.exports = function (grunt) {
 		});
 		macro.tag('module');
 
-		//TODO implements new gruntfile-gtx once() feature (run-once dependencies, like tslint:source or tslint:helper)
+		//TODO implement new gruntfile-gtx once() feature (run-once dependencies, like tslint:source or tslint:helper)
 	}, {
 		concurrent: 1 //cpuCores
 	});
@@ -196,7 +195,6 @@ module.exports = function (grunt) {
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
-	//waiting for fix in grunt-contrib-connect + node-exit
 	gtx.create('http', 'moduleTest', {
 		timeout: longTimer,
 		http: 9090

@@ -25,6 +25,7 @@ describe('xm.http', () => {
 
 	var assert:Chai.Assert = require('chai').assert;
 	var path = require('path');
+	var fs = require('fs');
 
 	function getInfo(name:string):helper.HttpTest {
 		assert.isString(name, 'name');
@@ -73,12 +74,16 @@ describe('xm.http', () => {
 	describe('cache', () => {
 		describe('simple http get', () => {
 			var test:helper.HttpTest = getInfo('simple');
+			var url = test.wwwHTTP + 'lorem.txt';
+			var src = path.join(test.wwwDir, 'lorem.txt');
+			var date = new Date();
+			var expected;
+			before(() => {
+				fs.utimesSync(src, date, date);
 
+				expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+			});
 			beforeEach(() => {
-				var url = test.wwwHTTP;
-
-				request = new xm.http.Request(url + 'lorem.txt', {});
-				request.lock();
 			});
 
 			it.eventually('should get a file', () => {
@@ -87,19 +92,20 @@ describe('xm.http', () => {
 				opts.cacheWrite = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = true;
+				cache.verbose = false;
+
+				request = new xm.http.Request(url, {});
+				request.lock();
 
 				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
 					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
 					assert.ok(obj.info);
 
+					assert.ok(obj.response, 'obj.response');
+					assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+
 					assert.instanceOf(obj.body, Buffer, '');
-
-					var expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
-					assert.isString(expected, 'expected');
-
 					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-
 				});
 			});
 
@@ -110,17 +116,92 @@ describe('xm.http', () => {
 				opts.remoteRead = false;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				cache.verbose = false;
+
+				request = new xm.http.Request(url, {});
+				request.lock();
 
 				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
 					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
 					assert.ok(obj.info);
 
 					assert.instanceOf(obj.body, Buffer, 'obj.body');
+					assert.notOk(obj.response, 'obj.response');
 
-					var expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
-					assert.isString(expected, 'expected');
+					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
+				});
+			});
 
+			it.eventually('should get a file from http-cache if specified', () => {
+				opts = new xm.http.CacheOpts();
+				opts.cacheRead = true;
+				opts.cacheWrite = false;
+				opts.remoteRead = true;
+
+				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+				cache.verbose = true;
+
+				request = new xm.http.Request(url, {});
+				request.checkHttp = true;
+				request.lock();
+
+				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
+					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
+					assert.ok(obj.info);
+
+					assert.ok(obj.response, 'obj.response');
+					assert.strictEqual(obj.response.status, 304, 'obj.response.status');
+
+					assert.instanceOf(obj.body, Buffer, 'obj.body');
+					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
+				});
+			});
+
+			it.eventually('should get a file from http if stale', () => {
+				opts = new xm.http.CacheOpts();
+				opts.cacheRead = true;
+				opts.cacheWrite = false;
+				opts.remoteRead = true;
+
+				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+				cache.verbose = true;
+
+				request = new xm.http.Request(url, {});
+				request.maxAge = -24 * 3600 * 1000;
+				request.lock();
+
+				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
+					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
+					assert.ok(obj.info);
+
+					assert.ok(obj.response, 'obj.response');
+					assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+
+					assert.instanceOf(obj.body, Buffer, 'obj.body');
+					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
+				});
+			});
+
+			it.eventually('should get a file from cache if within age', () => {
+				opts = new xm.http.CacheOpts();
+				opts.cacheRead = true;
+				opts.cacheWrite = false;
+				opts.remoteRead = true;
+
+				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
+				cache.verbose = true;
+
+				request = new xm.http.Request(url, {});
+				request.maxAge = 24 * 3600 * 1000;
+				request.lock();
+
+				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
+					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
+					assert.ok(obj.info);
+
+					assert.notOk(obj.response, 'obj.response');
+
+					assert.instanceOf(obj.body, Buffer, 'obj.body');
 					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 				});
 			});

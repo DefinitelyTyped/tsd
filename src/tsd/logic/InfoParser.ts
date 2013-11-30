@@ -57,7 +57,7 @@ module tsd {
 				return this.parseDefInfo(file).progress(d.notify);
 			})).then((list) => {
 				d.resolve(list);
-			}, d.reject, d.notify);
+			}, d.reject);
 
 			return d.promise;
 		}

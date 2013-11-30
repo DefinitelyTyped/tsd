@@ -24,9 +24,9 @@ describe('git.GithubAPI', () => {
 		repo = null;
 	});
 
-	describe.only('getBranches', () => {
+	describe('getBranches', () => {
 		it.eventually('should cache and return data from store', () => {
-			repo.api.verbose = true;
+			//repo.api.verbose = true;
 			repo.api.cache.track.reset();
 			assert.strictEqual(repo.api.cache.track.getItems().length, 0, 'pretest stats');
 

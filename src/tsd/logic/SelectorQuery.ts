@@ -58,6 +58,14 @@ module tsd {
 							throw new Error('match count ' + res.definitions.length + ' over api limit ' + options.limitApi);
 						}
 						return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
+							if (query.commitMatcher) {
+								//crude reset
+								res.selection = [];
+								res.definitions.forEach((def:tsd.Def) => {
+									res.selection = query.commitMatcher.filter(def.history);
+								});
+								res.definitions = tsd.DefUtil.getDefs(res.selection);
+							}
 							if (query.dateMatcher) {
 								//crude reset
 								res.selection = [];

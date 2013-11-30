@@ -47,6 +47,9 @@ module tsd {
 				opt.type = 'flag';
 				opt.global = true;
 				opt.note = ['experimental'];
+				opt.apply = (value, ctx:xm.ExposeContext) => {
+					ctx.out.warning('--progress events are not 100% yet');
+				};
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {

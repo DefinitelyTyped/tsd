@@ -34,6 +34,7 @@ module xm {
 		nibs = {
 			arrow: '-> ',
 			double: '>> ',
+			single: ' > ',
 			bullet: ' - ',
 			edge: ' | ',
 			none: '   '
@@ -137,6 +138,11 @@ module xm {
 			return this;
 		}
 
+		sp():StyledOut {
+			this._line.write(this._style.plain(' '));
+			return this;
+		}
+
 		// - - - - - status styling (inline) - - - - -
 
 		success(str:any):StyledOut {
@@ -157,18 +163,21 @@ module xm {
 		// - - - - - status finalisation (line end) - - - - -
 
 		//like success() but with emphasis and newline
+		//TODO ditch ok()
 		ok(str:any):StyledOut {
 			this._line.writeln(this._style.success(str));
 			return this;
 		}
 
 		//like warning() but with emphasis and newline
+		//TODO ditch warn()
 		warn(str:any):StyledOut {
 			this._line.writeln(this._style.warning(str));
 			return this;
 		}
 
 		//like error() but with emphasis and newline
+		//TODO ditch warn()
 		fail(str:any):StyledOut {
 			this._line.writeln(this._style.error(str));
 			return this;
@@ -264,6 +273,17 @@ module xm {
 			}
 			else {
 				this._line.write(this._style.plain(this.nibs.double));
+			}
+			return this;
+		}
+
+		//TODO add test?
+		note(accent:boolean = false):StyledOut {
+			if (accent) {
+				this._line.write(this._style.accent(this.nibs.single));
+			}
+			else {
+				this._line.write(this._style.plain(this.nibs.single));
 			}
 			return this;
 		}

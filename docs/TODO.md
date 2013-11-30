@@ -51,17 +51,17 @@ Basics commands
 * :m:	Add **init** (new json with repo/branch)
 * :m:	Add **settings** (show config info)
 * :m:	Add **reinstall** (from config)
-* :b:	Add **index** (list definition overview) (use search * for now)
+* :m:	Add **index** (list definition overview) (search * is compacted)
 * :vs:	Consider unifying local remote selectors
 
 Remote selector commands
 
 * :m:	Add **search** (search definitions)
 * :m:	Add **install** (install definitions)
-* :o:	Add **direct** (install from commit sha, or blob)
+* :m:	Add **direct** (install from commit sha, or blob) (via commit option)
 * :m:	Add **info** (parse file content)
 * :m:	Add **history** (list commit history)
-* :ng:	Add **details** ~~(detailed commit history)~~ (add param for history)
+* :ng:	Add **details** ~~(detailed commit history)~~ (make part of detail level option)
 * :m:	Enhance deps (list dependencies), make recursive and display
 
 Local selector commands
@@ -85,14 +85,16 @@ Cache commands
 
 * :b:	Add purge (or flush)
 * :b:	Add dump (see cache content)
+* :m:	Add rate (github api rate limit info)
 
 Selector
 
-* :x:	Improve globbing/RegExp (clean and more then just wrapping) :zap:
-* :m:	Add support for semver :zap:
-* :m:	Add support for multiple Selectors (blend results in select()) :zap:
+* :x:	Improve globbing/RegExp (maybe use [minimatch](https://github.com/isaacs/minimatch)?) :zap:
+* :m:	Add support for semver
+* :m:	Add support for multiple Selectors (blend results in select())
 * :x:	Add InfoMatcher to Selector / select() :zap:
-* :m:	Add search-by-date to history-command, add as DateMatcher to Selector / select()
+* :m:	Add search-by-date ~~to history-command,~~ add as DateMatcher to Selector / select()
+* :m:	Add search-by-commit to Selector / select()
 
 Command options
 
@@ -106,7 +108,7 @@ Command options
 
 Functionality
 
-* :o2:	Report rate-limit properly
+* :m:	Report rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
 * :b:	Add fancy promise progress events + CLI display (install etc)
 
@@ -116,7 +118,7 @@ CLI
 * :m:   Improve Expose to order/group commands :zap:
 * :x:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
-* :x:	Add TSD release/updates news to CLI console (periodically pull json from github) :zap:
+* :x:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
 
 API
@@ -128,14 +130,15 @@ API
 
 Data model/repo
 
-* :x:	Harden JSON import
+* :x:	Harden JSON import (there is some prototype schema in `./schema`)
 * :id:	Consider decoupling from Github json format (abstract service)
-* :id:	Consider adapting to work from a git-checkout (abstract service)
+* :id:	Consider adapting core to work from a git-checkout (abstract service)
 
 Info
 
 * :m:	Import tests for header parser from tsd-deftools @bartvds
 * :o:	Improve `DefInfo`/`Parser` to extract more info from more files :zap:
+* :id:	Consider dropping  `DefInfo`/`Parser` complications for cruder as-is report? :zap:
 
 Config
 
@@ -153,27 +156,32 @@ Cache
 
 * :m:	Decide on user caching directory: home / AppData like npm
 * :m:	Decide on cache folder version naming scheme
-* :b:	Add cache auto-refresh; for the non-unique queries like `getBranch`
+* :m:	Add cache auto-refresh; for the non-unique queries like `getBranch`
 * :m:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate limit timeout info)
 * :a:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :id:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
 * :ab:	Consider g-zip for caches
+* :b:	Improve HTTPCache with node streams + gzip/deflate
 
 Internals
 
 * :ng:	~~Try recalculating sha1 hash from content~~ Not practical
-* :ng:	Add local-changes detector using the hash / sha
+* :ng:	Add local-changes detector using the blob hash / sha :zap:
+* :o:	Add local-changes detector using custom hashes (like `xm.hashNormalines()` in `xm.hash.ts`) :zap:
 * :m:	Change Context objects to use `Q`/`Q-io` and not auto-create folders at init
-* :m:	Decide if API, Core etc need(more) race condition hardening
+* :m:	Decide if API, Core etc need(more) race condition hardening (some in loaders)
+* :b:	Don't keep file content/blobs in memory (load on demand + burst cache) 
 * :m:	Consider if API and/or Core need to be split into command classes `/tsd/logics`
 * :vs:	Consider adding timeout (with option)
 * :m:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
-* :id:	Consider moving to class model with promise-based methods
-* :id:	Consider adding class based façade to model, with promise-based methods
-* :id:	Consider global store for JSON pointers and RegExps etc
+* :ng:	Consider moving to class model with promise-based methods 
+	* :id:	Could be cool but maybe needs bluebird for speed
+* :m:	Consider adding class based façade to model
+* :ng:	Consider global store for JSON pointers and RegExps etc (meh)
 * :m:	Add xm ~~interface~~ class for debug/log/event tracking (`xm.EventLog`)
-* :ab:	Use promise notifiy/progress for event tracking
+* :ab:	Use promise notifiy/progress for event tracking (being implements)
+	* :a:	Needs a standard model (event-like) 
 * :m:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
 Technical
@@ -195,6 +203,7 @@ Cleanup
 
 Publishing
 
+* :a:	Make sure we keep `./deploy/repository.json` for `v0.3.0`.
 * :o2:	Add npm pre-publish tests hook :zap:
 * :o2:	Add test setup to test :zap:
 * :x:	Add git pre-commit test hook :zap:

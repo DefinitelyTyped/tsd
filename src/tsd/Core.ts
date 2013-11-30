@@ -68,8 +68,8 @@ module tsd {
 			]);
 
 			//lets be gents
-			//this.repo.api.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
-			this.repo.raw.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
+			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
 			this.track = new xm.EventLog('core', 'Core');
 			this.verbose = this.context.verbose;

@@ -58,7 +58,7 @@ module tsd {
 				});
 			})).then(() => {
 				d.resolve(written);
-			}, d.reject, d.notify);
+			}, d.reject);
 
 			return d.promise;
 		}

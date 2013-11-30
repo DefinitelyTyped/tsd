@@ -54,7 +54,8 @@ module xm {
 		static utf8 = new StringKoder('utf8');
 	}
 
-	export class ByteKoder<NodeBuffer> implements IContentKoder<NodeBuffer> {
+	//this looks weird...
+	export class ByteKoder implements IContentKoder<NodeBuffer> {
 
 		decode(content:NodeBuffer):Q.Promise<NodeBuffer> {
 			return Q().then(() => {

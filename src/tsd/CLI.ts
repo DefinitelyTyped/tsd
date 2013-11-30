@@ -32,7 +32,6 @@ module tsd {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var output = new xm.StyledOut();
-	xm.log.out = output;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -49,11 +48,17 @@ module tsd {
 	});
 	styleMap.set('html', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.html(true));
-		output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+		output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+		// same but seperate
+		xm.log.out.useStyle(ministyle.html(true));
+		xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
 	});
 	styleMap.set('css', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.css('', true));
 		output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+		// same but seperate
+		xm.log.out.useStyle(ministyle.css('', true));
+		xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 	});
 	styleMap.set('dev', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.dev());
@@ -116,6 +121,9 @@ module tsd {
 	}
 
 	function reportProgress(obj:any):xm.StyledOut {
+		if (obj instanceof git.GitRateInfo) {
+			return printRateInfo(obj);
+		}
 		return output.info().inspect(obj, 3);
 	}
 
@@ -182,7 +190,7 @@ module tsd {
 			output.clear();
 
 			//TODO full indent message
-			output.indent().line(file.commit.message.subject);
+			output.indent().note(true).line(file.commit.message.subject);
 			output.ln();
 		}
 		else if (!skipNull) {
@@ -262,8 +270,31 @@ module tsd {
 			var file:tsd.DefVersion = result.written.get(path);
 			output.bullet(true).glue(printFile(file)).ln();
 		});
-		output.ln().report().span('install').space().success('success!').ln();
+		output.ln().report(true).span('install').space().success('success!').ln();
 		return output;
+	}
+
+	function printRateInfo(info:git.GitRateInfo):xm.StyledOut {
+		output.report(true).span('rate-limit').sp();
+		//TODO clean this up
+		if (info.limit > 0) {
+			if (info.remaining === 0) {
+				output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').error(info.getResetString());
+			}
+			else if (info.remaining < 15) {
+				output.warn('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').warn(info.getResetString());
+			}
+			else if (info.remaining < info.limit - 15) {
+				output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').accent(info.getResetString());
+			}
+			else  {
+				output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').success(info.getResetString());
+			}
+		}
+		else {
+			output.success(info.getResetString());
+		}
+		return output.clear();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -351,8 +382,10 @@ module tsd {
 			for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
 				job.query.addNamePattern(ctx.getArgAt(i));
 			}
-			job.query.commitSha = ctx.getOpt(Opt.commit);
 
+			if (ctx.hasOpt(Opt.commit)) {
+				job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
+			}
 			if (ctx.hasOpt(Opt.semver)) {
 				job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
 			}
@@ -516,9 +549,11 @@ module tsd {
 
 								printDependencies(file);
 
-								file.def.history.slice(0).forEach((file:tsd.DefVersion) => {
-									printFileCommit(file);
-								});
+								if (ctx.getOpt(Opt.history)) {
+									file.def.history.slice(0).reverse().forEach((file:tsd.DefVersion) => {
+										printFileCommit(file);
+									});
+								}
 							});
 
 							//run actions
@@ -533,7 +568,8 @@ module tsd {
 									output.ln().report().warning('unknown action:').space().span(action).ln();
 									return;
 								}
-								output.ln().info().span('running:').space().accent(action).ln();
+								output.ln().info(true).span('running').space().accent(action).ln();
+
 								return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 									return run(ctx, job, selection).progress(notify);
 								}, true).then(() => {
@@ -541,7 +577,7 @@ module tsd {
 								}, (err) => {
 									output.ln().report().span(action).space().error('error!').ln();
 									reportError(err, false);
-								}, getProgress(ctx));
+								}, notify);
 							});
 						}
 					});
@@ -557,11 +593,30 @@ module tsd {
 			cmd.options = [Opt.overwrite];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.reinstall(job.options).progress(getProgress(ctx)).then((result:tsd.InstallResult) => {
+					output.ln().info(true).span('running').space().accent(cmd.name).ln();
+
+					return job.api.reinstall(job.options).progress(notify).then((result:tsd.InstallResult) => {
 						printInstallResult(result);
 					});
-				}, reportError, getProgress(ctx));
+				}, reportError, notify);
+			};
+		});
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'rate';
+			cmd.label = 'Check rate-limit';
+			cmd.groups = [Group.support];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
+				return getAPIJob(ctx).then((job:Job) => {
+					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
+						printRateInfo(info);
+					});
+				}, reportError, notify);
 			};
 		});
 

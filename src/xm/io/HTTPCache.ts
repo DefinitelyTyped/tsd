@@ -19,10 +19,13 @@ module xm {
 	var Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
+	var tv4:TV4 = require('tv4');
 	var FS:typeof QioFS = require('q-io/fs');
 	var HTTP:typeof QioHTTP = require('q-io/http');
 
 	require('date-utils');
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	function getISOString(input:any):string {
 		var date:Date;
@@ -35,8 +38,24 @@ module xm {
 		return (date ? date.toISOString() : null);
 	}
 
+	function distributeDir(base:string, name:string, levels:number, chunk:number = 1):string {
+		name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
+		if (levels === 0) {
+			return base;
+		}
+		var arr = [base];
+		var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
+		for (var i = 0; i < steps; i += chunk) {
+			arr.push(name.substr(i, chunk));
+		}
+		return path.join.apply(path, arr);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	export module http {
 
+		// a represent a single object in the cache
 		export class CacheObject {
 			request:Request;
 			storeDir:string;
@@ -55,11 +74,13 @@ module xm {
 			}
 		}
 
+		// hold some interesting meta data
 		export class ResponseInfo {
 			status:number = 0;
 			headers:any = {};
 		}
 
+		// meta data to keep on disk
 		export interface CacheInfo {
 			url:string;
 			key:string;
@@ -70,6 +91,9 @@ module xm {
 			contentChecksum:string;
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		// mini json-schema
 		var typeString = {'type': 'string'};
 		var typeStringNull = {anyOf: [
 			{'type': 'string'},
@@ -77,9 +101,11 @@ module xm {
 		]};
 		var typeObject = {'type': 'object'};
 
+		//
 		export var infoSchema = {
 			title: 'CacheInfo',
 			type: 'object',
+			required: null,
 			properties: {
 				url: typeString,
 				contentType: typeString,
@@ -89,6 +115,17 @@ module xm {
 				contentChecksum: typeString
 			}
 		};
+		infoSchema.required = Object.keys(infoSchema.properties);
+
+		export function assertInfo(value:any):void {
+			var res:TV4SingleResult = tv4.validateResult(value, infoSchema);
+			if (!res.valid || res.missing.length > 0) {
+				throw res.error;
+			}
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		export enum CacheMode {
 			forceLocal,
 			forceRemote,
@@ -98,7 +135,9 @@ module xm {
 		}
 
 		export class CacheOpts {
+			//TODO integrate compressStore with CacheInfo and streaming downloader
 			compressStore:boolean = false;
+
 			splitKeyDir:number = 0;
 
 			cacheRead = true;
@@ -143,13 +182,18 @@ module xm {
 			}
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		// single request, hashes to a unique id
 		export class Request {
 			key:string;
+			locked:boolean;
 
 			url:string;
 			headers:any;
 
-			locked:boolean;
+			maxAge:number;
+			checkHttp:boolean;
 
 			constructor(url:string, headers?:any) {
 				this.url = url;
@@ -162,12 +206,14 @@ module xm {
 					url: this.url,
 					headers: this.headers
 				});
-				xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'locked']);
-				//clone before freeze?
+				xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'maxAge', 'locked']);
+				//TODO maybe we should clone before freeze?
 				xm.ObjectUtil.deepFreeze(this.headers);
 				return this;
 			}
 		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		export class HTTPCache {
 
@@ -181,7 +227,9 @@ module xm {
 			infoKoder:IContentKoder<CacheInfo>;
 
 			private remove = new xm.KeyValueMap<number>();
-			jobTimeout = 5000;
+
+			// auto clear
+			jobTimeout:number = 1000;
 
 			private _init:Q.Promise<void>;
 
@@ -192,6 +240,7 @@ module xm {
 				this.storeDir = storeDir;
 				this.opts = (opts || new CacheOpts());
 				this.track = new xm.EventLog('http_cache', 'HTTPCache');
+				this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
 
 				this.infoKoder = new JSONKoder<CacheInfo>(infoSchema);
 			}
@@ -201,6 +250,7 @@ module xm {
 				xm.assert(request.locked, 'request must be lock()-ed {a}', request.url);
 
 				var d:Q.Deferred<CacheObject> = Q.defer();
+				this.track.start(HTTPCache.get_object, request.url);
 				this.track.promise(d.promise, HTTPCache.get_object);
 
 				this.init().then(() => {
@@ -209,7 +259,7 @@ module xm {
 						job = this.jobs.get(request.key);
 						this.track.skip(HTTPCache.get_object);
 
-						return job.getObject().then(d.resolve);
+						return job.getObject().progress(d.notify).then(d.resolve);
 					}
 					else {
 						job = new CacheLoader(this, request);
@@ -219,7 +269,6 @@ module xm {
 						this.track.start(HTTPCache.get_object);
 
 						return job.getObject().progress(d.notify).then((value:any) => {
-							//TODO drop loader from stash after a while
 							this.track.complete(HTTPCache.get_object);
 							d.resolve(value);
 						});
@@ -232,14 +281,16 @@ module xm {
 
 			private scheduleRelease(key:string):void {
 				if (this.jobs.has(key)) {
-					var t;
 					if (this.remove.has(key)) {
 						clearTimeout(this.remove.get(key));
 					}
 					this.remove.set(key, setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
-						this.track.logger.status(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
+						//TODO why both?
+						this.track.logger.debug(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
+
 						this.jobs.remove(key);
+
 					}, this.jobTimeout));
 				}
 			}
@@ -283,6 +334,8 @@ module xm {
 			}
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		export interface IObjectValidator {
 			assert(object:CacheObject):void
 		}
@@ -293,6 +346,34 @@ module xm {
 			}
 
 			static main = new SimpleValidator();
+		}
+
+
+		export class CacheValidator implements IObjectValidator {
+			assert(object:CacheObject):void {
+				//assertInfo(object.info);
+				//nothing more?
+			}
+
+			static main = new CacheValidator();
+		}
+		export class CacheAgeValidator implements IObjectValidator {
+			maxAgeMili:number = 0;
+
+			constructor(maxAgeMili?:number) {
+				this.maxAgeMili = maxAgeMili;
+			}
+
+			assert(object:CacheObject):void {
+				assertInfo(object.info);
+				xm.assertVar(object.info.httpModified, 'string', 'httpModified');
+
+				var date:Date = new Date(object.info.httpModified);
+				if (xm.isNumber(this.maxAgeMili)) {
+					var compare = new Date();
+					xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
+				}
+			}
 		}
 
 		export class ChecksumValidator implements IObjectValidator {
@@ -306,6 +387,14 @@ module xm {
 			static main = new ChecksumValidator();
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		//TODO rework downloader to write directly to disk using streams (maybe drop q-io for downloading)
+		// - this may require a switch on whether we want to update disk
+		// - see old slimer-js cache downlaoder (request.js + fs.createWriteStream + gunzip )
+		// - pipe switched on header: https://gist.github.com/nickfishman/5515364
+		// - integrate with CacheOpts.compressStore
+		//TODO rework this to allow to keep stale content if we can't get new
 		export class CacheLoader {
 
 			static get_object = 'get_object';
@@ -314,13 +403,19 @@ module xm {
 			static cache_write = 'cache_write';
 			static cache_remove = 'cache_remove';
 			static http_load = 'http_load';
+			static local_info_bad = 'local_info_bad';
+			static local_info_empty = 'local_info_empty';
+			static local_info_malformed = 'local_info_malformed';
+			static local_body_bad = 'local_body_bad';
+			static local_body_empty = 'local_body_empty';
 			static local_cache_hit = 'local_cache_hit';
 			static http_cache_hit = 'http_cache_hit';
 
 			cache:HTTPCache;
 			request:Request;
 			object:CacheObject;
-			cacheValidator:IObjectValidator;
+			infoCacheValidator:IObjectValidator;
+			bodyCacheValidator:IObjectValidator;
 			track:xm.EventLog;
 
 			private _defer:Q.Deferred<CacheObject>;
@@ -328,12 +423,19 @@ module xm {
 			constructor(cache:HTTPCache, request:Request) {
 				this.cache = cache;
 				this.request = request;
-				this.cacheValidator = ChecksumValidator.main;
+
+				this.bodyCacheValidator = ChecksumValidator.main;
+
+				if (this.cache.opts.remoteRead) {
+					this.infoCacheValidator = new CacheAgeValidator(request.maxAge);
+				}
+				else {
+					this.infoCacheValidator = new CacheValidator();
+				}
 
 				this.object = new CacheObject(request);
-				//TODO apply cache opts (splitKeyDir)
-				//this.object.storeDir = path.join(this.cache.storeDir, this.request.key.charAt(0), this.request.key.charAt(1));
-				this.object.storeDir = this.cache.storeDir;
+				this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+
 				this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
 				this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
@@ -342,11 +444,16 @@ module xm {
 				xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
 			}
 
-			config(cacheValidator?:IObjectValidator):CacheLoader {
-				this.cacheValidator = (cacheValidator || this.cacheValidator);
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-				return this;
+			private canUpdate():boolean {
+				if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
+					return true;
+				}
+				return false;
 			}
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
 			getObject():Q.Promise<CacheObject> {
 				//cache/load flow, the clousure  is only called when no matching keyTerm was found (or cache was locked)
@@ -363,19 +470,21 @@ module xm {
 					this._defer = null;
 				};
 
-				var checkHTTPCache = false;
-
-				//logic flow
+				// check the cache
 				this.cacheRead().progress(this._defer.notify).then(() => {
-					if (this.object.body && !checkHTTPCache) {
+					if (this.object.body && !this.request.checkHttp) {
 						this._defer.notify('using local cache: ' + this.request.url);
+
 						this._defer.resolve(this.object);
 						return;
 					}
-					return this.httpLoad(checkHTTPCache).progress(this._defer.notify).then(() => {
+
+					// lets load it
+					return this.httpLoad(true).progress(this._defer.notify).then(() => {
 						if (!xm.isValid(this.object.body)) {
 							throw new Error('no result body: ' + this.object.request.url);
 						}
+						this._defer.notify('fetched remote: ' + this.request.url);
 						this._defer.resolve(this.object);
 					});
 				}).fail((err) => {
@@ -395,9 +504,23 @@ module xm {
 				var d:Q.Deferred<void> = Q.defer();
 				this.track.promise(d.promise, CacheLoader.cache_read);
 
-				this.readInfo().then(() => {
+				this.readInfo().progress(d.notify).then(() => {
 					if (!this.object.info) {
 						throw new Error('no or invalid info object');
+					}
+					try {
+						this.infoCacheValidator.assert(this.object);
+					}
+					catch (err) {
+						// either bad or just stale
+						this.track.event(CacheLoader.local_info_bad, 'cache-info unsatisfactory', err);
+						d.notify('cache info unsatisfactory: ' + err);
+						//this.track.logger.inspect(err);
+
+						//TODO rework this to allow to keep stale content if request fails (see note above class)
+
+						this.object.info = null;
+						throw err;
 					}
 
 					return FS.read(this.object.bodyFile, {flags: 'rb'}).then((buffer:NodeBuffer) => {
@@ -409,56 +532,32 @@ module xm {
 					});
 				}).then(() => {
 					//validate it
-					if (this.object.body) {
-						try {
-							this.cacheValidator.assert(this.object);
-							//valid local cache hit
-							this.track.event(CacheLoader.local_cache_hit);
-							d.resolve();
-							return;
-						}
-						catch (err) {
-							this.track.logger.error('cache invalid');
-							this.track.logger.inspect(err);
-							this.object.body = null;
-							this.object.bodyChecksum = null;
-							throw err;
-						}
+					try {
+						this.bodyCacheValidator.assert(this.object);
+						//valid local cache hit
+						this.track.event(CacheLoader.local_cache_hit);
+						d.resolve();
+						return;
+					}
+					catch (err) {
+						//this is bad
+						this.track.error(CacheLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
+						this.track.logger.error('cache invalid');
+						this.track.logger.inspect(err);
+						this.object.body = null;
+						this.object.bodyChecksum = null;
+						throw err;
 					}
 				}).fail((err) => {
 					//clean up bad cache
-					return this.cacheRemove().then(d.resolve, d.reject);
+					return this.cacheRemove().then(d.resolve, d.reject, d.notify);
 				}).done();
 
 				return d.promise;
 			}
 
-			private readInfo():Q.Promise<void> {
-				var d:Q.Deferred<void> = Q.defer();
-				this.track.promise(d.promise, CacheLoader.info_read);
-
-				FS.isFile(this.object.infoFile).then((isFile) => {
-					if (!isFile) {
-						return null;
-					}
-					return FS.read(this.object.infoFile, {flags: 'rb'}).then((buffer:NodeBuffer) => {
-						if (buffer.length === 0) {
-							return null;
-						}
-						return this.cache.infoKoder.decode(buffer).then((info:CacheInfo) => {
-							//TODO do we need this test?
-							xm.assert((info.url === this.request.url), 'info.url {a} is not {e}', info.url, this.request.url);
-
-							this.object.info = info;
-						});
-					});
-				}).then(() => {
-					d.resolve();
-				}, d.reject).done();
-				return d.promise;
-			}
-
-			private httpLoad(httpCache:boolean) {
+			// rtfm: https://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
+			private httpLoad(httpCache:boolean = true) {
 				if (!this.cache.opts.remoteRead) {
 					this.track.skip(CacheLoader.http_load);
 					return Q().thenResolve();
@@ -466,40 +565,49 @@ module xm {
 				var d:Q.Deferred<void> = Q.defer();
 				this.track.promise(d.promise, CacheLoader.http_load);
 
+				// assemble request
 				var req = HTTP.normalizeRequest(this.request.url);
 				Object.keys(this.request.headers).forEach((key) => {
-					req.headers[key] = this.request.headers[key];
+					req.headers[key] = String(this.request.headers[key]).toLowerCase();
 				});
-				//TODO verify cache headers
-				if (this.object.info && httpCache) {
+
+				// set cache headers
+				if (this.object.info && this.object.body && httpCache) {
 					if (this.object.info.httpETag) {
-						req.headers['etag'] = this.object.info.httpETag;
+						req.headers['if-none-match'] = this.object.info.httpETag;
 					}
 					if (this.object.info.httpModified) {
-						//TODO this seems oddd
-						req.headers['last-modified'] = new Date(this.object.info.httpModified);
+						//TODO verify/fix date format
+						req.headers['if-modified-since'] = new Date(this.object.info.httpModified);
 					}
 				}
-				req = HTTP.normalizeRequest(req);
+				// we should always do always do this
+				//req.headers['accept-encoding'] = 'gzip, deflate';
 
+				// cleanup
+				req = HTTP.normalizeRequest(req);
 
 				if (this.track.logEnabled) {
 					this.track.logger.inspect(this.request);
 					this.track.logger.inspect(req);
 				}
-
 				this.track.start(CacheLoader.http_load);
 
 				d.notify('loading: ' + this.request.url);
 
+				// do the actual request
 				var httpPromise = HTTP.request(req).then((res:QioHTTP.Response) => {
-					this.track.status(CacheLoader.http_load, String(res.status));
 					d.notify('status: ' + this.request.url + ' ' + String(res.status));
 
 					if (this.track.logEnabled) {
-						this.track.logger.status(res.status, this.request.url);
+						this.track.logger.status(this.request.url + ' ' + String(res.status));
 						this.track.logger.inspect(res.headers);
 					}
+
+					this.object.response = new ResponseInfo();
+					this.object.response.status = res.status;
+					this.object.response.headers = res.headers;
+
 					if (res.status < 200 || res.status >= 400) {
 						this.track.error(CacheLoader.http_load);
 						throw new Error('unexpected status code: ' + res.status + ' on ' + this.request.url);
@@ -513,15 +621,18 @@ module xm {
 						}
 						//cache hit!
 						this.track.event(CacheLoader.http_cache_hit);
-						return;
-					}
-					if (!res.body) {
-						throw new Error('flow error: http 304 but no local info on ' + this.request.url);
+
+						return this.cacheWrite(true);
 					}
 
-					this.object.response = new ResponseInfo();
-					this.object.response.status = res.status;
-					this.object.response.headers = res.headers;
+					if (!res.body) {
+						// shouldn't we test
+						throw new Error('flow error: http 304 but no local info on ' + this.request.url);
+					}
+					if (res.body && this.object.info && httpCache) {
+						// we send cache headers but we got a body
+						// meh!
+					}
 
 					return res.body.read().then((buffer:NodeBuffer) => {
 						if (buffer.length === 0) {
@@ -543,36 +654,16 @@ module xm {
 						d.notify('complete: ' + this.request.url + ' ' + String(res.status));
 						this.track.complete(CacheLoader.http_load);
 
-						return this.cacheWrite();
-					}).then(() => {
-						d.resolve();
-					}, d.reject);
-				}).done();
+						return this.cacheWrite(false).progress(d.notify);
+					});
+				}).then(() => {
+					d.resolve();
+				}, d.reject).done();
 
 				return d.promise;
 			}
 
-			private copyInfo(res:QioHTTP.Response, checksum:string) {
-				var info:CacheInfo = <CacheInfo>{};
-				this.object.info = info;
-				info.url = this.request.url;
-				info.key = this.request.key;
-				info.contentType = res.headers['content-type'];
-				info.httpETag = res.headers['etag'] || null;
-				info.httpModified = getISOString(res.headers['last-modified']);
-				info.cacheCreated = getISOString(Date.now());
-				info.contentChecksum = checksum;
-			}
-
-			private updateInfo(res:QioHTTP.Response, checksum:string) {
-				var info = this.object.info;
-				info.contentType = res.headers['content-type'];
-				info.httpETag = res.headers['etag'] || null;
-				info.httpModified = getISOString(res.headers['last-modified']);
-				info.contentChecksum = checksum;
-			}
-
-			private cacheWrite():Q.Promise<void> {
+			private cacheWrite(cacheWasFresh:boolean):Q.Promise<void> {
 				if (!this.cache.opts.cacheWrite) {
 					this.track.skip(CacheLoader.cache_write);
 					return Q().thenResolve();
@@ -590,13 +681,46 @@ module xm {
 						d.reject(new Error('wont write empty info file ' + this.object.infoFile));
 						return;
 					}
-					return Q.all([
-						FS.write(this.object.infoFile, info, {flags: 'wb'}),
-						FS.write(this.object.bodyFile, this.object.body, {flags: 'wb'})
-					]).fail((err) => {
+					// assemble some writes
+					var write = [];
+					if (!cacheWasFresh) {
+						if (this.object.body.length === 0) {
+							d.reject(new Error('wont write empty body file ' + this.object.bodyFile));
+							return;
+						}
+						write.push(xm.FileUtil.mkdirCheckQ(path.dirname(this.object.bodyFile), true).then(() => {
+							return FS.write(this.object.bodyFile, this.object.body, {flags: 'wb'});
+						}).then(() => {
+							this.track.event(CacheLoader.cache_write, 'written file to cache');
+						}));
+					}
+					else {
+						this.track.skip(CacheLoader.cache_write, 'cache was fresh');
+					}
+					write.push(xm.FileUtil.mkdirCheckQ(path.dirname(this.object.infoFile), true).then(() => {
+						return FS.write(this.object.infoFile, info, {flags: 'wb'});
+					}));
+					// track em
+					return Q.all(write).fail((err) => {
 						this.track.error(CacheLoader.cache_write, 'file write', err);
 						//TODO clean things up?
 						throw err;
+					}).then(() => {
+						// ghost stat to fix weird empty file glitch (voodoo)
+						return Q.all([
+							FS.stat(this.object.bodyFile).then((stat) => {
+								if (stat.size === 0) {
+									this.track.error(CacheLoader.cache_write, 'written zero body bytes');
+									d.notify(new Error('written zero body bytes'));
+								}
+							}),
+							FS.stat(this.object.infoFile).then((stat) => {
+								if (stat.size === 0) {
+									this.track.error(CacheLoader.cache_write, 'written zero info bytes');
+									d.notify(new Error('written zero info bytes'));
+								}
+							})
+						]);
 					});
 				}).then(d.resolve, d.reject).done();
 
@@ -604,6 +728,7 @@ module xm {
 			}
 
 			private cacheRemove():Q.Promise<void> {
+				// maybe less strict check?
 				if (!this.canUpdate()) {
 					return Q.resolve(null);
 				}
@@ -615,11 +740,51 @@ module xm {
 				});
 			}
 
-			private canUpdate():boolean {
-				if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
-					return true;
-				}
-				return false;
+			private copyInfo(res:QioHTTP.Response, checksum:string) {
+				var info:CacheInfo = <CacheInfo>{};
+				this.object.info = info;
+				info.url = this.request.url;
+				info.key = this.request.key;
+				info.cacheCreated = getISOString(Date.now());
+				this.updateInfo(res, checksum);
+			}
+
+			private updateInfo(res:QioHTTP.Response, checksum:string) {
+				var info = this.object.info;
+				info.contentType = res.headers['content-type'];
+				info.httpETag = res.headers['etag'] || null;
+				info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
+				info.contentChecksum = checksum;
+			}
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+			private readInfo():Q.Promise<void> {
+				var d:Q.Deferred<void> = Q.defer();
+				this.track.promise(d.promise, CacheLoader.info_read);
+
+				FS.isFile(this.object.infoFile).then((isFile) => {
+					if (!isFile) {
+						return null;
+					}
+					return FS.read(this.object.infoFile, {flags: 'rb'}).then((buffer:NodeBuffer) => {
+						if (buffer.length === 0) {
+							this.track.event(CacheLoader.local_info_empty, 'empty info file');
+							return null;
+						}
+						return this.cache.infoKoder.decode(buffer).then((info:CacheInfo) => {
+							//TODO do we need this test?
+							xm.assert((info.url === this.request.url), 'info.url {a} is not {e}', info.url, this.request.url);
+							this.object.info = info;
+						}).fail((err) => {
+							this.track.event(CacheLoader.local_info_malformed, 'mlaformed info file');
+							throw err;
+						});
+					});
+				}).then(() => {
+					d.resolve();
+				}, d.reject).done();
+				return d.promise;
 			}
 
 			private removeFile(target:string):Q.Promise<void> {
@@ -639,6 +804,7 @@ module xm {
 						});
 					});
 				}).fail(d.reject).done();
+
 				return d.promise;
 			}
 

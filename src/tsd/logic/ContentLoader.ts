@@ -87,8 +87,8 @@ module tsd {
 			this.track.promise(d.promise, 'content_load_bulk');
 
 			Q.all(list.map((file:DefVersion) => {
-				return this.loadContent(file);
-			})).progress(d.notify).then((list) => {
+				return this.loadContent(file).progress(d.notify);
+			})).then((list) => {
 				d.resolve(list);
 			}, d.reject);
 
@@ -129,10 +129,10 @@ module tsd {
 			list = tsd.DefUtil.uniqueDefs(list);
 
 			Q.all(list.map((file:Def) => {
-				return this.loadHistory(file);
+				return this.loadHistory(file).progress(d.notify);
 			})).then((list) => {
 				d.resolve(list);
-			}, d.reject, d.notify);
+			}, d.reject);
 
 			return d.promise;
 		}

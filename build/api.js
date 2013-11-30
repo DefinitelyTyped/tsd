@@ -669,6 +669,7 @@ var xm;
             this.nibs = {
                 arrow: '-> ',
                 double: '>> ',
+                single: ' > ',
                 bullet: ' - ',
                 edge: ' | ',
                 none: '   '
@@ -752,6 +753,11 @@ var xm;
         };
 
         StyledOut.prototype.space = function () {
+            this._line.write(this._style.plain(' '));
+            return this;
+        };
+
+        StyledOut.prototype.sp = function () {
             this._line.write(this._style.plain(' '));
             return this;
         };
@@ -865,6 +871,16 @@ var xm;
                 this._line.write(this._style.accent(this.nibs.double));
             } else {
                 this._line.write(this._style.plain(this.nibs.double));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.note = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._line.write(this._style.accent(this.nibs.single));
+            } else {
+                this._line.write(this._style.plain(this.nibs.single));
             }
             return this;
         };
@@ -2838,6 +2854,49 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    require('date-utils');
+
+    var fullSha = /^[0-9a-f]{40}$/;
+    var hex = /^[0-9a-f]+$/g;
+
+    var CommitMatcher = (function () {
+        function CommitMatcher(commitSha) {
+            this.commitSha = commitSha;
+        }
+        CommitMatcher.prototype.filter = function (list) {
+            if (!this.commitSha) {
+                return list;
+            }
+            return list.filter(this.getFilterFunc(this.commitSha));
+        };
+
+        CommitMatcher.prototype.getFilterFunc = function (commitSha) {
+            commitSha = commitSha.toLowerCase();
+
+            if (fullSha.test(commitSha)) {
+                return function (file) {
+                    return (file.commit && file.commit.commitSha === commitSha);
+                };
+            }
+            if (!hex.test(commitSha)) {
+                xm.throwAssert('parameter not a hex {a}', commitSha);
+            }
+            var len = commitSha.length;
+            if (len < tsd.Const.shaShorten) {
+                xm.throwAssert('parameter hex too short {a}, {e}', tsd.Const.shaShorten, false);
+            }
+            return function (file) {
+                return (file.commit && file.commit.commitSha.substr(0, len) === commitSha);
+            };
+        };
+        return CommitMatcher;
+    })();
+    tsd.CommitMatcher = CommitMatcher;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
     var Query = (function () {
         function Query(pattern) {
             this.patterns = [];
@@ -2863,7 +2922,7 @@ var tsd;
 
         Object.defineProperty(Query.prototype, "requiresHistory", {
             get: function () {
-                return !!(this.dateMatcher || this.commitSha || this.loadHistory);
+                return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
             },
             enumerable: true,
             configurable: true
@@ -2957,6 +3016,7 @@ var git;
         function GithubURLs(repo) {
             _super.call(this);
             this._base = 'https://github.com/{owner}/{project}';
+            this._apiBase = 'https://api.github.com';
             this._api = 'https://api.github.com/repos/{owner}/{project}';
             this._raw = 'https://raw.github.com/{owner}/{project}';
             xm.assertVar(repo, git.GithubRepo, 'repo');
@@ -2978,6 +3038,7 @@ var git;
             this.addTemplate('apiCommit', this._api + '/commits/{commit}');
             this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
             this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
+            this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
 
             xm.ObjectUtil.hidePrefixed(this);
         }
@@ -3041,6 +3102,10 @@ var git;
             return this.getURL('apiBlob', {
                 blob: sha
             });
+        };
+
+        GithubURLs.prototype.rateLimit = function () {
+            return this.getURL('rateLimit');
         };
         return GithubURLs;
     })(xm.URLManager);
@@ -3273,6 +3338,7 @@ var xm;
             this._trackEnabled = false;
             this._trackLimit = 100;
             this._trackPrune = 30;
+            this._mutePromises = [xm.Level.notify, xm.Level.promise, xm.Level.resolve, xm.Level.reject];
             this._label = label;
             this._prefix = (prefix ? prefix + ':' : '');
             this.logger = logger || (label ? xm.getLogger(this._label) : (xm.log || xm.getLogger()));
@@ -3280,21 +3346,31 @@ var xm;
 
             xm.ObjectUtil.hidePrefixed(this);
         }
-        EventLog.prototype.start = function (type, message, data) {
-            return this.track(xm.Level.start, type, message, data);
-        };
-
         EventLog.prototype.promise = function (promise, type, message, data) {
             var _this = this;
-            promise.then(function () {
-                _this.track(xm.Level.resolve, type, message, data, promise);
-            }, function (err) {
-                _this.track(xm.Level.reject, type, message, err, promise);
-            }, function (note) {
-                _this.track(xm.Level.notify, type, message, note, promise);
-            });
-
+            if (!this.isMuted(xm.Level.notify)) {
+                promise.progress(function (note) {
+                    _this.track(xm.Level.notify, type, message, note, promise);
+                });
+            }
+            if (!this.isMuted(xm.Level.reject)) {
+                promise.fail(function (err) {
+                    _this.track(xm.Level.reject, type, message, err, promise);
+                });
+            }
+            if (!this.isMuted(xm.Level.resolve)) {
+                promise.then(function (err) {
+                    _this.track(xm.Level.resolve, type, message, err, promise);
+                });
+            }
+            if (!this.isMuted(xm.Level.promise)) {
+                return this.track(xm.Level.promise, type, message, data, promise);
+            }
             return null;
+        };
+
+        EventLog.prototype.start = function (type, message, data) {
+            return this.track(xm.Level.start, type, message, data);
         };
 
         EventLog.prototype.complete = function (type, message, data) {
@@ -3372,6 +3448,34 @@ var xm;
             this._items.splice(0, this._items.length);
         };
 
+        EventLog.prototype.isMuted = function (action) {
+            return this._mutePromises.indexOf(action) > -1;
+        };
+
+        EventLog.prototype.muteActions = function (actions) {
+            var _this = this;
+            actions.forEach(function (action) {
+                if (_this._mutePromises.indexOf(action) < 0) {
+                    _this._mutePromises.push(action);
+                }
+            });
+        };
+
+        EventLog.prototype.unmuteActions = function (actions) {
+            var _this = this;
+            if (!actions) {
+                this._mutePromises = [];
+                return;
+            }
+            actions.forEach(function (action) {
+                for (var i = _this._mutePromises.length - 1; i > -1; i--) {
+                    if (actions.indexOf(action) > -1) {
+                        _this._mutePromises.splice(i, 1);
+                    }
+                }
+            });
+        };
+
         EventLog.prototype.setTrack = function (enabled, limit, prune) {
             if (typeof limit === "undefined") { limit = NaN; }
             if (typeof prune === "undefined") { prune = NaN; }
@@ -3382,7 +3486,9 @@ var xm;
 
         EventLog.prototype.getItemString = function (item, multiline) {
             if (typeof multiline === "undefined") { multiline = false; }
-            var msg = padL(item.index, 6, '0') + ' ' + item.action + ' -> ' + item.type;
+            var msg = '';
+
+            msg += item.action + ' -> ' + item.type;
 
             if (xm.isValid(item.message) && item.message.length > 0) {
                 msg += (multiline ? '\n      ' : ': ') + xm.trimWrap(item.message, 200, true);
@@ -3627,6 +3733,7 @@ var xm;
     var Q = require('q');
     var fs = require('fs');
     var path = require('path');
+    var tv4 = require('tv4');
     var FS = require('q-io/fs');
     var HTTP = require('q-io/http');
 
@@ -3640,6 +3747,20 @@ var xm;
             date = new Date(input);
         }
         return (date ? date.toISOString() : null);
+    }
+
+    function distributeDir(base, name, levels, chunk) {
+        if (typeof chunk === "undefined") { chunk = 1; }
+        name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
+        if (levels === 0) {
+            return base;
+        }
+        var arr = [base];
+        var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
+        for (var i = 0; i < steps; i += chunk) {
+            arr.push(name.substr(i, chunk));
+        }
+        return path.join.apply(path, arr);
     }
 
     (function (http) {
@@ -3672,6 +3793,7 @@ var xm;
         http.infoSchema = {
             title: 'CacheInfo',
             type: 'object',
+            required: null,
             properties: {
                 url: typeString,
                 contentType: typeString,
@@ -3681,6 +3803,16 @@ var xm;
                 contentChecksum: typeString
             }
         };
+        http.infoSchema.required = Object.keys(http.infoSchema.properties);
+
+        function assertInfo(value) {
+            var res = tv4.validateResult(value, http.infoSchema);
+            if (!res.valid || res.missing.length > 0) {
+                throw res.error;
+            }
+        }
+        http.assertInfo = assertInfo;
+
         (function (CacheMode) {
             CacheMode[CacheMode["forceLocal"] = 0] = "forceLocal";
             CacheMode[CacheMode["forceRemote"] = 1] = "forceRemote";
@@ -3746,7 +3878,7 @@ var xm;
                     url: this.url,
                     headers: this.headers
                 });
-                xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'locked']);
+                xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'maxAge', 'locked']);
 
                 xm.ObjectUtil.deepFreeze(this.headers);
                 return this;
@@ -3759,13 +3891,14 @@ var xm;
             function HTTPCache(storeDir, opts) {
                 this.jobs = new xm.KeyValueMap();
                 this.remove = new xm.KeyValueMap();
-                this.jobTimeout = 5000;
+                this.jobTimeout = 1000;
                 xm.assertVar(storeDir, 'string', 'storeDir');
                 xm.assertVar(opts, CacheOpts, 'opts', true);
 
                 this.storeDir = storeDir;
                 this.opts = (opts || new CacheOpts());
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
+                this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
 
                 this.infoKoder = new xm.JSONKoder(http.infoSchema);
             }
@@ -3775,6 +3908,7 @@ var xm;
                 xm.assert(request.locked, 'request must be lock()-ed {a}', request.url);
 
                 var d = Q.defer();
+                this.track.start(HTTPCache.get_object, request.url);
                 this.track.promise(d.promise, HTTPCache.get_object);
 
                 this.init().then(function () {
@@ -3783,7 +3917,7 @@ var xm;
                         job = _this.jobs.get(request.key);
                         _this.track.skip(HTTPCache.get_object);
 
-                        return job.getObject().then(d.resolve);
+                        return job.getObject().progress(d.notify).then(d.resolve);
                     } else {
                         job = new CacheLoader(_this, request);
                         _this.jobs.set(request.key, job);
@@ -3805,13 +3939,14 @@ var xm;
             HTTPCache.prototype.scheduleRelease = function (key) {
                 var _this = this;
                 if (this.jobs.has(key)) {
-                    var t;
                     if (this.remove.has(key)) {
                         clearTimeout(this.remove.get(key));
                     }
                     this.remove.set(key, setTimeout(function () {
                         _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
-                        _this.track.logger.status(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
+
+                        _this.track.logger.debug(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
+
                         _this.jobs.remove(key);
                     }, this.jobTimeout));
                 }
@@ -3877,6 +4012,35 @@ var xm;
         })();
         http.SimpleValidator = SimpleValidator;
 
+        var CacheValidator = (function () {
+            function CacheValidator() {
+            }
+            CacheValidator.prototype.assert = function (object) {
+            };
+
+            CacheValidator.main = new CacheValidator();
+            return CacheValidator;
+        })();
+        http.CacheValidator = CacheValidator;
+        var CacheAgeValidator = (function () {
+            function CacheAgeValidator(maxAgeMili) {
+                this.maxAgeMili = 0;
+                this.maxAgeMili = maxAgeMili;
+            }
+            CacheAgeValidator.prototype.assert = function (object) {
+                assertInfo(object.info);
+                xm.assertVar(object.info.httpModified, 'string', 'httpModified');
+
+                var date = new Date(object.info.httpModified);
+                if (xm.isNumber(this.maxAgeMili)) {
+                    var compare = new Date();
+                    xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
+                }
+            };
+            return CacheAgeValidator;
+        })();
+        http.CacheAgeValidator = CacheAgeValidator;
+
         var ChecksumValidator = (function () {
             function ChecksumValidator() {
             }
@@ -3896,11 +4060,18 @@ var xm;
             function CacheLoader(cache, request) {
                 this.cache = cache;
                 this.request = request;
-                this.cacheValidator = ChecksumValidator.main;
+
+                this.bodyCacheValidator = ChecksumValidator.main;
+
+                if (this.cache.opts.remoteRead) {
+                    this.infoCacheValidator = new CacheAgeValidator(request.maxAge);
+                } else {
+                    this.infoCacheValidator = new CacheValidator();
+                }
 
                 this.object = new CacheObject(request);
+                this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
 
-                this.object.storeDir = this.cache.storeDir;
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
@@ -3908,10 +4079,11 @@ var xm;
 
                 xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
             }
-            CacheLoader.prototype.config = function (cacheValidator) {
-                this.cacheValidator = (cacheValidator || this.cacheValidator);
-
-                return this;
+            CacheLoader.prototype.canUpdate = function () {
+                if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
+                    return true;
+                }
+                return false;
             };
 
             CacheLoader.prototype.getObject = function () {
@@ -3928,18 +4100,19 @@ var xm;
                     _this._defer = null;
                 };
 
-                var checkHTTPCache = false;
-
                 this.cacheRead().progress(this._defer.notify).then(function () {
-                    if (_this.object.body && !checkHTTPCache) {
+                    if (_this.object.body && !_this.request.checkHttp) {
                         _this._defer.notify('using local cache: ' + _this.request.url);
+
                         _this._defer.resolve(_this.object);
                         return;
                     }
-                    return _this.httpLoad(checkHTTPCache).progress(_this._defer.notify).then(function () {
+
+                    return _this.httpLoad(true).progress(_this._defer.notify).then(function () {
                         if (!xm.isValid(_this.object.body)) {
                             throw new Error('no result body: ' + _this.object.request.url);
                         }
+                        _this._defer.notify('fetched remote: ' + _this.request.url);
                         _this._defer.resolve(_this.object);
                     });
                 }).fail(function (err) {
@@ -3960,9 +4133,18 @@ var xm;
                 var d = Q.defer();
                 this.track.promise(d.promise, CacheLoader.cache_read);
 
-                this.readInfo().then(function () {
+                this.readInfo().progress(d.notify).then(function () {
                     if (!_this.object.info) {
                         throw new Error('no or invalid info object');
+                    }
+                    try  {
+                        _this.infoCacheValidator.assert(_this.object);
+                    } catch (err) {
+                        _this.track.event(CacheLoader.local_info_bad, 'cache-info unsatisfactory', err);
+                        d.notify('cache info unsatisfactory: ' + err);
+
+                        _this.object.info = null;
+                        throw err;
                     }
 
                     return FS.read(_this.object.bodyFile, { flags: 'rb' }).then(function (buffer) {
@@ -3973,54 +4155,29 @@ var xm;
                         _this.object.body = buffer;
                     });
                 }).then(function () {
-                    if (_this.object.body) {
-                        try  {
-                            _this.cacheValidator.assert(_this.object);
+                    try  {
+                        _this.bodyCacheValidator.assert(_this.object);
 
-                            _this.track.event(CacheLoader.local_cache_hit);
-                            d.resolve();
-                            return;
-                        } catch (err) {
-                            _this.track.logger.error('cache invalid');
-                            _this.track.logger.inspect(err);
-                            _this.object.body = null;
-                            _this.object.bodyChecksum = null;
-                            throw err;
-                        }
+                        _this.track.event(CacheLoader.local_cache_hit);
+                        d.resolve();
+                        return;
+                    } catch (err) {
+                        _this.track.error(CacheLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
+                        _this.track.logger.error('cache invalid');
+                        _this.track.logger.inspect(err);
+                        _this.object.body = null;
+                        _this.object.bodyChecksum = null;
+                        throw err;
                     }
                 }).fail(function (err) {
-                    return _this.cacheRemove().then(d.resolve, d.reject);
+                    return _this.cacheRemove().then(d.resolve, d.reject, d.notify);
                 }).done();
 
                 return d.promise;
             };
 
-            CacheLoader.prototype.readInfo = function () {
-                var _this = this;
-                var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.info_read);
-
-                FS.isFile(this.object.infoFile).then(function (isFile) {
-                    if (!isFile) {
-                        return null;
-                    }
-                    return FS.read(_this.object.infoFile, { flags: 'rb' }).then(function (buffer) {
-                        if (buffer.length === 0) {
-                            return null;
-                        }
-                        return _this.cache.infoKoder.decode(buffer).then(function (info) {
-                            xm.assert((info.url === _this.request.url), 'info.url {a} is not {e}', info.url, _this.request.url);
-
-                            _this.object.info = info;
-                        });
-                    });
-                }).then(function () {
-                    d.resolve();
-                }, d.reject).done();
-                return d.promise;
-            };
-
             CacheLoader.prototype.httpLoad = function (httpCache) {
+                if (typeof httpCache === "undefined") { httpCache = true; }
                 var _this = this;
                 if (!this.cache.opts.remoteRead) {
                     this.track.skip(CacheLoader.http_load);
@@ -4031,36 +4188,40 @@ var xm;
 
                 var req = HTTP.normalizeRequest(this.request.url);
                 Object.keys(this.request.headers).forEach(function (key) {
-                    req.headers[key] = _this.request.headers[key];
+                    req.headers[key] = String(_this.request.headers[key]).toLowerCase();
                 });
 
-                if (this.object.info && httpCache) {
+                if (this.object.info && this.object.body && httpCache) {
                     if (this.object.info.httpETag) {
-                        req.headers['etag'] = this.object.info.httpETag;
+                        req.headers['if-none-match'] = this.object.info.httpETag;
                     }
                     if (this.object.info.httpModified) {
-                        req.headers['last-modified'] = new Date(this.object.info.httpModified);
+                        req.headers['if-modified-since'] = new Date(this.object.info.httpModified);
                     }
                 }
+
                 req = HTTP.normalizeRequest(req);
 
                 if (this.track.logEnabled) {
                     this.track.logger.inspect(this.request);
                     this.track.logger.inspect(req);
                 }
-
                 this.track.start(CacheLoader.http_load);
 
                 d.notify('loading: ' + this.request.url);
 
                 var httpPromise = HTTP.request(req).then(function (res) {
-                    _this.track.status(CacheLoader.http_load, String(res.status));
                     d.notify('status: ' + _this.request.url + ' ' + String(res.status));
 
                     if (_this.track.logEnabled) {
-                        _this.track.logger.status(res.status, _this.request.url);
+                        _this.track.logger.status(_this.request.url + ' ' + String(res.status));
                         _this.track.logger.inspect(res.headers);
                     }
+
+                    _this.object.response = new ResponseInfo();
+                    _this.object.response.status = res.status;
+                    _this.object.response.headers = res.headers;
+
                     if (res.status < 200 || res.status >= 400) {
                         _this.track.error(CacheLoader.http_load);
                         throw new Error('unexpected status code: ' + res.status + ' on ' + _this.request.url);
@@ -4074,15 +4235,15 @@ var xm;
                         }
 
                         _this.track.event(CacheLoader.http_cache_hit);
-                        return;
+
+                        return _this.cacheWrite(true);
                     }
+
                     if (!res.body) {
                         throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
                     }
-
-                    _this.object.response = new ResponseInfo();
-                    _this.object.response.status = res.status;
-                    _this.object.response.headers = res.headers;
+                    if (res.body && _this.object.info && httpCache) {
+                    }
 
                     return res.body.read().then(function (buffer) {
                         if (buffer.length === 0) {
@@ -4101,36 +4262,16 @@ var xm;
                         d.notify('complete: ' + _this.request.url + ' ' + String(res.status));
                         _this.track.complete(CacheLoader.http_load);
 
-                        return _this.cacheWrite();
-                    }).then(function () {
-                        d.resolve();
-                    }, d.reject);
-                }).done();
+                        return _this.cacheWrite(false).progress(d.notify);
+                    });
+                }).then(function () {
+                    d.resolve();
+                }, d.reject).done();
 
                 return d.promise;
             };
 
-            CacheLoader.prototype.copyInfo = function (res, checksum) {
-                var info = {};
-                this.object.info = info;
-                info.url = this.request.url;
-                info.key = this.request.key;
-                info.contentType = res.headers['content-type'];
-                info.httpETag = res.headers['etag'] || null;
-                info.httpModified = getISOString(res.headers['last-modified']);
-                info.cacheCreated = getISOString(Date.now());
-                info.contentChecksum = checksum;
-            };
-
-            CacheLoader.prototype.updateInfo = function (res, checksum) {
-                var info = this.object.info;
-                info.contentType = res.headers['content-type'];
-                info.httpETag = res.headers['etag'] || null;
-                info.httpModified = getISOString(res.headers['last-modified']);
-                info.contentChecksum = checksum;
-            };
-
-            CacheLoader.prototype.cacheWrite = function () {
+            CacheLoader.prototype.cacheWrite = function (cacheWasFresh) {
                 var _this = this;
                 if (!this.cache.opts.cacheWrite) {
                     this.track.skip(CacheLoader.cache_write);
@@ -4149,13 +4290,44 @@ var xm;
                         d.reject(new Error('wont write empty info file ' + _this.object.infoFile));
                         return;
                     }
-                    return Q.all([
-                        FS.write(_this.object.infoFile, info, { flags: 'wb' }),
-                        FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' })
-                    ]).fail(function (err) {
+
+                    var write = [];
+                    if (!cacheWasFresh) {
+                        if (_this.object.body.length === 0) {
+                            d.reject(new Error('wont write empty body file ' + _this.object.bodyFile));
+                            return;
+                        }
+                        write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
+                            return FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' });
+                        }).then(function () {
+                            _this.track.event(CacheLoader.cache_write, 'written file to cache');
+                        }));
+                    } else {
+                        _this.track.skip(CacheLoader.cache_write, 'cache was fresh');
+                    }
+                    write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
+                        return FS.write(_this.object.infoFile, info, { flags: 'wb' });
+                    }));
+
+                    return Q.all(write).fail(function (err) {
                         _this.track.error(CacheLoader.cache_write, 'file write', err);
 
                         throw err;
+                    }).then(function () {
+                        return Q.all([
+                            FS.stat(_this.object.bodyFile).then(function (stat) {
+                                if (stat.size === 0) {
+                                    _this.track.error(CacheLoader.cache_write, 'written zero body bytes');
+                                    d.notify(new Error('written zero body bytes'));
+                                }
+                            }),
+                            FS.stat(_this.object.infoFile).then(function (stat) {
+                                if (stat.size === 0) {
+                                    _this.track.error(CacheLoader.cache_write, 'written zero info bytes');
+                                    d.notify(new Error('written zero info bytes'));
+                                }
+                            })
+                        ]);
                     });
                 }).then(d.resolve, d.reject).done();
 
@@ -4175,11 +4347,49 @@ var xm;
                 });
             };
 
-            CacheLoader.prototype.canUpdate = function () {
-                if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
-                    return true;
-                }
-                return false;
+            CacheLoader.prototype.copyInfo = function (res, checksum) {
+                var info = {};
+                this.object.info = info;
+                info.url = this.request.url;
+                info.key = this.request.key;
+                info.cacheCreated = getISOString(Date.now());
+                this.updateInfo(res, checksum);
+            };
+
+            CacheLoader.prototype.updateInfo = function (res, checksum) {
+                var info = this.object.info;
+                info.contentType = res.headers['content-type'];
+                info.httpETag = res.headers['etag'] || null;
+                info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
+                info.contentChecksum = checksum;
+            };
+
+            CacheLoader.prototype.readInfo = function () {
+                var _this = this;
+                var d = Q.defer();
+                this.track.promise(d.promise, CacheLoader.info_read);
+
+                FS.isFile(this.object.infoFile).then(function (isFile) {
+                    if (!isFile) {
+                        return null;
+                    }
+                    return FS.read(_this.object.infoFile, { flags: 'rb' }).then(function (buffer) {
+                        if (buffer.length === 0) {
+                            _this.track.event(CacheLoader.local_info_empty, 'empty info file');
+                            return null;
+                        }
+                        return _this.cache.infoKoder.decode(buffer).then(function (info) {
+                            xm.assert((info.url === _this.request.url), 'info.url {a} is not {e}', info.url, _this.request.url);
+                            _this.object.info = info;
+                        }).fail(function (err) {
+                            _this.track.event(CacheLoader.local_info_malformed, 'mlaformed info file');
+                            throw err;
+                        });
+                    });
+                }).then(function () {
+                    d.resolve();
+                }, d.reject).done();
+                return d.promise;
             };
 
             CacheLoader.prototype.removeFile = function (target) {
@@ -4200,6 +4410,7 @@ var xm;
                         });
                     });
                 }).fail(d.reject).done();
+
                 return d.promise;
             };
 
@@ -4212,6 +4423,11 @@ var xm;
             CacheLoader.cache_write = 'cache_write';
             CacheLoader.cache_remove = 'cache_remove';
             CacheLoader.http_load = 'http_load';
+            CacheLoader.local_info_bad = 'local_info_bad';
+            CacheLoader.local_info_empty = 'local_info_empty';
+            CacheLoader.local_info_malformed = 'local_info_malformed';
+            CacheLoader.local_body_bad = 'local_body_bad';
+            CacheLoader.local_body_empty = 'local_body_empty';
             CacheLoader.local_cache_hit = 'local_cache_hit';
             CacheLoader.http_cache_hit = 'http_cache_hit';
             return CacheLoader;
@@ -4226,8 +4442,8 @@ var git;
 
     var GithubLoader = (function () {
         function GithubLoader(repo, prefix, label) {
-            this.label = 'GithubLoader';
-            this.formatVersion = '0.0.1';
+            this.label = 'github-loader';
+            this.formatVersion = '0.0.0';
             this.headers = {};
             xm.assertVar(repo, git.GithubRepo, 'repo');
             this.repo = repo;
@@ -4239,7 +4455,15 @@ var git;
             if (lock) {
                 xm.ObjectUtil.lockProps(this, lock);
             }
-            this.headers['User-Agent'] = 'gidorrah';
+
+            this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+        };
+
+        GithubLoader.prototype.copyHeadersTo = function (target, source) {
+            source = (source || this.headers);
+            Object.keys(source).forEach(function (name) {
+                target[name] = source[name];
+            });
         };
 
         Object.defineProperty(GithubLoader.prototype, "verbose", {
@@ -4256,17 +4480,101 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    require('date-utils');
+
+    function pad(number) {
+        var r = String(number);
+        if (r.length === 1) {
+            r = '0' + r;
+        }
+        return r;
+    }
+
+    var GitRateInfo = (function () {
+        function GitRateInfo(map) {
+            this.limit = 0;
+            this.remaining = 0;
+            this.resetAt = '';
+            this.readFromRes(map);
+        }
+        GitRateInfo.prototype.readFromRes = function (map) {
+            if (xm.isObject(map)) {
+                if (map['x-ratelimit-limit']) {
+                    this.limit = parseInt(map['x-ratelimit-limit'], 10);
+                }
+                if (map['x-ratelimit-remaining']) {
+                    this.remaining = parseInt(map['x-ratelimit-remaining'], 10);
+                }
+                if (map['x-ratelimit-reset']) {
+                    this.reset = parseInt(map['x-ratelimit-reset'], 10) * 1000;
+                }
+            }
+            this.lastUpdate = Date.now();
+            this.resetAt = this.getResetString();
+        };
+
+        GitRateInfo.prototype.toStatus = function () {
+            return this.remaining + ' of ' + this.limit + ' @ ' + this.getResetString();
+        };
+
+        GitRateInfo.prototype.getResetString = function () {
+            var time = this.getTimeToReset();
+            if (time > 0) {
+                time = time / 1000;
+                var hours = Math.floor(time / 3600);
+                time -= (hours * 3600);
+                var mins = Math.floor(time / 60);
+                var secs = Math.floor(time - (mins * 60));
+                return (hours) + ':' + pad(mins) + ':' + pad(secs);
+            }
+            if (this.limit > 0) {
+                return '<limit expired>';
+            }
+            return '<no known limit>';
+        };
+
+        GitRateInfo.prototype.getTimeToReset = function () {
+            if (this.reset) {
+                return Math.max(0, this.reset - Date.now());
+            }
+            return 0;
+        };
+
+        GitRateInfo.prototype.getMinutesToReset = function () {
+            if (this.reset) {
+                return Math.floor(this.getTimeToReset() / 1000 / 60);
+            }
+            return 0;
+        };
+
+        GitRateInfo.prototype.isBlocked = function () {
+            return this.remaining === 0;
+        };
+
+        GitRateInfo.prototype.isLimited = function () {
+            return this.limit > 0 && this.remaining < this.limit;
+        };
+
+        GitRateInfo.prototype.hasRemaining = function () {
+            return this.remaining > 0;
+        };
+        return GitRateInfo;
+    })();
+    git.GitRateInfo = GitRateInfo;
+})(git || (git = {}));
+var git;
+(function (git) {
     'use strict';
 
     var Q = require('q');
     var fs = require('fs');
     var path = require('path');
+    var HTTP = require('q-io/http');
 
     var GithubAPI = (function (_super) {
         __extends(GithubAPI, _super);
         function GithubAPI(repo, storeDir) {
             _super.call(this, repo, 'github-api', 'GithubAPI');
-            this.metaHeaders = {};
             this.apiVersion = '3.0.0';
             xm.assertVar(storeDir, 'string', 'storeDir');
 
@@ -4276,69 +4584,63 @@ var git;
             this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader(['apiVersion']);
-
-            this.metaHeaders['x-ratelimit-limit'] = parseInt;
-            this.metaHeaders['x-ratelimit-remaining'] = parseInt;
-            this.metaHeaders['x-ratelimit-reset'] = function (value) {
-                return new Date(parseInt(value, 10) * 1000);
-            };
         }
         GithubAPI.prototype.getBranches = function () {
             var url = this.repo.urls.apiBranches();
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
         GithubAPI.prototype.getBranch = function (branch) {
             var url = this.repo.urls.apiBranch(branch);
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
         GithubAPI.prototype.getTree = function (sha, recursive) {
             var url = this.repo.urls.apiTree(sha, (recursive ? 1 : undefined));
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
         GithubAPI.prototype.getCommit = function (sha) {
             var url = this.repo.urls.apiCommit(sha);
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
         GithubAPI.prototype.getBlob = function (sha) {
             var url = this.repo.urls.apiBlob(sha);
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
         GithubAPI.prototype.getPathCommits = function (path) {
             var url = this.repo.urls.apiPathCommits(path);
             var request = new xm.http.Request(url);
-            return this.getFile(request, true);
+            return this.getCachable(request, true);
         };
 
-        GithubAPI.prototype.getFile = function (request, addMeta, koder) {
-            var _this = this;
+        GithubAPI.prototype.getCachable = function (request, addMeta, koder) {
             var koder = (koder || xm.JSONKoder.main);
-
             var d = Q.defer();
-            this.track.promise(d.promise, GithubAPI.get_file, request.url);
+            this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
+            if (!xm.isNumber(request.maxAge)) {
+                request.maxAge = 30 * 60 * 1000;
+            }
+            this.copyHeadersTo(request.headers);
+            request.headers['accept'] = 'application/json';
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
                 return koder.decode(object.body).then(function (res) {
+                    if (object.response) {
+                        var rate = new git.GitRateInfo(object.response.headers);
+                        d.notify(rate);
+                    }
                     if (addMeta && xm.isObject(res)) {
-                        res.meta = {};
-                        if (object.response) {
-                            Object.keys(_this.metaHeaders).forEach(function (key) {
-                                if (xm.hasOwnProp(object.response.headers, key)) {
-                                    res.meta[key] = _this.metaHeaders[key](object.response.headers[key]);
-                                }
-                            });
-                        }
+                        res.meta = { rate: rate };
                     }
                     return res;
                 }).then(d.resolve);
@@ -4347,10 +4649,28 @@ var git;
             return d.promise;
         };
 
+        GithubAPI.prototype.getRateInfo = function () {
+            var url = this.repo.urls.rateLimit();
+            var d = Q.defer();
+            this.track.promise(d.promise, GithubAPI.get_rate, url);
+
+            var req = HTTP.normalizeRequest(url);
+            this.copyHeadersTo(req.headers);
+
+            d.notify('get url: ' + url);
+            var httpPromise = HTTP.request(req).then(function (res) {
+                var rate = new git.GitRateInfo(res.headers);
+                d.resolve(rate);
+            }, d.reject).done();
+
+            return d.promise;
+        };
+
         GithubAPI.prototype.getCacheKey = function () {
             return 'git-api-v' + this.apiVersion + '-fmt' + this.formatVersion;
         };
-        GithubAPI.get_file = 'get_file';
+        GithubAPI.get_cachable = 'get_cachable';
+        GithubAPI.get_rate = 'get_rate';
         return GithubAPI;
     })(git.GithubLoader);
     git.GithubAPI = GithubAPI;
@@ -4400,6 +4720,7 @@ var git;
             var headers = {};
 
             var request = new xm.http.Request(url, headers);
+            request.maxAge = 30 * 24 * 60 * 60 * 1000;
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
@@ -5583,8 +5904,8 @@ var tsd;
             this.track.promise(d.promise, 'content_load_bulk');
 
             Q.all(list.map(function (file) {
-                return _this.loadContent(file);
-            })).progress(d.notify).then(function (list) {
+                return _this.loadContent(file).progress(d.notify);
+            })).then(function (list) {
                 d.resolve(list);
             }, d.reject);
 
@@ -5617,10 +5938,10 @@ var tsd;
             list = tsd.DefUtil.uniqueDefs(list);
 
             Q.all(list.map(function (file) {
-                return _this.loadHistory(file);
+                return _this.loadHistory(file).progress(d.notify);
             })).then(function (list) {
                 d.resolve(list);
-            }, d.reject, d.notify);
+            }, d.reject);
 
             return d.promise;
         };
@@ -5680,7 +6001,7 @@ var tsd;
                 });
             })).then(function () {
                 d.resolve(written);
-            }, d.reject, d.notify);
+            }, d.reject);
 
             return d.promise;
         };
@@ -6228,7 +6549,7 @@ var tsd;
                 return _this.parseDefInfo(file).progress(d.notify);
             })).then(function (list) {
                 d.resolve(list);
-            }, d.reject, d.notify);
+            }, d.reject);
 
             return d.promise;
         };
@@ -6301,6 +6622,13 @@ var tsd;
                             throw new Error('match count ' + res.definitions.length + ' over api limit ' + options.limitApi);
                         }
                         return _this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(function () {
+                            if (query.commitMatcher) {
+                                res.selection = [];
+                                res.definitions.forEach(function (def) {
+                                    res.selection = query.commitMatcher.filter(def.history);
+                                });
+                                res.definitions = tsd.DefUtil.getDefs(res.selection);
+                            }
                             if (query.dateMatcher) {
                                 res.selection = [];
                                 res.definitions.forEach(function (def) {
@@ -6373,7 +6701,8 @@ var tsd;
                 this.resolver = new tsd.Resolver(this)
             ]);
 
-            this.repo.raw.headers['User-Agent'] = this.context.packageInfo.getNameVersion();
+            this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+            this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
             this.track = new xm.EventLog('core', 'Core');
             this.verbose = this.context.verbose;
@@ -6463,6 +6792,7 @@ var tsd;
 
             this.core = new tsd.Core(this.context);
             this.track = new xm.EventLog('api', 'API');
+            this.track.unmuteActions([xm.Level.notify]);
 
             xm.ObjectUtil.lockProps(this, ['core', 'track']);
 
@@ -6544,6 +6874,12 @@ var tsd;
             }, d.reject).done();
 
             return d.promise;
+        };
+
+        API.prototype.getRateInfo = function () {
+            var p = this.core.repo.api.getRateInfo();
+            this.track.promise(p, 'rate_info');
+            return p;
         };
 
         API.prototype.compare = function (query) {
@@ -7409,6 +7745,9 @@ var tsd;
                 opt.type = 'flag';
                 opt.global = true;
                 opt.note = ['experimental'];
+                opt.apply = function (value, ctx) {
+                    ctx.out.warning('--progress events are not 100% yet');
+                };
             });
 
             expose.defineOption(function (opt) {
@@ -7575,7 +7914,6 @@ var tsd;
     var Action = tsd.cli.Action;
 
     var output = new xm.StyledOut();
-    xm.log.out = output;
 
     tsd.styleMap = new xm.KeyValueMap();
 
@@ -7590,11 +7928,17 @@ var tsd;
     });
     tsd.styleMap.set('html', function (ctx) {
         output.useStyle(ministyle.html(true));
-        output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+        output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+
+        xm.log.out.useStyle(ministyle.html(true));
+        xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
     });
     tsd.styleMap.set('css', function (ctx) {
         output.useStyle(ministyle.css('', true));
         output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+
+        xm.log.out.useStyle(ministyle.css('', true));
+        xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
     });
     tsd.styleMap.set('dev', function (ctx) {
         output.useStyle(ministyle.dev());
@@ -7645,6 +7989,9 @@ var tsd;
     }
 
     function reportProgress(obj) {
+        if (obj instanceof git.GitRateInfo) {
+            return printRateInfo(obj);
+        }
         return output.info().inspect(obj, 3);
     }
 
@@ -7703,7 +8050,7 @@ var tsd;
             }
             output.clear();
 
-            output.indent().line(file.commit.message.subject);
+            output.indent().note(true).line(file.commit.message.subject);
             output.ln();
         } else if (!skipNull) {
             output.indent().accent('<no commmit>');
@@ -7776,8 +8123,27 @@ var tsd;
             var file = result.written.get(path);
             output.bullet(true).glue(printFile(file)).ln();
         });
-        output.ln().report().span('install').space().success('success!').ln();
+        output.ln().report(true).span('install').space().success('success!').ln();
         return output;
+    }
+
+    function printRateInfo(info) {
+        output.report(true).span('rate-limit').sp();
+
+        if (info.limit > 0) {
+            if (info.remaining === 0) {
+                output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').error(info.getResetString());
+            } else if (info.remaining < 15) {
+                output.warn('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').warn(info.getResetString());
+            } else if (info.remaining < info.limit - 15) {
+                output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').accent(info.getResetString());
+            } else {
+                output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').success(info.getResetString());
+            }
+        } else {
+            output.success(info.getResetString());
+        }
+        return output.clear();
     }
 
     function init(ctx) {
@@ -7848,8 +8214,10 @@ var tsd;
             for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
                 job.query.addNamePattern(ctx.getArgAt(i));
             }
-            job.query.commitSha = ctx.getOpt(Opt.commit);
 
+            if (ctx.hasOpt(Opt.commit)) {
+                job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
+            }
             if (ctx.hasOpt(Opt.semver)) {
                 job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
             }
@@ -7997,9 +8365,11 @@ var tsd;
 
                                 printDependencies(file);
 
-                                file.def.history.slice(0).forEach(function (file) {
-                                    printFileCommit(file);
-                                });
+                                if (ctx.getOpt(Opt.history)) {
+                                    file.def.history.slice(0).reverse().forEach(function (file) {
+                                        printFileCommit(file);
+                                    });
+                                }
                             });
 
                             return Q().then(function () {
@@ -8011,14 +8381,15 @@ var tsd;
                                     output.ln().report().warning('unknown action:').space().span(action).ln();
                                     return;
                                 }
-                                output.ln().info().span('running:').space().accent(action).ln();
+                                output.ln().info(true).span('running').space().accent(action).ln();
+
                                 return queryActions.run(action, function (run) {
                                     return run(ctx, job, selection).progress(notify);
                                 }, true).then(function () {
                                 }, function (err) {
                                     output.ln().report().span(action).space().error('error!').ln();
                                     reportError(err, false);
-                                }, getProgress(ctx));
+                                }, notify);
                             });
                         }
                     });
@@ -8032,11 +8403,28 @@ var tsd;
             cmd.options = [Opt.overwrite];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
                 return getAPIJob(ctx).then(function (job) {
-                    return job.api.reinstall(job.options).progress(getProgress(ctx)).then(function (result) {
+                    output.ln().info(true).span('running').space().accent(cmd.name).ln();
+
+                    return job.api.reinstall(job.options).progress(notify).then(function (result) {
                         printInstallResult(result);
                     });
-                }, reportError, getProgress(ctx));
+                }, reportError, notify);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'rate';
+            cmd.label = 'Check rate-limit';
+            cmd.groups = [Group.support];
+            cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
+                return getAPIJob(ctx).then(function (job) {
+                    return job.api.getRateInfo().progress(notify).then(function (info) {
+                        printRateInfo(info);
+                    });
+                }, reportError, notify);
             };
         });
 

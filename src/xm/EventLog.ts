@@ -76,6 +76,8 @@ module xm {
 		private _trackLimit:number = 100;
 		private _trackPrune:number = 30;
 
+		private _mutePromises:string[] = [Level.notify, Level.promise, Level.resolve, Level.reject];
+
 		constructor(prefix:string = '', label:string = '', logger?:xm.Logger) {
 			this._label = label;
 			this._prefix = (prefix ? prefix + ':' : '');
@@ -89,21 +91,33 @@ module xm {
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		start(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.start, type, message, data);
-		}
-
 		//TODO rethink arguments and add type-filtering
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
-			promise.then(() => {
-				this.track(Level.resolve, type, message, data, promise);
-			}, (err) => {
-				this.track(Level.reject, type, message, err, promise);
-			}, (note) => {
-				this.track(Level.notify, type, message, note, promise);
-			});
-			//return this.track(Level.promise, type, message, data, promise);
+			if (!this.isMuted(Level.notify)) {
+				promise.progress((note) => {
+					this.track(Level.notify, type, message, note, promise);
+				});
+			}
+			if (!this.isMuted(Level.reject)) {
+				promise.fail((err) => {
+					this.track(Level.reject, type, message, err, promise);
+				});
+			}
+			if (!this.isMuted(Level.resolve)) {
+				promise.then((err) => {
+					this.track(Level.resolve, type, message, err, promise);
+				});
+			}
+			if (!this.isMuted(Level.promise)) {
+				return this.track(Level.promise, type, message, data, promise);
+			}
 			return null;
+		}
+
+		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+		start(type:string, message?:string, data?:any):EventLogItem {
+			return this.track(Level.start, type, message, data);
 		}
 
 		complete(type:string, message?:string, data?:any):EventLogItem {
@@ -191,6 +205,32 @@ module xm {
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+		isMuted(action:string):boolean {
+			return this._mutePromises.indexOf(action) > -1;
+		}
+
+		muteActions(actions:string[]):void {
+			actions.forEach((action:string) => {
+				if (this._mutePromises.indexOf(action) < 0) {
+					this._mutePromises.push(action);
+				}
+			});
+		}
+
+		unmuteActions(actions?:string[]):void {
+			if (!actions) {
+				this._mutePromises = [];
+				return;
+			}
+			actions.forEach((action:string) => {
+				for (var i = this._mutePromises.length - 1; i > -1; i--) {
+					if (actions.indexOf(action) > -1) {
+						this._mutePromises.splice(i, 1);
+					}
+				}
+			});
+		}
+
 		//TODO fix odd isNaN default param
 		setTrack(enabled:boolean, limit:number = NaN, prune:number = NaN):void {
 			this._trackEnabled = enabled;
@@ -199,7 +239,9 @@ module xm {
 		}
 
 		getItemString(item:EventLogItem, multiline:boolean = false):string {
-			var msg = padL(item.index, 6, '0') + ' ' + item.action + ' -> ' + item.type;
+			var msg = '';
+			//msg += padL(item.index, 6, '0') + ' ';
+			msg += item.action + ' -> ' + item.type;
 			//msg += ' ' + (this._label ? +': ' + this._label : '');
 			if (xm.isValid(item.message) && item.message.length > 0) {
 				msg += (multiline ? '\n      ' : ': ') + trimWrap(item.message, 200, true);
