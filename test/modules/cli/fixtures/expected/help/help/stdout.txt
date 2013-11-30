@@ -1,5 +1,5 @@
 
->> tsd 0.5.2-alpha.5 (preview)
+>> tsd 0.5.2-alpha.6 (preview)
 --------
 
 Main commands                                                                                          
@@ -33,6 +33,7 @@ Support commands
    settings                    Display config settings                                                 
    reinstall                   Re-install definitions from config                                      
       --overwrite         -o    : Overwrite existing files (flag)                                      
+   rate                        Check rate-limit                                                        
 --------                 ----  --------                                                                
       --cacheDir <path>         : Path to cache directory (string)                                     
       --config <path>           : Path to config file (string)                                         

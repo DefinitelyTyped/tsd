@@ -13,12 +13,9 @@ See also:
 
 ## Implementation
 
-Most classes and methods have a small comment at the start of the declaration hinting their use. 
-
-Depends heavily on Promise's for async operation (using the excellent [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io).
+Depends heavily on Promise's for async operation (using excellent [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io)).
  
 ### Source
-
 
 Code in `/src`, also contains the 2 main files to compile to `/build` (`cli` and `api`)
 
@@ -26,7 +23,7 @@ Code modules: (short names, because lazy :)
 
 `/tsd` - all TSD specific code
 `/git` - holds Git and Github specific code (not coupled to TSD) 
-`/xm` - general utils and helpers (breeding code for my `typescript-xm` lib) (not coupled to TSD) 
+`/xm` - general utils and helpers (breeding code for `typescript-xm` lib) (not coupled to TSD) 
 
 Main modules in `/tsd`
 
@@ -38,16 +35,8 @@ Data structure files in `/tsd/data`
 
 * `DefIndex` is the central model that holds the extracted repository data and is also a factory for the data objects. It will try to maintain only a single instance per identification and re-use/re-issue them. Does *not* perform IO or interaction with the application.
 * A single definition is a `Def`: 
-	* Identified as a project + file name (parsed from its path)
-* The Git versioned contents of a `Def` is a `DefVersion`. 
-	* Identified as the combination of a `Def` and a `DefCommit`
-	* It can hold the source code and the derivatives (parsed info, resolved dependencies, history etc)
-	* Note: due to the rate-limit on the API the file content is get from Github RAW by path + commit-sha (instead of blob-sha): it is not workable to identify `DefVersion`s by their blob-sha without busting the rate-limit. Depending on the flow this means there can be `DefVersion` instances with different commits but identical file contents.
+* The Git versioned contents of a `Def` is a `DefVersion` (should've been `DevRevision`? beh) 
 * A single commit is a `DefCommit`. 
-	* Identified by its git sha.
-	* Can hold meta-data (authors, message etc) 
-	* Due to the many commits in DefinitelyTyped not all commits are loaded: only when relevant.
-	* Due to the large amount of definitions in DefinitelyTyped and our limit on API-use, a `DefCommit` does NOT contain a git tree-object (as each generation tree contains many identical blobs).
 * The other files are support or data objects uses by these main types. 
 	* `DefUtils` has many utility helpers.   
 
@@ -62,3 +51,31 @@ Selector stuff `/tsd/select`
 * `Selector` and related data objects:
 	* `NameMatcher` matches the proejct/name-glob (needs expansion, see note in class)  
 
+
+## Sub projects
+
+TSD is also proving-grounds @Bartvds's sub projects:
+
+**git.***
+
+Github module to pull data from API and RAW, based on promises with focus on heavy caching (using `xm.HTTPCache`). 
+
+**xm.assertVar** / **xm.typeOf**
+
+Usable runtime cehcks and assertions, will be an assertion/testing/assessment library.. one day.
+
+**xm.StyledOut** / **xm.Logger**
+
+Chainable semantic output log/stream constructs. Provide auto-suggest friendly and string-poor text formatting (with many outputs, composites with miniwrite/ministyle).
+
+**xm.Expose**
+
+CLI interface, abstracted with nice API. Very declarative but allows fluid building of CLI API in compiler checked way with good auto suggestion. Has all the info to print the help screens.
+
+**xm.HTTPCache**
+
+Http cache loader (generation 2). Used shared local disk cache and http-caching features. Queued for another update to support streams, gzip/deflate etc.
+
+**xm** *package (rest)*
+
+Many TypeScript based utilities. Over time each will either consolidate or get ditched for external modules.

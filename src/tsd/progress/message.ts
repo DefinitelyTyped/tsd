@@ -1,5 +1,6 @@
 module tsd {
 
+	//TODO copy some stuff from EventLog
 	export class APIMessage {
 		message:string;
 		tag:string;

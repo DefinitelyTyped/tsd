@@ -7449,14 +7449,14 @@ var xm;
 
             Q.resolve().then(function () {
                 if (_this.before) {
-                    return Q(_this.before(cmd, ctx));
+                    return Q(_this.before(ctx));
                 }
                 return null;
             }).then(function () {
                 return Q(cmd.execute(ctx));
             }).then(function () {
                 if (_this.after) {
-                    return Q(_this.after(cmd, ctx));
+                    return Q(_this.after(ctx));
                 }
                 return null;
             }).then(function () {
@@ -7624,7 +7624,7 @@ var xm;
             }
 
             if (allCommands.length > 0) {
-                addHeader('Other commands');
+                addHeader('other commands');
 
                 allCommands.forEach(function (name) {
                     addCommand(_this.commands.get(name), _this.mainGroup);
@@ -7633,7 +7633,7 @@ var xm;
             }
 
             if (commandOptNames.length > 0 && globalOptNames.length > 0) {
-                addHeader('Global options');
+                addHeader('global options');
 
                 if (commandOptNames.length > 0) {
                     xm.eachElem(commandOptNames, function (name) {
@@ -7712,7 +7712,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.version;
                 opt.short = 'V';
-                opt.description = 'Display version information';
+                opt.description = 'display version information';
                 opt.type = 'flag';
                 opt.command = 'version';
                 opt.global = true;
@@ -7720,14 +7720,14 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.dev;
-                opt.description = 'Development mode';
+                opt.description = 'development mode';
                 opt.type = 'flag';
                 opt.global = true;
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.color;
-                opt.description = 'Specify CLI color mode';
+                opt.description = 'specify CLI color mode';
                 opt.type = 'string';
                 opt.placeholder = 'name';
                 opt.global = true;
@@ -7741,25 +7741,25 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.progress;
                 opt.short = 'p';
-                opt.description = 'Display progress notifications';
+                opt.description = 'display progress notifications';
                 opt.type = 'flag';
                 opt.global = true;
                 opt.note = ['experimental'];
                 opt.apply = function (value, ctx) {
-                    ctx.out.warning('--progress events are not 100% yet');
+                    ctx.out.ln().indent().warning('--progress events are not 100% yet').ln();
                 };
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.verbose;
-                opt.description = 'Verbose output';
+                opt.description = 'verbose output';
                 opt.type = 'flag';
                 opt.global = true;
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.detail;
-                opt.description = 'Modify reporting detail level';
+                opt.description = 'modify reporting detail level';
                 opt.type = 'string';
                 opt.global = true;
                 opt.default = 'mid';
@@ -7770,7 +7770,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.semver;
                 opt.short = 'v';
-                opt.description = 'Filter on version postfix';
+                opt.description = 'filter on version postfix';
                 opt.type = 'string';
                 opt.placeholder = 'range';
                 opt.default = 'latest';
@@ -7780,7 +7780,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.date;
                 opt.short = 'd';
-                opt.description = 'Filter on commit date';
+                opt.description = 'filter on commit date';
                 opt.type = 'string';
                 opt.placeholder = 'range';
                 opt.note = ['example: ">2012-12-31"'];
@@ -7789,7 +7789,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.commit;
                 opt.short = 'c';
-                opt.description = 'Filter on commit hash';
+                opt.description = 'filter on commit hash';
                 opt.type = 'string';
                 opt.placeholder = 'sha1';
                 opt.note = ['status unknown'];
@@ -7798,27 +7798,27 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.info;
                 opt.short = 'i';
-                opt.description = 'Display definition info';
+                opt.description = 'display definition info';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.history;
                 opt.short = 'h';
-                opt.description = 'Display definition commit history';
+                opt.description = 'display definition commit history';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.resolve;
                 opt.short = 'r';
-                opt.description = 'Include reference dependencies';
+                opt.description = 'include reference dependencies';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.config;
-                opt.description = 'Path to config file';
+                opt.description = 'path to config file';
                 opt.type = 'string';
                 opt.placeholder = 'path';
                 opt.global = false;
@@ -7826,7 +7826,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.cacheDir;
-                opt.description = 'Path to cache directory';
+                opt.description = 'path to cache directory';
                 opt.type = 'string';
                 opt.placeholder = 'path';
                 opt.global = false;
@@ -7835,14 +7835,14 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.overwrite;
                 opt.short = 'o';
-                opt.description = 'Overwrite existing files';
+                opt.description = 'overwrite existing files';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.limit;
                 opt.short = 'l';
-                opt.description = 'Sanity limit for expensive API calls, 0 = unlimited';
+                opt.description = 'sanity limit for expensive API calls, 0 = unlimited';
                 opt.type = 'int';
                 opt.default = 2;
                 opt.placeholder = 'num';
@@ -7850,7 +7850,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.max;
-                opt.description = 'Enforce a maximum amount of results, 0 = unlimited';
+                opt.description = 'enforce a maximum amount of results, 0 = unlimited';
                 opt.type = 'int';
                 opt.default = 0;
                 opt.placeholder = 'num';
@@ -7858,7 +7858,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.min;
-                opt.description = 'Enforce a minimum amount of results';
+                opt.description = 'enforce a minimum amount of results';
                 opt.type = 'int';
                 opt.default = 0;
                 opt.placeholder = 'num';
@@ -7866,7 +7866,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.timeout;
-                opt.description = 'Set operation timeout in milliseconds, 0 = unlimited';
+                opt.description = 'set operation timeout in milliseconds, 0 = unlimited';
                 opt.type = 'int';
                 opt.default = 0;
                 opt.global = true;
@@ -7877,7 +7877,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.save;
                 opt.short = 's';
-                opt.description = 'Save to config file';
+                opt.description = 'save to config file';
                 opt.type = 'flag';
                 opt.default = false;
             });
@@ -7885,7 +7885,7 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.action;
                 opt.short = 'a';
-                opt.description = 'Run action on selection';
+                opt.description = 'run action on selection';
                 opt.type = 'string';
                 opt.placeholder = 'name';
                 opt.enum = [cli.Action.install, cli.Action.compare, cli.Action.update, cli.Action.open];
@@ -7906,8 +7906,8 @@ var tsd;
 
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
-    var miniio = require('../lib/miniwrite-io/miniio');
-    var minihtml = require('../lib/miniwrite-io/html');
+    var miniio = require('../lib/miniwrite-io/miniwrite-io');
+    var minihtml = require('../lib/miniwrite-html//miniwrite-html');
 
     var Opt = tsd.cli.Opt;
     var Group = tsd.cli.Group;
@@ -7926,6 +7926,7 @@ var tsd;
     tsd.styleMap.set('ansi', function (ctx) {
         output.useStyle(ministyle.ansi());
     });
+
     tsd.styleMap.set('html', function (ctx) {
         output.useStyle(ministyle.html(true));
         output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
@@ -8249,7 +8250,7 @@ var tsd;
             return undefined;
         }
 
-        expose.before = function (cmd, ctx) {
+        expose.before = function (ctx) {
             return Q.all([
                 printPreviewNotice()
             ]);
@@ -8257,7 +8258,7 @@ var tsd;
 
         expose.defineGroup(function (group) {
             group.name = Group.query;
-            group.label = 'Main commands';
+            group.label = 'main';
             group.options = [Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
             group.sorter = function (one, two) {
                 var sort;
@@ -8280,20 +8281,20 @@ var tsd;
 
         expose.defineGroup(function (group) {
             group.name = Group.support;
-            group.label = 'Support commands';
+            group.label = 'support';
             group.options = [Opt.config, Opt.cacheDir];
         });
 
         expose.defineGroup(function (group) {
             group.name = Group.help;
-            group.label = 'Help commands';
+            group.label = 'help';
         });
 
         tsd.cli.addOptions(expose);
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'version';
-            cmd.label = 'Display version';
+            cmd.label = 'display version';
             cmd.groups = [Group.help];
             cmd.execute = (function (ctx) {
                 return output.line(xm.PackageJSON.getLocal().version);
@@ -8302,7 +8303,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'init';
-            cmd.label = 'Create empty config file';
+            cmd.label = 'create empty config file';
             cmd.options = [Opt.config, Opt.overwrite];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
@@ -8319,7 +8320,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'settings';
-            cmd.label = 'Display config settings';
+            cmd.label = 'display config settings';
             cmd.options = [Opt.config, Opt.cacheDir];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
@@ -8338,7 +8339,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'query';
-            cmd.label = 'Search definitions';
+            cmd.label = 'search definitions';
             cmd.variadic = ['pattern'];
             cmd.groups = [Group.primary, Group.query];
             cmd.options = [
@@ -8399,7 +8400,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'reinstall';
-            cmd.label = 'Re-install definitions from config';
+            cmd.label = 're-install definitions from config';
             cmd.options = [Opt.overwrite];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
@@ -8416,7 +8417,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'rate';
-            cmd.label = 'Check rate-limit';
+            cmd.label = 'check rate-limit';
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);

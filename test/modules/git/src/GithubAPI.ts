@@ -1,9 +1,9 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/loader/GithubAPI.ts" />
-///<reference path="../../../../src/git/GitUtil.ts" />
-///<reference path="../../../../src/git/GitUtil.ts" />
-///<reference path="../../../../src/tsd/context/Context.ts" />
-///<reference path="helper.ts" />
+///<reference path='../../../globals.ts' />
+///<reference path='../../../../src/git/loader/GithubAPI.ts' />
+///<reference path='../../../../src/git/GitUtil.ts' />
+///<reference path='../../../../src/git/GitUtil.ts' />
+///<reference path='../../../../src/tsd/context/Context.ts' />
+///<reference path='helper.ts' />
 
 describe('git.GithubAPI', () => {
 	'use strict';
@@ -24,6 +24,50 @@ describe('git.GithubAPI', () => {
 		repo = null;
 	});
 
+	var num = {
+		'type' : 'number'
+	};
+	var str = {
+		'type' : 'string'
+	};
+	var metaFields = {
+		'type' : 'object',
+		'properties': {
+			'meta': {
+				'type' : 'object',
+				'required' : [
+					'rate'
+				],
+				'properties': {
+					'rate': {
+						'required' : [
+							'lastUpdate',
+							'limit',
+							'remaining',
+							'reset',
+							'resetAt'
+						],
+						'properties': {
+							'lastUpdate': num,
+							'limit': num,
+							'remaining': num,
+							'reset': num,
+							'resetAt': str
+						}
+					}
+				}
+			}
+		}
+	};
+
+	function fixMeta(meta) {
+		meta.rate.lastUpdate = 0;
+		meta.rate.limit = 0;
+		meta.rate.remaining = 0;
+		meta.rate.reset = 0;
+		meta.rate.resetAt = '0:11:22';
+	}
+
 	describe('getBranches', () => {
 		it.eventually('should cache and return data from store', () => {
 			//repo.api.verbose = true;
@@ -33,11 +77,15 @@ describe('git.GithubAPI', () => {
 			return repo.api.getBranches().then((first) => {
 				assert.ok(first, 'first data');
 				assert.isArray(first, 'first data');
+				//assert.jsonSchema(first, metaFields, 'first meta');
+				//fixMeta(first.meta);
 
 				// get again, should be cached
 				return repo.api.getBranches().then((second) => {
 					assert.ok(second, 'second data');
 					assert.isArray(second, 'second data');
+					//assert.jsonSchema(second, metaFields, 'second meta');
+					//fixMeta(second.meta);
 
 					//same data?
 					assert.deepEqual(first, second, 'first vs second');
@@ -63,10 +111,9 @@ describe('git.GithubAPI', () => {
 
 				assert.strictEqual(first.sha, expectedSha, 'first.sha vs expectedSha');
 
-				first.meta['x-ratelimit-remaining'] = expectedJson.meta['x-ratelimit-remaining'];
-				delete first.meta['x-ratelimit-reset'];
-
-				assert.deepEqual(first, expectedJson, 'first vs expectedJson');
+				assert.jsonSchema(first, metaFields, 'first meta');
+				fixMeta(first.meta);
+				assert.jsonOf(expectedJson, first, 'first vs expectedJson');
 
 				var firstBuffer = git.GitUtil.decodeBlobJson(first);
 				assert.instanceOf(firstBuffer, Buffer, 'buffer');
@@ -81,9 +128,9 @@ describe('git.GithubAPI', () => {
 
 					assert.strictEqual(second.sha, expectedSha, 'second.sha vs expectedSha');
 
-					second.meta['x-ratelimit-remaining'] = first.meta['x-ratelimit-remaining'];
-					delete second.meta['x-ratelimit-reset'];
-					assert.deepEqual(first, second, 'first vs second');
+					assert.jsonSchema(second, metaFields, 'second meta');
+					fixMeta(second.meta);
+					assert.jsonOf(expectedJson, second, 'second vs expectedJson');
 
 					var secondBuffer = git.GitUtil.decodeBlobJson(first);
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');

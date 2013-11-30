@@ -52,16 +52,17 @@ Basics commands
 * :m:	Add **settings** (show config info)
 * :m:	Add **reinstall** (from config)
 * :m:	Add **index** (list definition overview) (search * is compacted)
-* :vs:	Consider unifying local remote selectors
+* :id:	Consider unifying local remote selectors
 
 Remote selector commands
 
-* :m:	Add **search** (search definitions)
-* :m:	Add **install** (install definitions)
-* :m:	Add **direct** (install from commit sha, or blob) (via commit option)
-* :m:	Add **info** (parse file content)
-* :m:	Add **history** (list commit history)
-* :ng:	Add **details** ~~(detailed commit history)~~ (make part of detail level option)
+* :m:	Add **query** (search definitions)
+* :ng:	Add ~~**search** (search definitions)~~ (now `query`)
+* :ng:	Add ~~**install** (install definitions)~~ (via `--action install`)
+* :ng:	Add ~~**direct** (install from commit sha, or blob)~~ (via `--commit`)
+* :ng:	Add ~~**info** (parse file content)~~ (via `--info`)
+* :ng:	Add ~~**history** (list commit history)~~ (via `--history`)
+* :ng:	Add **details** ~~(detailed commit history)~~ (make part of `--detail` level option)
 * :m:	Enhance deps (list dependencies), make recursive and display
 
 Local selector commands
@@ -157,11 +158,11 @@ Cache
 * :m:	Decide on user caching directory: home / AppData like npm
 * :m:	Decide on cache folder version naming scheme
 * :m:	Add cache auto-refresh; for the non-unique queries like `getBranch`
-* :m:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate limit timeout info)
+* :m:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate timeout info)
 * :a:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :id:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
-* :ab:	Consider g-zip for caches
+* :ab:	Implement gzip for caches (integrat with http stream)
 * :b:	Improve HTTPCache with node streams + gzip/deflate
 
 Internals
@@ -172,15 +173,15 @@ Internals
 * :m:	Change Context objects to use `Q`/`Q-io` and not auto-create folders at init
 * :m:	Decide if API, Core etc need(more) race condition hardening (some in loaders)
 * :b:	Don't keep file content/blobs in memory (load on demand + burst cache) 
-* :m:	Consider if API and/or Core need to be split into command classes `/tsd/logics`
+* :m:	Consider if API and/or Core need to be split into command classes `/tsd/logics` (done)
 * :vs:	Consider adding timeout (with option)
 * :m:	Consider splitting Core.ts: index/select stuff vs helper methods/objects
 * :ng:	Consider moving to class model with promise-based methods 
 	* :id:	Could be cool but maybe needs bluebird for speed
-* :m:	Consider adding class based façade to model
+* :m:	Consider adding class based façade to core
 * :ng:	Consider global store for JSON pointers and RegExps etc (meh)
 * :m:	Add xm ~~interface~~ class for debug/log/event tracking (`xm.EventLog`)
-* :ab:	Use promise notifiy/progress for event tracking (being implements)
+* :o2:	Use promise notifiy/progress for event tracking (being implements)
 	* :a:	Needs a standard model (event-like) 
 * :m:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
@@ -189,7 +190,17 @@ Technical
 * :m:	Move to TS 0.9 generics definition of Q promises
 * :id:	Expand property / const immutability: Object.freeze()
 * :id:	Ditch more getters + private vars for Object.freeze() (`xm.ObjectUtils`)
-* :id:	Change some utils from static class members to module functions
+* :id:	Change some utils from static class members to module functions.
+
+Infrastructure
+
+* :o2:	Add npm pre-publish tests hook :zap:
+* :o2:	Add test setup to test :zap:
+* :x:	Add git pre-commit test hook :zap:
+* :id:	Lint TypeScript JS output (using JSHint or ESlint)
+* :id:	Validate `package.json` (and others) using json-schema.
+* :a:	Run CLI test after build from the integrity test (saves a node.js start).
+
 
 Cleanup
 
@@ -199,22 +210,18 @@ Cleanup
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
 * :cl:	Verify "use strict" (needed in node?)
-* :id:	Lint TypeScript JS output (using JSHint or ESlint)
 
 Publishing
 
-* :a:	Make sure we keep `./deploy/repository.json` for `v0.3.0`.
-* :o2:	Add npm pre-publish tests hook :zap:
-* :o2:	Add test setup to test :zap:
-* :x:	Add git pre-commit test hook :zap:
+* :a:	Sweep and enable `tslint.json` rules we keep `./deploy/repository.json` for `v0.3.0`.
 * :ok:	Use uppercase 'TSD' (looks like a type otherwise) ~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~
 * :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)
 * :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku. Use TSD's Git module to proxy API request
 * :m:	Fix bin/cli `$ npm install . -g` 
 * :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
 * :x:	Compile a build number + date into application :zap:
-* :m:	Credits
-* :m:	Licence to Apache 2.0
+* :m:	Migrate licence to Apache 2.0
+* :a:	Remove old MIT licence headers from xm-library (or externalise) (@Bartvds)
 
 Dependencies
 
@@ -245,9 +252,9 @@ Status indicators (with memory hint):
 * :b:	Second priority (prio B).
 * :ab:	Important non-prioritised (A or B or ?).
 * :cl:	Need to clean up (clean).
-* :o2:	Resolve for release (open).
+* :o2:	Open non immediate (zero).
 * :x:	Acknowledged, pending on priority (status X).
-* :o:	Open, incoming, undetermined (open).
+* :o:	Incoming, undetermined (open).
 
 Reserved (short codes):
 

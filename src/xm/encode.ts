@@ -1,6 +1,9 @@
 ///<reference path="typeOf.ts" />
 
 module xm {
+
+	//TODO figure out what is actually used at all and cleanup this nightmare (seriously wtf)
+
 	var util = require('util');
 	var jsesc = require('jsesc');
 

@@ -20,8 +20,8 @@ module tsd {
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
-	var miniio = require('../lib/miniwrite-io/miniio');
-	var minihtml = require('../lib/miniwrite-io/html');
+	var miniio = require('../lib/miniwrite-io/miniwrite-io');
+	var minihtml = require('../lib/miniwrite-html//miniwrite-html');
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -46,6 +46,7 @@ module tsd {
 	styleMap.set('ansi', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.ansi());
 	});
+	//TODO clean this up
 	styleMap.set('html', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.html(true));
 		output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
@@ -422,7 +423,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		expose.before = (cmd:xm.ExposeCommand, ctx:xm.ExposeContext) => {
+		expose.before = (ctx:xm.ExposeContext) => {
 			return Q.all([
 				printPreviewNotice()
 			]);
@@ -432,7 +433,7 @@ module tsd {
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = Group.query;
-			group.label = 'Main commands';
+			group.label = 'main';
 			group.options = [Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
 			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
 				var sort:number;
@@ -455,13 +456,13 @@ module tsd {
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = Group.support;
-			group.label = 'Support commands';
+			group.label = 'support';
 			group.options = [Opt.config, Opt.cacheDir];
 		});
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = Group.help;
-			group.label = 'Help commands';
+			group.label = 'help';
 		});
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -473,7 +474,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'version';
-			cmd.label = 'Display version';
+			cmd.label = 'display version';
 			cmd.groups = [Group.help];
 			cmd.execute = ((ctx:xm.ExposeContext) => {
 				return output.line(xm.PackageJSON.getLocal().version);
@@ -482,7 +483,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'init';
-			cmd.label = 'Create empty config file';
+			cmd.label = 'create empty config file';
 			cmd.options = [Opt.config, Opt.overwrite];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
@@ -499,7 +500,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'settings';
-			cmd.label = 'Display config settings';
+			cmd.label = 'display config settings';
 			cmd.options = [Opt.config, Opt.cacheDir];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
@@ -525,7 +526,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';
-			cmd.label = 'Search definitions';
+			cmd.label = 'search definitions';
 			cmd.variadic = ['pattern'];
 			cmd.groups = [Group.primary, Group.query];
 			cmd.options = [
@@ -589,7 +590,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
-			cmd.label = 'Re-install definitions from config';
+			cmd.label = 're-install definitions from config';
 			cmd.options = [Opt.overwrite];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
@@ -608,7 +609,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'rate';
-			cmd.label = 'Check rate-limit';
+			cmd.label = 'check rate-limit';
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);

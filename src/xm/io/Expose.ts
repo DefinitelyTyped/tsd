@@ -244,16 +244,8 @@ module xm {
 		}
 	}
 
-	export interface ExposeAction {
-		(ctx:ExposeContext):any;
-	}
-
-	export interface ExposeSorter {
-		(one:ExposeCommand, two:ExposeCommand):number;
-	}
-
 	export interface ExposeHook {
-		(cmd:ExposeCommand, ctx:ExposeContext):any;
+		(ctx:ExposeContext):any;
 	}
 
 	//TODO add ExposeCommand/ExposeContext (like ExposeHook)?
@@ -269,6 +261,10 @@ module xm {
 
 	//TODO add some extra properties?
 	export interface ExposeError extends Error {
+	}
+
+	export interface ExposeSorter {
+		(one:ExposeCommand, two:ExposeCommand):number;
 	}
 
 	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
@@ -357,7 +353,7 @@ module xm {
 
 	export class ExposeCommand {
 		name:string;
-		execute:ExposeAction;
+		execute:ExposeHook;
 		index:number;
 
 		label:string;
@@ -640,14 +636,14 @@ module xm {
 
 			Q.resolve().then(() => {
 				if (this.before) {
-					return Q(this.before(cmd, ctx));
+					return Q(this.before(ctx));
 				}
 				return null;
 			}).then(() => {
 				return Q(cmd.execute(ctx));
 			}).then(() => {
 				if (this.after) {
-					return Q(this.after(cmd, ctx));
+					return Q(this.after(ctx));
 				}
 				return null;
 			}).then(() => {
@@ -823,7 +819,7 @@ module xm {
 			}
 
 			if (allCommands.length > 0) {
-				addHeader('Other commands');
+				addHeader('other commands');
 
 				allCommands.forEach((name) => {
 					addCommand(this.commands.get(name), this.mainGroup);
@@ -832,7 +828,7 @@ module xm {
 			}
 
 			if (commandOptNames.length > 0 && globalOptNames.length > 0) {
-				addHeader('Global options');
+				addHeader('global options');
 
 				if (commandOptNames.length > 0) {
 					xm.eachElem(commandOptNames, (name:string) => {
