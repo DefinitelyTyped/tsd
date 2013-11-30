@@ -2561,7 +2561,7 @@ var xm;
             if (code !== 0) {
                 this.output.line().error('Closing with exit code ' + code).clear();
             } else {
-                this.output.line().ok('bye!');
+                this.output.line().success('bye!').ln();
             }
             exitProcess(code);
         };
@@ -2800,7 +2800,7 @@ var xm;
 
                         var i = allCommands.indexOf(cmd.name);
                         if (i > -1) {
-                            allCommands.splice(i, 1);
+                            allCommands.glue(i, 1);
                         }
                     });
 
@@ -2896,7 +2896,7 @@ var git;
                     }
                 });
             })).then(function () {
-                ctx.out.info().ok('done!');
+                ctx.out.info().success('done!').ln();
             }, function (err) {
                 ctx.out.info().error('error').inspect(err);
             });

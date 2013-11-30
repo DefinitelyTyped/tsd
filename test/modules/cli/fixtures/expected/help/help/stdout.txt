@@ -1,60 +1,60 @@
 
->> tsd 0.5.2-alpha.6 (preview)
+>> tsd 0.5.x (preview)
 --------
 
-Main commands                                                                                          
+main                                                                                                   
 --------                 ----  --------                                                                
-   query <pattern>             Search definitions                                                      
-      --action <name>     -a    : Run action on selection (string)                                     
+   query <pattern>             search definitions                                                      
+      --action <name>     -a    : run action on selection (string)                                     
                                   install,compare,update,open                                          
                                   <partially implemented>                                              
-      --commit <sha1>     -c    : Filter on commit hash (string)                                       
+      --commit <sha1>     -c    : filter on commit hash (string)                                       
                                   <status unknown>                                                     
-      --date <range>      -d    : Filter on commit date (string)                                       
+      --date <range>      -d    : filter on commit date (string)                                       
                                   <example: ">2012-12-31">                                             
-      --history           -h    : Display definition commit history (flag)                             
-      --info              -i    : Display definition info (flag)                                       
-      --overwrite         -o    : Overwrite existing files (flag)                                      
-      --resolve           -r    : Include reference dependencies (flag)                                
-      --save              -s    : Save to config file (flag)                                           
-      --semver <range>    -v    : Filter on version postfix (string, default: latest)                  
+      --history           -h    : display definition commit history (flag)                             
+      --info              -i    : display definition info (flag)                                       
+      --overwrite         -o    : overwrite existing files (flag)                                      
+      --resolve           -r    : include reference dependencies (flag)                                
+      --save              -s    : save to config file (flag)                                           
+      --semver <range>    -v    : filter on version postfix (string, default: latest)                  
                                   <semver-range | latest | all>                                        
 --------                 ----  --------                                                                
-      --limit <num>       -l    : Sanity limit for expensive API calls, 0 = unlimited (int, default: 2)
-      --cacheDir <path>         : Path to cache directory (string)                                     
-      --config <path>           : Path to config file (string)                                         
-      --max <num>               : Enforce a maximum amount of results, 0 = unlimited (int)             
-      --min <num>               : Enforce a minimum amount of results (int)                            
+      --limit <num>       -l    : sanity limit for expensive API calls, 0 = unlimited (int, default: 2)
+      --cacheDir <path>         : path to cache directory (string)                                     
+      --config <path>           : path to config file (string)                                         
+      --max <num>               : enforce a maximum amount of results, 0 = unlimited (int)             
+      --min <num>               : enforce a minimum amount of results (int)                            
                                                                                                        
-Support commands                                                                                       
+support                                                                                                
 --------                 ----  --------                                                                
-   init                        Create empty config file                                                
-      --overwrite         -o    : Overwrite existing files (flag)                                      
-   settings                    Display config settings                                                 
-   reinstall                   Re-install definitions from config                                      
-      --overwrite         -o    : Overwrite existing files (flag)                                      
-   rate                        Check rate-limit                                                        
+   init                        create empty config file                                                
+      --overwrite         -o    : overwrite existing files (flag)                                      
+   settings                    display config settings                                                 
+   reinstall                   re-install definitions from config                                      
+      --overwrite         -o    : overwrite existing files (flag)                                      
+   rate                        check rate-limit                                                        
 --------                 ----  --------                                                                
-      --cacheDir <path>         : Path to cache directory (string)                                     
-      --config <path>           : Path to config file (string)                                         
+      --cacheDir <path>         : path to cache directory (string)                                     
+      --config <path>           : path to config file (string)                                         
                                                                                                        
-Help commands                                                                                          
+help                                                                                                   
 --------                 ----  --------                                                                
-   help                        Display usage help                                                      
-   version                     Display version                                                         
+   help                        display usage help                                                      
+   version                     display version                                                         
                                                                                                        
-Global options                                                                                         
+global options                                                                                         
 --------                 ----  --------                                                                
-      --help              -h    : Display usage help (flag)                                            
-      --version           -V    : Display version information (flag)                                   
-      --progress          -p    : Display progress notifications (flag)                                
+      --help              -h    : display usage help (flag)                                            
+      --version           -V    : display version information (flag)                                   
+      --progress          -p    : display progress notifications (flag)                                
                                   <experimental>                                                       
-      --color <name>            : Specify CLI color mode (string, default: ansi)                       
+      --color <name>            : specify CLI color mode (string, default: ansi)                       
                                   no,plain,ansi,html,css,dev                                           
-      --detail                  : Modify reporting detail level (string, default: mid)                 
+      --detail                  : modify reporting detail level (string, default: mid)                 
                                   low,mid,high                                                         
                                   <partially implemented>                                              
-      --dev                     : Development mode (flag)                                              
-      --timeout <ms>            : Set operation timeout in milliseconds, 0 = unlimited (int)           
+      --dev                     : development mode (flag)                                              
+      --timeout <ms>            : set operation timeout in milliseconds, 0 = unlimited (int)           
                                   <not implemented>                                                    
-      --verbose                 : Verbose output (flag)
+      --verbose                 : verbose output (flag)

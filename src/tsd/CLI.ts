@@ -76,11 +76,10 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function printPreviewNotice():Q.Promise<void> {
+	function showPreviewNotice():Q.Promise<void> {
 		var pkg = xm.PackageJSON.getLocal();
 
-		output.ln()
-		.report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln()
+		output.ln().report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln()
 			//.clear().span(pkg.getHomepage(true)).ln()
 		.ruler().ln();
 		//TODO implement version check / news service
@@ -280,16 +279,16 @@ module tsd {
 		//TODO clean this up
 		if (info.limit > 0) {
 			if (info.remaining === 0) {
-				output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').error(info.getResetString());
+				output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
 			}
 			else if (info.remaining < 15) {
-				output.warn('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').warn(info.getResetString());
+				output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
 			}
 			else if (info.remaining < info.limit - 15) {
-				output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').accent(info.getResetString());
+				output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
 			}
 			else  {
-				output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' @ ').success(info.getResetString());
+				output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').success(info.getResetString());
 			}
 		}
 		else {
@@ -425,7 +424,7 @@ module tsd {
 
 		expose.before = (ctx:xm.ExposeContext) => {
 			return Q.all([
-				printPreviewNotice()
+				showPreviewNotice()
 			]);
 		};
 

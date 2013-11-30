@@ -403,6 +403,8 @@ module xm {
 	//TODO add per-command sub-help like npm
 	//TODO add more/less flag
 	//TODO add feature for printable placeholder sub-info (format etc)
+	//TODO unify Actions and Commands (same thing really)
+	//TODO implement action queues
 	export class Expose {
 
 		commands = new KeyValueMap<ExposeCommand>();
@@ -423,7 +425,7 @@ module xm {
 
 			this.defineCommand((cmd:ExposeCommand) => {
 				cmd.name = 'help';
-				cmd.label = 'Display usage help';
+				cmd.label = 'display usage help';
 				cmd.groups = ['help'];
 				cmd.execute = (ctx:xm.ExposeContext) => {
 					this.printCommands();
@@ -434,7 +436,7 @@ module xm {
 			this.defineOption((opt:ExposeOption) => {
 				opt.name = 'help';
 				opt.short = 'h';
-				opt.description = 'Display usage help';
+				opt.description = 'display usage help';
 				opt.type = 'flag';
 				opt.command = 'help';
 				opt.global = true;

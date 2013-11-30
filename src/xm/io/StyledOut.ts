@@ -26,10 +26,12 @@ module xm {
 	// -various statuses (expected etc)
 	//TODO drop ok/fail/warn
 	//TODO split further into semantics and structure
+	//TODO consider dynamicify indent size?
 	export class StyledOut {
 
 		private _style:MiniStyle.Style;
 		private _line:MiniWrite.Chars;
+		private _tabSize:number = 3;
 
 		nibs = {
 			arrow: '-> ',
@@ -37,6 +39,7 @@ module xm {
 			single: ' > ',
 			bullet: ' - ',
 			edge: ' | ',
+			ruler: '---',
 			none: '   '
 		};
 
@@ -95,26 +98,21 @@ module xm {
 			return this;
 		}
 
-		ruler():StyledOut {
-			this._line.writeln('--------');
+		ruler(levels:number = 1):StyledOut {
+			var str = '';
+			for (var i = 0; i < levels; i++) {
+				str += this.nibs.ruler;
+			}
+			this._line.writeln(str);
 			return this;
 		}
 
-		ruler2():StyledOut {
-			this._line.writeln('----');
-			return this;
-		}
-
-		h1(str:any):StyledOut {
+		heading(str:any, level:number = 1):StyledOut {
 			this._line.writeln(this._style.accent(str));
-			this.ruler();
-			this._line.writeln('');
-			return this;
-		}
-
-		h2(str:any):StyledOut {
-			this._line.writeln(this._style.accent(str));
-			this.ruler();
+			var l = Math.max(0, 3 - level);
+			if (l > 0) {
+				this.ruler(l);
+			}
 			return this;
 		}
 
@@ -127,6 +125,11 @@ module xm {
 
 		accent(str:any):StyledOut {
 			this._line.write(this._style.accent(str));
+			return this;
+		}
+
+		muted(str:any):StyledOut {
+			this._line.write(this._style.muted(str));
 			return this;
 		}
 
@@ -157,29 +160,6 @@ module xm {
 
 		error(str:any):StyledOut {
 			this._line.write(this._style.error(str));
-			return this;
-		}
-
-		// - - - - - status finalisation (line end) - - - - -
-
-		//like success() but with emphasis and newline
-		//TODO ditch ok()
-		ok(str:any):StyledOut {
-			this._line.writeln(this._style.success(str));
-			return this;
-		}
-
-		//like warning() but with emphasis and newline
-		//TODO ditch warn()
-		warn(str:any):StyledOut {
-			this._line.writeln(this._style.warning(str));
-			return this;
-		}
-
-		//like error() but with emphasis and newline
-		//TODO ditch warn()
-		fail(str:any):StyledOut {
-			this._line.writeln(this._style.error(str));
 			return this;
 		}
 
@@ -216,6 +196,8 @@ module xm {
 			return this;
 		}
 
+		// - - - - -chaining helpers - - - - -
+
 		glue(out:StyledOut):StyledOut {
 			return this;
 		}
@@ -233,8 +215,12 @@ module xm {
 		}
 
 		//TODO add test?
-		indent():StyledOut {
-			this._line.write(this.nibs.none);
+		indent(levels:number = 1):StyledOut {
+			var str = '';
+			for (var i = 0; i < levels; i++) {
+				str += this.nibs.none;
+			}
+			this._line.write(str);
 			return this;
 		}
 
@@ -251,7 +237,7 @@ module xm {
 
 		//TODO add test?
 		index(num:any):StyledOut {
-			this._line.write(this._style.plain(String(num) + +': '));
+			this._line.write(this._style.plain(String(num) + ': '));
 			return this;
 		}
 
@@ -285,6 +271,25 @@ module xm {
 			else {
 				this._line.write(this._style.plain(this.nibs.single));
 			}
+			return this;
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		//TODO add test?
+		tweakURI(str:string):StyledOut {
+			var repAccent = this._style.accent('/');
+			//lame tricks
+			this._line.write(str.split(/:\/\//).map((str) => {
+				return str.replace(/\//g, repAccent);
+
+			}).join(this._style.accent('://')));
+			return this;
+		}
+
+		//TODO add test?
+		tweakPath(str:string):StyledOut {
+			this._line.write(str.replace(/\//g, this._style.accent('/')));
 			return this;
 		}
 

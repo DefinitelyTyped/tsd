@@ -18,6 +18,7 @@ module xm {
 	// will be set below
 	export var log:xm.Logger;
 
+	//TODO consider merging Logger for StyledOut
 	export interface Logger {
 		(...args:any[]):void;
 		ok(...args:any[]):void;
