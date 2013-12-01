@@ -1,5 +1,5 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../xm/io/Expose.ts" />
+///<reference path="../../xm/expose/Expose.ts" />
 
 module tsd {
 

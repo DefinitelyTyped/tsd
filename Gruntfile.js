@@ -116,7 +116,7 @@ module.exports = function (grunt) {
 				command: [
 					'node', './build/cli.js',
 					'-h',
-					'--color', 'html'
+					'--style', 'html'
 				].join(' '),
 				options: {
 					stdout: true

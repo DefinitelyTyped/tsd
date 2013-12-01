@@ -213,6 +213,10 @@ Contributions will be welcome once the application architecture stabilises a bit
 
 * Original version by @[Diullei ](https://github.com/Diullei).
 
+To install `v0.3.x` use:
+
+	$ npm install tsd@0.3.0 -g
+
 ## License
 
 Copyright (c) 2013 by Bart van der Schoor

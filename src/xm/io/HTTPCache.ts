@@ -578,10 +578,10 @@ module xm {
 					}
 					if (this.object.info.httpModified) {
 						//TODO verify/fix date format
-						req.headers['if-modified-since'] = new Date(this.object.info.httpModified);
+						//req.headers['if-modified-since'] = // not correct! new Date(this.object.info.httpModified);
 					}
 				}
-				// we should always do always do this
+				// we should always do always do this (fix in streaming update)
 				//req.headers['accept-encoding'] = 'gzip, deflate';
 
 				// cleanup

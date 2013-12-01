@@ -1,5 +1,5 @@
 ///<reference path="../_ref.ts" />
-///<reference path="../../xm/io/Expose.ts" />
+///<reference path="../../xm/expose/Expose.ts" />
 ///<reference path="const.ts" />
 ///<reference path="../CLI.ts" />
 
@@ -7,7 +7,37 @@ module tsd {
 
 	export module cli {
 
-		export function addOptions(expose:xm.Expose):void {
+		export function addCommon(expose:xm.Expose):void {
+
+			expose.defineCommand((cmd:xm.ExposeCommand) => {
+				cmd.name = 'help';
+				cmd.label = 'display usage help';
+				cmd.groups = ['help'];
+				cmd.execute = (ctx:xm.ExposeContext) => {
+					this.reporter.printCommands();
+					return null;
+				};
+			});
+
+			expose.defineCommand((cmd:xm.ExposeCommand) => {
+				cmd.name = 'version';
+				cmd.label = 'display version';
+				cmd.groups = [Group.help];
+				cmd.execute = ((ctx:xm.ExposeContext) => {
+					return output.line(xm.PackageJSON.getLocal().version);
+				});
+			});
+
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = 'help';
+				opt.short = 'h';
+				opt.description = 'display usage help';
+				opt.type = 'flag';
+				opt.command = 'help';
+				opt.global = true;
+			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.version;
@@ -26,8 +56,8 @@ module tsd {
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.color;
-				opt.description = 'specify CLI color mode';
+				opt.name = Opt.style;
+				opt.description = 'specify CLI style';
 				opt.type = 'string';
 				opt.placeholder = 'name';
 				opt.global = true;

@@ -16,8 +16,8 @@ module xm {
 	'use strict';
 
 	function padL(input, len, char) {
-		var char = String(char).charAt(0);
-		var input = String(input);
+		char = String(char).charAt(0);
+		input = String(input);
 		while (input.length < len) {
 			input = char + input;
 		}

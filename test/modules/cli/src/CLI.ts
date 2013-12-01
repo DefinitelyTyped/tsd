@@ -48,11 +48,11 @@ describe('CLI Query', () => {
 			}
 		}
 
-		if (test.color) {
-			args.push('--color', test.color);
+		if (test.style) {
+			args.push('--style', test.style);
 		}
 		else {
-			args.push('--color', 'no');
+			args.push('--style', 'no');
 		}
 		args.push('--cacheDir', info.cacheDirTestFixed);
 		//args.push('--config', info.configFile);

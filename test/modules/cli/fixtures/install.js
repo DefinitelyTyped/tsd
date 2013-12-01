@@ -1,5 +1,5 @@
 /*jshint -W098*/
-var lib = require('../../../lib/lib');
+var lib = require('../../../../lib/lib');
 
 var installOpts = {
 	overwrite: true,

@@ -21,11 +21,11 @@ declare module MiniWrite {
 		clear();
 	}
 	interface Splitter extends Line {
-		targets:Line[];
+		target:Line;
 	}
 	interface Buffer extends Line {
 		lines:string[];
-		concat(seperator?:string, indent?:string):string;
+		concat(seperator?:string, indent?:string, appendSep?:boolean):string;
 		toString():string;
 		clear();
 	}

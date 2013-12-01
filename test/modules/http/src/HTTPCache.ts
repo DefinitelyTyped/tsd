@@ -92,7 +92,7 @@ describe('xm.http', () => {
 				opts.cacheWrite = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = false;
+				//cache.verbose = true;
 
 				request = new xm.http.Request(url, {});
 				request.lock();
@@ -116,7 +116,7 @@ describe('xm.http', () => {
 				opts.remoteRead = false;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = false;
+				//cache.verbose = true;
 
 				request = new xm.http.Request(url, {});
 				request.lock();
@@ -139,7 +139,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = true;
+				//cache.verbose = true;
 
 				request = new xm.http.Request(url, {});
 				request.checkHttp = true;
@@ -164,7 +164,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = true;
+				//cache.verbose = true;
 
 				request = new xm.http.Request(url, {});
 				request.maxAge = -24 * 3600 * 1000;
@@ -189,7 +189,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				cache.verbose = true;
+				//cache.verbose = true;
 
 				request = new xm.http.Request(url, {});
 				request.maxAge = 24 * 3600 * 1000;

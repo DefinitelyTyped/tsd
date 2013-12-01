@@ -1,0 +1,355 @@
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+///<reference path="../_ref.d.ts" />
+///<reference path="../../../typings/easy-table/easy-table.d.ts" />
+///<reference path="../KeyValueMap.ts" />
+///<reference path="../iterate.ts" />
+///<reference path="../callAsync.ts" />
+///<reference path="../assertVar.ts" />
+///<reference path="../typeOf.ts" />
+///<reference path="../ObjectUtil.ts" />
+///<reference path="../Logger.ts" />
+///<reference path="../convertString.ts" />
+///<reference path="../io/StyledOut.ts" />
+///<reference path="ExposeReporter.ts" />
+///<reference path="ExposeContext.ts" />
+
+/*
+ Expose: cli command manager and help generator
+ */
+module xm {
+	'use strict';
+
+	var optimist = require('optimist');
+	var jsesc = require('jsesc');
+	var Q:typeof Q = require('q');
+	//TODO ditch node-exit if node ever get fixed..
+	var exitProcess:(code:number) => void = require('exit');
+	//TODO ditch easy-table
+	var Table:EasyTableStatic = require('easy-table');
+
+	export interface ExposeHook {
+		(ctx:ExposeContext):any;
+	}
+
+	//TODO add ExposeCommand/ExposeContext (like ExposeHook)?
+	export interface ExposeOptionApply {
+		(value:any, ctx:ExposeContext):void;
+	}
+
+	export interface ExposeResult {
+		code:number;
+		ctx:ExposeContext;
+		error:ExposeError;
+	}
+
+	//TODO add some extra properties?
+	export interface ExposeError extends Error {
+	}
+
+	export interface ExposeSorter {
+		(one:ExposeCommand, two:ExposeCommand):number;
+	}
+
+	export class ExposeCommand {
+		name:string;
+		execute:ExposeHook;
+		index:number;
+
+		label:string;
+		options:string[] = [];
+		variadic:string[] = [];
+		groups:string[] = [];
+		note:string[] = [];
+		internal:boolean;
+
+		constructor() {
+		}
+	}
+
+	export class ExposeGroup {
+		name:string;
+		label:string;
+		index:number;
+		sorter:ExposeSorter = xm.exposeSortIndex;
+		options:string[] = [];
+
+		constructor() {
+		}
+	}
+
+	export class ExposeOption {
+		name:string;
+		description:string;
+		short:string;
+		type:string;
+		placeholder:string;
+		default:any;
+		command:string;
+		global:boolean = false;
+		//TODO implement optional
+		optional:boolean = true;
+		enum:any[] = [];
+		note:string[] = [];
+		//TODO implement example
+		example:string[] = [];
+		apply:ExposeOptionApply;
+	}
+
+	/*
+	 Expose: cli command manager, wraps optimist with better usage generator and other utils
+	 */
+	//TODO add detail level switch
+	//TODO add per-command sub-help like npm
+	//TODO add more/less flag
+	//TODO add feature for printable placeholder sub-info (format etc)
+	//TODO unify Actions and Commands (same thing really)
+	//TODO implement action queues
+	export class Expose {
+
+		commands = new KeyValueMap<ExposeCommand>();
+		options = new KeyValueMap<ExposeOption>();
+		groups = new KeyValueMap<ExposeGroup>();
+		mainGroup = new ExposeGroup();
+
+		private _isInit = false;
+		private _index = 0;
+
+		reporter:xm.ExposeReporter;
+
+		before:ExposeHook;
+		after:ExposeHook;
+
+		constructor(reporter:xm.ExposeReporter) {
+			xm.assertVar(reporter, xm.ExposeReporter, 'reporter');
+			this.reporter = reporter;
+
+			xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+				writable: false,
+				enumerable: false
+			});
+		}
+
+		defineOption(build:(opt:ExposeOption) => void) {
+			var opt = new ExposeOption();
+			build(opt);
+
+			if (opt.type === 'flag' && xm.isUndefined(opt.default)) {
+				opt.default = false;
+			}
+
+			xm.assertVar(opt.name, 'string', 'opt.name');
+
+			if (this.options.has(opt.name)) {
+				throw new Error('opt.name collision on ' + opt.name);
+			}
+			this.options.set(opt.name, opt);
+		}
+
+		defineCommand(build:(cmd:ExposeCommand) => void):void {
+			var cmd = new ExposeCommand();
+			build(cmd);
+			cmd.index = (++this._index);
+
+			xm.assertVar(cmd.name, 'string', 'build.name');
+
+			if (this.commands.has(cmd.name)) {
+				throw new Error('cmd.name collision on ' + cmd.name);
+			}
+			this.commands.set(cmd.name, cmd);
+		}
+
+		defineGroup(build:(group:ExposeGroup) => void):void {
+			var group = new ExposeGroup();
+			build(group);
+			group.index = (++this._index);
+
+			xm.assertVar(group.name, 'string', 'group.name');
+
+			if (this.groups.has(group.name)) {
+				throw new Error('group.name collision on ' + group.name);
+			}
+			this.groups.set(group.name, group);
+		}
+
+		applyOptions(argv:any):ExposeContext {
+			argv = optimist.parse(argv);
+			var ctx = new ExposeContext(this, argv, null);
+
+			ctx.getOptNames(true).forEach((name:string) => {
+				var opt = this.options.get(name);
+				if (opt.apply) {
+					opt.apply(ctx.getOpt(name), ctx);
+				}
+			});
+			return ctx;
+		}
+
+		init():void {
+			if (this._isInit) {
+				return;
+			}
+			this._isInit = true;
+
+			xm.eachProp(this.options.keys(), (name) => {
+				var option:ExposeOption = this.options.get(name);
+				if (option.short) {
+					optimist.alias(option.name, option.short);
+				}
+				//TODO get rid of optimist's defaults
+				/*if (!xm.isUndefined(option.default)) {
+				 optimist.default(option.name, option.default);
+				 }
+				 else {
+				 if (option.type === 'flag') {
+				 optimist.default(option.name, false);
+				 }
+				 else {
+				 optimist.default(option.name, null);
+				 }
+				 }*/
+			});
+
+			this.groups.values().forEach((group:xm.ExposeGroup) => {
+				this.validateOptions(group.options);
+			});
+
+			this.commands.values().forEach((cmd:xm.ExposeCommand) => {
+				this.validateOptions(cmd.options);
+			});
+		}
+
+		validateOptions(opts:string[]):void {
+			opts.forEach((name:string) => {
+				xm.assert(this.options.has(name), 'undefined option {a}', name);
+			});
+		}
+
+		exit(code:number):void {
+			if (code !== 0) {
+				this.reporter.output.ln().error('Closing with exit code ' + code).clear();
+			}
+			else {
+				//this.reporter.output.ln().success('Closing with exit code ' + code).clear();
+			}
+			exitProcess(code);
+		}
+
+		//execute and exit
+		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
+			Q(this.executeRaw(argvRaw, alt).then((result:ExposeResult) => {
+				if (result.error) {
+					throw(result.error);
+				}
+				if (exitAfter) {
+					this.exit(result.code);
+				}
+			}).fail((err) => {
+				//TODO what to do? with final error?
+				if (err.stack) {
+					this.reporter.output.span(err.stack).clear();
+				}
+				else {
+					this.reporter.output.error(err.toString()).clear();
+				}
+				this.exit(1);
+			}));
+		}
+
+		//parse and execute args, promise result
+		executeRaw(argvRaw:any, alt?:string):Q.Promise<ExposeResult> {
+			this.init();
+
+			if (!alt || !this.commands.has(alt)) {
+				alt = 'help';
+			}
+
+			var options:ExposeOption[] = this.options.values();
+			var opt:ExposeOption;
+			var i:number, ii:number;
+
+			var ctx = this.applyOptions(argvRaw);
+			if (!ctx) {
+				return this.executeCommand(alt);
+			}
+
+			//command options (option that takes priority, like --version etc)
+			for (i = 0, ii = options.length; i < ii; i++) {
+				opt = options[i];
+				if (opt.command && ctx.hasOpt(opt.name, true)) {
+					return this.executeCommand(opt.command, ctx);
+				}
+			}
+
+			//clean argv 'bin' padding
+			//node
+			var cmd = ctx.shiftArg();
+			//script
+			cmd = ctx.shiftArg();
+			if (ctx.numArgs === 0) {
+				//this.output.warning('undefined command').clear();
+				return this.executeCommand(alt, ctx);
+			}
+			//command
+			cmd = ctx.shiftArg();
+			if (this.commands.has(cmd)) {
+				// actual command
+				return this.executeCommand(cmd, ctx);
+			}
+			else {
+				this.reporter.output.ln().warning('command not found: ' + cmd).clear();
+				return this.executeCommand('help', ctx);
+			}
+		}
+
+		//execute command, promise result
+		executeCommand(name:string, ctx:xm.ExposeContext = null):Q.Promise<ExposeResult> {
+			this.init();
+
+			if (!this.commands.has(name)) {
+				return Q({
+					code: 1,
+					error: new Error('unknown command ' + name)
+				});
+			}
+			var cmd:ExposeCommand = this.commands.get(name);
+
+			var defer:Q.Deferred<ExposeResult> = Q.defer();
+
+			Q.resolve().then(() => {
+				if (this.before) {
+					return Q(this.before(ctx));
+				}
+				return null;
+			}).then(() => {
+				return Q(cmd.execute(ctx));
+			}).then(() => {
+				if (this.after) {
+					return Q(this.after(ctx));
+				}
+				return null;
+			}).then(() => {
+				return {
+					code: 0,
+					ctx: ctx
+				};
+			}, (err) => {
+				return {
+					code: (err.code && err.code > 0) ? err.code : 1,
+					error: err,
+					ctx: ctx
+				};
+			}).done((ret:ExposeResult) => {
+				defer.resolve(ret);
+			});
+
+			return defer.promise;
+		}
+	}
+}

@@ -1,6 +1,6 @@
 ///<reference path="_ref.ts" />
 ///<reference path="../xm/Logger.ts" />
-///<reference path="../xm/io/Expose.ts" />
+///<reference path="../xm/expose/Expose.ts" />
 ///<reference path="../xm/io/FileUtil.ts" />
 ///<reference path="../xm/io/StyledOut.ts" />
 ///<reference path="../xm/DateUtil.ts" />
@@ -407,9 +407,12 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	// the fun starts here
+
 	export function getExpose():xm.Expose {
 
-		var expose = new xm.Expose('', output);
+		var rep = new xm.ExposeReporter('', output);
+		var expose = new xm.Expose(rep);
 
 		function getProgress(ctx) {
 			if (ctx.getOpt(Opt.progress)) {
@@ -466,19 +469,10 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		// bulk add options
-		tsd.cli.addOptions(expose);
+		// bulk add boring commands and options
+		tsd.cli.addCommon(expose);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		expose.defineCommand((cmd:xm.ExposeCommand) => {
-			cmd.name = 'version';
-			cmd.label = 'display version';
-			cmd.groups = [Group.help];
-			cmd.execute = ((ctx:xm.ExposeContext) => {
-				return output.line(xm.PackageJSON.getLocal().version);
-			});
-		});
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'init';

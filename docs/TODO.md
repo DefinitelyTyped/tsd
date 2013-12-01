@@ -40,7 +40,7 @@ Working on a way run data tests from fixtures that can be updated easily (otherw
 * :m:	Run github api+raw caches from fixtures (with easy updates/expansion)
 * :m:   Run API tests from fixtures and stored comparison output (with easy updates/expansion)
 
-## Global / multi-file changes:
+## Big list
 
 ### Commands
 
@@ -81,6 +81,7 @@ UIX commands
 
 * :o:	Add auto/scan command (suggest appropriate definitions from package.json/bower.json) (@seanhess: see [codeplex](https://typescript.codeplex.com/discussions/461449) and [TPM](https://github.com/seanhess/TPM))
 * :id:	Consider adding reference/bundle command to generate typing collections (save in config)
+* :id:	Add stash save/pop type of snapshot command.
 
 Cache commands
 
@@ -167,8 +168,8 @@ Cache
 
 Internals
 
-* :ng:	~~Try recalculating sha1 hash from content~~ Not practical
-* :ng:	Add local-changes detector using the blob hash / sha :zap:
+* :ng:	~~Try recalculating sha1 hash from content~~ (not practical)
+* :ng:	~~Add local-changes detector using the blob hash / sha~~ (not practical)
 * :o:	Add local-changes detector using custom hashes (like `xm.hashNormalines()` in `xm.hash.ts`) :zap:
 * :m:	Change Context objects to use `Q`/`Q-io` and not auto-create folders at init
 * :m:	Decide if API, Core etc need(more) race condition hardening (some in loaders)
@@ -199,7 +200,10 @@ Infrastructure
 * :x:	Add git pre-commit test hook :zap:
 * :id:	Lint TypeScript JS output (using JSHint or ESlint)
 * :id:	Validate `package.json` (and others) using json-schema.
-* :a:	Run CLI test after build from the integrity test (saves a node.js start).
+* :a:	Run CLI test after build from the integrity test? (saves a node.js start)
+* :o2:	Update TODO levels (for example TODO|FIXME|XXX|IDEA|PERF)
+	*	:o:	Sweep code and apply new levels 
+	*	:o:	Update grunt-todos reporter
 
 
 Cleanup
@@ -239,29 +243,31 @@ More.. always more :rocket:
 
 ## Emoji based Project Management 
 
+Blue is good, red is bad (sorry)
+
 Status indicators (with memory hint):
 
 * :m:	Resolved and closed (*'mint!'*).
-* :id:	Proposal or idea for consideration (idea).
-* :vs:	Decision needed (this vs that).
-* :sa:	Pending external action (servicing).
 * :ok:	Decision made (ok).
 * :ng:	Won't fix (no-go).
 * :up:	Deployed (systems up).
+* :sa:	Pending external action (servicing).
+* :id:	Proposal or idea for consideration (idea).
+* :vs:	Decision needed (this vs that).
 * :a:	First priority (prio A).
 * :b:	Second priority (prio B).
 * :ab:	Important non-prioritised (A or B or ?).
 * :cl:	Need to clean up (clean).
-* :o2:	Open non immediate (zero).
-* :x:	Acknowledged, pending on priority (status X).
-* :o:	Incoming, undetermined (open).
+* :o2:	Non immediate (open).
+* :x:	Acknowledged, no priority (status X).
+* :o:	Undetermined (open).
 
 Reserved (short codes):
 
 * :cd:	Shipped? Released?
-* :on:
+* :on:	Working this now?
 * :tm:
-* :+1:
-* :-1:
-* :v:
+* :+1:	Positive .. what?
+* :-1:	Negative .. what?
+* :v:	
 

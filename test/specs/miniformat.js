@@ -1,4 +1,4 @@
-describe('minichain', function () {
+describe('miniformat', function () {
 	'use strict';
 
 	var grunt = require('grunt');
@@ -9,7 +9,7 @@ describe('minichain', function () {
 
 	var miniwrite = require('miniwrite');
 	var ministyle = require('ministyle');
-	var minitable = require('../../lib/minitable/minitable');
+	var miniformat = require('../../lib/miniformat/miniformat');
 
 	var chain;
 	var multi;
@@ -19,30 +19,30 @@ describe('minichain', function () {
 		multi = null;
 	});
 
-	describe('table', function () {
-		beforeEach(function () {
-
-		});
-	});
 	describe('chain', function () {
 		it('basic', function () {
-			multi = minitable.getMultiChain({
+			multi = miniformat.getMultiChain({
 				buffer: {
 					write: miniwrite.buffer(),
 					style: ministyle.plain()
 				}
 			});
-			multi.chain.plain('aa').sp().error('bb').sp().success('cc').ln('');
+			multi.out.plain('aa').sp().error('bb').sp().success('cc').ln('');
 			assert.deepEqual(multi.channels['buffer'].chars.target.lines, ['aa bb cc']);
 		});
 		it('mixed', function () {
-			multi = minitable.getMultiChain({
+
+			multi = miniformat.getMultiChain({
+				plain: {
+					write: miniwrite.chars(miniwrite.buffer()),
+					style: ministyle.plain()
+				},
 				buffer: {
 					write: miniwrite.buffer(),
 					style: ministyle.plain()
 				},
 				dev: {
-					write: miniwrite.log(),
+					write: miniwrite.multi([miniwrite.buffer(), miniwrite.log()]),
 					style: ministyle.dev()
 				},
 				ansi: {
@@ -52,13 +52,19 @@ describe('minichain', function () {
 				css: {
 					write: miniwrite.log(),
 					style: ministyle.css()
+				},
+				split: {
+					write: miniwrite.splitter(miniwrite.buffer(), / +/g),
+					style: ministyle.plain()
 				}
 			});
-			chain = multi.chain;
 
-			chain.plain('aa').sp().error('bb').sp().success('cc').ln('');
+			multi.out.plain('aa').sp().error('bb').sp().success('cc').ln();
 
 			assert.deepEqual(multi.channels.buffer.chars.target.lines, ['aa bb cc']);
+			//boooya!
+			assert.deepEqual(multi.channels.split.chars.target.target.lines, ['aa', 'bb', 'cc']);
+			assert.deepEqual(multi.channels.dev.chars.target.targets[0].lines, ['[plain|aa] [error|bb] [success|cc]']);
 		});
 	});
 });
