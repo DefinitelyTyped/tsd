@@ -6,7 +6,6 @@ describe('miniformat', function () {
 	chai.Assertion.includeStack = true;
 	var assert = chai.assert;
 
-
 	var miniwrite = require('miniwrite');
 	var ministyle = require('ministyle');
 	var miniformat = require('../../lib/miniformat/miniformat');
@@ -31,7 +30,6 @@ describe('miniformat', function () {
 			assert.deepEqual(multi.channels['buffer'].chars.target.lines, ['aa bb cc']);
 		});
 		it('mixed', function () {
-
 			multi = miniformat.getMultiChain({
 				plain: {
 					write: miniwrite.chars(miniwrite.buffer()),
@@ -42,17 +40,17 @@ describe('miniformat', function () {
 					style: ministyle.plain()
 				},
 				dev: {
-					write: miniwrite.multi([miniwrite.buffer(), miniwrite.log()]),
+					write: miniwrite.multi([miniwrite.buffer()/*, miniwrite.log()*/]),
 					style: ministyle.dev()
 				},
 				ansi: {
 					write: miniwrite.log(),
 					style: ministyle.ansi()
 				},
-				css: {
+				/*css: {
 					write: miniwrite.log(),
 					style: ministyle.css()
-				},
+				},*/
 				split: {
 					write: miniwrite.splitter(miniwrite.buffer(), / +/g),
 					style: ministyle.plain()
