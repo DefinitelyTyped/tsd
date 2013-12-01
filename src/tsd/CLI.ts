@@ -20,8 +20,7 @@ module tsd {
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
-	var miniio = require('../lib/miniwrite-io/miniwrite-io');
-	var minihtml = require('../lib/miniwrite-html//miniwrite-html');
+	var minihtml = require('../lib/miniwrite-html/miniwrite-html');
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -411,8 +410,7 @@ module tsd {
 
 	export function getExpose():xm.Expose {
 
-		var rep = new xm.ExposeReporter('', output);
-		var expose = new xm.Expose(rep);
+		var expose = new xm.Expose(output);
 
 		function getProgress(ctx) {
 			if (ctx.getOpt(Opt.progress)) {

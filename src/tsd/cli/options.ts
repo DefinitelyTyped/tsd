@@ -14,7 +14,7 @@ module tsd {
 				cmd.label = 'display usage help';
 				cmd.groups = ['help'];
 				cmd.execute = (ctx:xm.ExposeContext) => {
-					this.reporter.printCommands();
+					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 					return null;
 				};
 			});
@@ -24,7 +24,7 @@ module tsd {
 				cmd.label = 'display version';
 				cmd.groups = [Group.help];
 				cmd.execute = ((ctx:xm.ExposeContext) => {
-					return output.line(xm.PackageJSON.getLocal().version);
+					return ctx.out.line(xm.PackageJSON.getLocal().version);
 				});
 			});
 
@@ -94,7 +94,7 @@ module tsd {
 				opt.description = 'modify reporting detail level';
 				opt.type = 'string';
 				opt.global = true;
-				opt.default = 'mid';
+				opt.default = xm.ExposeLevel.med;
 				opt.enum = ['low', 'mid', 'high'];
 				opt.note = ['partially implemented'];
 			});

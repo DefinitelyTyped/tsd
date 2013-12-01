@@ -111,6 +111,7 @@ module xm {
 	//TODO add feature for printable placeholder sub-info (format etc)
 	//TODO unify Actions and Commands (same thing really)
 	//TODO implement action queues
+	//TODO drop optimist for something simpler (minimist)
 	export class Expose {
 
 		commands = new KeyValueMap<ExposeCommand>();
@@ -126,9 +127,8 @@ module xm {
 		before:ExposeHook;
 		after:ExposeHook;
 
-		constructor(reporter:xm.ExposeReporter) {
-			xm.assertVar(reporter, xm.ExposeReporter, 'reporter');
-			this.reporter = reporter;
+		constructor(output:xm.StyledOut = null) {
+			this.reporter = new xm.ExposeReporter(this, output);
 
 			xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
 				writable: false,

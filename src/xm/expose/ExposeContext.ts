@@ -24,6 +24,7 @@ module xm {
 	 */
 	//TODO should have a reject/resolve method
 	//TODO add assertion mode (hardcore verification for dev/test)
+	//TODO drop optimist for something simpler
 	export class ExposeContext {
 
 		expose:Expose;
@@ -35,7 +36,8 @@ module xm {
 			this.expose = expose;
 			this.command = command;
 			this.argv = argv;
-			this.out = this.expose.output;
+			//TODO maybe keep reporter instead of out?
+			this.out = this.expose.reporter.output;
 		}
 
 		hasOpt(name:string, strict:boolean = false):any {

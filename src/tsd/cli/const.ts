@@ -8,7 +8,7 @@ module tsd {
 		export module Opt {
 			export var version = 'version';
 			export var verbose = 'verbose';
-			export var color = 'color';
+			export var style = 'style';
 			export var dev = 'dev';
 			export var config = 'config';
 			export var cacheDir = 'cacheDir';

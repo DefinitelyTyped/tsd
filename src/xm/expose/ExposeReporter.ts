@@ -20,6 +20,7 @@ module xm {
 	var jsesc = require('jsesc');
 	//TODO ditch easy-table
 	var Table:EasyTableStatic = require('easy-table');
+	var minitable = require('../lib/minitable/minitable');
 
 	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
 		if (one.index < two.index) {
@@ -112,45 +113,27 @@ module xm {
 		static max = 1;
 	}
 
-	export class ExposeReporter {
-
-		title:string;
-		output:xm.StyledOut;
-
-		constructor(title:string, output:xm.StyledOut = null) {
-			xm.assertVar(title, 'string', 'title', true);
-			xm.assertVar(output, xm.StyledOut, 'output');
-			this.output = (output || new xm.StyledOut());
-		}
-
-		printCommands():void {
-
-		}
-
-	}
-
-		//TODO rep
-
 	/*
 	 ExposeHelpPrinter: pretty print Expose info
 	 */
-	export class ExposeHelpPrinter {
+	export class ExposeReporter {
 
+		output:xm.StyledOut;
+		expose:xm.Expose;
 
-		constructor() {
+		constructor(expose:xm.Expose, output:xm.StyledOut = null) {
+			xm.assertVar(expose, xm.Expose, 'expose');
+			xm.assertVar(output, xm.StyledOut, 'output', true);
+			this.expose = expose;
+			this.output = (output || new xm.StyledOut());
 		}
 
 		//TODO replace easy-tables with layout that supports colored/wrapped/non-printable output
-		printCommands(expose:xm.Expose, output:xm.StyledOut, level:number, meta:any):void {
-			meta = meta  || {};
-			if (meta.title && level >= ExposeLevel.med) {
-				output.accent(meta.title).clear();
-			}
-
+		//TODO figure-out proper way to specify/rank detail level
+		printCommands(level:string):void {
 			var optionString = (option:ExposeOption):string => {
 				var placeholder = (option.placeholder ? ' <' + option.placeholder + '>' : '');
 				return '--' + option.name + placeholder;
-				//return (option.short ? '-' + option.short + ', ' : '') + '--' + option.name + placeholder;
 			};
 
 			var commands = new Table();
@@ -162,10 +145,10 @@ module xm {
 			var optPaddingHalf:string = ' : ';
 
 			var sortOptionName = (one:string, two:string) => {
-				return exposeSortOption(expose.options.get(one), expose.options.get(two));
+				return exposeSortOption(this.expose.options.get(one), this.expose.options.get(two));
 			};
 
-			var optKeys = expose.options.keys().sort(sortOptionName);
+			var optKeys = this.expose.options.keys().sort(sortOptionName);
 
 			var addHeader = (label:string) => {
 				commands.cell('one', label);
@@ -181,7 +164,7 @@ module xm {
 			};
 
 			var addOption = (name:string) => {
-				var option:ExposeOption = expose.options.get(name, null);
+				var option:ExposeOption = this.expose.options.get(name, null);
 				if (!option) {
 					commands.cell('one', optPadding + '--' + name);
 					commands.cell('two', optPaddingHalf + '<undefined>');
@@ -247,11 +230,11 @@ module xm {
 				}
 			};
 
-			var allCommands = expose.commands.keys();
-			var allGroups = expose.groups.values();
+			var allCommands = this.expose.commands.keys();
+			var allGroups = this.expose.groups.values();
 
 			optKeys.forEach((name:string) => {
-				var option:ExposeOption = expose.options.get(name);
+				var option:ExposeOption = this.expose.options.get(name);
 				if (option.command) {
 					//addOption(option);
 					commandOptNames.push(option.name);
@@ -259,7 +242,7 @@ module xm {
 			});
 			//commands.newRow();
 			optKeys.forEach((name:string) => {
-				var option:ExposeOption = expose.options.get(name);
+				var option:ExposeOption = this.expose.options.get(name);
 				if (option.global && !option.command) {
 					//addOption(option);
 					globalOptNames.push(option.name);
@@ -267,10 +250,10 @@ module xm {
 			});
 
 			if (allGroups.length > 0) {
-				expose.groups.values().sort(exposeSortGroup).forEach((group:ExposeGroup) => {
+				this.expose.groups.values().sort(exposeSortGroup).forEach((group:ExposeGroup) => {
 					addHeader(group.label);
 
-					expose.commands.values().filter((cmd:ExposeCommand) => {
+					this.expose.commands.values().filter((cmd:ExposeCommand) => {
 						return cmd.groups.indexOf(group.name) > -1;
 
 					}).sort(group.sorter).forEach((cmd:ExposeCommand) => {
@@ -299,7 +282,7 @@ module xm {
 				addHeader('other commands');
 
 				allCommands.forEach((name) => {
-					addCommand(expose.commands.get(name), expose.mainGroup);
+					addCommand(this.expose.commands.get(name), this.expose.mainGroup);
 				});
 				commands.newRow();
 			}
@@ -323,7 +306,7 @@ module xm {
 			//now output
 
 			//TODO get rid of this nasty trim (ditch easy-table)
-			output.block(commands.print().replace(/\s*$/, ''));
+			this.output.block(commands.print().replace(/\s*$/, ''));
 		}
 	}
 }
