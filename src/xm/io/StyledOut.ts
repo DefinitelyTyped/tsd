@@ -40,6 +40,7 @@ module xm {
 			bullet: ' - ',
 			edge: ' | ',
 			ruler: '---',
+			decl: ' : ',
 			none: '   '
 		};
 

@@ -12,7 +12,7 @@ module tsd {
 			expose.defineCommand((cmd:xm.ExposeCommand) => {
 				cmd.name = 'help';
 				cmd.label = 'display usage help';
-				cmd.groups = ['help'];
+				cmd.groups = [Group.support];
 				cmd.execute = (ctx:xm.ExposeContext) => {
 					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 					return null;
@@ -22,7 +22,7 @@ module tsd {
 			expose.defineCommand((cmd:xm.ExposeCommand) => {
 				cmd.name = 'version';
 				cmd.label = 'display version';
-				cmd.groups = [Group.help];
+				cmd.groups = [Group.support];
 				cmd.execute = ((ctx:xm.ExposeContext) => {
 					return ctx.out.line(xm.PackageJSON.getLocal().version);
 				});
@@ -126,7 +126,6 @@ module tsd {
 				opt.description = 'filter on commit hash';
 				opt.type = 'string';
 				opt.placeholder = 'sha1';
-				opt.note = ['status unknown'];
 			});
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -180,18 +179,20 @@ module tsd {
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.limit;
 				opt.short = 'l';
-				opt.description = 'sanity limit for expensive API calls, 0 = unlimited';
+				opt.description = 'sanity limit for expensive API calls';
 				opt.type = 'int';
 				opt.default = 2;
 				opt.placeholder = 'num';
+				opt.note = ['0 = unlimited'];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.max;
-				opt.description = 'enforce a maximum amount of results, 0 = unlimited';
+				opt.description = 'enforce a maximum amount of results';
 				opt.type = 'int';
 				opt.default = 0;
 				opt.placeholder = 'num';
+				opt.note = ['0 = unlimited'];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -202,22 +203,22 @@ module tsd {
 				opt.placeholder = 'num';
 			});
 
-			expose.defineOption((opt:xm.ExposeOption) => {
+			/*expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.timeout;
-				opt.description = 'set operation timeout in milliseconds, 0 = unlimited';
+				opt.description = 'set operation timeout in milliseconds';
 				opt.type = 'int';
 				opt.default = 0;
 				opt.global = true;
 				opt.placeholder = 'ms';
-				opt.note = ['not implemented'];
-			});
+				opt.note = ['0 = unlimited', 'not implemented'];
+			});*/
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.save;
 				opt.short = 's';
-				opt.description = 'save to config file';
+				opt.description = 'save changes to config file';
 				opt.type = 'flag';
 				opt.default = false;
 			});

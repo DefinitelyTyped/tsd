@@ -203,17 +203,6 @@ module xm {
 					optimist.alias(option.name, option.short);
 				}
 				//TODO get rid of optimist's defaults
-				/*if (!xm.isUndefined(option.default)) {
-				 optimist.default(option.name, option.default);
-				 }
-				 else {
-				 if (option.type === 'flag') {
-				 optimist.default(option.name, false);
-				 }
-				 else {
-				 optimist.default(option.name, null);
-				 }
-				 }*/
 			});
 
 			this.groups.values().forEach((group:xm.ExposeGroup) => {

@@ -674,6 +674,7 @@ var xm;
                 bullet: ' - ',
                 edge: ' | ',
                 ruler: '---',
+                decl: ' : ',
                 none: '   '
             };
             if (style) {
@@ -6998,6 +6999,8 @@ var xm;
     var jsesc = require('jsesc');
 
     var Table = require('easy-table');
+    var ministyle = require('ministyle');
+    var miniwrite = require('miniwrite');
     var minitable = require('../lib/minitable/minitable');
 
     function exposeSortIndex(one, two) {
@@ -7100,20 +7103,31 @@ var xm;
         }
         ExposeReporter.prototype.printCommands = function (level) {
             var _this = this;
-            console.log('printCommandsprintCommands');
+            var builder = minitable.getBuilder(this.output.getWrite(), this.output.getStyle());
+            xm.assertVar(builder, 'object', 'builder');
 
-            var optionString = function (option) {
-                var placeholder = (option.placeholder ? ' <' + option.placeholder + '>' : '');
-                return '--' + option.name + placeholder;
-            };
+            var headers = builder.createType('headers', [
+                { name: 'title' }
+            ]);
+            var divider = builder.createType('divider', [
+                { name: 'main' }
+            ]);
+            var commands = builder.createType('commands', [
+                { name: 'command' },
+                { name: 'short' },
+                { name: 'label' }
+            ], {
+                inner: this.output.nibs.none,
+                rowSpace: 0
+            });
 
-            var commands = new Table();
+            headers.init();
+            divider.init();
+            commands.init();
 
             var commandOptNames = [];
             var globalOptNames = [];
-            var commandPadding = '   ';
-            var optPadding = '      ';
-            var optPaddingHalf = ' : ';
+            var detailPad = this.output.nibs.decl;
 
             var sortOptionName = function (one, two) {
                 return exposeSortOption(_this.expose.options.get(one), _this.expose.options.get(two));
@@ -7121,38 +7135,50 @@ var xm;
 
             var optKeys = this.expose.options.keys().sort(sortOptionName);
 
-            var addHeader = function (label) {
-                commands.cell('one', label);
-                commands.newRow();
+            var firstHeader = true;
+            var addHeader = function (title) {
+                if (!firstHeader) {
+                    addDivider();
+                }
+                builder.closeAll();
+                firstHeader = false;
+                headers.next();
+                headers.row.title.out.accent('>> ').plain(title).ln();
                 addDivider();
             };
 
             var addDivider = function () {
-                commands.cell('one', '--------');
-                commands.cell('short', '----');
-                commands.cell('two', '--------');
-                commands.newRow();
+                builder.closeAll();
+                divider.next();
+                divider.row.main.out.line('   ');
             };
 
             var addOption = function (name) {
+                commands.next();
                 var option = _this.expose.options.get(name, null);
+                var command = commands.row.command.out;
+                var label = commands.row.label.out;
                 if (!option) {
-                    commands.cell('one', optPadding + '--' + name);
-                    commands.cell('two', optPaddingHalf + '<undefined>');
+                    command.indent(1).sp().accent('--').plain(name).ln();
+                    label.indent(1).warning('<undefined>').ln();
                 } else {
-                    commands.cell('one', optPadding + optionString(option));
-                    if (option.short) {
-                        commands.cell('short', ' -' + option.short);
+                    command.indent(1).sp().accent('--').plain(name);
+                    if (option.placeholder) {
+                        command.sp().muted('<').plain(option.placeholder).muted('>');
                     }
-                    var desc = optPaddingHalf + option.description;
-                    desc += ' (' + option.type;
-                    desc += (option.default ? ', default: ' + option.default : '');
-                    desc += ')';
-                    commands.cell('two', desc);
+                    command.ln();
+
+                    if (option.short) {
+                        commands.row.short.out.accent('-').line(option.short);
+                    }
+
+                    label.accent(' > ').plain(option.description);
+                    label.sp().muted('(').plain(option.type);
+                    label.plain((option.default ? ', default: ' + option.default : ''));
+                    label.muted(')').ln();
 
                     if (option.enum.length > 0) {
-                        commands.newRow();
-                        commands.cell('two', '   ' + option.enum.map(function (value) {
+                        label.indent().accent(' [ ').plain(option.enum.map(function (value) {
                             if (xm.isNumber(value)) {
                                 return value;
                             }
@@ -7163,25 +7189,25 @@ var xm;
                             return '\'' + jsesc(('' + value), {
                                 quotes: 'single'
                             }) + '\'';
-                        }).join(','));
+                        }).join(',')).accent(' ]').ln();
                     }
                 }
-                commands.newRow();
 
                 addNote(option.note);
             };
 
             var addCommand = function (cmd, group) {
-                var usage = cmd.name;
+                commands.next();
+                var command = commands.row.command.out;
+                command.indent(1).plain(cmd.name);
                 if (cmd.variadic.length > 0) {
-                    usage += ' <' + cmd.variadic.join(', ') + '>';
+                    command.sp().muted('<').plain(cmd.variadic.join(', ')).muted('>');
                 }
-                commands.cell('one', commandPadding + usage);
-                commands.cell('two', cmd.label);
-                commands.newRow();
+                command.ln();
+
+                commands.row.label.out.line(cmd.label);
 
                 addNote(cmd.note);
-
                 cmd.options.sort(sortOptionName).forEach(function (name) {
                     if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
                         addOption(name);
@@ -7192,8 +7218,7 @@ var xm;
             var addNote = function (note) {
                 if (note && note.length > 0) {
                     note.forEach(function (note) {
-                        commands.cell('two', '   <' + note + '>');
-                        commands.newRow();
+                        commands.row.label.out.indent().accent(' : ').line(String(note));
                     });
                 }
             };
@@ -7217,28 +7242,28 @@ var xm;
 
             if (allGroups.length > 0) {
                 this.expose.groups.values().sort(exposeSortGroup).forEach(function (group) {
-                    addHeader(group.label);
-
-                    _this.expose.commands.values().filter(function (cmd) {
+                    var contents = _this.expose.commands.values().filter(function (cmd) {
                         return cmd.groups.indexOf(group.name) > -1;
-                    }).sort(group.sorter).forEach(function (cmd) {
-                        addCommand(cmd, group);
-
-                        var i = allCommands.indexOf(cmd.name);
-                        if (i > -1) {
-                            allCommands.splice(i, 1);
-                        }
                     });
+                    if (contents.length > 0) {
+                        addHeader(group.label);
+                        contents.sort(group.sorter).forEach(function (cmd) {
+                            addCommand(cmd, group);
 
-                    if (group.options.length > 0) {
-                        addDivider();
-                        group.options.sort(sortOptionName).forEach(function (name) {
-                            if (commandOptNames.indexOf(name) < 0) {
-                                addOption(name);
+                            var i = allCommands.indexOf(cmd.name);
+                            if (i > -1) {
+                                allCommands.splice(i, 1);
                             }
                         });
+
+                        if (group.options.length > 0) {
+                            group.options.sort(sortOptionName).forEach(function (name) {
+                                if (commandOptNames.indexOf(name) < 0) {
+                                    addOption(name);
+                                }
+                            });
+                        }
                     }
-                    commands.newRow();
                 });
             }
 
@@ -7248,7 +7273,6 @@ var xm;
                 allCommands.forEach(function (name) {
                     addCommand(_this.expose.commands.get(name), _this.expose.mainGroup);
                 });
-                commands.newRow();
             }
 
             if (commandOptNames.length > 0 && globalOptNames.length > 0) {
@@ -7265,10 +7289,8 @@ var xm;
                         addOption(name);
                     });
                 }
-                commands.newRow();
             }
-
-            this.output.block(commands.print().replace(/\s*$/, ''));
+            builder.flush();
         };
         return ExposeReporter;
     })();
@@ -7738,7 +7760,7 @@ var tsd;
             expose.defineCommand(function (cmd) {
                 cmd.name = 'help';
                 cmd.label = 'display usage help';
-                cmd.groups = ['help'];
+                cmd.groups = [cli.Group.support];
                 cmd.execute = function (ctx) {
                     ctx.expose.reporter.printCommands(ctx.getOpt(cli.Opt.detail));
                     return null;
@@ -7748,7 +7770,7 @@ var tsd;
             expose.defineCommand(function (cmd) {
                 cmd.name = 'version';
                 cmd.label = 'display version';
-                cmd.groups = [cli.Group.help];
+                cmd.groups = [cli.Group.support];
                 cmd.execute = (function (ctx) {
                     return ctx.out.line(xm.PackageJSON.getLocal().version);
                 });
@@ -7846,7 +7868,6 @@ var tsd;
                 opt.description = 'filter on commit hash';
                 opt.type = 'string';
                 opt.placeholder = 'sha1';
-                opt.note = ['status unknown'];
             });
 
             expose.defineOption(function (opt) {
@@ -7896,18 +7917,20 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.limit;
                 opt.short = 'l';
-                opt.description = 'sanity limit for expensive API calls, 0 = unlimited';
+                opt.description = 'sanity limit for expensive API calls';
                 opt.type = 'int';
                 opt.default = 2;
                 opt.placeholder = 'num';
+                opt.note = ['0 = unlimited'];
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.max;
-                opt.description = 'enforce a maximum amount of results, 0 = unlimited';
+                opt.description = 'enforce a maximum amount of results';
                 opt.type = 'int';
                 opt.default = 0;
                 opt.placeholder = 'num';
+                opt.note = ['0 = unlimited'];
             });
 
             expose.defineOption(function (opt) {
@@ -7919,19 +7942,9 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.timeout;
-                opt.description = 'set operation timeout in milliseconds, 0 = unlimited';
-                opt.type = 'int';
-                opt.default = 0;
-                opt.global = true;
-                opt.placeholder = 'ms';
-                opt.note = ['not implemented'];
-            });
-
-            expose.defineOption(function (opt) {
                 opt.name = cli.Opt.save;
                 opt.short = 's';
-                opt.description = 'save to config file';
+                opt.description = 'save changes to config file';
                 opt.type = 'flag';
                 opt.default = false;
             });
@@ -8383,7 +8396,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'query';
-            cmd.label = 'search definitions';
+            cmd.label = 'search definitions using globbing pattern';
             cmd.variadic = ['pattern'];
             cmd.groups = [Group.primary, Group.query];
             cmd.options = [
@@ -8461,7 +8474,7 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'rate';
-            cmd.label = 'check rate-limit';
+            cmd.label = 'check github rate-limit';
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);

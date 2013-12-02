@@ -20,6 +20,8 @@ module xm {
 	var jsesc = require('jsesc');
 	//TODO ditch easy-table
 	var Table:EasyTableStatic = require('easy-table');
+	var ministyle = <typeof MiniStyle> require('ministyle');
+	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var minitable = require('../lib/minitable/minitable');
 
 	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
@@ -131,18 +133,32 @@ module xm {
 		//TODO replace easy-tables with layout that supports colored/wrapped/non-printable output
 		//TODO figure-out proper way to specify/rank detail level
 		printCommands(level:string):void {
-			var optionString = (option:ExposeOption):string => {
-				var placeholder = (option.placeholder ? ' <' + option.placeholder + '>' : '');
-				return '--' + option.name + placeholder;
-			};
+			var builder = minitable.getBuilder(this.output.getWrite(), this.output.getStyle());
+			xm.assertVar(builder, 'object', 'builder');
 
-			var commands = new Table();
+			var headers = builder.createType('headers', [
+				{ name: 'title'},
+			]);
+			var divider = builder.createType('divider', [
+				{ name: 'main'},
+			]);
+			var commands = builder.createType('commands', [
+				{ name: 'command'},
+				{ name: 'short'},
+				{ name: 'label'}
+			], {
+				inner: this.output.nibs.none,
+				rowSpace: 0
+			});
+
+			//start rows
+			headers.init();
+			divider.init();
+			commands.init();
 
 			var commandOptNames:string[] = [];
 			var globalOptNames:string[] = [];
-			var commandPadding:string = '   ';
-			var optPadding:string = '      ';
-			var optPaddingHalf:string = ' : ';
+			var detailPad:string = this.output.nibs.decl;
 
 			var sortOptionName = (one:string, two:string) => {
 				return exposeSortOption(this.expose.options.get(one), this.expose.options.get(two));
@@ -150,39 +166,51 @@ module xm {
 
 			var optKeys = this.expose.options.keys().sort(sortOptionName);
 
-			var addHeader = (label:string) => {
-				commands.cell('one', label);
-				commands.newRow();
+			var firstHeader = true;
+			var addHeader = (title:string) => {
+				if (!firstHeader) {
+					addDivider();
+				}
+				builder.closeAll();
+				firstHeader = false;
+				headers.next();
+				headers.row.title.out.accent('>> ').plain(title).ln();
 				addDivider();
 			};
 
 			var addDivider = () => {
-				commands.cell('one', '--------');
-				commands.cell('short', '----');
-				commands.cell('two', '--------');
-				commands.newRow();
+				builder.closeAll();
+				divider.next();
+				divider.row.main.out.line('   ');
 			};
 
 			var addOption = (name:string) => {
+				commands.next();
 				var option:ExposeOption = this.expose.options.get(name, null);
+				var command = commands.row.command.out;
+				var label = commands.row.label.out;
 				if (!option) {
-					commands.cell('one', optPadding + '--' + name);
-					commands.cell('two', optPaddingHalf + '<undefined>');
+					command.indent(1).sp().accent('--').plain(name).ln();
+					label.indent(1).warning('<undefined>').ln();
 				}
 				else {
-					commands.cell('one', optPadding + optionString(option));
-					if (option.short) {
-						commands.cell('short', ' -' + option.short);
+					command.indent(1).sp().accent('--').plain(name);
+					if (option.placeholder) {
+						command.sp().muted('<').plain(option.placeholder).muted('>');
 					}
-					var desc = optPaddingHalf + option.description;
-					desc += ' (' + option.type;
-					desc += (option.default ? ', default: ' + option.default : '');
-					desc += ')';
-					commands.cell('two', desc);
+					command.ln();
+
+					if (option.short) {
+						commands.row.short.out.accent('-').line(option.short);
+					}
+
+					label.accent(' > ').plain(option.description);
+					label.sp().muted('(').plain(option.type);
+					label.plain((option.default ? ', default: ' + option.default : ''));
+					label.muted(')').ln();
 
 					if (option.enum.length > 0) {
-						commands.newRow();
-						commands.cell('two', '   ' + option.enum.map((value:any) => {
+						label.indent().accent(' [ ').plain(option.enum.map((value:any) => {
 							if (xm.isNumber(value)) {
 								return value;
 							}
@@ -193,39 +221,36 @@ module xm {
 							return '\'' + jsesc(('' + value), {
 								quotes: 'single'
 							}) + '\'';
-						}).join(','));
-
+						}).join(',')).accent(' ]').ln();
 					}
 				}
-				commands.newRow();
 
 				addNote(option.note);
 			};
 
 			var addCommand = (cmd:ExposeCommand, group:ExposeGroup) => {
-				var usage = cmd.name;
+				commands.next();
+				var command = commands.row.command.out;
+				command.indent(1).plain(cmd.name);
 				if (cmd.variadic.length > 0) {
-					usage += ' <' + cmd.variadic.join(', ') + '>';
+					command.sp().muted('<').plain(cmd.variadic.join(', ')).muted('>');
 				}
-				commands.cell('one', commandPadding + usage);
-				commands.cell('two', cmd.label);
-				commands.newRow();
+				command.ln();
+
+				commands.row.label.out.line(cmd.label);
 
 				addNote(cmd.note);
-
 				cmd.options.sort(sortOptionName).forEach((name:string) => {
 					if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
 						addOption(name);
 					}
 				});
-				//commands.newRow();
 			};
 
 			var addNote = (note:string[]) => {
 				if (note && note.length > 0) {
 					note.forEach((note:string) => {
-						commands.cell('two', '   <' + note + '>');
-						commands.newRow();
+						commands.row.label.out.indent().accent(' : ').line(String(note));
 					});
 				}
 			};
@@ -240,7 +265,7 @@ module xm {
 					commandOptNames.push(option.name);
 				}
 			});
-			//commands.newRow();
+
 			optKeys.forEach((name:string) => {
 				var option:ExposeOption = this.expose.options.get(name);
 				if (option.global && !option.command) {
@@ -251,29 +276,30 @@ module xm {
 
 			if (allGroups.length > 0) {
 				this.expose.groups.values().sort(exposeSortGroup).forEach((group:ExposeGroup) => {
-					addHeader(group.label);
 
-					this.expose.commands.values().filter((cmd:ExposeCommand) => {
+					var contents = this.expose.commands.values().filter((cmd:ExposeCommand) => {
 						return cmd.groups.indexOf(group.name) > -1;
-
-					}).sort(group.sorter).forEach((cmd:ExposeCommand) => {
-						addCommand(cmd, group);
-
-						var i = allCommands.indexOf(cmd.name);
-						if (i > -1) {
-							allCommands.splice(i, 1);
-						}
 					});
+					if (contents.length > 0) {
+						addHeader(group.label);
+						contents.sort(group.sorter).forEach((cmd:ExposeCommand) => {
+							addCommand(cmd, group);
 
-					if (group.options.length > 0) {
-						addDivider();
-						group.options.sort(sortOptionName).forEach((name:string) => {
-							if (commandOptNames.indexOf(name) < 0) {
-								addOption(name);
+							var i = allCommands.indexOf(cmd.name);
+							if (i > -1) {
+								allCommands.splice(i, 1);
 							}
 						});
+
+						if (group.options.length > 0) {
+							//addDivider();
+							group.options.sort(sortOptionName).forEach((name:string) => {
+								if (commandOptNames.indexOf(name) < 0) {
+									addOption(name);
+								}
+							});
+						}
 					}
-					commands.newRow();
 					//xm.eachProp(expose.commands.keys().sort(), (name) => {});
 				});
 			}
@@ -284,7 +310,6 @@ module xm {
 				allCommands.forEach((name) => {
 					addCommand(this.expose.commands.get(name), this.expose.mainGroup);
 				});
-				commands.newRow();
 			}
 
 			if (commandOptNames.length > 0 && globalOptNames.length > 0) {
@@ -301,12 +326,8 @@ module xm {
 						addOption(name);
 					});
 				}
-				commands.newRow();
 			}
-			//now output
-
-			//TODO get rid of this nasty trim (ditch easy-table)
-			this.output.block(commands.print().replace(/\s*$/, ''));
+			builder.flush();
 		}
 	}
 }

@@ -517,7 +517,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';
-			cmd.label = 'search definitions';
+			cmd.label = 'search definitions using globbing pattern';
 			cmd.variadic = ['pattern'];
 			cmd.groups = [Group.primary, Group.query];
 			cmd.options = [
@@ -600,7 +600,7 @@ module tsd {
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'rate';
-			cmd.label = 'check rate-limit';
+			cmd.label = 'check github rate-limit';
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
