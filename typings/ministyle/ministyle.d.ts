@@ -7,6 +7,7 @@ declare module MiniStyle {
 	interface Style {
 		success(str:string):string;
 		accent(str:string):string;
+		signal(str:string):string;
 		warning(str:string):string;
 		error(str:string):string;
 		muted(str:string):string;

@@ -56,10 +56,10 @@ describe('minitable', function () {
 		builder.flush();
 
 		var expected = [
-			'[plain|A] [accent|B]',
-			'[plain|aa1][accent|bb1][plain|cc1]',
-			'[plain|aa2][accent|bb2][plain|cc2]',
-			'[plain|aa3][accent|bb3][plain|cc3]'
+			'[plain|A] [accnt|B]',
+			'[plain|aa1][accnt|bb1][plain|cc1]',
+			'[plain|aa2][accnt|bb2][plain|cc2]',
+			'[plain|aa3][accnt|bb3][plain|cc3]'
 		].join('\n');
 
 		var actual = buffer.concat('\n', '', false);
@@ -337,9 +337,9 @@ describe('minitable', function () {
 		builder.flush();
 
 		var expected = [
-			'[plain|aa1][accent|bb1]      [plain|cc1]    ',
-			'[plain|aa2][accent|bb2][plain|bb2][accent|bb2][plain|cc2cc2]',
-			'[plain|aa2][accent|bb2]             '
+			'[plain|aa1][accnt|bb1]      [plain|cc1]    ',
+			'[plain|aa2][accnt|bb2][plain|bb2][accnt|bb2][plain|cc2cc2]',
+			'[plain|aa2][accnt|bb2]             '
 		].join('\n');
 
 		var actual = buffer.concat('\n', '', false);

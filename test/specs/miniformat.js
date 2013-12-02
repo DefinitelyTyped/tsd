@@ -62,7 +62,7 @@ describe('miniformat', function () {
 			assert.deepEqual(multi.channels.buffer.chars.target.lines, ['aa bb cc']);
 			//boooya!
 			assert.deepEqual(multi.channels.split.chars.target.target.lines, ['aa', 'bb', 'cc']);
-			assert.deepEqual(multi.channels.dev.chars.target.targets[0].lines, ['[plain|aa] [error|bb] [success|cc]']);
+			assert.deepEqual(multi.channels.dev.chars.target.targets[0].lines, ['[plain|aa] [error|bb] [succs|cc]']);
 		});
 	});
 });

@@ -20,7 +20,6 @@ module tsd {
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
-	var minihtml = require('../lib/miniwrite-html/miniwrite-html');
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -48,17 +47,17 @@ module tsd {
 	//TODO clean this up
 	styleMap.set('html', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.html(true));
-		output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+		output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
 		// same but seperate
 		xm.log.out.useStyle(ministyle.html(true));
-		xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+		xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
 	});
 	styleMap.set('css', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.css('', true));
-		output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+		output.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 		// same but seperate
 		xm.log.out.useStyle(ministyle.css('', true));
-		xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+		xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 	});
 	styleMap.set('dev', (ctx:xm.ExposeContext) => {
 		output.useStyle(ministyle.dev());

@@ -25,7 +25,7 @@
   ],
   "preferGlobal": true,
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.10.0"
   },
   "bin": {
     "tsd": "./build/cli.js"
@@ -46,7 +46,6 @@
     "tv4-reporter": "0.0.2",
     "uri-templates": "0.1.1",
     "optimist": "0.6.0",
-    "easy-table": "0.2.0",
     "assertion-error": "~1.0.0",
     "source-map-support": "0.2.3",
     "jsesc": "~0.4.3",

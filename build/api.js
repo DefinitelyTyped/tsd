@@ -7026,8 +7026,6 @@ var xm;
     'use strict';
 
     var jsesc = require('jsesc');
-
-    var Table = require('easy-table');
     var ministyle = require('ministyle');
     var miniwrite = require('miniwrite');
     var minitable = require('../lib/minitable/minitable');
@@ -7480,8 +7478,6 @@ var xm;
     var Q = require('q');
 
     var exitProcess = require('exit');
-
-    var Table = require('easy-table');
 
     var ExposeCommand = (function () {
         function ExposeCommand() {
@@ -8002,7 +7998,6 @@ var tsd;
 
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
-    var minihtml = require('../lib/miniwrite-html/miniwrite-html');
 
     var Opt = tsd.cli.Opt;
     var Group = tsd.cli.Group;
@@ -8024,17 +8019,17 @@ var tsd;
 
     tsd.styleMap.set('html', function (ctx) {
         output.useStyle(ministyle.html(true));
-        output.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
 
         xm.log.out.useStyle(ministyle.html(true));
-        xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, null, '<br/>'));
+        xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
     });
     tsd.styleMap.set('css', function (ctx) {
         output.useStyle(ministyle.css('', true));
-        output.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
 
         xm.log.out.useStyle(ministyle.css('', true));
-        xm.log.out.useWrite(minihtml.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
+        xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
     });
     tsd.styleMap.set('dev', function (ctx) {
         output.useStyle(ministyle.dev());

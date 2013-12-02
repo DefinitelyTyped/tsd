@@ -47,6 +47,12 @@ declare module MiniWrite {
 		callback:PeekCallback;
 	}
 
+	interface HTMLAppend extends Enable {
+		// DOM Element?
+		parent:any;
+	}
+
+
 	function assertMiniWrite(obj:any):void;
 	function isMiniWrite(obj:any):boolean;
 
@@ -58,6 +64,9 @@ declare module MiniWrite {
 
 	function buffer(patch?:any):Buffer;
 	function log(patch?:any):Line;
+
+	function htmlString(target:Line, tag?:string, attributes?:any, linebreak?:string):Line;
+	function htmlAppend(parent:any, tag?:string, attributes?:any):HTMLAppend;
 
 	//TODO what to do with node stream?
 	function stream(nodeStream:any):Line;

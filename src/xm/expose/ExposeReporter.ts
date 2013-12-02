@@ -7,7 +7,6 @@
  * */
 
 ///<reference path="../_ref.d.ts" />
-///<reference path="../../../typings/easy-table/easy-table.d.ts" />
 ///<reference path="../io/StyledOut.ts" />
 ///<reference path="../expose/Expose.ts" />
 
@@ -18,8 +17,6 @@ module xm {
 	'use strict';
 
 	var jsesc = require('jsesc');
-	//TODO ditch easy-table
-	var Table:EasyTableStatic = require('easy-table');
 	var ministyle = <typeof MiniStyle> require('ministyle');
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var minitable = require('../lib/minitable/minitable');
@@ -130,7 +127,6 @@ module xm {
 			this.output = (output || new xm.StyledOut());
 		}
 
-		//TODO replace easy-tables with layout that supports colored/wrapped/non-printable output
 		//TODO figure-out proper way to specify/rank detail level
 		printCommands(level:string):void {
 			var builder = minitable.getBuilder(this.output.getWrite(), this.output.getStyle());

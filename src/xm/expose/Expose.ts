@@ -7,7 +7,6 @@
  * */
 
 ///<reference path="../_ref.d.ts" />
-///<reference path="../../../typings/easy-table/easy-table.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 ///<reference path="../callAsync.ts" />
@@ -31,8 +30,6 @@ module xm {
 	var Q:typeof Q = require('q');
 	//TODO ditch node-exit if node ever get fixed..
 	var exitProcess:(code:number) => void = require('exit');
-	//TODO ditch easy-table
-	var Table:EasyTableStatic = require('easy-table');
 
 	export interface ExposeHook {
 		(ctx:ExposeContext):any;
