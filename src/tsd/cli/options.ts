@@ -133,14 +133,14 @@ module tsd {
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.info;
 				opt.short = 'i';
-				opt.description = 'display definition info';
+				opt.description = 'display definition file info';
 				opt.type = 'flag';
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.history;
 				opt.short = 'h';
-				opt.description = 'display definition commit history';
+				opt.description = 'display commit history';
 				opt.type = 'flag';
 			});
 

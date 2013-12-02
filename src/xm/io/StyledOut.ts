@@ -209,13 +209,11 @@ module xm {
 
 		// - - - - - extra api - - - - -
 
-		//TODO add test/
 		label(label:string):StyledOut {
 			this._line.write(this._style.plain(xm.wrapIfComplex(label) + ': '));
 			return this;
 		}
 
-		//TODO add test?
 		indent(levels:number = 1):StyledOut {
 			var str = '';
 			for (var i = 0; i < levels; i++) {
@@ -225,7 +223,6 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
 		bullet(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.bullet));
@@ -236,13 +233,11 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
 		index(num:any):StyledOut {
 			this._line.write(this._style.plain(String(num) + ': '));
 			return this;
 		}
 
-		//TODO add test?
 		info(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.arrow));
@@ -253,7 +248,6 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
 		report(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.double));
@@ -289,8 +283,31 @@ module xm {
 		}
 
 		//TODO add test?
-		tweakPath(str:string):StyledOut {
-			this._line.write(str.replace(/\//g, this._style.accent('/')));
+		tweakPath(str:string, muted:boolean = false):StyledOut {
+			return this.tweakExp(str, /\//g, muted);
+		}
+
+		//TODO add test?
+		tweakPunc(str:string, muted:boolean = false):StyledOut {
+			return this.tweakExp(str, /[\/\.,_-]/g, muted);
+		}
+
+		//TODO add test?
+		tweakBraces(str:string, muted:boolean = false):StyledOut {
+			return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
+		}
+
+		//TODO add test?
+		tweakExp(str:string, expr:RegExp, muted:boolean = false):StyledOut {
+			if (muted) {
+				this._line.write(str.replace(expr, (value) => {
+					return this._style.accent(value);
+				}));
+				return this;
+			}
+			this._line.write(str.replace(expr, (value) => {
+				return this._style.accent(value);
+			}));
 			return this;
 		}
 

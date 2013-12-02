@@ -205,9 +205,9 @@ module xm {
 					}
 
 					label.accent(' > ').plain(option.description);
-					label.sp().muted('(').plain(option.type);
+					label.sp().accent('(').plain(option.type);
 					label.plain((option.default ? ', default: ' + option.default : ''));
-					label.muted(')').ln();
+					label.accent(')').ln();
 
 					if (option.enum.length > 0) {
 						label.indent().accent(' [ ').plain(option.enum.map((value:any) => {

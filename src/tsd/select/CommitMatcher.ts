@@ -14,9 +14,10 @@ module tsd {
 	export class CommitMatcher {
 
 		commitSha:string;
+		minimumShaLen:number = 2;
 
 		constructor(commitSha?:string) {
-			this.commitSha = commitSha;
+			this.commitSha = String(commitSha);
 		}
 
 		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
@@ -38,8 +39,8 @@ module tsd {
 				xm.throwAssert('parameter not a hex {a}', commitSha);
 			}
 			var len = commitSha.length;
-			if (len < tsd.Const.shaShorten) {
-				xm.throwAssert('parameter hex too short {a}, {e}', tsd.Const.shaShorten, false);
+			if (len < this.minimumShaLen) {
+				xm.throwAssert('parameter hex too short {a}, {e}', this.minimumShaLen, false);
 			}
 			return (file:tsd.DefVersion) => {
 				return (file.commit && file.commit.commitSha.substr(0, len) === commitSha

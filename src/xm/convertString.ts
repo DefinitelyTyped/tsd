@@ -30,6 +30,9 @@ module xm {
 		}
 		return num;
 	};
+	converStringMap.string = function (input:string) {
+		return String(input);
+	};
 	converStringMap.boolean = function (input:string) {
 		input = ('' + input).toLowerCase();
 		if (input === '' || input === '0') {

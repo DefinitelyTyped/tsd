@@ -78,9 +78,9 @@ module tsd {
 	function showPreviewNotice():Q.Promise<void> {
 		var pkg = xm.PackageJSON.getLocal();
 
-		output.ln().report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln()
+		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln().ln();
 			//.clear().span(pkg.getHomepage(true)).ln()
-		.ruler().ln();
+		//.ruler().ln();
 		//TODO implement version check / news service
 		return Q.resolve();
 	}
@@ -144,7 +144,7 @@ module tsd {
 
 	function printFile(file:tsd.DefVersion, sep:string = ' : '):xm.StyledOut {
 		if (file.def) {
-			output.span(file.def.path);
+			output.tweakPath(file.def.path);
 		}
 		else {
 			output.accent('<no def>');
@@ -243,7 +243,7 @@ module tsd {
 
 				if (refer.dependencies.length > 0) {
 					refer.dependencies.sort(tsd.DefUtil.defCompare).forEach((dep:tsd.Def) => {
-						output.indent().indent().report(true).line(dep.path);
+						output.indent().indent().report(true).tweakPath(dep.path).ln();
 					});
 				}
 			});
@@ -560,7 +560,7 @@ module tsd {
 									output.ln().report().warning('unknown action:').space().span(action).ln();
 									return;
 								}
-								output.ln().info(true).span('running').space().accent(action).ln();
+								output.report(true).span('running').space().accent(action).ln();
 
 								return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 									return run(ctx, job, selection).progress(notify);

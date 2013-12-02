@@ -889,8 +889,33 @@ var xm;
             return this;
         };
 
-        StyledOut.prototype.tweakPath = function (str) {
-            this._line.write(str.replace(/\//g, this._style.accent('/')));
+        StyledOut.prototype.tweakPath = function (str, muted) {
+            if (typeof muted === "undefined") { muted = false; }
+            return this.tweakExp(str, /\//g, muted);
+        };
+
+        StyledOut.prototype.tweakPunc = function (str, muted) {
+            if (typeof muted === "undefined") { muted = false; }
+            return this.tweakExp(str, /[\/\.,_-]/g, muted);
+        };
+
+        StyledOut.prototype.tweakBraces = function (str, muted) {
+            if (typeof muted === "undefined") { muted = false; }
+            return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
+        };
+
+        StyledOut.prototype.tweakExp = function (str, expr, muted) {
+            if (typeof muted === "undefined") { muted = false; }
+            var _this = this;
+            if (muted) {
+                this._line.write(str.replace(expr, function (value) {
+                    return _this._style.accent(value);
+                }));
+                return this;
+            }
+            this._line.write(str.replace(expr, function (value) {
+                return _this._style.accent(value);
+            }));
             return this;
         };
 
@@ -2870,7 +2895,8 @@ var tsd;
 
     var CommitMatcher = (function () {
         function CommitMatcher(commitSha) {
-            this.commitSha = commitSha;
+            this.minimumShaLen = 2;
+            this.commitSha = String(commitSha);
         }
         CommitMatcher.prototype.filter = function (list) {
             if (!this.commitSha) {
@@ -2891,8 +2917,8 @@ var tsd;
                 xm.throwAssert('parameter not a hex {a}', commitSha);
             }
             var len = commitSha.length;
-            if (len < tsd.Const.shaShorten) {
-                xm.throwAssert('parameter hex too short {a}, {e}', tsd.Const.shaShorten, false);
+            if (len < this.minimumShaLen) {
+                xm.throwAssert('parameter hex too short {a}, {e}', this.minimumShaLen, false);
             }
             return function (file) {
                 return (file.commit && file.commit.commitSha.substr(0, len) === commitSha);
@@ -6943,6 +6969,9 @@ var xm;
         }
         return num;
     };
+    xm.converStringMap.string = function (input) {
+        return String(input);
+    };
     xm.converStringMap.boolean = function (input) {
         input = ('' + input).toLowerCase();
         if (input === '' || input === '0') {
@@ -7118,7 +7147,7 @@ var xm;
                 { name: 'label' }
             ], {
                 inner: this.output.nibs.none,
-                rowSpace: 0
+                rowSpace: 1
             });
 
             headers.init();
@@ -7173,9 +7202,9 @@ var xm;
                     }
 
                     label.accent(' > ').plain(option.description);
-                    label.sp().muted('(').plain(option.type);
+                    label.sp().accent('(').plain(option.type);
                     label.plain((option.default ? ', default: ' + option.default : ''));
-                    label.muted(')').ln();
+                    label.accent(')').ln();
 
                     if (option.enum.length > 0) {
                         label.indent().accent(' [ ').plain(option.enum.map(function (value) {
@@ -7331,9 +7360,9 @@ var xm;
         ExposeContext.prototype.getOpt = function (name, alt) {
             if (this.hasOpt(name)) {
                 var option = this.expose.options.get(name);
-                if (option && !xm.isUndefined(option.default)) {
+                if (option) {
                     if (option.type) {
-                        if (typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
+                        if (!xm.isUndefined(option.default) && typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
                             return this.getDefault(name, xm.convertStringTo(this.argv[name], option.type));
                         }
                         return xm.convertStringTo(this.argv[name], option.type);
@@ -7873,14 +7902,14 @@ var tsd;
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.info;
                 opt.short = 'i';
-                opt.description = 'display definition info';
+                opt.description = 'display definition file info';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.history;
                 opt.short = 'h';
-                opt.description = 'display definition commit history';
+                opt.description = 'display commit history';
                 opt.type = 'flag';
             });
 
@@ -8023,7 +8052,7 @@ var tsd;
     function showPreviewNotice() {
         var pkg = xm.PackageJSON.getLocal();
 
-        output.ln().report(true).span(pkg.getNameVersion()).space().accent('(preview)').ln().ruler().ln();
+        output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln().ln();
 
         return Q.resolve();
     }
@@ -8078,7 +8107,7 @@ var tsd;
     function printFile(file, sep) {
         if (typeof sep === "undefined") { sep = ' : '; }
         if (file.def) {
-            output.span(file.def.path);
+            output.tweakPath(file.def.path);
         } else {
             output.accent('<no def>');
         }
@@ -8168,7 +8197,7 @@ var tsd;
 
                 if (refer.dependencies.length > 0) {
                     refer.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (dep) {
-                        output.indent().indent().report(true).line(dep.path);
+                        output.indent().indent().report(true).tweakPath(dep.path).ln();
                     });
                 }
             });
@@ -8439,7 +8468,7 @@ var tsd;
                                     output.ln().report().warning('unknown action:').space().span(action).ln();
                                     return;
                                 }
-                                output.ln().info(true).span('running').space().accent(action).ln();
+                                output.report(true).span('running').space().accent(action).ln();
 
                                 return queryActions.run(action, function (run) {
                                     return run(ctx, job, selection).progress(notify);
