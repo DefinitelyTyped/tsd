@@ -219,7 +219,8 @@ module.exports = function (grunt) {
 	gtx.alias('test', [
 		'build',
 		'tslint:helper',
-		'gtx-type:moduleTest'
+		'gtx-type:moduleTest',
+		'mochaTest:specs'
 	]);
 	gtx.alias('default', [
 		'test'

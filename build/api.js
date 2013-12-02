@@ -7146,8 +7146,8 @@ var xm;
                 { name: 'short' },
                 { name: 'label' }
             ], {
-                inner: this.output.nibs.none,
-                rowSpace: 1
+                inner: '   ',
+                rowSpace: 0
             });
 
             headers.init();
@@ -8239,7 +8239,7 @@ var tsd;
         } else {
             output.success(info.getResetString());
         }
-        return output.clear();
+        return output.ln();
     }
 
     function init(ctx) {

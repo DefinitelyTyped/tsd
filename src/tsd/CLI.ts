@@ -293,7 +293,7 @@ module tsd {
 		else {
 			output.success(info.getResetString());
 		}
-		return output.clear();
+		return output.ln();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -147,7 +147,7 @@ module xm {
 				{ name: 'short'},
 				{ name: 'label'}
 			], {
-				inner: this.output.nibs.none,
+				inner: '   ',
 				rowSpace: 0
 			});
 
