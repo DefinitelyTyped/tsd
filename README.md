@@ -17,12 +17,12 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 	*	There will be bugs and quirks. We do out best to remove the bugs.
 * It is recommended you check-in any definitions you install into your VCS:
 	*	As we link directly to the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repo files may get moved or renamed. 
-	*	The new `tsd.json` format knows the commit + path so should be able to find the correct file, but this might not be implemented yet.
+	*	The new `tsd.json` format saves [repo + commit + path] to find the correct file in space/time, but this might not be implemented yet.
 
 ### API change
 
-* First versions of `0.5.x` has similar CLI commands to older version of TSD by having separate search/install commands
-* From `> 0.5.2` all CLI search-based features are bundled under the `query` command (see below)
+* First versions of `0.5.x` had similar CLI commands to older version of TSD by having separate search/install commands
+* As of `> 0.5.2` all CLI search-based features are bundled under the `query` command (see below). 
 
 ### Usage as CLI command
 
