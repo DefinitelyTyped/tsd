@@ -18,4 +18,5 @@ _tmp.*
 tmp/
 dump/
 
+/tscommand.*
 /*.tgz

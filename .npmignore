@@ -3,21 +3,30 @@
 .gitmodules
 .idea
 
+/*.tgz
+
 tmp/
-/src
 
 .travis.yml
 .jshintrc
 .vagrant
+.jslintrc
 .tslint.json
 Gruntfile.js
 tsd-config.json
+tsd.json
+tslint.json
+Vagrantfile
+tscommand.*
 
-/docs
-/tsd-cache
+/assets
 /cache
-/typings
-/test
-
 /cookbooks
-/Vagrantfile
+/deploy
+/docs
+/media
+/src
+/test
+/util
+/typings
+/tsd-cache
