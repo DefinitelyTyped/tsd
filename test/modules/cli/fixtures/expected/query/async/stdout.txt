@@ -1,5 +1,4 @@
 
 >> tsd 0.5.x (preview)
 
--> async/async.d.ts : <head> : 2013-11-30 00:58
-
+ - async/async.d.ts : <head> : 2013-11-30 00:58

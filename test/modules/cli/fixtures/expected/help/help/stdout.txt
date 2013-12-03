@@ -5,18 +5,18 @@
    
    query <pattern>           search definitions using globbing pattern                
     --action <name>     -a    > run action on selection (string)                      
-                                 [ install,compare,update,open ]                      
+                                 [ install, compare, update, open ]                   
                                  : partially implemented                              
     --commit <sha1>     -c    > filter on commit hash (string)                        
     --date <range>      -d    > filter on commit date (string)                        
                                  : example: ">2012-12-31"                             
-    --history           -h    > display commit history (flag)                         
     --info              -i    > display definition file info (flag)                   
     --overwrite         -o    > overwrite existing files (flag)                       
     --resolve           -r    > include reference dependencies (flag)                 
     --save              -s    > save changes to config file (flag)                    
     --semver <range>    -v    > filter on version postfix (string, default: latest)   
                                  : semver-range | latest | all                        
+    --history           -y    > display commit history (flag)                         
     --limit <num>       -l    > sanity limit for expensive API calls (int, default: 2)
                                  : 0 = unlimited                                      
     --cacheDir <path>         > path to cache directory (string)                      
@@ -31,12 +31,15 @@
    version                   display version                                          
    init                      create empty config file                                 
     --overwrite         -o    > overwrite existing files (flag)                       
+    --config <path>           > path to config file (string)                          
    settings                  display config settings                                  
-   reinstall                 re-install definitions from config                       
-    --overwrite         -o    > overwrite existing files (flag)                       
-   rate                      check github rate-limit                                  
     --cacheDir <path>         > path to cache directory (string)                      
     --config <path>           > path to config file (string)                          
+   reinstall                 re-install definitions from config                       
+    --overwrite         -o    > overwrite existing files (flag)                       
+    --cacheDir <path>         > path to cache directory (string)                      
+    --config <path>           > path to config file (string)                          
+   rate                      check github rate-limit                                  
    
 >> global options
    
@@ -45,9 +48,9 @@
     --progress          -p    > display progress notifications (flag)                 
                                  : experimental                                       
     --detail                  > modify reporting detail level (string)                
-                                 [ low,mid,high ]                                     
+                                 [ low, mid, high ]                                   
                                  : partially implemented                              
     --dev                     > development mode (flag)                               
     --style <name>            > specify CLI style (string, default: ansi)             
-                                 [ no,plain,ansi,html,css,dev ]                       
+                                 [ no, plain, ansi, html, css, dev ]                  
     --verbose                 > verbose output (flag)                                 

@@ -191,7 +191,7 @@ module tsd {
 				return -1;
 			}
 			else if (aa.def.path > bb.def.path) {
-				return -1;
+				return 1;
 			}
 			//hmm.. now what?
 			return -1;
@@ -208,7 +208,7 @@ module tsd {
 				return -1;
 			}
 			else if (aa.path > bb.path) {
-				return -1;
+				return 1;
 			}
 			//hmm.. now what?
 			return -1;

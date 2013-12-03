@@ -5053,7 +5053,7 @@ var tsd;
             if (aa.def.path < bb.def.path) {
                 return -1;
             } else if (aa.def.path > bb.def.path) {
-                return -1;
+                return 1;
             }
 
             return -1;
@@ -5069,7 +5069,7 @@ var tsd;
             if (aa.path < bb.path) {
                 return -1;
             } else if (aa.path > bb.path) {
-                return -1;
+                return 1;
             }
 
             return -1;
