@@ -6,7 +6,7 @@
 
 TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package manager. Search and install community contributed definition files directly from the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) Github repository. TSD works as a CLI command `$ tsd` similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module. 
 
-*Note:* the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. To keep within this limit TSD employs both local and http caching layers. The actual definition files are downloaded over the Github RAW service (also with local and http cache). We are looking into a API proxy service for the incidental rate-limit overflow.
+*Note:* the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. To keep within this limit TSD employs both local and http caching layers. The actual definition files are downloaded over the Github RAW service (also with local and http cache).
 
 :bangbang: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
 
@@ -30,7 +30,11 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 
 	$ npm install tsd -g
 
-:rocket: For npm preview install directly from github (if you feel particularly adventurous):
+:rocket: For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
+
+	$ npm install git://github.com/DefinitelyTyped/tsd#{{pick-a-tag}} -g
+
+:wrench: If you really must you can install directly from github (only if you feel particularly adventurous):
 
 	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
 
