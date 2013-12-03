@@ -37,7 +37,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "q": "0.9.6",
+    "q": "~0.9.7",
     "q-io": "1.9.4",
     "exit": "~0.1.1",
     "mkdirp": "0.3.5",

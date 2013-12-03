@@ -7,13 +7,14 @@ module tsd {
 
 	export module cli {
 
-		export function addCommon(expose:xm.Expose):void {
+		export function addCommon(expose:xm.Expose, print:tsd.cli.Printer, style:tsd.cli.StyleMap):void {
 
 			expose.defineCommand((cmd:xm.ExposeCommand) => {
 				cmd.name = 'help';
 				cmd.label = 'display usage help';
 				cmd.groups = [Group.support];
 				cmd.execute = (ctx:xm.ExposeContext) => {
+					ctx.out.ln();
 					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 					return null;
 				};
@@ -24,7 +25,8 @@ module tsd {
 				cmd.label = 'display version';
 				cmd.groups = [Group.support];
 				cmd.execute = ((ctx:xm.ExposeContext) => {
-					return ctx.out.line(xm.PackageJSON.getLocal().version);
+					ctx.out.ln();
+					return ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 				});
 			});
 
@@ -61,10 +63,10 @@ module tsd {
 				opt.type = 'string';
 				opt.placeholder = 'name';
 				opt.global = true;
-				opt.enum = tsd.styleMap.keys();
+				opt.enum = style.getKeys();
 				opt.default = 'ansi';
 				opt.apply = (value, ctx:xm.ExposeContext) => {
-					tsd.useColor(value, ctx);
+					style.useColor(value, ctx);
 				};
 			});
 
@@ -78,7 +80,7 @@ module tsd {
 				opt.global = true;
 				opt.note = ['experimental'];
 				opt.apply = (value, ctx:xm.ExposeContext) => {
-					ctx.out.ln().indent().warning('--progress events are not 100% yet').ln();
+					ctx.out.ln().indent().warning('--progress events are not 100%').ln();
 				};
 			});
 
@@ -139,7 +141,7 @@ module tsd {
 
 			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.history;
-				opt.short = 'h';
+				opt.short = 'y';
 				opt.description = 'display commit history';
 				opt.type = 'flag';
 			});
@@ -204,14 +206,14 @@ module tsd {
 			});
 
 			/*expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.timeout;
-				opt.description = 'set operation timeout in milliseconds';
-				opt.type = 'int';
-				opt.default = 0;
-				opt.global = true;
-				opt.placeholder = 'ms';
-				opt.note = ['0 = unlimited', 'not implemented'];
-			});*/
+			 opt.name = Opt.timeout;
+			 opt.description = 'set operation timeout in milliseconds';
+			 opt.type = 'int';
+			 opt.default = 0;
+			 opt.global = true;
+			 opt.placeholder = 'ms';
+			 opt.note = ['0 = unlimited', 'not implemented'];
+			 });*/
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -231,6 +233,9 @@ module tsd {
 				opt.placeholder = 'name';
 				opt.enum = [Action.install, Action.compare, Action.update, Action.open];
 				opt.note = ['partially implemented'];
+				opt.apply = (value, ctx:xm.ExposeContext) => {
+					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
+				};
 			});
 		}
 	}

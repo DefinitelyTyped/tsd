@@ -81,7 +81,10 @@ module xm {
 		constructor(prefix:string = '', label:string = '', logger?:xm.Logger) {
 			this._label = label;
 			this._prefix = (prefix ? prefix + ':' : '');
+
+			//TODO this is not dynamic (style/out not updatable)
 			this.logger = logger || (label ? xm.getLogger(this._label) : (xm.log || xm.getLogger()));
+
 			this._startAt = Date.now();
 
 			xm.ObjectUtil.hidePrefixed(this);
@@ -95,21 +98,21 @@ module xm {
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
 			if (!this.isMuted(Level.notify)) {
 				promise.progress((note) => {
-					this.track(Level.notify, type, message, note, promise);
+					this.track(Level.notify, type, message, note);
 				});
 			}
 			if (!this.isMuted(Level.reject)) {
 				promise.fail((err) => {
-					this.track(Level.reject, type, message, err, promise);
+					this.track(Level.reject, type, message, err);
 				});
 			}
 			if (!this.isMuted(Level.resolve)) {
-				promise.then((err) => {
-					this.track(Level.resolve, type, message, err, promise);
+				promise.then(() => {
+					this.track(Level.resolve, type, message);
 				});
 			}
 			if (!this.isMuted(Level.promise)) {
-				return this.track(Level.promise, type, message, data, promise);
+				return this.track(Level.promise, type, message);
 			}
 			return null;
 		}
@@ -229,6 +232,10 @@ module xm {
 					}
 				}
 			});
+		}
+
+		unmuteAll():void {
+			this._mutePromises = [];
 		}
 
 		//TODO fix odd isNaN default param

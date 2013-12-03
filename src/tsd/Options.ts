@@ -8,8 +8,8 @@ module tsd {
 		maxMatches:number = 0;
 		limitApi:number = 2;
 
-		overwriteFiles:boolean = false;
 		resolveDependencies:boolean = false;
+		overwriteFiles:boolean = false;
 		saveToConfig:boolean = false;
 
 		//TODO implement timeout (limitless powerr!)

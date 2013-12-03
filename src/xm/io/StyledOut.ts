@@ -40,6 +40,7 @@ module xm {
 			bullet: ' - ',
 			edge: ' | ',
 			ruler: '---',
+			dash: '-- ',
 			decl: ' : ',
 			none: '   '
 		};
@@ -186,6 +187,7 @@ module xm {
 			return this;
 		}
 
+		//TODO should not be writeln(
 		inspect(value:any, depth:number = 4, showHidden:boolean = false):StyledOut {
 			this._line.writeln(this._style.plain(util.inspect(value, <any>{showHidden: showHidden, depth: depth})));
 			return this;
@@ -215,11 +217,13 @@ module xm {
 		}
 
 		indent(levels:number = 1):StyledOut {
-			var str = '';
-			for (var i = 0; i < levels; i++) {
-				str += this.nibs.none;
+			if (levels > 0) {
+				var str = '';
+				for (var i = 0; i < levels; i++) {
+					str += this.nibs.none;
+				}
+				this._line.write(str);
 			}
-			this._line.write(str);
 			return this;
 		}
 
@@ -258,13 +262,23 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
 		note(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.single));
 			}
 			else {
 				this._line.write(this._style.plain(this.nibs.single));
+			}
+			return this;
+		}
+
+		//TODO add test?
+		dash(accent:boolean = false):StyledOut {
+			if (accent) {
+				this._line.write(this._style.accent(this.nibs.dash));
+			}
+			else {
+				this._line.write(this._style.plain(this.nibs.dash));
 			}
 			return this;
 		}

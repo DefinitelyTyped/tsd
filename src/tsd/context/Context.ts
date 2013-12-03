@@ -44,14 +44,15 @@ module tsd {
 			return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
 		}
 
+		//TODO move this out of this class
 		logInfo(details:boolean = false):void {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
 			if (details) {
-				this.log('paths', this.paths);
-				this.log('config', this.config);
-				this.log('resolved typings', this.config.resolveTypingsPath(path.dirname(this.paths.configFile)));
-				this.log('installed', this.config.getInstalled());
+				this.log('paths: ' + JSON.stringify(this.paths, null, 3));
+				this.log('config: ' + JSON.stringify(this.config, null, 3));
+				this.log('resolved typings: ' + JSON.stringify(this.config.resolveTypingsPath(path.dirname(this.paths.configFile)), null, 3));
+				this.log('installed: ' + JSON.stringify(this.config.getInstalled(), null, 3));
 			}
 		}
 	}

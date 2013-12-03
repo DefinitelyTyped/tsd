@@ -41,6 +41,7 @@ module tsd {
 		 lazy load a single DefVersion file content
 		 promise: DefVersion; with raw .blob loaded
 		 */
+		//TODO this should not keep the content in memory
 		loadContent(file:tsd.DefVersion):Q.Promise<DefVersion> {
 			if (file.hasContent()) {
 				this.track.skip('content_load', file.key);

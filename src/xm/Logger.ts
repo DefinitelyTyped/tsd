@@ -19,6 +19,7 @@ module xm {
 	export var log:xm.Logger;
 
 	//TODO consider merging Logger for StyledOut
+	//TODO find pattern to use sub-loggers that auto-update when .out changes) (o.a xm.EventLog need this)
 	export interface Logger {
 		(...args:any[]):void;
 		ok(...args:any[]):void;

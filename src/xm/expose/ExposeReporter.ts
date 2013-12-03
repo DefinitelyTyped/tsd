@@ -170,7 +170,7 @@ module xm {
 				builder.closeAll();
 				firstHeader = false;
 				headers.next();
-				headers.row.title.out.accent('>> ').plain(title).ln();
+				headers.row.title.out.accent('>> ').plain(title).line();
 				addDivider();
 			};
 
@@ -217,7 +217,7 @@ module xm {
 							return '\'' + jsesc(('' + value), {
 								quotes: 'single'
 							}) + '\'';
-						}).join(',')).accent(' ]').ln();
+						}).join(', ')).accent(' ]').ln();
 					}
 				}
 

@@ -6,8 +6,11 @@
 ///<reference path="../xm/DateUtil.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
 ///<reference path="../xm/promise.ts" />
+///<reference path="cli/printer.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="select/Query.ts" />
+///<reference path="cli/style.ts" />
+///<reference path="cli/printer.ts" />
 ///<reference path="cli/options.ts" />
 ///<reference path="cli/const.ts" />
 
@@ -21,70 +24,31 @@ module tsd {
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 	var Opt = tsd.cli.Opt;
 	var Group = tsd.cli.Group;
 	var Action = tsd.cli.Action;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var output = new xm.StyledOut();
+	var print = new tsd.cli.Printer(output);
+	var styles = new tsd.cli.StyleMap(output);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	export var styleMap = new xm.KeyValueMap<(ctx:xm.ExposeContext) => void>();
-
-	styleMap.set('no', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.plain());
-	});
-	styleMap.set('plain', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.plain());
-	});
-	styleMap.set('ansi', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.ansi());
-	});
-	//TODO clean this up
-	styleMap.set('html', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.html(true));
-		output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
-		// same but seperate
-		xm.log.out.useStyle(ministyle.html(true));
-		xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
-	});
-	styleMap.set('css', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.css('', true));
-		output.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
-		// same but seperate
-		xm.log.out.useStyle(ministyle.css('', true));
-		xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
-	});
-	styleMap.set('dev', (ctx:xm.ExposeContext) => {
-		output.useStyle(ministyle.dev());
-	});
-
-	export function useColor(color:string, ctx:xm.ExposeContext) {
-		if (styleMap.has(color)) {
-			styleMap.get(color)(ctx);
-		}
-		else {
-			styleMap.get('plain')(ctx);
-		}
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	function showPreviewNotice():Q.Promise<void> {
+	function showHeader():Q.Promise<void> {
 		var pkg = xm.PackageJSON.getLocal();
 
-		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln().ln();
-			//.clear().span(pkg.getHomepage(true)).ln()
+		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
+		//.clear().span(pkg.getHomepage(true)).ln()
 		//.ruler().ln();
 		//TODO implement version check / news service
 		return Q.resolve();
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	function getContext(ctx:xm.ExposeContext):tsd.Context {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
@@ -103,206 +67,14 @@ module tsd {
 		return context;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	//TODO further unify reporting format (consistent details and don't rely on toString()'s) (See TODO.md)
-
-	function reportError(err:any, head:boolean = true):xm.StyledOut {
-		if (head) {
-			output.info().error('an error occured!').clear();
-		}
-
-		if (err.stack) {
-			return output.block(err.stack);
-		}
-		return output.line(err);
-	}
-
-	function reportProgress(obj:any):xm.StyledOut {
-		if (obj instanceof git.GitRateInfo) {
-			return printRateInfo(obj);
-		}
-		return output.info().inspect(obj, 3);
-	}
-
-	function reportSucces(result:tsd.APIResult):xm.StyledOut {
-		//output.ln().info().success('success!').clear();
-		if (result) {
-			result.selection.forEach((def:tsd.DefVersion) => {
-				output.line(def.toString());
-				if (def.info) {
-					output.line(def.info.toString());
-					output.line(def.info);
-				}
-			});
-		}
-		return output;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	function printFile(file:tsd.DefVersion, sep:string = ' : '):xm.StyledOut {
-		if (file.def) {
-			output.tweakPath(file.def.path);
-		}
-		else {
-			output.accent('<no def>');
-		}
-		return output.accent(sep).glue(printFileEnd(file, sep));
-	}
-
-	function printFileEnd(file:tsd.DefVersion, sep:string = ' | '):xm.StyledOut {
-		if (file.def && file.def.head === file) {
-			output.span('<head>');
-			if (file.commit.changeDate) {
-				output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
-			}
-		}
-		else {
-			if (file.commit) {
-				output.span(file.commit.commitShort);
-				if (file.commit.changeDate) {
-					output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
-				}
-			}
-			else {
-				output.accent(sep).accent('<no commit>');
-			}
-		}
-		/*if (file.blob) {
-		 output.span(sep).span(file.blob.shaShort);
-		 }*/
-		return output;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	function printFileCommit(file:tsd.DefVersion, skipNull:boolean = false):xm.StyledOut {
-		var sep = '  |  ';
-		if (file.commit) {
-			output.indent().glue(printFileEnd(file, sep));
-			output.accent(sep).span(file.commit.gitAuthor.name);
-			if (file.commit.hubAuthor) {
-				output.accent('  @  ').span(file.commit.hubAuthor.login);
-			}
-			output.clear();
-
-			//TODO full indent message
-			output.indent().note(true).line(file.commit.message.subject);
-			output.ln();
-		}
-		else if (!skipNull) {
-			output.indent().accent('<no commmit>');
-			output.ln();
-		}
-		return output;
-	}
-
-	function printSubHead(text:string):xm.StyledOut {
-		return output.line(' ' + text).ln();
-	}
-
-	function printDefHead(def:tsd.Def):xm.StyledOut {
-		return output.line(def.toString()).ln();
-	}
-
-	function printFileHead(file:tsd.DefVersion):xm.StyledOut {
-		return output.info(true).glue(printFile(file)).ln().ln();
-	}
-
-	function printFileInfo(file:tsd.DefVersion, skipNull:boolean = false):xm.StyledOut {
-		if (file.info) {
-			if (file.info.isValid()) {
-				output.indent().line(file.info.toString());
-				output.indent().indent().line(file.info.projectUrl);
-				file.info.authors.forEach((author:xm.AuthorInfo) => {
-					output.indent().indent().line(author.toString());
-				});
-				output.ln();
-			}
-			else {
-				output.indent().accent('<invalid info>');
-				output.clear();
-			}
-		}
-		else if (!skipNull) {
-			output.indent().accent('<no info>');
-			output.clear();
-		}
-		return output;
-	}
-
-	function printDependencies(file:tsd.DefVersion):xm.StyledOut {
-		if (file.dependencies.length > 0) {
-
-			tsd.DefUtil.mergeDependenciesOf(file.dependencies).filter((refer:tsd.DefVersion) => {
-				return refer.def.path !== file.def.path;
-			}).sort(tsd.DefUtil.fileCompare).forEach((refer:tsd.DefVersion) => {
-				output.indent().report(true).glue(printFile(refer)).ln();
-
-				if (refer.dependencies.length > 0) {
-					refer.dependencies.sort(tsd.DefUtil.defCompare).forEach((dep:tsd.Def) => {
-						output.indent().indent().report(true).tweakPath(dep.path).ln();
-					});
-				}
-			});
-			output.ln();
-		}
-		return output;
-	}
-
-	function printInstallResult(result:tsd.InstallResult):xm.StyledOut {
-		//TODO fix pluralised reporting
-		if (result.written.keys().length === 0) {
-			output.ln().report(true).span('written ').accent('zero').span(' files').ln();
-		}
-		else if (result.written.keys().length === 1) {
-			output.ln().report(true).span('written ').accent(result.written.keys().length).span(' file:').clear();
-		}
-		else {
-			output.ln().report(true).span('written ').accent(result.written.keys().length).span(' files:').clear();
-		}
-
-		//TODO report on written/skipped
-		result.written.keys().sort().forEach((path:string) => {
-			var file:tsd.DefVersion = result.written.get(path);
-			output.bullet(true).glue(printFile(file)).ln();
-		});
-		output.ln().report(true).span('install').space().success('success!').ln();
-		return output;
-	}
-
-	function printRateInfo(info:git.GitRateInfo):xm.StyledOut {
-		output.report(true).span('rate-limit').sp();
-		//TODO clean this up
-		if (info.limit > 0) {
-			if (info.remaining === 0) {
-				output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
-			}
-			else if (info.remaining < 15) {
-				output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
-			}
-			else if (info.remaining < info.limit - 15) {
-				output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
-			}
-			else  {
-				output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').success(info.getResetString());
-			}
-		}
-		else {
-			output.success(info.getResetString());
-		}
-		return output.ln();
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 	//very basic (async) init stuff
 	function init(ctx:xm.ExposeContext):Q.Promise<void> {
 		return Q.resolve();
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 	//dry helpers: reuse / bundle init and arg parsing for query based commands
 
@@ -325,6 +97,7 @@ module tsd {
 		(ctx:xm.ExposeContext, job:Job, selection:tsd.Selection):Q.Promise<any>;
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//get a API with a Context and parse basic arguments
 	function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
@@ -403,12 +176,45 @@ module tsd {
 		return d.promise;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	function reportError(err:any, head:boolean = true):xm.StyledOut {
+		if (head) {
+			output.ln().info().error('an error occured!').clear();
+		}
+
+		if (err.stack) {
+			return output.block(err.stack);
+		}
+		return output.line(err);
+	}
+
+	function reportProgress(obj:any):xm.StyledOut {
+		if (obj instanceof git.GitRateInfo) {
+			return print.rateInfo(obj);
+		}
+		return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
+	}
+
+	function reportSucces(result:tsd.APIResult):xm.StyledOut {
+		//this.output.ln().info().success('success!').clear();
+		if (result) {
+			result.selection.forEach((def:tsd.DefVersion) => {
+				this.output.line(def.toString());
+				if (def.info) {
+					output.line(def.info.toString());
+					output.line(def.info);
+				}
+			});
+		}
+		return output;
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 	// the fun starts here
 
 	export function getExpose():xm.Expose {
-
 		var expose = new xm.Expose(output);
 
 		function getProgress(ctx) {
@@ -417,18 +223,20 @@ module tsd {
 					reportProgress(note);
 				};
 			}
-			return undefined;
+			return function (note) {
+				// ignore
+			};
 		}
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.before = (ctx:xm.ExposeContext) => {
 			return Q.all([
-				showPreviewNotice()
+				showHeader()
 			]);
 		};
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = Group.query;
@@ -456,7 +264,7 @@ module tsd {
 		expose.defineGroup((group:xm.ExposeGroup) => {
 			group.name = Group.support;
 			group.label = 'support';
-			group.options = [Opt.config, Opt.cacheDir];
+			group.options = [];
 		});
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
@@ -464,12 +272,12 @@ module tsd {
 			group.label = 'help';
 		});
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		// bulk add boring commands and options
-		tsd.cli.addCommon(expose);
+		tsd.cli.addCommon(expose, print, styles);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'init';
@@ -477,14 +285,15 @@ module tsd {
 			cmd.options = [Opt.config, Opt.overwrite];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(getProgress(ctx)).then((target:string) => {
-						output.info().success('written ').span(target).clear();
+					return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(notify).then((target:string) => {
+						output.ln().info().success('written').sp().span(target).ln();
 					}, (err) => {
-						output.info().error('error ').span(err.message).clear();
+						output.ln().info().error('error').sp().span(err.message).ln();
 						throw(err);
 					});
-				}, reportError, getProgress(ctx));
+				}, reportError);
 			};
 		});
 
@@ -494,20 +303,22 @@ module tsd {
 			cmd.options = [Opt.config, Opt.cacheDir];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
+					output.ln();
 					return <any> job.api.context.logInfo(true);
 
-				}, reportError, getProgress(ctx));
+				}, reportError);
 			};
 		});
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		//TODO abstractify this
 		var queryActions = new xm.ActionMap<tsd.JobSelectionAction>();
-		queryActions.set(Action.install, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
+		queryActions.set(Action.install, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
 			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {
-				printInstallResult(result);
+				print.installResult(result);
 			});
 		});
 		/*queryActions.set(Action.open, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
@@ -530,72 +341,71 @@ module tsd {
 				return getSelectorJob(ctx).then((job:Job) => {
 					return job.api.select(job.query, job.options).progress(notify).then((selection:tsd.Selection) => {
 						if (selection.selection.length === 0) {
-							output.ln().report().warning('zero results').clear();
-						} else {
-							//TODO report on written/skipped
-							selection.selection.forEach((file:tsd.DefVersion) => {
-								//printFile(file, true);
-								printFileHead(file);
-								printFileInfo(file, true);
-
-								printDependencies(file);
-
-								if (ctx.getOpt(Opt.history)) {
-									file.def.history.slice(0).reverse().forEach((file:tsd.DefVersion) => {
-										printFileCommit(file);
-									});
-								}
-							});
-
-							//run actions
-							return Q().then(() => {
-								//get as arg
-								var action = ctx.getOpt(Opt.action);
-								if (!action) {
-									//output.ln().report().warning('no action').ln();
-									return;
-								}
-								if (!queryActions.has(action)) {
-									output.ln().report().warning('unknown action:').space().span(action).ln();
-									return;
-								}
-								output.report(true).span('running').space().accent(action).ln();
-
-								return queryActions.run(action, (run:tsd.JobSelectionAction) => {
-									return run(ctx, job, selection).progress(notify);
-								}, true).then(() => {
-									//whut?
-								}, (err) => {
-									output.ln().report().span(action).space().error('error!').ln();
-									reportError(err, false);
-								}, notify);
-							});
+							output.ln().report().warning('zero results').ln();
+							return;
 						}
+						output.line();
+
+						//TODO report on written/skipped
+						selection.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion, i:number) => {
+							//printFile(file, true);
+							print.fileHead(file);
+							print.fileInfo(file, true);
+							print.dependencies(file);
+							print.history(file);
+
+							output.cond(i < selection.selection.length - 1, '\n');
+						});
+
+						//run actions
+						return Q().then(() => {
+							//get as arg
+							var action = ctx.getOpt(Opt.action);
+							if (!action) {
+								//output.ln().report().warning('no action').ln();
+								return;
+							}
+							if (!queryActions.has(action)) {
+								output.ln().report().warning('unknown action:').space().span(action).ln();
+								return;
+							}
+							output.ln().report(true).span('running').space().accent(action).span('..').ln();
+
+							return queryActions.run(action, (run:tsd.JobSelectionAction) => {
+								return run(ctx, job, selection);
+							}, true).then(() => {
+								//whut?
+							}, (err) => {
+								output.report().span(action).space().error('error!').ln();
+								reportError(err, false);
+							}, notify);
+						});
 					});
-				}, reportError, notify);
+				}, reportError);
 			};
 		});
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
 			cmd.label = 're-install definitions from config';
-			cmd.options = [Opt.overwrite];
+			cmd.options = [Opt.overwrite, Opt.config, Opt.cacheDir];
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
-					output.ln().info(true).span('running').space().accent(cmd.name).ln();
+					output.line();
+					output.info(true).span('running').space().accent(cmd.name).ln();
 
 					return job.api.reinstall(job.options).progress(notify).then((result:tsd.InstallResult) => {
-						printInstallResult(result);
+						print.installResult(result);
 					});
-				}, reportError, notify);
+				}, reportError);
 			};
 		});
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'rate';
@@ -605,16 +415,16 @@ module tsd {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
 					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
-						printRateInfo(info);
+						print.rateInfo(info);
 					});
-				}, reportError, notify);
+				}, reportError);
 			};
 		});
 
 		return expose;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 	/*
 	 runARGV: run raw cli arguments, like process.argv

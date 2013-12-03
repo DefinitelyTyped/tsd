@@ -42,8 +42,8 @@ module git {
 			this.resetAt = this.getResetString();
 		}
 
-		toStatus():string {
-			return this.remaining + ' of ' + this.limit + ' @ ' + this.getResetString();
+		toString():string {
+			return this.remaining + ' of ' + this.limit + (this.remaining < this.limit ? ' @ ' + this.getResetString() : '');
 		}
 
 		getResetString():string {

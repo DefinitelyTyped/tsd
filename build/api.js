@@ -674,6 +674,7 @@ var xm;
                 bullet: ' - ',
                 edge: ' | ',
                 ruler: '---',
+                dash: '-- ',
                 decl: ' : ',
                 none: '   '
             };
@@ -827,11 +828,13 @@ var xm;
 
         StyledOut.prototype.indent = function (levels) {
             if (typeof levels === "undefined") { levels = 1; }
-            var str = '';
-            for (var i = 0; i < levels; i++) {
-                str += this.nibs.none;
+            if (levels > 0) {
+                var str = '';
+                for (var i = 0; i < levels; i++) {
+                    str += this.nibs.none;
+                }
+                this._line.write(str);
             }
-            this._line.write(str);
             return this;
         };
 
@@ -876,6 +879,16 @@ var xm;
                 this._line.write(this._style.accent(this.nibs.single));
             } else {
                 this._line.write(this._style.plain(this.nibs.single));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.dash = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._line.write(this._style.accent(this.nibs.dash));
+            } else {
+                this._line.write(this._style.plain(this.nibs.dash));
             }
             return this;
         };
@@ -2430,10 +2443,10 @@ var tsd;
             this.log(this.packageInfo.getNameVersion());
             this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
             if (details) {
-                this.log('paths', this.paths);
-                this.log('config', this.config);
-                this.log('resolved typings', this.config.resolveTypingsPath(path.dirname(this.paths.configFile)));
-                this.log('installed', this.config.getInstalled());
+                this.log('paths: ' + JSON.stringify(this.paths, null, 3));
+                this.log('config: ' + JSON.stringify(this.config, null, 3));
+                this.log('resolved typings: ' + JSON.stringify(this.config.resolveTypingsPath(path.dirname(this.paths.configFile)), null, 3));
+                this.log('installed: ' + JSON.stringify(this.config.getInstalled(), null, 3));
             }
         };
         return Context;
@@ -2891,12 +2904,12 @@ var tsd;
     require('date-utils');
 
     var fullSha = /^[0-9a-f]{40}$/;
-    var hex = /^[0-9a-f]+$/g;
+    var hex = /^[0-9a-f]+$/;
 
     var CommitMatcher = (function () {
         function CommitMatcher(commitSha) {
             this.minimumShaLen = 2;
-            this.commitSha = String(commitSha);
+            this.commitSha = String(commitSha).toLowerCase();
         }
         CommitMatcher.prototype.filter = function (list) {
             if (!this.commitSha) {
@@ -2906,13 +2919,12 @@ var tsd;
         };
 
         CommitMatcher.prototype.getFilterFunc = function (commitSha) {
-            commitSha = commitSha.toLowerCase();
-
             if (fullSha.test(commitSha)) {
                 return function (file) {
                     return (file.commit && file.commit.commitSha === commitSha);
                 };
             }
+
             if (!hex.test(commitSha)) {
                 xm.throwAssert('parameter not a hex {a}', commitSha);
             }
@@ -3376,7 +3388,9 @@ var xm;
             this._mutePromises = [xm.Level.notify, xm.Level.promise, xm.Level.resolve, xm.Level.reject];
             this._label = label;
             this._prefix = (prefix ? prefix + ':' : '');
+
             this.logger = logger || (label ? xm.getLogger(this._label) : (xm.log || xm.getLogger()));
+
             this._startAt = Date.now();
 
             xm.ObjectUtil.hidePrefixed(this);
@@ -3385,21 +3399,21 @@ var xm;
             var _this = this;
             if (!this.isMuted(xm.Level.notify)) {
                 promise.progress(function (note) {
-                    _this.track(xm.Level.notify, type, message, note, promise);
+                    _this.track(xm.Level.notify, type, message, note);
                 });
             }
             if (!this.isMuted(xm.Level.reject)) {
                 promise.fail(function (err) {
-                    _this.track(xm.Level.reject, type, message, err, promise);
+                    _this.track(xm.Level.reject, type, message, err);
                 });
             }
             if (!this.isMuted(xm.Level.resolve)) {
-                promise.then(function (err) {
-                    _this.track(xm.Level.resolve, type, message, err, promise);
+                promise.then(function () {
+                    _this.track(xm.Level.resolve, type, message);
                 });
             }
             if (!this.isMuted(xm.Level.promise)) {
-                return this.track(xm.Level.promise, type, message, data, promise);
+                return this.track(xm.Level.promise, type, message);
             }
             return null;
         };
@@ -3509,6 +3523,10 @@ var xm;
                     }
                 }
             });
+        };
+
+        EventLog.prototype.unmuteAll = function () {
+            this._mutePromises = [];
         };
 
         EventLog.prototype.setTrack = function (enabled, limit, prune) {
@@ -4547,8 +4565,8 @@ var git;
             this.resetAt = this.getResetString();
         };
 
-        GitRateInfo.prototype.toStatus = function () {
-            return this.remaining + ' of ' + this.limit + ' @ ' + this.getResetString();
+        GitRateInfo.prototype.toString = function () {
+            return this.remaining + ' of ' + this.limit + (this.remaining < this.limit ? ' @ ' + this.getResetString() : '');
         };
 
         GitRateInfo.prototype.getResetString = function () {
@@ -4664,6 +4682,7 @@ var git;
                 request.maxAge = 30 * 60 * 1000;
             }
             this.copyHeadersTo(request.headers);
+
             request.headers['accept'] = 'application/json';
             request.lock();
 
@@ -4677,8 +4696,8 @@ var git;
                         res.meta = { rate: rate };
                     }
                     return res;
-                }).then(d.resolve);
-            }).fail(d.reject).done();
+                });
+            }).then(d.resolve, d.reject).done();
 
             return d.promise;
         };
@@ -4825,8 +4844,8 @@ var tsd;
             this.minMatches = 0;
             this.maxMatches = 0;
             this.limitApi = 2;
-            this.overwriteFiles = false;
             this.resolveDependencies = false;
+            this.overwriteFiles = false;
             this.saveToConfig = false;
             this.timeout = 10000;
         }
@@ -7170,7 +7189,7 @@ var xm;
                 builder.closeAll();
                 firstHeader = false;
                 headers.next();
-                headers.row.title.out.accent('>> ').plain(title).ln();
+                headers.row.title.out.accent('>> ').plain(title).line();
                 addDivider();
             };
 
@@ -7216,7 +7235,7 @@ var xm;
                             return '\'' + jsesc(('' + value), {
                                 quotes: 'single'
                             }) + '\'';
-                        }).join(',')).accent(' ]').ln();
+                        }).join(', ')).accent(' ]').ln();
                     }
                 }
 
@@ -7731,6 +7750,244 @@ var xm;
 var tsd;
 (function (tsd) {
     (function (cli) {
+        var Printer = (function () {
+            function Printer(output, indent) {
+                if (typeof indent === "undefined") { indent = 0; }
+                this.indent = 0;
+                this.output = output;
+                this.indent = indent;
+            }
+            Printer.prototype.file = function (file, sep) {
+                if (typeof sep === "undefined") { sep = ' : '; }
+                if (file.def) {
+                    this.output.tweakPath(file.def.path);
+                } else {
+                    this.output.accent('<no def>');
+                }
+                return this.output.accent(sep).glue(this.fileEnd(file, sep));
+            };
+
+            Printer.prototype.fileEnd = function (file, sep) {
+                if (typeof sep === "undefined") { sep = ' | '; }
+                if (file.def && file.def.head === file) {
+                    this.output.span('<head>');
+                    if (file.commit.changeDate) {
+                        this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+                    }
+                } else {
+                    if (file.commit) {
+                        this.output.span(file.commit.commitShort);
+                        if (file.commit.changeDate) {
+                            this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+                        }
+                    } else {
+                        this.output.accent(sep).accent('<no commit>');
+                    }
+                }
+
+                return this.output;
+            };
+
+            Printer.prototype.fileCommit = function (file, skipNull) {
+                if (typeof skipNull === "undefined") { skipNull = false; }
+                var sep = '  |  ';
+                if (file.commit) {
+                    this.output.indent(1).glue(this.fileEnd(file, sep));
+                    this.output.accent(sep).span(file.commit.gitAuthor.name);
+                    if (file.commit.hubAuthor) {
+                        this.output.accent('  @  ').span(file.commit.hubAuthor.login);
+                    }
+                    this.output.ln().ln();
+
+                    this.output.indent(1).note(true).line(file.commit.message.subject);
+                } else if (!skipNull) {
+                    this.output.indent(1).accent('<no commmit>').ln();
+                }
+                return this.output;
+            };
+
+            Printer.prototype.fileHead = function (file) {
+                return this.output.indent(0).bullet(true).glue(this.file(file)).ln();
+            };
+
+            Printer.prototype.fileInfo = function (file, skipNull) {
+                if (typeof skipNull === "undefined") { skipNull = false; }
+                var _this = this;
+                if (file.info) {
+                    this.output.line();
+                    if (file.info.isValid()) {
+                        this.output.indent(1).line(file.info.toString());
+                        this.output.indent(2).line(file.info.projectUrl);
+
+                        file.info.authors.forEach(function (author) {
+                            _this.output.ln();
+                            _this.output.indent(2).line(author.toString());
+                        });
+                    } else {
+                        this.output.indent(1).accent('<invalid info>').line();
+                    }
+                } else if (!skipNull) {
+                    this.output.line();
+                    this.output.indent(1).accent('<no info>').line();
+                }
+                return this.output;
+            };
+
+            Printer.prototype.dependencies = function (file) {
+                var _this = this;
+                if (file.dependencies.length > 0) {
+                    this.output.line();
+                    var deps = tsd.DefUtil.mergeDependenciesOf(file.dependencies).filter(function (refer) {
+                        return refer.def.path !== file.def.path;
+                    });
+                    if (deps.length > 0) {
+                        deps.filter(function (refer) {
+                            return refer.def.path !== file.def.path;
+                        }).sort(tsd.DefUtil.fileCompare).forEach(function (refer) {
+                            _this.output.indent(1).report(true).glue(_this.file(refer)).ln();
+
+                            if (refer.dependencies.length > 0) {
+                                refer.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (dep) {
+                                    _this.output.indent(2).bullet(true).tweakPath(dep.path).ln();
+                                });
+                                _this.output.ln();
+                            }
+                        });
+                    }
+                }
+                return this.output;
+            };
+
+            Printer.prototype.history = function (file) {
+                var _this = this;
+                if (file.def.history.length > 0) {
+                    this.output.line();
+                    file.def.history.slice(0).reverse().forEach(function (file, i) {
+                        _this.fileCommit(file);
+                        _this.output.cond(i < file.def.history.length - 1, '\n');
+                    });
+                }
+                return this.output;
+            };
+
+            Printer.prototype.installResult = function (result) {
+                var _this = this;
+                if (result.written.keys().length === 0) {
+                    this.output.ln().report(true).span('written ').accent('zero').span(' files').ln();
+                } else if (result.written.keys().length === 1) {
+                    this.output.ln().report(true).span('written ').accent(result.written.keys().length).span(' file:').ln().ln();
+                } else {
+                    this.output.ln().report(true).span('written ').accent(result.written.keys().length).span(' files:').ln().ln();
+                }
+
+                result.written.keys().sort().forEach(function (path) {
+                    var file = result.written.get(path);
+                    _this.output.indent().bullet(true).glue(_this.file(file)).ln();
+                });
+                this.output.ln().report(true).span('install').space().success('success!').ln();
+                return this.output;
+            };
+
+            Printer.prototype.rateInfo = function (info) {
+                this.output.line();
+                this.output.report(true).span('rate-limit').sp();
+
+                if (info.limit > 0) {
+                    if (info.remaining === 0) {
+                        this.output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
+                    } else if (info.remaining < 15) {
+                        this.output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
+                    } else if (info.remaining < info.limit - 15) {
+                        this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
+                    } else {
+                        this.output.success('remaining ' + info.remaining).span(' of ').span(info.limit);
+                    }
+                } else {
+                    this.output.success(info.getResetString());
+                }
+                return this.output.ln();
+            };
+            return Printer;
+        })();
+        cli.Printer = Printer;
+    })(tsd.cli || (tsd.cli = {}));
+    var cli = tsd.cli;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    var miniwrite = require('miniwrite');
+    var ministyle = require('ministyle');
+
+    (function (cli) {
+        var StyleMap = (function () {
+            function StyleMap(output) {
+                var _this = this;
+                this.outputs = [];
+                xm.assertVar(output, xm.StyledOut, 'output');
+
+                this.addOutput(output);
+
+                this._styleMap = new xm.KeyValueMap();
+
+                this._styleMap.set('no', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.plain());
+                    });
+                });
+                this._styleMap.set('plain', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.plain());
+                    });
+                });
+                this._styleMap.set('ansi', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.ansi());
+                    });
+                });
+                this._styleMap.set('html', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.html(true));
+                        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
+                    });
+                });
+                this._styleMap.set('css', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.html(true));
+                        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
+                    });
+                });
+                this._styleMap.set('dev', function (ctx) {
+                    _this.outputs.forEach(function (output) {
+                        output.useStyle(ministyle.dev());
+                    });
+                });
+            }
+            StyleMap.prototype.addOutput = function (output) {
+                if (this.outputs.indexOf(output) < 0) {
+                    this.outputs.push(output);
+                }
+            };
+
+            StyleMap.prototype.getKeys = function () {
+                return this._styleMap.keys();
+            };
+
+            StyleMap.prototype.useColor = function (color, ctx) {
+                if (this._styleMap.has(color)) {
+                    this._styleMap.get(color)(ctx);
+                } else {
+                    this._styleMap.get('plain')(ctx);
+                }
+            };
+            return StyleMap;
+        })();
+        cli.StyleMap = StyleMap;
+    })(tsd.cli || (tsd.cli = {}));
+    var cli = tsd.cli;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    (function (cli) {
         (function (Opt) {
             Opt.version = 'version';
             Opt.verbose = 'verbose';
@@ -7781,12 +8038,13 @@ var tsd;
 var tsd;
 (function (tsd) {
     (function (cli) {
-        function addCommon(expose) {
+        function addCommon(expose, print, style) {
             expose.defineCommand(function (cmd) {
                 cmd.name = 'help';
                 cmd.label = 'display usage help';
                 cmd.groups = [cli.Group.support];
                 cmd.execute = function (ctx) {
+                    ctx.out.ln();
                     ctx.expose.reporter.printCommands(ctx.getOpt(cli.Opt.detail));
                     return null;
                 };
@@ -7797,7 +8055,8 @@ var tsd;
                 cmd.label = 'display version';
                 cmd.groups = [cli.Group.support];
                 cmd.execute = (function (ctx) {
-                    return ctx.out.line(xm.PackageJSON.getLocal().version);
+                    ctx.out.ln();
+                    return ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
                 });
             });
 
@@ -7832,10 +8091,10 @@ var tsd;
                 opt.type = 'string';
                 opt.placeholder = 'name';
                 opt.global = true;
-                opt.enum = tsd.styleMap.keys();
+                opt.enum = style.getKeys();
                 opt.default = 'ansi';
                 opt.apply = function (value, ctx) {
-                    tsd.useColor(value, ctx);
+                    style.useColor(value, ctx);
                 };
             });
 
@@ -7847,7 +8106,7 @@ var tsd;
                 opt.global = true;
                 opt.note = ['experimental'];
                 opt.apply = function (value, ctx) {
-                    ctx.out.ln().indent().warning('--progress events are not 100% yet').ln();
+                    ctx.out.ln().indent().warning('--progress events are not 100%').ln();
                 };
             });
 
@@ -7904,7 +8163,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.history;
-                opt.short = 'h';
+                opt.short = 'y';
                 opt.description = 'display commit history';
                 opt.type = 'flag';
             });
@@ -7982,6 +8241,9 @@ var tsd;
                 opt.placeholder = 'name';
                 opt.enum = [cli.Action.install, cli.Action.compare, cli.Action.update, cli.Action.open];
                 opt.note = ['partially implemented'];
+                opt.apply = function (value, ctx) {
+                    ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
+                };
             });
         }
         cli.addCommon = addCommon;
@@ -8004,50 +8266,13 @@ var tsd;
     var Action = tsd.cli.Action;
 
     var output = new xm.StyledOut();
+    var print = new tsd.cli.Printer(output);
+    var styles = new tsd.cli.StyleMap(output);
 
-    tsd.styleMap = new xm.KeyValueMap();
-
-    tsd.styleMap.set('no', function (ctx) {
-        output.useStyle(ministyle.plain());
-    });
-    tsd.styleMap.set('plain', function (ctx) {
-        output.useStyle(ministyle.plain());
-    });
-    tsd.styleMap.set('ansi', function (ctx) {
-        output.useStyle(ministyle.ansi());
-    });
-
-    tsd.styleMap.set('html', function (ctx) {
-        output.useStyle(ministyle.html(true));
-        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
-
-        xm.log.out.useStyle(ministyle.html(true));
-        xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
-    });
-    tsd.styleMap.set('css', function (ctx) {
-        output.useStyle(ministyle.css('', true));
-        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
-
-        xm.log.out.useStyle(ministyle.css('', true));
-        xm.log.out.useWrite(miniwrite.htmlString(miniwrite.log(), null, 'class="cli"', '<br/>'));
-    });
-    tsd.styleMap.set('dev', function (ctx) {
-        output.useStyle(ministyle.dev());
-    });
-
-    function useColor(color, ctx) {
-        if (tsd.styleMap.has(color)) {
-            tsd.styleMap.get(color)(ctx);
-        } else {
-            tsd.styleMap.get('plain')(ctx);
-        }
-    }
-    tsd.useColor = useColor;
-
-    function showPreviewNotice() {
+    function showHeader() {
         var pkg = xm.PackageJSON.getLocal();
 
-        output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln().ln();
+        output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
 
         return Q.resolve();
     }
@@ -8065,176 +8290,6 @@ var tsd;
             context.paths.cacheDir = tsd.Paths.getUserCacheDir();
         }
         return context;
-    }
-
-    function reportError(err, head) {
-        if (typeof head === "undefined") { head = true; }
-        if (head) {
-            output.info().error('an error occured!').clear();
-        }
-
-        if (err.stack) {
-            return output.block(err.stack);
-        }
-        return output.line(err);
-    }
-
-    function reportProgress(obj) {
-        if (obj instanceof git.GitRateInfo) {
-            return printRateInfo(obj);
-        }
-        return output.info().inspect(obj, 3);
-    }
-
-    function reportSucces(result) {
-        if (result) {
-            result.selection.forEach(function (def) {
-                output.line(def.toString());
-                if (def.info) {
-                    output.line(def.info.toString());
-                    output.line(def.info);
-                }
-            });
-        }
-        return output;
-    }
-
-    function printFile(file, sep) {
-        if (typeof sep === "undefined") { sep = ' : '; }
-        if (file.def) {
-            output.tweakPath(file.def.path);
-        } else {
-            output.accent('<no def>');
-        }
-        return output.accent(sep).glue(printFileEnd(file, sep));
-    }
-
-    function printFileEnd(file, sep) {
-        if (typeof sep === "undefined") { sep = ' | '; }
-        if (file.def && file.def.head === file) {
-            output.span('<head>');
-            if (file.commit.changeDate) {
-                output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
-            }
-        } else {
-            if (file.commit) {
-                output.span(file.commit.commitShort);
-                if (file.commit.changeDate) {
-                    output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
-                }
-            } else {
-                output.accent(sep).accent('<no commit>');
-            }
-        }
-
-        return output;
-    }
-
-    function printFileCommit(file, skipNull) {
-        if (typeof skipNull === "undefined") { skipNull = false; }
-        var sep = '  |  ';
-        if (file.commit) {
-            output.indent().glue(printFileEnd(file, sep));
-            output.accent(sep).span(file.commit.gitAuthor.name);
-            if (file.commit.hubAuthor) {
-                output.accent('  @  ').span(file.commit.hubAuthor.login);
-            }
-            output.clear();
-
-            output.indent().note(true).line(file.commit.message.subject);
-            output.ln();
-        } else if (!skipNull) {
-            output.indent().accent('<no commmit>');
-            output.ln();
-        }
-        return output;
-    }
-
-    function printSubHead(text) {
-        return output.line(' ' + text).ln();
-    }
-
-    function printDefHead(def) {
-        return output.line(def.toString()).ln();
-    }
-
-    function printFileHead(file) {
-        return output.info(true).glue(printFile(file)).ln().ln();
-    }
-
-    function printFileInfo(file, skipNull) {
-        if (typeof skipNull === "undefined") { skipNull = false; }
-        if (file.info) {
-            if (file.info.isValid()) {
-                output.indent().line(file.info.toString());
-                output.indent().indent().line(file.info.projectUrl);
-                file.info.authors.forEach(function (author) {
-                    output.indent().indent().line(author.toString());
-                });
-                output.ln();
-            } else {
-                output.indent().accent('<invalid info>');
-                output.clear();
-            }
-        } else if (!skipNull) {
-            output.indent().accent('<no info>');
-            output.clear();
-        }
-        return output;
-    }
-
-    function printDependencies(file) {
-        if (file.dependencies.length > 0) {
-            tsd.DefUtil.mergeDependenciesOf(file.dependencies).filter(function (refer) {
-                return refer.def.path !== file.def.path;
-            }).sort(tsd.DefUtil.fileCompare).forEach(function (refer) {
-                output.indent().report(true).glue(printFile(refer)).ln();
-
-                if (refer.dependencies.length > 0) {
-                    refer.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (dep) {
-                        output.indent().indent().report(true).tweakPath(dep.path).ln();
-                    });
-                }
-            });
-            output.ln();
-        }
-        return output;
-    }
-
-    function printInstallResult(result) {
-        if (result.written.keys().length === 0) {
-            output.ln().report(true).span('written ').accent('zero').span(' files').ln();
-        } else if (result.written.keys().length === 1) {
-            output.ln().report(true).span('written ').accent(result.written.keys().length).span(' file:').clear();
-        } else {
-            output.ln().report(true).span('written ').accent(result.written.keys().length).span(' files:').clear();
-        }
-
-        result.written.keys().sort().forEach(function (path) {
-            var file = result.written.get(path);
-            output.bullet(true).glue(printFile(file)).ln();
-        });
-        output.ln().report(true).span('install').space().success('success!').ln();
-        return output;
-    }
-
-    function printRateInfo(info) {
-        output.report(true).span('rate-limit').sp();
-
-        if (info.limit > 0) {
-            if (info.remaining === 0) {
-                output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
-            } else if (info.remaining < 15) {
-                output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
-            } else if (info.remaining < info.limit - 15) {
-                output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
-            } else {
-                output.success('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').success(info.getResetString());
-            }
-        } else {
-            output.success(info.getResetString());
-        }
-        return output.ln();
     }
 
     function init(ctx) {
@@ -8328,6 +8383,39 @@ var tsd;
         return d.promise;
     }
 
+    function reportError(err, head) {
+        if (typeof head === "undefined") { head = true; }
+        if (head) {
+            output.ln().info().error('an error occured!').clear();
+        }
+
+        if (err.stack) {
+            return output.block(err.stack);
+        }
+        return output.line(err);
+    }
+
+    function reportProgress(obj) {
+        if (obj instanceof git.GitRateInfo) {
+            return print.rateInfo(obj);
+        }
+        return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
+    }
+
+    function reportSucces(result) {
+        var _this = this;
+        if (result) {
+            result.selection.forEach(function (def) {
+                _this.output.line(def.toString());
+                if (def.info) {
+                    output.line(def.info.toString());
+                    output.line(def.info);
+                }
+            });
+        }
+        return output;
+    }
+
     function getExpose() {
         var expose = new xm.Expose(output);
 
@@ -8337,12 +8425,13 @@ var tsd;
                     reportProgress(note);
                 };
             }
-            return undefined;
+            return function (note) {
+            };
         }
 
         expose.before = function (ctx) {
             return Q.all([
-                showPreviewNotice()
+                showHeader()
             ]);
         };
 
@@ -8372,7 +8461,7 @@ var tsd;
         expose.defineGroup(function (group) {
             group.name = Group.support;
             group.label = 'support';
-            group.options = [Opt.config, Opt.cacheDir];
+            group.options = [];
         });
 
         expose.defineGroup(function (group) {
@@ -8380,7 +8469,7 @@ var tsd;
             group.label = 'help';
         });
 
-        tsd.cli.addCommon(expose);
+        tsd.cli.addCommon(expose, print, styles);
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'init';
@@ -8388,14 +8477,15 @@ var tsd;
             cmd.options = [Opt.config, Opt.overwrite];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
                 return getAPIJob(ctx).then(function (job) {
-                    return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(getProgress(ctx)).then(function (target) {
-                        output.info().success('written ').span(target).clear();
+                    return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(notify).then(function (target) {
+                        output.ln().info().success('written').sp().span(target).ln();
                     }, function (err) {
-                        output.info().error('error ').span(err.message).clear();
+                        output.ln().info().error('error').sp().span(err.message).ln();
                         throw (err);
                     });
-                }, reportError, getProgress(ctx));
+                }, reportError);
             };
         });
 
@@ -8405,16 +8495,18 @@ var tsd;
             cmd.options = [Opt.config, Opt.cacheDir];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
                 return getAPIJob(ctx).then(function (job) {
+                    output.ln();
                     return job.api.context.logInfo(true);
-                }, reportError, getProgress(ctx));
+                }, reportError);
             };
         });
 
         var queryActions = new xm.ActionMap();
         queryActions.set(Action.install, function (ctx, job, selection) {
             return job.api.install(selection, job.options).then(function (result) {
-                printInstallResult(result);
+                print.installResult(result);
             });
         });
 
@@ -8439,60 +8531,59 @@ var tsd;
                 return getSelectorJob(ctx).then(function (job) {
                     return job.api.select(job.query, job.options).progress(notify).then(function (selection) {
                         if (selection.selection.length === 0) {
-                            output.ln().report().warning('zero results').clear();
-                        } else {
-                            selection.selection.forEach(function (file) {
-                                printFileHead(file);
-                                printFileInfo(file, true);
-
-                                printDependencies(file);
-
-                                if (ctx.getOpt(Opt.history)) {
-                                    file.def.history.slice(0).reverse().forEach(function (file) {
-                                        printFileCommit(file);
-                                    });
-                                }
-                            });
-
-                            return Q().then(function () {
-                                var action = ctx.getOpt(Opt.action);
-                                if (!action) {
-                                    return;
-                                }
-                                if (!queryActions.has(action)) {
-                                    output.ln().report().warning('unknown action:').space().span(action).ln();
-                                    return;
-                                }
-                                output.report(true).span('running').space().accent(action).ln();
-
-                                return queryActions.run(action, function (run) {
-                                    return run(ctx, job, selection).progress(notify);
-                                }, true).then(function () {
-                                }, function (err) {
-                                    output.ln().report().span(action).space().error('error!').ln();
-                                    reportError(err, false);
-                                }, notify);
-                            });
+                            output.ln().report().warning('zero results').ln();
+                            return;
                         }
+                        output.line();
+
+                        selection.selection.sort(tsd.DefUtil.fileCompare).forEach(function (file, i) {
+                            print.fileHead(file);
+                            print.fileInfo(file, true);
+                            print.dependencies(file);
+                            print.history(file);
+
+                            output.cond(i < selection.selection.length - 1, '\n');
+                        });
+
+                        return Q().then(function () {
+                            var action = ctx.getOpt(Opt.action);
+                            if (!action) {
+                                return;
+                            }
+                            if (!queryActions.has(action)) {
+                                output.ln().report().warning('unknown action:').space().span(action).ln();
+                                return;
+                            }
+                            output.ln().report(true).span('running').space().accent(action).span('..').ln();
+
+                            return queryActions.run(action, function (run) {
+                                return run(ctx, job, selection);
+                            }, true).then(function () {
+                            }, function (err) {
+                                output.report().span(action).space().error('error!').ln();
+                                reportError(err, false);
+                            }, notify);
+                        });
                     });
-                }, reportError, notify);
+                }, reportError);
             };
         });
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'reinstall';
             cmd.label = 're-install definitions from config';
-            cmd.options = [Opt.overwrite];
+            cmd.options = [Opt.overwrite, Opt.config, Opt.cacheDir];
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).then(function (job) {
-                    output.ln().info(true).span('running').space().accent(cmd.name).ln();
+                    output.line();
+                    output.info(true).span('running').space().accent(cmd.name).ln();
 
                     return job.api.reinstall(job.options).progress(notify).then(function (result) {
-                        printInstallResult(result);
+                        print.installResult(result);
                     });
-                }, reportError, notify);
+                }, reportError);
             };
         });
 
@@ -8504,9 +8595,9 @@ var tsd;
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).then(function (job) {
                     return job.api.getRateInfo().progress(notify).then(function (info) {
-                        printRateInfo(info);
+                        print.rateInfo(info);
                     });
-                }, reportError, notify);
+                }, reportError);
             };
         });
 

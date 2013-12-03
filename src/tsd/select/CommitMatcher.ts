@@ -6,7 +6,7 @@ module tsd {
 	require('date-utils');
 
 	var fullSha = /^[0-9a-f]{40}$/;
-	var hex = /^[0-9a-f]+$/g;
+	var hex = /^[0-9a-f]+$/;
 
 	/*
 	 CommitMatcher
@@ -17,7 +17,7 @@ module tsd {
 		minimumShaLen:number = 2;
 
 		constructor(commitSha?:string) {
-			this.commitSha = String(commitSha);
+			this.commitSha = String(commitSha).toLowerCase();
 		}
 
 		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
@@ -28,13 +28,13 @@ module tsd {
 		}
 
 		getFilterFunc(commitSha:string):(file:tsd.DefVersion) => boolean {
-			commitSha = commitSha.toLowerCase();
-
+			// safety first
 			if (fullSha.test(commitSha)) {
 				return (file:tsd.DefVersion) => {
 					return (file.commit && file.commit.commitSha === commitSha);
 				};
 			}
+			// alternately use shortened sha?
 			if (!hex.test(commitSha)) {
 				xm.throwAssert('parameter not a hex {a}', commitSha);
 			}

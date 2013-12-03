@@ -94,6 +94,7 @@ module git {
 				request.maxAge = 30 * 60 * 1000;
 			}
 			this.copyHeadersTo(request.headers);
+
 			request.headers['accept'] = 'application/json';
 			request.lock();
 
@@ -107,8 +108,8 @@ module git {
 						res.meta = {rate: rate};
 					}
 					return res;
-				}).then(d.resolve);
-			}).fail(d.reject).done();
+				});
+			}).then(d.resolve, d.reject).done();
 
 			return d.promise;
 		}
