@@ -50,29 +50,29 @@ Global `tsd` binary, view the help:
 Minimal search for 'bootstrap'
 		
 	$ tsd query bootstrap
-
-Get some info
-		
-	$ tsd query bootstrap --info --history --resolve
-	$ tsd query bootstrap -i -h -r
 	
 Install 'bootstrap' definitions:
 
 	$ tsd query bootstrap --action install
 	$ tsd query bootstrap -a install
 
-Install and install the reference to 'jquery', overwrite existing files and save to the tsd.config
+Get some info
+		
+	$ tsd query bootstrap --info --history --resolve
+	$ tsd query bootstrap -i -h -r
+
+Solve the reference to 'jquery', overwrite existing files and save to the tsd.config
 
 	$ tsd query bootstrap --resolve --overwrite --save --action install
 	$ tsd query bootstrap -r -o -s -a install
 
-Search search for jquery plugins:
+Search for jquery plugins:
 		
 	$ tsd query */jquery.*
 
 ### Selector explained
 
-TSD uses a globbing selector to query the definition list:
+TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index:
 
 	$ tsd query project/module
 
@@ -205,7 +205,7 @@ It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) an
 * [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help them making rules!)
 * [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (disclosure: my own module).
 * [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
-* [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js is [dropped the ball](https://github.com/joyent/node/issues/3584)).
+* [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js has [dropped the ball](https://github.com/joyent/node/issues/3584)).
 * And many others.
 
 ## Contribute
