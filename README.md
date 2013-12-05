@@ -24,7 +24,7 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 * First versions of `0.5.x` had similar CLI commands to older version of TSD by having separate search/install commands
 * As of `> 0.5.2` all CLI search-based features are bundled under the `query` command (see below). 
 
-### Usage as CLI command
+## Usage as CLI command
 
 :x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
 
@@ -49,7 +49,7 @@ Global `tsd` binary, view the help:
 
 	$ node ./build/cli.js
 
-#### Examples:
+#### Examples
 
 Minimal search for 'bootstrap'
 		
@@ -204,9 +204,9 @@ It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) an
 
 ### Awesome tech used
 
-* [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) - promises as promised.
+* [q](https://github.com/kriskowal/q) and [q-io](https://github.com/kriskowal/q-io) - Promises as promised.
 * [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
-* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help them making rules!)
+* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help make new rules!)
 * [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (disclosure: my own module).
 * [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
 * [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js has [dropped the ball](https://github.com/joyent/node/issues/3584)).
