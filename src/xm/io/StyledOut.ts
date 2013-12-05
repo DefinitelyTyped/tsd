@@ -283,6 +283,17 @@ module xm {
 			return this;
 		}
 
+		//TODO add test?
+		edge(accent:boolean = false):StyledOut {
+			if (accent) {
+				this._line.write(this._style.accent(this.nibs.edge));
+			}
+			else {
+				this._line.write(this._style.plain(this.nibs.edge));
+			}
+			return this;
+		}
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		//TODO add test?
@@ -315,7 +326,7 @@ module xm {
 		tweakExp(str:string, expr:RegExp, muted:boolean = false):StyledOut {
 			if (muted) {
 				this._line.write(str.replace(expr, (value) => {
-					return this._style.accent(value);
+					return this._style.muted(value);
 				}));
 				return this;
 			}

@@ -8,6 +8,8 @@
 module tsd {
 	export module cli {
 
+		var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
+
 		export class Printer {
 
 			output:xm.StyledOut;
@@ -63,7 +65,20 @@ module tsd {
 					this.output.ln().ln();
 
 					//TODO full indent message
-					this.output.indent(1).note(true).line(file.commit.message.subject);
+					this.output.indent(1).edge(true).line(file.commit.message.subject);
+
+					if (file.commit.message.body) {
+						this.output.indent(1).edge(true).ln();
+
+						file.commit.message.body.split(lineSplitExp).every((line:string, index:number, lines:string[]) => {
+							this.output.indent(1).edge(true).line(line);
+							if (index < 10) {
+								return true;
+							}
+							this.output.indent(1).edge(true).line('<...>');
+							return false;
+						});
+					}
 				}
 				else if (!skipNull) {
 					this.output.indent(1).accent('<no commmit>').ln();
@@ -79,12 +94,12 @@ module tsd {
 				if (file.info) {
 					this.output.line();
 					if (file.info.isValid()) {
-						this.output.indent(1).line(file.info.toString());
-						this.output.indent(2).line(file.info.projectUrl);
+						this.output.indent(1).tweakPunc(file.info.toString()).ln();
+						this.output.indent(2).tweakBraces(file.info.projectUrl, true).ln();
 
 						file.info.authors.forEach((author:xm.AuthorInfo) => {
 							this.output.ln();
-							this.output.indent(2).line(author.toString());
+							this.output.indent(2).tweakBraces(author.toString(), true).ln();
 						});
 					}
 					else {

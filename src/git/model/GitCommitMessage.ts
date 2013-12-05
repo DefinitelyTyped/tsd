@@ -1,7 +1,10 @@
 module git {
 	'use strict';
 
-	var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
+	//var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
+
+	var subjectMessageExp = /^\s*(\S.*?\S?)(?:\s*[\r\n]\s*([\s\S]*?))?\s*$/;
+	//var cleanMultiLineExp = /(?:[ \t]*\r?\n[ \t]*){3,}/g;
 
 	/*
 	 GitCommitMessage: parse git commit message (for subject/body/footer convention etc)
@@ -13,7 +16,6 @@ module git {
 		//extracted for text
 		subject:string;
 		body:string;
-		footer:string;
 
 		constructor(text:string = null) {
 			if (text) {
@@ -22,14 +24,17 @@ module git {
 		}
 
 		parse(text:string):void {
-			this.text = String(text);
-
-			subjectExp.lastIndex = 0;
-			var match = subjectExp.exec(this.text);
-			this.subject = (match && match.length > 1 ? match[1] : '');
+			this.text = String(text).replace(/(^\s+)|(\s+$)/g, '');
+			this.subject = '';
 			this.body = '';
-			this.footer = '';
-			//TODO extract body and footer too
+			subjectMessageExp.lastIndex = 0;
+			var match = subjectMessageExp.exec(this.text);
+			if (match && match.length > 1) {
+				this.subject = String(match[1]);
+				if (match.length > 2 && typeof match[2] === 'string' && match[2] !== '') {
+					this.body = match[2].replace(/\r?\n/g, '\n');
+				}
+			}
 		}
 
 		toString():string {
