@@ -34,18 +34,6 @@ module helper {
 		return path.resolve(__dirname, '..', 'tmp');
 	}
 
-	export function getProjectDevURL():string {
-		var prop = 'PROJECT_DEV_URL';
-		assert.property(process.env, prop, 'expected process.env prop: ' + prop);
-		return process.env[prop].replace(/\/$/, '');
-	}
-
-	export function getDirnameURL():string {
-		var url = getProjectDevURL();
-		url += '/test/modules/' + path.basename(path.resolve(__dirname, '..'));
-		return url;
-	}
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//helper to get a readable debug message (useful when comparing things absed on 2 paths)

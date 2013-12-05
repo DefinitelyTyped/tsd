@@ -10,26 +10,24 @@ describe('tsd', function () {
 	describe('package.json', function () {
 
 		var pkg;
-		//TODO move it to a json-schema
 		it('valid formed', function () {
 			assert.jsonFile('package.json');
 
 			pkg = grunt.file.readJSON('package.json');
 			assert.isObject(pkg, 'pkg');
 		});
-		it('api module', function () {
-			assert.isObject(pkg, 'pkg');
-
-			assert.property(pkg, 'main', 'pkg.utf8');
-			assert.property(pkg.main, 'tsd', 'pkg.main');
-			assert.isFile(pkg.main.tsd, 'pkg.main');
+		describe('api module', function () {
+			it('is defined', function () {
+				assert.property(pkg, 'main', 'pkg.main');
+				assert.isFile(pkg.main, 'pkg.bin');
+			});
 		});
-		it('cli module', function () {
-			assert.isObject(pkg, 'pkg');
-
-			assert.property(pkg, 'bin', 'pkg.bin');
-			assert.property(pkg.bin, 'tsd', 'pkg.bin');
-			assert.isFile(pkg.bin.tsd, 'pkg.bin');
+		describe('cli module', function () {
+			it('cli module', function () {
+				assert.property(pkg, 'bin', 'pkg.bin');
+				assert.property(pkg.bin, 'tsd', 'pkg.bin');
+				assert.isFile(pkg.bin.tsd, 'pkg.bin');
+			});
 		});
 	});
 });

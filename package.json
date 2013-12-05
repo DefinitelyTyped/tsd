@@ -1,7 +1,12 @@
 {
   "name": "tsd",
-  "description": "TypeScript definition package manager.",
   "version": "0.5.2-alpha.6",
+  "description": "TypeScript definition package manager.",
+  "keywords": [
+    "typescript",
+    "definition",
+    "package"
+  ],
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
     "type": "git",
@@ -23,15 +28,16 @@
       "url": "https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt"
     }
   ],
+  "bugs": {
+    "url": "https://github.com/DefinitelyTyped/tsd/issues"
+  },
   "preferGlobal": true,
   "engines": {
     "node": ">= 0.10.0"
   },
+  "main": "./build/api.js",
   "bin": {
     "tsd": "./build/cli.js"
-  },
-  "main": {
-    "tsd": "./build/api.js"
   },
   "scripts": {
     "test": "grunt test"
@@ -43,7 +49,7 @@
     "mkdirp": "0.3.5",
     "semver": "~2.1.0",
     "tv4": "~1.0.11",
-    "tv4-reporter": "0.0.2",
+    "tv4-reporter": "0.0.3",
     "uri-templates": "0.1.1",
     "optimist": "0.6.0",
     "assertion-error": "~1.0.0",
@@ -85,6 +91,7 @@
     "buffer-equal": "0.0.0",
     "memory-streams": "0.0.3",
     "ansidiff": "~1.0.0",
-    "time-grunt": "~0.2.3"
+    "time-grunt": "~0.2.3",
+    "grunt-tv4": "~0.3.1"
   }
 }

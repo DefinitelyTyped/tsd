@@ -13,6 +13,7 @@ module.exports = function (grunt) {
 	}
 	var cpuCores = require('os').cpus().length;
 	//grunt.log.writeln(util.inspect(process.env));
+	require('time-grunt')(grunt);
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 	gtx.loadAuto();
@@ -62,6 +63,20 @@ module.exports = function (grunt) {
 			cli: {
 				src: ['src/cli.js'],
 				dest: 'build/cli.js'
+			}
+		},
+		tv4: {
+			packjson: {
+				options: {
+					root: 'schema/package-v1.json'
+				},
+				src: ['package.json']
+			},
+			tsd: {
+				options: {
+					root: 'schema/tsd-v4.json'
+				},
+				src: ['tsd.json']
 			}
 		},
 		mochaTest: {
@@ -205,6 +220,8 @@ module.exports = function (grunt) {
 		'clean:tmp',
 		'jshint:support',
 		'jshint:fixtures',
+		'tv4:tsd',
+		'tv4:packjson',
 		'mocha_unfunk:dev'
 	]);
 	gtx.alias('build', [
