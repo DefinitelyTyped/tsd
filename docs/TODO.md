@@ -104,6 +104,7 @@ Command options
 * :m:	Add option for file overwrite (always on now) `--overwrite`
 * :b:	Add a compact vs detailed option (for search listings or history) `--detail`
 * :m:	Add option for dependency install (always on now) `--resolve`
+* :a:	Add a paginator option to `--history`
 * :m:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :m:	Implement `--min` / `--max` option to define expected result amount
 * :o:	.... more
@@ -146,7 +147,7 @@ Config
 
 * :m:	Improve config JSON-Schema (RegExp)
 	* :m: Improve flexibility
-	* :ab: Update tsd tests to verify changes
+	* :m: Update tsd tests to verify changes
 	* :m: Update ~~typingsPath~~ ('path' now): should be 1 length
 	* :m: Update commit: should be (7-40) length (as per git convention)
 	* :ng: ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit

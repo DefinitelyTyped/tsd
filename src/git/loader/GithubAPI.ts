@@ -16,7 +16,6 @@ module git {
 	/*
 	 GithubAPI: access github rest-api with local cache (evading the non-auth rate-limit)
 	 */
-	//TODO find out if a HEAD requests counts for rate-limiting
 	export class GithubAPI extends git.GithubLoader {
 
 		static get_cachable = 'get_cachable';

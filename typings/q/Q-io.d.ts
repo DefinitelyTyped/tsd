@@ -110,6 +110,10 @@ declare module QioFS {
 
 	//TODO link this to node.js FS module (no lazy clones)
 	interface Stats {
+		node:NodeStats;
+		size:number;
+	}
+	interface NodeStats {
 		isFile():boolean;
 		isDirectory():boolean;
 		isBlockDevice():boolean;
@@ -117,6 +121,7 @@ declare module QioFS {
 		isSymbolicLink():boolean;
 		isFIFO():boolean;
 		isSocket():boolean;
+		node:NodeStats;
 		dev:number;
 		ino:number;
 		mode:number;

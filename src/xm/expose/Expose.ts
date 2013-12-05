@@ -35,7 +35,6 @@ module xm {
 		(ctx:ExposeContext):any;
 	}
 
-	//TODO add ExposeCommand/ExposeContext (like ExposeHook)?
 	export interface ExposeOptionApply {
 		(value:any, ctx:ExposeContext):void;
 	}
