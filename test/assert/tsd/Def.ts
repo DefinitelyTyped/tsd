@@ -57,9 +57,10 @@ module helper {
 		}
 	}
 
-	var assertDefArrayUnordered:AssertCB = helper.getAssertUnorderedLike((act:tsd.Def, exp:tsd.Def) => {
+	//TODO should not be 'any' type
+	var assertDefArrayUnordered:any = helper.getAssertUnorderedLike<tsd.Def>(function (act:tsd.Def, exp:tsd.Def):boolean {
 		return (act.path === exp.path);
-	}, (act:tsd.Def, exp:tsd.Def, message?:string) => {
+	}, function (act:tsd.Def, exp:tsd.Def, message:string) {
 		assertDef(act, exp, message);
 	}, 'Def');
 

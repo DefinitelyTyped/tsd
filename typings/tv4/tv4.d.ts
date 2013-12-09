@@ -31,7 +31,7 @@ interface TV4 {
 
 	addSchema(uri:string, schema:any):boolean;
 	getSchema(uri:string):any;
-	normSchema(schema:any, baseUri):any;
+	normSchema(schema:any, baseUri:string):any;
 	resolveUrl(base:string, href:string):string;
 	freshApi():TV4;
 	dropSchemas():void;

@@ -57,7 +57,7 @@ module xm {
 		}
 		else if (type === 'array') {
 			ret += '[';
-			obj.forEach((value) => {
+			obj.forEach((value:any) => {
 				ret += jsonToIdent(value);
 			});
 			ret += ']' + sep;

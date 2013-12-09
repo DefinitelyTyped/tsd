@@ -84,7 +84,7 @@ module tsd {
 
 		static extractReferenceTags(source:string):string[] {
 			var ret:string[] = [];
-			var match;
+			var match:RegExpExecArray;
 
 			if (!referenceTagExp.global) {
 				throw new Error('referenceTagExp RegExp must have global flag');

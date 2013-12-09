@@ -1,7 +1,6 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="GithubLoader.ts" />
 ///<reference path="../model/GitRateInfo.ts" />
-///<reference path="../../../typings/underscore/underscore.d.ts" />
 ///<reference path="../../xm/io/HTTPCache.ts" />
 
 module git {

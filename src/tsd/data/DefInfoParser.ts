@@ -116,9 +116,9 @@ module tsd {
 	.join('i');
 
 	// dry helper
-	function mutate(base:string[], add:string[], remove:string[]) {
-		var res = base ? base.slice(0) : [];
-		var i , ii, index;
+	function mutate(base:string[], add:string[], remove:string[]):string[] {
+		var res:string[] = (base ? base.slice(0) : (<string[]> []));
+		var i:number , ii:number, index:number;
 		if (add) {
 			for (i = 0, ii = add.length; i < ii; i++) {
 				res.push(add[i]);

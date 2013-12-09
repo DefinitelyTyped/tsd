@@ -15,8 +15,8 @@ interface Function {
 module xm {
 	'use strict';
 
-	export function getFuncLabel(func):string {
-		var match = /^\s?function ([^( ]*) *\( *([^(]*?) *\)/.exec(func);
+	export function getFuncLabel(func:any):string {
+		var match:RegExpExecArray = /^\s?function ([^( ]*) *\( *([^(]*?) *\)/.exec(String(func));
 		if (match && match.length >= 3) {
 			return match[1] + '(' + match[2] + ')';
 		}

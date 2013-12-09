@@ -4,8 +4,8 @@
 module xm {
 	'use strict';
 
-	function deepFreezeRecursive(object, active:any[]) {
-		var value, prop;
+	function deepFreezeRecursive(object:any, active:any[]):void {
+		var value:any, prop:string;
 		active.push(object);
 		Object.freeze(object);
 		for (prop in object) {
@@ -44,26 +44,26 @@ module xm {
 			}
 		}
 
-		static hideProps(object, props:string[]) {
+		static hideProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {enumerable: false});
 			});
 		}
 
-		static lockProps(object, props:string[]) {
+		static lockProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 			});
 		}
 
-		static freezeProps(object, props:string[]) {
+		static freezeProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 				Object.freeze(object[property]);
 			});
 		}
 
-		static lockPrimitives(object) {
+		static lockPrimitives(object:Object):void {
 			Object.keys(object).forEach((property:string) => {
 				if (xm.isPrimitive(object[property])) {
 					Object.defineProperty(object, property, {writable: false});
@@ -71,7 +71,7 @@ module xm {
 			});
 		}
 
-		static deepFreeze(object) {
+		static deepFreeze(object:Object):void {
 			if (xm.isObject(object) || xm.isArray(object)) {
 				deepFreezeRecursive(object, []);
 			}

@@ -10,6 +10,7 @@
 ///<reference path="../io/FileUtil.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../ObjectUtil.ts" />
+///<reference path="../../../typings/node/node.d.ts" />
 
 module xm {
 	'use strict';
@@ -18,7 +19,7 @@ module xm {
 	var path = require('path');
 
 	//partial from pkginfo
-	function findInfo(pmodule, dir?) {
+	function findInfo(pmodule:NodeModule, dir?:string):string {
 		if (!dir) {
 			dir = path.dirname(pmodule.filename);
 		}

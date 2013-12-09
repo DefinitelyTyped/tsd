@@ -9,7 +9,6 @@
 ///<reference path="../_ref.d.ts" />
 ///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
-///<reference path="../callAsync.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../typeOf.ts" />
 ///<reference path="../ObjectUtil.ts" />
@@ -324,7 +323,7 @@ module xm {
 					code: 0,
 					ctx: ctx
 				};
-			}, (err) => {
+			}, (err:Error) => {
 				return {
 					code: (err.code && err.code > 0) ? err.code : 1,
 					error: err,

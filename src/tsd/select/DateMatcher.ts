@@ -78,7 +78,7 @@ module tsd {
 			//this.beforeDate = beforeDate;
 			//this.afterDate = afterDate;
 			termExp.lastIndex = 0;
-			var match;
+			var match:RegExpExecArray;
 			while ((match = termExp.exec(pattern))) {
 				termExp.lastIndex = match.index + match[0].length;
 				xm.assert(xm.hasOwnProp(comparators, match[1]), 'not a valid date comparator in filter {a}', match[0]);

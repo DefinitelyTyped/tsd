@@ -8,7 +8,7 @@
 
 //
 interface Error {
-	stack:string;
+	code:number;
 }
 
 module xm {
@@ -47,7 +47,7 @@ module xm {
 			}
 		}
 
-		export function getRawStack(err?):string {
+		export function getRawStack(err?:Error):string {
 			//snippet from: http://pastebin.com/aRpPr5Sd
 			err = err || new Error();
 			if (err.stack) {
@@ -67,7 +67,7 @@ module xm {
 			return '';
 		}
 
-		function isAbsolute(str):boolean {
+		function isAbsolute(str:string):boolean {
 			//TODO is this isAbsolute rule cross platform correct?
 			str = path.normalize(str);
 			var resolve = path.resolve(str);

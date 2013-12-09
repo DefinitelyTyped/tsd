@@ -65,7 +65,7 @@ module tsd {
 				opt.global = true;
 				opt.enum = style.getKeys();
 				opt.default = 'ansi';
-				opt.apply = (value, ctx:xm.ExposeContext) => {
+				opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					style.useColor(value, ctx);
 				};
 			});
@@ -79,7 +79,7 @@ module tsd {
 				opt.type = 'flag';
 				opt.global = true;
 				opt.note = ['experimental'];
-				opt.apply = (value, ctx:xm.ExposeContext) => {
+				opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--progress events are not 100%').ln();
 				};
 			});
@@ -233,7 +233,7 @@ module tsd {
 				opt.placeholder = 'name';
 				opt.enum = [Action.install, Action.compare, Action.update, Action.open];
 				opt.note = ['partially implemented'];
-				opt.apply = (value, ctx:xm.ExposeContext) => {
+				opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
 				};
 			});

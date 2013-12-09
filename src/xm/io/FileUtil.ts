@@ -24,8 +24,8 @@ module xm {
 	 */
 	export module FileUtil {
 
-		function parseJson(text:string) {
-			var json;
+		function parseJson(text:string):any {
+			var json:any;
 			try {
 				json = JSON.parse(text);
 			}
@@ -48,7 +48,7 @@ module xm {
 		}
 
 		export function readJSONSync(src:string):any {
-			var json;
+			var json:any;
 			/*try {*/
 			json = doReadJSONSync(src);
 			/*}
@@ -59,12 +59,12 @@ module xm {
 			return json;
 		}
 
-		export function readJSON(src:string, callback:(err, res:any) => void) {
-			fs.readFile(path.resolve(src), {encoding: 'utf8'}, (err, text) => {
+		export function readJSON(src:string, callback:(err:Error, res:any) => void):void {
+			fs.readFile(path.resolve(src), {encoding: 'utf8'}, (err:Error, text:string) => {
 				if (err || typeof text !== 'string') {
 					return callback(err, null);
 				}
-				var json = null;
+				var json:any = null;
 				try {
 					json = parseJson(text);
 				}

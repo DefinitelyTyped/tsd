@@ -226,7 +226,7 @@ module xm {
 			track:xm.EventLog;
 			infoKoder:IContentKoder<CacheInfo>;
 
-			private remove = new xm.KeyValueMap<number>();
+			private remove = new xm.KeyValueMap<Timer>();
 
 			// auto clear
 			jobTimeout:number = 1000;
@@ -254,7 +254,7 @@ module xm {
 				this.track.promise(d.promise, HTTPCache.get_object);
 
 				this.init().then(() => {
-					var job;
+					var job:CacheLoader;
 					if (this.jobs.has(request.key)) {
 						job = this.jobs.get(request.key);
 						this.track.skip(HTTPCache.get_object);
@@ -311,15 +311,14 @@ module xm {
 					}
 
 					return FS.isDirectory(this.storeDir).then((isDir:boolean) => {
-						if (isDir) {
-							this.track.event('dir_exists', this.storeDir);
-							return null;
+						if (!isDir) {
+							this.track.error('dir_error', this.storeDir);
+							throw new Error('is not a directory: ' + this.storeDir);
 						}
-						this.track.error('dir_error', this.storeDir);
-						throw new Error('is not a directory: ' + this.storeDir);
+						this.track.event('dir_exists', this.storeDir);
 					});
 				}).then(() => {
-					defer.resolve(null);
+					defer.resolve();
 				}, defer.reject).done();
 
 				return defer.promise;
@@ -701,20 +700,20 @@ module xm {
 						return FS.write(this.object.infoFile, info, {flags: 'wb'});
 					}));
 					// track em
-					return Q.all(write).fail((err) => {
+					return Q.all(write).fail((err:Error) => {
 						this.track.error(CacheLoader.cache_write, 'file write', err);
 						//TODO clean things up?
 						throw err;
 					}).then(() => {
 						// ghost stat to fix weird empty file glitch (voodoo)
 						return Q.all([
-							FS.stat(this.object.bodyFile).then((stat) => {
+							FS.stat(this.object.bodyFile).then((stat:QioFS.Stats) => {
 								if (stat.size === 0) {
 									this.track.error(CacheLoader.cache_write, 'written zero body bytes');
 									d.notify(new Error('written zero body bytes'));
 								}
 							}),
-							FS.stat(this.object.infoFile).then((stat) => {
+							FS.stat(this.object.infoFile).then((stat:QioFS.Stats) => {
 								if (stat.size === 0) {
 									this.track.error(CacheLoader.cache_write, 'written zero info bytes');
 									d.notify(new Error('written zero info bytes'));
@@ -763,7 +762,7 @@ module xm {
 				var d:Q.Deferred<void> = Q.defer();
 				this.track.promise(d.promise, CacheLoader.info_read);
 
-				FS.isFile(this.object.infoFile).then((isFile) => {
+				FS.isFile(this.object.infoFile).then((isFile:boolean) => {
 					if (!isFile) {
 						return null;
 					}
@@ -789,12 +788,12 @@ module xm {
 
 			private removeFile(target:string):Q.Promise<void> {
 				var d:Q.Deferred<void> = Q.defer();
-				FS.exists(target).then((exists) => {
+				FS.exists(target).then((exists:boolean) => {
 					if (!exists) {
 						d.resolve();
 						return;
 					}
-					return FS.isFile(target).then((isFile) => {
+					return FS.isFile(target).then((isFile:boolean) => {
 						if (!isFile) {
 							throw new Error('not a file: ' + target);
 						}

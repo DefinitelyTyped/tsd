@@ -168,7 +168,7 @@ module xm {
 
 	//clone/extend the map
 	export function getTypeOfMap(add?:any) {
-		var name;
+		var name:string;
 		var obj = {};
 		for (name in typeMap) {
 			if (hasOwnProp(typeMap, name)) {

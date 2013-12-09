@@ -36,9 +36,9 @@ module xm {
 	}
 
 	function writeMulti(logger:Logger, args:any[]):void {
-		var ret = [];
+		var ret:string[] = [];
 		for (var i = 0, ii = args.length; i < ii; i++) {
-			var value = args[i];
+			var value:any = args[i];
 			if (value && typeof value === 'object') {
 				ret.push(util.inspect(value, <any>{showHidden: false, depth: 8}));
 			}
@@ -76,7 +76,7 @@ module xm {
 			}
 		};
 
-		var doLog = function (logger, args) {
+		var doLog = function (logger:Logger, args:any[]) {
 			if (args.length > 0) {
 				writeMulti(logger, args);
 			}

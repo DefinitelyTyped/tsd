@@ -100,7 +100,8 @@ module.exports = function (grunt) {
 				module: 'commonjs',
 				target: 'es5',
 				declaration: false,
-				sourcemap: true
+				sourcemap: true,
+				noImplicitAny: false
 			},
 			api: {
 				src: ['src/api.ts'],

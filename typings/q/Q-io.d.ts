@@ -35,7 +35,7 @@ declare module QioFS {
 	export function copyTree(source:string, target:string):Q.Promise<void>;
 
 	export function list(path:string):Q.Promise<string[]>;
-	export function listTree(path:string, guard?:(path:string, stat) => boolean):Q.Promise<string[]>;
+	export function listTree(path:string, guard?:(path:string, stat:any) => boolean):Q.Promise<string[]>;
 	export function listDirectoryTree(path:string):Q.Promise<string[]>;
 
 	export function makeDirectory(path:string, mode?:string):Q.Promise<void>;
@@ -49,18 +49,18 @@ declare module QioFS {
 	export function rename(source:string, target:string):Q.Promise<void>;
 	export function move(source:string, target:string):Q.Promise<void>;
 
-	export function link(source:string, taget):Q.Promise<void>;
+	export function link(source:string, target:any):Q.Promise<void>;
 
-	export function symbolicCopy(source:string, target:string, type):Q.Promise<void>;
-	export function symbolicLink(target:string, link, type):Q.Promise<void>;
+	export function symbolicCopy(source:string, target:string, type:string):Q.Promise<void>;
+	export function symbolicLink(target:string, link:string, type:string):Q.Promise<void>;
 
-	export function chown(path:string, uid, gid):Q.Promise<void>;
+	export function chown(path:string, uid:number, gid:number):Q.Promise<void>;
 	export function chmod(path:string, mode?:string):Q.Promise<void>;
 	export function chmod(path:string, mode?:number):Q.Promise<void>;
 
 	export function stat(path:string):Q.Promise<Stats>;
 	export function statLink(path:string):Q.Promise<any>;
-	export function statFd(fd):Q.Promise<any>;
+	export function statFd(fd:number):Q.Promise<any>;
 
 	export function exists(path:string):Q.Promise<boolean>;
 
@@ -96,7 +96,7 @@ declare module QioFS {
 
 	export function root(path:string):string;
 	export function directory(path:string):string;
-	export function base(path:string, extension):string;
+	export function base(path:string, extension:string):string;
 	export function extension(path:string):string;
 
 	//this should return a q-io/fs-mock MockFS

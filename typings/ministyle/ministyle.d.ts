@@ -56,7 +56,7 @@ declare module MiniStyle {
 
 	function toggle():StyleToggle;
 	function stack(items:Style[]):StyleStack;
-	function peek(callback:StylePeekCallback, main, alt):StylePeek;
+	function peek(callback:StylePeekCallback, main:Style, alt:Style):StylePeek;
 
 	function colorjs():Style;
 	function grunt():Style;

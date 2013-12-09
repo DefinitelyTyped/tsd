@@ -217,13 +217,13 @@ module tsd {
 	export function getExpose():xm.Expose {
 		var expose = new xm.Expose(output);
 
-		function getProgress(ctx) {
+		function getProgress(ctx:xm.ExposeContext):(note:any) => void {
 			if (ctx.getOpt(Opt.progress)) {
-				return function (note) {
+				return function (note:any):void {
 					reportProgress(note);
 				};
 			}
-			return function (note) {
+			return function (note:any) {
 				// ignore
 			};
 		}

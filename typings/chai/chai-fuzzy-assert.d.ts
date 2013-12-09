@@ -7,11 +7,11 @@
 
 declare module Chai {
 	export interface Assert {
-		like(act:any, exp:any, msg?:string);
-		notLike(act:any, exp:any, msg?:string);
-		containOneLike(act:any, exp:any, msg?:string);
-		notContainOneLike(act:any, exp:any, msg?:string);
-		jsonOf(act:any, exp:any, msg?:string);
-		notJsonOf(act:any, exp:any, msg?:string);
+		like(act:any, exp:any, msg?:string):void;
+		notLike(act:any, exp:any, msg?:string):void;
+		containOneLike(act:any, exp:any, msg?:string):void;
+		notContainOneLike(act:any, exp:any, msg?:string):void;
+		jsonOf(act:any, exp:any, msg?:string):void;
+		notJsonOf(act:any, exp:any, msg?:string):void;
 	}
 }

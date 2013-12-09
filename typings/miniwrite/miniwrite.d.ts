@@ -18,7 +18,7 @@ declare module MiniWrite {
 		textBuffer:string;
 		lineExp:RegExp;
 		useTarget(write:Line):void;
-		clear();
+		clear():void;
 	}
 	interface Splitter extends Line {
 		target:Line;
@@ -27,7 +27,7 @@ declare module MiniWrite {
 		lines:string[];
 		concat(seperator?:string, indent?:string, appendSep?:boolean):string;
 		toString():string;
-		clear();
+		clear():void;
 	}
 	interface Multi extends Enable {
 		targets:Line[];

@@ -19,7 +19,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	var configSchema;
+	var configSchema:Object;
 
 	export function getConfigSchema():any {
 		if (!configSchema) {
@@ -82,7 +82,7 @@ module helper {
 		modBuildCLI:string;
 	}
 
-	export function getTestInfo(group:string, name:string, test, createConfigFile:boolean = true):TestInfo {
+	export function getTestInfo(group:string, name:string, test:any, createConfigFile:boolean = true):TestInfo {
 
 		var tmpDir = path.join(__dirname, 'result', group, name);
 		var dumpDir = path.resolve(tmpDir, 'dump');
@@ -142,8 +142,8 @@ module helper {
 	export function listDefPaths(dir:string):Q.Promise<string[]> {
 		var d:Q.Deferred<string[]> = Q.defer();
 
-		FS.listTree(dir, (full:string, stat):boolean => {
-			return (stat.isFile() && /\.d\.ts$/.test(full));
+		FS.listTree(dir, (full:string, stat:QioFS.Stats):boolean => {
+			return (stat.node.isFile() && /\.d\.ts$/.test(full));
 
 		}).then((paths:string[]) => {
 			d.resolve(paths.map((full:string) => {
@@ -160,23 +160,24 @@ module helper {
 	export function assertDefPathsP(actualDir:string, expectedDir:string, assertContent:boolean, message:string):Q.Promise<void> {
 		var d:Q.Deferred<void> = Q.defer();
 
-		Q.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths, expectedPaths) => {
+		Q.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths:string[], expectedPaths:string[]) => {
 			assert.sameMembers(actualPaths, expectedPaths, message);
 
 			if (assertContent) {
 				xm.log.json(actualPaths);
 				xm.log.json(expectedPaths);
 
-				helper.assertUnorderedLike(actualPaths, expectedPaths, (actualPath, expectedPath) => {
+				helper.assertUnorderedLike(actualPaths, expectedPaths, (actualPath:string, expectedPath:string) => {
 					return (tsd.Def.getFileFrom(actualPath) === tsd.Def.getFileFrom(expectedPath));
 
-				}, (actualPath, expectedPath) => {
+				}, (actualPath:string, expectedPath:string) => {
 					var msg = helper.getPathMessage(actualPath, expectedPath, message);
 
 					helper.assertBufferUTFEqual(fs.readfile(actualPath), fs.readfile(actualPath), msg);
 					//helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
 				}, message);
 			}
+		}).then(() => {
 			d.resolve();
 		});
 

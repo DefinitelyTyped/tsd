@@ -16,7 +16,7 @@ declare module SemverModule {
 	function lte(v1:string, v2:string, loose?:boolean):boolean; // v1 <= v2
 	function eq(v1:string, v2:string, loose?:boolean):boolean; // v1 == v2 This is true if they're logically equivalent, even if they're not the exact same string. You already know how to compare strings.
 	function neq(v1:string, v2:string, loose?:boolean):boolean; // v1 != v2 The opposite of eq.
-	function cmp(v1:string, comparator, v2:string, loose?:boolean):boolean; // Pass in a comparison string, and it'll call the corresponding function above. "===" and "!==" do simple string comparison, but are included for completeness. Throws if an invalid comparison string is provided.
+	function cmp(v1:string, comparator:any, v2:string, loose?:boolean):boolean; // Pass in a comparison string, and it'll call the corresponding function above. "===" and "!==" do simple string comparison, but are included for completeness. Throws if an invalid comparison string is provided.
 	function compare(v1:string, v2:string, loose?:boolean):number; // Return 0 if v1 == v2, or 1 if v1 is greater, or -1 if v2 is greater. Sorts in ascending order if passed to Array.sort().
 	function rcompare(v1:string, v2:string, loose?:boolean):number; // The reverse of compare. Sorts an array of versions in descending order when passed to Array.sort().
 
@@ -56,14 +56,14 @@ declare module SemverModule {
 		semver:Semver;
 		operator:string;
 		value:boolean;
-		parse(comp) :void;
-		test(version):boolean;
+		parse(comp:string) :void;
+		test(version:Semver):boolean;
 	}
 	interface Range extends SemverBase {
 		new(range:string, loose?:boolean):Range;
 		set:Comparator[][];
-		parseRange(range):Comparator[];
-		test(version):boolean;
+		parseRange(range:string):Comparator[];
+		test(version:Semver):boolean;
 	}
 }
 declare module "semver" {

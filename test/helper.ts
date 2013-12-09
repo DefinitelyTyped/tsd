@@ -72,36 +72,36 @@ module helper {
 		xm.log(message + JSON.stringify(object, null, 4));
 	}
 
-	export function assertFormatSHA1(value:string, msg?:string) {
+	export function assertFormatSHA1(value:string, msg?:string):void {
 		assert.isString(value, msg);
 		assert.match(value, shaRegExp, msg);
 	}
 
-	export function assertFormatMD5(value:string, msg?:string) {
+	export function assertFormatMD5(value:string, msg?:string):void {
 		assert.isString(value, msg);
 		assert.match(value, md5RegExp, msg);
 	}
 
-	export function propStrictEqual(actual, expected, prop:string, message:string) {
+	export function propStrictEqual(actual:Object, expected:Object, prop:string, message:string):void {
 		assert.property(actual, prop, message + '.' + prop + ' actual');
 		assert.property(expected, prop, message + '.' + prop + ' expected');
 		assert.strictEqual(actual[prop], expected[prop], message + '.' + prop + ' equal');
 	}
 
-	export function assertBufferEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string) {
+	export function assertBufferEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string):void {
 		assert.instanceOf(act, Buffer, msg + ': ' + act);
 		assert.instanceOf(exp, Buffer, msg + ': ' + exp);
 		assert(bufferEqual(act, exp), msg + ': bufferEqual');
 	}
 
-	export function assertBufferUTFEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string) {
+	export function assertBufferUTFEqual(act:NodeBuffer, exp:NodeBuffer, msg?:string):void {
 		assert.instanceOf(act, Buffer, msg + ': ' + act);
 		assert.instanceOf(exp, Buffer, msg + ': ' + exp);
 		assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');
 	}
 
 	//hackish to get more ingot then assert.throws()
-	export function assertError(exec:() => void, expected:any, msg?:string) {
+	export function assertError(exec:() => void, expected:any, msg?:string):void {
 		msg = (msg ? msg + ': ' : '');
 		try {
 			exec();
@@ -127,7 +127,7 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//for safety
-	function promiseDoneMistake() {
+	function promiseDoneMistake():void {
 		throw new Error('don\'t use a done() callback when using it.eventually()');
 	}
 
@@ -136,7 +136,7 @@ module helper {
 		it(expectation, (done) => {
 			Q(assertion(promiseDoneMistake)).done(() => {
 				done();
-			}, (err) => {
+			}, (err:Error) => {
 				done(err);
 			});
 		});
@@ -144,11 +144,11 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export interface AssertCB {
-		(actual, expected, message:string):void;
+	export interface AssertCB<T> {
+		(actual:T, expected:T, message:string):void;
 	}
-	export interface IsLikeCB {
-		(actual, expected):boolean;
+	export interface IsLikeCB<T> {
+		(actual:T, expected:T):boolean;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -204,20 +204,20 @@ module helper {
 			return d.promise;
 		}
 
-		child.stdout.on('data', (chunk) => {
+		child.stdout.on('data', (chunk:NodeBuffer) => {
 			stdout.push(chunk);
 			if (debug) {
 				process.stdout.write(chunk);
 			}
 		});
-		child.stderr.on('data', (chunk) => {
+		child.stderr.on('data', (chunk:NodeBuffer) => {
 			stderr.push(chunk);
 			if (debug) {
 				process.stdout.write(chunk);
 			}
 		});
 
-		child.on('error', (err) => {
+		child.on('error', (err:Error) => {
 			if (err) {
 				xm.log.error('child process exited with code ' + err.code);
 				xm.log.error(err);
@@ -226,7 +226,7 @@ module helper {
 			d.resolve(getRes(1, err));
 		});
 
-		child.on('exit', (event) => {
+		child.on('exit', () => {
 			d.resolve(getRes(0, null));
 		});
 
@@ -236,7 +236,7 @@ module helper {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
-	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string) {
+	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string):void {
 		var stats = cache.track;
 
 		var items = cache.track.getItems().filter((item:xm.EventLogItem) => {

@@ -7,7 +7,7 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function assertKeyValue(map:xm.IKeyValueMap<any>, values:any, assertion:AssertCB, message:string) {
+	export function assertKeyValue<T>(map:xm.IKeyValueMap<T>, values:any, assertion:AssertCB<T>, message:string):void {
 		assert.isObject(map, message + ': map');
 		assert.isObject(values, message + ': values');
 		assert.isFunction(assertion, message + ': assertion');

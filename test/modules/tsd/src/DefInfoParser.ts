@@ -7,35 +7,25 @@
 describe('DefInfoParser', () => {
 	'use strict';
 
-	var _ = require('underscore');
 	var fs = require('fs');
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 
 	var data:helper.HeaderAssert[];
-	var filter; // = ['async', 'expect.js'];
+	var filter:string[]; // = ['async', 'expect.js'];
 
 	before((done:(err?) => void) => {
 		//use old tsd-deftools loader
-		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers'), (err, res:helper.HeaderAssert[]) => {
-			if (err) {
-				return done(err);
-			}
-			try {
-				assert.operator(res.length, '>', 0);
-			}
-			catch (e) {
-				done(e);
-			}
+		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers')).done((res:helper.HeaderAssert[]) => {
+			assert.operator(res.length, '>', 0);
 			data = res;
-
 			if (filter) {
-				data = _.filter(data, (value:helper.HeaderAssert) => {
+				data = data.filter((value:helper.HeaderAssert) => {
 					return filter.indexOf(value.name) > -1;
 				});
 			}
 			done();
-		});
+		}, done);
 	});
 
 	after(() => {
@@ -48,11 +38,11 @@ describe('DefInfoParser', () => {
 			assert.operator(data.length, '>', 0, 'data.length');
 		});
 		it('parse test data', () => {
-			function testProp(def, data, parsed, prop) {
+			function testProp(def:helper.HeaderAssert, data:Object, parsed:Object, prop:string):void {
 				assert.strictEqual(data[prop], parsed[prop], def.key + ' .' + prop);
 			}
 
-			_.each(data, (def:helper.HeaderAssert) => {
+			data.forEach((def:helper.HeaderAssert) => {
 				assert.ok(def, def.key + ' ok');
 
 				var data = new tsd.DefInfo();
@@ -61,7 +51,7 @@ describe('DefInfoParser', () => {
 
 				var parsed = def.fields.parsed;
 				if (def.fields.fields) {
-					_.each(def.fields.fields, (field:string) => {
+					def.fields.fields.forEach((field:string) => {
 						testProp(def, data, parsed, field);
 					});
 				}
@@ -73,7 +63,7 @@ describe('DefInfoParser', () => {
 					testProp(def, data, parsed, 'projectUrl');
 					testProp(def, data, parsed, 'reposUrl');
 
-					assert.like(_.map(data.authors, (author) => {
+					assert.like(data.authors.map((author) => {
 						return author.toJSON();
 					}), parsed.authors, def.key + ' .' + 'authors');
 				}

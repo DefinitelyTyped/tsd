@@ -94,8 +94,8 @@ module xm {
 			var possibles:LineParser[] = asType ? this.get(asType) : this.all();
 
 			var length = source.length;
-			var line;
-			var i, ii;
+			var line:RegExpExecArray;
+			var i:number, ii:number;
 			var offset = 0;
 			var cursor = 0;
 			var lineCount = 0;
@@ -111,7 +111,7 @@ module xm {
 					console.log('zero length line match?');
 					break;
 				}
-				if (line.index + line[0].lengt === cursor) {
+				if (line.index + line[0].length === cursor) {
 					console.log('cursor not advancing?');
 					break;
 				}
@@ -254,7 +254,7 @@ module xm {
 	 */
 	export class LineParserMatch {
 
-		constructor(public parser:LineParser, public match) {
+		constructor(public parser:LineParser, public match:RegExpExecArray) {
 		}
 
 		extract():void {

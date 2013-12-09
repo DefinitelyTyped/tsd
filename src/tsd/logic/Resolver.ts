@@ -112,7 +112,7 @@ module tsd {
 			}).then(() => {
 				cleanup();
 				d.resolve(file);
-			}, (err) => {
+			}, (err:Error) => {
 				cleanup();
 				d.reject(err);
 			});

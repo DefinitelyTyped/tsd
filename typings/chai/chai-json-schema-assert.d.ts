@@ -7,7 +7,7 @@
 
 declare module Chai {
 	export interface Assert {
-		jsonSchema(value:any, schema:any, msg?:string);
-		notJsonSchema(value:any, schema:any, msg?:string);
+		jsonSchema(value:any, schema:any, msg?:string):void;
+		notJsonSchema(value:any, schema:any, msg?:string):void;
 	}
 }

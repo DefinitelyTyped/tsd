@@ -1,8 +1,8 @@
 module xm {
 	'use strict';
 
-	function pad(number) {
-		var r = String(number);
+	function pad(input:number):string {
+		var r = String(input);
 		if (r.length === 1) {
 			r = '0' + r;
 		}

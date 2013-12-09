@@ -87,7 +87,7 @@ module xm {
 	export class JSONKoder<T> implements IContentKoder<T> {
 		schema:any;
 
-		constructor(schema?) {
+		constructor(schema?:Object) {
 			this.schema = schema;
 		}
 

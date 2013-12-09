@@ -18,3 +18,13 @@ interface ReadOnlyBuffer {
 	readDoubleLE(offset:number, noAssert?:boolean): number;
 	readDoubleBE(offset:number, noAssert?:boolean): number;
 }
+
+interface NodeModule {
+	exports: any;
+	require(id: string): any;
+	id: string;
+	filename: string;
+	loaded: boolean;
+	parent: any;
+	children: any[];
+}

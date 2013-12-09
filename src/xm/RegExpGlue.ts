@@ -30,7 +30,7 @@ module xm {
 		}
 
 		static get(...exp:any[]):RegExpGlue {
-			var e = new RegExpGlue();
+			var e:RegExpGlue = new RegExpGlue();
 			return e.append.apply(e, exp);
 		}
 

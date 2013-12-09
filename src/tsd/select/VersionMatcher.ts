@@ -37,7 +37,7 @@ module tsd {
 				return list.slice(0);
 			}
 			//bake map
-			var map = list.reduce((map, def:tsd.Def) => {
+			var map = list.reduce((map:any, def:tsd.Def) => {
 				var id = def.project + '/' + def.name;
 				if (id in map) {
 					map[id].push(def);

@@ -12,7 +12,7 @@ declare module Chai {
 		becomes(promise:any, value:any, msg?:string):any;
 		doesNotBecome(promise:any, value:any, msg?:string):any;
 
-		isRejected(promise:any, msg?:string);
+		isRejected(promise:any, msg?:string):any;
 		isRejected(promise:any, instanceOf:Function, msg?:string):any;
 		isRejected(promise:any, regExp:RegExp, msg?:string):any;
 

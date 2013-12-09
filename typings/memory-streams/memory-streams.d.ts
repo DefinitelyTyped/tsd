@@ -5,14 +5,14 @@
 declare module MemoryStreams {
 
 	interface Writable extends WritableStream {
-		toString();
-		toBuffer();
+		toString():string;
+		toBuffer():NodeBuffer;
 	}
 
 	interface Readable extends ReadableStream {
 		append (chunk:string, encoding?:string):void;
 		append (chunk:NodeBuffer):void;
-		toString();
+		toString():string;
 	}
 }
 

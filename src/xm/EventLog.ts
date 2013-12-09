@@ -15,7 +15,7 @@
 module xm {
 	'use strict';
 
-	function padL(input, len, char) {
+	function padL(input:string, len:number, char:string):string {
 		char = String(char).charAt(0);
 		input = String(input);
 		while (input.length < len) {
@@ -260,7 +260,7 @@ module xm {
 		}
 
 		getHistory():string {
-			var memo = [];
+			var memo:string[] = [];
 			if (this._label) {
 				memo.push(this._label + '(' + this._items.length + ')');
 			}

@@ -2,8 +2,6 @@
 ///<reference path="../typings/q/Q.d.ts" />
 ///<reference path="../typings/q/Q-io.d.ts" />
 ///<reference path="../typings/tv4/tv4.d.ts" />
-///<reference path="../typings/async/async.d.ts" />
-///<reference path="../typings/underscore/underscore.d.ts" />
 ///<reference path="../typings/colors/colors.d.ts" />
 ///<reference path="../typings/date-utils/date-utils.d.ts" />
 ///<reference path="../typings/semver/semver.d.ts" />

@@ -9,7 +9,7 @@ module helper {
 
 	//helper: assert lists of unordered items
 	//first finds an identity match, then applies real assertion
-	export function assertUnorderedLike(actual:any[], expected:any[], matcher:IsLikeCB, assertion:AssertCB, message:string) {
+	export function assertUnorderedLike<T>(actual:any[], expected:any[], matcher:IsLikeCB<T>, assertion:AssertCB<T>, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 		assert.isFunction(matcher, 'matcher');
@@ -46,8 +46,8 @@ module helper {
 	}
 
 	//get lazy wrapper for re-use
-	export function getAssertUnorderedLike(matcher:IsLikeCB, assertion:AssertCB, preLabel:string):AssertCB {
-		return function assertUnorderedLikeWrap(actual:any[], expected:any[], message?:string) {
+	export function getAssertUnorderedLike<T>(matcher:IsLikeCB<T>, assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
+		return function assertUnorderedLikeWrap(actual:T[], expected:T[], message?:string) {
 			assertUnorderedLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
 		};
 	}
@@ -56,7 +56,7 @@ module helper {
 
 	//helper: assert lists of unordered items
 	//naively hammers assertions: every element has to pass at least one comparative assertion
-	export function assertUnorderedNaive(actual:any[], expected:any[], assertion:AssertCB, message:string) {
+	export function assertUnorderedNaive<T>(actual:T[], expected:T[], assertion:AssertCB<T>, message:string):void {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 		assert.isFunction(assertion, 'assertion');
@@ -94,14 +94,14 @@ module helper {
 	}
 
 	//get lazy wrapper for re-use
-	export function getAssertUnorderedNaive(assertion:AssertCB, preLabel:string):AssertCB {
-		return function (actual:any[], expected:any[], message?:string) {
+	export function getAssertUnorderedNaive<T>(assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
+		return function (actual:T[], expected:T[], message?:string) {
 			assertUnorderedNaive(actual, expected, assertion, preLabel + ': ' + message);
 		};
 	}
 
 	//abominables (use assert.sameMembers instead)
-	export function assertUnorderedStrict(actual:any[], expected:any[], message?:string) {
+	export function assertUnorderedStrict<T>(actual:T[], expected:T[], message?:string) {
 		assertUnorderedNaive(actual, expected, assert.strictEqual, message);
 	}
 }

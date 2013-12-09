@@ -15,7 +15,7 @@ module tsd {
 	var patternSplit:RegExp = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
-	function escapeRegExpChars(str) {
+	function escapeRegExpChars(str:string):string {
 		//http://stackoverflow.com/a/1144788/1026362
 		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 	}

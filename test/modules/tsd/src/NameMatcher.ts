@@ -33,8 +33,8 @@ describe('NameMatcher', () => {
 		//dummy list
 		list = [];
 
-		var badFixtures = [];
-		select.source.forEach((path) => {
+		var badFixtures:string[] = [];
+		select.source.forEach((path:string) => {
 			var def = tsd.Def.getFrom(path);
 			if (!def) {
 				badFixtures.push(path);
@@ -109,7 +109,7 @@ describe('NameMatcher', () => {
 	});
 
 	describe('bulk', () => {
-		select.data.forEach((data) => {
+		select.data.forEach((data:any) => {
 			it('match "' + String(data.pattern) + '"', () => {
 				var pattern = new tsd.NameMatcher(data.pattern);
 

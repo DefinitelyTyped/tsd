@@ -30,7 +30,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	export function assertDefVersion(file:tsd.DefVersion, values:any, message:string) {
+	export function assertDefVersion(file:tsd.DefVersion, values:any, message:string):void {
 		assert.ok(file, message + ': file');
 		assert.ok(values, message + ': values');
 		assert.instanceOf(file, tsd.DefVersion, message + ': file');
@@ -56,17 +56,18 @@ module helper {
 		}
 	}
 
-	export function assertDefVersionFlat(file:tsd.DefVersion, values:any, message:string) {
+	export function assertDefVersionFlat(file:tsd.DefVersion, values:any, message:string):void {
 		assertDefVersion(file, values, message);
 	}
 
-	var assertDefVersionArrayUnordered:AssertCB = helper.getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
+	//TODO should not be 'any' type
+	var assertDefVersionArrayUnordered:any = helper.getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
 		return (act.def.path === exp.path && exp.commit && act.commit.commitSha === exp.commit.commitSha);
 	}, (act:tsd.DefVersion, exp:any, message?:string) => {
 		assertDefVersion(act, exp, message + ': ' + tsd.shaShort(exp.commit.commitSha));
 	}, 'DefVersion');
 
-	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string) {
+	export function assertDefVersionArray(files:tsd.DefVersion[], values:any[], message:string):void {
 		assertDefVersionArrayUnordered(files, values, message + ': files');
 	}
 }

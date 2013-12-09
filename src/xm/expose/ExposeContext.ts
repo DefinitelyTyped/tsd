@@ -32,7 +32,7 @@ module xm {
 		argv:any;
 		out:xm.StyledOut;
 
-		constructor(expose:Expose, argv, command?:ExposeCommand) {
+		constructor(expose:Expose, argv:any, command?:ExposeCommand) {
 			this.expose = expose;
 			this.command = command;
 			this.argv = argv;

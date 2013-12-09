@@ -89,7 +89,8 @@ module tsd {
 
 			Q.all(list.map((file:DefVersion) => {
 				return this.loadContent(file).progress(d.notify);
-			})).then((list) => {
+
+			})).then((list:tsd.DefVersion[]) => {
 				d.resolve(list);
 			}, d.reject);
 
@@ -131,7 +132,7 @@ module tsd {
 
 			Q.all(list.map((file:Def) => {
 				return this.loadHistory(file).progress(d.notify);
-			})).then((list) => {
+			})).then((list:DefVersion[]) => {
 				d.resolve(list);
 			}, d.reject);
 
