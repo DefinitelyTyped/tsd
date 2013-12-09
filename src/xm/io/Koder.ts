@@ -104,12 +104,13 @@ module xm {
 		}
 
 		assert(value:T):void {
+			xm.assert(xm.isJSONValue(value), 'is not a JSON value {a}', value);
 			if (this.schema) {
 				//validate schema
 				var res:TV4SingleResult = tv4.validateResult(value, this.schema);
 				if (!res.valid || res.missing.length > 0) {
 					var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-					report.reportError(report.createTest(this.schema, value, null, res, true));
+					report.reportError(report.createTest(this.schema, value, null, res, true), res.error, '   ', '   ');
 					throw res.error;
 				}
 			}

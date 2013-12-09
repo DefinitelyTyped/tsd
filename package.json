@@ -1,6 +1,6 @@
 {
   "name": "tsd",
-  "version": "0.5.2-alpha.6",
+  "version": "0.5.2-alpha.7",
   "description": "TypeScript definition package manager.",
   "keywords": [
     "typescript",
@@ -48,7 +48,7 @@
     "exit": "~0.1.1",
     "mkdirp": "0.3.5",
     "semver": "~2.1.0",
-    "tv4": "~1.0.11",
+    "tv4": "git://github.com/geraintluff/tv4/#feature/error_prototype",
     "tv4-reporter": "0.0.3",
     "uri-templates": "0.1.1",
     "optimist": "0.6.0",
@@ -60,7 +60,9 @@
     "weak-map": "~1.0.0",
     "ministyle": "~0.1.2",
     "miniwrite": "~0.1.2",
-    "es6-shim": "~0.9.1"
+    "es6-shim": "~0.9.1",
+    "tmp": "0.0.23",
+    "request": "~2.29.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

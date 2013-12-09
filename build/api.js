@@ -3752,7 +3752,7 @@ var xm;
                 var res = tv4.validateResult(value, this.schema);
                 if (!res.valid || res.missing.length > 0) {
                     var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-                    report.reportError(report.createTest(this.schema, value, null, res, true));
+                    report.reportError(report.createTest(this.schema, value, null, res, true), res.error, '   ', '   ');
                     throw res.error;
                 }
             }
@@ -3784,6 +3784,7 @@ var xm;
     var tv4 = require('tv4');
     var FS = require('q-io/fs');
     var HTTP = require('q-io/http');
+    var memory = require('memory-streams');
 
     require('date-utils');
 
@@ -3812,6 +3813,419 @@ var xm;
     }
 
     (function (http) {
+        var CacheLoader = (function () {
+            function CacheLoader(cache, request) {
+                this.cache = cache;
+                this.request = request;
+
+                this.bodyCacheValidator = new http.ChecksumValidator();
+
+                if (this.cache.opts.remoteRead) {
+                    this.infoCacheValidator = new http.CacheAgeValidator(this.cache.infoSchema, request.localMaxAge);
+                } else {
+                    this.infoCacheValidator = new http.CacheValidator(this.cache.infoSchema);
+                }
+
+                this.object = new http.CacheObject(request);
+                this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+
+                this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
+                this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
+
+                this.track = new xm.EventLog('http_load', 'CacheLoader');
+
+                xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
+            }
+            CacheLoader.prototype.canUpdate = function () {
+                if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
+                    return true;
+                }
+                return false;
+            };
+
+            CacheLoader.prototype.getObject = function () {
+                var _this = this;
+                if (this._defer) {
+                    this.track.skip(CacheLoader.get_object);
+                    return this._defer.promise;
+                }
+
+                this._defer = Q.defer();
+                this.track.promise(this._defer.promise, CacheLoader.get_object);
+
+                var cleanup = function () {
+                    _this._defer = null;
+                };
+
+                this.cacheRead().progress(this._defer.notify).then(function () {
+                    var useCached = false;
+                    if (_this.object.body && _this.object.info) {
+                        useCached = !_this.request.forceRefresh;
+                        if (useCached && xm.isNumber(_this.request.httpInterval)) {
+                            if (new Date(_this.object.info.cacheUpdated).getTime() < Date.now() - _this.request.httpInterval) {
+                                _this._defer.notify('auto check update on interval: ' + _this.request.url);
+                                useCached = false;
+                            }
+                        }
+                    }
+
+                    if (useCached) {
+                        _this._defer.notify('using local cache: ' + _this.request.url);
+                        _this._defer.resolve(_this.object);
+                        return;
+                    }
+
+                    return _this.httpLoad(!_this.request.forceRefresh).progress(_this._defer.notify).then(function () {
+                        if (!xm.isValid(_this.object.body)) {
+                            throw new Error('no result body: ' + _this.object.request.url);
+                        }
+                        _this._defer.notify('fetched remote: ' + _this.request.url);
+                        _this._defer.resolve(_this.object);
+                    });
+                }).fail(function (err) {
+                    _this._defer.reject(err);
+                }).finally(function () {
+                    cleanup();
+                }).done();
+
+                return this._defer.promise;
+            };
+
+            CacheLoader.prototype.cacheRead = function () {
+                var _this = this;
+                if (!this.cache.opts.cacheRead) {
+                    this.track.skip(CacheLoader.cache_read);
+                    return Q().thenResolve();
+                }
+                var d = Q.defer();
+                this.track.promise(d.promise, CacheLoader.cache_read);
+
+                this.readInfo().progress(d.notify).then(function () {
+                    if (!_this.object.info) {
+                        throw new Error('no or invalid info object');
+                    }
+                    try  {
+                        _this.infoCacheValidator.assert(_this.object);
+                    } catch (err) {
+                        _this.track.event(CacheLoader.local_info_bad, 'cache-info unsatisfactory', err);
+                        d.notify('cache info unsatisfactory: ' + err);
+
+                        throw err;
+                    }
+
+                    return FS.read(_this.object.bodyFile, { flags: 'rb' }).then(function (buffer) {
+                        if (buffer.length === 0) {
+                            throw new Error('empty body file');
+                        }
+                        _this.object.bodyChecksum = xm.sha1(buffer);
+                        _this.object.body = buffer;
+                    });
+                }).then(function () {
+                    try  {
+                        _this.bodyCacheValidator.assert(_this.object);
+
+                        _this.track.event(CacheLoader.local_cache_hit);
+                        d.resolve();
+                        return;
+                    } catch (err) {
+                        _this.track.error(CacheLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
+                        _this.track.logger.error('cache invalid');
+                        _this.track.logger.inspect(err);
+                        throw err;
+                    }
+                }).fail(function (err) {
+                    _this.object.info = null;
+                    _this.object.body = null;
+                    _this.object.bodyChecksum = null;
+
+                    return _this.cacheRemove().then(d.resolve, d.reject, d.notify);
+                }).done();
+
+                return d.promise;
+            };
+
+            CacheLoader.prototype.httpLoad = function (httpCache) {
+                if (typeof httpCache === "undefined") { httpCache = true; }
+                var _this = this;
+                if (!this.cache.opts.remoteRead) {
+                    this.track.skip(CacheLoader.http_load);
+                    return Q().thenResolve();
+                }
+                var d = Q.defer();
+                this.track.promise(d.promise, CacheLoader.http_load);
+
+                var req = HTTP.normalizeRequest(this.request.url);
+                Object.keys(this.request.headers).forEach(function (key) {
+                    req.headers[key] = String(_this.request.headers[key]).toLowerCase();
+                });
+
+                if (this.object.info && this.object.body && httpCache) {
+                    if (this.object.info.httpETag) {
+                        req.headers['if-none-match'] = this.object.info.httpETag;
+                    }
+                    if (this.object.info.httpModified) {
+                    }
+                }
+
+                req = HTTP.normalizeRequest(req);
+
+                if (this.track.logEnabled) {
+                    this.track.logger.inspect(this.request);
+                    this.track.logger.inspect(req);
+                }
+                this.track.start(CacheLoader.http_load);
+
+                d.notify('loading: ' + this.request.url);
+
+                var httpPromise = HTTP.request(req).then(function (res) {
+                    d.notify('status: ' + _this.request.url + ' ' + String(res.status));
+
+                    if (_this.track.logEnabled) {
+                        _this.track.logger.status(_this.request.url + ' ' + String(res.status));
+                        _this.track.logger.inspect(res.headers);
+                    }
+
+                    _this.object.response = new http.ResponseInfo();
+                    _this.object.response.status = res.status;
+                    _this.object.response.headers = res.headers;
+
+                    if (res.status < 200 || res.status >= 400) {
+                        _this.track.error(CacheLoader.http_load);
+                        throw new Error('unexpected status code: ' + res.status + ' on ' + _this.request.url);
+                    }
+                    if (res.status === 304) {
+                        if (!_this.object.body) {
+                            throw new Error('flow error: http 304 but no local content on ' + _this.request.url);
+                        }
+                        if (!_this.object.info) {
+                            throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
+                        }
+
+                        _this.track.event(CacheLoader.http_cache_hit);
+
+                        _this.updateInfo(res, _this.object.info.contentChecksum);
+
+                        return _this.cacheWrite(true);
+                    }
+
+                    if (!res.body) {
+                        throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
+                    }
+                    if (res.body && _this.object.info && httpCache) {
+                    }
+
+                    return res.body.read().then(function (buffer) {
+                        if (buffer.length === 0) {
+                        }
+                        var checksum = xm.sha1(buffer);
+
+                        if (_this.object.info) {
+                            if (_this.object.info.contentChecksum) {
+                            }
+                            _this.updateInfo(res, checksum);
+                        } else {
+                            _this.copyInfo(res, checksum);
+                        }
+                        _this.object.body = buffer;
+
+                        d.notify('complete: ' + _this.request.url + ' ' + String(res.status));
+                        _this.track.complete(CacheLoader.http_load);
+
+                        return _this.cacheWrite(false).progress(d.notify);
+                    });
+                }).then(function () {
+                    d.resolve();
+                }, d.reject).done();
+
+                return d.promise;
+            };
+
+            CacheLoader.prototype.cacheWrite = function (cacheWasFresh) {
+                var _this = this;
+                if (!this.cache.opts.cacheWrite) {
+                    this.track.skip(CacheLoader.cache_write);
+                    return Q().thenResolve();
+                }
+                var d = Q.defer();
+                this.track.promise(d.promise, CacheLoader.cache_write);
+
+                if (this.object.body.length === 0) {
+                    d.reject(new Error('wont write empty file to ' + this.object.bodyFile));
+                    return;
+                }
+
+                this.cache.infoKoder.encode(this.object.info).then(function (info) {
+                    if (info.length === 0) {
+                        d.reject(new Error('wont write empty info file ' + _this.object.infoFile));
+                        return;
+                    }
+
+                    var write = [];
+                    if (!cacheWasFresh) {
+                        if (_this.object.body.length === 0) {
+                            d.reject(new Error('wont write empty body file ' + _this.object.bodyFile));
+                            return;
+                        }
+
+                        write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
+                            return FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' });
+                        }).then(function () {
+                            _this.track.event(CacheLoader.cache_write, 'written file to cache');
+                        }));
+                    } else {
+                        _this.track.skip(CacheLoader.cache_write, 'cache was fresh');
+                    }
+
+                    write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
+                        return FS.write(_this.object.infoFile, info, { flags: 'wb' });
+                    }));
+
+                    return Q.all(write).fail(function (err) {
+                        _this.track.error(CacheLoader.cache_write, 'file write', err);
+
+                        throw err;
+                    }).then(function () {
+                        return Q.all([
+                            FS.stat(_this.object.bodyFile).then(function (stat) {
+                                if (stat.size === 0) {
+                                    _this.track.error(CacheLoader.cache_write, 'written zero body bytes');
+                                    d.notify(new Error('written zero body bytes'));
+                                }
+                            }),
+                            FS.stat(_this.object.infoFile).then(function (stat) {
+                                if (stat.size === 0) {
+                                    _this.track.error(CacheLoader.cache_write, 'written zero info bytes');
+                                    d.notify(new Error('written zero info bytes'));
+                                }
+                            })
+                        ]);
+                    });
+                }).done(d.resolve, d.reject);
+
+                return d.promise;
+            };
+
+            CacheLoader.prototype.cacheRemove = function () {
+                var _this = this;
+                if (!this.canUpdate()) {
+                    return Q.resolve(null);
+                }
+                return Q.all([
+                    this.removeFile(this.object.infoFile),
+                    this.removeFile(this.object.bodyFile)
+                ]).then(function () {
+                    _this.track.event(CacheLoader.cache_remove, _this.request.url);
+                });
+            };
+
+            CacheLoader.prototype.copyInfo = function (res, checksum) {
+                xm.assertVar(checksum, 'sha1', 'checksum');
+                var info = {};
+                this.object.info = info;
+                info.url = this.request.url;
+                info.key = this.request.key;
+                info.contentType = res.headers['content-type'];
+                info.cacheCreated = getISOString(Date.now());
+                info.cacheUpdated = getISOString(Date.now());
+                this.updateInfo(res, checksum);
+            };
+
+            CacheLoader.prototype.updateInfo = function (res, checksum) {
+                var info = this.object.info;
+                info.httpETag = (res.headers['etag'] || info.httpETag);
+                info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
+                info.cacheUpdated = getISOString(Date.now());
+                info.contentChecksum = checksum;
+            };
+
+            CacheLoader.prototype.readInfo = function () {
+                var _this = this;
+                var d = Q.defer();
+                this.track.promise(d.promise, CacheLoader.info_read);
+
+                FS.isFile(this.object.infoFile).then(function (isFile) {
+                    if (!isFile) {
+                        return null;
+                    }
+                    return FS.read(_this.object.infoFile, { flags: 'rb' }).then(function (buffer) {
+                        if (buffer.length === 0) {
+                            _this.track.event(CacheLoader.local_info_empty, 'empty info file');
+                            return null;
+                        }
+                        return _this.cache.infoKoder.decode(buffer).then(function (info) {
+                            xm.assert((info.url === _this.request.url), 'info.url {a} is not {e}', info.url, _this.request.url);
+                            xm.assert((info.key === _this.request.key), 'info.key {a} is not {e}', info.key, _this.request.key);
+
+                            _this.object.info = info;
+                        }).fail(function (err) {
+                            _this.track.event(CacheLoader.local_info_malformed, 'mlaformed info file');
+                            throw err;
+                        });
+                    });
+                }).then(function () {
+                    d.resolve();
+                }, d.reject).done();
+                return d.promise;
+            };
+
+            CacheLoader.prototype.removeFile = function (target) {
+                var _this = this;
+                var d = Q.defer();
+                FS.exists(target).then(function (exists) {
+                    if (!exists) {
+                        d.resolve();
+                        return;
+                    }
+                    return FS.isFile(target).then(function (isFile) {
+                        if (!isFile) {
+                            throw new Error('not a file: ' + target);
+                        }
+                        _this.track.event(CacheLoader.cache_remove, target);
+                        return FS.remove(target).then(function () {
+                            d.resolve();
+                        });
+                    });
+                }).fail(d.reject).done();
+
+                return d.promise;
+            };
+
+            CacheLoader.prototype.toString = function () {
+                return this.request ? this.request.url : '<no request>';
+            };
+            CacheLoader.get_object = 'get_object';
+            CacheLoader.info_read = 'info_read';
+            CacheLoader.cache_read = 'cache_read';
+            CacheLoader.cache_write = 'cache_write';
+            CacheLoader.cache_remove = 'cache_remove';
+            CacheLoader.http_load = 'http_load';
+            CacheLoader.local_info_bad = 'local_info_bad';
+            CacheLoader.local_info_empty = 'local_info_empty';
+            CacheLoader.local_info_malformed = 'local_info_malformed';
+            CacheLoader.local_body_bad = 'local_body_bad';
+            CacheLoader.local_body_empty = 'local_body_empty';
+            CacheLoader.local_cache_hit = 'local_cache_hit';
+            CacheLoader.http_cache_hit = 'http_cache_hit';
+            return CacheLoader;
+        })();
+        http.CacheLoader = CacheLoader;
+    })(xm.http || (xm.http = {}));
+    var http = xm.http;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var tv4 = require('tv4');
+    var FS = require('q-io/fs');
+    var HTTP = require('q-io/http');
+
+    require('date-utils');
+
+    (function (http) {
         var CacheObject = (function () {
             function CacheObject(request) {
                 this.request = request;
@@ -3829,37 +4243,13 @@ var xm;
         })();
         http.ResponseInfo = ResponseInfo;
 
-        var typeString = { 'type': 'string' };
-        var typeStringNull = {
-            anyOf: [
-                { 'type': 'string' },
-                { 'type': 'null' }
-            ]
-        };
-        var typeObject = { 'type': 'object' };
-
-        http.infoSchema = {
-            title: 'CacheInfo',
-            type: 'object',
-            required: null,
-            properties: {
-                url: typeString,
-                contentType: typeString,
-                httpETag: typeStringNull,
-                httpModified: typeStringNull,
-                cacheCreated: typeString,
-                contentChecksum: typeString
-            }
-        };
-        http.infoSchema.required = Object.keys(http.infoSchema.properties);
-
-        function assertInfo(value) {
-            var res = tv4.validateResult(value, http.infoSchema);
+        function assertSchema(value, schema) {
+            var res = tv4.validateResult(value, schema);
             if (!res.valid || res.missing.length > 0) {
                 throw res.error;
             }
         }
-        http.assertInfo = assertInfo;
+        http.assertSchema = assertSchema;
 
         (function (CacheMode) {
             CacheMode[CacheMode["forceLocal"] = 0] = "forceLocal";
@@ -3926,7 +4316,7 @@ var xm;
                     url: this.url,
                     headers: this.headers
                 });
-                xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'maxAge', 'locked']);
+                xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
 
                 xm.ObjectUtil.deepFreeze(this.headers);
                 return this;
@@ -3947,8 +4337,6 @@ var xm;
                 this.opts = (opts || new CacheOpts());
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
                 this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
-
-                this.infoKoder = new xm.JSONKoder(http.infoSchema);
             }
             HTTPCache.prototype.getObject = function (request) {
                 var _this = this;
@@ -3967,7 +4355,7 @@ var xm;
 
                         return job.getObject().progress(d.notify).then(d.resolve);
                     } else {
-                        job = new CacheLoader(_this, request);
+                        job = new http.CacheLoader(_this, request);
                         _this.jobs.set(request.key, job);
 
                         job.track.logEnabled = _this.track.logEnabled;
@@ -4024,8 +4412,15 @@ var xm;
                         _this.track.event('dir_exists', _this.storeDir);
                     });
                 }).then(function () {
+                    var p = path.join(path.dirname(xm.PackageJSON.find()), 'schema', 'cache-v1.json');
+                    return xm.FileUtil.readJSONPromise(p).then(function (infoSchema) {
+                        xm.assertVar(infoSchema, 'object', 'infoSchema');
+                        _this.infoSchema = infoSchema;
+                        _this.infoKoder = new xm.JSONKoder(_this.infoSchema);
+                    });
+                }).done(function () {
                     defer.resolve();
-                }, defer.reject).done();
+                }, defer.reject);
 
                 return defer.promise;
             };
@@ -4060,25 +4455,26 @@ var xm;
         http.SimpleValidator = SimpleValidator;
 
         var CacheValidator = (function () {
-            function CacheValidator() {
+            function CacheValidator(schema) {
+                this.schema = schema;
             }
             CacheValidator.prototype.assert = function (object) {
+                assertSchema(object.info, this.schema);
             };
-
-            CacheValidator.main = new CacheValidator();
             return CacheValidator;
         })();
         http.CacheValidator = CacheValidator;
+
         var CacheAgeValidator = (function () {
-            function CacheAgeValidator(maxAgeMili) {
+            function CacheAgeValidator(schema, maxAgeMili) {
+                this.schema = schema;
                 this.maxAgeMili = 0;
                 this.maxAgeMili = maxAgeMili;
             }
             CacheAgeValidator.prototype.assert = function (object) {
-                assertInfo(object.info);
-                xm.assertVar(object.info.httpModified, 'string', 'httpModified');
+                assertSchema(object.info, this.schema);
 
-                var date = new Date(object.info.httpModified);
+                var date = new Date(object.info.cacheUpdated);
                 if (xm.isNumber(this.maxAgeMili)) {
                     var compare = new Date();
                     xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
@@ -4097,388 +4493,9 @@ var xm;
                 xm.assertVar(object.info.contentChecksum, 'sha1', 'contentChecksum');
                 xm.assert(object.info.contentChecksum === object.bodyChecksum, 'checksum', object.info.contentChecksum, object.bodyChecksum);
             };
-
-            ChecksumValidator.main = new ChecksumValidator();
             return ChecksumValidator;
         })();
         http.ChecksumValidator = ChecksumValidator;
-
-        var CacheLoader = (function () {
-            function CacheLoader(cache, request) {
-                this.cache = cache;
-                this.request = request;
-
-                this.bodyCacheValidator = ChecksumValidator.main;
-
-                if (this.cache.opts.remoteRead) {
-                    this.infoCacheValidator = new CacheAgeValidator(request.maxAge);
-                } else {
-                    this.infoCacheValidator = new CacheValidator();
-                }
-
-                this.object = new CacheObject(request);
-                this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
-
-                this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
-                this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
-
-                this.track = new xm.EventLog('http_load', 'CacheLoader');
-
-                xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
-            }
-            CacheLoader.prototype.canUpdate = function () {
-                if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
-                    return true;
-                }
-                return false;
-            };
-
-            CacheLoader.prototype.getObject = function () {
-                var _this = this;
-                if (this._defer) {
-                    this.track.skip(CacheLoader.get_object);
-                    return this._defer.promise;
-                }
-
-                this._defer = Q.defer();
-                this.track.promise(this._defer.promise, CacheLoader.get_object);
-
-                var cleanup = function () {
-                    _this._defer = null;
-                };
-
-                this.cacheRead().progress(this._defer.notify).then(function () {
-                    if (_this.object.body && !_this.request.checkHttp) {
-                        _this._defer.notify('using local cache: ' + _this.request.url);
-
-                        _this._defer.resolve(_this.object);
-                        return;
-                    }
-
-                    return _this.httpLoad(true).progress(_this._defer.notify).then(function () {
-                        if (!xm.isValid(_this.object.body)) {
-                            throw new Error('no result body: ' + _this.object.request.url);
-                        }
-                        _this._defer.notify('fetched remote: ' + _this.request.url);
-                        _this._defer.resolve(_this.object);
-                    });
-                }).fail(function (err) {
-                    _this._defer.reject(err);
-                }).finally(function () {
-                    cleanup();
-                }).done();
-
-                return this._defer.promise;
-            };
-
-            CacheLoader.prototype.cacheRead = function () {
-                var _this = this;
-                if (!this.cache.opts.cacheRead) {
-                    this.track.skip(CacheLoader.cache_read);
-                    return Q().thenResolve();
-                }
-                var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.cache_read);
-
-                this.readInfo().progress(d.notify).then(function () {
-                    if (!_this.object.info) {
-                        throw new Error('no or invalid info object');
-                    }
-                    try  {
-                        _this.infoCacheValidator.assert(_this.object);
-                    } catch (err) {
-                        _this.track.event(CacheLoader.local_info_bad, 'cache-info unsatisfactory', err);
-                        d.notify('cache info unsatisfactory: ' + err);
-
-                        _this.object.info = null;
-                        throw err;
-                    }
-
-                    return FS.read(_this.object.bodyFile, { flags: 'rb' }).then(function (buffer) {
-                        if (buffer.length === 0) {
-                            throw new Error('empty body file');
-                        }
-                        _this.object.bodyChecksum = xm.sha1(buffer);
-                        _this.object.body = buffer;
-                    });
-                }).then(function () {
-                    try  {
-                        _this.bodyCacheValidator.assert(_this.object);
-
-                        _this.track.event(CacheLoader.local_cache_hit);
-                        d.resolve();
-                        return;
-                    } catch (err) {
-                        _this.track.error(CacheLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
-                        _this.track.logger.error('cache invalid');
-                        _this.track.logger.inspect(err);
-                        _this.object.body = null;
-                        _this.object.bodyChecksum = null;
-                        throw err;
-                    }
-                }).fail(function (err) {
-                    return _this.cacheRemove().then(d.resolve, d.reject, d.notify);
-                }).done();
-
-                return d.promise;
-            };
-
-            CacheLoader.prototype.httpLoad = function (httpCache) {
-                if (typeof httpCache === "undefined") { httpCache = true; }
-                var _this = this;
-                if (!this.cache.opts.remoteRead) {
-                    this.track.skip(CacheLoader.http_load);
-                    return Q().thenResolve();
-                }
-                var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.http_load);
-
-                var req = HTTP.normalizeRequest(this.request.url);
-                Object.keys(this.request.headers).forEach(function (key) {
-                    req.headers[key] = String(_this.request.headers[key]).toLowerCase();
-                });
-
-                if (this.object.info && this.object.body && httpCache) {
-                    if (this.object.info.httpETag) {
-                        req.headers['if-none-match'] = this.object.info.httpETag;
-                    }
-                    if (this.object.info.httpModified) {
-                    }
-                }
-
-                req = HTTP.normalizeRequest(req);
-
-                if (this.track.logEnabled) {
-                    this.track.logger.inspect(this.request);
-                    this.track.logger.inspect(req);
-                }
-                this.track.start(CacheLoader.http_load);
-
-                d.notify('loading: ' + this.request.url);
-
-                var httpPromise = HTTP.request(req).then(function (res) {
-                    d.notify('status: ' + _this.request.url + ' ' + String(res.status));
-
-                    if (_this.track.logEnabled) {
-                        _this.track.logger.status(_this.request.url + ' ' + String(res.status));
-                        _this.track.logger.inspect(res.headers);
-                    }
-
-                    _this.object.response = new ResponseInfo();
-                    _this.object.response.status = res.status;
-                    _this.object.response.headers = res.headers;
-
-                    if (res.status < 200 || res.status >= 400) {
-                        _this.track.error(CacheLoader.http_load);
-                        throw new Error('unexpected status code: ' + res.status + ' on ' + _this.request.url);
-                    }
-                    if (res.status === 304) {
-                        if (!_this.object.body) {
-                            throw new Error('flow error: http 304 but no local content on ' + _this.request.url);
-                        }
-                        if (!_this.object.info) {
-                            throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
-                        }
-
-                        _this.track.event(CacheLoader.http_cache_hit);
-
-                        return _this.cacheWrite(true);
-                    }
-
-                    if (!res.body) {
-                        throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
-                    }
-                    if (res.body && _this.object.info && httpCache) {
-                    }
-
-                    return res.body.read().then(function (buffer) {
-                        if (buffer.length === 0) {
-                        }
-                        var checksum = xm.sha1(buffer);
-
-                        if (_this.object.info) {
-                            if (_this.object.info.contentChecksum) {
-                            }
-                            _this.updateInfo(res, checksum);
-                        } else {
-                            _this.copyInfo(res, checksum);
-                        }
-                        _this.object.body = buffer;
-
-                        d.notify('complete: ' + _this.request.url + ' ' + String(res.status));
-                        _this.track.complete(CacheLoader.http_load);
-
-                        return _this.cacheWrite(false).progress(d.notify);
-                    });
-                }).then(function () {
-                    d.resolve();
-                }, d.reject).done();
-
-                return d.promise;
-            };
-
-            CacheLoader.prototype.cacheWrite = function (cacheWasFresh) {
-                var _this = this;
-                if (!this.cache.opts.cacheWrite) {
-                    this.track.skip(CacheLoader.cache_write);
-                    return Q().thenResolve();
-                }
-                var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.cache_write);
-
-                if (this.object.body.length === 0) {
-                    d.reject(new Error('wont write empty file to ' + this.object.bodyFile));
-                    return;
-                }
-
-                this.cache.infoKoder.encode(this.object.info).then(function (info) {
-                    if (info.length === 0) {
-                        d.reject(new Error('wont write empty info file ' + _this.object.infoFile));
-                        return;
-                    }
-
-                    var write = [];
-                    if (!cacheWasFresh) {
-                        if (_this.object.body.length === 0) {
-                            d.reject(new Error('wont write empty body file ' + _this.object.bodyFile));
-                            return;
-                        }
-                        write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
-                            return FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' });
-                        }).then(function () {
-                            _this.track.event(CacheLoader.cache_write, 'written file to cache');
-                        }));
-                    } else {
-                        _this.track.skip(CacheLoader.cache_write, 'cache was fresh');
-                    }
-                    write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
-                        return FS.write(_this.object.infoFile, info, { flags: 'wb' });
-                    }));
-
-                    return Q.all(write).fail(function (err) {
-                        _this.track.error(CacheLoader.cache_write, 'file write', err);
-
-                        throw err;
-                    }).then(function () {
-                        return Q.all([
-                            FS.stat(_this.object.bodyFile).then(function (stat) {
-                                if (stat.size === 0) {
-                                    _this.track.error(CacheLoader.cache_write, 'written zero body bytes');
-                                    d.notify(new Error('written zero body bytes'));
-                                }
-                            }),
-                            FS.stat(_this.object.infoFile).then(function (stat) {
-                                if (stat.size === 0) {
-                                    _this.track.error(CacheLoader.cache_write, 'written zero info bytes');
-                                    d.notify(new Error('written zero info bytes'));
-                                }
-                            })
-                        ]);
-                    });
-                }).then(d.resolve, d.reject).done();
-
-                return d.promise;
-            };
-
-            CacheLoader.prototype.cacheRemove = function () {
-                var _this = this;
-                if (!this.canUpdate()) {
-                    return Q.resolve(null);
-                }
-                return Q.all([
-                    this.removeFile(this.object.infoFile),
-                    this.removeFile(this.object.bodyFile)
-                ]).then(function () {
-                    _this.track.event(CacheLoader.cache_remove, _this.request.url);
-                });
-            };
-
-            CacheLoader.prototype.copyInfo = function (res, checksum) {
-                var info = {};
-                this.object.info = info;
-                info.url = this.request.url;
-                info.key = this.request.key;
-                info.cacheCreated = getISOString(Date.now());
-                this.updateInfo(res, checksum);
-            };
-
-            CacheLoader.prototype.updateInfo = function (res, checksum) {
-                var info = this.object.info;
-                info.contentType = res.headers['content-type'];
-                info.httpETag = res.headers['etag'] || null;
-                info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
-                info.contentChecksum = checksum;
-            };
-
-            CacheLoader.prototype.readInfo = function () {
-                var _this = this;
-                var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.info_read);
-
-                FS.isFile(this.object.infoFile).then(function (isFile) {
-                    if (!isFile) {
-                        return null;
-                    }
-                    return FS.read(_this.object.infoFile, { flags: 'rb' }).then(function (buffer) {
-                        if (buffer.length === 0) {
-                            _this.track.event(CacheLoader.local_info_empty, 'empty info file');
-                            return null;
-                        }
-                        return _this.cache.infoKoder.decode(buffer).then(function (info) {
-                            xm.assert((info.url === _this.request.url), 'info.url {a} is not {e}', info.url, _this.request.url);
-                            _this.object.info = info;
-                        }).fail(function (err) {
-                            _this.track.event(CacheLoader.local_info_malformed, 'mlaformed info file');
-                            throw err;
-                        });
-                    });
-                }).then(function () {
-                    d.resolve();
-                }, d.reject).done();
-                return d.promise;
-            };
-
-            CacheLoader.prototype.removeFile = function (target) {
-                var _this = this;
-                var d = Q.defer();
-                FS.exists(target).then(function (exists) {
-                    if (!exists) {
-                        d.resolve();
-                        return;
-                    }
-                    return FS.isFile(target).then(function (isFile) {
-                        if (!isFile) {
-                            throw new Error('not a file: ' + target);
-                        }
-                        _this.track.event(CacheLoader.cache_remove, target);
-                        return FS.remove(target).then(function () {
-                            d.resolve();
-                        });
-                    });
-                }).fail(d.reject).done();
-
-                return d.promise;
-            };
-
-            CacheLoader.prototype.toString = function () {
-                return this.request ? this.request.url : '<no request>';
-            };
-            CacheLoader.get_object = 'get_object';
-            CacheLoader.info_read = 'info_read';
-            CacheLoader.cache_read = 'cache_read';
-            CacheLoader.cache_write = 'cache_write';
-            CacheLoader.cache_remove = 'cache_remove';
-            CacheLoader.http_load = 'http_load';
-            CacheLoader.local_info_bad = 'local_info_bad';
-            CacheLoader.local_info_empty = 'local_info_empty';
-            CacheLoader.local_info_malformed = 'local_info_malformed';
-            CacheLoader.local_body_bad = 'local_body_bad';
-            CacheLoader.local_body_empty = 'local_body_empty';
-            CacheLoader.local_cache_hit = 'local_cache_hit';
-            CacheLoader.http_cache_hit = 'http_cache_hit';
-            return CacheLoader;
-        })();
-        http.CacheLoader = CacheLoader;
     })(xm.http || (xm.http = {}));
     var http = xm.http;
 })(xm || (xm = {}));
@@ -4672,8 +4689,11 @@ var git;
             var d = Q.defer();
             this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
-            if (!xm.isNumber(request.maxAge)) {
-                request.maxAge = 30 * 60 * 1000;
+            if (!xm.isNumber(request.localMaxAge)) {
+                request.localMaxAge = 30 * 60 * 1000;
+            }
+            if (!xm.isNumber(request.httpInterval)) {
+                request.httpInterval = 1 * 60 * 1000;
             }
             this.copyHeadersTo(request.headers);
 
@@ -4767,7 +4787,8 @@ var git;
             var headers = {};
 
             var request = new xm.http.Request(url, headers);
-            request.maxAge = 30 * 24 * 3600 * 1000;
+            request.localMaxAge = 30 * 24 * 3600 * 1000;
+            request.httpInterval = 24 * 3600 * 1000;
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
@@ -7912,7 +7933,7 @@ var tsd;
                     } else if (info.remaining < 15) {
                         this.output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
                     } else if (info.remaining < info.limit - 15) {
-                        this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
+                        this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').accent(info.getResetString());
                     } else {
                         this.output.success('remaining ' + info.remaining).span(' of ').span(info.limit);
                     }

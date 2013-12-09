@@ -2,7 +2,7 @@
 ///<reference path="../../xm/ObjectUtil.ts" />
 ///<reference path="../../xm/Logger.ts" />
 ///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../../xm/io/HTTPCache.ts" />
+///<reference path="../../xm/http/HTTPCache.ts" />
 ///<reference path="../GithubRepo.ts" />
 
 module git {

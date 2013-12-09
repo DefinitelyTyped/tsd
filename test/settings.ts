@@ -1,7 +1,7 @@
 ///<reference path="helper.ts" />
 ///<reference path="../src/xm/ObjectUtil.ts" />
 ///<reference path="../src/xm/Logger.ts" />
-///<reference path="../src/xm/io/HTTPCache.ts" />
+///<reference path="../src/xm/http/HTTPCache.ts" />
 
 module helper {
 	'use strict';

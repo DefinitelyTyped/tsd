@@ -54,7 +54,8 @@ module git {
 			var headers = {};
 
 			var request = new xm.http.Request(url, headers);
-			request.maxAge = 30 * 24 * 3600 * 1000;
+			request.localMaxAge = 30 * 24 * 3600 * 1000;
+			request.httpInterval = 24 * 3600 * 1000;
 			request.lock();
 
 			this.cache.getObject(request).progress(d.notify).then((object:xm.http.CacheObject) => {

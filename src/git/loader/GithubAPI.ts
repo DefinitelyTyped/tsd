@@ -1,7 +1,7 @@
 ///<reference path="../../_ref.d.ts" />
 ///<reference path="GithubLoader.ts" />
 ///<reference path="../model/GitRateInfo.ts" />
-///<reference path="../../xm/io/HTTPCache.ts" />
+///<reference path="../../xm/http/HTTPCache.ts" />
 
 module git {
 	'use strict';
@@ -88,8 +88,11 @@ module git {
 			var d:Q.Deferred<T> = Q.defer();
 			this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
-			if (!xm.isNumber(request.maxAge)) {
-				request.maxAge = 30 * 60 * 1000;
+			if (!xm.isNumber(request.localMaxAge)) {
+				request.localMaxAge = 30 * 60 * 1000;
+			}
+			if (!xm.isNumber(request.httpInterval)) {
+				request.httpInterval = 1 * 60 * 1000;
 			}
 			this.copyHeadersTo(request.headers);
 

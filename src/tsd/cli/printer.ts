@@ -181,7 +181,7 @@ module tsd {
 						this.output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
 					}
 					else if (info.remaining < info.limit - 15) {
-						this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' ->').accent(info.getResetString());
+						this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').accent(info.getResetString());
 					}
 					else {
 						this.output.success('remaining ' + info.remaining).span(' of ').span(info.limit);

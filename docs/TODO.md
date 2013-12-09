@@ -230,6 +230,7 @@ Publishing
 
 Dependencies
 
+* :cl:	Swap `optimist` for `minimist`.
 * :m:	Consider dropping `underscore`?
 * :m:	Update `Q` with generics
 * :o:	Sweep recent xm `package changes for new tests 
