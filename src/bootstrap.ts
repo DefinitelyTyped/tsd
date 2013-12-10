@@ -6,6 +6,9 @@ module tsd {
 
 	require('source-map-support').install();
 
+	// kill warning
+	require('bufferstream').fn.warn = false;
+
 	// future is now
 	require('es6-shim');
 

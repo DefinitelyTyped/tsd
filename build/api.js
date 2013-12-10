@@ -3748,6 +3748,7 @@ var xm;
         };
 
         JSONKoder.prototype.assert = function (value) {
+            xm.assert(xm.isJSONValue(value), 'is not a JSON value {a}', value);
             if (this.schema) {
                 var res = tv4.validateResult(value, this.schema);
                 if (!res.valid || res.missing.length > 0) {
@@ -3783,8 +3784,11 @@ var xm;
     var path = require('path');
     var tv4 = require('tv4');
     var FS = require('q-io/fs');
-    var HTTP = require('q-io/http');
-    var memory = require('memory-streams');
+
+    var es = require('event-stream');
+    var zlib = require('zlib');
+    var request = require('request');
+    var BufferStream = require('bufferstream');
 
     require('date-utils');
 
@@ -3813,8 +3817,8 @@ var xm;
     }
 
     (function (http) {
-        var CacheLoader = (function () {
-            function CacheLoader(cache, request) {
+        var CacheStreamLoader = (function () {
+            function CacheStreamLoader(cache, request) {
                 this.cache = cache;
                 this.request = request;
 
@@ -3832,26 +3836,26 @@ var xm;
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
-                this.track = new xm.EventLog('http_load', 'CacheLoader');
+                this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
                 xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
             }
-            CacheLoader.prototype.canUpdate = function () {
+            CacheStreamLoader.prototype.canUpdate = function () {
                 if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
                     return true;
                 }
                 return false;
             };
 
-            CacheLoader.prototype.getObject = function () {
+            CacheStreamLoader.prototype.getObject = function () {
                 var _this = this;
                 if (this._defer) {
-                    this.track.skip(CacheLoader.get_object);
+                    this.track.skip(CacheStreamLoader.get_object);
                     return this._defer.promise;
                 }
 
                 this._defer = Q.defer();
-                this.track.promise(this._defer.promise, CacheLoader.get_object);
+                this.track.promise(this._defer.promise, CacheStreamLoader.get_object);
 
                 var cleanup = function () {
                     _this._defer = null;
@@ -3891,14 +3895,14 @@ var xm;
                 return this._defer.promise;
             };
 
-            CacheLoader.prototype.cacheRead = function () {
+            CacheStreamLoader.prototype.cacheRead = function () {
                 var _this = this;
                 if (!this.cache.opts.cacheRead) {
-                    this.track.skip(CacheLoader.cache_read);
+                    this.track.skip(CacheStreamLoader.cache_read);
                     return Q().thenResolve();
                 }
                 var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.cache_read);
+                this.track.promise(d.promise, CacheStreamLoader.cache_read);
 
                 this.readInfo().progress(d.notify).then(function () {
                     if (!_this.object.info) {
@@ -3907,7 +3911,7 @@ var xm;
                     try  {
                         _this.infoCacheValidator.assert(_this.object);
                     } catch (err) {
-                        _this.track.event(CacheLoader.local_info_bad, 'cache-info unsatisfactory', err);
+                        _this.track.event(CacheStreamLoader.local_info_bad, 'cache-info unsatisfactory', err);
                         d.notify('cache info unsatisfactory: ' + err);
 
                         throw err;
@@ -3924,11 +3928,11 @@ var xm;
                     try  {
                         _this.bodyCacheValidator.assert(_this.object);
 
-                        _this.track.event(CacheLoader.local_cache_hit);
+                        _this.track.event(CacheStreamLoader.local_cache_hit);
                         d.resolve();
                         return;
                     } catch (err) {
-                        _this.track.error(CacheLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
+                        _this.track.error(CacheStreamLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
                         _this.track.logger.error('cache invalid');
                         _this.track.logger.inspect(err);
                         throw err;
@@ -3944,19 +3948,22 @@ var xm;
                 return d.promise;
             };
 
-            CacheLoader.prototype.httpLoad = function (httpCache) {
+            CacheStreamLoader.prototype.httpLoad = function (httpCache) {
                 if (typeof httpCache === "undefined") { httpCache = true; }
                 var _this = this;
                 if (!this.cache.opts.remoteRead) {
-                    this.track.skip(CacheLoader.http_load);
+                    this.track.skip(CacheStreamLoader.http_load);
                     return Q().thenResolve();
                 }
                 var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.http_load);
+                this.track.promise(d.promise, CacheStreamLoader.http_load);
 
-                var req = HTTP.normalizeRequest(this.request.url);
+                var req = {
+                    url: this.request.url,
+                    headers: {}
+                };
                 Object.keys(this.request.headers).forEach(function (key) {
-                    req.headers[key] = String(_this.request.headers[key]).toLowerCase();
+                    req.headers[key] = String(_this.request.headers[key]);
                 });
 
                 if (this.object.info && this.object.body && httpCache) {
@@ -3964,60 +3971,80 @@ var xm;
                         req.headers['if-none-match'] = this.object.info.httpETag;
                     }
                     if (this.object.info.httpModified) {
+                        req.headers['if-modified-since'] = new Date(this.object.info.httpModified).toUTCString();
                     }
                 }
 
-                req = HTTP.normalizeRequest(req);
+                req.headers['accept-encoding'] = 'gzip, deflate';
 
+                this.track.start(CacheStreamLoader.http_load);
                 if (this.track.logEnabled) {
                     this.track.logger.inspect(this.request);
                     this.track.logger.inspect(req);
                 }
-                this.track.start(CacheLoader.http_load);
-
                 d.notify('loading: ' + this.request.url);
 
-                var httpPromise = HTTP.request(req).then(function (res) {
-                    d.notify('status: ' + _this.request.url + ' ' + String(res.status));
+                var writer = new BufferStream({ size: 'flexible' });
+
+                var pause = es.pause();
+                pause.pause();
+
+                request.get(req).on('response', function (res) {
+                    d.notify('status: ' + String(res.statusCode) + ' ' + _this.request.url);
 
                     if (_this.track.logEnabled) {
-                        _this.track.logger.status(_this.request.url + ' ' + String(res.status));
+                        _this.track.logger.status(String(res.statusCode) + ' ' + _this.request.url);
                         _this.track.logger.inspect(res.headers);
                     }
 
                     _this.object.response = new http.ResponseInfo();
-                    _this.object.response.status = res.status;
+                    _this.object.response.status = res.statusCode;
                     _this.object.response.headers = res.headers;
 
-                    if (res.status < 200 || res.status >= 400) {
-                        _this.track.error(CacheLoader.http_load);
-                        throw new Error('unexpected status code: ' + res.status + ' on ' + _this.request.url);
+                    if (res.statusCode < 200 || res.statusCode >= 400) {
+                        _this.track.error(CacheStreamLoader.http_load);
+                        d.reject(new Error('unexpected status code: ' + res.statusCode + ' on ' + _this.request.url));
+                        return;
                     }
-                    if (res.status === 304) {
+                    if (res.statusCode === 304) {
                         if (!_this.object.body) {
-                            throw new Error('flow error: http 304 but no local content on ' + _this.request.url);
+                            d.reject(new Error('flow error: http 304 but no local content on ' + _this.request.url));
+                            return;
                         }
                         if (!_this.object.info) {
-                            throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
+                            d.reject(new Error('flow error: http 304 but no local info on ' + _this.request.url));
+                            return;
                         }
 
-                        _this.track.event(CacheLoader.http_cache_hit);
+                        _this.track.event(CacheStreamLoader.http_cache_hit);
 
                         _this.updateInfo(res, _this.object.info.contentChecksum);
 
-                        return _this.cacheWrite(true);
+                        _this.cacheWrite(true).done(d.resolve, d.reject);
+                        return;
                     }
 
-                    if (!res.body) {
-                        throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
-                    }
-                    if (res.body && _this.object.info && httpCache) {
+                    switch (res.headers['content-encoding']) {
+                        case 'gzip':
+                            pause.pipe(zlib.createGunzip()).pipe(writer);
+                            break;
+                        case 'deflate':
+                            pause.pipe(zlib.createInflate()).pipe(writer);
+                            break;
+                        default:
+                            pause.pipe(writer);
+                            break;
                     }
 
-                    return res.body.read().then(function (buffer) {
-                        if (buffer.length === 0) {
+                    writer.on('end', function () {
+                        var body = writer.getBuffer();
+                        if (!body) {
+                            throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
                         }
-                        var checksum = xm.sha1(buffer);
+                        if (body.length === 0) {
+                            throw new Error('loaded zero bytes ' + _this.request.url);
+                        }
+                        var checksum = xm.sha1(body);
 
                         if (_this.object.info) {
                             if (_this.object.info.contentChecksum) {
@@ -4026,28 +4053,31 @@ var xm;
                         } else {
                             _this.copyInfo(res, checksum);
                         }
-                        _this.object.body = buffer;
+                        _this.object.body = body;
 
-                        d.notify('complete: ' + _this.request.url + ' ' + String(res.status));
-                        _this.track.complete(CacheLoader.http_load);
+                        d.notify('complete: ' + _this.request.url + ' ' + String(res.statusCode));
+                        _this.track.complete(CacheStreamLoader.http_load);
 
-                        return _this.cacheWrite(false).progress(d.notify);
+                        _this.cacheWrite(false).done(d.resolve, d.reject, d.notify);
                     });
-                }).then(function () {
-                    d.resolve();
-                }, d.reject).done();
+
+                    pause.resume();
+                }).pipe(pause).on('error', function (err) {
+                    _this.track.complete(CacheStreamLoader.http_error, 'request error');
+                    d.reject(err);
+                });
 
                 return d.promise;
             };
 
-            CacheLoader.prototype.cacheWrite = function (cacheWasFresh) {
+            CacheStreamLoader.prototype.cacheWrite = function (cacheWasFresh) {
                 var _this = this;
                 if (!this.cache.opts.cacheWrite) {
-                    this.track.skip(CacheLoader.cache_write);
+                    this.track.skip(CacheStreamLoader.cache_write);
                     return Q().thenResolve();
                 }
                 var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.cache_write);
+                this.track.promise(d.promise, CacheStreamLoader.cache_write);
 
                 if (this.object.body.length === 0) {
                     d.reject(new Error('wont write empty file to ' + this.object.bodyFile));
@@ -4070,10 +4100,10 @@ var xm;
                         write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
                             return FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' });
                         }).then(function () {
-                            _this.track.event(CacheLoader.cache_write, 'written file to cache');
+                            _this.track.event(CacheStreamLoader.cache_write, 'written file to cache');
                         }));
                     } else {
-                        _this.track.skip(CacheLoader.cache_write, 'cache was fresh');
+                        _this.track.skip(CacheStreamLoader.cache_write, 'cache was fresh');
                     }
 
                     write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
@@ -4081,20 +4111,20 @@ var xm;
                     }));
 
                     return Q.all(write).fail(function (err) {
-                        _this.track.error(CacheLoader.cache_write, 'file write', err);
+                        _this.track.error(CacheStreamLoader.cache_write, 'file write', err);
 
                         throw err;
                     }).then(function () {
                         return Q.all([
                             FS.stat(_this.object.bodyFile).then(function (stat) {
                                 if (stat.size === 0) {
-                                    _this.track.error(CacheLoader.cache_write, 'written zero body bytes');
+                                    _this.track.error(CacheStreamLoader.cache_write, 'written zero body bytes');
                                     d.notify(new Error('written zero body bytes'));
                                 }
                             }),
                             FS.stat(_this.object.infoFile).then(function (stat) {
                                 if (stat.size === 0) {
-                                    _this.track.error(CacheLoader.cache_write, 'written zero info bytes');
+                                    _this.track.error(CacheStreamLoader.cache_write, 'written zero info bytes');
                                     d.notify(new Error('written zero info bytes'));
                                 }
                             })
@@ -4105,7 +4135,7 @@ var xm;
                 return d.promise;
             };
 
-            CacheLoader.prototype.cacheRemove = function () {
+            CacheStreamLoader.prototype.cacheRemove = function () {
                 var _this = this;
                 if (!this.canUpdate()) {
                     return Q.resolve(null);
@@ -4114,11 +4144,11 @@ var xm;
                     this.removeFile(this.object.infoFile),
                     this.removeFile(this.object.bodyFile)
                 ]).then(function () {
-                    _this.track.event(CacheLoader.cache_remove, _this.request.url);
+                    _this.track.event(CacheStreamLoader.cache_remove, _this.request.url);
                 });
             };
 
-            CacheLoader.prototype.copyInfo = function (res, checksum) {
+            CacheStreamLoader.prototype.copyInfo = function (res, checksum) {
                 xm.assertVar(checksum, 'sha1', 'checksum');
                 var info = {};
                 this.object.info = info;
@@ -4130,7 +4160,7 @@ var xm;
                 this.updateInfo(res, checksum);
             };
 
-            CacheLoader.prototype.updateInfo = function (res, checksum) {
+            CacheStreamLoader.prototype.updateInfo = function (res, checksum) {
                 var info = this.object.info;
                 info.httpETag = (res.headers['etag'] || info.httpETag);
                 info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
@@ -4138,10 +4168,10 @@ var xm;
                 info.contentChecksum = checksum;
             };
 
-            CacheLoader.prototype.readInfo = function () {
+            CacheStreamLoader.prototype.readInfo = function () {
                 var _this = this;
                 var d = Q.defer();
-                this.track.promise(d.promise, CacheLoader.info_read);
+                this.track.promise(d.promise, CacheStreamLoader.info_read);
 
                 FS.isFile(this.object.infoFile).then(function (isFile) {
                     if (!isFile) {
@@ -4149,7 +4179,7 @@ var xm;
                     }
                     return FS.read(_this.object.infoFile, { flags: 'rb' }).then(function (buffer) {
                         if (buffer.length === 0) {
-                            _this.track.event(CacheLoader.local_info_empty, 'empty info file');
+                            _this.track.event(CacheStreamLoader.local_info_empty, 'empty info file');
                             return null;
                         }
                         return _this.cache.infoKoder.decode(buffer).then(function (info) {
@@ -4158,7 +4188,7 @@ var xm;
 
                             _this.object.info = info;
                         }).fail(function (err) {
-                            _this.track.event(CacheLoader.local_info_malformed, 'mlaformed info file');
+                            _this.track.event(CacheStreamLoader.local_info_malformed, 'mlaformed info file');
                             throw err;
                         });
                     });
@@ -4168,7 +4198,7 @@ var xm;
                 return d.promise;
             };
 
-            CacheLoader.prototype.removeFile = function (target) {
+            CacheStreamLoader.prototype.removeFile = function (target) {
                 var _this = this;
                 var d = Q.defer();
                 FS.exists(target).then(function (exists) {
@@ -4180,7 +4210,7 @@ var xm;
                         if (!isFile) {
                             throw new Error('not a file: ' + target);
                         }
-                        _this.track.event(CacheLoader.cache_remove, target);
+                        _this.track.event(CacheStreamLoader.cache_remove, target);
                         return FS.remove(target).then(function () {
                             d.resolve();
                         });
@@ -4190,25 +4220,26 @@ var xm;
                 return d.promise;
             };
 
-            CacheLoader.prototype.toString = function () {
+            CacheStreamLoader.prototype.toString = function () {
                 return this.request ? this.request.url : '<no request>';
             };
-            CacheLoader.get_object = 'get_object';
-            CacheLoader.info_read = 'info_read';
-            CacheLoader.cache_read = 'cache_read';
-            CacheLoader.cache_write = 'cache_write';
-            CacheLoader.cache_remove = 'cache_remove';
-            CacheLoader.http_load = 'http_load';
-            CacheLoader.local_info_bad = 'local_info_bad';
-            CacheLoader.local_info_empty = 'local_info_empty';
-            CacheLoader.local_info_malformed = 'local_info_malformed';
-            CacheLoader.local_body_bad = 'local_body_bad';
-            CacheLoader.local_body_empty = 'local_body_empty';
-            CacheLoader.local_cache_hit = 'local_cache_hit';
-            CacheLoader.http_cache_hit = 'http_cache_hit';
-            return CacheLoader;
+            CacheStreamLoader.get_object = 'get_object';
+            CacheStreamLoader.info_read = 'info_read';
+            CacheStreamLoader.cache_read = 'cache_read';
+            CacheStreamLoader.cache_write = 'cache_write';
+            CacheStreamLoader.cache_remove = 'cache_remove';
+            CacheStreamLoader.http_load = 'http_load';
+            CacheStreamLoader.http_error = 'http_error';
+            CacheStreamLoader.local_info_bad = 'local_info_bad';
+            CacheStreamLoader.local_info_empty = 'local_info_empty';
+            CacheStreamLoader.local_info_malformed = 'local_info_malformed';
+            CacheStreamLoader.local_body_bad = 'local_body_bad';
+            CacheStreamLoader.local_body_empty = 'local_body_empty';
+            CacheStreamLoader.local_cache_hit = 'local_cache_hit';
+            CacheStreamLoader.http_cache_hit = 'http_cache_hit';
+            return CacheStreamLoader;
         })();
-        http.CacheLoader = CacheLoader;
+        http.CacheStreamLoader = CacheStreamLoader;
     })(xm.http || (xm.http = {}));
     var http = xm.http;
 })(xm || (xm = {}));
@@ -4355,7 +4386,7 @@ var xm;
 
                         return job.getObject().progress(d.notify).then(d.resolve);
                     } else {
-                        job = new http.CacheLoader(_this, request);
+                        job = new http.CacheStreamLoader(_this, request);
                         _this.jobs.set(request.key, job);
 
                         job.track.logEnabled = _this.track.logEnabled;
@@ -6894,7 +6925,7 @@ var tsd;
             options = options || tsd.Options.main;
 
             var p = this.core.selector.select(query, options);
-            this.track.promise(p, 'config_select');
+            this.track.promise(p, 'select');
             return p;
         };
 
@@ -8651,6 +8682,8 @@ var tsd;
     Q.longStackSupport = true;
 
     require('source-map-support').install();
+
+    require('bufferstream').fn.warn = false;
 
     require('es6-shim');
 

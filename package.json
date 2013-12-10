@@ -1,6 +1,6 @@
 {
   "name": "tsd",
-  "version": "0.5.2-alpha.7",
+  "version": "0.5.2-alpha.8",
   "description": "TypeScript definition package manager.",
   "keywords": [
     "typescript",
@@ -61,8 +61,10 @@
     "ministyle": "~0.1.2",
     "miniwrite": "~0.1.2",
     "es6-shim": "~0.9.1",
-    "tmp": "0.0.23",
-    "request": "~2.29.0"
+    "request": "~2.29.0",
+    "event-stream": "~3.0.18",
+    "memorystream": "~0.2.0",
+    "bufferstream": "~0.6.2"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

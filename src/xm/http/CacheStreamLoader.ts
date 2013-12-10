@@ -22,7 +22,11 @@ module xm {
 	var path = require('path');
 	var tv4:TV4 = require('tv4');
 	var FS:typeof QioFS = require('q-io/fs');
-	var HTTP:typeof QioHTTP = require('q-io/http');
+
+	var es = require('event-stream');
+	var zlib = require('zlib');
+	var request = require('request');
+	var BufferStream = require('bufferstream');
 
 	require('date-utils');
 
@@ -72,6 +76,7 @@ module xm {
 			static cache_write = 'cache_write';
 			static cache_remove = 'cache_remove';
 			static http_load = 'http_load';
+			static http_error = 'http_error';
 			static local_info_bad = 'local_info_bad';
 			static local_info_empty = 'local_info_empty';
 			static local_info_malformed = 'local_info_malformed';
@@ -194,7 +199,6 @@ module xm {
 						// either bad or just stale
 						this.track.event(CacheStreamLoader.local_info_bad, 'cache-info unsatisfactory', err);
 						d.notify('cache info unsatisfactory: ' + err);
-						//this.track.logger.inspect(err);
 						//TODO rework this to allow to keep stale content if request fails (see note above class)
 						throw err;
 					}
@@ -244,9 +248,12 @@ module xm {
 				this.track.promise(d.promise, CacheStreamLoader.http_load);
 
 				// assemble request
-				var req = HTTP.normalizeRequest(this.request.url);
+				var req = {
+					url: this.request.url,
+					headers: {},
+				};
 				Object.keys(this.request.headers).forEach((key) => {
-					req.headers[key] = String(this.request.headers[key]).toLowerCase();
+					req.headers[key] = String(this.request.headers[key]);
 				});
 
 				// set cache headers
@@ -256,69 +263,88 @@ module xm {
 					}
 					if (this.object.info.httpModified) {
 						//TODO verify/fix date format
-						//req.headers['if-modified-since'] = new Date(this.object.info.httpModified).toUTCString();
+						req.headers['if-modified-since'] = new Date(this.object.info.httpModified).toUTCString();
 					}
 				}
-				// we should always do always do this (fix in streaming update)
-				//req.headers['accept-encoding'] = 'gzip, deflate';
+				// always zip
+				req.headers['accept-encoding'] = 'gzip, deflate';
 
-				// cleanup
-				req = HTTP.normalizeRequest(req);
-
+				// print some stuff
+				this.track.start(CacheStreamLoader.http_load);
 				if (this.track.logEnabled) {
 					this.track.logger.inspect(this.request);
 					this.track.logger.inspect(req);
 				}
-				this.track.start(CacheStreamLoader.http_load);
-
 				d.notify('loading: ' + this.request.url);
 
-				// do the actual request
-				var httpPromise = HTTP.request(req).then((res:QioHTTP.Response) => {
-					d.notify('status: ' + this.request.url + ' ' + String(res.status));
+				// memory stream for now
+				var writer = new BufferStream({size: 'flexible'});
+				// pause it so we don't miss chunks before we choose a decoder
+				var pause = es.pause();
+				pause.pause();
+
+				// start loading
+				request.get(req).on('response', (res) => {
+					d.notify('status: ' + String(res.statusCode) + ' ' + this.request.url);
 
 					if (this.track.logEnabled) {
-						this.track.logger.status(this.request.url + ' ' + String(res.status));
+						this.track.logger.status(String(res.statusCode) + ' ' + this.request.url);
 						this.track.logger.inspect(res.headers);
 					}
 
+					// keep some info
 					this.object.response = new ResponseInfo();
-					this.object.response.status = res.status;
+					this.object.response.status = res.statusCode;
 					this.object.response.headers = res.headers;
 
-					if (res.status < 200 || res.status >= 400) {
+					// check status
+					if (res.statusCode < 200 || res.statusCode >= 400) {
 						this.track.error(CacheStreamLoader.http_load);
-						throw new Error('unexpected status code: ' + res.status + ' on ' + this.request.url);
+						d.reject(new Error('unexpected status code: ' + res.statusCode + ' on ' + this.request.url));
+						return;
 					}
-					if (res.status === 304) {
+					if (res.statusCode === 304) {
 						if (!this.object.body) {
-							throw new Error('flow error: http 304 but no local content on ' + this.request.url);
+							d.reject(new Error('flow error: http 304 but no local content on ' + this.request.url));
+							return;
 						}
 						if (!this.object.info) {
-							throw new Error('flow error: http 304 but no local info on ' + this.request.url);
+							d.reject(new Error('flow error: http 304 but no local info on ' + this.request.url));
+							return;
 						}
 						//cache hit!
 						this.track.event(CacheStreamLoader.http_cache_hit);
 
 						this.updateInfo(res, this.object.info.contentChecksum);
 
-						return this.cacheWrite(true);
+						this.cacheWrite(true).done(d.resolve, d.reject);
+						return;
 					}
 
-					if (!res.body) {
-						// shouldn't we test
-						throw new Error('flow error: http 304 but no local info on ' + this.request.url);
-					}
-					if (res.body && this.object.info && httpCache) {
-						// we send cache headers but we got a body
-						// meh!
+					// pick and pipe pasued stream to decoder
+					switch (res.headers['content-encoding']) {
+						case 'gzip':
+							pause.pipe(zlib.createGunzip()).pipe(writer);
+							break;
+						case 'deflate':
+							pause.pipe(zlib.createInflate()).pipe(writer);
+							break;
+						default:
+							pause.pipe(writer);
+							break;
 					}
 
-					return res.body.read().then((buffer:NodeBuffer) => {
-						if (buffer.length === 0) {
-
+					// setup completion handler
+					writer.on('end', () => {
+						var body = writer.getBuffer();
+						if (!body) {
+							// shouldn't we test
+							throw new Error('flow error: http 304 but no local info on ' + this.request.url);
 						}
-						var checksum = xm.sha1(buffer);
+						if (body.length === 0) {
+							throw new Error('loaded zero bytes ' + this.request.url);
+						}
+						var checksum = xm.sha1(body);
 
 						if (this.object.info) {
 							if (this.object.info.contentChecksum) {
@@ -329,16 +355,21 @@ module xm {
 						else {
 							this.copyInfo(res, checksum);
 						}
-						this.object.body = buffer;
+						this.object.body = body;
 
-						d.notify('complete: ' + this.request.url + ' ' + String(res.status));
+						d.notify('complete: ' + this.request.url + ' ' + String(res.statusCode));
 						this.track.complete(CacheStreamLoader.http_load);
 
-						return this.cacheWrite(false).progress(d.notify);
+						this.cacheWrite(false).done(d.resolve, d.reject, d.notify);
 					});
-				}).then(() => {
-					d.resolve();
-				}, d.reject).done();
+
+					//restart stream with proper setup
+					pause.resume();
+
+				}).pipe(pause).on('error', (err) => {
+					this.track.complete(CacheStreamLoader.http_error, 'request error');
+					d.reject(err);
+				});
 
 				return d.promise;
 			}
@@ -390,7 +421,7 @@ module xm {
 						//TODO clean things up?
 						throw err;
 					}).then(() => {
-						// ghost stat to fix weird empty file glitch (voodoo)
+						// ghost stat to fix weird empty file glitch (voodoo.. only on windows?)
 						return Q.all([
 							FS.stat(this.object.bodyFile).then((stat:QioFS.Stats) => {
 								if (stat.size === 0) {

@@ -102,7 +102,7 @@ module tsd {
 			options = options || Options.main;
 
 			var p = this.core.selector.select(query, options);
-			this.track.promise(p, 'config_select');
+			this.track.promise(p, 'select');
 			return p;
 		}
 
