@@ -25,11 +25,11 @@ declare module QioFS {
 	//export function read(path:string, options?:any):Q.Promise<string>;
 	//export function read(path:string, options?:any):Q.Promise<NodeBuffer>;
 
-	export function write(path:string, content:any, options?:any):Q.Promise<void>;
-	export function write(path:NodeBuffer, content:any, options?:any):Q.Promise<void>;
+	export function write(path:string, content:NodeBuffer, options?:any):Q.Promise<void>;
+	export function write(path:string, content:string, options?:any):Q.Promise<void>;
 
-	export function append(path:string, content:any, options?:any):Q.Promise<void>;
-	export function append(path:NodeBuffer, content:any, options?:any):Q.Promise<void>;
+	export function append(path:string, content:NodeBuffer, options?:any):Q.Promise<void>;
+	export function append(path:string, content:string, options?:any):Q.Promise<void>;
 
 	export function copy(source:string, target:string):Q.Promise<void>;
 	export function copyTree(source:string, target:string):Q.Promise<void>;
