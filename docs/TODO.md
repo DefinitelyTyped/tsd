@@ -85,7 +85,7 @@ UIX commands
 
 Cache commands
 
-* :b:	Add purge (or flush)
+* :m:	Add purge (or flush)
 * :b:	Add dump (see cache content)
 * :m:	Add rate (github api rate limit info)
 
@@ -108,7 +108,7 @@ Command options
 * :m:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :m:	Implement `--min` / `--max` option to define expected result amount
 * :o:	.... more
-
+p
 Functionality
 
 * :m:	Report rate-limit properly
@@ -119,7 +119,7 @@ CLI
 
 * :m:	Improve Expose for crisper CLI help screen layout (table/columns)
 * :m:   Improve Expose to order/group commands :zap:
-* :x:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
+* :m:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
 * :x:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
@@ -154,6 +154,8 @@ Config
 * :m:	Validate config save-data before writing to diskk, catch invalid json
 * :m:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
 * :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
+* :ab:	Add caching parameters to config
+* :id:	Consider adding `.tsdrc` global config.
 
 Cache
 
@@ -161,11 +163,11 @@ Cache
 * :m:	Decide on cache folder version naming scheme
 * :m:	Add cache auto-refresh; for the non-unique queries like `getBranch`
 * :m:	Drop 'node-github' dependency and re-implement github API to leverage http-cache-headers (and rate timeout info)
-* :a:	Add periodic automated cache purge/flush
+* :m:	Add periodic automated cache purge/flush
 * :m:	Add skip features to loaders; enforce for testing from local fixtures. 
 * :id:	Consider blob cache by resolving commit sha to blob in a history; cache mappings; calc sha from content
-* :ab:	Implement gzip for caches (integrat with http stream)
-* :b:	Improve HTTPCache with node streams + gzip/deflate
+* :ab:	Implement gzip for caches (integrate with http stream)
+* :m:	Improve HTTPCache with node streams + gzip/deflate
 
 Internals
 
@@ -183,7 +185,8 @@ Internals
 * :m:	Consider adding class based façade to core
 * :ng:	Consider global store for JSON pointers and RegExps etc (meh)
 * :m:	Add xm ~~interface~~ class for debug/log/event tracking (`xm.EventLog`)
-* :o2:	Use promise notifiy/progress for event tracking (being implements)
+* :id:	Consider unifying `xm.EventLog` with promise progress/notify?
+* :o2:	Use promise notifiy/progress for event tracking (being implemented)
 	* :a:	Needs a standard model (event-like) 
 * :m:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
@@ -200,9 +203,9 @@ Infrastructure
 * :o2:	Add test setup to test :zap:
 * :x:	Add git pre-commit test hook :zap:
 * :id:	Lint TypeScript JS output (using JSHint or ESlint)
-* :id:	Validate `package.json` (and others) using json-schema.
+* :m:	Validate `package.json` (and others) using json-schema.
 * :a:	Run CLI test after build from the integrity test? (saves a node.js start)
-* :o2:	Update TODO levels (for example TODO|FIXME|XXX|IDEA|PERF)
+* :o2:	Update TODO levels (for example `TODO|FIXME|XXX|IDEA|PERF`)
 	*	:o:	Sweep code and apply new levels 
 	*	:o:	Update grunt-todos reporter
 
@@ -218,8 +221,8 @@ Cleanup
 
 Publishing
 
-* :a:	Sweep and enable `tslint.json` rules we keep `./deploy/repository.json` for `v0.3.0`.
-* :ok:	Use uppercase 'TSD' (looks like a type otherwise) ~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~
+* :a:	Keep `./deploy/repository.json` for `v0.3.0`.
+* :ok:	~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~ Use uppercase 'TSD' (looks like a type otherwise) 
 * :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)
 * :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku. Use TSD's Git module to proxy API request
 * :m:	Fix bin/cli `$ npm install . -g` 
@@ -230,6 +233,7 @@ Publishing
 
 Dependencies
 
+* :cl:	Drop `xm.KeyValue`/`xm.Set` for ES6-shim `Map`/`Set`.
 * :cl:	Swap `optimist` for `minimist`.
 * :m:	Consider dropping `underscore`?
 * :m:	Update `Q` with generics

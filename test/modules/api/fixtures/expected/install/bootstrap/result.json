@@ -1,44 +1,11 @@
 {
-  "selection": [
-    {
-      "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f",
-      "solved": true,
-      "commit": {
-        "commitSha": "2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f"
-      },
-      "blob": {
-        "sha": "c14bf61d4b35530cd4f42fe1759f52dea96fd61f"
-      },
-      "dependencies": [
-        {
-          "path": "jquery/jquery.d.ts",
-          "project": "jquery",
-          "name": "jquery"
-        }
-      ]
-    }
-  ],
-  "nameMatches": [
-    {
-      "path": "bootstrap/bootstrap.d.ts",
-      "project": "bootstrap",
-      "name": "bootstrap",
-      "head": {
-        "path": "bootstrap/bootstrap.d.ts",
-        "key": "bootstrap/bootstrap.d.ts-2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f",
-        "solved": true
-      },
-      "history": []
-    }
-  ],
   "written": {
     "bootstrap/bootstrap.d.ts": {
       "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f",
+      "key": "bootstrap/bootstrap.d.ts-4cc9beb4057a46d0d81fdbf8621fa693b7157a0c",
       "solved": true,
       "commit": {
-        "commitSha": "2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f"
+        "commitSha": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
       },
       "blob": {
         "sha": "c14bf61d4b35530cd4f42fe1759f52dea96fd61f"
@@ -53,15 +20,17 @@
     },
     "jquery/jquery.d.ts": {
       "path": "jquery/jquery.d.ts",
-      "key": "jquery/jquery.d.ts-2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f",
+      "key": "jquery/jquery.d.ts-4cc9beb4057a46d0d81fdbf8621fa693b7157a0c",
       "solved": true,
       "commit": {
-        "commitSha": "2dbd46d87f3f05aa3344f8a2c3e6c4b8fa09841f"
+        "commitSha": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
       },
       "blob": {
-        "sha": "332ee75da76233b015ce68413208fa3c51e86eaf"
+        "sha": "4b8e9f49c0e71612654dbc8473f1265626e0c0c7"
       },
       "dependencies": []
     }
-  }
+  },
+  "removed": {},
+  "skipped": {}
 }

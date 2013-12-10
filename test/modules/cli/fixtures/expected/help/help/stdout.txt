@@ -35,6 +35,8 @@
    settings                  display config settings                                  
     --cacheDir <path>         > path to cache directory (string)                      
     --config <path>           > path to config file (string)                          
+   purge                     clear local caches                                       
+    --cacheDir <path>         > path to cache directory (string)                      
    reinstall                 re-install definitions from config                       
     --overwrite         -o    > overwrite existing files (flag)                       
     --cacheDir <path>         > path to cache directory (string)                      

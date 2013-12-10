@@ -9,27 +9,27 @@ var installOpts = {
 
 var tests = {
 	'async': lib.clone(installOpts, {
-		selector: {
+		query: {
 			pattern: 'async'
 		}
 	}),
 	'async-async-no-save': lib.clone(installOpts, {
 		debug: false,
 		save: false,
-		selector: {
+		query: {
 			pattern: 'async/async'
 		}
 	}),
 	'bootstrap' : lib.clone(installOpts, {
 		debug: false,
-		selector: {
+		query: {
 			pattern: 'bootstrap/bootstrap'
 		}
 	}),
 	'bootstrap-no-resolve' : lib.clone(installOpts, {
 		debug: false,
 		resolve: false,
-		selector: {
+		query: {
 			pattern: 'bootstrap/bootstrap'
 		}
 	}),
@@ -43,12 +43,12 @@ var tests = {
 				}
 			}
 		},
-		selector: {
+		query: {
 			pattern: 'bootstrap/bootstrap'
 		}
 	}),
 	'chai': lib.clone(installOpts, {
-		selector: {
+		query: {
 			pattern: 'chai'
 		}
 	})

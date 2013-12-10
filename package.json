@@ -63,7 +63,6 @@
     "es6-shim": "~0.9.1",
     "request": "~2.29.0",
     "event-stream": "~3.0.18",
-    "memorystream": "~0.2.0",
     "bufferstream": "~0.6.2"
   },
   "devDependencies": {
@@ -91,7 +90,6 @@
     "chai-json-schema": "1.0.7",
     "chai-as-promised": "4.0.0",
     "buffer-equal": "0.0.0",
-    "memory-streams": "0.0.3",
     "ansidiff": "~1.0.0",
     "time-grunt": "~0.2.3",
     "grunt-tv4": "~0.3.1"

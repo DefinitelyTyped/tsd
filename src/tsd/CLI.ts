@@ -196,7 +196,7 @@ module tsd {
 		return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
 	}
 
-	function reportSucces(result:tsd.APIResult):xm.StyledOut {
+	/*function reportSucces(result:tsd.APIResult):xm.StyledOut {
 		//this.output.ln().info().success('success!').clear();
 		if (result) {
 			result.selection.forEach((def:tsd.DefVersion) => {
@@ -208,7 +208,7 @@ module tsd {
 			});
 		}
 		return output;
-	}
+	}*/
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -308,6 +308,22 @@ module tsd {
 					output.ln();
 					return <any> job.api.context.logInfo(true);
 
+				}, reportError);
+			};
+		});
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'purge';
+			cmd.label = 'clear local caches';
+			cmd.options = [Opt.cacheDir];
+			cmd.groups = [Group.support];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
+				return getAPIJob(ctx).then((job:Job) => {
+					//TODO expose raw/api/all option
+					return job.api.purge(true, true).progress(notify).then(() => {
+
+					});
 				}, reportError);
 			};
 		});

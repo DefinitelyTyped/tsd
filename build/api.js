@@ -4367,6 +4367,7 @@ var xm;
                 }
             }
             CacheOpts.prototype.applyCacheMode = function (mode) {
+                this.cacheCleanInterval = null;
                 switch (mode) {
                     case CacheMode.forceRemote:
                         this.cacheRead = false;
@@ -4425,7 +4426,6 @@ var xm;
                 this.jobs = new xm.KeyValueMap();
                 this.remove = new xm.KeyValueMap();
                 this.jobTimeout = 1000;
-                this.cacheMaxAge = 30 * 24 * 3600 * 1000;
                 xm.assertVar(storeDir, 'string', 'storeDir');
                 xm.assertVar(opts, CacheOpts, 'opts', true);
 
@@ -4604,6 +4604,7 @@ var xm;
 
                 this.init().then(function () {
                     var limit = Date.now() - maxAge;
+
                     return FS.listTree(_this.storeDir, function (src, stat) {
                         if (stat.node.isFile()) {
                             var ext = path.extname(src);
@@ -7048,26 +7049,24 @@ var tsd;
     var Q = require('q');
     var FS = require('q-io/fs');
 
-    var APIResult = (function () {
-        function APIResult(query) {
-            if (typeof query === "undefined") { query = null; }
-            this.query = query;
-            this.written = new xm.KeyValueMap();
-            xm.assertVar(query, tsd.Query, 'query', true);
-        }
-        return APIResult;
-    })();
-    tsd.APIResult = APIResult;
-
     var InstallResult = (function () {
         function InstallResult(options) {
             this.written = new xm.KeyValueMap();
+            this.removed = new xm.KeyValueMap();
+            this.skipped = new xm.KeyValueMap();
             xm.assertVar(options, tsd.Options, 'options');
             this.options = options;
         }
         return InstallResult;
     })();
     tsd.InstallResult = InstallResult;
+
+    var CompareResult = (function () {
+        function CompareResult() {
+        }
+        return CompareResult;
+    })();
+    tsd.CompareResult = CompareResult;
 
     var API = (function () {
         function API(context) {
@@ -7175,10 +7174,25 @@ var tsd;
             return d.promise;
         };
 
-        API.prototype.purge = function () {
+        API.prototype.purge = function (raw, api) {
             var d = Q.defer();
             this.track.promise(d.promise, 'purge');
-            d.reject(new Error('not implemented yet'));
+            var queue = [];
+
+            if (raw) {
+                queue.push(this.core.repo.raw.cache.cleanupCacheAge(0));
+            }
+            if (api) {
+                queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
+            }
+
+            if (queue.length > 0) {
+                Q.all(queue).done(function () {
+                    d.resolve();
+                }, d.reject);
+            } else {
+                d.resolve();
+            }
 
             return d.promise;
         };
@@ -8649,20 +8663,6 @@ var tsd;
         return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
     }
 
-    function reportSucces(result) {
-        var _this = this;
-        if (result) {
-            result.selection.forEach(function (def) {
-                _this.output.line(def.toString());
-                if (def.info) {
-                    output.line(def.info.toString());
-                    output.line(def.info);
-                }
-            });
-        }
-        return output;
-    }
-
     function getExpose() {
         var expose = new xm.Expose(output);
 
@@ -8746,6 +8746,20 @@ var tsd;
                 return getAPIJob(ctx).then(function (job) {
                     output.ln();
                     return job.api.context.logInfo(true);
+                }, reportError);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'purge';
+            cmd.label = 'clear local caches';
+            cmd.options = [Opt.cacheDir];
+            cmd.groups = [Group.support];
+            cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
+                return getAPIJob(ctx).then(function (job) {
+                    return job.api.purge(true, true).progress(notify).then(function () {
+                    });
                 }, reportError);
             };
         });

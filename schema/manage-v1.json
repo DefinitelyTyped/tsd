@@ -8,6 +8,9 @@
 	"properties": {
 		"lastSweep": {
 			"$ref": "#/definitions/dateUTCISO"
+		},
+		"ignore": {
+			"type": "boolean"
 		}
 	},
 	"definitions": {

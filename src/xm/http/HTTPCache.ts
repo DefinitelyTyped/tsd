@@ -112,6 +112,8 @@ module xm {
 			}
 
 			applyCacheMode(mode:CacheMode) {
+				//TODO what to do with this?
+				this.cacheCleanInterval = null;
 				switch (mode) {
 					case CacheMode.forceRemote:
 						this.cacheRead = false;
@@ -194,7 +196,6 @@ module xm {
 
 			// auto clear
 			jobTimeout:number = 1000;
-			cacheMaxAge:number = 30 * 24 * 3600 * 1000;
 
 			private _init:Q.Promise<void>;
 
@@ -384,6 +385,7 @@ module xm {
 
 				this.init().then(() => {
 					var limit = Date.now() - maxAge;
+
 					return FS.listTree(this.storeDir, (src:string, stat:QioFS.Stats) => {
 						if (stat.node.isFile()) {
 							var ext = path.extname(src);
@@ -401,7 +403,7 @@ module xm {
 							return true;
 						}
 						return false;
-					}).then((tree) => {
+					}).then((tree:string[]) => {
 						return Q.all(tree.reduce((memo:any[], src:string) => {
 							memo.push(xm.FileUtil.removeFile(src));
 							memo.push(xm.FileUtil.removeFile(src.replace(/\.json$/, '.raw')));

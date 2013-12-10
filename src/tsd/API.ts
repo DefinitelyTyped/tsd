@@ -12,30 +12,12 @@ module tsd {
 	var Q:typeof Q = require('q');
 	var FS:typeof QioFS = require('q-io/fs');
 
-	/*
-	 APIResult: hold result data (composition may vary)
-	 */
-	//TODO consider splitting into more specific result for each command
-	//TODO add useful methods to result (wrap some helpers from DefUtils)
-	export class APIResult {
-
-		error:any;
-		nameMatches:tsd.Def[];
-		definitions:tsd.Def[];
-		selection:tsd.DefVersion[];
-		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
-		//removed:xm.KeyValueMap = new xm.KeyValueMap();
-
-		constructor(public query:tsd.Query = null) {
-			xm.assertVar(query, tsd.Query, 'query', true);
-		}
-	}
-
 	export class InstallResult {
 
 		options:tsd.Options;
 		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
-		//removed:xm.KeyValueMap = new xm.KeyValueMap();
+		removed:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
+		skipped:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
 
 		constructor(options:tsd.Options) {
 			xm.assertVar(options, tsd.Options, 'options');
@@ -43,6 +25,9 @@ module tsd {
 		}
 	}
 
+	export class CompareResult {
+
+	}
 
 	/*
 	 API: the high-level API used by dependants
@@ -175,9 +160,9 @@ module tsd {
 		 compare repo data with local installed file and check for changes
 		 */
 		//TODO implement compare() command
-		compare(query:tsd.Query):Q.Promise<APIResult> {
+		compare(query:tsd.Query):Q.Promise<CompareResult> {
 			xm.assertVar(query, tsd.Query, 'query');
-			var d:Q.Deferred<APIResult> = Q.defer();
+			var d:Q.Deferred<CompareResult> = Q.defer();
 			this.track.promise(d.promise, 'compare');
 			d.reject(new Error('not implemented yet'));
 
@@ -187,12 +172,28 @@ module tsd {
 		/*
 		 clear caches and temporary files
 		 */
-		//TODO implement: purge() command
-		purge():Q.Promise<APIResult> {
+		purge(raw:boolean, api:boolean):Q.Promise<void> {
 			// add proper safety checks (let's not accidentally rimraf too much)
-			var d:Q.Deferred<APIResult> = Q.defer();
+			var d:Q.Deferred<void> = Q.defer();
 			this.track.promise(d.promise, 'purge');
-			d.reject(new Error('not implemented yet'));
+			var queue = [];
+
+			if (raw) {
+				queue.push(this.core.repo.raw.cache.cleanupCacheAge(0));
+			}
+			if (api) {
+				queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
+			}
+
+			// run?
+			if (queue.length > 0) {
+				Q.all(queue).done(() => {
+					d.resolve();
+				}, d.reject);
+			}
+			else {
+				d.resolve();
+			}
 
 			return d.promise;
 		}

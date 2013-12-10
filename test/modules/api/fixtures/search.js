@@ -3,18 +3,18 @@ var lib = require('../../../../lib/lib');
 
 var tests = {
 	'async': {
-		selector: {
+		query: {
 			pattern: 'async'
 		}
 	},
 	'bootstrap': {
-		selector: {
+		query: {
 			pattern: 'bootstrap'
 		},
 		resolve: true
 	},
 	'angularjs-angular-all': {
-		selector: {
+		query: {
 			pattern: 'angularjs/angular*'
 		}
 	}

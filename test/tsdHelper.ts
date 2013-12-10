@@ -58,7 +58,6 @@ module helper {
 		cacheDirDev:string;
 		cacheDirUser:string;
 
-		//should be <*>Actual, not <*>File
 		configFile:string;
 		resultFile:string;
 		errorFile:string;
@@ -67,6 +66,7 @@ module helper {
 
 		testDump:string;
 		queryDump:string;
+		selectionDump:string;
 		optionsDump:string;
 		argsDump:string;
 
