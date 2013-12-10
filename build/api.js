@@ -1597,6 +1597,69 @@ var xm;
             });
         }
         FileUtil.canWriteFile = canWriteFile;
+
+        function removeFile(target) {
+            var d = Q.defer();
+            FS.exists(target).then(function (exists) {
+                if (!exists) {
+                    d.resolve();
+                    return;
+                }
+                return FS.isFile(target).then(function (isFile) {
+                    if (!isFile) {
+                        throw new Error('not a file: ' + target);
+                    }
+                    return FS.remove(target).then(function () {
+                        d.resolve();
+                    });
+                });
+            }).fail(d.reject).done();
+
+            return d.promise;
+        }
+        FileUtil.removeFile = removeFile;
+
+        function touchFile(src, atime, mtime) {
+            var d = Q.defer();
+            FS.stat(src).then(function (stat) {
+                atime = (atime || new Date());
+                mtime = (mtime || stat.node.mtime);
+                return Q.nfcall(fs.utimes, src, atime, mtime);
+            }).done(function () {
+                d.resolve();
+            }, d.reject);
+            return d.promise;
+        }
+        FileUtil.touchFile = touchFile;
+
+        function findup(dir, name) {
+            var d = Q.defer();
+            if (dir === '/') {
+                d.reject(new Error('Could not find package.json up from: ' + dir));
+                return;
+            } else if (!dir || dir === '.') {
+                d.reject(new Error('Cannot find package.json from unspecified directory'));
+                return;
+            }
+            var file = path.join(dir, name);
+            FS.exists(file).then(function (exists) {
+                if (exists) {
+                    d.resolve(file);
+                    return;
+                }
+
+                var dirName = path.dirname(dir);
+                if (dirName === dir) {
+                    d.reject(new Error('cannot find file: ' + name));
+                    return;
+                }
+                return findup(path.dirname(dir), name).then(function (file) {
+                    d.resolve(file);
+                });
+            }, d.reject);
+            return d.promise;
+        }
+        FileUtil.findup = findup;
     })(xm.FileUtil || (xm.FileUtil = {}));
     var FileUtil = xm.FileUtil;
 })(xm || (xm = {}));
@@ -3753,8 +3816,14 @@ var xm;
                 var res = tv4.validateResult(value, this.schema);
                 if (!res.valid || res.missing.length > 0) {
                     var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-                    report.reportError(report.createTest(this.schema, value, null, res, true), res.error, '   ', '   ');
-                    throw res.error;
+                    var test = report.createTest(this.schema, value, null, res, true);
+                    if (res.missing.length > 0) {
+                        report.reportMissing(test, '   ');
+                        throw new Error('missing schemas');
+                    } else {
+                        report.reportError(test, res.error, '   ', '   ');
+                        throw res.error;
+                    }
                 }
             }
         };
@@ -3874,9 +3943,10 @@ var xm;
                     }
 
                     if (useCached) {
-                        _this._defer.notify('using local cache: ' + _this.request.url);
-                        _this._defer.resolve(_this.object);
-                        return;
+                        return _this.cacheTouch().then(function () {
+                            _this._defer.notify('using local cache: ' + _this.request.url);
+                            _this._defer.resolve(_this.object);
+                        });
                     }
 
                     return _this.httpLoad(!_this.request.forceRefresh).progress(_this._defer.notify).then(function () {
@@ -4129,6 +4199,8 @@ var xm;
                                 }
                             })
                         ]);
+                    }).then(function () {
+                        return _this.cacheTouch();
                     });
                 }).done(d.resolve, d.reject);
 
@@ -4138,14 +4210,28 @@ var xm;
             CacheStreamLoader.prototype.cacheRemove = function () {
                 var _this = this;
                 if (!this.canUpdate()) {
-                    return Q.resolve(null);
+                    return Q.resolve();
                 }
                 return Q.all([
-                    this.removeFile(this.object.infoFile),
-                    this.removeFile(this.object.bodyFile)
+                    xm.FileUtil.removeFile(this.object.infoFile),
+                    xm.FileUtil.removeFile(this.object.bodyFile)
                 ]).then(function () {
                     _this.track.event(CacheStreamLoader.cache_remove, _this.request.url);
                 });
+            };
+
+            CacheStreamLoader.prototype.cacheTouch = function () {
+                var d = Q.defer();
+                if (!this.canUpdate()) {
+                    return Q.resolve();
+                }
+                Q.all([
+                    xm.FileUtil.touchFile(this.object.infoFile),
+                    xm.FileUtil.touchFile(this.object.bodyFile)
+                ]).done(function () {
+                    d.resolve();
+                }, d.reject);
+                return d.promise;
             };
 
             CacheStreamLoader.prototype.copyInfo = function (res, checksum) {
@@ -4195,28 +4281,6 @@ var xm;
                 }).then(function () {
                     d.resolve();
                 }, d.reject).done();
-                return d.promise;
-            };
-
-            CacheStreamLoader.prototype.removeFile = function (target) {
-                var _this = this;
-                var d = Q.defer();
-                FS.exists(target).then(function (exists) {
-                    if (!exists) {
-                        d.resolve();
-                        return;
-                    }
-                    return FS.isFile(target).then(function (isFile) {
-                        if (!isFile) {
-                            throw new Error('not a file: ' + target);
-                        }
-                        _this.track.event(CacheStreamLoader.cache_remove, target);
-                        return FS.remove(target).then(function () {
-                            d.resolve();
-                        });
-                    });
-                }).fail(d.reject).done();
-
                 return d.promise;
             };
 
@@ -4361,11 +4425,15 @@ var xm;
                 this.jobs = new xm.KeyValueMap();
                 this.remove = new xm.KeyValueMap();
                 this.jobTimeout = 1000;
+                this.cacheMaxAge = 30 * 24 * 3600 * 1000;
                 xm.assertVar(storeDir, 'string', 'storeDir');
                 xm.assertVar(opts, CacheOpts, 'opts', true);
 
                 this.storeDir = storeDir;
                 this.opts = (opts || new CacheOpts());
+
+                this.manageFile = path.join(this.storeDir, '_info.json');
+
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
                 this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
             }
@@ -4398,6 +4466,8 @@ var xm;
                         });
                     }
                     _this.scheduleRelease(request.key);
+                }).then(function () {
+                    return _this.cleanCache();
                 }).fail(d.reject).done();
 
                 return d.promise;
@@ -4425,9 +4495,12 @@ var xm;
                     this.track.skip('init');
                     return this._init;
                 }
-                var defer = Q.defer();
-                this._init = defer.promise;
-                this.track.promise(defer.promise, 'init');
+                var d = Q.defer();
+                this._init = d.promise;
+                this.track.promise(d.promise, 'init');
+
+                var baseDir;
+                var schemaDir;
 
                 FS.exists(this.storeDir).then(function (exists) {
                     if (!exists) {
@@ -4443,17 +4516,123 @@ var xm;
                         _this.track.event('dir_exists', _this.storeDir);
                     });
                 }).then(function () {
-                    var p = path.join(path.dirname(xm.PackageJSON.find()), 'schema', 'cache-v1.json');
+                    return xm.FileUtil.findup(path.dirname((module).filename), 'package.json').then(function (src) {
+                        baseDir = path.dirname(src);
+                        schemaDir = path.join(baseDir, 'schema');
+                    });
+                }).then(function () {
+                    var p = path.join(schemaDir, 'cache-v1.json');
                     return xm.FileUtil.readJSONPromise(p).then(function (infoSchema) {
                         xm.assertVar(infoSchema, 'object', 'infoSchema');
                         _this.infoSchema = infoSchema;
                         _this.infoKoder = new xm.JSONKoder(_this.infoSchema);
                     });
+                }).then(function () {
+                    var p = path.join(schemaDir, 'manage-v1.json');
+                    return xm.FileUtil.readJSONPromise(p).then(function (manageSchema) {
+                        xm.assertVar(manageSchema, 'object', 'manageSchema');
+                        _this.manageSchema = manageSchema;
+                        _this.manageKoder = new xm.JSONKoder(_this.manageSchema);
+                    });
                 }).done(function () {
-                    defer.resolve();
-                }, defer.reject);
+                    d.resolve();
+                }, d.reject);
 
-                return defer.promise;
+                return d.promise;
+            };
+
+            HTTPCache.prototype.cleanCache = function () {
+                var _this = this;
+                var d = Q.defer();
+                if (!this._init || !this.opts.cacheWrite || !this.opts.cacheRead || !xm.isNumber(this.opts.cacheCleanInterval)) {
+                    d.resolve();
+                    return d.promise;
+                }
+                if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cacheCleanInterval) {
+                    this.track.skip('cache_clean', this.storeDir);
+                    d.resolve();
+                    return d.promise;
+                }
+
+                this.track.event('cache_clean', this.storeDir);
+
+                var manageInfo;
+
+                FS.exists(this.manageFile).then(function (exists) {
+                    if (!exists) {
+                        return;
+                    }
+                    return FS.read(_this.manageFile).then(function (buffer) {
+                        return _this.manageKoder.decode(buffer).then(function (info) {
+                            manageInfo = info;
+                        }).fail(function (err) {
+                            _this.track.logger.warn('removing bad manageFile: ' + _this.manageFile);
+                            return xm.FileUtil.removeFile(_this.manageFile);
+                        });
+                    });
+                }).then(function () {
+                    if (manageInfo) {
+                        var date = new Date(manageInfo.lastSweep);
+                        if (date.getTime() > Date.now() - _this.opts.cacheCleanInterval) {
+                            return;
+                        }
+                    }
+                    return _this.cleanupCacheAge(_this.opts.cacheCleanInterval).then(function () {
+                        _this.cacheSweepLast = new Date();
+                        if (!manageInfo) {
+                            manageInfo = {
+                                lastSweep: _this.cacheSweepLast.toISOString()
+                            };
+                        } else {
+                            manageInfo.lastSweep = _this.cacheSweepLast.toISOString();
+                        }
+                        return _this.manageKoder.encode(manageInfo).then(function (buffer) {
+                            return FS.write(_this.manageFile, buffer);
+                        });
+                    });
+                }).done(function () {
+                    d.resolve();
+                }, d.reject);
+
+                return d.promise;
+            };
+
+            HTTPCache.prototype.cleanupCacheAge = function (maxAge) {
+                var _this = this;
+                var d = Q.defer();
+                this.track.promise(d.promise, 'clean_cache_age');
+
+                this.init().then(function () {
+                    var limit = Date.now() - maxAge;
+                    return FS.listTree(_this.storeDir, function (src, stat) {
+                        if (stat.node.isFile()) {
+                            var ext = path.extname(src);
+                            if (ext !== '.json') {
+                                return false;
+                            }
+                            var name = path.basename(src, ext);
+                            if (!xm.isSha(name)) {
+                                return false;
+                            }
+                            if (stat.node.atime.getTime() > limit) {
+                                return false;
+                            }
+
+                            return true;
+                        }
+                        return false;
+                    }).then(function (tree) {
+                        return Q.all(tree.reduce(function (memo, src) {
+                            memo.push(xm.FileUtil.removeFile(src));
+                            memo.push(xm.FileUtil.removeFile(src.replace(/\.json$/, '.raw')));
+                            return memo;
+                        }, []));
+                    });
+                }).done(function () {
+                    d.resolve();
+                }, d.reject);
+
+                return d.promise;
             };
 
             HTTPCache.prototype.getDir = function (key) {
@@ -4675,6 +4854,7 @@ var git;
             this.formatVersion = '1.0';
 
             var opts = new xm.http.CacheOpts();
+            opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
             this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader(['apiVersion']);
@@ -4721,10 +4901,10 @@ var git;
             this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
             if (!xm.isNumber(request.localMaxAge)) {
-                request.localMaxAge = 30 * 60 * 1000;
+                request.localMaxAge = 60 * 60 * 1000;
             }
             if (!xm.isNumber(request.httpInterval)) {
-                request.httpInterval = 1 * 60 * 1000;
+                request.httpInterval = 30 * 60 * 1000;
             }
             this.copyHeadersTo(request.headers);
 
@@ -4789,6 +4969,7 @@ var git;
             this.formatVersion = '1.0';
 
             var opts = new xm.http.CacheOpts();
+            opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
             this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader();

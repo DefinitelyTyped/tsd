@@ -24,6 +24,7 @@ module git {
 			this.formatVersion = '1.0';
 
 			var opts = new xm.http.CacheOpts();
+			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
 			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
 			this._initGithubLoader();

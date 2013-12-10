@@ -206,5 +206,65 @@ module xm {
 				});
 			});
 		}
+
+		export function removeFile(target:string):Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+			FS.exists(target).then((exists:boolean) => {
+				if (!exists) {
+					d.resolve();
+					return;
+				}
+				return FS.isFile(target).then((isFile:boolean) => {
+					if (!isFile) {
+						throw new Error('not a file: ' + target);
+					}
+					return FS.remove(target).then(() => {
+						d.resolve();
+					});
+				});
+			}).fail(d.reject).done();
+
+			return d.promise;
+		}
+
+		export function touchFile(src:string, atime?:Date, mtime?:Date):Q.Promise<void> {
+			var d:Q.Deferred<void> = Q.defer();
+			FS.stat(src).then((stat:QioFS.Stats) => {
+				atime = (atime || new Date());
+				mtime = (mtime || stat.node.mtime);
+				return Q.nfcall(fs.utimes, src, atime, mtime);
+			}).done(() => {
+				d.resolve();
+			}, d.reject);
+			return d.promise;
+		}
+
+		export function findup(dir:string, name:string):Q.Promise<string> {			var d:Q.Deferred<string> = Q.defer();
+			if (dir === '/') {
+				d.reject(new Error('Could not find package.json up from: ' + dir));
+				return;
+			}
+			else if (!dir || dir === '.') {
+				d.reject(new Error('Cannot find package.json from unspecified directory'));
+				return;
+			}
+			var file = path.join(dir, name);
+			FS.exists(file).then((exists:boolean) => {
+				if (exists) {
+					d.resolve(file);
+					return;
+				}
+				//one-up
+				var dirName = path.dirname(dir);
+				if (dirName === dir) {
+					d.reject(new Error('cannot find file: ' + name));
+					return;
+				}
+				return findup(path.dirname(dir), name).then((file:string) => {
+					d.resolve(file);
+				});
+			}, d.reject);
+			return d.promise;
+		}
 	}
 }

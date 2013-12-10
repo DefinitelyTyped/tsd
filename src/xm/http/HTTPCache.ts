@@ -68,6 +68,14 @@ module xm {
 			contentChecksum:string;
 		}
 
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		export interface CacheManage {
+			lastSweep:string;
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		export function assertSchema(value:any, schema:any):void {
 			var res:TV4SingleResult = tv4.validateResult(value, schema);
 			if (!res.valid || res.missing.length > 0) {
@@ -94,6 +102,8 @@ module xm {
 			cacheRead = true;
 			cacheWrite = true;
 			remoteRead = true;
+
+			cacheCleanInterval:number;
 
 			constructor(mode?:CacheMode) {
 				if (mode) {
@@ -176,6 +186,7 @@ module xm {
 			private jobs = new xm.KeyValueMap<CacheStreamLoader>();
 			opts:CacheOpts;
 			track:xm.EventLog;
+
 			infoKoder:IContentKoder<CacheInfo>;
 			infoSchema:any;
 
@@ -183,8 +194,14 @@ module xm {
 
 			// auto clear
 			jobTimeout:number = 1000;
+			cacheMaxAge:number = 30 * 24 * 3600 * 1000;
 
 			private _init:Q.Promise<void>;
+
+			private manageFile:string;
+			private manageKoder:IContentKoder<CacheManage>;
+			private manageSchema:any;
+			private cacheSweepLast:Date;
 
 			constructor(storeDir:string, opts?:CacheOpts) {
 				xm.assertVar(storeDir, 'string', 'storeDir');
@@ -192,6 +209,9 @@ module xm {
 
 				this.storeDir = storeDir;
 				this.opts = (opts || new CacheOpts());
+
+				this.manageFile = path.join(this.storeDir, '_info.json');
+
 				this.track = new xm.EventLog('http_cache', 'HTTPCache');
 				this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
 			}
@@ -225,6 +245,8 @@ module xm {
 						});
 					}
 					this.scheduleRelease(request.key);
+				}).then(() => {
+					return this.cleanCache();
 				}).fail(d.reject).done();
 
 				return d.promise;
@@ -251,10 +273,14 @@ module xm {
 					this.track.skip('init');
 					return this._init;
 				}
-				var defer:Q.Deferred<void> = Q.defer();
-				this._init = defer.promise;
-				this.track.promise(defer.promise, 'init');
+				var d:Q.Deferred<void> = Q.defer();
+				this._init = d.promise;
+				this.track.promise(d.promise, 'init');
 
+				var baseDir;
+				var schemaDir;
+
+				// first create directory
 				FS.exists(this.storeDir).then((exists:boolean) => {
 					if (!exists) {
 						this.track.event('dir_create', this.storeDir);
@@ -268,19 +294,127 @@ module xm {
 						}
 						this.track.event('dir_exists', this.storeDir);
 					});
+				}).then(() => {					// find module directory
+					return FileUtil.findup(path.dirname((module).filename), 'package.json').then((src:string) => {
+						baseDir = path.dirname(src);
+						schemaDir = path.join(baseDir, 'schema');
+					});
 				}).then(() => {
-					var p = path.join(path.dirname(PackageJSON.find()), 'schema', 'cache-v1.json');
+					// load info schema
+					var p = path.join(schemaDir, 'cache-v1.json');
 					return xm.FileUtil.readJSONPromise(p).then((infoSchema:string) => {
 						xm.assertVar(infoSchema, 'object', 'infoSchema');
 						this.infoSchema = infoSchema;
 						this.infoKoder = new JSONKoder<CacheInfo>(this.infoSchema);
 					});
+				}).then(() => {
+					var p = path.join(schemaDir, 'manage-v1.json');
+					return xm.FileUtil.readJSONPromise(p).then((manageSchema:string) => {
+						xm.assertVar(manageSchema, 'object', 'manageSchema');
+						this.manageSchema = manageSchema;
+						this.manageKoder = new JSONKoder<CacheManage>(this.manageSchema);
+					});
 				}).done(() => {
-					defer.resolve();
-				}, defer.reject);
+					d.resolve();
+				}, d.reject);
 
-				return defer.promise;
+				return d.promise;
 			}
+
+			cleanCache():Q.Promise<void> {
+				var d:Q.Deferred<void> = Q.defer();
+				if (!this._init || !this.opts.cacheWrite || !this.opts.cacheRead || !xm.isNumber(this.opts.cacheCleanInterval)) {
+					d.resolve();
+					return d.promise;
+				}
+				if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cacheCleanInterval) {
+					this.track.skip('cache_clean', this.storeDir);
+					d.resolve();
+					return d.promise;
+				}
+
+				this.track.event('cache_clean', this.storeDir);
+
+				var manageInfo;
+
+				FS.exists(this.manageFile).then((exists:boolean) => {
+					if (!exists) {
+						return;
+					}
+					return FS.read(this.manageFile).then((buffer:NodeBuffer) => {
+						return this.manageKoder.decode(buffer).then((info:CacheManage) => {
+							manageInfo = info;
+						}).fail((err) => {
+							this.track.logger.warn('removing bad manageFile: ' + this.manageFile);
+							return xm.FileUtil.removeFile(this.manageFile);
+						});
+					});
+				}).then(() => {
+					if (manageInfo) {
+						var date = new Date(manageInfo.lastSweep);
+						if (date.getTime() > Date.now() - this.opts.cacheCleanInterval) {
+							// fine, keep it
+							return;
+						}
+					}
+					return this.cleanupCacheAge(this.opts.cacheCleanInterval).then(() => {
+						this.cacheSweepLast = new Date();
+						if (!manageInfo) {
+							manageInfo = {
+								lastSweep: this.cacheSweepLast.toISOString()
+							};
+						}
+						else {
+							manageInfo.lastSweep = this.cacheSweepLast.toISOString();
+						}
+						return this.manageKoder.encode(manageInfo).then((buffer:NodeBuffer) => {
+							return FS.write(this.manageFile, buffer);
+						});
+					});
+				}).done(() => {
+					d.resolve();
+				}, d.reject);
+
+				return d.promise;
+			}
+
+			cleanupCacheAge(maxAge:number):Q.Promise<void> {
+				var d:Q.Deferred<void> = Q.defer();
+				this.track.promise(d.promise, 'clean_cache_age');
+
+				this.init().then(() => {
+					var limit = Date.now() - maxAge;
+					return FS.listTree(this.storeDir, (src:string, stat:QioFS.Stats) => {
+						if (stat.node.isFile()) {
+							var ext = path.extname(src);
+							if (ext !== '.json') {
+								return false;
+							}
+							var name = path.basename(src, ext);
+							if (!xm.isSha(name)) {
+								return false;
+							}
+							if (stat.node.atime.getTime() > limit) {
+								return false;
+							}
+							//kill it
+							return true;
+						}
+						return false;
+					}).then((tree) => {
+						return Q.all(tree.reduce((memo:any[], src:string) => {
+							memo.push(xm.FileUtil.removeFile(src));
+							memo.push(xm.FileUtil.removeFile(src.replace(/\.json$/, '.raw')));
+							return memo;
+						}, []));
+					});
+				}).done(() => {
+					d.resolve();
+				}, d.reject);
+
+				return d.promise;
+			}
+
 
 			private getDir(key:string):boolean {
 				return path.join(this.storeDir, key.charAt(0), key.charAt(1), key);

@@ -30,6 +30,7 @@ module git {
 			this.formatVersion = '1.0';
 
 			var opts = new xm.http.CacheOpts();
+			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
 			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
 			this._initGithubLoader(['apiVersion']);
@@ -89,10 +90,10 @@ module git {
 			this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
 			if (!xm.isNumber(request.localMaxAge)) {
-				request.localMaxAge = 30 * 60 * 1000;
+				request.localMaxAge = 60 * 60 * 1000;
 			}
 			if (!xm.isNumber(request.httpInterval)) {
-				request.httpInterval = 1 * 60 * 1000;
+				request.httpInterval = 30 * 60 * 1000;
 			}
 			this.copyHeadersTo(request.headers);
 

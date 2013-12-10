@@ -110,8 +110,15 @@ module xm {
 				var res:TV4SingleResult = tv4.validateResult(value, this.schema);
 				if (!res.valid || res.missing.length > 0) {
 					var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-					report.reportError(report.createTest(this.schema, value, null, res, true), res.error, '   ', '   ');
-					throw res.error;
+					var test = report.createTest(this.schema, value, null, res, true);
+					if (res.missing.length > 0) {
+						report.reportMissing(test, '   ');
+						throw new Error('missing schemas');
+					}
+					else {
+						report.reportError(test, res.error, '   ', '   ');
+						throw res.error;
+					}
 				}
 			}
 		}

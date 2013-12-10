@@ -158,9 +158,10 @@ module xm {
 					}
 
 					if (useCached) {
-						this._defer.notify('using local cache: ' + this.request.url);
-						this._defer.resolve(this.object);
-						return;
+						return this.cacheTouch().then(() => {
+							this._defer.notify('using local cache: ' + this.request.url);
+							this._defer.resolve(this.object);
+						});
 					}
 
 					// lets load it
@@ -436,6 +437,8 @@ module xm {
 								}
 							})
 						]);
+					}).then(() => {
+						return this.cacheTouch();
 					});
 				}).done(d.resolve, d.reject);
 
@@ -445,14 +448,28 @@ module xm {
 			private cacheRemove():Q.Promise<void> {
 				// maybe less strict check?
 				if (!this.canUpdate()) {
-					return Q.resolve(null);
+					return Q.resolve();
 				}
 				return Q.all([
-					this.removeFile(this.object.infoFile),
-					this.removeFile(this.object.bodyFile),
+					xm.FileUtil.removeFile(this.object.infoFile),
+					xm.FileUtil.removeFile(this.object.bodyFile),
 				]).then(() => {
 					this.track.event(CacheStreamLoader.cache_remove, this.request.url);
 				});
+			}
+
+			private cacheTouch():Q.Promise<void> {
+				var d:Q.Deferred<void> = Q.defer();
+				if (!this.canUpdate()) {
+					return Q.resolve();
+				}
+				Q.all([
+					xm.FileUtil.touchFile(this.object.infoFile),
+					xm.FileUtil.touchFile(this.object.bodyFile)
+				]).done(() => {
+					d.resolve();
+				}, d.reject);
+				return d.promise;
 			}
 
 			private copyInfo(res:QioHTTP.Response, checksum:string) {
@@ -504,27 +521,6 @@ module xm {
 				}).then(() => {
 					d.resolve();
 				}, d.reject).done();
-				return d.promise;
-			}
-
-			private removeFile(target:string):Q.Promise<void> {
-				var d:Q.Deferred<void> = Q.defer();
-				FS.exists(target).then((exists:boolean) => {
-					if (!exists) {
-						d.resolve();
-						return;
-					}
-					return FS.isFile(target).then((isFile:boolean) => {
-						if (!isFile) {
-							throw new Error('not a file: ' + target);
-						}
-						this.track.event(CacheStreamLoader.cache_remove, target);
-						return FS.remove(target).then(() => {
-							d.resolve();
-						});
-					});
-				}).fail(d.reject).done();
-
 				return d.promise;
 			}
 

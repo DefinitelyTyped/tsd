@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema",
-	"title": "CacheInfo",
+	"description": "Track caching info for a single (hashed) request",
 	"type": "object",
 	"required": [
 		"url",
