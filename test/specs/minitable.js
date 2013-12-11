@@ -192,7 +192,7 @@ describe('minitable', function () {
 		assert.deepEqual(actual, expected);
 	});
 
-	it('supports pinner/ outer acing', function () {
+	it('supports inner/ outer spacing', function () {
 		//TODO assert with miniwrite built-in assert (like ministyle etc do, when implemented)
 		var buffer = miniwrite.buffer();
 		var builder = minitable.getBuilder(buffer, ministyle.plain());

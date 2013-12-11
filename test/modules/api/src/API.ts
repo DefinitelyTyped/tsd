@@ -192,7 +192,7 @@ describe('API', () => {
 								return helper.listDefPaths(info.typingsDir).then((typings:string[]) => {
 									assert.includeMembers(typings, context.config.getInstalledPaths(), 'saved installed file');
 									if (test.modify && test.modify.written) {
-										var writenPaths = tsd.DefUtil.getPathsOf(result.written.values());
+										var writenPaths = tsd.DefUtil.getPathsOf(xm.valuesOf(result.written));
 										assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
 									}
 								});

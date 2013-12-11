@@ -185,17 +185,18 @@ module xm {
 			static drop_job = 'drop_job';
 
 			storeDir:string;
-			private jobs = new Map<string, CacheStreamLoader>();
 			opts:CacheOpts;
 			track:xm.EventLog;
 
 			infoKoder:IContentKoder<CacheInfo>;
 			infoSchema:any;
 
-			private remove = new Map<string, Timer>();
-
-			// auto clear
+			// linger & clear
 			jobTimeout:number = 1000;
+
+			private jobs = new Map<string, CacheStreamLoader>();
+			private remove = new Map<string, NodeTimer>();
+
 
 			private _init:Q.Promise<void>;
 

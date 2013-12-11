@@ -4218,9 +4218,9 @@ var xm;
 
         var HTTPCache = (function () {
             function HTTPCache(storeDir, opts) {
+                this.jobTimeout = 1000;
                 this.jobs = new Map();
                 this.remove = new Map();
-                this.jobTimeout = 1000;
                 xm.assertVar(storeDir, 'string', 'storeDir');
                 xm.assertVar(opts, CacheOpts, 'opts', true);
 
