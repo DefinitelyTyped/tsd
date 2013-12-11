@@ -1,0 +1,23 @@
+{
+  "name": "rx.async.js",
+  "description": "RxJS (Reactive Extensions for JavaScript) Async Module",
+  "versions": [
+    {
+      "version": "2.2",
+      "key": "6fc25290-6262-11e3-949a-0800200c9a66",
+      "dependencies": [
+        {
+          "name": "rx.js",
+          "version": "latest"
+        },
+        {
+          "name": "rx.binding.js",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.async.d.ts",
+      "author": "zoetrope",
+      "author_url": "https://github.com/zoetrope"
+    }
+  ]
+}

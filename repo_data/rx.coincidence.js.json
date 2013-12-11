@@ -1,0 +1,19 @@
+{
+  "name": "rx.coincidence.js",
+  "description": "RxJS (Reactive Extensions for JavaScript) Coincidence Module",
+  "versions": [
+    {
+      "version": "2.2",
+      "key": "ed5a1df0-6262-11e3-949a-0800200c9a66",
+      "dependencies": [
+        {
+          "name": "rx.js",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.coincidence.d.ts",
+      "author": "Carl de Billy",
+      "author_url": "http://carl.debilly.net/"
+    }
+  ]
+}
