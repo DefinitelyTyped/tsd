@@ -217,7 +217,7 @@ module helper {
 			}
 		});
 
-		child.on('error', (err:Error) => {
+		child.on('error', (err:any) => {
 			if (err) {
 				xm.log.error('child process exited with code ' + err.code);
 				xm.log.error(err);
