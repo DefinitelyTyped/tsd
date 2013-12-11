@@ -7,7 +7,6 @@
  * */
 
 ///<reference path="../_ref.d.ts" />
-///<reference path="../KeyValueMap.ts" />
 ///<reference path="../iterate.ts" />
 ///<reference path="../assertVar.ts" />
 ///<reference path="../typeOf.ts" />
@@ -109,9 +108,9 @@ module xm {
 	//TODO drop optimist for something simpler (minimist)
 	export class Expose {
 
-		commands = new KeyValueMap<ExposeCommand>();
-		options = new KeyValueMap<ExposeOption>();
-		groups = new KeyValueMap<ExposeGroup>();
+		commands = new Map<string, ExposeCommand>();
+		options = new Map<string, ExposeOption>();
+		groups = new Map<string, ExposeGroup>();
 		mainGroup = new ExposeGroup();
 
 		private _isInit = false;
@@ -192,19 +191,18 @@ module xm {
 			}
 			this._isInit = true;
 
-			xm.eachProp(this.options.keys(), (name) => {
-				var option:ExposeOption = this.options.get(name);
+			xm.valuesOf(this.options).forEach((option:ExposeOption) => {
 				if (option.short) {
 					optimist.alias(option.name, option.short);
 				}
 				//TODO get rid of optimist's defaults
 			});
 
-			this.groups.values().forEach((group:xm.ExposeGroup) => {
+			xm.valuesOf(this.groups).forEach((group:xm.ExposeGroup) => {
 				this.validateOptions(group.options);
 			});
 
-			this.commands.values().forEach((cmd:xm.ExposeCommand) => {
+			xm.valuesOf(this.commands).forEach((cmd:xm.ExposeCommand) => {
 				this.validateOptions(cmd.options);
 			});
 		}
@@ -254,7 +252,7 @@ module xm {
 				alt = 'help';
 			}
 
-			var options:ExposeOption[] = this.options.values();
+			var options:ExposeOption[] = xm.valuesOf(this.options);
 			var opt:ExposeOption;
 			var i:number, ii:number;
 

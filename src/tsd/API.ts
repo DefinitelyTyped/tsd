@@ -2,7 +2,6 @@
 ///<reference path="Core.ts" />
 ///<reference path="context/Context.ts" />
 ///<reference path="select/Query.ts" />
-///<reference path="../xm/KeyValueMap.ts" />
 
 module tsd {
 	'use strict';
@@ -15,9 +14,9 @@ module tsd {
 	export class InstallResult {
 
 		options:tsd.Options;
-		written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
-		removed:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
-		skipped:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
+		written:Map<string, tsd.DefVersion> = new Map();
+		removed:Map<string, tsd.DefVersion> = new Map();
+		skipped:Map<string, tsd.DefVersion> = new Map();
 
 		constructor(options:tsd.Options) {
 			xm.assertVar(options, tsd.Options, 'options');
@@ -107,7 +106,7 @@ module tsd {
 			var res = new tsd.InstallResult(options);
 			var files:tsd.DefVersion[] = tsd.DefUtil.mergeDependencies(selection.selection);
 
-			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles).progress(d.notify).then((written:xm.IKeyValueMap) => {
+			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles).progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
 				if (!written) {
 					throw new Error('expected install paths');
 				}
@@ -133,7 +132,7 @@ module tsd {
 
 			var res = new tsd.InstallResult(options);
 
-			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles).progress(d.notify).then((map:xm.IKeyValueMap) => {
+			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles).progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
 				res.written = map;
 			}).then(() => {
 				if (options.saveToConfig) {

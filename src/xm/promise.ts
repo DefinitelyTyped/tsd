@@ -1,5 +1,4 @@
 ///<reference path="../_ref.d.ts" />
-///<reference path="KeyValueMap.ts" />
 ///<reference path="assertVar.ts" />
 
 module xm {
@@ -8,16 +7,22 @@ module xm {
 
 	var Q = require('q');
 
-	export class ActionMap<T> extends xm.KeyValueMap<T> {
+	export class ActionMap<T> {
+
+		private _map = new Map<string, T>();
 
 		constructor(data?:any) {
-			super(data);
+			if (data) {
+				Object.keys(data).forEach((key:string, value:T) => {
+					this._map.set(key, value);
+				});
+			}
 		}
 
 		run(id:string, call:(value:T) => any, optional:boolean = false):Q.Promise<T> {
-			if (this.has(id)) {
+			if (this._map.has(id)) {
 				//cast as any
-				return Q(call(this.get(id)));
+				return Q(call(this._map.get(id)));
 			}
 			else if (!optional) {
 				return Q.reject(new Error('missing action: ' + id));
@@ -41,6 +46,18 @@ module xm {
 
 			return defer.promise;
 		}
+
+		has(key:string) {
+			return this._map.has(key);
+		}
+
+		get(key:string) {
+			return this._map.get(key);
+		}
+
+		set(key:string, value:T) {
+			return this._map.set(key, value);
+		}
 	}
 
 	export class PromiseHandle<T> {
@@ -57,7 +74,7 @@ module xm {
 
 	export class PromiseStash<T> {
 
-		private _stash:xm.KeyValueMap<Q.Deferred<T>> = new xm.KeyValueMap();
+		private _stash = new Map<string, Q.Deferred<T>>();
 
 		constructor() {
 		}
@@ -93,7 +110,7 @@ module xm {
 		}
 
 		remove(key:string):void {
-			return this._stash.remove(key);
+			this._stash.delete(key);
 		}
 	}
 }

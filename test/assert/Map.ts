@@ -1,23 +1,22 @@
-///<reference path="../../helper.ts" />
-///<reference path="../../../src/xm/StatCounter.ts" />
-///<reference path="../../../src/xm/KeyValueMap.ts" />
+///<reference path="../helper.ts" />
+///<reference path="../../src/xm/StatCounter.ts" />>
 
 module helper {
 	'use strict';
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	export function assertKeyValue<T>(map:xm.IKeyValueMap<T>, values:any, assertion:AssertCB<T>, message:string):void {
+	export function assertMap<V>(map:Map<string, V>, values:any, assertion:AssertCB<V>, message:string):void {
 		assert.isObject(map, message + ': map');
 		assert.isObject(values, message + ': values');
 		assert.isFunction(assertion, message + ': assertion');
 
-		var mapKeys:string[] = map.keys().sort();
+		var mapKeys:string[] = xm.keysOf(map).sort();
 		var valueKeys:string[] = Object.keys(values).sort();
 
 		assert.sameMembers(mapKeys, valueKeys, message + ': same paths');
 
-		var keys:string[] = map.keys();
+		var keys:string[] = mapKeys.slice(0);
 		valueKeys.forEach((key:string) => {
 			var i = keys.indexOf(key);
 			assert(i > -1, message + ': expected key "' + key + '"');

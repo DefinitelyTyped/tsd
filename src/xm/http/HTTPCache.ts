@@ -185,14 +185,14 @@ module xm {
 			static drop_job = 'drop_job';
 
 			storeDir:string;
-			private jobs = new xm.KeyValueMap<CacheStreamLoader>();
+			private jobs = new Map<string, CacheStreamLoader>();
 			opts:CacheOpts;
 			track:xm.EventLog;
 
 			infoKoder:IContentKoder<CacheInfo>;
 			infoSchema:any;
 
-			private remove = new xm.KeyValueMap<Timer>();
+			private remove = new Map<string, Timer>();
 
 			// auto clear
 			jobTimeout:number = 1000;
@@ -263,7 +263,7 @@ module xm {
 						//TODO why both?
 						this.track.logger.debug(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
-						this.jobs.remove(key);
+						this.jobs.delete(key);
 
 					}, this.jobTimeout));
 				}

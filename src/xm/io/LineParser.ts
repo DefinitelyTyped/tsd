@@ -7,7 +7,7 @@
  * */
 
 ///<reference path="../_ref.d.ts" />
-///<reference path="../KeyValueMap.ts" />
+///<reference path="../collection.ts" />
 ///<reference path="../iterate.ts" />
 
 module xm {
@@ -21,7 +21,7 @@ module xm {
 	 */
 	export class LineParserCore {
 
-		parsers = new xm.KeyValueMap();
+		parsers = new Map<string, LineParser>();
 
 		constructor(public verbose:boolean = false) {
 
@@ -33,16 +33,16 @@ module xm {
 
 		getInfo() {
 			var ret:any = {};
-			ret.parsers = this.parsers.keys().sort();
+			ret.parsers = xm.keysOf(this.parsers).sort();
 			return ret;
 		}
 
 		getParser(id:string):LineParser {
-			return this.parsers.get(id, null);
+			return this.parsers.get(id);
 		}
 
 		private link() {
-			xm.eachElem(this.parsers.values(), (parser:LineParser) => {
+			xm.valuesOf(this.parsers).forEach((parser:LineParser) => {
 				xm.eachElem(parser.nextIds, (id:string) => {
 					var p = this.parsers.get(id);
 					if (p) {
@@ -67,7 +67,7 @@ module xm {
 		}
 
 		all():LineParser[] {
-			return this.parsers.values();
+			return xm.valuesOf(this.parsers);
 		}
 
 		listIds(parsers:LineParser[]):string[] {

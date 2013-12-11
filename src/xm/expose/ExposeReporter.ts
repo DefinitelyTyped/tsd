@@ -7,6 +7,7 @@
  * */
 
 ///<reference path="../_ref.d.ts" />
+///<reference path="../collection.ts" />
 ///<reference path="../io/StyledOut.ts" />
 ///<reference path="../expose/Expose.ts" />
 
@@ -160,7 +161,7 @@ module xm {
 				return exposeSortOption(this.expose.options.get(one), this.expose.options.get(two));
 			};
 
-			var optKeys = this.expose.options.keys().sort(sortOptionName);
+			var optKeys = xm.keysOf(this.expose.options).sort(sortOptionName);
 
 			var firstHeader = true;
 			var addHeader = (title:string) => {
@@ -182,7 +183,7 @@ module xm {
 
 			var addOption = (name:string) => {
 				commands.next();
-				var option:ExposeOption = this.expose.options.get(name, null);
+				var option:ExposeOption = this.expose.options.get(name);
 				var command = commands.row.command.out;
 				var label = commands.row.label.out;
 				if (!option) {
@@ -251,8 +252,8 @@ module xm {
 				}
 			};
 
-			var allCommands = this.expose.commands.keys();
-			var allGroups = this.expose.groups.values();
+			var allCommands = xm.keysOf(this.expose.commands);
+			var allGroups = xm.valuesOf(this.expose.groups);
 
 			optKeys.forEach((name:string) => {
 				var option:ExposeOption = this.expose.options.get(name);
@@ -271,9 +272,9 @@ module xm {
 			});
 
 			if (allGroups.length > 0) {
-				this.expose.groups.values().sort(exposeSortGroup).forEach((group:ExposeGroup) => {
+				xm.valuesOf(this.expose.groups).sort(exposeSortGroup).forEach((group:ExposeGroup) => {
 
-					var contents = this.expose.commands.values().filter((cmd:ExposeCommand) => {
+					var contents = xm.valuesOf(this.expose.commands).filter((cmd:ExposeCommand) => {
 						return cmd.groups.indexOf(group.name) > -1;
 					});
 					if (contents.length > 0) {

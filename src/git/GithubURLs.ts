@@ -3,7 +3,6 @@
 ///<reference path="GithubRepo.ts" />
 ///<reference path="../xm/assertVar.ts" />
 ///<reference path="../xm/ObjectUtil.ts" />
-///<reference path="../xm/KeyValueMap.ts" />
 ///<reference path="../xm/io/URLManager.ts" />
 
 module git {

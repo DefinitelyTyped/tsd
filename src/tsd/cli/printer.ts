@@ -150,18 +150,19 @@ module tsd {
 
 			installResult(result:tsd.InstallResult):xm.StyledOut {
 				//TODO fix pluralised reporting
-				if (result.written.keys().length === 0) {
+				var keys = xm.keysOf(result.written);
+				if (keys.length === 0) {
 					this.output.ln().report(true).span('written ').accent('zero').span(' files').ln();
 				}
-				else if (result.written.keys().length === 1) {
-					this.output.ln().report(true).span('written ').accent(result.written.keys().length).span(' file:').ln().ln();
+				else if (keys.length === 1) {
+					this.output.ln().report(true).span('written ').accent(keys.length).span(' file:').ln().ln();
 				}
 				else {
-					this.output.ln().report(true).span('written ').accent(result.written.keys().length).span(' files:').ln().ln();
+					this.output.ln().report(true).span('written ').accent(keys.length).span(' files:').ln().ln();
 				}
 
 				//TODO report on written/skipped
-				result.written.keys().sort().forEach((path:string) => {
+				keys.sort().forEach((path:string) => {
 					var file:tsd.DefVersion = result.written.get(path);
 					this.output.indent().bullet(true).glue(this.file(file)).ln();
 				});

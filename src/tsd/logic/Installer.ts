@@ -42,13 +42,13 @@ module tsd {
 
 		/*
 		 bulk version of installFile()
-		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
+		 promise: Map: mapping path of written file -> DefVersion
 		 */
-		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true, overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
-			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+		installFileBulk(list:tsd.DefVersion[], addToConfig:boolean = true, overwrite:boolean = true):Q.Promise<Map<string, DefVersion>> {
+			var d:Q.Deferred<Map<string, DefVersion>> = Q.defer();
 			this.track.promise(d.promise, 'file_bulk');
 
-			var written:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
+			var written = new Map<string, DefVersion>();
 
 			Q.all(list.map((file:tsd.DefVersion) => {
 				return this.installFile(file, addToConfig, overwrite).progress(d.notify).then((targetPath:string) => {
@@ -65,13 +65,13 @@ module tsd {
 
 		/*
 		 reinstall multiple DefVersion's from InstalledDef data
-		 promise: xm.IKeyValueMap: mapping path of written file -> DefVersion
+		 promise: Map: mapping path of written file -> DefVersion
 		 */
-		reinstallBulk(list:tsd.InstalledDef[], overwrite:boolean = false):Q.Promise<xm.IKeyValueMap<DefVersion>> {
-			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+		reinstallBulk(list:tsd.InstalledDef[], overwrite:boolean = false):Q.Promise<Map<string, DefVersion>> {
+			var d:Q.Deferred<Map<string, DefVersion>> = Q.defer();
 			this.track.promise(d.promise, 'reinstall_bulk');
 
-			var written = new xm.KeyValueMap();
+			var written = new Map<string, DefVersion>();
 
 			Q.all(list.map((installed:tsd.InstalledDef) => {
 				return this.core.index.procureFile(installed.path, installed.commitSha).progress(d.notify).then((file:tsd.DefVersion)=> {
@@ -128,17 +128,17 @@ module tsd {
 
 		/*
 		 bulk version of useFile()
-		 promise: xm.IKeyValueMap: mapping absolute path of written file -> DefVersion
+		 promise: Map: mapping absolute path of written file -> DefVersion
 		 */
-		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Q.Promise<xm.IKeyValueMap<DefVersion>> {
-			var d:Q.Deferred<xm.IKeyValueMap<DefVersion>> = Q.defer();
+		useFileBulk(list:tsd.DefVersion[], overwrite:boolean = true):Q.Promise<Map<string, DefVersion>> {
+			var d:Q.Deferred<Map<string, DefVersion>> = Q.defer();
 			this.track.promise(d.promise, 'use_bulk');
 
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
 			//this could be a bit more then just 'written'
-			var written:xm.IKeyValueMap<DefVersion> = new xm.KeyValueMap();
+			var written = new Map<string, DefVersion>();
 
 			Q.all(list.map((file:tsd.DefVersion) => {
 				return this.useFile(file, overwrite).progress(d.notify).then((targetPath:string) => {

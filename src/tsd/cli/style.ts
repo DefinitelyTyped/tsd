@@ -1,7 +1,6 @@
 ///<reference path="../_ref.ts" />
 ///<reference path="../../xm/expose/ExposeContext.ts" />
 ///<reference path="../../xm/io/StyledOut.ts" />
-///<reference path="../../xm/KeyValueMap.ts" />
 
 module tsd {
 
@@ -13,14 +12,14 @@ module tsd {
 		export class StyleMap {
 
 			outputs:xm.StyledOut[] = [];
-			_styleMap:xm.KeyValueMap<(ctx:xm.ExposeContext) => void>;
+			_styleMap:Map<string, (ctx:xm.ExposeContext) => void>;
 
 			constructor(output:xm.StyledOut) {
 				xm.assertVar(output, xm.StyledOut, 'output');
 
 				this.addOutput(output);
 
-				this._styleMap = new xm.KeyValueMap<any>();
+				this._styleMap = new Map();
 
 				this._styleMap.set('no', (ctx:xm.ExposeContext) => {
 					this.outputs.forEach((output) => {
@@ -45,7 +44,7 @@ module tsd {
 				});
 				this._styleMap.set('css', (ctx:xm.ExposeContext) => {
 					this.outputs.forEach((output) => {
-						output.useStyle(ministyle.html(true));
+						output.useStyle(ministyle.css('', true));
 						output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
 					});
 				});
@@ -63,7 +62,7 @@ module tsd {
 			}
 
 			getKeys():string[] {
-				return this._styleMap.keys();
+				return xm.keysOf(this._styleMap);
 			}
 
 			useColor(color:string, ctx:xm.ExposeContext) {

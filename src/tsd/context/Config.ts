@@ -56,7 +56,7 @@ module tsd {
 		repo:string;
 		ref:string;
 
-		private _installed:xm.IKeyValueMap<InstalledDef> = new xm.KeyValueMap();
+		private _installed:Map<string, tsd.InstalledDef> = new Map();
 		private _schema:any;
 
 		log:xm.Logger = xm.getLogger('Config');
@@ -133,21 +133,21 @@ module tsd {
 
 		getFile(filePath:string):tsd.InstalledDef {
 			xm.assertVar(filePath, 'string', 'filePath');
-			return this._installed.get(filePath, null);
+			return this._installed.has(filePath) ? this._installed.get(filePath) : null;
 		}
 
 		removeFile(filePath:string) {
 			xm.assertVar(filePath, 'string', 'filePath');
-			this._installed.remove(filePath);
+			this._installed.delete(filePath);
 		}
 
 		getInstalled():tsd.InstalledDef[] {
-			return this._installed.values();
+			return xm.valuesOf(this._installed);
 		}
 
 		getInstalledPaths():string[] {
-			return this._installed.values().map((file:tsd.InstalledDef) => {
-				return file.path;
+			return xm.valuesOf(this._installed).map((value:InstalledDef) => {
+				return value.path;
 			});
 		}
 
@@ -160,7 +160,8 @@ module tsd {
 				installed: {}
 			};
 
-			this._installed.values().forEach((file:tsd.InstalledDef) => {
+			xm.keysOf(this._installed).forEach((key:string) => {
+				var file = this._installed.get(key);
 				json.installed[file.path] = {
 					commit: file.commitSha
 					//what more?

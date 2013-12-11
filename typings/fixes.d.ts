@@ -1,4 +1,3 @@
-
 interface ReadOnlyBuffer {
 	toString(encoding?:string, start?:number, end?:number): string;
 	length: number;
@@ -21,10 +20,24 @@ interface ReadOnlyBuffer {
 
 interface NodeModule {
 	exports: any;
-	require(id: string): any;
+	require(id:string): any;
 	id: string;
 	filename: string;
 	loaded: boolean;
 	parent: any;
 	children: any[];
+}
+
+interface ArrayIterator<T> {
+	next():ArrayIteratorTuple<T>;
+}
+
+interface ArrayIteratorTuple<T> {
+	done:boolean;
+	value:T;
+}
+
+interface Map<K, V> {
+	keys(): ArrayIterator<K>;
+	values():  ArrayIterator<V>;
 }

@@ -7,7 +7,6 @@
  * */
 
 ///<reference path="../../_ref.d.ts" />
-///<reference path="../KeyValueMap.ts" />
 ///<reference path="../typeOf.ts" />
 
 module xm {

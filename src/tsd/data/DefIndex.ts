@@ -22,10 +22,10 @@ module tsd {
 		private _hasIndex:boolean = false;
 		private _indexCommit:tsd.DefCommit = null;
 
-		private _definitions:xm.IKeyValueMap<tsd.Def> = new xm.KeyValueMap();
-		private _commits:xm.IKeyValueMap<tsd.DefCommit> = new xm.KeyValueMap();
-		private _blobs:xm.IKeyValueMap<tsd.DefBlob> = new xm.KeyValueMap();
-		private _versions:xm.IKeyValueMap<tsd.DefVersion> = new xm.KeyValueMap();
+		private _definitions = new Map<string, tsd.Def>();
+		private _commits = new Map<string, tsd.DefCommit>();
+		private _blobs = new Map<string, tsd.DefBlob>();
+		private _versions = new Map<string, tsd.DefVersion>();
 
 		constructor() {
 			//hide from inspect()
@@ -254,7 +254,7 @@ module tsd {
 		}
 
 		getDef(path:string):tsd.Def {
-			return this._definitions.get(path, null);
+			return this._definitions.get(path);
 		}
 
 		hasDef(path:string):boolean {
@@ -262,7 +262,7 @@ module tsd {
 		}
 
 		getBlob(sha:string):tsd.DefBlob {
-			return this._blobs.get(sha, null);
+			return this._blobs.get(sha);
 		}
 
 		hasBlob(sha:string):boolean {
@@ -270,7 +270,7 @@ module tsd {
 		}
 
 		getCommit(sha:string):tsd.DefCommit {
-			return this._commits.get(sha, null);
+			return this._commits.get(sha);
 		}
 
 		hasCommit(sha:string):boolean {
@@ -278,7 +278,7 @@ module tsd {
 		}
 
 		getPaths():string[] {
-			return this._definitions.values().map((file:Def) => {
+			return xm.valuesOf(this._definitions).map((file:Def) => {
 				return file.path;
 			});
 		}
@@ -286,7 +286,7 @@ module tsd {
 		toDump():string {
 			var ret:string[] = [];
 			ret.push(this.toString());
-			var arr = this._definitions.values();
+			var arr = xm.valuesOf(this._definitions);
 			arr.forEach((def:Def) => {
 				ret.push('  ' + def.toString());
 				//ret.push('  ' + def.head.toString());
@@ -305,7 +305,7 @@ module tsd {
 
 		get list():Def[] {
 			//need generics :)
-			return <Def[]>this._definitions.values();
+			return <Def[]>xm.valuesOf(this._definitions);
 		}
 
 		get indexCommit():tsd.DefCommit {

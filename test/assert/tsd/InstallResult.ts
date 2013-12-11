@@ -14,19 +14,19 @@ module helper {
 		var json:any = {};
 		if (result.written) {
 			json.written = {};
-			result.written.keys().forEach((key:string) => {
+			xm.keysOf(result.written).forEach((key:string) => {
 				json.written[key] = helper.serialiseDefVersion(result.written.get(key), recursive);
 			});
 		}
 		if (result.removed) {
 			json.removed = {};
-			result.removed.keys().forEach((key:string) => {
+			xm.keysOf(result.removed).forEach((key:string) => {
 				json.removed[key] = helper.serialiseDefVersion(result.removed.get(key), recursive);
 			});
 		}
 		if (result.skipped) {
 			json.skipped = {};
-			result.skipped.keys().forEach((key:string) => {
+			xm.keysOf(result.skipped).forEach((key:string) => {
 				json.skipped[key] = helper.serialiseDefVersion(result.skipped.get(key), recursive);
 			});
 		}
@@ -41,13 +41,13 @@ module helper {
 		assert.instanceOf(result, tsd.InstallResult, message + ': result');
 
 		if (values.written) {
-			helper.assertKeyValue(result.written, values.written, helper.assertDefVersionFlat, message + ': written');
+			helper.assertMap(result.written, values.written, helper.assertDefVersionFlat, message + ': written');
 		}
 		if (values.removed) {
-			helper.assertKeyValue(result.removed, values.removed, helper.assertDefVersionFlat, message + ': removed');
+			helper.assertMap(result.removed, values.removed, helper.assertDefVersionFlat, message + ': removed');
 		}
 		if (values.skipped) {
-			helper.assertKeyValue(result.skipped, values.skipped, helper.assertDefVersionFlat, message + ': skipped');
+			helper.assertMap(result.skipped, values.skipped, helper.assertDefVersionFlat, message + ': skipped');
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ///<reference path="_ref.d.ts" />
 ///<reference path="globals.ts" />
 ///<reference path="assert/xm/_all.ts" />
-///<reference path="assert/xm/unordered.ts" />
+///<reference path="assert/Map.ts" />
 ///<reference path="../src/xm/data/PackageJSON.ts" />
 
 module helper {
