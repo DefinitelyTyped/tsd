@@ -979,134 +979,6 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var path = require('path');
-
-    (function (stack) {
-        var stackExp = /^ *at (.*?) \((.*?)(?::(\d+))?(?::(\d+))?\)$/gm;
-
-        var Stackline = (function () {
-            function Stackline() {
-                this.line = NaN;
-                this.column = NaN;
-            }
-            Stackline.prototype.getLink = function () {
-                if (!this.file) {
-                    return '';
-                }
-                if (isNaN(this.line)) {
-                    return this.file;
-                }
-                var ret = '[' + this.line;
-                if (!isNaN(this.column)) {
-                    ret += ',' + this.column;
-                }
-                return this.file + ret + ']';
-            };
-            return Stackline;
-        })();
-        stack.Stackline = Stackline;
-
-        function getRawStack(err) {
-            err = err || new Error();
-            if (err.stack) {
-                if (typeof (chrome) !== 'undefined' || typeof (process) !== 'undefined') {
-                    return err.stack.replace(/\n[^\n]*/, '');
-                } else if (typeof (Components) !== 'undefined') {
-                    return err.stack.substring(err.stack.indexOf('\n') + 1);
-                } else {
-                    return err.stack;
-                }
-            }
-            return '';
-        }
-        stack.getRawStack = getRawStack;
-
-        function isAbsolute(str) {
-            str = path.normalize(str);
-            var resolve = path.resolve(str);
-            if (resolve === str) {
-                return true;
-            }
-            return false;
-        }
-
-        function trimInternalLines(lines) {
-            var cut = lines.length - 1;
-            while (cut > 0) {
-                var line = lines[cut];
-                if (!line.internal) {
-                    break;
-                }
-                cut--;
-            }
-            return lines.slice(0, cut + 1);
-        }
-        stack.trimInternalLines = trimInternalLines;
-
-        function lineFromMatch(match) {
-            var len = match.length;
-
-            var line = new Stackline();
-            line.call = match[1];
-
-            line.file = len > 1 ? match[2] : '';
-
-            line.line = len > 2 ? parseInt(match[3], 10) : NaN;
-            line.column = len > 3 ? parseInt(match[4], 10) : NaN;
-
-            line.link = line.getLink();
-
-            line.absolute = isAbsolute(line.file);
-            line.internal = !line.absolute;
-            return line;
-        }
-
-        function getStackLines(keep, offset, trim, err) {
-            if (typeof keep === "undefined") { keep = 0; }
-            if (typeof offset === "undefined") { offset = 0; }
-            if (typeof trim === "undefined") { trim = false; }
-            var stack = getRawStack(err);
-
-            var trimTop = 2 + offset;
-            var keepBottom = keep + offset;
-
-            var line;
-            var lines = [];
-            var match;
-
-            stackExp.lastIndex = 0;
-
-            while ((match = stackExp.exec(stack))) {
-                stackExp.lastIndex = match.index + match[0].length;
-
-                trimTop--;
-                if (trimTop > 0) {
-                    continue;
-                }
-                line = lineFromMatch(match);
-
-                lines.push(line);
-
-                if (keep > 0) {
-                    keepBottom--;
-                    if (keepBottom <= 0) {
-                        break;
-                    }
-                }
-            }
-            if (trim) {
-                lines = trimInternalLines(lines);
-            }
-            return lines;
-        }
-        stack.getStackLines = getStackLines;
-    })(xm.stack || (xm.stack = {}));
-    var stack = xm.stack;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
     var util = require('util');
 
     xm.consoleOut = new xm.StyledOut();
@@ -7978,7 +7850,7 @@ var xm;
                 };
             }, function (err) {
                 return {
-                    code: (err.code && err.code > 0) ? err.code : 1,
+                    code: (err.code && err.code !== 0 ? err.code : 1),
                     error: err,
                     ctx: ctx
                 };

@@ -13,7 +13,6 @@ module.exports = function (grunt) {
 	}
 	var cpuCores = require('os').cpus().length;
 	//grunt.log.writeln(util.inspect(process.env));
-	require('time-grunt')(grunt);
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 	gtx.loadAuto();
@@ -104,6 +103,9 @@ module.exports = function (grunt) {
 				noImplicitAny: false
 			},
 			api: {
+				options: {
+					reference: 'src/reference.ts'
+				},
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},

@@ -323,9 +323,9 @@ module xm {
 					code: 0,
 					ctx: ctx
 				};
-			}, (err:Error) => {
+			}, (err:any) => {
 				return {
-					code: (err.code && err.code > 0) ? err.code : 1,
+					code: (err.code && err.code !== 0 ? err.code : 1),
 					error: err,
 					ctx: ctx
 				};

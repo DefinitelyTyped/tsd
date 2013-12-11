@@ -3,17 +3,23 @@
 		"tslint is still in development: some rules wait for fixes"
 	],
 	"rules": {
+		"ban": [],
 		"class-name": true,
+		"x__comment-format": [true,
+			"check-space",
+			"check-lowercase"
+		],
 		"curly": true,
 		"eofline": true,
 		"forin": true,
 		"indent": [true, 4],
+		"interface-name": false,
 		"label-position": true,
 		"label-undefined": true,
 		"x__max-line-length": [
 			"for legacy reasons this is insanely high, should be < ~120"
 		],
-		"max-line-length": [true, 240],
+		"max-line-length": [true, 200],
 		"no-arg": true,
 		"no-bitwise": true,
 		"no-console": [true,
@@ -32,7 +38,7 @@
 		"no-string-literal": false,
 		"no-trailing-whitespace": true,
 		"no-unreachable": true,
-		"x___one-line": [true,
+		"x__one-line": [true,
 			"check-catch",
 			"check-else"
 		],
@@ -40,13 +46,37 @@
 			"check-open-brace",
 			"check-whitespace"
 		],
-		"quotemark": [true, "single"],
+		"quotemark": [true,
+			"single"
+		],
 		"radix": true,
 		"semicolon": true,
-		"triple-equals": [true, "allow-null-check"],
-		"variable-name": false,
-		"x___whitespace": [
-			true,
+		"triple-equals": [true,
+			"allow-null-check"
+		],
+		"x__typedef": [
+			"callSignature",
+			"parameter",
+			"variableDeclarator",
+			"catchClause"
+		],
+		"typedef": [true,
+			"indexSignature",
+			"propertySignature"
+		],
+		"typedef-whitespace": [true,
+			{
+				"callSignature": "nospace",
+				"catchClause": "nospace",
+				"indexSignature": "nospace",
+				"parameter": "nospace",
+				"propertySignature": "nospace",
+				"variableDeclarator": "nospace"
+			}
+		],
+		"x__variable-name": [true,
+			"allow-leading-underscore"],
+		"x__whitespace": [true,
 			"check-type"
 		],
 		"whitespace": [true,

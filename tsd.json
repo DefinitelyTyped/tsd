@@ -11,28 +11,10 @@
       "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768"
     },
     "node/node.d.ts": {
-      "commit": "684691c72037377257c72c35d2eaa8d76fea58e8"
-    },
-    "underscore/underscore.d.ts": {
-      "commit": "6b5f41cf318dd6c32fc405067e63921dcd447768"
-    },
-    "angularjs/angular-cookies.d.ts": {
-      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638"
-    },
-    "angularjs/angular.d.ts": {
-      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638"
-    },
-    "jquery/jquery.d.ts": {
-      "commit": "d922319a867ab8d93acffd35a7500b3f4233e638"
+      "commit": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
     },
     "q/Q.d.ts": {
       "commit": "994826736356e9a5fa23a34f7daf5734ad6dfdcc"
-    },
-    "async/async.d.ts": {
-      "commit": "684691c72037377257c72c35d2eaa8d76fea58e8"
-    },
-    "node/node-0.8.8.d.ts": {
-      "commit": "684691c72037377257c72c35d2eaa8d76fea58e8"
     }
   }
 }

@@ -1,6 +1,6 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd)
+[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [[![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
 > TypeScript Definition Package Manager
 
@@ -17,7 +17,7 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 	*	There will be bugs and quirks. We do out best to remove the bugs.
 * It is recommended you check-in any definitions you install into your VCS:
 	*	As we link directly to the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repo files may get moved or renamed. 
-	*	The new `tsd.json` format saves [repo + commit + path] to find the correct file in space/time, but this might not be implemented yet.
+	*	The `tsd.json` file saves [repo + commit + path], but full deeplink might not be implemented yet.
 
 ### API change
 
@@ -241,3 +241,5 @@ Licensed under the [Apache License, Version 2.0](https://raw.github.com/Definite
 Copyright (c) 2012 by Diullei Gomes
 
 Licensed under the MIT License. 
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/DefinitelyTyped/tsd/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

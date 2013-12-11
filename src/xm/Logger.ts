@@ -7,7 +7,6 @@
  * */
 
 /// <reference path="io/StyledOut.ts" />
-/// <reference path="stack.ts" />
 
 module xm {
 	'use strict';
