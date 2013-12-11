@@ -103,9 +103,6 @@ module.exports = function (grunt) {
 				noImplicitAny: false
 			},
 			api: {
-				options: {
-					reference: 'src/reference.ts'
-				},
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},
@@ -120,6 +117,10 @@ module.exports = function (grunt) {
 			}
 		},
 		shell: {
+			options :{
+				failOnError: true,
+				stdout: true
+			},
 			demo_help: {
 				command: [
 					'node', './build/cli.js',
@@ -127,7 +128,6 @@ module.exports = function (grunt) {
 					'--capture'
 				].join(' '),
 				options: {
-					stdout: true
 				}
 			},
 			demo_html: {
@@ -137,7 +137,6 @@ module.exports = function (grunt) {
 					'--style', 'html'
 				].join(' '),
 				options: {
-					stdout: true
 				}
 			},
 			//use this to test stuff
@@ -151,7 +150,6 @@ module.exports = function (grunt) {
 					'--dev'
 				].join(' '),
 				options: {
-					stdout: true
 				}
 			}
 		},
