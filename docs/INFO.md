@@ -5,7 +5,6 @@
 See also:
 
 * Main [readme](../README.md)
-* Project [scope](SCOPE.md)
 * Things [todo](TODO.md)
 * More about [code](CODE.md)
 

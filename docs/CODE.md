@@ -7,7 +7,6 @@
 See also:
 
 * Main [readme](../README.md)
-* Project [scope](SCOPE.md)
 * Some extra [info](INFO.md)
 * Things [todo](TODO.md)
 
@@ -49,33 +48,37 @@ Logical building blocks in `/tsd/logic`
 Selector stuff `/tsd/select`
 
 * `Selector` and related data objects:
-	* `NameMatcher` matches the proejct/name-glob (needs expansion, see note in class)  
+	* `NameMatcher` matches the project/name-glob (needs expansion, see note in class)  
 
 
 ## Sub projects
 
-TSD is also proving-grounds @Bartvds's sub projects:
+TSD is also a incubator and proving-ground for some of @Bartvds's sub-projects:
 
 **git.***
 
-Github module to pull data from API and RAW, based on promises with focus on heavy caching (using `xm.HTTPCache`). 
+Github module to pull data from API and RAW, based on promises with focus on heavy caching (using `xm.http.HTTPCache`). 
 
 **xm.assertVar** / **xm.typeOf**
 
-Usable runtime cehcks and assertions, will be an assertion/testing/assessment library.. one day.
+Usable runtime checks and assertions, will be an assertion/testing/assessment library.. one day.
 
 **xm.StyledOut** / **xm.Logger**
 
 Chainable semantic output log/stream constructs. Provide auto-suggest friendly and string-poor text formatting (with many outputs, composites with miniwrite/ministyle).
 
-**xm.Expose**
+**xm.expose.~**
 
 CLI interface, abstracted with nice API. Very declarative but allows fluid building of CLI API in compiler checked way with good auto suggestion. Has all the info to print the help screens.
 
-**xm.HTTPCache**
+**xm.http.~**
 
-Http cache loader (generation 2). Used shared local disk cache and http-caching features. Queued for another update to support streams, gzip/deflate etc.
+Http cache loader (generation 3). Uses a shared local cache with http-caching features. Queued for another update to support big files.
 
 **xm** *package (rest)*
 
 Many TypeScript based utilities. Over time each will either consolidate or get ditched for external modules.
+
+**./src/mini~.js**
+
+Minimalistic output helpers. So far yieled [miniwrite](https://github.com/Bartvds/miniwrite) and [ministyle](https://github.com/Bartvds/ministyle).

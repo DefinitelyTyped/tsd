@@ -2,27 +2,27 @@
 
 [![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
-> TypeScript Definition Package Manager
+> TypeScript Definition package manager for DefinitelyTyped
 
-TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package manager. Search and install community contributed definition files directly from the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) Github repository. TSD works as a CLI command `$ tsd` similar to `$ npm` and `$ bower`. All functionality is also exported as a node.js module. 
-
-*Note:* the Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. To keep within this limit TSD employs both local and http caching layers. The actual definition files are downloaded over the Github RAW service (also with local and http cache).
+TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
 :bangbang: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
 
-**Preview notes** :warning: 
+### 0.5.x Preview notes :warning: 
 
-* Version `0.5.x` is functional and usable but still in development:
+*	Version `0.5.x` is functional and usable but still in development:
 	*	If you decide to use it be sure to update regularly.
 	*	There will be bugs and quirks. We do out best to remove the bugs.
-* It is recommended you check-in any definitions you install into your VCS:
-	*	As we link directly to the [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repo files may get moved or renamed. 
-	*	The `tsd.json` file saves [repo + commit + path], but full deeplink might not be implemented yet.
+*	It is recommended you check-in the definitions you install into your VCS:	*	
+	*	The `tsd.json` file saves [repo + commit + path] so usually we can find the file but you might want to make local changes.
+	*	Don't forget to push your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) (maybe one day TSD will help you with this).
+*	API and options are not 100% final.
 
-### API change
+#### Rate limit
 
-* First versions of `0.5.x` had similar CLI commands to older version of TSD by having separate search/install commands
-* As of `> 0.5.2` all CLI search-based features are bundled under the `query` command (see below). 
+The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over no-limited Github RAW urls. 
+
+Unless you do something silly like `$ tsd query * --history --limit 1000 --cacheMode forceRemote`. We are looking into a fallbacks and alternatives to bypass the occasional burst mode.
 
 ## Usage as CLI command
 
@@ -38,18 +38,21 @@ TSD is a [TypeScript](http://www.typescriptlang.org/) definition file package ma
 
 	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
 
+:ghost: If you need to install the legacy `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
+
+	$ npm install tsd@0.3.0 -g
+
 #### Call CLI
 
-Global `tsd` binary, view the help:
+Global `tsd` binary:
 
-	$ tsd	
-	$ tsd -h
+	$ tsd
 
 :wrench: For development from a local install/checkout:
 
 	$ node ./build/cli.js
 
-#### Examples
+#### Practical examples
 
 Minimal search for 'bootstrap'
 		
@@ -166,6 +169,44 @@ TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [krisko
 
 :x: Not yet. 
 
+## FAQ & Info
+
+### What is the location of the cache folders?
+
+The cache is stored in the users home directory (like `$ npm` does). Use `$ tsd settings` to view the current path. Use the `--cacheDir` to overide, or `--cacheMode` to modify caching behaviour. 
+
+### Why does the install / search command not work like in TSD 0.3.0?
+
+The old TSD `v0.3.0` had it's own repository data file that mapped module names to urls of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
+
+The DefinitelyTyped group is working on a meta-data source that will solve this.
+
+### Can TSD install the definitions for the correct module version or fork?
+
+Yes, and no. 
+
+There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
+
+It works well but is not used a lot in the current DefinitelyTyped repository, because of some issues in other toolings. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+
+### I have a suggestion or idea
+
+Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
+
+### Do you have a grunt task to automate some TSD tasks?
+
+Of course! We are developing [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+
+### What is all this non-tsd stuff in `./src` and `./lib`?
+
+Author @Bartvds is incubating some modules and helpers there. Some of these will be moved to their own packages at some point. 
+
+### What are the docs?
+
+* More about [code](CODE.md).
+* Some extra [info](INFO.md).
+* Things [todo](TODO.md).
+
 ## Build
 
 TSD is written in [TypeScript](http://www.typescriptlang.org/) `0.9.x` and build using [Grunt](http://www.gruntjs.com).
@@ -189,7 +230,7 @@ Either install global or use in dev folder:
 	// install to global cli
 	$ npm install . -g
 
-TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to easily test separate test sets during development:
+TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to test separate test suites sets during development:
 	
 	// list aliases
 	$ grunt -h
@@ -200,21 +241,25 @@ TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to easily tes
 	$ grunt gtx:tsd
 	//.. etc
 
-It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a decent workstation. Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8, I don't care, because smart-tabs are awesome like that). 
-
-### Awesome tech used
-
-* [q](https://github.com/kriskowal/q) and [q-io](https://github.com/kriskowal/q-io) - Promises as promised.
-* [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
-* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help make new rules!)
-* [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (disclosure: my own module).
-* [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
-* [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js has [dropped the ball](https://github.com/joyent/node/issues/3584)).
-* And many others.
+It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a decent workstation. Code looks best with tabs rendered at 4 spaces (3 is really nice too, or 6 or 8, I don't care, because smart-tabs are awesome like that). 
 
 ## Contribute
 
-Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss a [ticket](https://github.com/DefinitelyTyped/tsd/issues) or risk the basis of your work being re-factored. 
+Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss a [ticket](https://github.com/DefinitelyTyped/tsd/issues) (or risk the basis of your work being re-factored). 
+
+**Note:** TSD no longer maintains it's own data sources, contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+
+## Notable modules
+
+Shout-out to essential modules used to build TSD:
+
+* [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
+* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help make new rules!)
+* [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (by author).
+* [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
+* [q](https://github.com/kriskowal/q) and [q-io](https://github.com/kriskowal/q-io) - Promises as promised.
+* [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js has [dropped the ball](https://github.com/joyent/node/issues/3584)).
+* [semver](https://github.com/isaacs/node-semver) - Semver parsing and filtering
 
 ## History
 
@@ -224,7 +269,7 @@ Contributions will be welcome once the application architecture stabilises a bit
 
 ### v0.3.x
 
-* Original version by @[Diullei ](https://github.com/Diullei).
+* Original version by @[Diullei](https://github.com/Diullei).
 
 To install `v0.3.x` use:
 
@@ -236,9 +281,9 @@ Copyright (c) 2013 by Bart van der Schoor
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt). 
 
-(there is some imported MIT licensed code by myself, Bart van der Schoor, but I grant myself perpetual licence of my own work)
+* note: there is some imported MIT licensed code by myself, [Bart van der Schoor](https://github.com/Bartvds), but I grant myself perpetual licence of my own work)
 
-Copyright (c) 2012 by Diullei Gomes
+Copyright (c) 2012 by [Diullei Gomes](https://github.com/Diullei).
 
 Licensed under the MIT License. 
 

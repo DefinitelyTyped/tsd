@@ -5,7 +5,6 @@
 See also:
 
 * Main [readme](../README.md)
-* Project [scope](SCOPE.md)
 * Some extra [info](INFO.md)
 * More about [code](CODE.md)
 
@@ -53,6 +52,7 @@ Basics commands
 * :m:	Add **reinstall** (from config)
 * :m:	Add **index** (list definition overview) (search * is compacted)
 * :id:	Consider unifying local remote selectors
+* :ab:	Add **install** / **search** aliases
 
 Remote selector commands
 
@@ -67,10 +67,10 @@ Remote selector commands
 
 Local selector commands
 
-* :x:	Add **local** (search local files)
-* :x:	Add **uninstall** (remove local files)
-* :x:	Add **compare** (check for updates)
-* :x:	Add **update** (apply updates)
+* :o:	Add **local** (search local files)
+* :o:	Add **uninstall** (remove local files)
+* :o:	Add **compare** (check for updates)
+* :o:	Add **update** (apply updates)
 
 Browser commands
 
@@ -85,16 +85,17 @@ UIX commands
 
 Cache commands
 
-* :m:	Add purge (or flush)
-* :b:	Add dump (see cache content)
-* :m:	Add rate (github api rate limit info)
+* :m:	Add **purge** (or flush)
+* :m:	Add `--cacheMode` option
+* :o:	Add **dump** (see cache content)
+* :m:	Add **rate** (github api rate limit info)
 
 Selector
 
-* :x:	Improve globbing/RegExp (maybe use [minimatch](https://github.com/isaacs/minimatch)?) :zap:
+* :o:	Improve globbing/RegExp (maybe use [minimatch](https://github.com/isaacs/minimatch)?) :zap:
 * :m:	Add support for semver
 * :m:	Add support for multiple Selectors (blend results in select())
-* :x:	Add InfoMatcher to Selector / select() :zap:
+* :o:	Add InfoMatcher to Selector / select() :zap:
 * :m:	Add search-by-date ~~to history-command,~~ add as DateMatcher to Selector / select()
 * :m:	Add search-by-commit to Selector / select()
 
@@ -108,12 +109,12 @@ Command options
 * :m:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :m:	Implement `--min` / `--max` option to define expected result amount
 * :o:	.... more
-p
+
 Functionality
 
 * :m:	Report rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* :b:	Add fancy promise progress events + CLI display (install etc)
+* :a:	Add promise progress events + CLI display (http actions, cache hits)
 
 CLI
 
@@ -121,12 +122,13 @@ CLI
 * :m:   Improve Expose to order/group commands :zap:
 * :m:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
-* :x:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
+* :o:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
 
 API
 
 * :o:	Export API docs during build :zap:
+	* :id:	Consider using [TSDoc](https://github.com/theblacksmith/TSDoc)
 * :o:	Export TypeScript definitions :zap:
 * :id:	Consider optimising or wrapping the JavaScript API (less OO-ish)
 * :id:	Add options to authenticate to github API for higher rate-limit
@@ -208,8 +210,7 @@ Infrastructure
 * :o2:	Update TODO levels (for example `TODO|FIXME|XXX|IDEA|PERF`)
 	*	:o:	Sweep code and apply new levels 
 	*	:o:	Update grunt-todos reporter
-
-
+* 
 Cleanup
 
 * :x:	Sweep and enable `tslint.json` rules
@@ -233,7 +234,7 @@ Publishing
 
 Dependencies
 
-* :cl:	Drop `xm.KeyValue`/`xm.Set` for ES6-shim `Map`/`Set`.
+* :m:	Drop `xm.KeyValue`/`xm.Set` for ES6-shim `Map`/`Set`.
 * :cl:	Swap `optimist` for `minimist`.
 * :m:	Consider dropping `underscore`?
 * :m:	Update `Q` with generics
@@ -242,7 +243,7 @@ Dependencies
 Bugs:
 
 * :m:	Installing `$ tsd install chai` gives content error
-* :a:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
+* :m:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
 * :o:	Underscore.d.ts header has multiple authors
 
 More.. always more :rocket:
