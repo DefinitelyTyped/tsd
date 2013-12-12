@@ -1,5 +1,5 @@
-///<reference path="../../helper.ts" />
-///<reference path="../../../src/xm/data/AuthorInfo" />
+/// <reference path="../../helper.ts" />
+/// <reference path="../../../src/xm/data/AuthorInfo" />
 
 module helper {
 	'use strict';

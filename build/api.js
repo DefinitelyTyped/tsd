@@ -250,6 +250,7 @@ var xm;
 
     function deepFreezeRecursive(object, active) {
         var value, prop;
+        active = (active || []);
         active.push(object);
         Object.freeze(object);
         for (prop in object) {
@@ -264,67 +265,73 @@ var xm;
         }
     }
 
-    var ObjectUtil = (function () {
-        function ObjectUtil() {
-        }
-        ObjectUtil.hasOwnProp = function (obj, prop) {
+    (function (object) {
+        function hasOwnProp(obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
-        };
+        }
+        object.hasOwnProp = hasOwnProp;
 
-        ObjectUtil.defineProp = function (object, property, settings) {
+        function defineProp(object, property, settings) {
             Object.defineProperty(object, property, settings);
-        };
+        }
+        object.defineProp = defineProp;
 
-        ObjectUtil.defineProps = function (object, propertyNames, settings) {
+        function defineProps(object, propertyNames, settings) {
             propertyNames.forEach(function (property) {
-                ObjectUtil.defineProp(object, property, settings);
+                xm.object.defineProp(object, property, settings);
             });
-        };
+        }
+        object.defineProps = defineProps;
 
-        ObjectUtil.hidePrefixed = function (object, ownOnly) {
+        function hidePrefixed(object, ownOnly) {
             if (typeof ownOnly === "undefined") { ownOnly = true; }
             for (var property in object) {
-                if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
-                    ObjectUtil.defineProp(object, property, { enumerable: false });
+                if (property.charAt(0) === '_' && (!ownOnly || xm.object.hasOwnProp(object, property))) {
+                    xm.object.defineProp(object, property, { enumerable: false });
                 }
             }
-        };
+        }
+        object.hidePrefixed = hidePrefixed;
 
-        ObjectUtil.hideProps = function (object, props) {
+        function hideProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { enumerable: false });
             });
-        };
+        }
+        object.hideProps = hideProps;
 
-        ObjectUtil.lockProps = function (object, props) {
+        function lockProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { writable: false });
             });
-        };
+        }
+        object.lockProps = lockProps;
 
-        ObjectUtil.freezeProps = function (object, props) {
+        function freezeProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { writable: false });
                 Object.freeze(object[property]);
             });
-        };
+        }
+        object.freezeProps = freezeProps;
 
-        ObjectUtil.lockPrimitives = function (object) {
+        function lockPrimitives(object) {
             Object.keys(object).forEach(function (property) {
                 if (xm.isPrimitive(object[property])) {
                     Object.defineProperty(object, property, { writable: false });
                 }
             });
-        };
+        }
+        object.lockPrimitives = lockPrimitives;
 
-        ObjectUtil.deepFreeze = function (object) {
+        function deepFreeze(object) {
             if (xm.isObject(object) || xm.isArray(object)) {
                 deepFreezeRecursive(object, []);
             }
-        };
-        return ObjectUtil;
-    })();
-    xm.ObjectUtil = ObjectUtil;
+        }
+        object.deepFreeze = deepFreeze;
+    })(xm.object || (xm.object = {}));
+    var object = xm.object;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -724,7 +731,7 @@ var xm;
             }
             this._style = (style || ministyle.ansi());
             this._line = miniwrite.chars((write || miniwrite.log()));
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         StyledOut.prototype.write = function (str) {
             this._line.write(this._style.plain(str));
@@ -1197,7 +1204,22 @@ var xm;
     var FS = require('q-io/fs');
     var mkdirp = require('mkdirp');
 
-    (function (FileUtil) {
+    (function (file) {
+        function distributeDir(base, name, levels, chunk) {
+            if (typeof chunk === "undefined") { chunk = 1; }
+            name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
+            if (levels === 0) {
+                return base;
+            }
+            var arr = [base];
+            var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
+            for (var i = 0; i < steps; i += chunk) {
+                arr.push(name.substr(i, chunk));
+            }
+            return path.join.apply(path, arr);
+        }
+        file.distributeDir = distributeDir;
+
         function parseJson(text) {
             var json;
             try  {
@@ -1205,28 +1227,21 @@ var xm;
             } catch (err) {
                 if (err.name === 'SyntaxError') {
                     xm.log.error(err);
-                    xm.log('---');
-                    xm.log(text);
-                    xm.log('---');
+                    xm.log.status('---');
+                    xm.log.status(text);
+                    xm.log.status('---');
                 }
 
                 throw (err);
             }
             return json;
         }
-
-        function doReadJSONSync(src) {
-            return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
-        }
+        file.parseJson = parseJson;
 
         function readJSONSync(src) {
-            var json;
-
-            json = doReadJSONSync(src);
-
-            return json;
+            return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
         }
-        FileUtil.readJSONSync = readJSONSync;
+        file.readJSONSync = readJSONSync;
 
         function readJSON(src, callback) {
             fs.readFile(path.resolve(src), { encoding: 'utf8' }, function (err, text) {
@@ -1242,27 +1257,27 @@ var xm;
                 return callback(null, json);
             });
         }
-        FileUtil.readJSON = readJSON;
+        file.readJSON = readJSON;
 
         function readJSONPromise(src) {
             return FS.read(src, { encoding: 'utf8' }).then(function (text) {
                 return parseJson(text);
             });
         }
-        FileUtil.readJSONPromise = readJSONPromise;
+        file.readJSONPromise = readJSONPromise;
 
         function writeJSONSync(dest, data) {
             dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+            xm.file.mkdirCheckSync(path.dirname(dest));
             fs.writeFileSync(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
         }
-        FileUtil.writeJSONSync = writeJSONSync;
+        file.writeJSONSync = writeJSONSync;
 
         function writeJSONPromise(dest, data) {
             var d = Q.defer();
 
             dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
+            xm.file.mkdirCheckQ(path.dirname(dest), true).then(function (dest) {
                 return FS.write(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
             }).then(function () {
                 d.resolve(null);
@@ -1270,21 +1285,21 @@ var xm;
 
             return d.promise;
         }
-        FileUtil.writeJSONPromise = writeJSONPromise;
+        file.writeJSONPromise = writeJSONPromise;
 
         function readFileSync(dest, encoding) {
             if (typeof encoding === "undefined") { encoding = 'utf8'; }
             return fs.readFileSync(dest, { encoding: encoding });
         }
-        FileUtil.readFileSync = readFileSync;
+        file.readFileSync = readFileSync;
 
         function writeFileSync(dest, data, encoding) {
             if (typeof encoding === "undefined") { encoding = 'utf8'; }
             dest = path.resolve(dest);
-            xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+            xm.file.mkdirCheckSync(path.dirname(dest));
             fs.writeFileSync(dest, data, { encoding: encoding });
         }
-        FileUtil.writeFileSync = writeFileSync;
+        file.writeFileSync = writeFileSync;
 
         function mkdirCheckSync(dir, writable, testWritable) {
             if (typeof writable === "undefined") { writable = false; }
@@ -1315,7 +1330,7 @@ var xm;
             }
             return dir;
         }
-        FileUtil.mkdirCheckSync = mkdirCheckSync;
+        file.mkdirCheckSync = mkdirCheckSync;
 
         function mkdirCheckQ(dir, writable, testWritable) {
             if (typeof writable === "undefined") { writable = false; }
@@ -1356,7 +1371,7 @@ var xm;
             });
             return d.promise;
         }
-        FileUtil.mkdirCheckQ = mkdirCheckQ;
+        file.mkdirCheckQ = mkdirCheckQ;
 
         function canWriteFile(targetPath, overwrite) {
             return FS.exists(targetPath).then(function (exists) {
@@ -1372,7 +1387,7 @@ var xm;
                 });
             });
         }
-        FileUtil.canWriteFile = canWriteFile;
+        file.canWriteFile = canWriteFile;
 
         function removeFile(target) {
             var d = Q.defer();
@@ -1393,7 +1408,7 @@ var xm;
 
             return d.promise;
         }
-        FileUtil.removeFile = removeFile;
+        file.removeFile = removeFile;
 
         function touchFile(src, atime, mtime) {
             var d = Q.defer();
@@ -1406,15 +1421,15 @@ var xm;
             }, d.reject);
             return d.promise;
         }
-        FileUtil.touchFile = touchFile;
+        file.touchFile = touchFile;
 
         function findup(dir, name) {
             var d = Q.defer();
             if (dir === '/') {
-                d.reject(new Error('Could not find package.json up from: ' + dir));
+                d.reject(new Error('could not find package.json up from: ' + dir));
                 return;
             } else if (!dir || dir === '.') {
-                d.reject(new Error('Cannot find package.json from unspecified directory'));
+                d.reject(new Error('cannot find package.json from unspecified directory'));
                 return;
             }
             var file = path.join(dir, name);
@@ -1435,9 +1450,9 @@ var xm;
             }, d.reject);
             return d.promise;
         }
-        FileUtil.findup = findup;
-    })(xm.FileUtil || (xm.FileUtil = {}));
-    var FileUtil = xm.FileUtil;
+        file.findup = findup;
+    })(xm.file || (xm.file = {}));
+    var file = xm.file;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -1564,7 +1579,7 @@ var xm;
             xm.assertVar(pkg, 'object', 'pkg');
             this._pkg = pkg;
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         Object.defineProperty(PackageJSON.prototype, "raw", {
             get: function () {
@@ -1634,7 +1649,7 @@ var xm;
                 if (!src) {
                     throw (new Error('cannot find local package.json'));
                 }
-                PackageJSON._local = new PackageJSON(xm.FileUtil.readJSONSync(src), src);
+                PackageJSON._local = new PackageJSON(xm.file.readJSONSync(src), src);
             }
             return PackageJSON._local;
         };
@@ -1739,7 +1754,7 @@ var tsd;
                 }
             }
 
-            xm.ObjectUtil.lockProps(file, ['path', 'project', 'name', 'semver']);
+            xm.object.lockProps(file, ['path', 'project', 'name', 'semver']);
 
             return file;
         };
@@ -1887,7 +1902,7 @@ var tsd;
             this.sha = sha;
             this.encoding = encoding;
 
-            xm.ObjectUtil.defineProps(this, ['sha', 'encoding'], { writable: false });
+            xm.object.defineProps(this, ['sha', 'encoding'], { writable: false });
 
             if (content) {
                 this.setContent(content);
@@ -1910,9 +1925,9 @@ var tsd;
                 xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
             }
 
-            xm.ObjectUtil.defineProp(this, 'content', { writable: true });
+            xm.object.defineProp(this, 'content', { writable: true });
             this.content = content;
-            xm.ObjectUtil.defineProp(this, 'content', { writable: false, enumerable: false });
+            xm.object.defineProp(this, 'content', { writable: false, enumerable: false });
         };
 
         Object.defineProperty(DefBlob.prototype, "shaShort", {
@@ -1947,7 +1962,7 @@ var tsd;
             this._def = def;
             this._commit = commit;
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         DefVersion.prototype.setContent = function (blob) {
             xm.assertVar(blob, tsd.DefBlob, 'blob');
@@ -2061,7 +2076,7 @@ var tsd;
 
             this.reset();
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
             Object.defineProperty(this, 'log', { enumerable: false });
         }
         Config.prototype.reset = function () {
@@ -2267,7 +2282,7 @@ var tsd;
             if (configFile) {
                 this.paths.configFile = path.resolve(configFile);
             }
-            this.configSchema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+            this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
             this.config = new tsd.Config(this.configSchema);
         }
         Context.prototype.getTypingsDir = function () {
@@ -2923,7 +2938,7 @@ var git;
             this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
             this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         GithubURLs.prototype.api = function () {
             return this.getURL('api');
@@ -3095,6 +3110,8 @@ var xm;
 (function (xm) {
     'use strict';
 
+    require('date-utils');
+
     function pad(input) {
         var r = String(input);
         if (r.length === 1) {
@@ -3103,13 +3120,24 @@ var xm;
         return r;
     }
 
-    (function (DateUtil) {
+    (function (date) {
+        function getISOString(input) {
+            var date;
+            if (xm.isDate(input)) {
+                date = input;
+            } else if (xm.isString(input) || xm.isNumber(input)) {
+                date = new Date(input);
+            }
+            return (date ? date.toISOString() : null);
+        }
+        date.getISOString = getISOString;
+
         function toNiceUTC(date) {
             return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
         }
-        DateUtil.toNiceUTC = toNiceUTC;
-    })(xm.DateUtil || (xm.DateUtil = {}));
-    var DateUtil = xm.DateUtil;
+        date.toNiceUTC = toNiceUTC;
+    })(xm.date || (xm.date = {}));
+    var date = xm.date;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -3210,6 +3238,7 @@ var xm;
         complete: 'complete',
         failure: 'failure',
         skip: 'skip',
+        share: 'share',
         event: 'event',
         error: 'error',
         warning: 'warning',
@@ -3246,7 +3275,7 @@ var xm;
 
             this._startAt = Date.now();
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         EventLog.prototype.promise = function (promise, type, message, data) {
             var _this = this;
@@ -3289,6 +3318,10 @@ var xm;
 
         EventLog.prototype.skip = function (type, message, data) {
             return this.track(xm.Level.skip, type, message, data);
+        };
+
+        EventLog.prototype.share = function (type, message, data) {
+            return this.track(xm.Level.share, type, message, data);
         };
 
         EventLog.prototype.error = function (type, message, data) {
@@ -3643,6 +3676,73 @@ var xm;
 (function (xm) {
     'use strict';
 
+    (function (http) {
+        (function (CacheMode) {
+            CacheMode[CacheMode["forceLocal"] = 1] = "forceLocal";
+            CacheMode[CacheMode["forceRemote"] = 2] = "forceRemote";
+            CacheMode[CacheMode["forceUpdate"] = 3] = "forceUpdate";
+            CacheMode[CacheMode["allowRemote"] = 4] = "allowRemote";
+            CacheMode[CacheMode["allowUpdate"] = 5] = "allowUpdate";
+        })(http.CacheMode || (http.CacheMode = {}));
+        var CacheMode = http.CacheMode;
+
+        var CacheOpts = (function () {
+            function CacheOpts(mode) {
+                this.compressStore = false;
+                this.splitKeyDir = 0;
+                this.cacheRead = true;
+                this.cacheWrite = true;
+                this.remoteRead = true;
+                this.allowClean = false;
+                if (mode) {
+                    this.applyCacheMode(mode);
+                }
+            }
+            CacheOpts.prototype.applyCacheMode = function (mode) {
+                switch (mode) {
+                    case CacheMode.forceRemote:
+                        this.cacheRead = false;
+                        this.remoteRead = true;
+                        this.cacheWrite = false;
+                        this.allowClean = false;
+                        break;
+                    case CacheMode.forceUpdate:
+                        this.cacheRead = false;
+                        this.remoteRead = true;
+                        this.cacheWrite = true;
+                        this.allowClean = true;
+                        break;
+                    case CacheMode.allowUpdate:
+                        this.cacheRead = true;
+                        this.remoteRead = true;
+                        this.cacheWrite = true;
+                        this.allowClean = true;
+                        break;
+                    case CacheMode.allowRemote:
+                        this.cacheRead = true;
+                        this.remoteRead = true;
+                        this.cacheWrite = false;
+                        this.allowClean = false;
+                        break;
+                    case CacheMode.forceLocal:
+                    default:
+                        this.cacheRead = true;
+                        this.remoteRead = false;
+                        this.cacheWrite = false;
+                        this.allowClean = false;
+                        break;
+                }
+            };
+            return CacheOpts;
+        })();
+        http.CacheOpts = CacheOpts;
+    })(xm.http || (xm.http = {}));
+    var http = xm.http;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
     var Q = require('q');
     var fs = require('fs');
     var path = require('path');
@@ -3655,30 +3755,6 @@ var xm;
     var BufferStream = require('bufferstream');
 
     require('date-utils');
-
-    function getISOString(input) {
-        var date;
-        if (xm.isDate(input)) {
-            date = input;
-        } else if (xm.isString(input) || xm.isNumber(input)) {
-            date = new Date(input);
-        }
-        return (date ? date.toISOString() : null);
-    }
-
-    function distributeDir(base, name, levels, chunk) {
-        if (typeof chunk === "undefined") { chunk = 1; }
-        name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
-        if (levels === 0) {
-            return base;
-        }
-        var arr = [base];
-        var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
-        for (var i = 0; i < steps; i += chunk) {
-            arr.push(name.substr(i, chunk));
-        }
-        return path.join.apply(path, arr);
-    }
 
     (function (http) {
         var CacheStreamLoader = (function () {
@@ -3695,14 +3771,14 @@ var xm;
                 }
 
                 this.object = new http.CacheObject(request);
-                this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+                this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
 
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
                 this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
-                xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
+                xm.object.lockProps(this, ['cache', 'request', 'object']);
             }
             CacheStreamLoader.prototype.canUpdate = function () {
                 if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
@@ -3962,7 +4038,7 @@ var xm;
                             return;
                         }
 
-                        write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
+                        write.push(xm.file.mkdirCheckQ(path.dirname(_this.object.bodyFile), true).then(function () {
                             return FS.write(_this.object.bodyFile, _this.object.body, { flags: 'wb' });
                         }).then(function () {
                             _this.track.event(CacheStreamLoader.cache_write, 'written file to cache');
@@ -3971,7 +4047,7 @@ var xm;
                         _this.track.skip(CacheStreamLoader.cache_write, 'cache was fresh');
                     }
 
-                    write.push(xm.FileUtil.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
+                    write.push(xm.file.mkdirCheckQ(path.dirname(_this.object.infoFile), true).then(function () {
                         return FS.write(_this.object.infoFile, info, { flags: 'wb' });
                     }));
 
@@ -4008,8 +4084,8 @@ var xm;
                     return Q.resolve();
                 }
                 return Q.all([
-                    xm.FileUtil.removeFile(this.object.infoFile),
-                    xm.FileUtil.removeFile(this.object.bodyFile)
+                    xm.file.removeFile(this.object.infoFile),
+                    xm.file.removeFile(this.object.bodyFile)
                 ]).then(function () {
                     _this.track.event(CacheStreamLoader.cache_remove, _this.request.url);
                 });
@@ -4021,8 +4097,8 @@ var xm;
                     return Q.resolve();
                 }
                 Q.all([
-                    xm.FileUtil.touchFile(this.object.infoFile),
-                    xm.FileUtil.touchFile(this.object.bodyFile)
+                    xm.file.touchFile(this.object.infoFile),
+                    xm.file.touchFile(this.object.bodyFile)
                 ]).done(function () {
                     d.resolve();
                 }, d.reject);
@@ -4036,16 +4112,18 @@ var xm;
                 info.url = this.request.url;
                 info.key = this.request.key;
                 info.contentType = res.headers['content-type'];
-                info.cacheCreated = getISOString(Date.now());
-                info.cacheUpdated = getISOString(Date.now());
+
+                info.cacheCreated = xm.date.getISOString(Date.now());
+                info.cacheUpdated = xm.date.getISOString(Date.now());
                 this.updateInfo(res, checksum);
             };
 
             CacheStreamLoader.prototype.updateInfo = function (res, checksum) {
                 var info = this.object.info;
                 info.httpETag = (res.headers['etag'] || info.httpETag);
-                info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
-                info.cacheUpdated = getISOString(Date.now());
+
+                info.httpModified = xm.date.getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
+                info.cacheUpdated = xm.date.getISOString(Date.now());
                 info.contentChecksum = checksum;
             };
 
@@ -4106,16 +4184,43 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var Q = require('q');
-    var fs = require('fs');
-    var path = require('path');
     var tv4 = require('tv4');
-    var FS = require('q-io/fs');
-    var HTTP = require('q-io/http');
+
+    function assertJSONSchema(value, schema) {
+        var res = tv4.validateResult(value, schema);
+        if (!res.valid || res.missing.length > 0) {
+            throw res.error;
+        }
+    }
+    xm.assertJSONSchema = assertJSONSchema;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
 
     require('date-utils');
 
     (function (http) {
+        var CacheRequest = (function () {
+            function CacheRequest(url, headers) {
+                this.url = url;
+                this.headers = headers || {};
+            }
+            CacheRequest.prototype.lock = function () {
+                this.locked = true;
+                this.key = xm.jsonToIdentHash({
+                    url: this.url,
+                    headers: this.headers
+                });
+                xm.object.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
+
+                xm.object.deepFreeze(this.headers);
+                return this;
+            };
+            return CacheRequest;
+        })();
+        http.CacheRequest = CacheRequest;
+
         var CacheObject = (function () {
             function CacheObject(request) {
                 this.request = request;
@@ -4133,99 +4238,86 @@ var xm;
         })();
         http.ResponseInfo = ResponseInfo;
 
-        function assertSchema(value, schema) {
-            var res = tv4.validateResult(value, schema);
-            if (!res.valid || res.missing.length > 0) {
-                throw res.error;
+        var SimpleValidator = (function () {
+            function SimpleValidator() {
             }
-        }
-        http.assertSchema = assertSchema;
+            SimpleValidator.prototype.assert = function (object) {
+                xm.assert(xm.isValid(object.body), 'body valid');
+            };
 
-        (function (CacheMode) {
-            CacheMode[CacheMode["forceLocal"] = 0] = "forceLocal";
-            CacheMode[CacheMode["forceRemote"] = 1] = "forceRemote";
-            CacheMode[CacheMode["forceUpdate"] = 2] = "forceUpdate";
-            CacheMode[CacheMode["allowRemote"] = 3] = "allowRemote";
-            CacheMode[CacheMode["allowUpdate"] = 4] = "allowUpdate";
-        })(http.CacheMode || (http.CacheMode = {}));
-        var CacheMode = http.CacheMode;
+            SimpleValidator.main = new SimpleValidator();
+            return SimpleValidator;
+        })();
+        http.SimpleValidator = SimpleValidator;
 
-        var CacheOpts = (function () {
-            function CacheOpts(mode) {
-                this.compressStore = false;
-                this.splitKeyDir = 0;
-                this.cacheRead = true;
-                this.cacheWrite = true;
-                this.remoteRead = true;
-                if (mode) {
-                    this.applyCacheMode(mode);
-                }
+        var CacheValidator = (function () {
+            function CacheValidator(schema) {
+                this.schema = schema;
             }
-            CacheOpts.prototype.applyCacheMode = function (mode) {
-                this.cacheCleanInterval = null;
-                switch (mode) {
-                    case CacheMode.forceRemote:
-                        this.cacheRead = false;
-                        this.remoteRead = true;
-                        this.cacheWrite = false;
-                        break;
-                    case CacheMode.forceUpdate:
-                        this.cacheRead = false;
-                        this.remoteRead = true;
-                        this.cacheWrite = true;
-                        break;
-                    case CacheMode.allowUpdate:
-                        this.cacheRead = true;
-                        this.remoteRead = true;
-                        this.cacheWrite = true;
-                        break;
-                    case CacheMode.allowRemote:
-                        this.cacheRead = true;
-                        this.remoteRead = true;
-                        this.cacheWrite = false;
-                        break;
-                    case CacheMode.forceLocal:
-                    default:
-                        this.cacheRead = true;
-                        this.remoteRead = false;
-                        this.cacheWrite = false;
-                        break;
+            CacheValidator.prototype.assert = function (object) {
+                xm.assertJSONSchema(object.info, this.schema);
+            };
+            return CacheValidator;
+        })();
+        http.CacheValidator = CacheValidator;
+
+        var CacheAgeValidator = (function () {
+            function CacheAgeValidator(schema, maxAgeMili) {
+                this.schema = schema;
+                this.maxAgeMili = 0;
+                this.maxAgeMili = maxAgeMili;
+            }
+            CacheAgeValidator.prototype.assert = function (object) {
+                xm.assertJSONSchema(object.info, this.schema);
+
+                var date = new Date(object.info.cacheUpdated);
+                if (xm.isNumber(this.maxAgeMili)) {
+                    var compare = new Date();
+                    xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
                 }
             };
-            return CacheOpts;
+            return CacheAgeValidator;
         })();
-        http.CacheOpts = CacheOpts;
+        http.CacheAgeValidator = CacheAgeValidator;
 
-        var Request = (function () {
-            function Request(url, headers) {
-                this.url = url;
-                this.headers = headers || {};
+        var ChecksumValidator = (function () {
+            function ChecksumValidator() {
             }
-            Request.prototype.lock = function () {
-                this.locked = true;
-                this.key = xm.jsonToIdentHash({
-                    url: this.url,
-                    headers: this.headers
-                });
-                xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
-
-                xm.ObjectUtil.deepFreeze(this.headers);
-                return this;
+            ChecksumValidator.prototype.assert = function (object) {
+                xm.assertVar(object.body, Buffer, 'body');
+                xm.assertVar(object.bodyChecksum, 'sha1', 'bodyChecksum');
+                xm.assertVar(object.info.contentChecksum, 'sha1', 'contentChecksum');
+                xm.assert(object.info.contentChecksum === object.bodyChecksum, 'checksum', object.info.contentChecksum, object.bodyChecksum);
             };
-            return Request;
+            return ChecksumValidator;
         })();
-        http.Request = Request;
+        http.ChecksumValidator = ChecksumValidator;
+    })(xm.http || (xm.http = {}));
+    var http = xm.http;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
 
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var FS = require('q-io/fs');
+    var HTTP = require('q-io/http');
+
+    require('date-utils');
+
+    (function (http) {
         var HTTPCache = (function () {
             function HTTPCache(storeDir, opts) {
                 this.jobTimeout = 1000;
                 this.jobs = new Map();
                 this.remove = new Map();
                 xm.assertVar(storeDir, 'string', 'storeDir');
-                xm.assertVar(opts, CacheOpts, 'opts', true);
+                xm.assertVar(opts, http.CacheOpts, 'opts', true);
 
                 this.storeDir = storeDir;
-                this.opts = (opts || new CacheOpts());
+                this.opts = (opts || new http.CacheOpts());
 
                 this.manageFile = path.join(this.storeDir, '_info.json');
 
@@ -4234,18 +4326,17 @@ var xm;
             }
             HTTPCache.prototype.getObject = function (request) {
                 var _this = this;
-                xm.assertVar(request, xm.http.Request, 'request');
+                xm.assertVar(request, xm.http.CacheRequest, 'request');
                 xm.assert(request.locked, 'request must be lock()-ed {a}', request.url);
 
                 var d = Q.defer();
-                this.track.start(HTTPCache.get_object, request.url);
                 this.track.promise(d.promise, HTTPCache.get_object);
 
                 this.init().then(function () {
                     var job;
                     if (_this.jobs.has(request.key)) {
                         job = _this.jobs.get(request.key);
-                        _this.track.skip(HTTPCache.get_object);
+                        _this.track.share(HTTPCache.get_object, request.url);
 
                         return job.getObject().progress(d.notify).then(d.resolve);
                     } else {
@@ -4253,17 +4344,18 @@ var xm;
                         _this.jobs.set(request.key, job);
 
                         job.track.logEnabled = _this.track.logEnabled;
-                        _this.track.start(HTTPCache.get_object);
+                        _this.track.start(HTTPCache.get_object, request.url);
 
                         return job.getObject().progress(d.notify).then(function (value) {
                             _this.track.complete(HTTPCache.get_object);
                             d.resolve(value);
                         });
                     }
+                }).fail(d.reject).then(function () {
                     _this.scheduleRelease(request.key);
-                }).then(function () {
-                    return _this.cleanCache();
-                }).fail(d.reject).done();
+
+                    return _this.checkCleanCache();
+                }).done();
 
                 return d.promise;
             };
@@ -4276,8 +4368,6 @@ var xm;
                     }
                     this.remove.set(key, setTimeout(function () {
                         _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
-
-                        _this.track.logger.debug(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
 
                         _this.jobs.delete(key);
                     }, this.jobTimeout));
@@ -4300,7 +4390,7 @@ var xm;
                 FS.exists(this.storeDir).then(function (exists) {
                     if (!exists) {
                         _this.track.event('dir_create', _this.storeDir);
-                        return xm.FileUtil.mkdirCheckQ(_this.storeDir, true, true);
+                        return xm.file.mkdirCheckQ(_this.storeDir, true, true);
                     }
 
                     return FS.isDirectory(_this.storeDir).then(function (isDir) {
@@ -4311,20 +4401,20 @@ var xm;
                         _this.track.event('dir_exists', _this.storeDir);
                     });
                 }).then(function () {
-                    return xm.FileUtil.findup(path.dirname((module).filename), 'package.json').then(function (src) {
+                    return xm.file.findup(path.dirname((module).filename), 'package.json').then(function (src) {
                         baseDir = path.dirname(src);
                         schemaDir = path.join(baseDir, 'schema');
                     });
                 }).then(function () {
                     var p = path.join(schemaDir, 'cache-v1.json');
-                    return xm.FileUtil.readJSONPromise(p).then(function (infoSchema) {
+                    return xm.file.readJSONPromise(p).then(function (infoSchema) {
                         xm.assertVar(infoSchema, 'object', 'infoSchema');
                         _this.infoSchema = infoSchema;
                         _this.infoKoder = new xm.JSONKoder(_this.infoSchema);
                     });
                 }).then(function () {
                     var p = path.join(schemaDir, 'manage-v1.json');
-                    return xm.FileUtil.readJSONPromise(p).then(function (manageSchema) {
+                    return xm.file.readJSONPromise(p).then(function (manageSchema) {
                         xm.assertVar(manageSchema, 'object', 'manageSchema');
                         _this.manageSchema = manageSchema;
                         _this.manageKoder = new xm.JSONKoder(_this.manageSchema);
@@ -4336,10 +4426,10 @@ var xm;
                 return d.promise;
             };
 
-            HTTPCache.prototype.cleanCache = function () {
+            HTTPCache.prototype.checkCleanCache = function () {
                 var _this = this;
                 var d = Q.defer();
-                if (!this._init || !this.opts.cacheWrite || !this.opts.cacheRead || !xm.isNumber(this.opts.cacheCleanInterval)) {
+                if (!this._init || !this.opts.allowClean || !xm.isNumber(this.opts.cacheCleanInterval)) {
                     d.resolve();
                     return d.promise;
                 }
@@ -4362,7 +4452,7 @@ var xm;
                             manageInfo = info;
                         }).fail(function (err) {
                             _this.track.logger.warn('removing bad manageFile: ' + _this.manageFile);
-                            return xm.FileUtil.removeFile(_this.manageFile);
+                            return xm.file.removeFile(_this.manageFile);
                         });
                     });
                 }).then(function () {
@@ -4394,6 +4484,8 @@ var xm;
 
             HTTPCache.prototype.cleanupCacheAge = function (maxAge) {
                 var _this = this;
+                xm.assertVar(maxAge, 'number', 'maxAge');
+
                 var d = Q.defer();
                 this.track.promise(d.promise, 'clean_cache_age');
 
@@ -4419,8 +4511,8 @@ var xm;
                         return false;
                     }).then(function (tree) {
                         return Q.all(tree.reduce(function (memo, src) {
-                            memo.push(xm.FileUtil.removeFile(src));
-                            memo.push(xm.FileUtil.removeFile(src.replace(/\.json$/, '.raw')));
+                            memo.push(xm.file.removeFile(src));
+                            memo.push(xm.file.removeFile(src.replace(/\.json$/, '.raw')));
                             return memo;
                         }, []));
                     });
@@ -4447,61 +4539,6 @@ var xm;
             return HTTPCache;
         })();
         http.HTTPCache = HTTPCache;
-
-        var SimpleValidator = (function () {
-            function SimpleValidator() {
-            }
-            SimpleValidator.prototype.assert = function (object) {
-                xm.assert(xm.isValid(object.body), 'body valid');
-            };
-
-            SimpleValidator.main = new SimpleValidator();
-            return SimpleValidator;
-        })();
-        http.SimpleValidator = SimpleValidator;
-
-        var CacheValidator = (function () {
-            function CacheValidator(schema) {
-                this.schema = schema;
-            }
-            CacheValidator.prototype.assert = function (object) {
-                assertSchema(object.info, this.schema);
-            };
-            return CacheValidator;
-        })();
-        http.CacheValidator = CacheValidator;
-
-        var CacheAgeValidator = (function () {
-            function CacheAgeValidator(schema, maxAgeMili) {
-                this.schema = schema;
-                this.maxAgeMili = 0;
-                this.maxAgeMili = maxAgeMili;
-            }
-            CacheAgeValidator.prototype.assert = function (object) {
-                assertSchema(object.info, this.schema);
-
-                var date = new Date(object.info.cacheUpdated);
-                if (xm.isNumber(this.maxAgeMili)) {
-                    var compare = new Date();
-                    xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
-                }
-            };
-            return CacheAgeValidator;
-        })();
-        http.CacheAgeValidator = CacheAgeValidator;
-
-        var ChecksumValidator = (function () {
-            function ChecksumValidator() {
-            }
-            ChecksumValidator.prototype.assert = function (object) {
-                xm.assertVar(object.body, Buffer, 'body');
-                xm.assertVar(object.bodyChecksum, 'sha1', 'bodyChecksum');
-                xm.assertVar(object.info.contentChecksum, 'sha1', 'contentChecksum');
-                xm.assert(object.info.contentChecksum === object.bodyChecksum, 'checksum', object.info.contentChecksum, object.bodyChecksum);
-            };
-            return ChecksumValidator;
-        })();
-        http.ChecksumValidator = ChecksumValidator;
     })(xm.http || (xm.http = {}));
     var http = xm.http;
 })(xm || (xm = {}));
@@ -4520,9 +4557,9 @@ var git;
             this.track = new xm.EventLog(prefix, label);
         }
         GithubLoader.prototype._initGithubLoader = function (lock) {
-            xm.ObjectUtil.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
+            xm.object.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
             if (lock) {
-                xm.ObjectUtil.lockProps(this, lock);
+                xm.object.lockProps(this, lock);
             }
 
             this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
@@ -4650,44 +4687,38 @@ var git;
             this.formatVersion = '1.0';
 
             var opts = new xm.http.CacheOpts();
+            opts.allowClean = true;
             opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
             this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader(['apiVersion']);
         }
         GithubAPI.prototype.getBranches = function () {
-            var url = this.repo.urls.apiBranches();
-            var request = new xm.http.Request(url);
-            return this.getCachable(request, true);
+            return this.getCachableURL(this.repo.urls.apiBranches());
         };
 
         GithubAPI.prototype.getBranch = function (branch) {
-            var url = this.repo.urls.apiBranch(branch);
-            var request = new xm.http.Request(url);
-            return this.getCachable(request, true);
+            return this.getCachableURL(this.repo.urls.apiBranch(branch));
         };
 
         GithubAPI.prototype.getTree = function (sha, recursive) {
-            var url = this.repo.urls.apiTree(sha, (recursive ? 1 : undefined));
-            var request = new xm.http.Request(url);
-            return this.getCachable(request, true);
+            return this.getCachableURL(this.repo.urls.apiTree(sha, (recursive ? 1 : undefined)));
         };
 
         GithubAPI.prototype.getCommit = function (sha) {
-            var url = this.repo.urls.apiCommit(sha);
-            var request = new xm.http.Request(url);
-            return this.getCachable(request, true);
+            return this.getCachableURL(this.repo.urls.apiCommit(sha));
         };
 
         GithubAPI.prototype.getBlob = function (sha) {
-            var url = this.repo.urls.apiBlob(sha);
-            var request = new xm.http.Request(url);
-            return this.getCachable(request, true);
+            return this.getCachableURL(this.repo.urls.apiBlob(sha));
         };
 
         GithubAPI.prototype.getPathCommits = function (path) {
-            var url = this.repo.urls.apiPathCommits(path);
-            var request = new xm.http.Request(url);
+            return this.getCachableURL(this.repo.urls.apiPathCommits(path));
+        };
+
+        GithubAPI.prototype.getCachableURL = function (url) {
+            var request = new xm.http.CacheRequest(url);
             return this.getCachable(request, true);
         };
 
@@ -4700,7 +4731,7 @@ var git;
                 request.localMaxAge = 60 * 60 * 1000;
             }
             if (!xm.isNumber(request.httpInterval)) {
-                request.httpInterval = 30 * 60 * 1000;
+                request.httpInterval = 5 * 60 * 1000;
             }
             this.copyHeadersTo(request.headers);
 
@@ -4765,6 +4796,7 @@ var git;
             this.formatVersion = '1.0';
 
             var opts = new xm.http.CacheOpts();
+            opts.allowClean = true;
             opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
             this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
@@ -4794,7 +4826,7 @@ var git;
             this.track.promise(d.promise, GithubRaw.get_file, url);
             var headers = {};
 
-            var request = new xm.http.Request(url, headers);
+            var request = new xm.http.CacheRequest(url, headers);
             request.localMaxAge = 30 * 24 * 3600 * 1000;
             request.httpInterval = 24 * 3600 * 1000;
             request.lock();
@@ -4838,7 +4870,7 @@ var git;
             this.api = new git.GithubAPI(this, this.storeDir);
             this.raw = new git.GithubRaw(this, this.storeDir);
 
-            xm.ObjectUtil.lockProps(this, Object.keys(this));
+            xm.object.lockProps(this, Object.keys(this));
         }
         GithubRepo.prototype.getCacheKey = function () {
             return this.ownerName + '-' + this.projectName;
@@ -4866,7 +4898,7 @@ var tsd;
         function Options() {
             this.minMatches = 0;
             this.maxMatches = 0;
-            this.limitApi = 2;
+            this.limitApi = 5;
             this.resolveDependencies = false;
             this.overwriteFiles = false;
             this.saveToConfig = false;
@@ -4888,8 +4920,8 @@ var tsd;
             this.core = core;
             this.track = new xm.EventLog(track, label);
 
-            xm.ObjectUtil.lockProps(this, ['core', 'track']);
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.lockProps(this, ['core', 'track']);
+            xm.object.hidePrefixed(this);
         }
 
         Object.defineProperty(SubCore.prototype, "verbose", {
@@ -5354,8 +5386,8 @@ var tsd;
 
             this.commitSha = commitSha;
 
-            xm.ObjectUtil.hidePrefixed(this);
-            xm.ObjectUtil.lockProps(this, ['commitSha']);
+            xm.object.hidePrefixed(this);
+            xm.object.lockProps(this, ['commitSha']);
         }
         DefCommit.prototype.parseJSON = function (commit) {
             xm.assertVar(commit, 'object', 'commit');
@@ -5370,7 +5402,7 @@ var tsd;
             this.message.parse(commit.commit.message);
             this.hasMeta = true;
 
-            xm.ObjectUtil.lockProps(this, ['commitSha', 'hasMeta']);
+            xm.object.lockProps(this, ['commitSha', 'hasMeta']);
         };
 
         DefCommit.prototype.hasMetaData = function () {
@@ -5423,7 +5455,7 @@ var tsd;
             this._commits = new Map();
             this._blobs = new Map();
             this._versions = new Map();
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         DefIndex.prototype.hasIndex = function () {
             return this._hasIndex;
@@ -5859,7 +5891,7 @@ var tsd;
                     }
                     return;
                 }
-                return xm.FileUtil.readJSONPromise(target).then(function (json) {
+                return xm.file.readJSONPromise(target).then(function (json) {
                     _this.core.context.config.parseJSON(json, target);
                     d.resolve(null);
                 });
@@ -5887,7 +5919,7 @@ var tsd;
                 return d.promise;
             }
 
-            xm.FileUtil.mkdirCheckQ(dir, true).then(function () {
+            xm.file.mkdirCheckQ(dir, true).then(function () {
                 return FS.write(target, json).then(function () {
                     return FS.stat(target);
                 }).then(function () {
@@ -6117,7 +6149,7 @@ var tsd;
 
             var targetPath = this.core.getInstallPath(file.def);
 
-            xm.FileUtil.canWriteFile(targetPath, overwrite).then(function (canWrite) {
+            xm.file.canWriteFile(targetPath, overwrite).then(function (canWrite) {
                 if (!canWrite) {
                     if (!overwrite) {
                         d.notify('skipped existing file: ' + file.def.path);
@@ -6132,7 +6164,7 @@ var tsd;
                     if (exists) {
                         return FS.remove(targetPath);
                     }
-                    return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
+                    return xm.file.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
                 }).then(function () {
@@ -6645,7 +6677,7 @@ var tsd;
             xm.assertVar(query, tsd.Query, 'query', true);
             this.query = query;
 
-            xm.ObjectUtil.lockProps(this, ['query']);
+            xm.object.lockProps(this, ['query']);
         }
         return Selection;
     })();
@@ -6787,11 +6819,19 @@ var tsd;
             this.track = new xm.EventLog('core', 'Core');
             this.verbose = this.context.verbose;
 
-            xm.ObjectUtil.lockProps(this, Object.keys(this));
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.lockProps(this, Object.keys(this));
+            xm.object.hidePrefixed(this);
         }
         Core.prototype.getInstallPath = function (def) {
             return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
+        };
+
+        Core.prototype.useCacheMode = function (modeName) {
+            if (modeName in xm.http.CacheMode) {
+                var mode = xm.http.CacheMode[modeName];
+                this.repo.api.cache.opts.applyCacheMode(mode);
+                this.repo.raw.cache.opts.applyCacheMode(mode);
+            }
         };
 
         Object.defineProperty(Core.prototype, "verbose", {
@@ -6872,7 +6912,7 @@ var tsd;
             this.track = new xm.EventLog('api', 'API');
             this.track.unmuteActions([xm.Level.notify]);
 
-            xm.ObjectUtil.lockProps(this, ['core', 'track']);
+            xm.object.lockProps(this, ['core', 'track']);
 
             this.verbose = this.context.verbose;
         }
@@ -7010,28 +7050,28 @@ var xm;
 
     var jsesc = require('jsesc');
 
-    xm.converStringMap = Object.create(null);
+    xm.parseStringMap = Object.create(null);
 
     var splitSV = /[\t ]*[,][\t ]*/g;
 
-    xm.converStringMap.number = function (input) {
+    xm.parseStringMap.number = function (input) {
         var num = parseFloat(input);
         if (isNaN(num)) {
             throw new Error('input is NaN and not float');
         }
         return num;
     };
-    xm.converStringMap.int = function (input) {
+    xm.parseStringMap.int = function (input) {
         var num = parseInt(input, 10);
         if (isNaN(num)) {
             throw new Error('input is NaN and not integer');
         }
         return num;
     };
-    xm.converStringMap.string = function (input) {
+    xm.parseStringMap.string = function (input) {
         return String(input);
     };
-    xm.converStringMap.boolean = function (input) {
+    xm.parseStringMap.boolean = function (input) {
         input = ('' + input).toLowerCase();
         if (input === '' || input === '0') {
             return false;
@@ -7049,36 +7089,36 @@ var xm;
         }
         return true;
     };
-    xm.converStringMap.flag = function (input) {
+    xm.parseStringMap.flag = function (input) {
         if (xm.isUndefined(input) || input === '') {
             return true;
         }
-        return xm.converStringMap.boolean(input);
+        return xm.parseStringMap.boolean(input);
     };
-    xm.converStringMap['number[]'] = function (input) {
+    xm.parseStringMap['number[]'] = function (input) {
         return input.split(splitSV).map(function (value) {
-            return xm.converStringMap.number(value);
+            return xm.parseStringMap.number(value);
         });
     };
-    xm.converStringMap['int[]'] = function (input) {
+    xm.parseStringMap['int[]'] = function (input) {
         return input.split(splitSV).map(function (value) {
-            return xm.converStringMap.int(value);
+            return xm.parseStringMap.int(value);
         });
     };
-    xm.converStringMap['string[]'] = function (input) {
+    xm.parseStringMap['string[]'] = function (input) {
         return input.split(splitSV);
     };
-    xm.converStringMap.json = function (input) {
+    xm.parseStringMap.json = function (input) {
         return JSON.parse(input);
     };
 
-    function convertStringTo(input, type) {
-        if (xm.hasOwnProp(xm.converStringMap, type)) {
-            return xm.converStringMap[type](input);
+    function parseStringTo(input, type) {
+        if (xm.hasOwnProp(xm.parseStringMap, type)) {
+            return xm.parseStringMap[type](input);
         }
         return input;
     }
-    xm.convertStringTo = convertStringTo;
+    xm.parseStringTo = parseStringTo;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -7215,6 +7255,9 @@ var xm;
             var globalOptNames = [];
             var detailPad = this.output.nibs.decl;
 
+            var allCommands = xm.keysOf(this.expose.commands);
+            var allGroups = xm.valuesOf(this.expose.groups);
+
             var sortOptionName = function (one, two) {
                 return exposeSortOption(_this.expose.options.get(one), _this.expose.options.get(two));
             };
@@ -7294,10 +7337,11 @@ var xm;
                 commands.row.label.out.line(cmd.label);
 
                 addNote(cmd.note);
-                cmd.options.sort(sortOptionName).forEach(function (name) {
-                    if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
-                        addOption(name);
-                    }
+
+                cmd.options.filter(function (name) {
+                    return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
+                }).sort(sortOptionName).forEach(function (name) {
+                    addOption(name);
                 });
             };
 
@@ -7308,9 +7352,6 @@ var xm;
                     });
                 }
             };
-
-            var allCommands = xm.keysOf(this.expose.commands);
-            var allGroups = xm.valuesOf(this.expose.groups);
 
             optKeys.forEach(function (name) {
                 var option = _this.expose.options.get(name);
@@ -7343,10 +7384,10 @@ var xm;
                         });
 
                         if (group.options.length > 0) {
-                            group.options.sort(sortOptionName).forEach(function (name) {
-                                if (commandOptNames.indexOf(name) < 0) {
-                                    addOption(name);
-                                }
+                            group.options.filter(function (name) {
+                                return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
+                            }).sort(sortOptionName).forEach(function (name) {
+                                addOption(name);
                             });
                         }
                     }
@@ -7365,13 +7406,13 @@ var xm;
                 addHeader('global options');
 
                 if (commandOptNames.length > 0) {
-                    xm.eachElem(commandOptNames, function (name) {
+                    commandOptNames.forEach(function (name) {
                         addOption(name);
                     });
                 }
 
                 if (globalOptNames.length > 0) {
-                    xm.eachElem(globalOptNames, function (name) {
+                    globalOptNames.forEach(function (name) {
                         addOption(name);
                     });
                 }
@@ -7420,9 +7461,9 @@ var xm;
                 if (option) {
                     if (option.type) {
                         if (!xm.isUndefined(option.default) && typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
-                            return this.getDefault(name, xm.convertStringTo(this.argv[name], option.type));
+                            return this.getDefault(name, xm.parseStringTo(this.argv[name], option.type));
                         }
-                        return xm.convertStringTo(this.argv[name], option.type);
+                        return xm.parseStringTo(this.argv[name], option.type);
                     }
                 }
                 return this.argv[name];
@@ -7432,7 +7473,7 @@ var xm;
 
         ExposeContext.prototype.getOptAs = function (name, type, alt) {
             if (this.hasOpt(name)) {
-                return xm.convertStringTo(this.argv[name], type);
+                return xm.parseStringTo(this.argv[name], type);
             }
             return this.getDefault(name, alt);
         };
@@ -7485,14 +7526,14 @@ var xm;
 
         ExposeContext.prototype.getArgAtAs = function (index, type, alt) {
             if (index >= 0 && index < this.argv._.length) {
-                return xm.convertStringTo(this.argv._[index], type);
+                return xm.parseStringTo(this.argv._[index], type);
             }
             return alt;
         };
 
         ExposeContext.prototype.getArgsAs = function (type) {
             return this.argv._.map(function (value) {
-                return xm.convertStringTo(value, type);
+                return xm.parseStringTo(value, type);
             });
         };
 
@@ -7505,7 +7546,7 @@ var xm;
 
         ExposeContext.prototype.shiftArgAs = function (type, alt) {
             if (this.argv._.length > 0) {
-                return xm.convertStringTo(this.argv._.shift(), type);
+                return xm.parseStringTo(this.argv._.shift(), type);
             }
             return alt;
         };
@@ -7581,7 +7622,7 @@ var xm;
             this._index = 0;
             this.reporter = new xm.ExposeReporter(this, output);
 
-            xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+            xm.object.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
                 writable: false,
                 enumerable: false
             });
@@ -7813,13 +7854,13 @@ var tsd;
                 if (file.def && file.def.head === file) {
                     this.output.span('<head>');
                     if (file.commit.changeDate) {
-                        this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+                        this.output.accent(sep).span(xm.date.toNiceUTC(file.commit.changeDate));
                     }
                 } else {
                     if (file.commit) {
                         this.output.span(file.commit.commitShort);
                         if (file.commit.changeDate) {
-                            this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+                            this.output.accent(sep).span(xm.date.toNiceUTC(file.commit.changeDate));
                         }
                     } else {
                         this.output.accent(sep).accent('<no commit>');
@@ -8041,6 +8082,15 @@ var tsd;
     })(tsd.cli || (tsd.cli = {}));
     var cli = tsd.cli;
 })(tsd || (tsd = {}));
+var xm;
+(function (xm) {
+    function enumNames(enumer) {
+        return Object.keys(enumer).filter(function (value) {
+            return !/\d+/.test(value);
+        });
+    }
+    xm.enumNames = enumNames;
+})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     (function (cli) {
@@ -8051,6 +8101,7 @@ var tsd;
             Opt.dev = 'dev';
             Opt.config = 'config';
             Opt.cacheDir = 'cacheDir';
+            Opt.cacheMode = 'cacheMode';
             Opt.resolve = 'resolve';
             Opt.save = 'save';
             Opt.overwrite = 'overwrite';
@@ -8069,7 +8120,7 @@ var tsd;
             Opt.detail = 'detail';
         })(cli.Opt || (cli.Opt = {}));
         var Opt = cli.Opt;
-        xm.ObjectUtil.lockPrimitives(Opt);
+        xm.object.lockPrimitives(Opt);
 
         (function (Group) {
             Group.primary = 'primary';
@@ -8078,7 +8129,7 @@ var tsd;
             Group.help = 'help';
         })(cli.Group || (cli.Group = {}));
         var Group = cli.Group;
-        xm.ObjectUtil.lockPrimitives(Group);
+        xm.object.lockPrimitives(Group);
 
         (function (Action) {
             Action.install = 'install';
@@ -8087,7 +8138,7 @@ var tsd;
             Action.update = 'update';
         })(cli.Action || (cli.Action = {}));
         var Action = cli.Action;
-        xm.ObjectUtil.lockPrimitives(Action);
+        xm.object.lockPrimitives(Action);
     })(tsd.cli || (tsd.cli = {}));
     var cli = tsd.cli;
 })(tsd || (tsd = {}));
@@ -8108,7 +8159,7 @@ var tsd;
 
             expose.defineCommand(function (cmd) {
                 cmd.name = 'version';
-                cmd.label = 'display version';
+                cmd.label = 'display tsd version info';
                 cmd.groups = [cli.Group.support];
                 cmd.execute = (function (ctx) {
                     ctx.out.ln();
@@ -8178,6 +8229,7 @@ var tsd;
                 opt.description = 'modify reporting detail level';
                 opt.type = 'string';
                 opt.global = true;
+                opt.placeholder = 'level';
                 opt.default = xm.ExposeLevel.med;
                 opt.enum = ['low', 'mid', 'high'];
                 opt.note = ['partially implemented'];
@@ -8236,7 +8288,7 @@ var tsd;
                 opt.description = 'path to config file';
                 opt.type = 'string';
                 opt.placeholder = 'path';
-                opt.global = false;
+                opt.global = true;
             });
 
             expose.defineOption(function (opt) {
@@ -8244,7 +8296,17 @@ var tsd;
                 opt.description = 'path to cache directory';
                 opt.type = 'string';
                 opt.placeholder = 'path';
-                opt.global = false;
+                opt.global = true;
+            });
+
+            expose.defineOption(function (opt) {
+                opt.name = cli.Opt.cacheMode;
+                opt.description = 'change cache behaviour';
+                opt.type = 'string';
+                opt.placeholder = 'mode';
+                opt.default = xm.http.CacheMode[xm.http.CacheMode.allowUpdate];
+                opt.enum = xm.enumNames(xm.http.CacheMode);
+                opt.global = true;
             });
 
             expose.defineOption(function (opt) {
@@ -8295,8 +8357,8 @@ var tsd;
                 opt.description = 'run action on selection';
                 opt.type = 'string';
                 opt.placeholder = 'name';
-                opt.enum = [cli.Action.install, cli.Action.compare, cli.Action.update, cli.Action.open];
-                opt.note = ['partially implemented'];
+                opt.enum = [cli.Action.install];
+
                 opt.apply = function (value, ctx) {
                     ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
                 };
@@ -8395,8 +8457,11 @@ var tsd;
             job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
             job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-            var required = ctx.hasOpt(Opt.config);
+            if (ctx.hasOpt(Opt.cacheMode)) {
+                job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+            }
 
+            var required = ctx.hasOpt(Opt.config);
             return job.api.readConfig(!required).progress(d.notify).then(function () {
                 d.resolve(job);
             });

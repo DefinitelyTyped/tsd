@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
 
-///<reference path="../../../../src/tsd/context/Config.ts" />
+/// <reference path="../../../../src/tsd/context/Config.ts" />
 
 describe('Config', () => {
 	'use strict';
@@ -61,7 +61,7 @@ describe('Config', () => {
 			];
 			valid.forEach((name) => {
 				it('parses "' + name + '"', () => {
-					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + name + '.json');
+					var json = xm.file.readJSONSync('./test/fixtures/config/' + name + '.json');
 
 					config.parseJSON(json, name);
 					helper.assertConfig(config, json, name);
@@ -84,7 +84,7 @@ describe('Config', () => {
 				it('rejects "' + tuple[0] + '"', () => {
 					assert.lengthOf(tuple, 2, 'tuple');
 
-					var json = xm.FileUtil.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
+					var json = xm.file.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 					assert.throws(() => {
 						//xm.log(json);
 						config.parseJSON(json, (<string>tuple[0]));

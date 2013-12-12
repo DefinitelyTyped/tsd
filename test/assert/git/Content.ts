@@ -1,6 +1,6 @@
-///<reference path="../../helper.ts" />
-///<reference path="../xm/unordered.ts" />
-///<reference path="../../../src/git/GitUtil.ts" />
+/// <reference path="../../helper.ts" />
+/// <reference path="../xm/unordered.ts" />
+/// <reference path="../../../src/git/GitUtil.ts" />
 
 module helper {
 	'use strict';

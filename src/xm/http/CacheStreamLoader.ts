@@ -1,12 +1,3 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../promise.ts" />
-///<reference path="../EventLog.ts" />
-///<reference path="../hash.ts" />
-///<reference path="../typeOf.ts" />
-///<reference path="../io/FileUtil.ts" />
-///<reference path="../io/Koder.ts" />
-///<reference path="HTTPCache.ts" />
 /*
  * imported from typescript-xm package
  *
@@ -14,6 +5,19 @@
  * https://github.com/Bartvds/typescript-xm
  * License: MIT - 2013
  * */
+
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../object.ts" />
+/// <reference path="../promise.ts" />
+/// <reference path="../EventLog.ts" />
+/// <reference path="../date.ts" />
+/// <reference path="../hash.ts" />
+/// <reference path="../typeOf.ts" />
+/// <reference path="../file.ts" />
+/// <reference path="../Koder.ts" />
+/// <reference path="HTTPCache.ts" />
+/// <reference path="CacheMode.ts" />
+
 module xm {
 	'use strict';
 
@@ -32,29 +36,6 @@ module xm {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function getISOString(input:any):string {
-		var date:Date;
-		if (xm.isDate(input)) {
-			date = input;
-		}
-		else if (xm.isString(input) || xm.isNumber(input)) {
-			date = new Date(input);
-		}
-		return (date ? date.toISOString() : null);
-	}
-
-	function distributeDir(base:string, name:string, levels:number, chunk:number = 1):string {
-		name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
-		if (levels === 0) {
-			return base;
-		}
-		var arr = [base];
-		var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
-		for (var i = 0; i < steps; i += chunk) {
-			arr.push(name.substr(i, chunk));
-		}
-		return path.join.apply(path, arr);
-	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -62,10 +43,8 @@ module xm {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//TODO rework downloader to write directly to disk using streams (maybe drop q-io for downloading)
+		//TODO rework downloader to write directly to disk using streams
 		// - this may require a switch on whether we want to update disk
-		// - see old slimer-js cache downlaoder (request.js + fs.createWriteStream + gunzip )
-		// - pipe switched on header: https://gist.github.com/nickfishman/5515364
 		// - integrate with CacheOpts.compressStore
 		//TODO rework this to allow to keep stale content if we can't get new
 		export class CacheStreamLoader {
@@ -86,7 +65,7 @@ module xm {
 			static http_cache_hit = 'http_cache_hit';
 
 			cache:HTTPCache;
-			request:Request;
+			request:CacheRequest;
 			object:CacheObject;
 			infoCacheValidator:IObjectValidator;
 			bodyCacheValidator:IObjectValidator;
@@ -94,7 +73,7 @@ module xm {
 
 			private _defer:Q.Deferred<CacheObject>;
 
-			constructor(cache:HTTPCache, request:Request) {
+			constructor(cache:HTTPCache, request:CacheRequest) {
 				this.cache = cache;
 				this.request = request;
 
@@ -108,14 +87,14 @@ module xm {
 				}
 
 				this.object = new CacheObject(request);
-				this.object.storeDir = distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+				this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
 
 				this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
 				this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
 				this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
-				xm.ObjectUtil.lockProps(this, ['cache', 'request', 'object']);
+				xm.object.lockProps(this, ['cache', 'request', 'object']);
 			}
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -401,7 +380,7 @@ module xm {
 							return;
 						}
 
-						write.push(xm.FileUtil.mkdirCheckQ(path.dirname(this.object.bodyFile), true).then(() => {
+						write.push(xm.file.mkdirCheckQ(path.dirname(this.object.bodyFile), true).then(() => {
 							return FS.write(this.object.bodyFile, this.object.body, {flags: 'wb'});
 						}).then(() => {
 							this.track.event(CacheStreamLoader.cache_write, 'written file to cache');
@@ -412,7 +391,7 @@ module xm {
 					}
 
 					// write info file with udpated data
-					write.push(xm.FileUtil.mkdirCheckQ(path.dirname(this.object.infoFile), true).then(() => {
+					write.push(xm.file.mkdirCheckQ(path.dirname(this.object.infoFile), true).then(() => {
 						return FS.write(this.object.infoFile, info, {flags: 'wb'});
 					}));
 
@@ -451,8 +430,8 @@ module xm {
 					return Q.resolve();
 				}
 				return Q.all([
-					xm.FileUtil.removeFile(this.object.infoFile),
-					xm.FileUtil.removeFile(this.object.bodyFile),
+					xm.file.removeFile(this.object.infoFile),
+					xm.file.removeFile(this.object.bodyFile),
 				]).then(() => {
 					this.track.event(CacheStreamLoader.cache_remove, this.request.url);
 				});
@@ -464,8 +443,8 @@ module xm {
 					return Q.resolve();
 				}
 				Q.all([
-					xm.FileUtil.touchFile(this.object.infoFile),
-					xm.FileUtil.touchFile(this.object.bodyFile)
+					xm.file.touchFile(this.object.infoFile),
+					xm.file.touchFile(this.object.bodyFile)
 				]).done(() => {
 					d.resolve();
 				}, d.reject);
@@ -479,16 +458,18 @@ module xm {
 				info.url = this.request.url;
 				info.key = this.request.key;
 				info.contentType = res.headers['content-type'];
-				info.cacheCreated = getISOString(Date.now());
-				info.cacheUpdated = getISOString(Date.now());
+				//TODO why not keep http date format?
+				info.cacheCreated = xm.date.getISOString(Date.now());
+				info.cacheUpdated = xm.date.getISOString(Date.now());
 				this.updateInfo(res, checksum);
 			}
 
 			private updateInfo(res:QioHTTP.Response, checksum:string) {
 				var info = this.object.info;
 				info.httpETag = (res.headers['etag'] || info.httpETag);
-				info.httpModified = getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
-				info.cacheUpdated = getISOString(Date.now());
+				//TODO why not keep http date format?
+				info.httpModified = xm.date.getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
+				info.cacheUpdated = xm.date.getISOString(Date.now());
 				info.contentChecksum = checksum;
 			}
 

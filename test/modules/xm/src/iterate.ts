@@ -1,5 +1,5 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/iterate.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/iterate.ts" />
 
 describe('xm.iterate', () => {
 	'use strict';

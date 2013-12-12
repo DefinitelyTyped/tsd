@@ -1,4 +1,4 @@
-///<reference path="_ref.d.ts" />
+/// <reference path="_ref.d.ts" />
 
 module tsd {
 	var Q:typeof Q = require('q');

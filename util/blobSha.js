@@ -868,7 +868,7 @@ var xm;
         };
         return ObjectUtil;
     })();
-    xm.ObjectUtil = ObjectUtil;
+    xm.object = ObjectUtil;
 })(xm || (xm = {}));
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1373,7 +1373,7 @@ var xm;
 
             this._writer.start();
 
-            xm.ObjectUtil.hidePrefixed(this);
+            xm.object.hidePrefixed(this);
         }
         StyledOut.prototype.write = function (str) {
             this._writer.write(this._styler.plain(str));
@@ -1595,8 +1595,8 @@ var xm;
             return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
         }
         DateUtil.toNiceUTC = toNiceUTC;
-    })(xm.DateUtil || (xm.DateUtil = {}));
-    var DateUtil = xm.DateUtil;
+    })(xm.date || (xm.DateUtil = {}));
+    var DateUtil = xm.date;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -2232,7 +2232,7 @@ var xm;
         }
         return input;
     }
-    xm.convertStringTo = convertStringTo;
+    xm.parseStringTo = convertStringTo;
 
     var ExposeContext = (function () {
         function ExposeContext(expose, argv, command) {
@@ -2257,7 +2257,7 @@ var xm;
                 if (this.expose.options.has(name)) {
                     var option = this.expose.options.get(name);
                     if (option.type) {
-                        return xm.convertStringTo(this.argv[name], option.type);
+                        return xm.parseStringTo(this.argv[name], option.type);
                     }
                 }
                 return this.argv[name];
@@ -2267,7 +2267,7 @@ var xm;
 
         ExposeContext.prototype.getArgAs = function (name, type, alt) {
             if (xm.hasOwnProp(this.argv, name)) {
-                return xm.convertStringTo(this.argv[name], type);
+                return xm.parseStringTo(this.argv[name], type);
             }
             return alt;
         };
@@ -2281,14 +2281,14 @@ var xm;
 
         ExposeContext.prototype.getArgAtAs = function (index, type, alt) {
             if (index >= 0 && index < this.argv._.length) {
-                return xm.convertStringTo(this.argv._[index], type);
+                return xm.parseStringTo(this.argv._[index], type);
             }
             return alt;
         };
 
         ExposeContext.prototype.getArgsAs = function (type) {
             return this.argv._.map(function (value) {
-                return xm.convertStringTo(value, type);
+                return xm.parseStringTo(value, type);
             });
         };
 
@@ -2320,7 +2320,7 @@ var xm;
 
         ExposeContext.prototype.shiftArgAs = function (type, alt) {
             if (this.argv._.length > 0) {
-                return xm.convertStringTo(this.argv._.shift(), type);
+                return xm.parseStringTo(this.argv._.shift(), type);
             }
             return alt;
         };
@@ -2480,7 +2480,7 @@ var xm;
                 opt.global = true;
             });
 
-            xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+            xm.object.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
                 writable: false,
                 enumerable: false
             });
@@ -2551,7 +2551,7 @@ var xm;
                 if (option.short) {
                     optimist.alias(option.name, option.short);
                 }
-                if (xm.ObjectUtil.hasOwnProp(option, 'default')) {
+                if (xm.object.hasOwnProp(option, 'default')) {
                     optimist.default(option.name, option.default);
                 }
             });

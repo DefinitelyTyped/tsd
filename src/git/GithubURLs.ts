@@ -1,9 +1,9 @@
-///<reference path="../_ref.d.ts" />
-///<reference path="_ref.d.ts" />
-///<reference path="GithubRepo.ts" />
-///<reference path="../xm/assertVar.ts" />
-///<reference path="../xm/ObjectUtil.ts" />
-///<reference path="../xm/io/URLManager.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="_ref.d.ts" />
+/// <reference path="GithubRepo.ts" />
+/// <reference path="../xm/assertVar.ts" />
+/// <reference path="../xm/object.ts" />
+/// <reference path="../xm/URLManager.ts" />
 
 module git {
 	'use strict';
@@ -42,7 +42,7 @@ module git {
 			this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
 			this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		api():string {

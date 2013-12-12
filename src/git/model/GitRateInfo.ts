@@ -1,5 +1,5 @@
-///<reference path="../../xm/typeOf.ts" />
-///<reference path="../../../typings/date-utils/date-utils.d.ts" />
+/// <reference path="../../xm/typeOf.ts" />
+/// <reference path="../../../typings/date-utils/date-utils.d.ts" />
 
 module git {
 

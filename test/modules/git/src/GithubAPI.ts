@@ -1,9 +1,9 @@
-///<reference path='../../../globals.ts' />
-///<reference path='../../../../src/git/loader/GithubAPI.ts' />
-///<reference path='../../../../src/git/GitUtil.ts' />
-///<reference path='../../../../src/git/GitUtil.ts' />
-///<reference path='../../../../src/tsd/context/Context.ts' />
-///<reference path='helper.ts' />
+/// <reference path='../../../globals.ts' />
+/// <reference path='../../../../src/git/loader/GithubAPI.ts' />
+/// <reference path='../../../../src/git/GitUtil.ts' />
+/// <reference path='../../../../src/git/GitUtil.ts' />
+/// <reference path='../../../../src/tsd/context/Context.ts' />
+/// <reference path='helper.ts' />
 
 describe('git.GithubAPI', () => {
 	'use strict';
@@ -100,7 +100,7 @@ describe('git.GithubAPI', () => {
 			repo.api.cache.track.reset();
 			//assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
-			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
+			var expectedJson = xm.file.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');
 

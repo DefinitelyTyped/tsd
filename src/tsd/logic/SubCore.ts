@@ -1,7 +1,7 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../xm/assertVar.ts" />
-///<reference path="../../xm/Logger.ts" />
-///<reference path="../Core.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../xm/assertVar.ts" />
+/// <reference path="../../xm/Logger.ts" />
+/// <reference path="../Core.ts" />
 
 module tsd {
 	'use strict';
@@ -17,8 +17,8 @@ module tsd {
 			this.core = core;
 			this.track = new xm.EventLog(track, label);
 
-			xm.ObjectUtil.lockProps(this, ['core', 'track']);
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.lockProps(this, ['core', 'track']);
+			xm.object.hidePrefixed(this);
 		}
 
 		set verbose(verbose:boolean) {

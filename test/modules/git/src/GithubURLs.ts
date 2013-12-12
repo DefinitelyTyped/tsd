@@ -1,6 +1,6 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/GithubURLs.ts" />
-///<reference path="helper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/git/GithubURLs.ts" />
+/// <reference path="helper.ts" />
 
 describe('git.GithubRepo / git.GithubURLs', () => {
 	'use strict';

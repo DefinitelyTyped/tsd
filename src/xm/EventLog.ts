@@ -6,11 +6,11 @@
  * License: MIT - 2013
  * */
 
-///<reference path="DateUtil.ts" />
-///<reference path="Logger.ts" />
-///<reference path="inspect.ts" />
-///<reference path="StatCounter.ts" />
-///<reference path="ObjectUtil.ts" />
+/// <reference path="date.ts" />
+/// <reference path="Logger.ts" />
+/// <reference path="inspect.ts" />
+/// <reference path="StatCounter.ts" />
+/// <reference path="object.ts" />
 
 module xm {
 	'use strict';
@@ -40,6 +40,7 @@ module xm {
 		complete: 'complete',
 		failure: 'failure',
 		skip: 'skip',
+		share: 'share',
 
 		event: 'event',
 
@@ -87,7 +88,7 @@ module xm {
 
 			this._startAt = Date.now();
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		//many lazy wrappers
@@ -137,6 +138,10 @@ module xm {
 
 		skip(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(Level.skip, type, message, data);
+		}
+
+		share(type:string, message?:string, data?:any):EventLogItem {
+			return this.track(Level.share, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

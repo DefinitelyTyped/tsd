@@ -1,7 +1,7 @@
-///<reference path="../_ref.d.ts"/>
-///<reference path="../git/GitUtil.ts"/>
-///<reference path="../xm/expose/Expose.ts"/>
-///<reference path="../xm/Logger.ts"/>
+/// <reference path="../_ref.d.ts"/>
+/// <reference path="../git/GitUtil.ts"/>
+/// <reference path="../xm/expose/Expose.ts"/>
+/// <reference path="../xm/Logger.ts"/>
 
 module git {
 

@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
 
-///<reference path="../../../../src/tsd/context/Context.ts" />
+/// <reference path="../../../../src/tsd/context/Context.ts" />
 
 describe('Context', () => {
 	'use strict';
@@ -58,7 +58,7 @@ describe('Context', () => {
 			//assert.isObject(ctx.config.installed, 'installed');
 		});
 		it('has valid default', () => {
-			var json = xm.FileUtil.readJSONSync('./test/fixtures/config/default.json');
+			var json = xm.file.readJSONSync('./test/fixtures/config/default.json');
 			helper.assertConfig(ctx.config, json, 'default');
 		});
 	});

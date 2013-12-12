@@ -1,5 +1,5 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/DateUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/object.ts" />
 
 class ObjectUtilTestClass {
 	private _propA:string = 'a';
@@ -8,7 +8,7 @@ class ObjectUtilTestClass {
 	propD:string = 'd';
 }
 
-describe('xm.ObjectUtil', () => {
+describe('xm.object', () => {
 	'use strict';
 
 	var assert:Chai.Assert = require('chai').assert;
@@ -22,7 +22,7 @@ describe('xm.ObjectUtil', () => {
 			keys = Object.keys(inst);
 			assert.sameMembers(keys, ['_propA', '_propB', 'propC', 'propD'], 'before hide');
 
-			xm.ObjectUtil.hidePrefixed(inst);
+			xm.object.hidePrefixed(inst);
 
 			keys = Object.keys(inst);
 			assert.sameMembers(keys, ['propC', 'propD'], 'after hide');
@@ -37,7 +37,7 @@ describe('xm.ObjectUtil', () => {
 			assert.strictEqual(fixed.aa, 10, 'before fixed.aa');
 			assert.strictEqual(fixed.bb, 20, 'before fixed.bb');
 
-			xm.ObjectUtil.lockProps(fixed, ['aa']);
+			xm.object.lockProps(fixed, ['aa']);
 
 			assert.throws(() => {
 				fixed.aa = 100;

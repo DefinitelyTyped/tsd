@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../data/DefInfo.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../data/DefInfo.ts" />
 
 module tsd {
 	'use strict';

@@ -1,4 +1,4 @@
-///<reference path="GitCommitUser.ts" />
+/// <reference path="GitCommitUser.ts" />
 
 module git {
 	'use strict';

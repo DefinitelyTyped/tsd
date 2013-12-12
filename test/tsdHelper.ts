@@ -1,10 +1,12 @@
-///<reference path="_ref.d.ts" />
-///<reference path="helper.ts" />
-///<reference path="../src/tsd/data/_all.ts" />
+/// <reference path="_ref.d.ts" />
+/// <reference path="helper.ts" />
+/// <reference path="../src/xm/http/CacheMode.ts" />
+/// <reference path="../src/tsd/data/_all.ts" />
 
-///<reference path="assert/tsd/_all.ts" />
-///<reference path="assert/xm/_all.ts" />
-///<reference path="assert/git/_all.ts" />
+/// <reference path="assert/tsd/_all.ts" />
+/// <reference path="assert/xm/_all.ts" />
+/// <reference path="assert/git/_all.ts" />
+/// <reference path="tsdTestInfo.ts" />
 
 module helper {
 	'use strict';
@@ -23,7 +25,7 @@ module helper {
 
 	export function getConfigSchema():any {
 		if (!configSchema) {
-			configSchema = xm.FileUtil.readJSONSync(path.join(helper.getProjectRoot(), 'schema', tsd.Const.configSchemaFile));
+			configSchema = xm.file.readJSONSync(path.join(helper.getProjectRoot(), 'schema', tsd.Const.configSchemaFile));
 		}
 		return configSchema;
 	}
@@ -42,99 +44,7 @@ module helper {
 	}
 
 	export function applyCoreUpdate(core:tsd.Core) {
-		core.repo.api.cache.opts.applyCacheMode(helper.settings.cache);
-		core.repo.raw.cache.opts.applyCacheMode(helper.settings.cache);
-	}
-
-	export class TestInfo {
-		name:string;
-		group:string;
-
-		tmpDir:string;
-		fixturesDir:string;
-		typingsDir:string;
-
-		cacheDirTestFixed:string;
-		cacheDirDev:string;
-		cacheDirUser:string;
-
-		configFile:string;
-		resultFile:string;
-		errorFile:string;
-		stdoutFile:string;
-		stderrFile:string;
-
-		testDump:string;
-		queryDump:string;
-		selectionDump:string;
-		optionsDump:string;
-		argsDump:string;
-
-		resultExpect:string;
-		configExpect:string;
-		errorExpect:string;
-		stdoutExpect:string;
-		stderrExpect:string;
-		typingsExpect:string;
-
-		modBuildDir:string;
-		modBuildAPI:string;
-		modBuildCLI:string;
-	}
-
-	export function getTestInfo(group:string, name:string, test:any, createConfigFile:boolean = true):TestInfo {
-
-		var tmpDir = path.join(__dirname, 'result', group, name);
-		var dumpDir = path.resolve(tmpDir, 'dump');
-		var fixturesDir = path.resolve(__dirname, '..', 'fixtures', 'expected', group, name);
-		var modBuildDir = path.resolve(__dirname, '..', '..', '..', '..', 'build');
-
-		if (test.fixtures) {
-			fixturesDir = path.resolve(fixturesDir, '..', test.fixtures);
-		}
-
-		xm.FileUtil.mkdirCheckSync(tmpDir, true);
-		xm.FileUtil.mkdirCheckSync(modBuildDir, true);
-
-		var info = new TestInfo();
-		info.name = name;
-		info.group = group;
-
-		info.tmpDir = tmpDir;
-		info.fixturesDir = fixturesDir;
-		info.typingsDir = path.join(tmpDir, 'typings');
-
-		info.cacheDirTestFixed = getFixedCacheDir();
-		info.cacheDirDev = path.join(helper.getProjectRoot(), tsd.Const.cacheDir);
-		info.cacheDirUser = tsd.Paths.getUserCacheDir();
-
-		info.configFile = path.join(tmpDir, tsd.Const.configFile);
-		info.resultFile = path.join(tmpDir, 'result.json');
-		info.errorFile = path.join(tmpDir, 'error.json');
-		info.stdoutFile = path.join(tmpDir, 'stdout.txt');
-		info.stderrFile = path.join(tmpDir, 'stderr.txt');
-
-		info.configExpect = path.join(fixturesDir, tsd.Const.configFile);
-		info.resultExpect = path.join(fixturesDir, 'result.json');
-		info.errorExpect = path.join(fixturesDir, 'error.json');
-		info.stdoutExpect = path.join(fixturesDir, 'stdout.txt');
-		info.stderrExpect = path.join(fixturesDir, 'stderr.txt');
-		info.typingsExpect = path.join(fixturesDir, 'typings');
-
-		info.testDump = path.join(dumpDir, 'test.json');
-		info.argsDump = path.join(dumpDir, 'args.json');
-		info.queryDump = path.join(dumpDir, 'query.json');
-		info.optionsDump = path.join(dumpDir, 'options.json');
-
-		info.modBuildDir = modBuildDir;
-		//TODO decide to assert these?
-		info.modBuildAPI = path.join(modBuildDir, 'api.js');
-		info.modBuildCLI = path.join(modBuildDir, 'cli.js');
-
-		if (createConfigFile) {
-			fs.writeFileSync(info.configFile, fs.readFileSync('./test/fixtures/config/default.json', {encoding: 'utf8'}), {encoding: 'utf8'});
-		}
-		return info;
+		core.useCacheMode(xm.http.CacheMode[helper.settings.cache]);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -1,10 +1,10 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../../xm/iterate.ts" />
-///<reference path="../../xm/ObjectUtil.ts" />
-///<reference path="../../xm/Logger.ts" />
-///<reference path="../../xm/data/PackageJSON.ts" />
-///<reference path="../data/DefVersion.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../xm/file.ts" />
+/// <reference path="../../xm/iterate.ts" />
+/// <reference path="../../xm/object.ts" />
+/// <reference path="../../xm/Logger.ts" />
+/// <reference path="../../xm/data/PackageJSON.ts" />
+/// <reference path="../data/DefVersion.ts" />
 
 module tsd {
 	'use strict';
@@ -70,7 +70,7 @@ module tsd {
 			//import defaults
 			this.reset();
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 			Object.defineProperty(this, 'log', {enumerable: false});
 		}
 

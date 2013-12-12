@@ -1,7 +1,7 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../git/model/GithubJSON.ts" />
-///<reference path="../../git/model/GithubUser.ts" />
-///<reference path="../../git/model/GitCommitMessage.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../git/model/GithubJSON.ts" />
+/// <reference path="../../git/model/GithubUser.ts" />
+/// <reference path="../../git/model/GitCommitMessage.ts" />
 
 module tsd {
 	'use strict';
@@ -33,8 +33,8 @@ module tsd {
 
 			this.commitSha = commitSha;
 
-			xm.ObjectUtil.hidePrefixed(this);
-			xm.ObjectUtil.lockProps(this, ['commitSha']);
+			xm.object.hidePrefixed(this);
+			xm.object.lockProps(this, ['commitSha']);
 		}
 
 		parseJSON(commit:any):void {
@@ -51,7 +51,7 @@ module tsd {
 			this.message.parse(commit.commit.message);
 			this.hasMeta = true;
 
-			xm.ObjectUtil.lockProps(this, ['commitSha', 'hasMeta']);
+			xm.object.lockProps(this, ['commitSha', 'hasMeta']);
 		}
 
 		hasMetaData():boolean {

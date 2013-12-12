@@ -1,4 +1,4 @@
-///<reference path="../_ref.ts" />
+/// <reference path="../_ref.ts" />
 
 //TODO remove inlined def (weird priority failure)
 declare var Date:{

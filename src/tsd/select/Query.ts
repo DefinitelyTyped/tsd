@@ -1,9 +1,9 @@
-///<reference path="../_ref.ts" />
-///<reference path="NameMatcher.ts" />
-///<reference path="InfoMatcher.ts" />
-///<reference path="DateMatcher.ts" />
-///<reference path="VersionMatcher.ts" />
-///<reference path="CommitMatcher.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="NameMatcher.ts" />
+/// <reference path="InfoMatcher.ts" />
+/// <reference path="DateMatcher.ts" />
+/// <reference path="VersionMatcher.ts" />
+/// <reference path="CommitMatcher.ts" />
 
 module tsd {
 	'use strict';

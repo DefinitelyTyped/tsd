@@ -6,10 +6,10 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../_ref.d.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../io/StyledOut.ts" />
-///<reference path="Expose.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="../object.ts" />
+/// <reference path="../StyledOut.ts" />
+/// <reference path="Expose.ts" />
 
 /*
  Expose: cli command manager and help generator
@@ -64,9 +64,9 @@ module xm {
 					if (option.type) {
 						// unhack optimist flags
 						if (!xm.isUndefined(option.default) && typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
-							return this.getDefault(name, xm.convertStringTo(this.argv[name], option.type));
+							return this.getDefault(name, xm.parseStringTo(this.argv[name], option.type));
 						}
-						return xm.convertStringTo(this.argv[name], option.type);
+						return xm.parseStringTo(this.argv[name], option.type);
 					}
 				}
 				return this.argv[name];
@@ -76,7 +76,7 @@ module xm {
 
 		getOptAs(name:string, type:string, alt?:any):any {
 			if (this.hasOpt(name)) {
-				return xm.convertStringTo(this.argv[name], type);
+				return xm.parseStringTo(this.argv[name], type);
 			}
 			return this.getDefault(name, alt);
 		}
@@ -128,7 +128,7 @@ module xm {
 		//(booya!)
 		getArgAtAs(index:number, type:string, alt?:any):any {
 			if (index >= 0 && index < this.argv._.length) {
-				return xm.convertStringTo(this.argv._[index], type);
+				return xm.parseStringTo(this.argv._[index], type);
 			}
 			return alt;
 		}
@@ -136,7 +136,7 @@ module xm {
 		//(gasp!)
 		getArgsAs(type:string):any[] {
 			return this.argv._.map((value:string) => {
-				return xm.convertStringTo(value, type);
+				return xm.parseStringTo(value, type);
 			});
 		}
 
@@ -149,7 +149,7 @@ module xm {
 
 		shiftArgAs(type:string, alt?:string):any {
 			if (this.argv._.length > 0) {
-				return xm.convertStringTo(this.argv._.shift(), type);
+				return xm.parseStringTo(this.argv._.shift(), type);
 			}
 			return alt;
 		}

@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/loader/GithubRaw.ts" />
-///<reference path="../../../../src/tsd/context/Context.ts" />
-///<reference path="helper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/git/loader/GithubRaw.ts" />
+/// <reference path="../../../../src/tsd/context/Context.ts" />
+/// <reference path="helper.ts" />
 
 describe('git.GithubRaw', () => {
 	'use strict';

@@ -1,21 +1,21 @@
-///<reference path="../git/GithubRepo.ts" />
-///<reference path="../xm/assertVar.ts" />
+/// <reference path="../git/GithubRepo.ts" />
+/// <reference path="../xm/assertVar.ts" />
 
-///<reference path="context/Config.ts" />
+/// <reference path="context/Config.ts" />
 
-///<reference path="Options.ts" />
-///<reference path="logic/SubCore.ts" />
-///<reference path="logic/Resolver.ts" />
-///<reference path="logic/IndexManager.ts" />
-///<reference path="logic/ConfigIO.ts" />
-///<reference path="logic/ContentLoader.ts" />
-///<reference path="logic/Installer.ts" />
-///<reference path="logic/InfoParser.ts" />
-///<reference path="logic/ContentLoader.ts" />
-///<reference path="logic/SelectorQuery.ts" />
-///<reference path="select/Query.ts" />
+/// <reference path="Options.ts" />
+/// <reference path="logic/SubCore.ts" />
+/// <reference path="logic/Resolver.ts" />
+/// <reference path="logic/IndexManager.ts" />
+/// <reference path="logic/ConfigIO.ts" />
+/// <reference path="logic/ContentLoader.ts" />
+/// <reference path="logic/Installer.ts" />
+/// <reference path="logic/InfoParser.ts" />
+/// <reference path="logic/ContentLoader.ts" />
+/// <reference path="logic/SelectorQuery.ts" />
+/// <reference path="select/Query.ts" />
 
-///<reference path="API.ts" />
+/// <reference path="API.ts" />
 
 module tsd {
 	'use strict';
@@ -74,12 +74,20 @@ module tsd {
 			this.track = new xm.EventLog('core', 'Core');
 			this.verbose = this.context.verbose;
 
-			xm.ObjectUtil.lockProps(this, Object.keys(this));
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.lockProps(this, Object.keys(this));
+			xm.object.hidePrefixed(this);
 		}
 
 		getInstallPath(def:tsd.Def):string {
 			return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
+		}
+
+		useCacheMode(modeName:string):void {
+			if (modeName in xm.http.CacheMode) {
+				var mode = xm.http.CacheMode[modeName];
+				this.repo.api.cache.opts.applyCacheMode(mode);
+				this.repo.raw.cache.opts.applyCacheMode(mode);
+			}
 		}
 
 		set verbose(verbose:boolean) {

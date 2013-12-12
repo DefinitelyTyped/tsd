@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
-///<reference path="../../../../src/tsd/Core.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../../src/tsd/Core.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
 
 describe('Core', () => {
 	'use strict';
@@ -22,7 +22,7 @@ describe('Core', () => {
 
 	function testConfig(path:string):Q.Promise<void> {
 		context.paths.configFile = path;
-		var source = xm.FileUtil.readJSONSync(path);
+		var source = xm.file.readJSONSync(path);
 
 		core = getCore(context);
 		return core.config.readConfig(false).then(() => {
@@ -90,8 +90,8 @@ describe('Core', () => {
 			//core.verbose = true;
 
 			//modify test data
-			var source = xm.FileUtil.readJSONSync(saveFile);
-			var changed = xm.FileUtil.readJSONSync(saveFile);
+			var source = xm.file.readJSONSync(saveFile);
+			var changed = xm.file.readJSONSync(saveFile);
 
 			changed.path = 'some/other/path';
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
@@ -107,7 +107,7 @@ describe('Core', () => {
 				return core.config.saveConfig();
 			}).then(() => {
 				assert.notIsEmptyFile(context.paths.configFile);
-				return xm.FileUtil.readJSONPromise(context.paths.configFile);
+				return xm.file.readJSONPromise(context.paths.configFile);
 			}).then((json) => {
 				assert.like(json, changed, 'saved data json');
 				assert.jsonSchema(json, helper.getConfigSchema(), 'saved valid json');

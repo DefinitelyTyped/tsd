@@ -1,7 +1,8 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/expose/Expose.ts" />
-///<reference path="const.ts" />
-///<reference path="../CLI.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/expose/Expose.ts" />
+/// <reference path="../../xm/enum.ts" />
+/// <reference path="const.ts" />
+/// <reference path="../CLI.ts" />
 
 module tsd {
 
@@ -22,7 +23,7 @@ module tsd {
 
 			expose.defineCommand((cmd:xm.ExposeCommand) => {
 				cmd.name = 'version';
-				cmd.label = 'display version';
+				cmd.label = 'display tsd version info';
 				cmd.groups = [Group.support];
 				cmd.execute = ((ctx:xm.ExposeContext) => {
 					ctx.out.ln();
@@ -96,6 +97,7 @@ module tsd {
 				opt.description = 'modify reporting detail level';
 				opt.type = 'string';
 				opt.global = true;
+				opt.placeholder = 'level';
 				opt.default = xm.ExposeLevel.med;
 				opt.enum = ['low', 'mid', 'high'];
 				opt.note = ['partially implemented'];
@@ -160,7 +162,7 @@ module tsd {
 				opt.description = 'path to config file';
 				opt.type = 'string';
 				opt.placeholder = 'path';
-				opt.global = false;
+				opt.global = true;
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -168,7 +170,17 @@ module tsd {
 				opt.description = 'path to cache directory';
 				opt.type = 'string';
 				opt.placeholder = 'path';
-				opt.global = false;
+				opt.global = true;
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.cacheMode;
+				opt.description = 'change cache behaviour';
+				opt.type = 'string';
+				opt.placeholder = 'mode';
+				opt.default = xm.http.CacheMode[xm.http.CacheMode.allowUpdate];
+				opt.enum = xm.enumNames(xm.http.CacheMode);
+				opt.global = true;
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -231,8 +243,8 @@ module tsd {
 				opt.description = 'run action on selection';
 				opt.type = 'string';
 				opt.placeholder = 'name';
-				opt.enum = [Action.install, Action.compare, Action.update, Action.open];
-				opt.note = ['partially implemented'];
+				opt.enum = [Action.install]; //, Action.compare, Action.update, Action.open];
+				//opt.note = ['partially implemented'];
 				opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
 				};

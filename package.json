@@ -76,7 +76,7 @@
     "grunt-ts": "~1.4.6",
     "grunt-tslint": "~0.4.0",
     "tslint-path-formatter": "0.1",
-	"grunt-tv4": "~0.3.1",
+    "grunt-tv4": "~0.3.1",
     "grunt-shell": "~0.6.1",
     "grunt-execute": "0.1.5",
     "grunt-contrib-connect": "~0.5.0",

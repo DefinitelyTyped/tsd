@@ -6,10 +6,10 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../_ref.d.ts" />
-///<reference path="../collection.ts" />
-///<reference path="../io/StyledOut.ts" />
-///<reference path="../expose/Expose.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="../collection.ts" />
+/// <reference path="../StyledOut.ts" />
+/// <reference path="../expose/Expose.ts" />
 
 /*
  Expose: cli command manager and help generator
@@ -157,6 +157,9 @@ module xm {
 			var globalOptNames:string[] = [];
 			var detailPad:string = this.output.nibs.decl;
 
+			var allCommands = xm.keysOf(this.expose.commands);
+			var allGroups = xm.valuesOf(this.expose.groups);
+
 			var sortOptionName = (one:string, two:string) => {
 				return exposeSortOption(this.expose.options.get(one), this.expose.options.get(two));
 			};
@@ -237,10 +240,11 @@ module xm {
 				commands.row.label.out.line(cmd.label);
 
 				addNote(cmd.note);
-				cmd.options.sort(sortOptionName).forEach((name:string) => {
-					if (commandOptNames.indexOf(name) < 0 && group.options.indexOf(name) < 0) {
-						addOption(name);
-					}
+
+				cmd.options.filter((name:string) => {
+					return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
+				}).sort(sortOptionName).forEach((name:string) => {
+					addOption(name);
 				});
 			};
 
@@ -251,9 +255,6 @@ module xm {
 					});
 				}
 			};
-
-			var allCommands = xm.keysOf(this.expose.commands);
-			var allGroups = xm.valuesOf(this.expose.groups);
 
 			optKeys.forEach((name:string) => {
 				var option:ExposeOption = this.expose.options.get(name);
@@ -290,10 +291,11 @@ module xm {
 
 						if (group.options.length > 0) {
 							//addDivider();
-							group.options.sort(sortOptionName).forEach((name:string) => {
-								if (commandOptNames.indexOf(name) < 0) {
-									addOption(name);
-								}
+
+							group.options.filter((name:string) => {
+								return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
+							}).sort(sortOptionName).forEach((name:string) => {
+								addOption(name);
 							});
 						}
 					}
@@ -313,13 +315,13 @@ module xm {
 				addHeader('global options');
 
 				if (commandOptNames.length > 0) {
-					xm.eachElem(commandOptNames, (name:string) => {
+					commandOptNames.forEach((name:string) => {
 						addOption(name);
 					});
 				}
 
 				if (globalOptNames.length > 0) {
-					xm.eachElem(globalOptNames, (name:string) => {
+					globalOptNames.forEach((name:string) => {
 						addOption(name);
 					});
 				}

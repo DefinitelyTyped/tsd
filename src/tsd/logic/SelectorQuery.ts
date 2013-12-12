@@ -1,8 +1,8 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../tsd/data/DefIndex.ts" />
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../select/Selection.ts" />
-///<reference path="SubCore.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../tsd/data/DefIndex.ts" />
+/// <reference path="../../xm/file.ts" />
+/// <reference path="../select/Selection.ts" />
+/// <reference path="SubCore.ts" />
 
 module tsd {
 	'use strict';

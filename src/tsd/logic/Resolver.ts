@@ -1,9 +1,9 @@
-///<reference path="../data/DefUtil.ts" />
-///<reference path="../data/Def.ts" />
-///<reference path="../data/DefVersion.ts" />
-///<reference path="../data/DefBlob.ts" />
-///<reference path="SubCore.ts" />
-///<reference path="../../xm/promise.ts" />
+/// <reference path="../data/DefUtil.ts" />
+/// <reference path="../data/Def.ts" />
+/// <reference path="../data/DefVersion.ts" />
+/// <reference path="../data/DefBlob.ts" />
+/// <reference path="SubCore.ts" />
+/// <reference path="../../xm/promise.ts" />
 
 module tsd {
 	'use strict';

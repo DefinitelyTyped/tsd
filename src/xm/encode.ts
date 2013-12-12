@@ -1,4 +1,12 @@
-///<reference path="typeOf.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+ /// <reference path="typeOf.ts" />
 
 module xm {
 

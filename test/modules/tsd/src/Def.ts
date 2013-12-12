@@ -1,11 +1,11 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
-///<reference path="../../../../src/xm/hash.ts" />
-///<reference path="../../../../src/xm/io/FileUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../../src/xm/hash.ts" />
+/// <reference path="../../../../src/xm/file.ts" />
 
-///<reference path="../../../../src/tsd/data/Def.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
-///<reference path="../../../../src/tsd/select/NameMatcher.ts" />
+/// <reference path="../../../../src/tsd/data/Def.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../../src/tsd/select/NameMatcher.ts" />
 
 describe('Def', () => {
 	'use strict';
@@ -51,7 +51,7 @@ describe('Def', () => {
 	});
 
 	describe('isDef', () => {
-		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
+		var data:any = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
 		after(() => {
 			data = null;
 		});
@@ -68,7 +68,7 @@ describe('Def', () => {
 	});
 
 	describe('getFrom', () => {
-		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
+		var data:any = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
 		after(() => {
 			data = null;
 		});
@@ -85,7 +85,7 @@ describe('Def', () => {
 	});
 
 	describe('getFrom trimmed', () => {
-		var data:any = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path-trim.json'));
+		var data:any = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path-trim.json'));
 		after(() => {
 			data = null;
 		});

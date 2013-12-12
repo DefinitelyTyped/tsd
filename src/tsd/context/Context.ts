@@ -1,10 +1,10 @@
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../../xm/iterate.ts" />
-///<reference path="../../xm/Logger.ts" />
-///<reference path="../../xm/data/PackageJSON.ts" />
-///<reference path="Config.ts" />
-///<reference path="Paths.ts" />
-///<reference path="Const.ts" />
+/// <reference path="../../xm/file.ts" />
+/// <reference path="../../xm/iterate.ts" />
+/// <reference path="../../xm/Logger.ts" />
+/// <reference path="../../xm/data/PackageJSON.ts" />
+/// <reference path="Config.ts" />
+/// <reference path="Paths.ts" />
+/// <reference path="Const.ts" />
 
 module tsd {
 	'use strict';
@@ -36,7 +36,7 @@ module tsd {
 			if (configFile) {
 				this.paths.configFile = path.resolve(configFile);
 			}
-			this.configSchema = xm.FileUtil.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
+			this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
 			this.config = new Config(this.configSchema);
 		}
 

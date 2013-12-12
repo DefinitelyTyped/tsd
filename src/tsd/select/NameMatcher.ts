@@ -1,6 +1,6 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/RegExpGlue.ts" />
-///<reference path="../data/Def.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/RegExpGlue.ts" />
+/// <reference path="../data/Def.ts" />
 
 module tsd {
 	'use strict';

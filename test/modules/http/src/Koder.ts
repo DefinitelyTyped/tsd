@@ -1,8 +1,8 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../helper.ts" />
-///<reference path="../../../../src/xm/iterate.ts" />
-///<reference path="../../../../src/xm/assertVar.ts" />
-///<reference path="../../../../src/xm/io/Koder.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../helper.ts" />
+/// <reference path="../../../../src/xm/iterate.ts" />
+/// <reference path="../../../../src/xm/assertVar.ts" />
+/// <reference path="../../../../src/xm/Koder.ts" />
 
 describe('koders', () => {
 

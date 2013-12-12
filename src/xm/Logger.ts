@@ -6,7 +6,7 @@
  * License: MIT - 2013
  * */
 
-/// <reference path="io/StyledOut.ts" />
+/// <reference path="StyledOut.ts" />
 
 module xm {
 	'use strict';

@@ -1,18 +1,18 @@
-///<reference path="_ref.ts" />
-///<reference path="../xm/Logger.ts" />
-///<reference path="../xm/expose/Expose.ts" />
-///<reference path="../xm/io/FileUtil.ts" />
-///<reference path="../xm/io/StyledOut.ts" />
-///<reference path="../xm/DateUtil.ts" />
-///<reference path="../xm/ObjectUtil.ts" />
-///<reference path="../xm/promise.ts" />
-///<reference path="cli/printer.ts" />
-///<reference path="context/Context.ts" />
-///<reference path="select/Query.ts" />
-///<reference path="cli/style.ts" />
-///<reference path="cli/printer.ts" />
-///<reference path="cli/options.ts" />
-///<reference path="cli/const.ts" />
+/// <reference path="_ref.ts" />
+/// <reference path="../xm/Logger.ts" />
+/// <reference path="../xm/expose/Expose.ts" />
+/// <reference path="../xm/file.ts" />
+/// <reference path="../xm/StyledOut.ts" />
+/// <reference path="../xm/date.ts" />
+/// <reference path="../xm/object.ts" />
+/// <reference path="../xm/promise.ts" />
+/// <reference path="cli/printer.ts" />
+/// <reference path="context/Context.ts" />
+/// <reference path="select/Query.ts" />
+/// <reference path="cli/style.ts" />
+/// <reference path="cli/printer.ts" />
+/// <reference path="cli/options.ts" />
+/// <reference path="cli/const.ts" />
 
 module tsd {
 	'use strict';
@@ -56,6 +56,7 @@ module tsd {
 		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
 		if (ctx.getOpt(Opt.dev)) {
+			//TODO why not local?
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
 		else if (ctx.hasOpt(Opt.cacheDir)) {
@@ -130,8 +131,12 @@ module tsd {
 			job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
 			job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-			var required:boolean = ctx.hasOpt(Opt.config);
+			if (ctx.hasOpt(Opt.cacheMode)) {
+				// booya!
+				job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+			}
 
+			var required:boolean = ctx.hasOpt(Opt.config);
 			return job.api.readConfig(!required).progress(d.notify).then(() => {
 				d.resolve(job);
 			});

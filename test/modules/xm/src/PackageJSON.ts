@@ -1,5 +1,5 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/data/PackageJSON.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/data/PackageJSON.ts" />
 
 describe('xm.PackageJSON', () => {
 	'use strict';

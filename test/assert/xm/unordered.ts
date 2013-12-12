@@ -1,4 +1,4 @@
-///<reference path="../../helper.ts" />
+/// <reference path="../../helper.ts" />
 
 module helper {
 	'use strict';

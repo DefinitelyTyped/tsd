@@ -6,16 +6,16 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../_ref.d.ts" />
-///<reference path="../iterate.ts" />
-///<reference path="../assertVar.ts" />
-///<reference path="../typeOf.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../Logger.ts" />
-///<reference path="../convertString.ts" />
-///<reference path="../io/StyledOut.ts" />
-///<reference path="ExposeReporter.ts" />
-///<reference path="ExposeContext.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="../iterate.ts" />
+/// <reference path="../assertVar.ts" />
+/// <reference path="../typeOf.ts" />
+/// <reference path="../object.ts" />
+/// <reference path="../Logger.ts" />
+/// <reference path="../parseString.ts" />
+/// <reference path="../StyledOut.ts" />
+/// <reference path="ExposeReporter.ts" />
+/// <reference path="ExposeContext.ts" />
 
 /*
  Expose: cli command manager and help generator
@@ -99,12 +99,11 @@ module xm {
 	/*
 	 Expose: cli command manager, wraps optimist with better usage generator and other utils
 	 */
-	//TODO add detail level switch
+	//TODO add detail level switch / more/less flag
 	//TODO add per-command sub-help like npm
-	//TODO add more/less flag
 	//TODO add feature for printable placeholder sub-info (format etc)
 	//TODO unify Actions and Commands (same thing really)
-	//TODO implement action queues
+	//TODO implement Actions/Commands queue
 	//TODO drop optimist for something simpler (minimist)
 	export class Expose {
 
@@ -124,7 +123,7 @@ module xm {
 		constructor(output:xm.StyledOut = null) {
 			this.reporter = new xm.ExposeReporter(this, output);
 
-			xm.ObjectUtil.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
+			xm.object.defineProps(this, ['commands', 'options', 'groups', 'mainGroup'], {
 				writable: false,
 				enumerable: false
 			});

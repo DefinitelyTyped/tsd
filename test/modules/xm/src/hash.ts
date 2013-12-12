@@ -1,6 +1,6 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/hash.ts" />
-///<reference path="../../../../src/xm/encode.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/hash.ts" />
+/// <reference path="../../../../src/xm/encode.ts" />
 
 describe('xm.hash', () => {
 

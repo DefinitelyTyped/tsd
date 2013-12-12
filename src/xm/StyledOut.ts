@@ -1,8 +1,16 @@
-/// <reference path="../../../typings/miniwrite/miniwrite.d.ts" />
-/// <reference path="../../../typings/ministyle/ministyle.d.ts" />
-/// <reference path="../ObjectUtil.ts" />
-/// <reference path="../assertVar.ts" />
-/// <reference path="../encode.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+/// <reference path="../../typings/miniwrite/miniwrite.d.ts" />
+/// <reference path="../../typings/ministyle/ministyle.d.ts" />
+/// <reference path="object.ts" />
+/// <reference path="assertVar.ts" />
+/// <reference path="encode.ts" />
 
 module xm {
 
@@ -24,7 +32,6 @@ module xm {
 	//TODO revise API for common usage scenarios
 	// -final reporting (succes/fail/pending/total + pluralise etc)
 	// -various statuses (expected etc)
-	//TODO drop ok/fail/warn
 	//TODO split further into semantics and structure
 	//TODO consider dynamicify indent size?
 	export class StyledOut {
@@ -54,7 +61,7 @@ module xm {
 			}
 			this._style = (style || ministyle.ansi());
 			this._line = miniwrite.chars((write || miniwrite.log()));
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		// - - - - - core (inline) - - - - -

@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/git/GitUtil.ts" />
-///<reference path="helper.ts" />
-///<reference path="../../../helper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/git/GitUtil.ts" />
+/// <reference path="helper.ts" />
+/// <reference path="../../../helper.ts" />
 
 describe('git.GitUtils', () => {
 	'use strict';
@@ -14,7 +14,7 @@ describe('git.GitUtils', () => {
 	describe('getDecodedBlob / blobSHABuffer', () => {
 		it('should decode correct data', () => {
 
-			var expectedJson = xm.FileUtil.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
+			var expectedJson = xm.file.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			assert.isObject(expectedJson, 'expectedJson');
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');

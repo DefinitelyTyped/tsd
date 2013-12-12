@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
-///<reference path="../../../../src/xm/io/FileUtil.ts" />
-///<reference path="../helper/HeaderHelper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../../src/xm/file.ts" />
+/// <reference path="../helper/HeaderHelper.ts" />
 
 
 describe('DefInfoParser', () => {

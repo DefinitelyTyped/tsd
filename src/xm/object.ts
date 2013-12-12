@@ -1,11 +1,20 @@
-///<reference path="_ref.d.ts" />
-///<reference path="typeOf.ts" />
+/*
+ * imported from typescript-xm package
+ *
+ * Bart van der Schoor
+ * https://github.com/Bartvds/typescript-xm
+ * License: MIT - 2013
+ * */
+
+/// <reference path="_ref.d.ts" />
+/// <reference path="typeOf.ts" />
 
 module xm {
 	'use strict';
 
 	function deepFreezeRecursive(object:any, active:any[]):void {
 		var value:any, prop:string;
+		active = (active || []);
 		active.push(object);
 		Object.freeze(object);
 		for (prop in object) {
@@ -20,50 +29,50 @@ module xm {
 		}
 	}
 
-	export class ObjectUtil {
+	export module object {
 		//lazy alias for consistency
-		static hasOwnProp(obj:any, prop:string):boolean {
+		export function hasOwnProp(obj:any, prop:string):boolean {
 			return Object.prototype.hasOwnProperty.call(obj, prop);
 		}
 
-		static defineProp(object:Object, property:string, settings:any):void {
+		export function defineProp(object:Object, property:string, settings:any):void {
 			Object.defineProperty(object, property, settings);
 		}
 
-		static defineProps(object:Object, propertyNames:string[], settings:any):void {
+		export function defineProps(object:Object, propertyNames:string[], settings:any):void {
 			propertyNames.forEach((property:string) => {
-				ObjectUtil.defineProp(object, property, settings);
+				xm.object.defineProp(object, property, settings);
 			});
 		}
 
-		static hidePrefixed(object:Object, ownOnly:boolean = true):void {
+		export function hidePrefixed(object:Object, ownOnly:boolean = true):void {
 			for (var property in object) {
-				if (property.charAt(0) === '_' && (!ownOnly || ObjectUtil.hasOwnProp(object, property))) {
-					ObjectUtil.defineProp(object, property, {enumerable: false});
+				if (property.charAt(0) === '_' && (!ownOnly || xm.object.hasOwnProp(object, property))) {
+					xm.object.defineProp(object, property, {enumerable: false});
 				}
 			}
 		}
 
-		static hideProps(object:Object, props:string[]) {
+		export function hideProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {enumerable: false});
 			});
 		}
 
-		static lockProps(object:Object, props:string[]) {
+		export function lockProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 			});
 		}
 
-		static freezeProps(object:Object, props:string[]) {
+		export function freezeProps(object:Object, props:string[]) {
 			props.forEach((property:string) => {
 				Object.defineProperty(object, property, {writable: false});
 				Object.freeze(object[property]);
 			});
 		}
 
-		static lockPrimitives(object:Object):void {
+		export function lockPrimitives(object:Object):void {
 			Object.keys(object).forEach((property:string) => {
 				if (xm.isPrimitive(object[property])) {
 					Object.defineProperty(object, property, {writable: false});
@@ -71,7 +80,7 @@ module xm {
 			});
 		}
 
-		static deepFreeze(object:Object):void {
+		export function deepFreeze(object:Object):void {
 			if (xm.isObject(object) || xm.isArray(object)) {
 				deepFreezeRecursive(object, []);
 			}

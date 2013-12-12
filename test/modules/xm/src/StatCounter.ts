@@ -1,5 +1,5 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/StatCounter.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/StatCounter.ts" />
 
 describe('xm.StatCounter', () => {
 	'use strict';

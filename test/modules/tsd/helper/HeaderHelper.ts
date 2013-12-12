@@ -1,6 +1,6 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/tsd/data/DefInfoParser.ts" />
-///<reference path="../../../../typings/node/node.d.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/tsd/data/DefInfoParser.ts" />
+/// <reference path="../../../../typings/node/node.d.ts" />
 
 module helper {
 
@@ -37,7 +37,7 @@ module helper {
 					return Q.all(names.reduce((memo:any[], name:string) => {
 						var pack = path.join(src, project, name);
 						memo.push(Q.all([
-							xm.FileUtil.readJSONPromise(path.join(pack, 'fields.json')),
+							xm.file.readJSONPromise(path.join(pack, 'fields.json')),
 							FS.read(path.join(pack, 'header.ts'))
 						]).spread((fields, header) => {
 							var data = new helper.HeaderAssert(project, name);

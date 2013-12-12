@@ -1,1 +1,1 @@
-///<reference path="Content.ts" />
+/// <reference path="Content.ts" />

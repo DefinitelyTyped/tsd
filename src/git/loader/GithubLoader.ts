@@ -1,9 +1,9 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../xm/ObjectUtil.ts" />
-///<reference path="../../xm/Logger.ts" />
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="../../xm/http/HTTPCache.ts" />
-///<reference path="../GithubRepo.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../xm/object.ts" />
+/// <reference path="../../xm/Logger.ts" />
+/// <reference path="../../xm/file.ts" />
+/// <reference path="../../xm/http/HTTPCache.ts" />
+/// <reference path="../GithubRepo.ts" />
 
 module git {
 
@@ -33,9 +33,9 @@ module git {
 		}
 
 		_initGithubLoader(lock?:string[]):void {
-			xm.ObjectUtil.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
+			xm.object.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
 			if (lock) {
-				xm.ObjectUtil.lockProps(this, lock);
+				xm.object.lockProps(this, lock);
 			}
 			// required to have some header
 			this.headers['user-agent'] = this.label + '-v' + this.formatVersion;

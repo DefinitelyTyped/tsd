@@ -1,8 +1,8 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../helper.ts" />
-///<reference path="../../../../src/xm/iterate.ts" />
-///<reference path="../../../../src/xm/assertVar.ts" />
-///<reference path="../../../../src/xm/encode.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../helper.ts" />
+/// <reference path="../../../../src/xm/iterate.ts" />
+/// <reference path="../../../../src/xm/assertVar.ts" />
+/// <reference path="../../../../src/xm/encode.ts" />
 
 module helper {
 
@@ -40,7 +40,7 @@ describe('xm.http', () => {
 	var cache:xm.http.HTTPCache;
 	var opts:xm.http.CacheOpts;
 	var object:xm.http.CacheObject;
-	var request:xm.http.Request;
+	var request:xm.http.CacheRequest;
 
 	afterEach(() => {
 		cache = null;
@@ -55,7 +55,7 @@ describe('xm.http', () => {
 			assert.isFunction(xm.http.HTTPCache, 'cache');
 			assert.isFunction(xm.http.CacheOpts, 'opts');
 			assert.isFunction(xm.http.CacheObject, 'object');
-			assert.isFunction(xm.http.Request, 'request');
+			assert.isFunction(xm.http.CacheRequest, 'request');
 		});
 	});
 
@@ -81,7 +81,7 @@ describe('xm.http', () => {
 			before(() => {
 				fs.utimesSync(src, date, date);
 
-				expected = xm.FileUtil.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+				expected = xm.file.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
 			});
 			beforeEach(() => {
 			});
@@ -94,7 +94,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.lock();
 
 				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
@@ -118,7 +118,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.lock();
 
 				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
@@ -141,7 +141,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.forceRefresh = true;
 				request.lock();
 
@@ -166,7 +166,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.localMaxAge = -24 * 3600 * 1000;
 				request.lock();
 
@@ -191,7 +191,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.localMaxAge = 24 * 3600 * 1000;
 				request.lock();
 
@@ -215,7 +215,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.httpInterval = 24 * 3600 * 1000;
 				request.lock();
 
@@ -239,7 +239,7 @@ describe('xm.http', () => {
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
 				//cache.verbose = true;
 
-				request = new xm.http.Request(url, {});
+				request = new xm.http.CacheRequest(url, {});
 				request.httpInterval = -24 * 3600 * 1000;
 				request.lock();
 

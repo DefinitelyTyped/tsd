@@ -1,7 +1,7 @@
-///<reference path="../xm/assertVar.ts" />
-///<reference path="GithubURLs.ts" />
-///<reference path="loader/GithubAPI.ts" />
-///<reference path="loader/GithubRaw.ts" />
+/// <reference path="../xm/assertVar.ts" />
+/// <reference path="GithubURLs.ts" />
+/// <reference path="loader/GithubAPI.ts" />
+/// <reference path="loader/GithubRaw.ts" />
 
 module git {
 	'use strict';
@@ -35,7 +35,7 @@ module git {
 			this.api = new git.GithubAPI(this, this.storeDir);
 			this.raw = new git.GithubRaw(this, this.storeDir);
 
-			xm.ObjectUtil.lockProps(this, Object.keys(this));
+			xm.object.lockProps(this, Object.keys(this));
 		}
 
 		getCacheKey():string {

@@ -1,6 +1,6 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/StatCounter.ts" />
-///<reference path="../../../../src/xm/io/FileUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/StatCounter.ts" />
+/// <reference path="../../../../src/xm/file.ts" />
 
 describe('xm.Logger', () => {
 	'use strict';
@@ -28,9 +28,9 @@ describe('xm.Logger', () => {
 
 	function assertLoggerBuffer(name:string, buffer:string) {
 		var file = name + '.txt';
-		xm.FileUtil.writeFileSync(path.resolve(testPath, 'tmp', 'logger', file), buffer);
+		xm.file.writeFileSync(path.resolve(testPath, 'tmp', 'logger', file), buffer);
 
-		var expected = xm.FileUtil.readFileSync(path.resolve(testPath, 'fixtures', 'logger', file));
+		var expected = xm.file.readFileSync(path.resolve(testPath, 'fixtures', 'logger', file));
 		assert.strictEqual(buffer, expected, name + ': stored results');
 	}
 

@@ -1,6 +1,6 @@
-///<reference path="../../tsdHelper.ts" />
-///<reference path="../../../src/tsd/API.ts" />
-///<reference path="../../../src/tsd/select/Selection.ts" />
+/// <reference path="../../tsdHelper.ts" />
+/// <reference path="../../../src/tsd/API.ts" />
+/// <reference path="../../../src/tsd/select/Selection.ts" />
 
 module helper {
 	'use strict';

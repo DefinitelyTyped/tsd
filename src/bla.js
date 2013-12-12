@@ -45,3 +45,5 @@ request.get(req).on('response', function (res) {
 var map = new Map();
 map.set(1, 2);
 console.log(map.get(1));
+
+console.log(map.keys());

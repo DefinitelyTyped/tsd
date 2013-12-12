@@ -1,6 +1,6 @@
-///<reference path="../_ref.ts" />
-///<reference path="Def.ts" />
-///<reference path="../../xm/data/AuthorInfo.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="Def.ts" />
+/// <reference path="../../xm/data/AuthorInfo.ts" />
 
 module tsd {
 	'use strict';

@@ -1,7 +1,7 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/xm/StatCounter.ts" />
-///<reference path="../../../../src/xm/io/StyledOut.ts" />
-///<reference path="../../../../src/xm/io/FileUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/xm/StatCounter.ts" />
+/// <reference path="../../../../src/xm/StyledOut.ts" />
+/// <reference path="../../../../src/xm/file.ts" />
 
 describe('xm.StyledOut', () => {
 	'use strict';
@@ -235,9 +235,9 @@ describe('xm.StyledOut', () => {
 
 		var file = name + '.json';
 
-		xm.FileUtil.writeJSONSync(path.resolve(testPath, 'tmp', 'styledout', file), data);
+		xm.file.writeJSONSync(path.resolve(testPath, 'tmp', 'styledout', file), data);
 
-		var expected = xm.FileUtil.readJSONSync(path.resolve(testPath, 'fixtures', 'styledout', file));
+		var expected = xm.file.readJSONSync(path.resolve(testPath, 'fixtures', 'styledout', file));
 		// test all in one
 		assert.deepEqual(data, expected, name + ': results');
 	}

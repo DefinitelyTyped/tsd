@@ -6,11 +6,11 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../../_ref.d.ts" />
-///<reference path="../io/FileUtil.ts" />
-///<reference path="../assertVar.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../../../typings/node/node.d.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../file.ts" />
+/// <reference path="../assertVar.ts" />
+/// <reference path="../object.ts" />
+/// <reference path="../../../typings/node/node.d.ts" />
 
 module xm {
 	'use strict';
@@ -54,7 +54,7 @@ module xm {
 			xm.assertVar(pkg, 'object', 'pkg');
 			this._pkg = pkg;
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		get raw():any {
@@ -109,7 +109,7 @@ module xm {
 				if (!src) {
 					throw (new Error('cannot find local package.json'));
 				}
-				PackageJSON._local = new PackageJSON(xm.FileUtil.readJSONSync(src), src);
+				PackageJSON._local = new PackageJSON(xm.file.readJSONSync(src), src);
 			}
 			return PackageJSON._local;
 		}

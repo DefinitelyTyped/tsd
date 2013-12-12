@@ -6,7 +6,7 @@ module tsd {
 
 		minMatches:number = 0;
 		maxMatches:number = 0;
-		limitApi:number = 2;
+		limitApi:number = 5;
 
 		resolveDependencies:boolean = false;
 		overwriteFiles:boolean = false;

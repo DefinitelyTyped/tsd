@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="DefVersion.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="DefVersion.ts" />
 
 module tsd {
 	'use strict';
@@ -121,7 +121,7 @@ module tsd {
 				}
 			}
 
-			xm.ObjectUtil.lockProps(file, ['path', 'project', 'name', 'semver']);
+			xm.object.lockProps(file, ['path', 'project', 'name', 'semver']);
 
 			return file;
 		}

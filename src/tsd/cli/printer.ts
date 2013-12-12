@@ -1,9 +1,9 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/DateUtil.ts" />
-///<reference path="../../xm/io/StyledOut.ts" />
-///<reference path="../../git/model/GitRateInfo.ts" />
-///<reference path="../../tsd/data/_all.ts" />
-///<reference path="../../tsd/API.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/date.ts" />
+/// <reference path="../../xm/StyledOut.ts" />
+/// <reference path="../../git/model/GitRateInfo.ts" />
+/// <reference path="../../tsd/data/_all.ts" />
+/// <reference path="../../tsd/API.ts" />
 
 module tsd {
 	export module cli {
@@ -34,14 +34,14 @@ module tsd {
 				if (file.def && file.def.head === file) {
 					this.output.span('<head>');
 					if (file.commit.changeDate) {
-						this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+						this.output.accent(sep).span(xm.date.toNiceUTC(file.commit.changeDate));
 					}
 				}
 				else {
 					if (file.commit) {
 						this.output.span(file.commit.commitShort);
 						if (file.commit.changeDate) {
-							this.output.accent(sep).span(xm.DateUtil.toNiceUTC(file.commit.changeDate));
+							this.output.accent(sep).span(xm.date.toNiceUTC(file.commit.changeDate));
 						}
 					}
 					else {

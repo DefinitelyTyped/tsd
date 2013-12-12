@@ -1,5 +1,5 @@
-///<reference path="../../tsdHelper.ts" />
-///<reference path="../../../src/tsd/API.ts" />
+/// <reference path="../../tsdHelper.ts" />
+/// <reference path="../../../src/tsd/API.ts" />
 
 module helper {
 	'use strict';

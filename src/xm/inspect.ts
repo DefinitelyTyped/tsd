@@ -6,8 +6,8 @@
  * License: MIT - 2013
  * */
 
-///<reference path="typeOf.ts" />
-///<reference path="encode.ts" />
+/// <reference path="typeOf.ts" />
+/// <reference path="encode.ts" />
 
 interface Function {
 	name:string;

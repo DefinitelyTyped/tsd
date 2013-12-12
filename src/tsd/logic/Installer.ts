@@ -1,7 +1,7 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../tsd/data/DefIndex.ts" />
-///<reference path="../../xm/io/FileUtil.ts" />
-///<reference path="SubCore.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../tsd/data/DefIndex.ts" />
+/// <reference path="../../xm/file.ts" />
+/// <reference path="SubCore.ts" />
 
 module tsd {
 	'use strict';
@@ -99,7 +99,7 @@ module tsd {
 
 			var targetPath = this.core.getInstallPath(file.def);
 
-			xm.FileUtil.canWriteFile(targetPath, overwrite).then((canWrite:boolean) => {
+			xm.file.canWriteFile(targetPath, overwrite).then((canWrite:boolean) => {
 				if (!canWrite) {
 					if (!overwrite) {
 						d.notify('skipped existing file: ' + file.def.path);
@@ -115,7 +115,7 @@ module tsd {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
-					return xm.FileUtil.mkdirCheckQ(path.dirname(targetPath), true);
+					return xm.file.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);
 				}).then(() => {

@@ -6,11 +6,12 @@
  * License: MIT - 2013
  * */
 
-///<reference path="typeOf.ts" />
-///<reference path="../../typings/fixes.d.ts" />
+/// <reference path="typeOf.ts" />
+/// <reference path="../../typings/fixes.d.ts" />
 
 module xm {
 	'use strict';
+	//TODO consider expanding to work on every collection type
 
 	export function keysOf<K, V>(map:Map<K, V>):K[] {
 		return toArray<K>(map.keys());

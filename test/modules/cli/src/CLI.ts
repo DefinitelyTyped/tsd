@@ -1,5 +1,5 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
 
 describe('CLI Query', () => {
 	'use strict';
@@ -10,9 +10,9 @@ describe('CLI Query', () => {
 	var assert:Chai.Assert = require('chai').assert;
 
 	function applyTestInfo(group:string, name:string, test:any, createConfigFile:boolean = false):helper.TestInfo {
-		var info = helper.getTestInfo(group, name, test, createConfigFile);
+		var info = new helper.TestInfo(group, name, test, createConfigFile);
 
-		xm.FileUtil.writeJSONSync(info.testDump, test);
+		xm.file.writeJSONSync(info.testDump, test);
 
 		return info;
 	}
@@ -55,10 +55,11 @@ describe('CLI Query', () => {
 			args.push('--style', 'no');
 		}
 		args.push('--cacheDir', info.cacheDirTestFixed);
+		args.push('--cacheMode', xm.http.CacheMode[xm.http.CacheMode.forceLocal]);
 		//args.push('--config', info.configFile);
 
 		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
-		xm.FileUtil.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
+		xm.file.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
 
 		return args;
 	}
@@ -83,7 +84,7 @@ describe('CLI Query', () => {
 			fs.writeFileSync(info.stderrFile, stderr, 'utf8');
 		}
 		if (result.error) {
-			xm.FileUtil.writeJSONSync(info.errorFile, result.error);
+			xm.file.writeJSONSync(info.errorFile, result.error);
 		}
 
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
@@ -96,7 +97,7 @@ describe('CLI Query', () => {
 			assert.strictEqual(stderr, stderrExpect, 'result.stderr');
 		}
 		if (fs.existsSync(info.errorExpect)) {
-			var errorExpect = xm.FileUtil.readJSONSync(info.errorExpect);
+			var errorExpect = xm.file.readJSONSync(info.errorExpect);
 			assert.jsonOf(result.error, errorExpect, 'result.error');
 		}
 	}

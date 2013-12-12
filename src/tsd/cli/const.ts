@@ -1,5 +1,5 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/expose/Expose.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/expose/Expose.ts" />
 
 module tsd {
 
@@ -12,6 +12,7 @@ module tsd {
 			export var dev = 'dev';
 			export var config = 'config';
 			export var cacheDir = 'cacheDir';
+			export var cacheMode = 'cacheMode';
 			export var resolve = 'resolve';
 			export var save = 'save';
 			export var overwrite = 'overwrite';
@@ -30,7 +31,7 @@ module tsd {
 			export var history = 'history';
 			export var detail = 'detail';
 		}
-		xm.ObjectUtil.lockPrimitives(Opt);
+		xm.object.lockPrimitives(Opt);
 
 		export module Group {
 			export var primary = 'primary';
@@ -38,7 +39,7 @@ module tsd {
 			export var support = 'support';
 			export var help = 'help';
 		}
-		xm.ObjectUtil.lockPrimitives(Group);
+		xm.object.lockPrimitives(Group);
 
 		export module Action {
 			export var install = 'install';
@@ -46,6 +47,6 @@ module tsd {
 			export var compare = 'compare';
 			export var update = 'update';
 		}
-		xm.ObjectUtil.lockPrimitives(Action);
+		xm.object.lockPrimitives(Action);
 	}
 }

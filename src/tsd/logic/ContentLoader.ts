@@ -1,6 +1,6 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../tsd/data/DefIndex.ts" />
-///<reference path="SubCore.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../tsd/data/DefIndex.ts" />
+/// <reference path="SubCore.ts" />
 
 module tsd {
 	'use strict';

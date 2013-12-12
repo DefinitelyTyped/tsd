@@ -1,12 +1,12 @@
-///<reference path="../../../globals.ts" />
-///<reference path="helper.ts" />
-///<reference path="../../../assert/git/_all.ts" />
-///<reference path="../../../../src/xm/hash.ts" />
-///<reference path="../../../../src/xm/iterate.ts" />
-///<reference path="../../../../src/git/GitUtil.ts" />
-///<reference path="../../../../src/git/GithubRepo.ts" />
-///<reference path="../../../../src/git/loader/GithubRaw.ts" />
-///<reference path="../../../../src/git/loader/GithubAPI.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="helper.ts" />
+/// <reference path="../../../assert/git/_all.ts" />
+/// <reference path="../../../../src/xm/hash.ts" />
+/// <reference path="../../../../src/xm/iterate.ts" />
+/// <reference path="../../../../src/git/GitUtil.ts" />
+/// <reference path="../../../../src/git/GithubRepo.ts" />
+/// <reference path="../../../../src/git/loader/GithubRaw.ts" />
+/// <reference path="../../../../src/git/loader/GithubAPI.ts" />
 
 describe('git.Github', () => {
 	'use strict';
@@ -77,7 +77,7 @@ describe('git.Github', () => {
 					//assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
 					//temp hackish
-					return xm.FileUtil.mkdirCheckQ(gitTest.extraDir, true).then(() => {
+					return xm.file.mkdirCheckQ(gitTest.extraDir, true).then(() => {
 						return FS.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
 					}).then(() => {
 						return FS.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});

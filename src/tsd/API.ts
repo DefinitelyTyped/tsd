@@ -1,7 +1,7 @@
-///<reference path="_ref.ts" />
-///<reference path="Core.ts" />
-///<reference path="context/Context.ts" />
-///<reference path="select/Query.ts" />
+/// <reference path="_ref.ts" />
+/// <reference path="Core.ts" />
+/// <reference path="context/Context.ts" />
+/// <reference path="select/Query.ts" />
 
 module tsd {
 	'use strict';
@@ -43,7 +43,7 @@ module tsd {
 			this.track = new xm.EventLog('api', 'API');
 			this.track.unmuteActions([xm.Level.notify]);
 
-			xm.ObjectUtil.lockProps(this, ['core', 'track']);
+			xm.object.lockProps(this, ['core', 'track']);
 
 			this.verbose = this.context.verbose;
 		}

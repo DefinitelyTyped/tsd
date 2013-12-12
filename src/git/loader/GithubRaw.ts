@@ -1,6 +1,6 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="GithubLoader.ts" />
-///<reference path="../../xm/hash.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="GithubLoader.ts" />
+/// <reference path="../../xm/hash.ts" />
 
 module git {
 
@@ -24,6 +24,7 @@ module git {
 			this.formatVersion = '1.0';
 
 			var opts = new xm.http.CacheOpts();
+			opts.allowClean = true;
 			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
 			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
@@ -54,7 +55,7 @@ module git {
 			this.track.promise(d.promise, GithubRaw.get_file, url);
 			var headers = {};
 
-			var request = new xm.http.Request(url, headers);
+			var request = new xm.http.CacheRequest(url, headers);
 			request.localMaxAge = 30 * 24 * 3600 * 1000;
 			request.httpInterval = 24 * 3600 * 1000;
 			request.lock();

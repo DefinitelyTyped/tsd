@@ -5,6 +5,7 @@
  * https://github.com/Bartvds/typescript-xm
  * License: MIT - 2013
  * */
+
 module xm {
 	'use strict';
 

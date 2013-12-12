@@ -1,8 +1,8 @@
-///<reference path="../_ref.ts" />
-///<reference path="Def.ts" />
-///<reference path="DefInfo.ts" />
-///<reference path="DefBlob.ts" />
-///<reference path="../../git/GitUtil.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="Def.ts" />
+/// <reference path="DefInfo.ts" />
+/// <reference path="DefBlob.ts" />
+/// <reference path="../../git/GitUtil.ts" />
 
 module tsd {
 	'use strict';
@@ -36,7 +36,7 @@ module tsd {
 			this._def = def;
 			this._commit = commit;
 
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		setContent(blob:tsd.DefBlob):void {

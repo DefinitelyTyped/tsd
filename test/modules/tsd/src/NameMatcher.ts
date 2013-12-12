@@ -1,11 +1,11 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
-///<reference path="../../../../src/xm/hash.ts" />
-///<reference path="../../../../src/xm/io/FileUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../../src/xm/hash.ts" />
+/// <reference path="../../../../src/xm/file.ts" />
 
-///<reference path="../../../../src/tsd/data/Def.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
-///<reference path="../../../../src/tsd/select/NameMatcher.ts" />
+/// <reference path="../../../../src/tsd/data/Def.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../../src/tsd/select/NameMatcher.ts" />
 
 describe('NameMatcher', () => {
 	'use strict';
@@ -24,8 +24,8 @@ describe('NameMatcher', () => {
 	var select:any = {};
 
 	//get data to generate cases
-	select.data = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
-	select.source = xm.FileUtil.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
+	select.data = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
+	select.source = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
 	assert.ok(select.data, 'select.data');
 	assert.ok(select.source, 'select.source');
 

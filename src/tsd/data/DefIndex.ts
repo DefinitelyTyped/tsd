@@ -1,7 +1,7 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../git/model/GithubJSON.ts" />
-///<reference path="../../xm/ObjectUtil.ts" />
-///<reference path="DefCommit.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../git/model/GithubJSON.ts" />
+/// <reference path="../../xm/object.ts" />
+/// <reference path="DefCommit.ts" />
 
 module tsd {
 	'use strict';
@@ -29,7 +29,7 @@ module tsd {
 
 		constructor() {
 			//hide from inspect()
-			xm.ObjectUtil.hidePrefixed(this);
+			xm.object.hidePrefixed(this);
 		}
 
 		hasIndex():boolean {

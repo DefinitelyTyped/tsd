@@ -6,8 +6,8 @@
  * License: MIT - 2013
  * */
 
-///<reference path="typeOf.ts" />
-///<reference path="inspect.ts" />
+/// <reference path="typeOf.ts" />
+/// <reference path="inspect.ts" />
 
 module xm {
 	'use strict';

@@ -1,7 +1,7 @@
-///<reference path='../../xm/Logger.ts' />
-///<reference path='../../xm/Logger.ts' />
-///<reference path='../../_ref.d.ts' />
-///<reference path='Const.ts' />
+/// <reference path='../../xm/Logger.ts' />
+/// <reference path='../../xm/Logger.ts' />
+/// <reference path='../../_ref.d.ts' />
+/// <reference path='Const.ts' />
 
 module tsd {
 	'use strict';

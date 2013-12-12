@@ -1,8 +1,8 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../../tsd/data/DefIndex.ts" />
-///<reference path="../Core.ts" />
-///<reference path="../Options.ts" />
-///<reference path="SubCore.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../../tsd/data/DefIndex.ts" />
+/// <reference path="../Core.ts" />
+/// <reference path="../Options.ts" />
+/// <reference path="SubCore.ts" />
 
 module tsd {
 	'use strict';
@@ -70,7 +70,7 @@ module tsd {
 					}
 					return;
 				}
-				return xm.FileUtil.readJSONPromise(target).then((json) => {
+				return xm.file.readJSONPromise(target).then((json) => {
 					this.core.context.config.parseJSON(json, target);
 					d.resolve(null);
 				});
@@ -102,7 +102,7 @@ module tsd {
 				return d.promise;
 			}
 
-			xm.FileUtil.mkdirCheckQ(dir, true).then(() => {
+			xm.file.mkdirCheckQ(dir, true).then(() => {
 				//TODO un-voodoo
 				return FS.write(target, json).then(() => {
 					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).

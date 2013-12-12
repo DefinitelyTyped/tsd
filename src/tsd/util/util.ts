@@ -1,4 +1,4 @@
-///<reference path="../context/Const.ts" />
+/// <reference path="../context/Const.ts" />
 
 module tsd {
 	'use strict';

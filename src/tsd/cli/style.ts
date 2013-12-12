@@ -1,6 +1,6 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/expose/ExposeContext.ts" />
-///<reference path="../../xm/io/StyledOut.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/expose/ExposeContext.ts" />
+/// <reference path="../../xm/StyledOut.ts" />
 
 module tsd {
 

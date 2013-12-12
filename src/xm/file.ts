@@ -6,7 +6,8 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../../_ref.d.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="Logger.ts" />
 
 module xm {
 	'use strict';
@@ -20,11 +21,25 @@ module xm {
 	var mkdirp = require('mkdirp');
 
 	/*
-	 FileUtil: do stuff with files
+	 file: do stuff with files
 	 */
-	export module FileUtil {
+	export module file {
 
-		function parseJson(text:string):any {
+		// make nested tree from filename for high-volume folders: abcdefg.txt -> a/b/c/abcdefg.txt
+		export function distributeDir(base:string, name:string, levels:number, chunk:number = 1):string {
+			name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
+			if (levels === 0) {
+				return base;
+			}
+			var arr = [base];
+			var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
+			for (var i = 0; i < steps; i += chunk) {
+				arr.push(name.substr(i, chunk));
+			}
+			return path.join.apply(path, arr);
+		}
+
+		export function parseJson(text:string):any {
 			var json:any;
 			try {
 				json = JSON.parse(text);
@@ -33,30 +48,18 @@ module xm {
 				if (err.name === 'SyntaxError') {
 					//TODO find/write module to pretty print parse errors
 					xm.log.error(err);
-					xm.log('---');
-					xm.log(text);
-					xm.log('---');
+					xm.log.status('---');
+					xm.log.status(text);
+					xm.log.status('---');
 				}
 				//rethrow
-				throw(err);
+				throw (err);
 			}
 			return json;
 		}
 
-		function doReadJSONSync(src:string):any {
-			return parseJson(fs.readFileSync(src, {encoding: 'utf8'}));
-		}
-
 		export function readJSONSync(src:string):any {
-			var json:any;
-			/*try {*/
-			json = doReadJSONSync(src);
-			/*}
-			 catch (err) {
-			 //retry.. weird glitch (windows)
-			 json = doReadJSONSync(src);
-			 }*/
-			return json;
+			return parseJson(fs.readFileSync(src, {encoding: 'utf8'}));
 		}
 
 		export function readJSON(src:string, callback:(err:Error, res:any) => void):void {
@@ -83,7 +86,7 @@ module xm {
 
 		export function writeJSONSync(dest:string, data:any) {
 			dest = path.resolve(dest);
-			xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+			xm.file.mkdirCheckSync(path.dirname(dest));
 			fs.writeFileSync(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 		}
 
@@ -91,7 +94,7 @@ module xm {
 			var d:Q.Deferred<void> = Q.defer();
 
 			dest = path.resolve(dest);
-			xm.FileUtil.mkdirCheckQ(path.dirname(dest), true).then((dest:string) => {
+			xm.file.mkdirCheckQ(path.dirname(dest), true).then((dest:string) => {
 				return FS.write(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 			}).then(() => {
 				d.resolve(null);
@@ -108,7 +111,7 @@ module xm {
 		//lazy wrapper as alternative to writeJSONSync
 		export function writeFileSync(dest:string, data:any, encoding:string = 'utf8') {
 			dest = path.resolve(dest);
-			xm.FileUtil.mkdirCheckSync(path.dirname(dest));
+			xm.file.mkdirCheckSync(path.dirname(dest));
 			fs.writeFileSync(dest, data, {encoding: encoding});
 		}
 
@@ -227,6 +230,7 @@ module xm {
 			return d.promise;
 		}
 
+		//TODO what about directories?
 		export function touchFile(src:string, atime?:Date, mtime?:Date):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
 			FS.stat(src).then((stat:QioFS.Stats) => {
@@ -239,13 +243,14 @@ module xm {
 			return d.promise;
 		}
 
-		export function findup(dir:string, name:string):Q.Promise<string> {			var d:Q.Deferred<string> = Q.defer();
+		export function findup(dir:string, name:string):Q.Promise<string> {
+			var d:Q.Deferred<string> = Q.defer();
 			if (dir === '/') {
-				d.reject(new Error('Could not find package.json up from: ' + dir));
+				d.reject(new Error('could not find package.json up from: ' + dir));
 				return;
 			}
 			else if (!dir || dir === '.') {
-				d.reject(new Error('Cannot find package.json from unspecified directory'));
+				d.reject(new Error('cannot find package.json from unspecified directory'));
 				return;
 			}
 			var file = path.join(dir, name);

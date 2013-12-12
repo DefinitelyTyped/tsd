@@ -1,7 +1,7 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../../typings/fixes.d.ts" />
-///<reference path="../../git/GitUtil.ts" />
-///<reference path="../../xm/typeOf.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../../typings/fixes.d.ts" />
+/// <reference path="../../git/GitUtil.ts" />
+/// <reference path="../../xm/typeOf.ts" />
 
 module tsd {
 	'use strict';
@@ -16,7 +16,7 @@ module tsd {
 			this.sha = sha;
 			this.encoding = encoding;
 
-			xm.ObjectUtil.defineProps(this, ['sha', 'encoding'], {writable: false});
+			xm.object.defineProps(this, ['sha', 'encoding'], {writable: false});
 
 			if (content) {
 				this.setContent(content);
@@ -41,9 +41,9 @@ module tsd {
 				xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
 			}
 
-			xm.ObjectUtil.defineProp(this, 'content', {writable: true});
+			xm.object.defineProp(this, 'content', {writable: true});
 			this.content = content;
-			xm.ObjectUtil.defineProp(this, 'content', {writable: false, enumerable: false});
+			xm.object.defineProp(this, 'content', {writable: false, enumerable: false});
 		}
 
 		//human friendly

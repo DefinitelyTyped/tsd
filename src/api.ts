@@ -1,8 +1,8 @@
-///<reference path="bootstrap.ts" />
-///<reference path="_ref.d.ts" />
-///<reference path="tsd/_ref.ts" />
-///<reference path="tsd/API.ts" />
-///<reference path="tsd/CLI.ts" />
+/// <reference path="bootstrap.ts" />
+/// <reference path="_ref.d.ts" />
+/// <reference path="tsd/_ref.ts" />
+/// <reference path="tsd/API.ts" />
+/// <reference path="tsd/CLI.ts" />
 
 //TODO decide on export git + xm (no)
 //TODO improve code (nice TS 0.9 single export)

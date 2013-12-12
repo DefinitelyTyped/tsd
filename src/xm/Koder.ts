@@ -1,10 +1,11 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../promise.ts" />
-///<reference path="../EventLog.ts" />
-///<reference path="../hash.ts" />
-///<reference path="../typeOf.ts" />
-///<reference path="FileUtil.ts" />
+/// <reference path="../_ref.d.ts" />
+/// <reference path="object.ts" />
+/// <reference path="promise.ts" />
+/// <reference path="EventLog.ts" />
+/// <reference path="hash.ts" />
+/// <reference path="typeOf.ts" />
+/// <reference path="file.ts" />
+
 /*
  * imported from typescript-xm package
  *
@@ -12,7 +13,8 @@
  * https://github.com/Bartvds/typescript-xm
  * License: MIT - 2013
  * */
-module xm {
+
+ module xm {
 	'use strict';
 
 	var Q = require('q');

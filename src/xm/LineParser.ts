@@ -6,9 +6,9 @@
  * License: MIT - 2013
  * */
 
-///<reference path="../_ref.d.ts" />
-///<reference path="../collection.ts" />
-///<reference path="../iterate.ts" />
+/// <reference path="_ref.d.ts" />
+/// <reference path="collection.ts" />
+/// <reference path="iterate.ts" />
 
 module xm {
 	'use strict';

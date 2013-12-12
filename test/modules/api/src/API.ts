@@ -1,10 +1,10 @@
-///<reference path="../../../globals.ts" />
-///<reference path="../../../tsdHelper.ts" />
-///<reference path="../../../../src/tsd/API.ts" />
-///<reference path="../../../../src/tsd/select/Query.ts" />
-///<reference path="../../../../src/tsd/Options.ts" />
-///<reference path="../../../../src/xm/hash.ts" />
-///<reference path="../../../../src/git/GitUtil.ts" />
+/// <reference path="../../../globals.ts" />
+/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../../../src/tsd/API.ts" />
+/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../../../src/tsd/Options.ts" />
+/// <reference path="../../../../src/xm/hash.ts" />
+/// <reference path="../../../../src/git/GitUtil.ts" />
 
 describe('API', () => {
 	'use strict';
@@ -15,8 +15,8 @@ describe('API', () => {
 	var Q = require('q');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var writeJSONSync = xm.FileUtil.writeJSONSync;
-	var readJSONSync = xm.FileUtil.readJSONSync;
+	var writeJSONSync = xm.file.writeJSONSync;
+	var readJSONSync = xm.file.readJSONSync;
 
 	var api:tsd.API;
 	var context:tsd.Context;
@@ -54,13 +54,13 @@ describe('API', () => {
 	}
 
 	function applyTestInfo(group:string, name:string, test:any, query:tsd.Query, opt:tsd.Options):helper.TestInfo {
-		var tmp = helper.getTestInfo(group, name, test, true);
+		var tmp = new helper.TestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
 
-		xm.FileUtil.writeJSONSync(tmp.testDump, test);
-		xm.FileUtil.writeJSONSync(tmp.queryDump, query);
-		xm.FileUtil.writeJSONSync(tmp.optionsDump, opt);
+		xm.file.writeJSONSync(tmp.testDump, test);
+		xm.file.writeJSONSync(tmp.queryDump, query);
+		xm.file.writeJSONSync(tmp.optionsDump, opt);
 
 		api.verbose = test.debug;
 
@@ -112,7 +112,7 @@ describe('API', () => {
 						if (test.debug) {
 							xm.log.debug('setting content of ' + name + ' in ' + dest);
 						}
-						xm.FileUtil.writeFileSync(destFull, value);
+						xm.file.writeFileSync(destFull, value);
 					});
 				}
 				return Q.resolve();
@@ -142,9 +142,9 @@ describe('API', () => {
 					return api.select(query).then((selection:tsd.Selection) => {
 						assert.instanceOf(selection, tsd.Selection, 'selection');
 
-						xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseSelection(selection, 2));
+						xm.file.writeJSONSync(info.resultFile, helper.serialiseSelection(selection, 2));
 
-						var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
+						var resultExpect = xm.file.readJSONSync(info.resultExpect);
 						helper.assertSelection(selection, resultExpect, 'result');
 					});
 				});
@@ -172,13 +172,13 @@ describe('API', () => {
 						return api.install(selection, opts).then((result:tsd.InstallResult) => {
 							assert.instanceOf(result, tsd.InstallResult, 'result');
 
-							xm.FileUtil.writeJSONSync(info.resultFile, helper.serialiseInstallResult(result, 2));
+							xm.file.writeJSONSync(info.resultFile, helper.serialiseInstallResult(result, 2));
 
-							var resultExpect = xm.FileUtil.readJSONSync(info.resultExpect);
+							var resultExpect = xm.file.readJSONSync(info.resultExpect);
 							helper.assertInstallResult(result, resultExpect, 'result');
 
-							var configExpect = xm.FileUtil.readJSONSync(info.configExpect);
-							var configActual = xm.FileUtil.readJSONSync(info.configFile);
+							var configExpect = xm.file.readJSONSync(info.configExpect);
+							var configActual = xm.file.readJSONSync(info.configFile);
 
 							assert.deepEqual(configActual, configExpect, 'configActual');
 							helper.assertConfig(api.context.config, configExpect, 'api.context.config');

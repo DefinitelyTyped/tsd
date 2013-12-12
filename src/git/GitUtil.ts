@@ -1,7 +1,6 @@
-///<reference path="../../typings/node/node.d.ts" />
-///<reference path="../xm/typeOf.ts" />
-///<reference path="../xm/assertVar.ts" />
-
+/// <reference path="../../typings/node/node.d.ts" />
+/// <reference path="../xm/typeOf.ts" />
+/// <reference path="../xm/assertVar.ts" />
 
 module git {
 	'use strict';

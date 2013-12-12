@@ -1,8 +1,8 @@
-///<reference path="../_ref.ts" />
-///<reference path="../../xm/RegExpGlue.ts" />
-///<reference path="../../xm/io/LineParser.ts" />
-///<reference path="../../xm/data/AuthorInfo.ts" />
-///<reference path="DefInfo.ts" />
+/// <reference path="../_ref.ts" />
+/// <reference path="../../xm/RegExpGlue.ts" />
+/// <reference path="../../xm/LineParser.ts" />
+/// <reference path="../../xm/data/AuthorInfo.ts" />
+/// <reference path="DefInfo.ts" />
 
 module tsd {
 	'use strict';

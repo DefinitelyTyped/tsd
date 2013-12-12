@@ -1,13 +1,3 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="../ObjectUtil.ts" />
-///<reference path="../promise.ts" />
-///<reference path="../EventLog.ts" />
-///<reference path="../hash.ts" />
-///<reference path="../typeOf.ts" />
-///<reference path="../io/FileUtil.ts" />
-///<reference path="../io/Koder.ts" />
-///<reference path="../data/PackageJSON.ts" />
-///<reference path="CacheStreamLoader.ts" />
 /*
  * imported from typescript-xm package
  *
@@ -15,13 +5,26 @@
  * https://github.com/Bartvds/typescript-xm
  * License: MIT - 2013
  * */
+
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="../object.ts" />
+/// <reference path="../promise.ts" />
+/// <reference path="../EventLog.ts" />
+/// <reference path="../hash.ts" />
+/// <reference path="../typeOf.ts" />
+/// <reference path="../file.ts" />
+/// <reference path="../Koder.ts" />
+/// <reference path="../data/PackageJSON.ts" />
+/// <reference path="CacheStreamLoader.ts" />
+/// <reference path="CacheMode.ts" />
+/// <reference path="CacheObject.ts" />
+
 module xm {
 	'use strict';
 
 	var Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
-	var tv4:TV4 = require('tv4');
 	var FS:typeof QioFS = require('q-io/fs');
 	var HTTP:typeof QioHTTP = require('q-io/http');
 
@@ -31,150 +34,8 @@ module xm {
 
 	export module http {
 
-		// a represent a single object in the cache
-		export class CacheObject {
-			request:Request;
-			storeDir:string;
-
-			infoFile:string;
-			info:CacheInfo;
-
-			response:ResponseInfo;
-
-			bodyFile:string;
-			bodyChecksum:string;
-			body:NodeBuffer;
-
-			constructor(request:Request) {
-				this.request = request;
-			}
-		}
-
-		// hold some interesting meta data
-		export class ResponseInfo {
-			status:number = 0;
-			headers:any = {};
-		}
-
-		// meta data to keep on disk
-		export interface CacheInfo {
-			url:string;
-			key:string;
-			contentType:string;
-			httpETag:string;
-			httpModified:string;
-			cacheCreated:string;
-			cacheUpdated:string;
-			contentChecksum:string;
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 		export interface CacheManage {
 			lastSweep:string;
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		export function assertSchema(value:any, schema:any):void {
-			var res:TV4SingleResult = tv4.validateResult(value, schema);
-			if (!res.valid || res.missing.length > 0) {
-				throw res.error;
-			}
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		export enum CacheMode {
-			forceLocal,
-			forceRemote,
-			forceUpdate,
-			allowRemote,
-			allowUpdate
-		}
-
-		export class CacheOpts {
-			//TODO integrate compressStore with CacheInfo and streaming downloader
-			compressStore:boolean = false;
-
-			splitKeyDir:number = 0;
-
-			cacheRead = true;
-			cacheWrite = true;
-			remoteRead = true;
-
-			cacheCleanInterval:number;
-
-			constructor(mode?:CacheMode) {
-				if (mode) {
-					this.applyCacheMode(mode);
-				}
-			}
-
-			applyCacheMode(mode:CacheMode) {
-				//TODO what to do with this?
-				this.cacheCleanInterval = null;
-				switch (mode) {
-					case CacheMode.forceRemote:
-						this.cacheRead = false;
-						this.remoteRead = true;
-						this.cacheWrite = false;
-						break;
-					case CacheMode.forceUpdate:
-						this.cacheRead = false;
-						this.remoteRead = true;
-						this.cacheWrite = true;
-						break;
-					case CacheMode.allowUpdate:
-						this.cacheRead = true;
-						this.remoteRead = true;
-						this.cacheWrite = true;
-						break;
-					case CacheMode.allowRemote:
-						this.cacheRead = true;
-						this.remoteRead = true;
-						this.cacheWrite = false;
-						break;
-					case CacheMode.forceLocal:
-					default:
-						this.cacheRead = true;
-						this.remoteRead = false;
-						this.cacheWrite = false;
-						break;
-				}
-			}
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		// single request, hashes to a unique id
-		export class Request {
-			key:string;
-			locked:boolean;
-
-			url:string;
-			headers:any;
-
-			localMaxAge:number;
-			httpInterval:number;
-			forceRefresh:boolean;
-
-			constructor(url:string, headers?:any) {
-				this.url = url;
-				this.headers = headers || {};
-			}
-
-			lock():Request {
-				this.locked = true;
-				this.key = xm.jsonToIdentHash({
-					url: this.url,
-					headers: this.headers
-				});
-				xm.ObjectUtil.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
-				//TODO maybe we should clone before freeze?
-				xm.ObjectUtil.deepFreeze(this.headers);
-				return this;
-			}
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -218,19 +79,18 @@ module xm {
 				this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
 			}
 
-			getObject(request:Request):Q.Promise<CacheObject> {
-				xm.assertVar(request, xm.http.Request, 'request');
+			getObject(request:CacheRequest):Q.Promise<CacheObject> {
+				xm.assertVar(request, xm.http.CacheRequest, 'request');
 				xm.assert(request.locked, 'request must be lock()-ed {a}', request.url);
 
 				var d:Q.Deferred<CacheObject> = Q.defer();
-				this.track.start(HTTPCache.get_object, request.url);
 				this.track.promise(d.promise, HTTPCache.get_object);
 
 				this.init().then(() => {
 					var job:CacheStreamLoader;
 					if (this.jobs.has(request.key)) {
 						job = this.jobs.get(request.key);
-						this.track.skip(HTTPCache.get_object);
+						this.track.share(HTTPCache.get_object, request.url);
 
 						return job.getObject().progress(d.notify).then(d.resolve);
 					}
@@ -239,17 +99,19 @@ module xm {
 						this.jobs.set(request.key, job);
 
 						job.track.logEnabled = this.track.logEnabled;
-						this.track.start(HTTPCache.get_object);
+						this.track.start(HTTPCache.get_object, request.url);
 
 						return job.getObject().progress(d.notify).then((value:any) => {
 							this.track.complete(HTTPCache.get_object);
 							d.resolve(value);
 						});
 					}
+				}).fail(d.reject).then(() => {
+					// housekeeping
 					this.scheduleRelease(request.key);
-				}).then(() => {
-					return this.cleanCache();
-				}).fail(d.reject).done();
+
+					return this.checkCleanCache();
+				}).done();
 
 				return d.promise;
 			}
@@ -261,8 +123,6 @@ module xm {
 					}
 					this.remove.set(key, setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
-						//TODO why both?
-						this.track.logger.debug(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
 						this.jobs.delete(key);
 
@@ -286,7 +146,7 @@ module xm {
 				FS.exists(this.storeDir).then((exists:boolean) => {
 					if (!exists) {
 						this.track.event('dir_create', this.storeDir);
-						return xm.FileUtil.mkdirCheckQ(this.storeDir, true, true);
+						return xm.file.mkdirCheckQ(this.storeDir, true, true);
 					}
 
 					return FS.isDirectory(this.storeDir).then((isDir:boolean) => {
@@ -297,21 +157,21 @@ module xm {
 						this.track.event('dir_exists', this.storeDir);
 					});
 				}).then(() => {					// find module directory
-					return FileUtil.findup(path.dirname((module).filename), 'package.json').then((src:string) => {
+					return file.findup(path.dirname((module).filename), 'package.json').then((src:string) => {
 						baseDir = path.dirname(src);
 						schemaDir = path.join(baseDir, 'schema');
 					});
 				}).then(() => {
 					// load info schema
 					var p = path.join(schemaDir, 'cache-v1.json');
-					return xm.FileUtil.readJSONPromise(p).then((infoSchema:string) => {
+					return xm.file.readJSONPromise(p).then((infoSchema:string) => {
 						xm.assertVar(infoSchema, 'object', 'infoSchema');
 						this.infoSchema = infoSchema;
 						this.infoKoder = new JSONKoder<CacheInfo>(this.infoSchema);
 					});
 				}).then(() => {
 					var p = path.join(schemaDir, 'manage-v1.json');
-					return xm.FileUtil.readJSONPromise(p).then((manageSchema:string) => {
+					return xm.file.readJSONPromise(p).then((manageSchema:string) => {
 						xm.assertVar(manageSchema, 'object', 'manageSchema');
 						this.manageSchema = manageSchema;
 						this.manageKoder = new JSONKoder<CacheManage>(this.manageSchema);
@@ -323,9 +183,9 @@ module xm {
 				return d.promise;
 			}
 
-			cleanCache():Q.Promise<void> {
+			checkCleanCache():Q.Promise<void> {
 				var d:Q.Deferred<void> = Q.defer();
-				if (!this._init || !this.opts.cacheWrite || !this.opts.cacheRead || !xm.isNumber(this.opts.cacheCleanInterval)) {
+				if (!this._init || !this.opts.allowClean || !xm.isNumber(this.opts.cacheCleanInterval)) {
 					d.resolve();
 					return d.promise;
 				}
@@ -348,7 +208,7 @@ module xm {
 							manageInfo = info;
 						}).fail((err) => {
 							this.track.logger.warn('removing bad manageFile: ' + this.manageFile);
-							return xm.FileUtil.removeFile(this.manageFile);
+							return xm.file.removeFile(this.manageFile);
 						});
 					});
 				}).then(() => {
@@ -381,6 +241,8 @@ module xm {
 			}
 
 			cleanupCacheAge(maxAge:number):Q.Promise<void> {
+				xm.assertVar(maxAge, 'number', 'maxAge');
+
 				var d:Q.Deferred<void> = Q.defer();
 				this.track.promise(d.promise, 'clean_cache_age');
 
@@ -406,8 +268,8 @@ module xm {
 						return false;
 					}).then((tree:string[]) => {
 						return Q.all(tree.reduce((memo:any[], src:string) => {
-							memo.push(xm.FileUtil.removeFile(src));
-							memo.push(xm.FileUtil.removeFile(src.replace(/\.json$/, '.raw')));
+							memo.push(xm.file.removeFile(src));
+							memo.push(xm.file.removeFile(src.replace(/\.json$/, '.raw')));
 							return memo;
 						}, []));
 					});
@@ -425,58 +287,6 @@ module xm {
 
 			set verbose(verbose:boolean) {
 				this.track.logEnabled = verbose;
-			}
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		export interface IObjectValidator {
-			assert(object:CacheObject):void
-		}
-
-		export class SimpleValidator implements IObjectValidator {
-			assert(object:CacheObject):void {
-				xm.assert(xm.isValid(object.body), 'body valid');
-			}
-
-			static main = new SimpleValidator();
-		}
-
-
-		export class CacheValidator implements IObjectValidator {
-
-			constructor(public schema) {
-			}
-
-			assert(object:CacheObject):void {
-				assertSchema(object.info, this.schema);
-			}
-		}
-
-		export class CacheAgeValidator implements IObjectValidator {
-			maxAgeMili:number = 0;
-
-			constructor(public schema, maxAgeMili?:number) {
-				this.maxAgeMili = maxAgeMili;
-			}
-
-			assert(object:CacheObject):void {
-				assertSchema(object.info, this.schema);
-
-				var date:Date = new Date(object.info.cacheUpdated);
-				if (xm.isNumber(this.maxAgeMili)) {
-					var compare = new Date();
-					xm.assert(date.getTime() < compare.getTime() + this.maxAgeMili, 'checksum {a} vs {e}', date.toISOString(), compare.toISOString());
-				}
-			}
-		}
-
-		export class ChecksumValidator implements IObjectValidator {
-			assert(object:CacheObject):void {
-				xm.assertVar(object.body, Buffer, 'body');
-				xm.assertVar(object.bodyChecksum, 'sha1', 'bodyChecksum');
-				xm.assertVar(object.info.contentChecksum, 'sha1', 'contentChecksum');
-				xm.assert(object.info.contentChecksum === object.bodyChecksum, 'checksum', object.info.contentChecksum, object.bodyChecksum);
 			}
 		}
 	}

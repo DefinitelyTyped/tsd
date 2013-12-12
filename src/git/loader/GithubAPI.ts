@@ -1,7 +1,7 @@
-///<reference path="../../_ref.d.ts" />
-///<reference path="GithubLoader.ts" />
-///<reference path="../model/GitRateInfo.ts" />
-///<reference path="../../xm/http/HTTPCache.ts" />
+/// <reference path="../../_ref.d.ts" />
+/// <reference path="GithubLoader.ts" />
+/// <reference path="../model/GitRateInfo.ts" />
+/// <reference path="../../xm/http/HTTPCache.ts" />
 
 module git {
 	'use strict';
@@ -15,6 +15,7 @@ module git {
 	/*
 	 GithubAPI: access github rest-api with local cache (evading the non-auth rate-limit)
 	 */
+	//TODO add OAuth support (here or in HTTPCache)
 	export class GithubAPI extends git.GithubLoader {
 
 		static get_cachable = 'get_cachable';
@@ -30,6 +31,7 @@ module git {
 			this.formatVersion = '1.0';
 
 			var opts = new xm.http.CacheOpts();
+			opts.allowClean = true;
 			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
 			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
@@ -37,35 +39,24 @@ module git {
 		}
 
 		getBranches():Q.Promise<any> {
-			var url = this.repo.urls.apiBranches();
-			var request = new xm.http.Request(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachableURL(this.repo.urls.apiBranches());
 		}
 
 		getBranch(branch:string):Q.Promise<any> {
-			var url = this.repo.urls.apiBranch(branch);
-			var request = new xm.http.Request(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachableURL(this.repo.urls.apiBranch(branch));
 		}
 
 		getTree(sha:string, recursive:boolean):Q.Promise<any> {
-			var url = this.repo.urls.apiTree(sha, (recursive ? 1 : undefined));
-			var request = new xm.http.Request(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachableURL(this.repo.urls.apiTree(sha, (recursive ? 1 : undefined)));
 		}
 
 		getCommit(sha:string):Q.Promise<any> {
-			var url = this.repo.urls.apiCommit(sha);
-			var request = new xm.http.Request(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachableURL(this.repo.urls.apiCommit(sha));
 		}
 
 		getBlob(sha:string):Q.Promise<any> {
-			var url = this.repo.urls.apiBlob(sha);
-			var request = new xm.http.Request(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachableURL(this.repo.urls.apiBlob(sha));
 		}
-
 		/*
 		 getCommits(sha:string):Q.Promise<any> {
 		 //TODO implement result pagination
@@ -78,12 +69,15 @@ module git {
 
 		getPathCommits(path:string):Q.Promise<any> {
 			//TODO implement result pagination
-			var url = this.repo.urls.apiPathCommits(path);
-			var request = new xm.http.Request(url);
+			return this.getCachableURL(this.repo.urls.apiPathCommits(path));
+		}
+
+		getCachableURL(url:string):Q.Promise<any> {
+			var request = new xm.http.CacheRequest(url);
 			return this.getCachable<any>(request, true);
 		}
 
-		getCachable<T>(request:xm.http.Request, addMeta:boolean, koder?:xm.IContentKoder<T>):Q.Promise<T> {
+		getCachable<T>(request:xm.http.CacheRequest, addMeta:boolean, koder?:xm.IContentKoder<T>):Q.Promise<T> {
 			//TODO add some specific validation
 			var koder = (koder || xm.JSONKoder.main);
 			var d:Q.Deferred<T> = Q.defer();
@@ -93,7 +87,7 @@ module git {
 				request.localMaxAge = 60 * 60 * 1000;
 			}
 			if (!xm.isNumber(request.httpInterval)) {
-				request.httpInterval = 30 * 60 * 1000;
+				request.httpInterval = 5 * 60 * 1000;
 			}
 			this.copyHeadersTo(request.headers);
 
