@@ -20,7 +20,7 @@ module xm {
 	var jsesc = require('jsesc');
 	var ministyle = <typeof MiniStyle> require('ministyle');
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
-	var minitable = require('../lib/minitable/minitable');
+	var minitable = require('minitable');
 
 	export function exposeSortIndex(one:ExposeCommand, two:ExposeCommand):number {
 		if (one.index < two.index) {

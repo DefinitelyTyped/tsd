@@ -7127,7 +7127,7 @@ var xm;
     var jsesc = require('jsesc');
     var ministyle = require('ministyle');
     var miniwrite = require('miniwrite');
-    var minitable = require('../lib/minitable/minitable');
+    var minitable = require('minitable');
 
     function exposeSortIndex(one, two) {
         if (one.index < two.index) {
