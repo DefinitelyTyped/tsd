@@ -1,206 +1,5 @@
 [
     {
-        "name": "AzureMobileServicesClient",
-        "description": "Type definitions for Microsoft.Windows.Azure.MobileService.Web-1.0.0",
-        "versions": [
-            {
-                "version": "1.0.0",
-                "key": "ebb29277-4d32-46fd-a0ec-6c530ffec573",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/AzureMobileServicesClient/AzureMobileServicesClient.d.ts",
-                "author": "Morosinotto Daniele",
-                "author_url": "https://github.com/dmorosinotto/"
-            }
-        ]
-    },
-    {
-        "name": "Bootstrap",
-        "description": "Twitter Bootstrap javascript code.",
-        "versions": [
-            {
-                "version": "2.1",
-                "key": "D02BBE29-B1F2-4E9A-AD69-B1BF3D9BFDDD",
-                "dependencies": [
-                    {
-                        "name": "jquery",
-                        "version": "latest"
-                    }
-                ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap/bootstrap.d.ts",
-                "author": "Boris Yankov",
-                "author_url": "https://github.com/borisyankov"
-            }
-        ]
-    },
-    {
-        "name": "GreenSock",
-        "description": "GreenSock Animation Platform (GSAP)",
-        "versions": [
-            {
-                "version": "1.0",
-                "key": "E08A7E0B-A7C4-4B49-982A-CF5D484A39A3",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/greensock/greensock.d.ts",
-                "author": "Robert S.",
-                "author_url": "https://github.com/codeBelt"
-            }
-        ]
-    },
-    {
-        "name": "Hammer.js",
-        "description": "Type definitions for Hammer.js 0.6",
-        "versions": [
-            {
-                "version": "0.6",
-                "key": "D8502E10-0504-4473-8257-E5E5D313C807",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/hammerjs/hammerjs.d.ts",
-                "author": "Boris Yankov",
-                "author_url": "https://github.com/borisyankov"
-            }
-        ]
-    },
-    {
-        "name": "Highcharts",
-        "description": "Type definitions for Highcharts",
-        "versions": [
-            {
-                "version": "2.3",
-                "key": "C19BCFAA-F9D3-40BC-B0FD-AC8D06BF9789",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/highcharts/highcharts.d.ts",
-                "author": "Damiano Gambarotto",
-                "author_url": "https://github.com/damianog"
-            }
-        ]
-    },
-    {
-        "name": "phonegap",
-        "description": "Framework that supports 7 mobile platforms",
-        "versions": [
-            {
-                "version": "2.3",
-                "key": "272ed09f-33c3-40c2-86bf-fa0aee183bae",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phonegap/phonegap.d.ts",
-                "author": "Boris Yankov",
-                "author_url": "https://github.com/borisyankov"
-            }
-        ]
-    },
-    {
-        "name": "Sammyjs",
-        "description": "RESTful Evented JavaScript",
-        "versions": [
-            {
-                "version": "0.7",
-                "key": "3FBC8337-4741-416D-B576-B55221CDA93A",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sammyjs/sammyjs.d.ts",
-                "author": "Boris Yankov",
-                "author_url": "https://github.com/borisyankov"
-            }
-        ]
-    },
-    {
-        "name": "SockJS",
-        "description": "Type definitions for SockJS",
-        "versions": [
-            {
-                "version": "0.3",
-                "key": "0B9D45DE-3046-4A93-964B-0EEA8CFFDE4A",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sockjs/sockjs.d.ts",
-                "author": "Emil Ivanov",
-                "author_url": "https://github.com/vladev"
-            }
-        ]
-    },
-    {
-        "name": "SoundJS",
-        "description": "Javascript library that provides a simple API, and powerful features to make working with audio a breeze",
-        "versions": [
-            {
-                "version": "3.0",
-                "key": "E6459F1B-6722-4B84-9E42-150F0D7740B1",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/soundjs/soundjs.d.ts",
-                "author": "Pedro Ferreira",
-                "author_url": "https://bitbucket.org/drk4"
-            }
-        ]
-    },
-    {
-        "name": "TeeChart",
-        "description": "TeeChart Pro provides complete, quick and easy to use charting",
-        "versions": [
-            {
-                "version": "1.3",
-                "key": "CD94F66C-57A3-4FCA-B8BF-EA93D9D1B843",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/teechart/teechart.d.ts",
-                "author": "Steema Software SL.",
-                "author_url": "http://www.steema.com/"
-            }
-        ]
-    },
-    {
-        "name": "TweenJS",
-        "description": "A Javascript library for tweening and animating HTML5 and Javascript properties.",
-        "versions": [
-            {
-                "version": "0.3",
-                "key": "43E6CDBC-EAFC-4F54-A57E-C2CF2F287624",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tweenjs/tweenjs.d.ts",
-                "author": "Pedro Ferreira",
-                "author_url": "https://bitbucket.org/drk4"
-            }
-        ]
-    },
-    {
-        "name": "Web-Audio-API-Nightly",
-        "description": "Type definitions for the Web Audio API, currently only implemented in WebKit browsers",
-        "versions": [
-            {
-                "version": "",
-                "key": "81458086-1919-44BC-9D3F-ECC1D865CCAC",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa-nightly.d.ts",
-                "author": "bbss",
-                "author_url": "https://github.com/bbss"
-            }
-        ]
-    },
-    {
-        "name": "Web-Audio-API",
-        "description": "Type definitions for the Web Audio API, currently only implemented in WebKit browsers",
-        "versions": [
-            {
-                "version": "",
-                "key": "625D38FB-E434-4306-8773-A1BC4A4170CD",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa.d.ts",
-                "author": "bbss",
-                "author_url": "https://github.com/bbss"
-            }
-        ]
-    },
-    {
-        "name": "Youtube",
-        "description": "Type definitions for YouTube",
-        "versions": [
-            {
-                "version": "",
-                "key": "302735EF-0179-4F79-932B-7A0DB70EAED0",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/youtube/youtube.d.ts",
-                "author": "Daz Wilkin",
-                "author_url": "https://github.com/DazWilkin/"
-            }
-        ]
-    },
-    {
         "name": "ace",
         "description": "Ace Cloud9 Editor",
         "versions": [
@@ -286,6 +85,25 @@
         ]
     },
     {
+        "name": "angular-route",
+        "description": "Google - Angular.Js",
+        "versions": [
+            {
+                "version": "1.2",
+                "key": "782dd530-6267-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "angular",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/angularjs/angular-route.d.ts",
+                "author": "Jonathan Park",
+                "author_url": "https://github.com/park9140"
+            }
+        ]
+    },
+    {
         "name": "angular-sanitize",
         "description": "Google - Angular.Js",
         "versions": [
@@ -334,6 +152,20 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/async/async.d.ts",
                 "author": "Boris Yankov",
                 "author_url": "https://github.com/borisyankov"
+            }
+        ]
+    },
+    {
+        "name": "AzureMobileServicesClient",
+        "description": "Type definitions for Microsoft.Windows.Azure.MobileService.Web-1.0.0",
+        "versions": [
+            {
+                "version": "1.0.0",
+                "key": "ebb29277-4d32-46fd-a0ec-6c530ffec573",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/AzureMobileServicesClient/AzureMobileServicesClient.d.ts",
+                "author": "Morosinotto Daniele",
+                "author_url": "https://github.com/dmorosinotto/"
             }
         ]
     },
@@ -421,6 +253,25 @@
                     }
                 ],
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap.datepicker/bootstrap.datepicker.d.ts",
+                "author": "Boris Yankov",
+                "author_url": "https://github.com/borisyankov"
+            }
+        ]
+    },
+    {
+        "name": "Bootstrap",
+        "description": "Twitter Bootstrap javascript code.",
+        "versions": [
+            {
+                "version": "2.1",
+                "key": "D02BBE29-B1F2-4E9A-AD69-B1BF3D9BFDDD",
+                "dependencies": [
+                    {
+                        "name": "jquery",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/bootstrap/bootstrap.d.ts",
                 "author": "Boris Yankov",
                 "author_url": "https://github.com/borisyankov"
             }
@@ -988,6 +839,34 @@
         ]
     },
     {
+        "name": "GreenSock",
+        "description": "GreenSock Animation Platform (GSAP)",
+        "versions": [
+            {
+                "version": "1.0",
+                "key": "E08A7E0B-A7C4-4B49-982A-CF5D484A39A3",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/greensock/greensock.d.ts",
+                "author": "Robert S.",
+                "author_url": "https://github.com/codeBelt"
+            }
+        ]
+    },
+    {
+        "name": "Hammer.js",
+        "description": "Type definitions for Hammer.js 0.6",
+        "versions": [
+            {
+                "version": "0.6",
+                "key": "D8502E10-0504-4473-8257-E5E5D313C807",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/hammerjs/hammerjs.d.ts",
+                "author": "Boris Yankov",
+                "author_url": "https://github.com/borisyankov"
+            }
+        ]
+    },
+    {
         "name": "handlebars",
         "description": "Handlebars provides the power necessary to let you build semantic templates effectively with no frustration.",
         "versions": [
@@ -998,6 +877,20 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/handlebars/handlebars.d.ts",
                 "author": "Boris Yankov",
                 "author_url": "https://github.com/borisyankov"
+            }
+        ]
+    },
+    {
+        "name": "Highcharts",
+        "description": "Type definitions for Highcharts",
+        "versions": [
+            {
+                "version": "2.3",
+                "key": "C19BCFAA-F9D3-40BC-B0FD-AC8D06BF9789",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/highcharts/highcharts.d.ts",
+                "author": "Damiano Gambarotto",
+                "author_url": "https://github.com/damianog"
             }
         ]
     },
@@ -1086,63 +979,6 @@
         ]
     },
     {
-        "name": "jQuery-Cookie",
-        "description": "Type definitions for jQuery Cookie Plugin",
-        "versions": [
-            {
-                "version": "1.3",
-                "key": "F5087F23-10F4-45CE-8B76-ECBB431CF372",
-                "dependencies": [
-                    {
-                        "name": "jquery",
-                        "version": "latest"
-                    }
-                ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
-                "author": "Roy Goode",
-                "author_url": "https://github.com/RoyGoode"
-            }
-        ]
-    },
-    {
-        "name": "jQuery.clientSideLogging",
-        "description": "This plugin allows you to store front end log/info/error messages on the server",
-        "versions": [
-            {
-                "version": "",
-                "key": "CAFAC332-3FF1-42BD-AF20-D8DBBF8FF01B",
-                "dependencies": [
-                    {
-                        "name": "jquery",
-                        "version": "latest"
-                    }
-                ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.clientSideLogging/jquery.clientSideLogging.d.ts",
-                "author": "Diullei Gomes",
-                "author_url": "https://github.com/Diullei"
-            }
-        ]
-    },
-    {
-        "name": "jQuery.transit",
-        "description": "Type definitions for jQuery.transit.js",
-        "versions": [
-            {
-                "version": "0.1",
-                "key": "08B14258-99CB-4B15-8A87-24B3656F825E",
-                "dependencies": [
-                    {
-                        "name": "jquery",
-                        "version": "latest"
-                    }
-                ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.transit/jquery.transit.d.ts",
-                "author": "William Sears",
-                "author_url": "https://github.com/MrBigDog2U"
-            }
-        ]
-    },
-    {
         "name": "jake",
         "description": "JavaScript build tool, similar to Make or Rake. Built to work with Node.js.",
         "versions": [
@@ -1190,6 +1026,25 @@
         ]
     },
     {
+        "name": "jQuery-Cookie",
+        "description": "Type definitions for jQuery Cookie Plugin",
+        "versions": [
+            {
+                "version": "1.3",
+                "key": "F5087F23-10F4-45CE-8B76-ECBB431CF372",
+                "dependencies": [
+                    {
+                        "name": "jquery",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.cookie/jquery.cookie.d.ts",
+                "author": "Roy Goode",
+                "author_url": "https://github.com/RoyGoode"
+            }
+        ]
+    },
+    {
         "name": "jquery.bbq",
         "description": "jQuery BBQ leverages the HTML5 hashchange event to allow simple, yet powerful bookmarkable #hash history.",
         "versions": [
@@ -1224,6 +1079,25 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.bootstrap.wizard/jquery.bootstrap.wizard.d.ts",
                 "author": "Blake Niemyjski",
                 "author_url": "https://github.com/niemyjski"
+            }
+        ]
+    },
+    {
+        "name": "jQuery.clientSideLogging",
+        "description": "This plugin allows you to store front end log/info/error messages on the server",
+        "versions": [
+            {
+                "version": "",
+                "key": "CAFAC332-3FF1-42BD-AF20-D8DBBF8FF01B",
+                "dependencies": [
+                    {
+                        "name": "jquery",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.clientSideLogging/jquery.clientSideLogging.d.ts",
+                "author": "Diullei Gomes",
+                "author_url": "https://github.com/Diullei"
             }
         ]
     },
@@ -1466,6 +1340,25 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.timepicker/jquery.timepicker.d.ts",
                 "author": "Anwar Javed",
                 "author_url": "https://github.com/anwarjaved"
+            }
+        ]
+    },
+    {
+        "name": "jQuery.transit",
+        "description": "Type definitions for jQuery.transit.js",
+        "versions": [
+            {
+                "version": "0.1",
+                "key": "08B14258-99CB-4B15-8A87-24B3656F825E",
+                "dependencies": [
+                    {
+                        "name": "jquery",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/jquery.transit/jquery.transit.d.ts",
+                "author": "William Sears",
+                "author_url": "https://github.com/MrBigDog2U"
             }
         ]
     },
@@ -1872,20 +1765,6 @@
         ]
     },
     {
-        "name": "noVNC",
-        "description": "VNC client using HTML5 (Web Sockets, Canvas) with encryption (wss://) support.",
-        "versions": [
-            {
-                "version": "",
-                "key": "5c2cc4ff-1d35-4a71-a1e4-666c35966c86",
-                "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/noVNC/noVNC.d.ts",
-                "author": "smithkl42",
-                "author_url": "https://github.com/smithkl42"
-            }
-        ]
-    },
-    {
         "name": "node",
         "description": "JavaScript runtime for build applications.",
         "versions": [
@@ -1908,6 +1787,20 @@
         ]
     },
     {
+        "name": "nodemailer",
+        "description": "Nodemailer is an easy to use module to send e-mails with Node.JS (using SMTP or sendmail or Amazon SES) and is unicode friendly.",
+        "versions": [
+            {
+                "version": "",
+                "key": "f22fa921-9879-4f22-a583-d38e158f2496",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/nodemailer/nodemailer.d.ts",
+                "author": "Vincent Bortone",
+                "author_url": "https://github.com/vbortone/"
+            }
+        ]
+    },
+    {
         "name": "node_redis",
         "description": "Redis client for node",
         "versions": [
@@ -1922,16 +1815,16 @@
         ]
     },
     {
-        "name": "nodemailer",
-        "description": "Nodemailer is an easy to use module to send e-mails with Node.JS (using SMTP or sendmail or Amazon SES) and is unicode friendly.",
+        "name": "noVNC",
+        "description": "VNC client using HTML5 (Web Sockets, Canvas) with encryption (wss://) support.",
         "versions": [
             {
                 "version": "",
-                "key": "f22fa921-9879-4f22-a583-d38e158f2496",
+                "key": "5c2cc4ff-1d35-4a71-a1e4-666c35966c86",
                 "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/nodemailer/nodemailer.d.ts",
-                "author": "Vincent Bortone",
-                "author_url": "https://github.com/vbortone/"
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/noVNC/noVNC.d.ts",
+                "author": "smithkl42",
+                "author_url": "https://github.com/smithkl42"
             }
         ]
     },
@@ -1960,6 +1853,20 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phantomjs/phantomjs.d.ts",
                 "author": "Jed Hunsaker",
                 "author_url": "https://github.com/jedhunsaker"
+            }
+        ]
+    },
+    {
+        "name": "phonegap",
+        "description": "Framework that supports 7 mobile platforms",
+        "versions": [
+            {
+                "version": "2.3",
+                "key": "272ed09f-33c3-40c2-86bf-fa0aee183bae",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/phonegap/phonegap.d.ts",
+                "author": "Boris Yankov",
+                "author_url": "https://github.com/borisyankov"
             }
         ]
     },
@@ -2117,16 +2024,186 @@
         ]
     },
     {
-        "name": "rx.js",
-        "description": "Rx (Reactive Extensions)",
+        "name": "rx.aggregates.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Aggregates Module",
         "versions": [
             {
-                "version": "",
+                "version": "2.2",
+                "key": "c8efb7f0-6261-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.aggregates.d.ts",
+                "author": "Carl de Billy",
+                "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.async.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Async Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "6fc25290-6262-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    },
+                    {
+                        "name": "rx.binding.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.async.d.ts",
+                "author": "zoetrope",
+                "author_url": "https://github.com/zoetrope"
+            }
+        ]
+    },
+    {
+        "name": "rx.binding.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Binding Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "c3d94500-6262-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.binding.d.ts",
+                "author": "Carl de Billy",
+                "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.coincidence.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Coincidence Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "ed5a1df0-6262-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.coincidence.d.ts",
+                "author": "Carl de Billy",
+                "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.experimental.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Experimental Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "1b468e60-6263-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.experimental.d.ts",
+                "author": "Igor Oleinikov",
+                "author_url": "https://github.com/Igorbek"
+            }
+        ]
+    },
+    {
+        "name": "rx.joinpatterns.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Join Patterns Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "4414e030-6263-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.joinpatterns.d.ts",
+                "author": "Carl de Billy",
+                "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.js",
+        "description": "RxJS (Reactive Extensions for JavaScript)",
+        "versions": [
+            {
+                "version": "2.2",
                 "key": "719c6d9d-881a-c5cf-c264-e13b1ee1590f",
                 "dependencies": [],
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.d.ts",
                 "author": "gsino",
                 "author_url": "http://www.codeplex.com/site/users/view/gsino"
+            }
+        ]
+    },
+    {
+        "name": "rx.time.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Time Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "67012720-6263-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.time.d.ts",
+                "author": "Carl de Billy",
+                "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.virtualtime.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Virtual Time Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "91a8f3e0-6263-11e3-949a-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.virtualtime.d.ts",
+                "author": "gsino",
+                "author_url": "http://www.codeplex.com/site/users/view/gsino"
+            }
+        ]
+    },
+    {
+        "name": "Sammyjs",
+        "description": "RESTful Evented JavaScript",
+        "versions": [
+            {
+                "version": "0.7",
+                "key": "3FBC8337-4741-416D-B576-B55221CDA93A",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sammyjs/sammyjs.d.ts",
+                "author": "Boris Yankov",
+                "author_url": "https://github.com/borisyankov"
             }
         ]
     },
@@ -2206,6 +2283,34 @@
         ]
     },
     {
+        "name": "SockJS",
+        "description": "Type definitions for SockJS",
+        "versions": [
+            {
+                "version": "0.3",
+                "key": "0B9D45DE-3046-4A93-964B-0EEA8CFFDE4A",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/sockjs/sockjs.d.ts",
+                "author": "Emil Ivanov",
+                "author_url": "https://github.com/vladev"
+            }
+        ]
+    },
+    {
+        "name": "SoundJS",
+        "description": "Javascript library that provides a simple API, and powerful features to make working with audio a breeze",
+        "versions": [
+            {
+                "version": "3.0",
+                "key": "E6459F1B-6722-4B84-9E42-150F0D7740B1",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/soundjs/soundjs.d.ts",
+                "author": "Pedro Ferreira",
+                "author_url": "https://bitbucket.org/drk4"
+            }
+        ]
+    },
+    {
         "name": "spin",
         "description": "A spinning activity indicator.",
         "versions": [
@@ -2276,6 +2381,20 @@
         ]
     },
     {
+        "name": "TeeChart",
+        "description": "TeeChart Pro provides complete, quick and easy to use charting",
+        "versions": [
+            {
+                "version": "1.3",
+                "key": "CD94F66C-57A3-4FCA-B8BF-EA93D9D1B843",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/teechart/teechart.d.ts",
+                "author": "Steema Software SL.",
+                "author_url": "http://www.steema.com/"
+            }
+        ]
+    },
+    {
         "name": "threejs",
         "description": "Three.js",
         "versions": [
@@ -2314,6 +2433,20 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tween.js/tween.js.d.ts",
                 "author": "Adam R. Smith",
                 "author_url": "https://github.com/sunetos"
+            }
+        ]
+    },
+    {
+        "name": "TweenJS",
+        "description": "A Javascript library for tweening and animating HTML5 and Javascript properties.",
+        "versions": [
+            {
+                "version": "0.3",
+                "key": "43E6CDBC-EAFC-4F54-A57E-C2CF2F287624",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/tweenjs/tweenjs.d.ts",
+                "author": "Pedro Ferreira",
+                "author_url": "https://bitbucket.org/drk4"
             }
         ]
     },
@@ -2444,6 +2577,34 @@
         ]
     },
     {
+        "name": "Web-Audio-API-Nightly",
+        "description": "Type definitions for the Web Audio API, currently only implemented in WebKit browsers",
+        "versions": [
+            {
+                "version": "",
+                "key": "81458086-1919-44BC-9D3F-ECC1D865CCAC",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa-nightly.d.ts",
+                "author": "bbss",
+                "author_url": "https://github.com/bbss"
+            }
+        ]
+    },
+    {
+        "name": "Web-Audio-API",
+        "description": "Type definitions for the Web Audio API, currently only implemented in WebKit browsers",
+        "versions": [
+            {
+                "version": "",
+                "key": "625D38FB-E434-4306-8773-A1BC4A4170CD",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webaudioapi/waa.d.ts",
+                "author": "bbss",
+                "author_url": "https://github.com/bbss"
+            }
+        ]
+    },
+    {
         "name": "webrtc.MediaStream",
         "description": "Media Capture and Streams",
         "versions": [
@@ -2468,6 +2629,20 @@
                 "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/webrtc/RTCPeerConnection.d.ts",
                 "author": "https://github.com/smithkl42",
                 "author_url": "smithkl42"
+            }
+        ]
+    },
+    {
+        "name": "Youtube",
+        "description": "Type definitions for YouTube",
+        "versions": [
+            {
+                "version": "",
+                "key": "302735EF-0179-4F79-932B-7A0DB70EAED0",
+                "dependencies": [],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/youtube/youtube.d.ts",
+                "author": "Daz Wilkin",
+                "author_url": "https://github.com/DazWilkin/"
             }
         ]
     },

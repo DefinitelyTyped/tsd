@@ -48,7 +48,7 @@ function fromTsdLibs(lib, name, version) {
 
     var targetDir = '../../tsd-libs/libs/' + lib.dir;
     var files = new NodeJs.DirectoryHandle().getAllFiles(targetDir, null, { recursive: true });
-    
+
     for (var i = 0; i < files.length; i++) {
         var file = files[i];
         var fileName = file.substr(targetDir.length + 1);
@@ -118,20 +118,22 @@ for (var i = 0; i < files.length; i++) {
     };
 
     for (var x = 0; x < obj.versions.length; x++){
-        v2lib.versions.push({
-            version: obj.versions[x].version,
-            key: obj.versions[x].key,
-            dependencies: obj.versions[x].dependencies,
-            uri: {
-                source: obj.versions[x].url,
-                sourceType: 1
-            },
-            author: {
-                name: obj.versions[x].author,
-                url: obj.versions[x].author_url,
-            },
-            lib: buildSource(obj.versions[x].lib, obj.name, obj.versions[x].version)
-        });
+        if (obj.versions[x].lib && obj.versions[x].lib.target === 'file') {
+            v2lib.versions.push({
+                version: obj.versions[x].version,
+                key: obj.versions[x].key,
+                dependencies: obj.versions[x].dependencies,
+                uri: {
+                    source: obj.versions[x].url,
+                    sourceType: 1
+                },
+                author: {
+                    name: obj.versions[x].author,
+                    url: obj.versions[x].author_url,
+                },
+                lib: buildSource(obj.versions[x].lib, obj.name, obj.versions[x].version)
+            });
+        }
         delete obj.versions[x].lib;
     }
 
@@ -172,16 +174,16 @@ for (var i = 0; i < files.length; i++) {
 }
 
 var sw = new NodeJs.FileHandle().createFile('../deploy/repository.json');
-sw.write(JSON.stringify(repo));
+sw.write(JSON.stringify(repo, null, 4));
 sw.flush();
 sw.close();
 
 var sw2 = new NodeJs.FileHandle().createFile('../../tsdpm-site/tmpl/repository.js');
-sw2.write('var __repo = ' + JSON.stringify(repo_site) + ';');
+sw2.write('var __repo = ' + JSON.stringify(repo_site + ';', null, 4));
 sw2.flush();
 sw2.close();
 
 var sw3 = new NodeJs.FileHandle().createFile('../../tsdpm-site/repository_v2.json');
-sw3.write(JSON.stringify({ repo: repo_v2 }));
+sw3.write(JSON.stringify({ repo: repo_v2 }, null, 4));
 sw3.flush();
 sw3.close();
