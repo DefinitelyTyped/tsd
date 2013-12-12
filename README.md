@@ -8,7 +8,7 @@ TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/)
 
 :bangbang: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
 
-### 0.5.x Preview notes :warning: 
+#### 0.5.x Preview notes :warning: 
 
 *	Version `0.5.x` is functional and usable but still in development:
 	*	If you decide to use it be sure to update regularly.
@@ -22,9 +22,11 @@ TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/)
 
 The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over no-limited Github RAW urls. 
 
-Unless you do something silly like `$ tsd query * --history --limit 1000 --cacheMode forceRemote`. We are looking into a fallbacks and alternatives to bypass the occasional burst mode.
+We are looking into a fallback to bypass the occasional burst mode for when you'd do something silly like `$ tsd query * --history --limit 500 --cacheMode forceRemote`.
 
 ## Usage as CLI command
+
+### Install
 
 :x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
 
@@ -42,7 +44,7 @@ Unless you do something silly like `$ tsd query * --history --limit 1000 --cache
 
 	$ npm install tsd@0.3.0 -g
 
-#### Call CLI
+### Call CLI
 
 Global `tsd` binary:
 
@@ -52,7 +54,11 @@ Global `tsd` binary:
 
 	$ node ./build/cli.js
 
-#### Practical examples
+### List commands and options
+
+	$ tsd -h
+
+### Practical examples
 
 Minimal search for 'bootstrap'
 		
@@ -79,8 +85,9 @@ Search for jquery plugins:
 
 ### Selector explained
 
-TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index:
+TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index, where the definition name takes priority:
 
+	$ tsd query module
 	$ tsd query project/module
 
 Consider these definitions:
@@ -126,9 +133,9 @@ The selector also supports globbing, for example:
 
 :bangbang: Globbing implements only leading and trailing (for now).
 
-### Semver
+### Semver filter
 
-Note: the semver postfix is expected to be separated by a dash and possibly a `'v'`
+Note: the [semver](https://github.com/isaacs/node-semver) postfix of definition files is expected to be separated by a dash and possibly a `'v'`
 
 	module-0.1.2
 	module-v0.1.2
@@ -138,14 +145,39 @@ If there are multiple matches with same module name they will be prioritised:
 
 1.	The unversioned name is considered being most recent.
 2.	Then versions are compared as expected following these [comparison](https://github.com/isaacs/node-semver#comparison) rules.
-3.	Use the `--version` argument to supply a semver-range:
+3.	Use the `--version` / `-v` option to set a semver-range:
 
 ````
 $ tsd query node -v latest
 $ tsd query node -v all
 $ tsd query node -v ">=0.8 <0.10"
+$ tsd query node -v "<0.10"
 ````
-## Use as module
+
+### Date filter
+
+Use the `--date` / `-d` option to set a date-range (find dates using `--history`):
+
+````
+$ tsd query d3 --history
+$ tsd query d3 --date ">=2012-01-01"
+````
+
+### Commit filter
+
+Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), 
+for convenience a shortened sha1 hash is supported. 
+
+````
+$ tsd query youtube --history
+$ tsd query youtube --commit d6ff
+````
+
+Notes:
+
+1. For now this only works with commits that actually changed the definition file you selected (eg, from `--history`) This will be expanded to allow selecting from any commit at a later date.
+
+## Usage as module
 
 :bangbang: Outdated info until after we push out the preview release, but intended to work (as it is a key to some planned dependencies).
  
@@ -171,23 +203,23 @@ TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [krisko
 
 ## FAQ & Info
 
-### What is the location of the cache folders?
-
-The cache is stored in the users home directory (like `$ npm` does). Use `$ tsd settings` to view the current path. Use the `--cacheDir` to overide, or `--cacheMode` to modify caching behaviour. 
-
 ### Why does the install / search command not work like in TSD 0.3.0?
 
-The old TSD `v0.3.0` had it's own repository data file that mapped module names to urls of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
+The old TSD `v0.3.0` had it's own repository data file that mapped module names to url's of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
 
 The DefinitelyTyped group is working on a meta-data source that will solve this.
 
 ### Can TSD install the definitions for the correct module version or fork?
 
-Yes, and no. 
+Yes, and no, (and later yes again) 
 
 There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
 
-It works well but is not used a lot in the current DefinitelyTyped repository, because of some issues in other toolings. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+It works well but is not used a lot in the current DefinitelyTyped repository (because of some issues in other toolings). The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+
+### What is the location of the cache folders?
+
+The cache is stored in the users home directory (like `$ npm` does). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
 
 ### I have a suggestion or idea
 
@@ -199,13 +231,13 @@ Of course! We are developing [grunt-tsd](https://github.com/DefinitelyTyped/grun
 
 ### What is all this non-tsd stuff in `./src` and `./lib`?
 
-Author @Bartvds is incubating some modules and helpers there. Some of these will be moved to their own packages at some point. 
+Author @Bartvds is incubating some modules and helpers there. Most of these will be moved to their own packages at some point. 
 
-### What are the docs?
+### Where do you keep background and work docs?
 
-* More about [code](CODE.md).
-* Some extra [info](INFO.md).
-* Things [todo](TODO.md).
+* Some more about the [code](CODE.md).
+* Extra background [info](INFO.md) about the conceptual choices (old).
+* Internal list of things [todo](TODO.md).
 
 ## Build
 
@@ -241,11 +273,13 @@ TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to test separ
 	$ grunt gtx:tsd
 	//.. etc
 
-It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a decent workstation. Code looks best with tabs rendered at 4 spaces (3 is really nice too, or 6 or 8, I don't care, because smart-tabs are awesome like that). 
+It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a properly powerful workstation.
+
+Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don't really care, because [smart-tabs](http://www.emacswiki.org/SmartTabs) are awesome like that). The gruntfile uses slightly fascistic [JSHint](https://github.com/jshint/jshint) and [TSLint](https://github.com/palantir/tslint) settings to enforce code style, but there is an `.editorconfig`(http://editorconfig.org/) to elevate some of the pain.
 
 ## Contribute
 
-Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss a [ticket](https://github.com/DefinitelyTyped/tsd/issues) (or risk the basis of your work being re-factored). 
+Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first (or risk the basis of your work being re-factored). 
 
 **Note:** TSD no longer maintains it's own data sources, contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
@@ -254,7 +288,7 @@ Contributions will be welcome once the application architecture stabilises a bit
 Shout-out to essential modules used to build TSD:
 
 * [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
-* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help make new rules!)
+* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (note: if you are bored then help making new rules!)
 * [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (by author).
 * [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
 * [q](https://github.com/kriskowal/q) and [q-io](https://github.com/kriskowal/q-io) - Promises as promised.
