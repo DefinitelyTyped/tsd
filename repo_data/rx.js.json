@@ -1,9 +1,9 @@
 {
   "name": "rx.js",
-  "description": "Rx (Reactive Extensions)",
+  "description": "RxJS (Reactive Extensions for JavaScript)",
   "versions": [
     {
-      "version": "",
+      "version": "2.2",
       "key": "719c6d9d-881a-c5cf-c264-e13b1ee1590f",
       "dependencies": [],
       "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.d.ts",

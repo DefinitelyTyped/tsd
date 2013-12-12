@@ -1,0 +1,19 @@
+{
+  "name": "rx.experimental.js",
+  "description": "RxJS (Reactive Extensions for JavaScript) Experimental Module",
+  "versions": [
+    {
+      "version": "2.2",
+      "key": "1b468e60-6263-11e3-949a-0800200c9a66",
+      "dependencies": [
+        {
+          "name": "rx.js",
+          "version": "latest"
+        }
+      ],
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.experimental.d.ts",
+      "author": "Igor Oleinikov",
+      "author_url": "https://github.com/Igorbek"
+    }
+  ]
+}
