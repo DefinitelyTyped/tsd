@@ -219,7 +219,7 @@ It works well but is not used a lot in the current DefinitelyTyped repository (b
 
 ### What is the location of the cache folders?
 
-The cache is stored in the users home directory (like `$ npm` does). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
+The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
 
 ### I have a suggestion or idea
 
@@ -227,11 +227,11 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 ### Do you have a grunt task to automate some TSD tasks?
 
-Of course! We are developing [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+Of course! The official plugin is aptly named [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
 ### What is all this non-tsd stuff in `./src` and `./lib`?
 
-Author @Bartvds is incubating some modules and helpers there. Most of these will be moved to their own packages at some point. 
+Author @Bartvds is incubating some modules and helpers in this project. Most of these will be moved to their own packages at some point. 
 
 ### Where do you keep background and work docs?
 

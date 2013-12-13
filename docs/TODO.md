@@ -50,7 +50,7 @@ Basics commands
 * :m:	Add **init** (new json with repo/branch)
 * :m:	Add **settings** (show config info)
 * :m:	Add **reinstall** (from config)
-* :m:	Add **index** (list definition overview) (search * is compacted)
+* :m:	Add ~~**index** (list definition overview)~~ (now `query *`)
 * :id:	Consider unifying local remote selectors
 * :ab:	Add **install** / **search** aliases
 
@@ -58,12 +58,12 @@ Remote selector commands
 
 * :m:	Add **query** (search definitions)
 * :ng:	Add ~~**search** (search definitions)~~ (now `query`)
-* :ng:	Add ~~**install** (install definitions)~~ (via `--action install`)
-* :ng:	Add ~~**direct** (install from commit sha, or blob)~~ (via `--commit`)
-* :ng:	Add ~~**info** (parse file content)~~ (via `--info`)
-* :ng:	Add ~~**history** (list commit history)~~ (via `--history`)
-* :ng:	Add **details** ~~(detailed commit history)~~ (make part of `--detail` level option)
-* :m:	Enhance deps (list dependencies), make recursive and display
+* :ng:	Add ~~**install** (install definitions)~~ (via `query --action install`)
+* :ng:	Add ~~**direct** (install from commit sha, or blob)~~ (via `query --commit`)
+* :ng:	Add ~~**info** (parse file content)~~ (via `query --info`)
+* :ng:	Add ~~**history** (list commit history)~~ (via `query --history`)
+* :ng:	Add **details** ~~(detailed commit history)~~ (make part of `query --detail` level option)
+* :m:	Enhance ~~deps~~ (list dependencies), make recursive and display (via `query --resolve`)
 
 Local selector commands
 
@@ -105,7 +105,7 @@ Command options
 * :m:	Add option for file overwrite (always on now) `--overwrite`
 * :b:	Add a compact vs detailed option (for search listings or history) `--detail`
 * :m:	Add option for dependency install (always on now) `--resolve`
-* :a:	Add a paginator option to `--history`
+* :ab:	Add a paginator option to `--history`
 * :m:	Implement `--limit` option for selection-match-count limiter; so user don't accidentally bust their rate limit using `$ tsd history  *` etc
 * :m:	Implement `--min` / `--max` option to define expected result amount
 * :o:	.... more
@@ -135,7 +135,7 @@ API
 
 Data model/repo
 
-* :x:	Harden JSON import (there is some prototype schema in `./schema`)
+* :o:	Harden JSON import (there is some prototype schema in `./schema`)
 * :id:	Consider decoupling from Github json format (abstract service)
 * :id:	Consider adapting core to work from a git-checkout (abstract service)
 
@@ -202,8 +202,7 @@ Technical
 Infrastructure
 
 * :o2:	Add npm pre-publish tests hook :zap:
-* :o2:	Add test setup to test :zap:
-* :x:	Add git pre-commit test hook :zap:
+* :o2:	Add git pre-commit test hook :zap:
 * :id:	Lint TypeScript JS output (using JSHint or ESlint)
 * :m:	Validate `package.json` (and others) using json-schema.
 * :a:	Run CLI test after build from the integrity test? (saves a node.js start)
@@ -213,7 +212,7 @@ Infrastructure
 * 
 Cleanup
 
-* :x:	Sweep and enable `tslint.json` rules
+* :ab:	Sweep and enable `tslint.json` rules
 * :cl:	Clean `package.json`: fix some ~tildes before release
 * :cl:	Sweep used modules: `require()` and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
@@ -259,7 +258,7 @@ Status indicators (with memory hint):
 * :ng:	Won't fix (no-go).
 * :up:	Deployed (systems up).
 * :sa:	Pending external action (servicing).
-* :id:	Proposal or idea for consideration (idea).
+* :id:	Proposal for consideration (idea).
 * :vs:	Decision needed (this vs that).
 * :a:	First priority (prio A).
 * :b:	Second priority (prio B).
