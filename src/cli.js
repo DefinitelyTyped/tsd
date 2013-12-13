@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-// handler is compiled into utf8 codebase
+// handler is compiled into main codebase
 require('./api').runARGV(process.argv);
