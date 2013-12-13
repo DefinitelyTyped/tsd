@@ -45,7 +45,7 @@ module tsd {
 				this._styleMap.set('css', (ctx:xm.ExposeContext) => {
 					this.outputs.forEach((output) => {
 						output.useStyle(ministyle.css('', true));
-						output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
+						output.useWrite(miniwrite.htmlString(miniwrite.log(), 'span', {'class': 'cli'}, '<br/>'));
 					});
 				});
 				this._styleMap.set('dev', (ctx:xm.ExposeContext) => {

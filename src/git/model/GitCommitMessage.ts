@@ -32,7 +32,7 @@ module git {
 			if (match && match.length > 1) {
 				this.subject = String(match[1]);
 				if (match.length > 2 && typeof match[2] === 'string' && match[2] !== '') {
-					this.body = match[2].replace(/\r?\n/g, '\n');
+					this.body = match[2].replace(/\r\n/g, '\n');
 				}
 			}
 		}

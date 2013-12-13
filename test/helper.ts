@@ -34,7 +34,7 @@ module helper {
 		return path.resolve(__dirname, '..', 'tmp');
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//helper to get a readable debug message (useful when comparing things absed on 2 paths)
 	//can be improved freely (as required as it is for visualisation only)
@@ -60,7 +60,7 @@ module helper {
 		return message + ': ' + '\'' + elemsA.join(path.sep) + '\' vs \'' + elemsB.join(path.sep) + '\'';
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export function dump(object:any, message?:string, depth:number = 6, showHidden:boolean = false):any {
 		message = xm.isUndefined(message) ? '' : message + ': ';
@@ -124,7 +124,7 @@ module helper {
 		assert.strictEqual('', expected.toString(), msg + 'expected to throw and match ' + expected);
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//for safety
 	function promiseDoneMistake():void {
@@ -142,7 +142,7 @@ module helper {
 		});
 	};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export interface AssertCB<T> {
 		(actual:T, expected:T, message:string):void;
@@ -151,89 +151,7 @@ module helper {
 		(actual:T, expected:T):boolean;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	export interface RunCLIResult {
-		code:number;
-		error:Error;
-		stdout:NodeBuffer;
-		stderr:NodeBuffer;
-		args:string[];
-	}
-
-	//TODO decide runCLI use fork(), exec() or spawn() (fork slightly faster? does it matter?)
-	//TODO fix code to properly show errors
-	export function runCLI(modulePath:string, args:string[], debug:boolean = false, cwd:string = './'):Q.Promise<RunCLIResult> {
-		assert.isArray(args, 'args');
-
-		var d:Q.Deferred<RunCLIResult> = Q.defer();
-
-		var stdout:NodeBuffer[] = [];
-		var stderr:NodeBuffer[] = [];
-
-		var options:any = {
-			cwd: path.resolve(cwd),
-			silent: true
-		};
-
-		var getRes = (code:number = 0, err:Error = null):RunCLIResult => {
-			var res:RunCLIResult = {
-				code: code,
-				error: err || null,
-				stdout: Buffer.concat(stdout),
-				stderr: Buffer.concat(stderr),
-				args: args
-			};
-			if (debug && res.code > 0) {
-				xm.log.debug(['node', modulePath , res.args.join(' ')].join(' '));
-				xm.log.debug('error: ' + res.error);
-				xm.log.debug('code: ' + res.code);
-				/*xm.log(res.stdout.toString('utf8'));
-				 if (res.stderr.length) {
-				 xm.log.error(res.stderr.toString('utf8'));
-				 }*/
-			}
-			return res;
-		};
-
-		args.unshift(modulePath);
-
-		var child = childProcess.spawn('node', args, options);
-		if (!child) {
-			d.resolve(getRes(1, new Error('child spawned as null')));
-			return d.promise;
-		}
-
-		child.stdout.on('data', (chunk:NodeBuffer) => {
-			stdout.push(chunk);
-			if (debug) {
-				process.stdout.write(chunk);
-			}
-		});
-		child.stderr.on('data', (chunk:NodeBuffer) => {
-			stderr.push(chunk);
-			if (debug) {
-				process.stdout.write(chunk);
-			}
-		});
-
-		child.on('error', (err:any) => {
-			if (err) {
-				xm.log.error('child process exited with code ' + err.code);
-				xm.log.error(err);
-			}
-			//never fail (we might test for cli failure after all)
-			d.resolve(getRes(1, err));
-		});
-
-		child.on('exit', () => {
-			d.resolve(getRes(0, null));
-		});
-
-		return d.promise;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	//TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
 	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string):void {

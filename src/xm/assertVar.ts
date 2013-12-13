@@ -107,8 +107,8 @@ module xm {
 					'expected ' + xm.wrapQuotes(label, true)
 						+ ' to be instanceof ' + xm.getFuncLabel(type)
 						+ ' but is a ' + xm.getFuncLabel(value.constructor)
-						+ ': ' + xm.toValueStrim(value))
-					;
+						+ ': ' + xm.toValueStrim(value)
+				);
 			}
 		}
 		else if (typeKind === 'string') {
@@ -126,15 +126,16 @@ module xm {
 			else {
 				throw new AssertionError(
 					'unknown type-assertion parameter ' + xm.wrapQuotes(type, true)
-						+ ' for ' + xm.toValueStrim(value) + ''
+						+ ' for ' + xm.toValueStrim(value)
 				);
 			}
 		}
 		else {
 			throw new AssertionError(
 				'bad type-assertion parameter '
-					+ xm.toValueStrim(type) + ' for '
-					+ xm.wrapQuotes(label, true) + ''
+					+ xm.toValueStrim(type)
+					+ ' for '
+					+ xm.wrapQuotes(label, true)
 			);
 		}
 	}

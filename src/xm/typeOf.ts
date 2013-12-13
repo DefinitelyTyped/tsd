@@ -9,7 +9,7 @@
  module xm {
 	'use strict';
 
-	var natives = {
+	 var natives = {
 		'[object Arguments]': 'arguments',
 		'[object Array]': 'array',
 		'[object Date]': 'date',

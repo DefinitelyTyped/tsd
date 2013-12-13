@@ -2,6 +2,7 @@
 /// <reference path="helper.ts" />
 /// <reference path="../src/xm/http/CacheMode.ts" />
 /// <reference path="../src/tsd/data/_all.ts" />
+/// <reference path="../src/xm/childProcess.ts" />
 
 /// <reference path="assert/tsd/_all.ts" />
 /// <reference path="assert/xm/_all.ts" />

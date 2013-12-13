@@ -71,7 +71,7 @@ describe('CLI Query', () => {
 		return str.replace(trimHeaderExp, '').replace(versionNumber, 'x');
 	}
 
-	function assertCLIResult(result:helper.RunCLIResult, test, info:helper.TestInfo, args):void {
+	function assertCLIResult(result:xm.RunCLIResult, test, info:helper.TestInfo, args):void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
@@ -115,7 +115,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
-				return helper.runCLI(info.modBuildCLI, args, debug).then((result:helper.RunCLIResult) => {
+				return xm.runCLI(info.modBuildCLI, args, debug).then((result:xm.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
@@ -138,7 +138,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 
-				return helper.runCLI(info.modBuildCLI, args, debug).then((result:helper.RunCLIResult) => {
+				return xm.runCLI(info.modBuildCLI, args, debug).then((result:xm.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
