@@ -694,10 +694,10 @@ var xm;
                     throw new AssertionError('expected ' + xm.wrapQuotes(label, true) + ' to be a ' + xm.wrapQuotes(type, true) + ' but got a ' + xm.wrapQuotes(valueKind, true) + ': ' + xm.toValueStrim(value));
                 }
             } else {
-                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type, true) + ' for ' + xm.toValueStrim(value) + '');
+                throw new AssertionError('unknown type-assertion parameter ' + xm.wrapQuotes(type, true) + ' for ' + xm.toValueStrim(value));
             }
         } else {
-            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label, true) + '');
+            throw new AssertionError('bad type-assertion parameter ' + xm.toValueStrim(type) + ' for ' + xm.wrapQuotes(label, true));
         }
     }
     xm.assertVar = assertVar;
@@ -5360,7 +5360,7 @@ var git;
             if (match && match.length > 1) {
                 this.subject = String(match[1]);
                 if (match.length > 2 && typeof match[2] === 'string' && match[2] !== '') {
-                    this.body = match[2].replace(/\r?\n/g, '\n');
+                    this.body = match[2].replace(/\r\n/g, '\n');
                 }
             }
         };
@@ -8050,7 +8050,7 @@ var tsd;
                 this._styleMap.set('css', function (ctx) {
                     _this.outputs.forEach(function (output) {
                         output.useStyle(ministyle.css('', true));
-                        output.useWrite(miniwrite.htmlString(miniwrite.log(), null, null, '<br/>'));
+                        output.useWrite(miniwrite.htmlString(miniwrite.log(), 'span', { 'class': 'cli' }, '<br/>'));
                     });
                 });
                 this._styleMap.set('dev', function (ctx) {

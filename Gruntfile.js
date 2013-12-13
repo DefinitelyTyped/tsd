@@ -16,6 +16,7 @@ module.exports = function (grunt) {
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 	gtx.loadAuto();
+	gtx.loadTasks('tasks');
 	gtx.loadNpm([
 		'mocha-unfunk-reporter'
 	]);
@@ -27,7 +28,7 @@ module.exports = function (grunt) {
 			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
 				reporter: './node_modules/jshint-path-reporter'
 			}),
-			support: ['Gruntfile.js', 'tasks/**/*.js', 'test/*.js', 'lib/**/*.js'],
+			support: ['Gruntfile.js', 'test/*.js', 'lib/**/*.js'],
 			fixtures: ['test/**/fixtures/**/*.js']
 		},
 		tslint: {
@@ -106,9 +107,13 @@ module.exports = function (grunt) {
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},
-			specjsblobSha: {
+			blobSha: {
 				src: ['src/util/blobSha.ts'],
 				out: 'util/blobSha.js'
+			},
+			capture_task: {
+				src: ['tasks/capture_cli.ts'],
+				out: 'tasks/capture_cli.js'
 			},
 			//use this non-checked-in file to test small snippets of dev code
 			dev: {
@@ -117,7 +122,7 @@ module.exports = function (grunt) {
 			}
 		},
 		shell: {
-			options :{
+			options: {
 				failOnError: true,
 				stdout: true
 			},
@@ -138,33 +143,15 @@ module.exports = function (grunt) {
 				].join(' '),
 				options: {
 				}
-			},
-			//use this to test stuff
-			dev_hist: {
-				command: [
-					'node', './build/cli.js',
-					'query',
-					'angular',
-					'--history',
-					'--resolve',
-					'--dev'
-				].join(' '),
-				options: {
-				}
 			}
 		},
-		execute: {
-			dev: {
-				before: function (grunt) {
-					grunt.log.writeln('start dev');
-				},
-				options: {
-					module: true
-				},
-				after: function (grunt) {
-					grunt.log.writeln('end dev');
-				},
-				src: ['tmp/dev.js']
+		capture_cli: {
+			options: {
+				modulePath: './build/cli.js',
+				debug: false,
+				cwd: null,
+				template: path.resolve('assets', 'templates', 'cli-standard.html'),
+				outDir: './media/capture'
 			}
 		}
 	});
@@ -249,7 +236,7 @@ module.exports = function (grunt) {
 
 	//gtx.alias('run', ['build', 'demo:help']);
 	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
-	gtx.alias('run', ['build', 'shell:dev_hist']);
+	gtx.alias('run', ['capture_demo']);
 
 	gtx.alias('specjs', ['mochaTest:specs']);
 
@@ -262,6 +249,52 @@ module.exports = function (grunt) {
 	gtx.alias('edit_06', 'gtx:xm');
 	gtx.alias('edit_07', 'gtx:http');
 	gtx.alias('edit_08', 'specjs');
+
+	// capture macro
+	gtx.define('capture', function (macro, id) {
+		macro.add('capture_cli', id, {
+			options: {
+				title: id,
+				name: id + '.html',
+				args: [
+					'--style', 'css'
+				].concat(macro.getParam('args', []))
+			}
+		});
+	}, {
+		concurrent: cpuCores
+	});
+	gtx.create('help', 'capture', {
+		args: [
+			'help'
+		]
+	});
+	gtx.create('index', 'capture', {
+		args: [
+			'query', '*'
+		]
+	});
+	gtx.create('async', 'capture', {
+		args: [
+			'query',
+			'async',
+			'--action', 'install',
+			'--overwrite',
+			'--history',
+			'--info'
+		]
+	});
+	gtx.create('angular', 'capture', {
+		args: [
+			'query',
+			'angular*',
+			'--resolve'
+		]
+	});
+	gtx.alias('capture_demo', [
+		'ts:capture_task',
+		'gtx-type:capture'
+	]);
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();

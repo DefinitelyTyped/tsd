@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>tsd demo</title>
+    <title><%= title %></title>
     <style type="text/css">
         html, body {
             background-color: black;
             color: #ccc;
+            font-family: sans-serif;
         }
         body {
             margin:1em;
         }
 
-        .cli {
-            white-space: pre;
+        .content {
             font-family: monospace;
         }
 
+        .cli {
+            white-space: pre;
+            color: #ddd;
+        }
+
         .accent {
-            color: cyan;
+            color: #0cc;
+        }
+
+        .signal {
+            color: #c0c;
         }
 
         .plain {
@@ -25,23 +34,23 @@
         }
 
         .error {
-            color: red;
+            color: #c00;
         }
 
         .warning {
-            color: yellow;
+            color: #cc0;
         }
 
         .muted {
-            color: grey;
+            color: #888;
         }
 
         .success {
-            color: green;
+            color: #0c0;
         }
     </style>
 </head>
-<body>
-<%CLI_OUTPUT%>
-</body>
+<body><div class="content">
+<%= capture %>
+</div></body>
 </head>
