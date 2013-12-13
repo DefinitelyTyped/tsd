@@ -54,9 +54,11 @@ Global `tsd` binary:
 
 	$ node ./build/cli.js
 
-### List commands and options
+### Help
 
 	$ tsd -h
+
+[![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help.png)
 
 ### Practical examples
 
@@ -82,6 +84,12 @@ Solve the reference to 'jquery', overwrite existing files and save to the tsd.co
 Search for jquery plugins:
 		
 	$ tsd query */jquery.*
+
+It looks like this:
+
+* [`$ tsd --help`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help.png)
+* [`$ tsd query async --info --history --install`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/async.png)
+* [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/angular.png)
 
 ### Selector explained
 
@@ -215,15 +223,11 @@ Yes, and no, (and later yes again)
 
 There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
 
-It works well but is not used a lot in the current DefinitelyTyped repository (because of some issues in other toolings). The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+It works well but is not used much in the current DefinitelyTyped repository. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
 
 ### What is the location of the cache folders?
 
 The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
-
-### I have a suggestion or idea
-
-Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
 
 ### Do you have a grunt task to automate some TSD tasks?
 
@@ -238,6 +242,10 @@ Author @Bartvds is incubating some modules and helpers in this project. Most of 
 * Some more about the [code](CODE.md).
 * Extra background [info](INFO.md) about the conceptual choices (old).
 * Internal list of things [todo](TODO.md).
+
+### I have a suggestion or idea
+
+Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
 
 ## Build
 
@@ -305,7 +313,7 @@ Shout-out to essential modules used to build TSD:
 
 * Original version by @[Diullei](https://github.com/Diullei).
 
-To install `v0.3.x` use:
+To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
 
 	$ npm install tsd@0.3.0 -g
 

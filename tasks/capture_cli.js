@@ -1228,8 +1228,10 @@ var xm;
 
     function getTemplate(options) {
         xm.assertVar(options, 'object', 'src');
+
         var key;
         var tmp;
+
         if (options.template) {
             xm.assertVar(options.template, 'string', 'options.template');
             key = options.template;
@@ -1240,7 +1242,9 @@ var xm;
             templates.set(key, tmp);
             return tmp;
         }
+
         xm.assertVar(options.templateString, 'string', 'options.templateString');
+
         if (options.template) {
             key = options.template;
             if (templates.has(key)) {

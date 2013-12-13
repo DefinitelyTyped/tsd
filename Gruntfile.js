@@ -252,28 +252,73 @@ module.exports = function (grunt) {
 
 	// capture macro
 	gtx.define('capture', function (macro, id) {
-		macro.add('capture_cli', id, {
+		var output = './media/capture/' + id + '.html';
+		var shotFull = './media/capture/' + id + '.png';
+		var shotSmall = './media/capture/' + id + '-small.png';
+
+		macro.add('clean', [
+			output,
+			shotFull,
+			shotSmall
+		]);
+
+		macro.add('capture_cli', {
 			options: {
 				title: id,
-				name: id + '.html',
+				outDir: '',
+				name: output,
 				args: [
 					'--style', 'css'
 				].concat(macro.getParam('args', []))
 			}
 		});
+		macro.add('webshot', {
+			options: {
+				site: output,
+				savePath: shotFull,
+				siteType: 'file',
+				windowSize: {
+					width: 1024,
+					height: 400
+				},
+				shotSize: {
+					width: macro.getParam('width', 800),
+					height: macro.getParam('height', 'all')
+				}
+			}
+		});
+		if (macro.getParam('small', false)) {
+			macro.add('webshot', {
+				options: {
+					site: output,
+					savePath: shotSmall,
+					siteType: 'file',
+					windowSize: {
+						width: 640,
+						height: 768
+					},
+					shotSize: {
+						width: 640,
+						height: macro.getParam('smallHeight', 'all')
+					}
+				}
+			});
+		}
 	}, {
 		concurrent: cpuCores
 	});
 	gtx.create('help', 'capture', {
 		args: [
 			'help'
-		]
+		],
+		small: true,
+		smallHeight: 300
 	});
-	gtx.create('index', 'capture', {
-		args: [
-			'query', '*'
-		]
-	});
+	/*gtx.create('index', 'capture', {
+	 args: [
+	 'query', '*'
+	 ]
+	 });*/
 	gtx.create('async', 'capture', {
 		args: [
 			'query',

@@ -93,6 +93,7 @@
     "chai-as-promised": "4.1.0",
     "buffer-equal": "0.0.0",
     "ansidiff": "~1.0.0",
-    "lodash-template": "~1.0.0"
+    "lodash-template": "~1.0.0",
+    "webshot": "~0.8.0"
   }
 }
