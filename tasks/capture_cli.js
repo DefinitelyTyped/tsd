@@ -681,6 +681,7 @@ var xm;
                 bullet: ' - ',
                 edge: ' | ',
                 ruler: '---',
+                shell: ' $ ',
                 dash: '-- ',
                 decl: ' : ',
                 none: '   '
@@ -886,6 +887,16 @@ var xm;
                 this._line.write(this._style.accent(this.nibs.single));
             } else {
                 this._line.write(this._style.plain(this.nibs.single));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.shell = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._line.write(this._style.accent(this.nibs.shell));
+            } else {
+                this._line.write(this._style.plain(this.nibs.shell));
             }
             return this;
         };

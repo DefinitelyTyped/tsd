@@ -21,7 +21,6 @@
 		"afterEach": true,
 		"before": true,
 		"after": true,
-		"tv4": true,
 		"define": true,
 		"chai": true,
 		"assert": true

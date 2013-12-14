@@ -33,6 +33,10 @@ module xm {
 		(ctx:ExposeContext):any;
 	}
 
+	export interface ExposeHandle {
+		(res:ExposeResult):any;
+	}
+
 	export interface ExposeOptionApply {
 		(value:any, ctx:ExposeContext):void;
 	}
@@ -119,6 +123,7 @@ module xm {
 
 		before:ExposeHook;
 		after:ExposeHook;
+		end:ExposeHandle;
 
 		constructor(output:xm.StyledOut = null) {
 			this.reporter = new xm.ExposeReporter(this, output);
@@ -224,12 +229,17 @@ module xm {
 
 		//execute and exit
 		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
-			Q(this.executeRaw(argvRaw, alt).then((result:ExposeResult) => {
-				if (result.error) {
-					throw(result.error);
+			Q(this.executeRaw(argvRaw, alt).then((res:ExposeResult) => {
+				if (res.error) {
+					throw(res.error);
 				}
+				if (this.end) {
+					return this.end.call(null, res).thenResolve(res);
+				}
+				return res;
+			}).then((res:ExposeResult) => {
 				if (exitAfter) {
-					this.exit(result.code);
+					this.exit(res.code);
 				}
 			}).fail((err) => {
 				//TODO what to do? with final error?

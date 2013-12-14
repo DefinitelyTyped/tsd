@@ -1,0 +1,49 @@
+{
+	"cli": {
+		"style": "ansi"
+	},
+	"git": {
+		"raw": {
+			"allowClean": true,
+			"splitKeyDir": 0,
+			"cacheCleanInterval": {
+				"days": 2
+			},
+			"localMaxAge": {
+				"days": 14
+			},
+			"httpInterval": {
+				"days": 1
+			},
+			"jobTimeout": {
+				"seconds": 5
+			}
+		},
+		"api": {
+			"allowClean": true,
+			"splitKeyDir": 0,
+			"cacheCleanInterval": {
+				"days": 2
+			},
+			"localMaxAge": {
+				"days": 7
+			},
+			"httpInterval": {
+				"minutes": 5
+			},
+			"jobTimeout": {
+				"seconds": 5
+			}
+		}
+	},
+	"update-notifier": {
+		"enabled": true,
+		"registryUrl": "http://registry.npmjs.org/%s",
+		"updateCheckTimeout": {
+			"seconds": 20
+		},
+		"updateCheckInterval": {
+			"days": 5
+		}
+	}
+}

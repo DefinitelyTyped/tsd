@@ -10,27 +10,6 @@ module tsd {
 
 		export function addCommon(expose:xm.Expose, print:tsd.cli.Printer, style:tsd.cli.StyleMap):void {
 
-			expose.defineCommand((cmd:xm.ExposeCommand) => {
-				cmd.name = 'help';
-				cmd.label = 'display usage help';
-				cmd.groups = [Group.support];
-				cmd.execute = (ctx:xm.ExposeContext) => {
-					ctx.out.ln();
-					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
-					return null;
-				};
-			});
-
-			expose.defineCommand((cmd:xm.ExposeCommand) => {
-				cmd.name = 'version';
-				cmd.label = 'display tsd version info';
-				cmd.groups = [Group.support];
-				cmd.execute = ((ctx:xm.ExposeContext) => {
-					ctx.out.ln();
-					return ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
-				});
-			});
-
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {

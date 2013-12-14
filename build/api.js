@@ -719,6 +719,7 @@ var xm;
                 bullet: ' - ',
                 edge: ' | ',
                 ruler: '---',
+                shell: ' $ ',
                 dash: '-- ',
                 decl: ' : ',
                 none: '   '
@@ -924,6 +925,16 @@ var xm;
                 this._line.write(this._style.accent(this.nibs.single));
             } else {
                 this._line.write(this._style.plain(this.nibs.single));
+            }
+            return this;
+        };
+
+        StyledOut.prototype.shell = function (accent) {
+            if (typeof accent === "undefined") { accent = false; }
+            if (accent) {
+                this._line.write(this._style.accent(this.nibs.shell));
+            } else {
+                this._line.write(this._style.plain(this.nibs.shell));
             }
             return this;
         };
@@ -4526,11 +4537,6 @@ var xm;
 
                 return d.promise;
             };
-
-            HTTPCache.prototype.getDir = function (key) {
-                return path.join(this.storeDir, key.charAt(0), key.charAt(1), key);
-            };
-
             Object.defineProperty(HTTPCache.prototype, "verbose", {
                 set: function (verbose) {
                     this.track.logEnabled = verbose;
@@ -7726,12 +7732,17 @@ var xm;
         Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
             if (typeof exitAfter === "undefined") { exitAfter = true; }
             var _this = this;
-            Q(this.executeRaw(argvRaw, alt).then(function (result) {
-                if (result.error) {
-                    throw (result.error);
+            Q(this.executeRaw(argvRaw, alt).then(function (res) {
+                if (res.error) {
+                    throw (res.error);
                 }
+                if (_this.end) {
+                    return _this.end.call(null, res).thenResolve(res);
+                }
+                return res;
+            }).then(function (res) {
                 if (exitAfter) {
-                    _this.exit(result.code);
+                    _this.exit(res.code);
                 }
             }).fail(function (err) {
                 if (err.stack) {
@@ -8149,27 +8160,6 @@ var tsd;
 (function (tsd) {
     (function (cli) {
         function addCommon(expose, print, style) {
-            expose.defineCommand(function (cmd) {
-                cmd.name = 'help';
-                cmd.label = 'display usage help';
-                cmd.groups = [cli.Group.support];
-                cmd.execute = function (ctx) {
-                    ctx.out.ln();
-                    ctx.expose.reporter.printCommands(ctx.getOpt(cli.Opt.detail));
-                    return null;
-                };
-            });
-
-            expose.defineCommand(function (cmd) {
-                cmd.name = 'version';
-                cmd.label = 'display tsd version info';
-                cmd.groups = [cli.Group.support];
-                cmd.execute = (function (ctx) {
-                    ctx.out.ln();
-                    return ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
-                });
-            });
-
             expose.defineOption(function (opt) {
                 opt.name = 'help';
                 opt.short = 'h';
@@ -8382,6 +8372,9 @@ var tsd;
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
 
+    var updateNotifier = require('update-notifier');
+    var notifier = null;
+
     var Opt = tsd.cli.Opt;
     var Group = tsd.cli.Group;
     var Action = tsd.cli.Action;
@@ -8398,6 +8391,59 @@ var tsd;
         return Q.resolve();
     }
 
+    function runUpdateNotifier(context, promise) {
+        if (typeof promise === "undefined") { promise = false; }
+        return Q.resolve().then(function () {
+            var defer = Q.defer();
+            if (notifier) {
+                return Q.resolve(notifier);
+            }
+
+            var callback = (promise ? function (err, update) {
+                if (err) {
+                    notifier = null;
+                    defer.reject(err);
+                } else {
+                    notifier.update = update;
+                    defer.resolve(notifier);
+                }
+            } : undefined);
+
+            var settings = {
+                packageName: context.packageInfo.name,
+                packageVersion: '0.0.1',
+                updateCheckInterval: 86400000,
+                callback: callback
+            };
+            notifier = updateNotifier(settings);
+            if (!callback) {
+                defer.resolve(notifier);
+            }
+            return defer.promise;
+        });
+    }
+
+    function showUpdateNotifier(context, promise) {
+        if (typeof promise === "undefined") { promise = false; }
+        return Q.resolve().then(function () {
+            if (context) {
+                return runUpdateNotifier(context, promise);
+            }
+            return notifier;
+        }).then(function (notifier) {
+            if (notifier && notifier.update) {
+                output.ln();
+                output.report(true).span('update available: ');
+                output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
+                output.ln().ln();
+                output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
+                output.ln();
+
+                notifier = null;
+            }
+        });
+    }
+
     function getContext(ctx) {
         xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
@@ -8410,7 +8456,8 @@ var tsd;
         } else {
             context.paths.cacheDir = tsd.Paths.getUserCacheDir();
         }
-        return context;
+
+        return Q.resolve(context);
     }
 
     function init(ctx) {
@@ -8445,28 +8492,34 @@ var tsd;
             }
             return null;
         }).then(function () {
-            var job = new Job();
-            job.context = getContext(ctx);
-            job.api = new tsd.API(job.context);
+            return getContext(ctx).then(function (context) {
+                var job = new Job();
+                job.context = context;
 
-            job.options = new tsd.Options();
+                job.ctx = ctx;
+                job.api = new tsd.API(job.context);
 
-            job.options.timeout = ctx.getOpt(Opt.timeout);
-            job.options.limitApi = ctx.getOpt(Opt.limit);
-            job.options.minMatches = ctx.getOpt(Opt.min);
-            job.options.maxMatches = ctx.getOpt(Opt.max);
+                job.options = new tsd.Options();
 
-            job.options.saveToConfig = ctx.getOpt(Opt.save);
-            job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-            job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+                job.options.timeout = ctx.getOpt(Opt.timeout);
+                job.options.limitApi = ctx.getOpt(Opt.limit);
+                job.options.minMatches = ctx.getOpt(Opt.min);
+                job.options.maxMatches = ctx.getOpt(Opt.max);
 
-            if (ctx.hasOpt(Opt.cacheMode)) {
-                job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-            }
+                job.options.saveToConfig = ctx.getOpt(Opt.save);
+                job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+                job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-            var required = ctx.hasOpt(Opt.config);
-            return job.api.readConfig(!required).progress(d.notify).then(function () {
-                d.resolve(job);
+                if (ctx.hasOpt(Opt.cacheMode)) {
+                    job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+                }
+
+                var required = ctx.hasOpt(Opt.config);
+                return job.api.readConfig(!required).progress(d.notify).then(function () {
+                    return runUpdateNotifier(job.context);
+                }).then(function () {
+                    d.resolve(job);
+                });
             });
         }).fail(d.reject);
 
@@ -8540,9 +8593,11 @@ var tsd;
         }
 
         expose.before = function (ctx) {
-            return Q.all([
-                showHeader()
-            ]);
+            return showHeader();
+        };
+
+        expose.end = function (ctx) {
+            return showUpdateNotifier();
         };
 
         expose.defineGroup(function (group) {
@@ -8580,6 +8635,34 @@ var tsd;
         });
 
         tsd.cli.addCommon(expose, print, styles);
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'help';
+            cmd.label = 'display usage help';
+            cmd.groups = [Group.support];
+            cmd.execute = function (ctx) {
+                return getContext(ctx).then(function (context) {
+                    ctx.out.ln();
+                    ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
+
+                    return runUpdateNotifier(context);
+                }).fail(reportError);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'version';
+            cmd.label = 'display tsd version info';
+            cmd.groups = [Group.support];
+            cmd.execute = (function (ctx) {
+                return getContext(ctx).then(function (context) {
+                    ctx.out.ln();
+                    ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
+
+                    return runUpdateNotifier(context, true);
+                }).fail(reportError);
+            });
+        });
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'init';

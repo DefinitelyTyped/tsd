@@ -6,17 +6,17 @@
 
 TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
-:bangbang: Version `0.5.x` not backwards compatible with the config files from earlier versions (as the data source changed so much).
-
 #### 0.5.x Preview notes :warning: 
 
 *	Version `0.5.x` is functional and usable but still in development:
 	*	If you decide to use it be sure to update regularly.
-	*	There will be bugs and quirks. We do out best to remove the bugs.
-*	It is recommended you check-in the definitions you install into your VCS:	*	
+	*	There will be bugs and quirks. We do out best to remove some bugs.
+*	It is recommended you check-in the definitions you install into your VCS:
 	*	The `tsd.json` file saves [repo + commit + path] so usually we can find the file but you might want to make local changes.
 	*	Don't forget to push your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) (maybe one day TSD will help you with this).
-*	API and options are not 100% final.
+*	Not backwards compatible with the config files from earlier versions (as the data source changed so much).
+*	API and options are incomplete and not 100% final.
+*	See below for legacy version.
 
 #### Rate limit
 
@@ -25,24 +25,6 @@ The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.c
 We are looking into a fallback to bypass the occasional burst mode for when you'd do something silly like `$ tsd query * --history --limit 500 --cacheMode forceRemote`.
 
 ## Usage as CLI command
-
-### Install
-
-:x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
-
-	$ npm install tsd -g
-
-:rocket: For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
-
-	$ npm install git://github.com/DefinitelyTyped/tsd#{{pick-a-tag}} -g
-
-:wrench: If you really must you can install directly from github (only if you feel particularly adventurous):
-
-	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
-
-:ghost: If you need to install the legacy `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
-
-	$ npm install tsd@0.3.0 -g
 
 ### Call CLI
 
@@ -209,43 +191,23 @@ TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [krisko
 
 :x: Not yet. 
 
-## FAQ & Info
+## Install
 
-### Why does the install / search command not work like in TSD 0.3.0?
+:x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
 
-The old TSD `v0.3.0` had it's own repository data file that mapped module names to url's of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
+	$ npm install tsd -g
 
-The DefinitelyTyped group is working on a meta-data source that will solve this.
+:rocket: For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
-### Can TSD install the definitions for the correct module version or fork?
+	$ npm install git://github.com/DefinitelyTyped/tsd#{{pick-a-tag}} -g
 
-Yes, and no, (and later yes again) 
+:wrench: If you really must you can install directly from github (only if you feel particularly adventurous):
 
-There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
+	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
 
-It works well but is not used much in the current DefinitelyTyped repository. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+:ghost: If you need to install the legacy `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
 
-### What is the location of the cache folders?
-
-The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
-
-### Do you have a grunt task to automate some TSD tasks?
-
-Of course! The official plugin is aptly named [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
-
-### What is all this non-tsd stuff in `./src` and `./lib`?
-
-Author @Bartvds is incubating some modules and helpers in this project. Most of these will be moved to their own packages at some point. 
-
-### Where do you keep background and work docs?
-
-* Some more about the [code](CODE.md).
-* Extra background [info](INFO.md) about the conceptual choices (old).
-* Internal list of things [todo](TODO.md).
-
-### I have a suggestion or idea
-
-Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
+	$ npm install tsd@0.3.0 -g
 
 ## Build
 
@@ -303,6 +265,45 @@ Shout-out to essential modules used to build TSD:
 * [node-exit](https://github.com/cowboy/node-exit) - (@cowboy and the grunt team pick up where node.js has [dropped the ball](https://github.com/joyent/node/issues/3584)).
 * [semver](https://github.com/isaacs/node-semver) - Semver parsing and filtering
 
+
+## FAQ & Info
+
+### Why does the install / search command not work like in TSD 0.3.0?
+
+The old TSD `v0.3.0` had it's own repository data file that mapped module names to url's of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
+
+The DefinitelyTyped group is working on a meta-data source that will solve this.
+
+### Can TSD install the definitions for the correct module version or fork?
+
+Yes, and no, (and later yes again) 
+
+There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
+
+It works well but is not used much in the current DefinitelyTyped repository. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+
+### What is the location of the cache folders?
+
+The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
+
+### Do you have a grunt task to automate some TSD tasks?
+
+Of course! The official plugin is aptly named [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+
+### What is all this non-tsd stuff in `./src` and `./lib`?
+
+Author @Bartvds is incubating some modules and helpers in this project. Most of these will be moved to their own packages at some point. 
+
+### Where do you keep background and work docs?
+
+* Some more about the [code](CODE.md).
+* Extra background [info](INFO.md) about the conceptual choices (old).
+* Internal list of things [todo](TODO.md).
+
+### I have a suggestion or idea
+
+Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
+
 ## History
 
 ### v0.5.x ( > 2013-08)
@@ -319,7 +320,7 @@ To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/bl
 
 ## License
 
-Copyright (c) 2013 by Bart van der Schoor
+Copyright (c) 2013 by [Bart van der Schoor](https://github.com/Bartvds).
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt). 
 

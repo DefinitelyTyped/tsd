@@ -47,6 +47,7 @@ module xm {
 			bullet: ' - ',
 			edge: ' | ',
 			ruler: '---',
+			shell: ' $ ',
 			dash: '-- ',
 			decl: ' : ',
 			none: '   '
@@ -275,6 +276,16 @@ module xm {
 			}
 			else {
 				this._line.write(this._style.plain(this.nibs.single));
+			}
+			return this;
+		}
+
+		shell(accent:boolean = false):StyledOut {
+			if (accent) {
+				this._line.write(this._style.accent(this.nibs.shell));
+			}
+			else {
+				this._line.write(this._style.plain(this.nibs.shell));
 			}
 			return this;
 		}

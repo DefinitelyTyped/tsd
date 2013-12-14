@@ -43,6 +43,8 @@ module xm {
 	 PackageJSON: wrap a package.json
 	 */
 	//TODO add typed json-pointers? (low prio)
+	//TODO add validation with the json schema
+	//TODO extract io to promise based module
 	export class PackageJSON {
 
 		private _pkg:any;

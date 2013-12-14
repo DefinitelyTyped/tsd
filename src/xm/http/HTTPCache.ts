@@ -279,12 +279,6 @@ module xm {
 
 				return d.promise;
 			}
-
-
-			private getDir(key:string):boolean {
-				return path.join(this.storeDir, key.charAt(0), key.charAt(1), key);
-			}
-
 			set verbose(verbose:boolean) {
 				this.track.logEnabled = verbose;
 			}

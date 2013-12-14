@@ -124,6 +124,9 @@ CLI
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
 * :o:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
+* :a:	Add [inquirer](https://npmjs.org/package/inquirer) for interactive control
+* :a:	Add [insight](https://npmjs.org/package/insight) for analytics
+* :a:	Add [update-notifier](https://npmjs.org/package/update-notifier) for auto update notifications
 
 API
 
@@ -234,7 +237,7 @@ Publishing
 Dependencies
 
 * :m:	Drop `xm.KeyValue`/`xm.Set` for ES6-shim `Map`/`Set`.
-* :cl:	Swap `optimist` for `minimist`.
+* :cl:	Swap `optimist` for ~~minimist~~ npm/yo's [`nopt`](https://npmjs.org/package/nopt).
 * :m:	Consider dropping `underscore`?
 * :m:	Update `Q` with generics
 * :o:	Sweep recent xm `package changes for new tests 

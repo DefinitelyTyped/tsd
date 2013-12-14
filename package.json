@@ -65,7 +65,8 @@
     "es6-shim": "~0.9.1",
     "request": "~2.29.0",
     "event-stream": "~3.0.18",
-    "bufferstream": "~0.6.2"
+    "bufferstream": "~0.6.2",
+    "update-notifier": "~0.1.7"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -94,6 +95,6 @@
     "buffer-equal": "0.0.0",
     "ansidiff": "~1.0.0",
     "lodash-template": "~1.0.0",
-    "webshot": "~0.8.0"
+    "grunt-webshot": "~0.0.1"
   }
 }
