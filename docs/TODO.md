@@ -161,6 +161,7 @@ Config
 * :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
 * :ab:	Add caching parameters to config
 * :id:	Consider adding `.tsdrc` global config.
+* :o2:	Writer config using [detect-indent](https://npmjs.org/package/detect-indent)
 
 Cache
 

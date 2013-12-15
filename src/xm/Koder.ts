@@ -24,9 +24,10 @@
 	var reporter = require('tv4-reporter');
 
 	/*
-	 IContentKoder: transcode NodeBuffers  (mostly all about JSONKoder)
+	 IContentKoder: transcode NodeBuffers (mostly all about JSONKoder)
 	 */
-	//TODO simplyfy this (not both ways)
+	//TODO simplified this (not both ways)
+	//TODO scheduled for reimplementation using streams (with next-gen HTTP cache)
 	export interface IContentKoder<T> {
 		decode(content:NodeBuffer):Q.Promise<T>;
 		encode(value:T):Q.Promise<NodeBuffer>;

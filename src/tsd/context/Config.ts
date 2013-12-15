@@ -49,6 +49,8 @@ module tsd {
 	/*
 	 Config: local config file
 	 */
+	//TODO extract loading io to own class
+	//TODO move parse/to/validate code to Koder (or it's replacement)
 	export class Config {
 
 		path:string;
@@ -173,7 +175,7 @@ module tsd {
 			return json;
 		}
 
-		parseJSON(json:any, label?:string) {
+		parseJSON(json:any, label?:string):any {
 			xm.assertVar(json, 'object', 'json');
 
 			this.validateJSON(json, this._schema, label);
@@ -197,7 +199,9 @@ module tsd {
 			}
 		}
 
-		validateJSON(json:any, schema:any, label?:string) {
+		validateJSON(json:any, schema:any, label?:string):any {
+			xm.assertVar(schema, 'object', 'schema');
+
 			label = (label || '<config json>');
 			var res = tv4.validateMultiple(json, schema);
 			if (!res.valid || res.missing.length > 0) {
