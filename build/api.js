@@ -2918,11 +2918,7 @@ var git;
             this._api = 'https://api.github.com/repos/{owner}/{project}';
             this._raw = 'https://raw.github.com/{owner}/{project}';
             xm.assertVar(repo, git.GithubRepo, 'repo');
-
-            this.setVars({
-                owner: repo.ownerName,
-                project: repo.projectName
-            });
+            this._repo = repo;
 
             this.addTemplate('base', this._base);
 
@@ -2940,6 +2936,14 @@ var git;
 
             xm.object.hidePrefixed(this);
         }
+        GithubURLs.prototype.getURL = function (id, vars) {
+            this.setVars({
+                owner: this._repo.config.repoOwner,
+                project: this._repo.config.repoProject
+            });
+            return _super.prototype.getURL.call(this, id, vars);
+        };
+
         GithubURLs.prototype.api = function () {
             return this.getURL('api');
         };
@@ -4856,13 +4860,12 @@ var git;
     var path = require('path');
 
     var GithubRepo = (function () {
-        function GithubRepo(ownerName, projectName, storeDir) {
-            xm.assertVar(ownerName, 'string', 'ownerName');
-            xm.assertVar(projectName, 'string', 'projectName');
+        function GithubRepo(config, storeDir) {
+            xm.assertVar(config, 'object', 'config');
             xm.assertVar(storeDir, 'string', 'storeDir');
 
-            this.ownerName = ownerName;
-            this.projectName = projectName;
+            this.config = config;
+
             this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
             this.urls = new git.GithubURLs(this);
@@ -4873,11 +4876,11 @@ var git;
             xm.object.lockProps(this, Object.keys(this));
         }
         GithubRepo.prototype.getCacheKey = function () {
-            return this.ownerName + '-' + this.projectName;
+            return this.config.repoOwner + '-' + this.config.repoProject;
         };
 
         GithubRepo.prototype.toString = function () {
-            return this.ownerName + '/' + this.projectName;
+            return this.config.repoOwner + '/' + this.config.repoProject;
         };
 
         Object.defineProperty(GithubRepo.prototype, "verbose", {
@@ -6803,7 +6806,7 @@ var tsd;
 
             this._components = new tsd.MultiManager(this);
             this._components.add([
-                this.repo = new git.GithubRepo(this.context.config.repoOwner, this.context.config.repoProject, path.join(this.context.paths.cacheDir)),
+                this.repo = new git.GithubRepo(this.context.config, path.join(this.context.paths.cacheDir)),
                 this.index = new tsd.IndexManager(this),
                 this.config = new tsd.ConfigIO(this),
                 this.selector = new tsd.SelectorQuery(this),

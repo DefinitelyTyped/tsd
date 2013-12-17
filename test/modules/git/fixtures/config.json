@@ -1,7 +1,7 @@
 {
 	"repo": {
-		"owner": "borisyankov",
-		"project": "DefinitelyTyped",
+		"repoOwner": "borisyankov",
+		"repoProject": "DefinitelyTyped",
 		"ref": "master"
 	},
 	"data": {

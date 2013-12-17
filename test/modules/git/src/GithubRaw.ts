@@ -16,7 +16,7 @@ describe('git.GithubRaw', () => {
 	beforeEach(() => {
 		//use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubRaw');
-		repo = new git.GithubRepo(gitTest.config.repo.owner, gitTest.config.repo.project, cacheDir);
+		repo = new git.GithubRepo(gitTest.config.repo, cacheDir);
 	});
 
 	afterEach(() => {
