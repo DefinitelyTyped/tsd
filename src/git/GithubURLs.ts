@@ -17,16 +17,12 @@ module git {
 		private _apiBase:string = 'https://api.github.com';
 		private _api:string = 'https://api.github.com/repos/{owner}/{project}';
 		private _raw:string = 'https://raw.github.com/{owner}/{project}';
+		private _repo:GithubRepo;
 
 		constructor(repo:GithubRepo) {
 			super();
 			xm.assertVar(repo, GithubRepo, 'repo');
-
-			this.setVars({
-				owner: repo.ownerName,
-				project: repo.projectName
-			});
-
+			this._repo = repo;
 			// externalise later
 			this.addTemplate('base', this._base);
 
@@ -43,6 +39,14 @@ module git {
 			this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
 
 			xm.object.hidePrefixed(this);
+		}
+
+		getURL(id:string, vars?: any):string {
+			this.setVars({
+				owner: this._repo.config.repoOwner,
+				project: this._repo.config.repoProject
+			});
+			return super.getURL(id, vars);
 		}
 
 		api():string {

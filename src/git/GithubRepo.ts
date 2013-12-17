@@ -2,6 +2,7 @@
 /// <reference path="GithubURLs.ts" />
 /// <reference path="loader/GithubAPI.ts" />
 /// <reference path="loader/GithubRaw.ts" />
+/// <reference path="./GithubRepoConfig.d.ts" />
 
 module git {
 	'use strict';
@@ -13,21 +14,20 @@ module git {
 	 */
 	export class GithubRepo {
 
-		ownerName:string;
-		projectName:string;
+		config:GithubRepoConfig;
 		storeDir:string;
 
 		urls:git.GithubURLs;
 		api:git.GithubAPI;
 		raw:git.GithubRaw;
 
-		constructor(ownerName:string, projectName:string, storeDir:string) {
-			xm.assertVar(ownerName, 'string', 'ownerName');
-			xm.assertVar(projectName, 'string', 'projectName');
+
+		constructor(config:GithubRepoConfig, storeDir:string) {
+			xm.assertVar(config, 'object', 'config');
 			xm.assertVar(storeDir, 'string', 'storeDir');
 
-			this.ownerName = ownerName;
-			this.projectName = projectName;
+			this.config = config;
+
 			this.storeDir =  path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
 			this.urls = new git.GithubURLs(this);
@@ -39,11 +39,11 @@ module git {
 		}
 
 		getCacheKey():string {
-			return this.ownerName + '-' + this.projectName;
+			return this.config.repoOwner + '-' + this.config.repoProject;
 		}
 
 		toString():string {
-			return this.ownerName + '/' + this.projectName;
+			return this.config.repoOwner + '/' + this.config.repoProject;
 		}
 
 		set verbose(verbose:boolean) {
