@@ -55,7 +55,7 @@ describe('CLI Query', () => {
 			args.push('--style', 'no');
 		}
 		args.push('--cacheDir', info.cacheDirTestFixed);
-		args.push('--cacheMode', xm.http.CacheMode[xm.http.CacheMode.forceLocal]);
+		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
 		//args.push('--config', info.configFile);
 
 		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)

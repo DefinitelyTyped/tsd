@@ -5,10 +5,10 @@
   "ref": "master",
   "installed": {
     "bootstrap/bootstrap.d.ts": {
-      "commit": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
+      "commit": "baa8c189422bc60b58f67885efd99361edb3973c"
     },
     "jquery/jquery.d.ts": {
-      "commit": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
+      "commit": "baa8c189422bc60b58f67885efd99361edb3973c"
     }
   }
 }

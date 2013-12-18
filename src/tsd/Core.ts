@@ -56,7 +56,7 @@ module tsd {
 
 			this._components = new tsd.MultiManager(this);
 			this._components.add([
-				this.repo = new git.GithubRepo(this.context.config, path.join(this.context.paths.cacheDir)),
+				this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir),
 
 				this.index = new tsd.IndexManager(this),
 				this.config = new tsd.ConfigIO(this),

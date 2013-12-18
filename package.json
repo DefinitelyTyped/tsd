@@ -1,6 +1,6 @@
 {
   "name": "tsd",
-  "version": "0.5.2-alpha.8",
+  "version": "0.5.2-alpha.10",
   "description": "TypeScript definition package manager for DefinitelyTyped.",
   "keywords": [
     "typescript",
@@ -71,7 +71,7 @@
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-cli": "0.1.11",
-    "gruntfile-gtx": "~0.1.1",
+    "gruntfile-gtx": "~0.2.0",
     "grunt-contrib-clean": "0.5.0",
     "grunt-contrib-copy": "0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
@@ -81,7 +81,6 @@
     "tslint-path-formatter": "0.1",
     "grunt-tv4": "~0.3.1",
     "grunt-shell": "~0.6.1",
-    "grunt-execute": "0.1.5",
     "grunt-contrib-connect": "~0.5.0",
     "grunt-concurrent": "0.4.2",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
@@ -95,6 +94,6 @@
     "buffer-equal": "0.0.0",
     "ansidiff": "~1.0.0",
     "lodash-template": "~1.0.0",
-    "grunt-webshot": "~0.0.1"
+    "grunt-webshot": "~0.0.3"
   }
 }

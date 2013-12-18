@@ -51,7 +51,7 @@ module tsd {
 	 */
 	//TODO extract loading io to own class
 	//TODO move parse/to/validate code to Koder (or it's replacement)
-	export class Config {
+	export class Config implements git.GithubRepoConfig {
 
 		path:string;
 		version:string;

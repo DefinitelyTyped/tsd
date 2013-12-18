@@ -26,7 +26,8 @@ tscommand.*
 /docs
 /media
 /src
+/tasks
 /test
-/util
 /typings
 /tsd-cache
+/util

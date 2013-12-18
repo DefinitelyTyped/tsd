@@ -2,10 +2,10 @@
   "written": {
     "bootstrap/bootstrap.d.ts": {
       "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-4cc9beb4057a46d0d81fdbf8621fa693b7157a0c",
+      "key": "bootstrap/bootstrap.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
       "solved": true,
       "commit": {
-        "commitSha": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
       },
       "blob": {
         "sha": "c14bf61d4b35530cd4f42fe1759f52dea96fd61f"
@@ -20,13 +20,13 @@
     },
     "jquery/jquery.d.ts": {
       "path": "jquery/jquery.d.ts",
-      "key": "jquery/jquery.d.ts-4cc9beb4057a46d0d81fdbf8621fa693b7157a0c",
+      "key": "jquery/jquery.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
       "solved": true,
       "commit": {
-        "commitSha": "4cc9beb4057a46d0d81fdbf8621fa693b7157a0c"
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
       },
       "blob": {
-        "sha": "4b8e9f49c0e71612654dbc8473f1265626e0c0c7"
+        "sha": "e68d50e3664419263b550dca31989a119cb33171"
       },
       "dependencies": []
     }

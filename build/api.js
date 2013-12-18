@@ -2226,6 +2226,8 @@ var tsd;
         };
 
         Config.prototype.validateJSON = function (json, schema, label) {
+            xm.assertVar(schema, 'object', 'schema');
+
             label = (label || '<config json>');
             var res = tv4.validateMultiple(json, schema);
             if (!res.valid || res.missing.length > 0) {
@@ -3822,7 +3824,7 @@ var xm;
                         useCached = !_this.request.forceRefresh;
                         if (useCached && xm.isNumber(_this.request.httpInterval)) {
                             if (new Date(_this.object.info.cacheUpdated).getTime() < Date.now() - _this.request.httpInterval) {
-                                _this._defer.notify('auto check update on interval: ' + _this.request.url);
+                                _this._defer.notify('auto check update on interval: ' + _this.request.url + ' ->  ' + _this.object.request.key);
                                 useCached = false;
                             }
                         }
@@ -3830,16 +3832,16 @@ var xm;
 
                     if (useCached) {
                         return _this.cacheTouch().then(function () {
-                            _this._defer.notify('using local cache: ' + _this.request.url);
+                            _this._defer.notify('using local cache: ' + _this.request.url + ' ->  ' + _this.object.request.key);
                             _this._defer.resolve(_this.object);
                         });
                     }
 
                     return _this.httpLoad(!_this.request.forceRefresh).progress(_this._defer.notify).then(function () {
                         if (!xm.isValid(_this.object.body)) {
-                            throw new Error('no result body: ' + _this.object.request.url);
+                            throw new Error('no result body: ' + _this.object.request.url + ' ->  ' + _this.object.request.key);
                         }
-                        _this._defer.notify('fetched remote: ' + _this.request.url);
+                        _this._defer.notify('fetched remote: ' + _this.request.url + ' ->  ' + _this.object.request.key);
                         _this._defer.resolve(_this.object);
                     });
                 }).fail(function (err) {
@@ -4218,15 +4220,32 @@ var xm;
     (function (http) {
         var CacheRequest = (function () {
             function CacheRequest(url, headers) {
+                this.keyHeaders = [
+                    'accept',
+                    'accept-charset',
+                    'accept-language',
+                    'content-md5',
+                    'content-type',
+                    'cookie',
+                    'host'
+                ];
                 this.url = url;
                 this.headers = headers || {};
             }
             CacheRequest.prototype.lock = function () {
+                var _this = this;
                 this.locked = true;
-                this.key = xm.jsonToIdentHash({
+
+                var keyHash = {
                     url: this.url,
-                    headers: this.headers
-                });
+                    headers: Object.keys(this.headers).reduce(function (memo, key) {
+                        if (_this.keyHeaders.indexOf(key) > -1) {
+                            memo[key] = _this.headers[key];
+                        }
+                        return memo;
+                    }, Object.create(null))
+                };
+                this.key = xm.jsonToIdentHash(keyHash);
                 xm.object.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
 
                 xm.object.deepFreeze(this.headers);
@@ -4875,7 +4894,6 @@ var git;
             this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
             this.urls = new git.GithubURLs(this);
-
             this.api = new git.GithubAPI(this, this.storeDir);
             this.raw = new git.GithubRaw(this, this.storeDir);
 
@@ -4913,6 +4931,19 @@ var tsd;
             this.saveToConfig = false;
             this.timeout = 10000;
         }
+        Options.fromJSON = function (json) {
+            var opts = new Options();
+            if (json) {
+                Object.keys(opts).forEach(function (key) {
+                    if (key in json) {
+                        xm.assertVar(json[key], xm.typeOf(opts[key]), 'json[' + key + ']');
+                        opts[key] = json[key];
+                    }
+                });
+            }
+            return opts;
+        };
+
         Options.main = Object.freeze(new Options());
         return Options;
     })();
@@ -6812,7 +6843,7 @@ var tsd;
 
             this._components = new tsd.MultiManager(this);
             this._components.add([
-                this.repo = new git.GithubRepo(this.context.config, path.join(this.context.paths.cacheDir)),
+                this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir),
                 this.index = new tsd.IndexManager(this),
                 this.config = new tsd.ConfigIO(this),
                 this.selector = new tsd.SelectorQuery(this),
@@ -8817,13 +8848,15 @@ var tsd;
     }
     tsd.runARGV = runARGV;
 })(tsd || (tsd = {}));
-(module).exports = {
-    tsd: tsd,
-    runARGV: tsd.runARGV,
-    getAPI: function (configPath, verbose) {
+var tsd;
+(function (tsd) {
+    function getAPI(configPath, verbose) {
         if (typeof verbose === "undefined") { verbose = false; }
         xm.assertVar(configPath, 'string', 'configPath');
         return new tsd.API(new tsd.Context(configPath, verbose));
     }
-};
+    tsd.getAPI = getAPI;
+})(tsd || (tsd = {}));
+
+module.exports = tsd;
 //# sourceMappingURL=api.js.map

@@ -4,11 +4,21 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 interface Lazy {
-	(value:any):Lazy.Sequence;
+	(value:string):Lazy.StringLikeSequence;
+	(value:any[]):Lazy.ArrayLikeSequence;
+	(value:Object):Lazy.ObjectLikeSequence;
 
-	generate():Lazy.GeneratedSequence;
-	range():Lazy.GeneratedSequence;
-	repeat():Lazy.GeneratedSequence;
+	generate(generatorFn:Lazy.GeneratorCallback, length?:number):Lazy.GeneratedSequence;
+
+	range(to:number):Lazy.GeneratedSequence;
+	range(from:number, to:number, step?:number):Lazy.GeneratedSequence;
+
+	repeat(value:any, count?:number):Lazy.GeneratedSequence;
+
+	on(eventType:string):Lazy.Sequence;
+
+	readFile(path:string):Lazy.StringLikeSequence;
+	makeHttpRequest(path:string):Lazy.StringLikeSequence;
 }
 
 declare module Lazy {
@@ -209,7 +219,7 @@ declare module Lazy {
 		lastIndexOf(substring:string, startIndex?:number):number;
 		mapString(mapFn:MapStringCallback):StringLikeSequence;
 		match(pattern:RegExp):StringLikeSequence;
-		reverse(): StringLikeSequence;
+		reverse():StringLikeSequence;
 
 		split(delimiter:string):Sequence;
 		split(delimiter:RegExp):Sequence;

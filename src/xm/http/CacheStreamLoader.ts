@@ -130,7 +130,7 @@ module xm {
 						useCached = !this.request.forceRefresh;
 						if (useCached && xm.isNumber(this.request.httpInterval)) {
 							if (new Date(this.object.info.cacheUpdated).getTime() < Date.now() - this.request.httpInterval) {
-								this._defer.notify('auto check update on interval: ' + this.request.url);
+								this._defer.notify('auto check update on interval: ' + this.request.url + ' ->  ' + this.object.request.key);
 								useCached = false;
 							}
 						}
@@ -138,7 +138,7 @@ module xm {
 
 					if (useCached) {
 						return this.cacheTouch().then(() => {
-							this._defer.notify('using local cache: ' + this.request.url);
+							this._defer.notify('using local cache: ' + this.request.url + ' ->  ' + this.object.request.key);
 							this._defer.resolve(this.object);
 						});
 					}
@@ -146,9 +146,9 @@ module xm {
 					// lets load it
 					return this.httpLoad(!this.request.forceRefresh).progress(this._defer.notify).then(() => {
 						if (!xm.isValid(this.object.body)) {
-							throw new Error('no result body: ' + this.object.request.url);
+							throw new Error('no result body: ' + this.object.request.url + ' ->  ' + this.object.request.key);
 						}
-						this._defer.notify('fetched remote: ' + this.request.url);
+						this._defer.notify('fetched remote: ' + this.request.url + ' ->  ' + this.object.request.key);
 						this._defer.resolve(this.object);
 					});
 				}).fail((err) => {

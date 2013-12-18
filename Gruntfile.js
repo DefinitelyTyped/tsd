@@ -16,7 +16,6 @@ module.exports = function (grunt) {
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 	gtx.loadAuto();
-	gtx.loadTasks('tasks');
 	gtx.loadNpm([
 		'mocha-unfunk-reporter'
 	]);
@@ -191,7 +190,7 @@ module.exports = function (grunt) {
 		concurrent: 1 //cpuCores
 	});
 
-	var longTimer = (isVagrant ? 250000 : 5000);
+	var longTimer = (isVagrant ? 250000 : 7000);
 
 	// modules
 	gtx.create('xm', 'moduleTest', null, 'lib');
@@ -235,7 +234,7 @@ module.exports = function (grunt) {
 	]);
 
 	//gtx.alias('run', ['build', 'demo:help']);
-	gtx.alias('dev', ['prep', 'ts:dev', 'execute:dev']);
+	gtx.alias('dev', ['prep', 'ts:dev']);
 	gtx.alias('run', ['capture_demo']);
 
 	gtx.alias('specjs', ['mochaTest:specs']);

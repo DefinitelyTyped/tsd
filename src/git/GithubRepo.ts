@@ -1,8 +1,8 @@
 /// <reference path="../xm/assertVar.ts" />
 /// <reference path="GithubURLs.ts" />
+/// <reference path="GithubRepoConfig.ts" />
 /// <reference path="loader/GithubAPI.ts" />
 /// <reference path="loader/GithubRaw.ts" />
-/// <reference path="./GithubRepoConfig.d.ts" />
 
 module git {
 	'use strict';
@@ -14,15 +14,14 @@ module git {
 	 */
 	export class GithubRepo {
 
-		config:GithubRepoConfig;
+		config:git.GithubRepoConfig;
 		storeDir:string;
 
 		urls:git.GithubURLs;
 		api:git.GithubAPI;
 		raw:git.GithubRaw;
 
-
-		constructor(config:GithubRepoConfig, storeDir:string) {
+		constructor(config:git.GithubRepoConfig, storeDir:string) {
 			xm.assertVar(config, 'object', 'config');
 			xm.assertVar(storeDir, 'string', 'storeDir');
 
@@ -31,7 +30,6 @@ module git {
 			this.storeDir =  path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
 			this.urls = new git.GithubURLs(this);
-
 			this.api = new git.GithubAPI(this, this.storeDir);
 			this.raw = new git.GithubRaw(this, this.storeDir);
 
