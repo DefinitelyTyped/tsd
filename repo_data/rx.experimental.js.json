@@ -11,7 +11,7 @@
           "version": "latest"
         }
       ],
-      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.experimental.d.ts",
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.experimental.d.ts",
       "author": "Igor Oleinikov",
       "author_url": "https://github.com/Igorbek"
     }
