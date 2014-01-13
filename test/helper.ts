@@ -62,6 +62,17 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	export function longAssert(actual:string, expected:string, msg?:string):void {
+		if (actual !== expected) {
+			throw new chai.AssertionError((msg ? msg + ': ' : '') + ' long string', {
+				actual: actual,
+				expected: expected
+			}, helper.longAssert);
+		}
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	export function dump(object:any, message?:string, depth:number = 6, showHidden:boolean = false):any {
 		message = xm.isUndefined(message) ? '' : message + ': ';
 		xm.log(message + util.inspect(object, showHidden, depth, true));

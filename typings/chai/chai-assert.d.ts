@@ -5,19 +5,23 @@
 
 declare module Chai
 {
-	export interface ChaiStatic
-	{
+	export interface ChaiStatic {
 		use(plugin:any):void;
 		Assertion:ChaiAssertion;
+		AssertionError:AssertionError;
 		assert:Assert;
 	}
-	export interface ChaiAssertion
-	{
+
+	export interface AssertionError {
+		includeStack:boolean;
+		new (message:any, props:any, ssf:any):any
+	}
+
+	export interface ChaiAssertion {
 		includeStack:boolean;
 	}
 
-	export interface Assert
-	{
+	export interface Assert {
 		(express:any, msg?:string):void;
 
 		fail(actual?:any, expected?:any, msg?:string, operator?:string):void;

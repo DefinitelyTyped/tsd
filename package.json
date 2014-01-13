@@ -85,7 +85,7 @@
     "grunt-concurrent": "0.4.2",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
     "grunt-mocha-test": "~0.8.0",
-    "mocha-unfunk-reporter": "~0.3.7",
+    "mocha-unfunk-reporter": "~0.4.0",
     "chai": "git://github.com/Bartvds/chai/#fixes/1.8.x",
     "chai-fs": "0.0.3",
     "chai-fuzzy": "1.4.0",

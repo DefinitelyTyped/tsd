@@ -90,11 +90,11 @@ describe('CLI Query', () => {
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
 		assert.operator(stdoutExpect.length, '>=', 0, 'stdoutExpect.length');
 
-		assert.strictEqual(stdout, stdoutExpect, 'result.stdout');
+		helper.longAssert(stdout, stdoutExpect, 'result.stdout');
 
 		if (fs.existsSync(info.stderrExpect)) {
 			var stderrExpect = fs.readFileSync(info.stderrExpect, 'utf8');
-			assert.strictEqual(stderr, stderrExpect, 'result.stderr');
+			helper.longAssert(stderr, stderrExpect, 'result.stderr');
 		}
 		if (fs.existsSync(info.errorExpect)) {
 			var errorExpect = xm.file.readJSONSync(info.errorExpect);
