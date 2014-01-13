@@ -55,6 +55,7 @@ describe('CLI Query', () => {
 			args.push('--style', 'no');
 		}
 		args.push('--cacheDir', info.cacheDirTestFixed);
+		args.push('--checkUpdate', 'no');
 		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
 		//args.push('--config', info.configFile);
 

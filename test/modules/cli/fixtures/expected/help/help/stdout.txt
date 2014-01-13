@@ -43,6 +43,7 @@
     --cacheDir <path>          > path to cache directory (string)                                   
     --cacheMode <mode>         > change cache behaviour (string, default: allowUpdate)              
                                   [ forceLocal, forceRemote, forceUpdate, allowRemote, allowUpdate ]
+    --checkUpdate              > check for updates (flag, default: true)                            
     --config <path>            > path to config file (string)                                       
     --detail <level>           > modify reporting detail level (string)                             
                                   [ low, mid, high ]                                                

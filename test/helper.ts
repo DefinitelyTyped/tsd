@@ -64,7 +64,7 @@ module helper {
 
 	export function longAssert(actual:string, expected:string, msg?:string):void {
 		if (actual !== expected) {
-			throw new chai.AssertionError((msg ? msg + ': ' : '') + ' long string', {
+			throw new chai.AssertionError((msg ? msg + ': ' : '') + 'long string', {
 				actual: actual,
 				expected: expected
 			}, helper.longAssert);

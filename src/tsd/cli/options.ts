@@ -82,6 +82,14 @@ module tsd {
 				opt.note = ['partially implemented'];
 			});
 
+			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.checkUpdate;
+				opt.description = 'check for updates';
+				opt.type = 'flag';
+				opt.default = true;
+				opt.global = true;
+			});
+
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 			expose.defineOption((opt:xm.ExposeOption) => {

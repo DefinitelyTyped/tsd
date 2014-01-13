@@ -6,9 +6,10 @@
 /// <reference path="../xm/date.ts" />
 /// <reference path="../xm/object.ts" />
 /// <reference path="../xm/promise.ts" />
-/// <reference path="cli/printer.ts" />
 /// <reference path="context/Context.ts" />
 /// <reference path="select/Query.ts" />
+/// <reference path="cli/printer.ts" />
+/// <reference path="cli/update.ts" />
 /// <reference path="cli/style.ts" />
 /// <reference path="cli/printer.ts" />
 /// <reference path="cli/options.ts" />
@@ -23,9 +24,6 @@ module tsd {
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
-
-	var updateNotifier = require('update-notifier');
-	var notifier = null;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -53,62 +51,6 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	function runUpdateNotifier(context:tsd.Context, promise:boolean = false):Q.Promise<any> {
-		return Q.resolve().then(() => {
-			var defer = Q.defer();
-			if (notifier) {
-				return Q.resolve(notifier);
-			}
-			// switch it we want to wait for this
-			var callback = (promise ? (err, update) => {
-				if (err) {
-					notifier = null;
-					defer.reject(err);
-				}
-				else {
-					notifier.update = update;
-					defer.resolve(notifier);
-				}
-			} : undefined);
-
-			var settings:any = {
-				packageName: context.packageInfo.name,
-				packageVersion: '0.0.1', // context.packageInfo.version,
-				updateCheckInterval: 86400000,
-				//updateCheckTimeout: null,
-				//registryUrl: null,
-				callback: callback
-			};
-			notifier = updateNotifier(settings);
-			if (!callback) {
-				defer.resolve(notifier);
-			}
-			return defer.promise;
-		});
-	}
-
-	function showUpdateNotifier(context?:tsd.Context, promise:boolean = false):Q.Promise<void> {
-		return Q.resolve().then(() => {
-			if (context) {
-				return runUpdateNotifier(context, promise);
-			}
-			return notifier;
-		}).then((notifier) => {
-			if (notifier && notifier.update) {
-				output.ln();
-				output.report(true).span('update available: ');
-				output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
-				output.ln().ln();
-				output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
-				output.ln();
-
-				notifier = null;
-			}
-		});
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	//TODO get rid of syncronous io
 	function getContext(ctx:xm.ExposeContext):Q.Promise<tsd.Context> {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
@@ -127,6 +69,13 @@ module tsd {
 		}
 
 		return Q.resolve(context);
+	}
+
+	function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context):Q.Promise<any> {
+		if (ctx.getOpt(Opt.checkUpdate)) {
+			return tsd.cli.runUpdateNotifier(context, false);
+		}
+		return Q.resolve();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -202,7 +151,7 @@ module tsd {
 
 				var required:boolean = ctx.hasOpt(Opt.config);
 				return job.api.readConfig(!required).progress(d.notify).then(() => {
-					return runUpdateNotifier(job.context);
+					return runUpdateNotifier(ctx, job.context);
 				}).then(() => {
 					d.resolve(job);
 				});
@@ -300,6 +249,12 @@ module tsd {
 			};
 		}
 
+		function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context, promise:boolean = false):Q.Promise<any> {
+			if (ctx.getOpt(Opt.checkUpdate)) {
+				return tsd.cli.runUpdateNotifier(context, promise);
+			}
+			return Q.resolve();
+		}
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.before = (ctx:xm.ExposeContext) => {
@@ -307,7 +262,7 @@ module tsd {
 		};
 
 		expose.end = (ctx:xm.ExposeResult) => {
-			return showUpdateNotifier();
+			return tsd.cli.showUpdateNotifier(output);
 		};
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -362,7 +317,7 @@ module tsd {
 					ctx.out.ln();
 					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 
-					return runUpdateNotifier(context);
+					return runUpdateNotifier(ctx, context);
 				}).fail(reportError);
 			};
 		});
@@ -376,7 +331,7 @@ module tsd {
 					ctx.out.ln();
 					ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
-					return runUpdateNotifier(context, true);
+					return runUpdateNotifier(ctx, context);
 				}).fail(reportError);
 			});
 		});
