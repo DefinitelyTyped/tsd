@@ -207,7 +207,7 @@ module xm {
 						return this.manageKoder.decode(buffer).then((info:CacheManage) => {
 							manageInfo = info;
 						}).fail((err) => {
-							this.track.logger.warn('removing bad manageFile: ' + this.manageFile);
+							this.track.logger.warn('removing bad manageFile: ' + this.manageFile + ' -> ' + err.message);
 							return xm.file.removeFile(this.manageFile);
 						});
 					});
@@ -279,6 +279,7 @@ module xm {
 
 				return d.promise;
 			}
+
 			set verbose(verbose:boolean) {
 				this.track.logEnabled = verbose;
 			}

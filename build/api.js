@@ -4074,16 +4074,26 @@ var xm;
                         throw err;
                     }).then(function () {
                         return Q.all([
-                            FS.stat(_this.object.bodyFile).then(function (stat) {
-                                if (stat.size === 0) {
-                                    _this.track.error(CacheStreamLoader.cache_write, 'written zero body bytes');
-                                    d.notify(new Error('written zero body bytes'));
+                            FS.exists(_this.object.bodyFile).then(function (exist) {
+                                if (exist) {
+                                    return FS.stat(_this.object.bodyFile).then(function (stat) {
+                                        if (stat.size === 0) {
+                                            d.notify(new Error('written zero body bytes'));
+                                        }
+                                    });
+                                } else {
+                                    d.notify(new Error('written no body file: ' + _this.object.infoFile));
                                 }
                             }),
-                            FS.stat(_this.object.infoFile).then(function (stat) {
-                                if (stat.size === 0) {
-                                    _this.track.error(CacheStreamLoader.cache_write, 'written zero info bytes');
-                                    d.notify(new Error('written zero info bytes'));
+                            FS.exists(_this.object.infoFile).then(function (exist) {
+                                if (exist) {
+                                    return FS.stat(_this.object.infoFile).then(function (stat) {
+                                        if (stat.size === 0) {
+                                            d.notify(new Error('written zero info bytes: ' + _this.object.infoFile));
+                                        }
+                                    });
+                                } else {
+                                    d.notify(new Error('written no info file: ' + _this.object.infoFile));
                                 }
                             })
                         ]);
@@ -4485,7 +4495,7 @@ var xm;
                         return _this.manageKoder.decode(buffer).then(function (info) {
                             manageInfo = info;
                         }).fail(function (err) {
-                            _this.track.logger.warn('removing bad manageFile: ' + _this.manageFile);
+                            _this.track.logger.warn('removing bad manageFile: ' + _this.manageFile + ' -> ' + err.message);
                             return xm.file.removeFile(_this.manageFile);
                         });
                     });
@@ -4556,6 +4566,7 @@ var xm;
 
                 return d.promise;
             };
+
             Object.defineProperty(HTTPCache.prototype, "verbose", {
                 set: function (verbose) {
                     this.track.logEnabled = verbose;

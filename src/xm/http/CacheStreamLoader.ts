@@ -403,16 +403,28 @@ module xm {
 					}).then(() => {
 						// ghost stat to fix weird empty file glitch (voodoo.. only on windows?)
 						return Q.all([
-							FS.stat(this.object.bodyFile).then((stat:QioFS.Stats) => {
-								if (stat.size === 0) {
-									this.track.error(CacheStreamLoader.cache_write, 'written zero body bytes');
-									d.notify(new Error('written zero body bytes'));
+							FS.exists(this.object.bodyFile).then((exist:boolean) => {
+								if (exist) {
+									return FS.stat(this.object.bodyFile).then((stat:QioFS.Stats) => {
+										if (stat.size === 0) {
+											d.notify(new Error('written zero body bytes'));
+										}
+									});
+								}
+								else {
+									d.notify(new Error('written no body file: ' + this.object.infoFile));
 								}
 							}),
-							FS.stat(this.object.infoFile).then((stat:QioFS.Stats) => {
-								if (stat.size === 0) {
-									this.track.error(CacheStreamLoader.cache_write, 'written zero info bytes');
-									d.notify(new Error('written zero info bytes'));
+							FS.exists(this.object.infoFile).then((exist:boolean) => {
+								if (exist) {
+									return FS.stat(this.object.infoFile).then((stat:QioFS.Stats) => {
+										if (stat.size === 0) {
+											d.notify(new Error('written zero info bytes: ' + this.object.infoFile));
+										}
+									});
+								}
+								else {
+									d.notify(new Error('written no info file: ' + this.object.infoFile));
 								}
 							})
 						]);
