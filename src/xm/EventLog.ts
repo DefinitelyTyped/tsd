@@ -35,7 +35,7 @@ module xm {
 
 	//some standard levels
 	//TODO replace with proper enum
-	export var Level = {
+	export var EventLevel = {
 		start: 'start',
 		complete: 'complete',
 		failure: 'failure',
@@ -57,9 +57,9 @@ module xm {
 		debug: 'debug',
 		log: 'log'
 	};
-	Level = xm.valueMap(Level);
+	EventLevel = xm.valueMap(EventLevel);
 	//subzero
-	Object.freeze(Level);
+	Object.freeze(EventLevel);
 
 	export var startTime = Date.now();
 	Object.defineProperty(xm, 'startTime', {writable: false});
@@ -77,7 +77,7 @@ module xm {
 		private _trackLimit:number = 100;
 		private _trackPrune:number = 30;
 
-		private _mutePromises:string[] = [Level.notify, Level.promise, Level.resolve, Level.reject];
+		private _mutePromises:string[] = [EventLevel.notify, EventLevel.promise, EventLevel.resolve, EventLevel.reject];
 
 		constructor(prefix:string = '', label:string = '', logger?:xm.Logger) {
 			this._label = label;
@@ -97,23 +97,23 @@ module xm {
 
 		//TODO rethink arguments and add type-filtering
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
-			if (!this.isMuted(Level.notify)) {
+			if (!this.isMuted(EventLevel.notify)) {
 				promise.progress((note) => {
-					this.track(Level.notify, type, message, note);
+					this.track(EventLevel.notify, type, message, note);
 				});
 			}
-			if (!this.isMuted(Level.reject)) {
+			if (!this.isMuted(EventLevel.reject)) {
 				promise.fail((err) => {
-					this.track(Level.reject, type, message, err);
+					this.track(EventLevel.reject, type, message, err);
 				});
 			}
-			if (!this.isMuted(Level.resolve)) {
+			if (!this.isMuted(EventLevel.resolve)) {
 				promise.then(() => {
-					this.track(Level.resolve, type, message);
+					this.track(EventLevel.resolve, type, message);
 				});
 			}
-			if (!this.isMuted(Level.promise)) {
-				return this.track(Level.promise, type, message);
+			if (!this.isMuted(EventLevel.promise)) {
+				return this.track(EventLevel.promise, type, message);
 			}
 			return null;
 		}
@@ -121,55 +121,55 @@ module xm {
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		start(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.start, type, message, data);
+			return this.track(EventLevel.start, type, message, data);
 		}
 
 		complete(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.complete, type, message, data);
+			return this.track(EventLevel.complete, type, message, data);
 		}
 
 		failure(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.complete, type, message, data);
+			return this.track(EventLevel.complete, type, message, data);
 		}
 
 		event(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.event, type, message, data);
+			return this.track(EventLevel.event, type, message, data);
 		}
 
 		skip(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.skip, type, message, data);
+			return this.track(EventLevel.skip, type, message, data);
 		}
 
 		share(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.share, type, message, data);
+			return this.track(EventLevel.share, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		error(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.error, type, message, data);
+			return this.track(EventLevel.error, type, message, data);
 		}
 
 		warning(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.warning, type, message, data);
+			return this.track(EventLevel.warning, type, message, data);
 		}
 
 		success(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.success, type, message, data);
+			return this.track(EventLevel.success, type, message, data);
 		}
 
 		status(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.status, type, message, data);
+			return this.track(EventLevel.status, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		log(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.log, type, message, data);
+			return this.track(EventLevel.log, type, message, data);
 		}
 
 		debug(type:string, message?:string, data?:any):EventLogItem {
-			return this.track(Level.debug, type, message, data);
+			return this.track(EventLevel.debug, type, message, data);
 		}
 
 		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

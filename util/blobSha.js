@@ -1693,7 +1693,7 @@ var xm;
     }
     xm.valueMap = valueMap;
 
-    xm.Level = {
+    xm.EventLevel = {
         start: 'start',
         complete: 'complete',
         failure: 'failure',
@@ -1710,9 +1710,9 @@ var xm;
         debug: 'debug',
         log: 'log'
     };
-    xm.Level = xm.valueMap(xm.Level);
+    xm.EventLevel = xm.valueMap(xm.EventLevel);
 
-    Object.freeze(xm.Level);
+    Object.freeze(xm.EventLevel);
 
     xm.startTime = Date.now();
     Object.defineProperty(xm, 'startTime', { writable: false });
@@ -1732,59 +1732,59 @@ var xm;
             this._startAt = Date.now();
         }
         EventLog.prototype.start = function (type, message, data) {
-            return this.track(xm.Level.start, type, message, data);
+            return this.track(xm.EventLevel.start, type, message, data);
         };
 
         EventLog.prototype.promise = function (promise, type, message, data) {
             var _this = this;
             promise.then(function () {
-                return _this.track(xm.Level.resolve, type, message, data, promise);
+                return _this.track(xm.EventLevel.resolve, type, message, data, promise);
             }, function (err) {
-                return _this.track(xm.Level.reject, type, message, err, promise);
+                return _this.track(xm.EventLevel.reject, type, message, err, promise);
             }, function (note) {
-                return _this.track(xm.Level.notify, type, message, note, promise);
+                return _this.track(xm.EventLevel.notify, type, message, note, promise);
             });
-            return this.track(xm.Level.promise, type, message, data, promise);
+            return this.track(xm.EventLevel.promise, type, message, data, promise);
         };
 
         EventLog.prototype.complete = function (type, message, data) {
-            return this.track(xm.Level.complete, type, message, data);
+            return this.track(xm.EventLevel.complete, type, message, data);
         };
 
         EventLog.prototype.failure = function (type, message, data) {
-            return this.track(xm.Level.complete, type, message, data);
+            return this.track(xm.EventLevel.complete, type, message, data);
         };
 
         EventLog.prototype.event = function (type, message, data) {
-            return this.track(xm.Level.event, type, message, data);
+            return this.track(xm.EventLevel.event, type, message, data);
         };
 
         EventLog.prototype.skip = function (type, message, data) {
-            return this.track(xm.Level.skip, type, message, data);
+            return this.track(xm.EventLevel.skip, type, message, data);
         };
 
         EventLog.prototype.error = function (type, message, data) {
-            return this.track(xm.Level.error, type, message, data);
+            return this.track(xm.EventLevel.error, type, message, data);
         };
 
         EventLog.prototype.warning = function (type, message, data) {
-            return this.track(xm.Level.warning, type, message, data);
+            return this.track(xm.EventLevel.warning, type, message, data);
         };
 
         EventLog.prototype.success = function (type, message, data) {
-            return this.track(xm.Level.success, type, message, data);
+            return this.track(xm.EventLevel.success, type, message, data);
         };
 
         EventLog.prototype.status = function (type, message, data) {
-            return this.track(xm.Level.status, type, message, data);
+            return this.track(xm.EventLevel.status, type, message, data);
         };
 
         EventLog.prototype.log = function (type, message, data) {
-            return this.track(xm.Level.log, type, message, data);
+            return this.track(xm.EventLevel.log, type, message, data);
         };
 
         EventLog.prototype.debug = function (type, message, data) {
-            return this.track(xm.Level.debug, type, message, data);
+            return this.track(xm.EventLevel.debug, type, message, data);
         };
 
         EventLog.prototype.track = function (action, type, message, data, group) {

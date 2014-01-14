@@ -76,7 +76,7 @@ module xm {
 				this.manageFile = path.join(this.storeDir, '_info.json');
 
 				this.track = new xm.EventLog('http_cache', 'HTTPCache');
-				this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
+				this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
 			}
 
 			getObject(request:CacheRequest):Q.Promise<CacheObject> {

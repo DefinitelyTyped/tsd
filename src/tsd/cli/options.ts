@@ -58,10 +58,11 @@ module tsd {
 				opt.description = 'display progress notifications';
 				opt.type = 'flag';
 				opt.global = true;
-				opt.note = ['experimental'];
-				opt.apply = (value:any, ctx:xm.ExposeContext) => {
+				opt.default = true;
+				//opt.note = ['experimental'];
+				/*opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--progress events are not 100%').ln();
-				};
+				};*/
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -232,9 +233,9 @@ module tsd {
 				opt.placeholder = 'name';
 				opt.enum = [Action.install]; //, Action.compare, Action.update, Action.open];
 				//opt.note = ['partially implemented'];
-				opt.apply = (value:any, ctx:xm.ExposeContext) => {
+				/*opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
-				};
+				};*/
 			});
 		}
 	}

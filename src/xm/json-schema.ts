@@ -15,8 +15,11 @@ module xm {
 
 	export function assertJSONSchema(value:any, schema:any):void {
 		var res:TV4SingleResult = tv4.validateResult(value, schema);
-		if (!res.valid || res.missing.length > 0) {
+		if (!res.valid) {
 			throw res.error;
+		}
+		if (res.missing && res.missing.length > 0) {
+			throw new Error('validation error, missing schema: ' + res.missing);
 		}
 	}
 }

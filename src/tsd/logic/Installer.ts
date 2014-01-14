@@ -102,7 +102,7 @@ module tsd {
 			xm.file.canWriteFile(targetPath, overwrite).then((canWrite:boolean) => {
 				if (!canWrite) {
 					if (!overwrite) {
-						d.notify('skipped existing file: ' + file.def.path);
+						d.notify(xm.getNote('skipped existing file: ' + file.def.path));
 					}
 					d.resolve(null);
 					return;

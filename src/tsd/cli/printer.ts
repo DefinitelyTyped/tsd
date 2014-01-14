@@ -20,6 +20,16 @@ module tsd {
 				this.indent = indent;
 			}
 
+			fmtSortKey(key:string):string {
+				return String(key).substr(0, 6);
+			}
+
+			fmtGitURI(str:string):string {
+				return String(str).replace(/https:\/\/[a-z]+\.github\.com\/(?:repos\/)?/g, '').replace(/([0-9a-f]{40})/g, (match, p1) => {
+					return this.fmtSortKey(p1);
+				});
+			}
+
 			file(file:tsd.DefVersion, sep:string = ' : '):xm.StyledOut {
 				if (file.def) {
 					this.output.tweakPath(file.def.path);
@@ -170,22 +180,27 @@ module tsd {
 				return this.output;
 			}
 
-			rateInfo(info:git.GitRateInfo):xm.StyledOut {
-				this.output.line();
-				this.output.report(true).span('rate-limit').sp();
+			rateInfo(info:git.GitRateInfo, note:boolean = false):xm.StyledOut {
+				if (note) {
+					this.output.indent(1).report(true).span('rate-limit').sp();
+				}
+				else {
+					this.output.line();
+					this.output.report(true).span('rate-limit').sp();
+				}
 				//TODO clean this up
 				if (info.limit > 0) {
 					if (info.remaining === 0) {
-						this.output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
+						this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
 					}
 					else if (info.remaining < 15) {
-						this.output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
+						this.output.span('remaining ').warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
 					}
 					else if (info.remaining < info.limit - 15) {
-						this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').accent(info.getResetString());
+						this.output.span('remaining ').success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
 					}
 					else {
-						this.output.success('remaining ' + info.remaining).span(' of ').span(info.limit);
+						this.output.span('remaining ').accent(info.remaining).span(' / ').accent(info.limit);
 					}
 				}
 				else {

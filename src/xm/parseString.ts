@@ -7,6 +7,7 @@
  * */
 
 /// <reference path="../_ref.d.ts" />
+/// <reference path="typeOf.ts" />
 
 module xm {
 	'use strict';

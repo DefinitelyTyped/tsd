@@ -1041,6 +1041,19 @@ var xm;
 
     xm.log;
 
+    var LogLevel = (function () {
+        function LogLevel() {
+        }
+        LogLevel.ok = 'ok';
+        LogLevel.log = 'log';
+        LogLevel.warn = 'warn';
+        LogLevel.error = 'error';
+        LogLevel.debug = 'debug';
+        LogLevel.status = 'status';
+        return LogLevel;
+    })();
+    xm.LogLevel = LogLevel;
+
     function writeMulti(logger, args) {
         var ret = [];
         for (var i = 0, ii = args.length; i < ii; i++) {
@@ -1063,16 +1076,12 @@ var xm;
     function getLogger(label) {
         label = arguments.length > 0 ? (String(label) + ' ') : '';
 
-        var precall = function () {
-        };
-
         var plain = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 writeMulti(logger, args);
             }
         };
@@ -1103,7 +1112,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').success(label + 'ok ');
                 doLog(logger, args);
             }
@@ -1114,7 +1122,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').warning(label + 'warning ');
                 doLog(logger, args);
             }
@@ -1125,7 +1132,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').error(label + 'error ');
                 doLog(logger, args);
             }
@@ -1136,7 +1142,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').accent(label + 'debug ');
                 doLog(logger, args);
             }
@@ -1147,22 +1152,42 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.accent('-> ').span(label + ' ');
                 doLog(logger, args);
             }
         };
+
+        var map = Object.create(null);
+        map[LogLevel.ok] = logger.ok;
+        map['success'] = logger.ok;
+        map[LogLevel.log] = logger.log;
+        map[LogLevel.warn] = logger.warn;
+        map['warning'] = logger.warn;
+        map[LogLevel.error] = logger.error;
+        map[LogLevel.debug] = logger.debug;
+        map[LogLevel.status] = logger.status;
+
         logger.inspect = function (value, depth, label) {
             if (typeof depth === "undefined") { depth = 3; }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').cond(arguments.length > 2, label + ' ').inspect(value, depth);
             }
         };
         logger.json = function (value, label) {
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').cond(arguments.length > 2, label + ' ').block(JSON.stringify(value, null, 3));
+            }
+        };
+
+        logger.level = function (level) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            if (level in map) {
+                map[level].apply(null, args);
+            } else {
+                logger.warn.apply(null, args);
             }
         };
 
@@ -3250,7 +3275,7 @@ var xm;
     }
     xm.valueMap = valueMap;
 
-    xm.Level = {
+    xm.EventLevel = {
         start: 'start',
         complete: 'complete',
         failure: 'failure',
@@ -3268,9 +3293,9 @@ var xm;
         debug: 'debug',
         log: 'log'
     };
-    xm.Level = xm.valueMap(xm.Level);
+    xm.EventLevel = xm.valueMap(xm.EventLevel);
 
-    Object.freeze(xm.Level);
+    Object.freeze(xm.EventLevel);
 
     xm.startTime = Date.now();
     Object.defineProperty(xm, 'startTime', { writable: false });
@@ -3284,7 +3309,7 @@ var xm;
             this._trackEnabled = false;
             this._trackLimit = 100;
             this._trackPrune = 30;
-            this._mutePromises = [xm.Level.notify, xm.Level.promise, xm.Level.resolve, xm.Level.reject];
+            this._mutePromises = [xm.EventLevel.notify, xm.EventLevel.promise, xm.EventLevel.resolve, xm.EventLevel.reject];
             this._label = label;
             this._prefix = (prefix ? prefix + ':' : '');
 
@@ -3296,73 +3321,73 @@ var xm;
         }
         EventLog.prototype.promise = function (promise, type, message, data) {
             var _this = this;
-            if (!this.isMuted(xm.Level.notify)) {
+            if (!this.isMuted(xm.EventLevel.notify)) {
                 promise.progress(function (note) {
-                    _this.track(xm.Level.notify, type, message, note);
+                    _this.track(xm.EventLevel.notify, type, message, note);
                 });
             }
-            if (!this.isMuted(xm.Level.reject)) {
+            if (!this.isMuted(xm.EventLevel.reject)) {
                 promise.fail(function (err) {
-                    _this.track(xm.Level.reject, type, message, err);
+                    _this.track(xm.EventLevel.reject, type, message, err);
                 });
             }
-            if (!this.isMuted(xm.Level.resolve)) {
+            if (!this.isMuted(xm.EventLevel.resolve)) {
                 promise.then(function () {
-                    _this.track(xm.Level.resolve, type, message);
+                    _this.track(xm.EventLevel.resolve, type, message);
                 });
             }
-            if (!this.isMuted(xm.Level.promise)) {
-                return this.track(xm.Level.promise, type, message);
+            if (!this.isMuted(xm.EventLevel.promise)) {
+                return this.track(xm.EventLevel.promise, type, message);
             }
             return null;
         };
 
         EventLog.prototype.start = function (type, message, data) {
-            return this.track(xm.Level.start, type, message, data);
+            return this.track(xm.EventLevel.start, type, message, data);
         };
 
         EventLog.prototype.complete = function (type, message, data) {
-            return this.track(xm.Level.complete, type, message, data);
+            return this.track(xm.EventLevel.complete, type, message, data);
         };
 
         EventLog.prototype.failure = function (type, message, data) {
-            return this.track(xm.Level.complete, type, message, data);
+            return this.track(xm.EventLevel.complete, type, message, data);
         };
 
         EventLog.prototype.event = function (type, message, data) {
-            return this.track(xm.Level.event, type, message, data);
+            return this.track(xm.EventLevel.event, type, message, data);
         };
 
         EventLog.prototype.skip = function (type, message, data) {
-            return this.track(xm.Level.skip, type, message, data);
+            return this.track(xm.EventLevel.skip, type, message, data);
         };
 
         EventLog.prototype.share = function (type, message, data) {
-            return this.track(xm.Level.share, type, message, data);
+            return this.track(xm.EventLevel.share, type, message, data);
         };
 
         EventLog.prototype.error = function (type, message, data) {
-            return this.track(xm.Level.error, type, message, data);
+            return this.track(xm.EventLevel.error, type, message, data);
         };
 
         EventLog.prototype.warning = function (type, message, data) {
-            return this.track(xm.Level.warning, type, message, data);
+            return this.track(xm.EventLevel.warning, type, message, data);
         };
 
         EventLog.prototype.success = function (type, message, data) {
-            return this.track(xm.Level.success, type, message, data);
+            return this.track(xm.EventLevel.success, type, message, data);
         };
 
         EventLog.prototype.status = function (type, message, data) {
-            return this.track(xm.Level.status, type, message, data);
+            return this.track(xm.EventLevel.status, type, message, data);
         };
 
         EventLog.prototype.log = function (type, message, data) {
-            return this.track(xm.Level.log, type, message, data);
+            return this.track(xm.EventLevel.log, type, message, data);
         };
 
         EventLog.prototype.debug = function (type, message, data) {
-            return this.track(xm.Level.debug, type, message, data);
+            return this.track(xm.EventLevel.debug, type, message, data);
         };
 
         EventLog.prototype.track = function (action, type, message, data, group) {
@@ -3691,6 +3716,17 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    function getNote(message, code, data) {
+        return {
+            code: (xm.isValid(code) ? String(code) : null),
+            message: message,
+            data: data
+        };
+    }
+    xm.getNote = getNote;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
     'use strict';
 
     (function (http) {
@@ -3822,9 +3858,9 @@ var xm;
                     var useCached = false;
                     if (_this.object.body && _this.object.info) {
                         useCached = !_this.request.forceRefresh;
-                        if (useCached && xm.isNumber(_this.request.httpInterval)) {
+                        if (useCached && xm.isNumber(_this.request.httpInterval) && _this.cache.opts.cacheWrite) {
                             if (new Date(_this.object.info.cacheUpdated).getTime() < Date.now() - _this.request.httpInterval) {
-                                _this._defer.notify('auto check update on interval: ' + _this.request.url + ' ->  ' + _this.object.request.key);
+                                _this._defer.notify(xm.getNote('check on interval: ' + _this.request.url + ' -> ' + _this.request.key));
                                 useCached = false;
                             }
                         }
@@ -3832,16 +3868,15 @@ var xm;
 
                     if (useCached) {
                         return _this.cacheTouch().then(function () {
-                            _this._defer.notify('using local cache: ' + _this.request.url + ' ->  ' + _this.object.request.key);
+                            _this._defer.notify(xm.getNote('local cache: ' + _this.request.url + ' -> ' + _this.request.key));
                             _this._defer.resolve(_this.object);
                         });
                     }
 
                     return _this.httpLoad(!_this.request.forceRefresh).progress(_this._defer.notify).then(function () {
                         if (!xm.isValid(_this.object.body)) {
-                            throw new Error('no result body: ' + _this.object.request.url + ' ->  ' + _this.object.request.key);
+                            throw new Error('no result body: ' + _this.request.url + ' -> ' + _this.request.key);
                         }
-                        _this._defer.notify('fetched remote: ' + _this.request.url + ' ->  ' + _this.object.request.key);
                         _this._defer.resolve(_this.object);
                     });
                 }).fail(function (err) {
@@ -3870,7 +3905,7 @@ var xm;
                         _this.infoCacheValidator.assert(_this.object);
                     } catch (err) {
                         _this.track.event(CacheStreamLoader.local_info_bad, 'cache-info unsatisfactory', err);
-                        d.notify('cache info unsatisfactory: ' + err);
+                        d.notify(xm.getNote('cache info unsatisfactory: ' + err.message, xm.LogLevel.status, err));
 
                         throw err;
                     }
@@ -3940,7 +3975,7 @@ var xm;
                     this.track.logger.inspect(this.request);
                     this.track.logger.inspect(req);
                 }
-                d.notify('loading: ' + this.request.url);
+                d.notify(xm.getNote('loading: ' + this.request.url));
 
                 var writer = new BufferStream({ size: 'flexible' });
 
@@ -3948,8 +3983,6 @@ var xm;
                 pause.pause();
 
                 request.get(req).on('response', function (res) {
-                    d.notify('status: ' + String(res.statusCode) + ' ' + _this.request.url);
-
                     if (_this.track.logEnabled) {
                         _this.track.logger.status(String(res.statusCode) + ' ' + _this.request.url);
                         _this.track.logger.inspect(res.headers);
@@ -3961,20 +3994,22 @@ var xm;
 
                     if (res.statusCode < 200 || res.statusCode >= 400) {
                         _this.track.error(CacheStreamLoader.http_load);
-                        d.reject(new Error('unexpected status code: ' + res.statusCode + ' on ' + _this.request.url));
+                        d.reject(new Error('unexpected status code: ' + res.statusCode + ' on: ' + _this.request.url));
                         return;
                     }
                     if (res.statusCode === 304) {
                         if (!_this.object.body) {
-                            d.reject(new Error('flow error: http 304 but no local content on ' + _this.request.url));
+                            d.reject(new Error('flow error: http 304 but no local content on: ' + _this.request.url));
                             return;
                         }
                         if (!_this.object.info) {
-                            d.reject(new Error('flow error: http 304 but no local info on ' + _this.request.url));
+                            d.reject(new Error('flow error: http 304 but no local info on: ' + _this.request.url));
                             return;
                         }
 
                         _this.track.event(CacheStreamLoader.http_cache_hit);
+
+                        _this._defer.notify(xm.getNote('remote: ' + _this.request.url + ' -> ' + _this.request.key, res.statusCode));
 
                         _this.updateInfo(res, _this.object.info.contentChecksum);
 
@@ -3997,7 +4032,7 @@ var xm;
                     writer.on('end', function () {
                         var body = writer.getBuffer();
                         if (!body) {
-                            throw new Error('flow error: http 304 but no local info on ' + _this.request.url);
+                            throw new Error('flow error: http 304 but no local info on: ' + _this.request.url);
                         }
                         if (body.length === 0) {
                             throw new Error('loaded zero bytes ' + _this.request.url);
@@ -4013,7 +4048,7 @@ var xm;
                         }
                         _this.object.body = body;
 
-                        d.notify('complete: ' + _this.request.url + ' ' + String(res.statusCode));
+                        _this._defer.notify(xm.getNote('remote: ' + _this.request.url + ' -> ' + _this.request.key, 'http ' + res.statusCode));
                         _this.track.complete(CacheStreamLoader.http_load);
 
                         _this.cacheWrite(false).done(d.resolve, d.reject, d.notify);
@@ -4074,34 +4109,34 @@ var xm;
                         throw err;
                     }).then(function () {
                         return Q.all([
-                            FS.exists(_this.object.bodyFile).then(function (exist) {
-                                if (exist) {
-                                    return FS.stat(_this.object.bodyFile).then(function (stat) {
-                                        if (stat.size === 0) {
-                                            d.notify(new Error('written zero body bytes'));
-                                        }
-                                    });
-                                } else {
-                                    d.notify(new Error('written no body file: ' + _this.object.infoFile));
-                                }
-                            }),
-                            FS.exists(_this.object.infoFile).then(function (exist) {
-                                if (exist) {
-                                    return FS.stat(_this.object.infoFile).then(function (stat) {
-                                        if (stat.size === 0) {
-                                            d.notify(new Error('written zero info bytes: ' + _this.object.infoFile));
-                                        }
-                                    });
-                                } else {
-                                    d.notify(new Error('written no info file: ' + _this.object.infoFile));
-                                }
-                            })
+                            _this.checkExists(_this.object.bodyFile, 'body').progress(d.notify),
+                            _this.checkExists(_this.object.infoFile, 'info').progress(d.notify)
                         ]);
                     }).then(function () {
                         return _this.cacheTouch();
                     });
                 }).done(d.resolve, d.reject);
 
+                return d.promise;
+            };
+
+            CacheStreamLoader.prototype.checkExists = function (file, label) {
+                var d = Q.defer();
+                FS.exists(file).then(function (exist) {
+                    if (exist) {
+                        return FS.stat(file).then(function (stat) {
+                            if (stat.size === 0) {
+                                d.notify(xm.getNote('written zero ' + label + ' bytes to: ' + file, xm.LogLevel.error));
+                                d.resolve(false);
+                            } else {
+                                d.resolve(true);
+                            }
+                        });
+                    } else {
+                        d.notify(xm.getNote('missing ' + label + ' file: ' + file, xm.LogLevel.error));
+                        d.resolve(false);
+                    }
+                }).fail(d.reject);
                 return d.promise;
             };
 
@@ -4215,8 +4250,11 @@ var xm;
 
     function assertJSONSchema(value, schema) {
         var res = tv4.validateResult(value, schema);
-        if (!res.valid || res.missing.length > 0) {
+        if (!res.valid) {
             throw res.error;
+        }
+        if (res.missing && res.missing.length > 0) {
+            throw new Error('validation error, missing schema: ' + res.missing);
         }
     }
     xm.assertJSONSchema = assertJSONSchema;
@@ -4366,7 +4404,7 @@ var xm;
                 this.manageFile = path.join(this.storeDir, '_info.json');
 
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
-                this.track.unmuteActions([xm.Level.reject, xm.Level.notify]);
+                this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
             }
             HTTPCache.prototype.getObject = function (request) {
                 var _this = this;
@@ -4782,7 +4820,10 @@ var git;
                 return koder.decode(object.body).then(function (res) {
                     if (object.response) {
                         var rate = new git.GitRateInfo(object.response.headers);
-                        d.notify(rate);
+                        d.notify({
+                            message: rate.toString(),
+                            data: rate
+                        });
                     }
                     if (addMeta && xm.isObject(res)) {
                         res.meta = { rate: rate };
@@ -4802,7 +4843,9 @@ var git;
             var req = HTTP.normalizeRequest(url);
             this.copyHeadersTo(req.headers);
 
-            d.notify('get url: ' + url);
+            d.notify({
+                message: 'get url: ' + url
+            });
             var httpPromise = HTTP.request(req).then(function (res) {
                 var rate = new git.GitRateInfo(res.headers);
                 d.resolve(rate);
@@ -6203,7 +6246,7 @@ var tsd;
             xm.file.canWriteFile(targetPath, overwrite).then(function (canWrite) {
                 if (!canWrite) {
                     if (!overwrite) {
-                        d.notify('skipped existing file: ' + file.def.path);
+                        d.notify(xm.getNote('skipped existing file: ' + file.def.path));
                     }
                     d.resolve(null);
                     return;
@@ -6961,7 +7004,7 @@ var tsd;
 
             this.core = new tsd.Core(this.context);
             this.track = new xm.EventLog('api', 'API');
-            this.track.unmuteActions([xm.Level.notify]);
+            this.track.unmuteActions([xm.EventLevel.notify]);
 
             xm.object.lockProps(this, ['core', 'track']);
 
@@ -7895,6 +7938,17 @@ var tsd;
                 this.output = output;
                 this.indent = indent;
             }
+            Printer.prototype.fmtSortKey = function (key) {
+                return String(key).substr(0, 6);
+            };
+
+            Printer.prototype.fmtGitURI = function (str) {
+                var _this = this;
+                return String(str).replace(/https:\/\/[a-z]+\.github\.com\/(?:repos\/)?/g, '').replace(/([0-9a-f]{40})/g, function (match, p1) {
+                    return _this.fmtSortKey(p1);
+                });
+            };
+
             Printer.prototype.file = function (file, sep) {
                 if (typeof sep === "undefined") { sep = ' : '; }
                 if (file.def) {
@@ -8041,19 +8095,24 @@ var tsd;
                 return this.output;
             };
 
-            Printer.prototype.rateInfo = function (info) {
-                this.output.line();
-                this.output.report(true).span('rate-limit').sp();
+            Printer.prototype.rateInfo = function (info, note) {
+                if (typeof note === "undefined") { note = false; }
+                if (note) {
+                    this.output.indent(1).report(true).span('rate-limit').sp();
+                } else {
+                    this.output.line();
+                    this.output.report(true).span('rate-limit').sp();
+                }
 
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
-                        this.output.error('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').error(info.getResetString());
+                        this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
                     } else if (info.remaining < 15) {
-                        this.output.warning('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').warning(info.getResetString());
+                        this.output.span('remaining ').warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
                     } else if (info.remaining < info.limit - 15) {
-                        this.output.accent('remaining ' + info.remaining).span(' of ').span(info.limit).span(' -> ').accent(info.getResetString());
+                        this.output.span('remaining ').success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
                     } else {
-                        this.output.success('remaining ' + info.remaining).span(' of ').span(info.limit);
+                        this.output.span('remaining ').accent(info.remaining).span(' / ').accent(info.limit);
                     }
                 } else {
                     this.output.success(info.getResetString());
@@ -8316,10 +8375,7 @@ var tsd;
                 opt.description = 'display progress notifications';
                 opt.type = 'flag';
                 opt.global = true;
-                opt.note = ['experimental'];
-                opt.apply = function (value, ctx) {
-                    ctx.out.ln().indent().warning('--progress events are not 100%').ln();
-                };
+                opt.default = true;
             });
 
             expose.defineOption(function (opt) {
@@ -8471,10 +8527,6 @@ var tsd;
                 opt.type = 'string';
                 opt.placeholder = 'name';
                 opt.enum = [cli.Action.install];
-
-                opt.apply = function (value, ctx) {
-                    ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
-                };
             });
         }
         cli.addCommon = addCommon;
@@ -8645,7 +8697,34 @@ var tsd;
 
     function reportProgress(obj) {
         if (obj instanceof git.GitRateInfo) {
-            return print.rateInfo(obj);
+            return print.rateInfo(obj, true);
+        }
+        if (xm.isObject(obj)) {
+            if (obj.data instanceof git.GitRateInfo) {
+                return print.rateInfo(obj.data, true);
+            }
+            output.indent().note(true);
+            if (xm.isValid(obj.code)) {
+                output.label(obj.code);
+            }
+            if (obj.message) {
+                var msg = print.fmtGitURI(String(obj.message));
+                msg = msg.replace(' -> ', output.getStyle().accent(' -> '));
+                msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
+                    return p1 + output.getStyle().accent(p2) + p3;
+                });
+                output.span(msg);
+            } else {
+                output.span('<no message>');
+            }
+            if (obj.data) {
+                output.sp().inspect(obj, 3);
+            } else {
+                output.ln();
+            }
+            return output;
+        } else {
+            return output.indent().note(true).span(String(obj)).ln();
         }
         return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
     }

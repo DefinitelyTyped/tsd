@@ -15,6 +15,7 @@
 /// <reference path="../typeOf.ts" />
 /// <reference path="../file.ts" />
 /// <reference path="../Koder.ts" />
+/// <reference path="../Notification.ts" />
 /// <reference path="HTTPCache.ts" />
 /// <reference path="CacheMode.ts" />
 
@@ -127,10 +128,11 @@ module xm {
 				this.cacheRead().progress(this._defer.notify).then(() => {
 					var useCached = false;
 					if (this.object.body && this.object.info) {
+						// check if we want to use this object
 						useCached = !this.request.forceRefresh;
-						if (useCached && xm.isNumber(this.request.httpInterval)) {
+						if (useCached && xm.isNumber(this.request.httpInterval) && this.cache.opts.cacheWrite) {
 							if (new Date(this.object.info.cacheUpdated).getTime() < Date.now() - this.request.httpInterval) {
-								this._defer.notify('auto check update on interval: ' + this.request.url + ' ->  ' + this.object.request.key);
+								this._defer.notify(xm.getNote('check on interval: ' + this.request.url + ' -> ' + this.request.key));
 								useCached = false;
 							}
 						}
@@ -138,7 +140,7 @@ module xm {
 
 					if (useCached) {
 						return this.cacheTouch().then(() => {
-							this._defer.notify('using local cache: ' + this.request.url + ' ->  ' + this.object.request.key);
+							this._defer.notify(xm.getNote('local cache: ' + this.request.url + ' -> ' + this.request.key));
 							this._defer.resolve(this.object);
 						});
 					}
@@ -146,9 +148,8 @@ module xm {
 					// lets load it
 					return this.httpLoad(!this.request.forceRefresh).progress(this._defer.notify).then(() => {
 						if (!xm.isValid(this.object.body)) {
-							throw new Error('no result body: ' + this.object.request.url + ' ->  ' + this.object.request.key);
+							throw new Error('no result body: ' + this.request.url + ' -> ' + this.request.key);
 						}
-						this._defer.notify('fetched remote: ' + this.request.url + ' ->  ' + this.object.request.key);
 						this._defer.resolve(this.object);
 					});
 				}).fail((err) => {
@@ -178,7 +179,7 @@ module xm {
 					catch (err) {
 						// either bad or just stale
 						this.track.event(CacheStreamLoader.local_info_bad, 'cache-info unsatisfactory', err);
-						d.notify('cache info unsatisfactory: ' + err);
+						d.notify(xm.getNote('cache info unsatisfactory: ' + err.message, xm.LogLevel.status, err));
 						//TODO rework this to allow to keep stale content if request fails (see note above class)
 						throw err;
 					}
@@ -255,7 +256,7 @@ module xm {
 					this.track.logger.inspect(this.request);
 					this.track.logger.inspect(req);
 				}
-				d.notify('loading: ' + this.request.url);
+				d.notify(xm.getNote('loading: ' + this.request.url));
 
 				// memory stream for now
 				var writer = new BufferStream({size: 'flexible'});
@@ -265,8 +266,6 @@ module xm {
 
 				// start loading
 				request.get(req).on('response', (res) => {
-					d.notify('status: ' + String(res.statusCode) + ' ' + this.request.url);
-
 					if (this.track.logEnabled) {
 						this.track.logger.status(String(res.statusCode) + ' ' + this.request.url);
 						this.track.logger.inspect(res.headers);
@@ -280,20 +279,22 @@ module xm {
 					// check status
 					if (res.statusCode < 200 || res.statusCode >= 400) {
 						this.track.error(CacheStreamLoader.http_load);
-						d.reject(new Error('unexpected status code: ' + res.statusCode + ' on ' + this.request.url));
+						d.reject(new Error('unexpected status code: ' + res.statusCode + ' on: ' + this.request.url));
 						return;
 					}
 					if (res.statusCode === 304) {
 						if (!this.object.body) {
-							d.reject(new Error('flow error: http 304 but no local content on ' + this.request.url));
+							d.reject(new Error('flow error: http 304 but no local content on: ' + this.request.url));
 							return;
 						}
 						if (!this.object.info) {
-							d.reject(new Error('flow error: http 304 but no local info on ' + this.request.url));
+							d.reject(new Error('flow error: http 304 but no local info on: ' + this.request.url));
 							return;
 						}
 						//cache hit!
 						this.track.event(CacheStreamLoader.http_cache_hit);
+
+						this._defer.notify(xm.getNote('remote: ' + this.request.url + ' -> ' + this.request.key, res.statusCode));
 
 						this.updateInfo(res, this.object.info.contentChecksum);
 
@@ -301,7 +302,7 @@ module xm {
 						return;
 					}
 
-					// pick and pipe pasued stream to decoder
+					// pick and pipe paused stream to decoder
 					switch (res.headers['content-encoding']) {
 						case 'gzip':
 							pause.pipe(zlib.createGunzip()).pipe(writer);
@@ -319,7 +320,7 @@ module xm {
 						var body = writer.getBuffer();
 						if (!body) {
 							// shouldn't we test
-							throw new Error('flow error: http 304 but no local info on ' + this.request.url);
+							throw new Error('flow error: http 304 but no local info on: ' + this.request.url);
 						}
 						if (body.length === 0) {
 							throw new Error('loaded zero bytes ' + this.request.url);
@@ -337,7 +338,7 @@ module xm {
 						}
 						this.object.body = body;
 
-						d.notify('complete: ' + this.request.url + ' ' + String(res.statusCode));
+						this._defer.notify(xm.getNote('remote: ' + this.request.url + ' -> ' + this.request.key, 'http ' + res.statusCode));
 						this.track.complete(CacheStreamLoader.http_load);
 
 						this.cacheWrite(false).done(d.resolve, d.reject, d.notify);
@@ -403,36 +404,36 @@ module xm {
 					}).then(() => {
 						// ghost stat to fix weird empty file glitch (voodoo.. only on windows?)
 						return Q.all([
-							FS.exists(this.object.bodyFile).then((exist:boolean) => {
-								if (exist) {
-									return FS.stat(this.object.bodyFile).then((stat:QioFS.Stats) => {
-										if (stat.size === 0) {
-											d.notify(new Error('written zero body bytes'));
-										}
-									});
-								}
-								else {
-									d.notify(new Error('written no body file: ' + this.object.infoFile));
-								}
-							}),
-							FS.exists(this.object.infoFile).then((exist:boolean) => {
-								if (exist) {
-									return FS.stat(this.object.infoFile).then((stat:QioFS.Stats) => {
-										if (stat.size === 0) {
-											d.notify(new Error('written zero info bytes: ' + this.object.infoFile));
-										}
-									});
-								}
-								else {
-									d.notify(new Error('written no info file: ' + this.object.infoFile));
-								}
-							})
+							this.checkExists(this.object.bodyFile, 'body').progress(d.notify),
+							this.checkExists(this.object.infoFile, 'info').progress(d.notify)
 						]);
 					}).then(() => {
 						return this.cacheTouch();
 					});
 				}).done(d.resolve, d.reject);
 
+				return d.promise;
+			}
+
+			private checkExists(file:string, label:string):Q.Promise<boolean> {
+				var d:Q.Deferred<boolean> = Q.defer();
+				FS.exists(file).then((exist:boolean) => {
+					if (exist) {
+						return FS.stat(file).then((stat:QioFS.Stats) => {
+							if (stat.size === 0) {
+								d.notify(xm.getNote('written zero ' + label + ' bytes to: ' + file, xm.LogLevel.error));
+								d.resolve(false);
+							}
+							else {
+								d.resolve(true);
+							}
+						});
+					}
+					else {
+						d.notify(xm.getNote('missing ' + label + ' file: ' + file, xm.LogLevel.error));
+						d.resolve(false);
+					}
+				}).fail(d.reject);
 				return d.promise;
 			}
 

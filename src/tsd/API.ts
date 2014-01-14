@@ -41,7 +41,7 @@ module tsd {
 
 			this.core = new tsd.Core(this.context);
 			this.track = new xm.EventLog('api', 'API');
-			this.track.unmuteActions([xm.Level.notify]);
+			this.track.unmuteActions([xm.EventLevel.notify]);
 
 			xm.object.lockProps(this, ['core', 'track']);
 

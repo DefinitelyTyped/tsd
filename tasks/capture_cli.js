@@ -1003,6 +1003,19 @@ var xm;
 
     xm.log;
 
+    var LogLevel = (function () {
+        function LogLevel() {
+        }
+        LogLevel.ok = 'ok';
+        LogLevel.log = 'log';
+        LogLevel.warn = 'warn';
+        LogLevel.error = 'error';
+        LogLevel.debug = 'debug';
+        LogLevel.status = 'status';
+        return LogLevel;
+    })();
+    xm.LogLevel = LogLevel;
+
     function writeMulti(logger, args) {
         var ret = [];
         for (var i = 0, ii = args.length; i < ii; i++) {
@@ -1025,16 +1038,12 @@ var xm;
     function getLogger(label) {
         label = arguments.length > 0 ? (String(label) + ' ') : '';
 
-        var precall = function () {
-        };
-
         var plain = function () {
             var args = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 writeMulti(logger, args);
             }
         };
@@ -1065,7 +1074,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').success(label + 'ok ');
                 doLog(logger, args);
             }
@@ -1076,7 +1084,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').warning(label + 'warning ');
                 doLog(logger, args);
             }
@@ -1087,7 +1094,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').error(label + 'error ');
                 doLog(logger, args);
             }
@@ -1098,7 +1104,6 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').accent(label + 'debug ');
                 doLog(logger, args);
             }
@@ -1109,22 +1114,42 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                precall();
                 logger.out.accent('-> ').span(label + ' ');
                 doLog(logger, args);
             }
         };
+
+        var map = Object.create(null);
+        map[LogLevel.ok] = logger.ok;
+        map['success'] = logger.ok;
+        map[LogLevel.log] = logger.log;
+        map[LogLevel.warn] = logger.warn;
+        map['warning'] = logger.warn;
+        map[LogLevel.error] = logger.error;
+        map[LogLevel.debug] = logger.debug;
+        map[LogLevel.status] = logger.status;
+
         logger.inspect = function (value, depth, label) {
             if (typeof depth === "undefined") { depth = 3; }
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').cond(arguments.length > 2, label + ' ').inspect(value, depth);
             }
         };
         logger.json = function (value, label) {
             if (logger.enabled) {
-                precall();
                 logger.out.span('-> ').cond(arguments.length > 2, label + ' ').block(JSON.stringify(value, null, 3));
+            }
+        };
+
+        logger.level = function (level) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
+            if (level in map) {
+                map[level].apply(null, args);
+            } else {
+                logger.warn.apply(null, args);
             }
         };
 

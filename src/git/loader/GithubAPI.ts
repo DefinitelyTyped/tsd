@@ -98,7 +98,10 @@ module git {
 				return koder.decode(object.body).then((res:any) => {
 					if (object.response) {
 						var rate = new git.GitRateInfo(object.response.headers);
-						d.notify(rate);
+						d.notify({
+							message: rate.toString(),
+							data: rate
+						});
 					}
 					if (addMeta && xm.isObject(res)) {
 						res.meta = {rate: rate};
@@ -118,7 +121,9 @@ module git {
 			var req = HTTP.normalizeRequest(url);
 			this.copyHeadersTo(req.headers);
 
-			d.notify('get url: ' + url);
+			d.notify({
+				message: 'get url: ' + url
+			});
 			var httpPromise = HTTP.request(req).then((res:QioHTTP.Response) => {
 				var rate = new git.GitRateInfo(res.headers);
 				d.resolve(rate);

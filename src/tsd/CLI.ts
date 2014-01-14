@@ -211,25 +211,42 @@ module tsd {
 	}
 
 	function reportProgress(obj:any):xm.StyledOut {
+		// hackytek
 		if (obj instanceof git.GitRateInfo) {
-			return print.rateInfo(obj);
+			return print.rateInfo(obj, true);
+		}
+		if (xm.isObject(obj)) {
+			if (obj.data instanceof git.GitRateInfo) {
+				return print.rateInfo(obj.data, true);
+			}
+			output.indent().note(true);
+			if (xm.isValid(obj.code)) {
+				output.label(obj.code);
+			}
+			if (obj.message) {
+				var msg = print.fmtGitURI(String(obj.message));
+				msg = msg.replace(' -> ', output.getStyle().accent(' -> '));
+				msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
+					return p1 + output.getStyle().accent(p2) + p3;
+				});
+				output.span(msg);
+			}
+			else {
+				output.span('<no message>');
+			}
+			if (obj.data) {
+				output.sp().inspect(obj, 3);
+			}
+			else {
+				output.ln();
+			}
+			return output;
+		}
+		else {
+			return output.indent().note(true).span(String(obj)).ln();
 		}
 		return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
 	}
-
-	/*function reportSucces(result:tsd.APIResult):xm.StyledOut {
-	 //this.output.ln().info().success('success!').clear();
-	 if (result) {
-	 result.selection.forEach((def:tsd.DefVersion) => {
-	 this.output.line(def.toString());
-	 if (def.info) {
-	 output.line(def.info.toString());
-	 output.line(def.info);
-	 }
-	 });
-	 }
-	 return output;
-	 }*/
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -255,6 +272,7 @@ module tsd {
 			}
 			return Q.resolve();
 		}
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.before = (ctx:xm.ExposeContext) => {
