@@ -1,6 +1,6 @@
 /// <reference path="../_ref.ts" />
 
-//TODO remove inlined def (weird priority failure)
+//TODO remove inlined Date definition (weird priority failure)
 declare var Date:{
 	compare(date1:Date, date2:Date):number; // -1 if date1 is smaller than date2, 0 if equal, 1 if date2 is smaller than date1
 };

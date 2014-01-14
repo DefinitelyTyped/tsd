@@ -74,7 +74,6 @@ module tsd {
 					}
 					this.output.ln().ln();
 
-					//TODO full indent message
 					this.output.indent(1).edge(true).line(file.commit.message.subject);
 
 					if (file.commit.message.body) {
@@ -159,7 +158,6 @@ module tsd {
 			}
 
 			installResult(result:tsd.InstallResult):xm.StyledOut {
-				//TODO fix pluralised reporting
 				var keys = xm.keysOf(result.written);
 				if (keys.length === 0) {
 					this.output.ln().report(true).span('written ').accent('zero').span(' files').ln();
@@ -188,7 +186,6 @@ module tsd {
 					this.output.line();
 					this.output.report(true).span('rate-limit').sp();
 				}
-				//TODO clean this up
 				if (info.limit > 0) {
 					if (info.remaining === 0) {
 						this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());

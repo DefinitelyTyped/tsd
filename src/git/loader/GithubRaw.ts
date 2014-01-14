@@ -12,7 +12,6 @@ module git {
 	/*
 	 GithubRaw: get files from raw.github.com and cache on disk
 	 */
-	//TODO add pruning/clear feature
 	export class GithubRaw extends git.GithubLoader {
 
 		static get_file:string = 'get_file';

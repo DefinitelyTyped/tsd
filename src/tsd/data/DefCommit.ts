@@ -62,7 +62,6 @@ module tsd {
 			return this.commitSha;
 		}
 
-		//TODO verify ths order is optimal
 		get changeDate():Date {
 			if (this.gitAuthor) {
 				return this.gitAuthor.date;

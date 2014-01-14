@@ -243,7 +243,7 @@ module xm {
 			this._mutePromises = [];
 		}
 
-		//TODO fix odd isNaN default param
+		//TODO fix odd NaN default param
 		setTrack(enabled:boolean, limit:number = NaN, prune:number = NaN):void {
 			this._trackEnabled = enabled;
 			this._trackLimit = (isNaN(limit) ? this._trackLimit : limit);

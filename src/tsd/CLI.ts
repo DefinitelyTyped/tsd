@@ -45,7 +45,6 @@ module tsd {
 		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
 		//.clear().span(pkg.getHomepage(true)).ln()
 		//.ruler().ln();
-		//TODO implement version check / news service
 		return Q.resolve();
 	}
 
@@ -405,7 +404,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//TODO abstractify this
+		//TODO abstractify ActionMap / JobSelectionAction into Expose
 		var queryActions = new xm.ActionMap<tsd.JobSelectionAction>();
 		queryActions.set(Action.install, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
 			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {

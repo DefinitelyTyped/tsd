@@ -50,7 +50,7 @@ describe('xm.http', () => {
 	});
 
 	describe('HTTPCache core', () => {
-		//TODO add more existance tests
+		//TODO add more existence tests
 		it('should exist', () => {
 			assert.isFunction(xm.http.HTTPCache, 'cache');
 			assert.isFunction(xm.http.CacheOpts, 'opts');

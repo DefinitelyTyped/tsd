@@ -139,7 +139,7 @@
 
 	// - - - - meta types
 
-	//TODO add more array-likes??
+	//TODO add more array-likes?? DOM???
 	export function isArrayLike(obj:any):boolean {
 		return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
 	}

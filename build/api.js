@@ -4105,7 +4105,6 @@ var xm;
 
                     return Q.all(write).fail(function (err) {
                         _this.track.error(CacheStreamLoader.cache_write, 'file write', err);
-
                         throw err;
                     }).then(function () {
                         return Q.all([
@@ -5396,6 +5395,9 @@ var git;
             if (!json) {
                 return null;
             }
+
+            xm.assertVar(json.name, 'string', ' json.name');
+            xm.assertVar(json.email, 'string', ' json.email');
 
             var ret = new git.GitUserCommit();
             ret.name = json.name;
@@ -7141,7 +7143,6 @@ var tsd;
 var xm;
 (function (xm) {
     'use strict';
-
     var jsesc = require('jsesc');
 
     xm.parseStringMap = Object.create(null);
@@ -8103,7 +8104,6 @@ var tsd;
                     this.output.line();
                     this.output.report(true).span('rate-limit').sp();
                 }
-
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
                         this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());

@@ -15,7 +15,7 @@ module tsd {
 	/*
 	 Resolver: resolve dependencies for given def versions
 	 */
-	//TODO add unit test,  verify race condition solver works properly
+	//TODO add unit test, verify race condition solver works properly
 	//TODO 'resolve' not good choice (conflicts with promises)
 	export class Resolver extends tsd.SubCore {
 

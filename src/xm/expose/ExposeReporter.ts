@@ -106,7 +106,7 @@ module xm {
 		return 0;
 	}
 
-	//TODO swap for enum
+	//TODO swap ExposeLevel class for enum
 	export class ExposeLevel {
 		static min = -1;
 		static med = 0;

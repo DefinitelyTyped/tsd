@@ -11,8 +11,6 @@
 
 module xm {
 	'use strict';
-	//TODO should probably be parseString?
-
 	var jsesc = require('jsesc');
 
 	export var parseStringMap:any = Object.create(null);

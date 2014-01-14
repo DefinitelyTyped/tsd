@@ -12,7 +12,6 @@ module git {
 	/*
 	 GithubRaw: get files from raw.github.com and cache on disk
 	 */
-	//TODO add pruning/clear feature
 	export class GithubLoader {
 
 		repo:git.GithubRepo;

@@ -120,7 +120,7 @@ module xm {
 				this.track.promise(this._defer.promise, CacheStreamLoader.get_object);
 
 				var cleanup = () => {
-					//TODOset timeout
+					//TODO set timeout
 					this._defer = null;
 				};
 
@@ -243,7 +243,6 @@ module xm {
 						req.headers['if-none-match'] = this.object.info.httpETag;
 					}
 					if (this.object.info.httpModified) {
-						//TODO verify/fix date format
 						req.headers['if-modified-since'] = new Date(this.object.info.httpModified).toUTCString();
 					}
 				}
@@ -399,7 +398,6 @@ module xm {
 					// track em
 					return Q.all(write).fail((err:Error) => {
 						this.track.error(CacheStreamLoader.cache_write, 'file write', err);
-						//TODO clean things up?
 						throw err;
 					}).then(() => {
 						// ghost stat to fix weird empty file glitch (voodoo.. only on windows?)
@@ -471,7 +469,7 @@ module xm {
 				info.url = this.request.url;
 				info.key = this.request.key;
 				info.contentType = res.headers['content-type'];
-				//TODO why not keep http date format?
+				//TODO why not keep http date format? (reformatting is safest?)
 				info.cacheCreated = xm.date.getISOString(Date.now());
 				info.cacheUpdated = xm.date.getISOString(Date.now());
 				this.updateInfo(res, checksum);
@@ -480,7 +478,7 @@ module xm {
 			private updateInfo(res:QioHTTP.Response, checksum:string) {
 				var info = this.object.info;
 				info.httpETag = (res.headers['etag'] || info.httpETag);
-				//TODO why not keep http date format?
+				//TODO why not keep http date format? (reformatting is safest?)
 				info.httpModified = xm.date.getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
 				info.cacheUpdated = xm.date.getISOString(Date.now());
 				info.contentChecksum = checksum;

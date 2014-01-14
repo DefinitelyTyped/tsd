@@ -138,7 +138,6 @@ module tsd {
 			}
 		}
 
-		//TODO (auto) cache compile result
 		private getFilterFunc(current:tsd.Def[]):(file:tsd.Def) => boolean {
 			this.compile();
 

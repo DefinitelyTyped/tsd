@@ -41,19 +41,19 @@ module tsd {
 			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
 		}
 
-		//TODO test
+		//TODO add test
 		get pathTerm():string {
 			return this.path.replace(/\.d\.ts$/, '');
 		}
 
-		//TODO test
+		//TODO add test
 		static getPathExp(trim:boolean):RegExp {
 			var useExp:RegExp = (trim ? Def.nameExpEnd : Def.nameExp);
 			useExp.lastIndex = 0;
 			return useExp;
 		}
 
-		//TODO test
+		//TODO add test
 		static getFileFrom(path:string):string {
 			var useExp:RegExp = Def.getPathExp(true);
 			var match = useExp.exec(path);

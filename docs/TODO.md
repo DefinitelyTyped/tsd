@@ -16,14 +16,6 @@ This info might later migrate to the Github Issue tracker.
 
 Always text to edit in the README or ./docs.
 
-## Local changes
-
-Browse the code in `/src` and `/test` for `//TODO` comments,
-
-Or use `$ grunt todos` for an overview. :point_left::+1:
-
-Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Some are more important then others (but which ones? :smiley_cat:)
-
 ## Tests
 
 Never enough.
@@ -250,6 +242,14 @@ Bugs:
 * :o:	Underscore.d.ts header has multiple authors
 
 More.. always more :rocket:
+
+## Local changes
+
+Browse the code in `/src` and `/test` for `//TODO` comments,
+
+Or use `$ grunt todos` for an overview. :point_left::+1:
+
+Most of these are file/class/block 'local' changes: easy to fix without conflicts (hardening, re-implement etc). Some are more important then others (but which ones? :smiley_cat:)
 
 ## Emoji based Project Management 
 
