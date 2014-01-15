@@ -1684,8 +1684,13 @@
                 "version": "1.9.0",
                 "key": "b9e68cdc-415a-4e21-9be6-5ff88ef8f02e",
                 "dependencies": [],
-                "url": "https://github.com/kazimanzurrashid/",
-                "name": "Kazi Manzur Rashid"
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/mocha/mocha.d.ts",
+                "authors": [
+                    {
+                        "name": "Kazi Manzur Rashid",
+                        "url": "https://github.com/kazimanzurrashid/"
+                    }
+                ]
             }
         ]
     },
@@ -2036,7 +2041,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.aggregates.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.aggregates.d.ts",
                 "author": "Carl de Billy",
                 "author_url": "http://carl.debilly.net/"
             }
@@ -2059,7 +2064,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.async.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.async.d.ts",
                 "author": "zoetrope",
                 "author_url": "https://github.com/zoetrope"
             }
@@ -2078,7 +2083,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.binding.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.binding.d.ts",
                 "author": "Carl de Billy",
                 "author_url": "http://carl.debilly.net/"
             }
@@ -2097,7 +2102,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.coincidence.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.coincidence.d.ts",
                 "author": "Carl de Billy",
                 "author_url": "http://carl.debilly.net/"
             }
@@ -2116,7 +2121,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.experimental.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.experimental.d.ts",
                 "author": "Igor Oleinikov",
                 "author_url": "https://github.com/Igorbek"
             }
@@ -2135,9 +2140,32 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.joinpatterns.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.joinpatterns.d.ts",
                 "author": "Carl de Billy",
                 "author_url": "http://carl.debilly.net/"
+            }
+        ]
+    },
+    {
+        "name": "rx.jquery.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) With jQuery",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "f97b06f0-6d69-11e3-981f-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    },
+                    {
+                        "name": "jquery",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.jquery.d.ts",
+                "author": "Igor Oleinikov",
+                "author_url": "https://github.com/Igorbek"
             }
         ]
     },
@@ -2149,9 +2177,32 @@
                 "version": "2.2",
                 "key": "719c6d9d-881a-c5cf-c264-e13b1ee1590f",
                 "dependencies": [],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.d.ts",
                 "author": "gsino",
                 "author_url": "http://www.codeplex.com/site/users/view/gsino"
+            }
+        ]
+    },
+    {
+        "name": "rx.testing.js",
+        "description": "RxJS (Reactive Extensions for JavaScript) Testing Module",
+        "versions": [
+            {
+                "version": "2.2",
+                "key": "011e70e0-6d6a-11e3-981f-0800200c9a66",
+                "dependencies": [
+                    {
+                        "name": "rx.js",
+                        "version": "latest"
+                    },
+                    {
+                        "name": "rx.virtualtime.js",
+                        "version": "latest"
+                    }
+                ],
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.testing.d.ts",
+                "author": "Igor Oleinikov",
+                "author_url": "https://github.com/Igorbek"
             }
         ]
     },
@@ -2168,7 +2219,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.time.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.time.d.ts",
                 "author": "Carl de Billy",
                 "author_url": "http://carl.debilly.net/"
             }
@@ -2187,7 +2238,7 @@
                         "version": "latest"
                     }
                 ],
-                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.virtualtime.d.ts",
+                "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.virtualtime.d.ts",
                 "author": "gsino",
                 "author_url": "http://www.codeplex.com/site/users/view/gsino"
             }
