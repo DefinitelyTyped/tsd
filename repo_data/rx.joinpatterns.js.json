@@ -11,7 +11,7 @@
           "version": "latest"
         }
       ],
-      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.joinpatterns.d.ts",
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.joinpatterns.d.ts",
       "author": "Carl de Billy",
       "author_url": "http://carl.debilly.net/"
     }

@@ -11,7 +11,7 @@
           "version": "latest"
         }
       ],
-      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.js.virtualtime.d.ts",
+      "url": "https://github.com/borisyankov/DefinitelyTyped/raw/master/rx.js/rx.virtualtime.d.ts",
       "author": "gsino",
       "author_url": "http://www.codeplex.com/site/users/view/gsino"
     }
