@@ -124,6 +124,8 @@ module xm {
 					this.remove.set(key, setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
+						this.jobs.get(key).destruct();;
+
 						this.jobs.delete(key);
 
 					}, this.jobTimeout));

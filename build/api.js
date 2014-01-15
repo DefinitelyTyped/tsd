@@ -3850,10 +3850,6 @@ var xm;
                 this._defer = Q.defer();
                 this.track.promise(this._defer.promise, CacheStreamLoader.get_object);
 
-                var cleanup = function () {
-                    _this._defer = null;
-                };
-
                 this.cacheRead().progress(this._defer.notify).then(function () {
                     var useCached = false;
                     if (_this.object.body && _this.object.info) {
@@ -3881,8 +3877,6 @@ var xm;
                     });
                 }).fail(function (err) {
                     _this._defer.reject(err);
-                }).finally(function () {
-                    cleanup();
                 }).done();
 
                 return this._defer.promise;

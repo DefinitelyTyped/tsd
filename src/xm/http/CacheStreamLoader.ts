@@ -86,16 +86,19 @@ module xm {
 				else {
 					this.infoCacheValidator = new CacheValidator(this.cache.infoSchema);
 				}
+				this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
-				this.object = new CacheObject(request);
+				this.object = new CacheObject(this.request);
 				this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
 
 				this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
 				this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
-				this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
-
 				xm.object.lockProps(this, ['cache', 'request', 'object']);
+			}
+
+			destruct():void {
+				this._defer = null;
 			}
 
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -118,11 +121,6 @@ module xm {
 
 				this._defer = Q.defer();
 				this.track.promise(this._defer.promise, CacheStreamLoader.get_object);
-
-				var cleanup = () => {
-					//TODO set timeout
-					this._defer = null;
-				};
 
 				// check the cache
 				this.cacheRead().progress(this._defer.notify).then(() => {
@@ -154,8 +152,6 @@ module xm {
 					});
 				}).fail((err) => {
 					this._defer.reject(err);
-				}).finally(() => {
-					cleanup();
 				}).done();
 
 				return this._defer.promise;
