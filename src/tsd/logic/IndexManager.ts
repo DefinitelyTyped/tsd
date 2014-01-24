@@ -20,7 +20,7 @@ module tsd {
 		static procure_file:string = 'procure_file';
 		static procure_commit:string = 'procure_commit';
 
-		private _defer:Q.Deferred<tsd.DefIndex>;
+		private _defer:Map<string, Q.Deferred<tsd.DefIndex>> = new Map();
 
 		constructor(core:tsd.Core) {
 			super(core, 'index', 'IndexManager');
@@ -31,22 +31,26 @@ module tsd {
 		 promise: DefIndex: with a git-tree loaded and parsed for Defs (likely always the same)
 		 */
 		getIndex():Q.Promise<tsd.DefIndex> {
-			if (this._defer) {
+			var refKey = this.core.context.config.repoRef;
+			var defer:Q.Deferred<tsd.DefIndex> = this._defer[refKey];
+
+			if (defer) {
 				this.track.skip(IndexManager.init);
 				// TODO fix progress properly and remove hack
 				// lame bypass notify
 				var d = Q.defer<tsd.DefIndex>();
-				this._defer.promise.then(d.resolve, d.reject);
-				return this._defer.promise;
+				defer.promise.then(d.resolve, d.reject);
+				return defer.promise;
 			}
 			var index = new tsd.DefIndex();
 
-			this._defer = Q.defer<tsd.DefIndex>();
+			defer = Q.defer<tsd.DefIndex>();
+			this._defer[refKey] = defer;
 
-			this.track.promise(this._defer.promise, IndexManager.init, this.core.context.config.repoRef);
+			this.track.promise(defer.promise, IndexManager.init, refKey);
 			this.track.start(IndexManager.branch_get);
 
-			this.core.repo.api.getBranch(this.core.context.config.ref).progress(this._defer.notify).then((branchData:any) => {
+			this.core.repo.api.getBranch(this.core.context.config.ref).progress(defer.notify).then((branchData:any) => {
 				this.track.complete(IndexManager.branch_get);
 
 				if (!branchData) {
@@ -58,21 +62,20 @@ module tsd {
 				}
 				this.track.start(IndexManager.tree_get);
 
-				return this.core.repo.api.getTree(sha, true).progress(this._defer.notify).then((data:any) => {
+				return this.core.repo.api.getTree(sha, true).progress(defer.notify).then((data:any) => {
 					this.track.complete(IndexManager.tree_get);
 
 					index.init(branchData, data);
 
 					this.track.complete(IndexManager.init);
-					this._defer.resolve(index);
+					defer.resolve(index);
 				});
 			}).fail((err) => {
-				this.track.failure(IndexManager.init, err.message, err);
-				this._defer.reject(err);
-				this._defer = null;
-			}).done();
+					this.track.failure(IndexManager.init, err.message, err);
+					defer.reject(err);
+				}).done();
 
-			return this._defer.promise;
+			return defer.promise;
 		}
 
 		/*

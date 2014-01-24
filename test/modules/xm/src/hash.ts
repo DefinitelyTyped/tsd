@@ -111,6 +111,8 @@ describe('xm.hash', () => {
 
 	describe('hashNormalines()', () => {
 
+		/* tslint:disable:max-line-length */
+
 		function assertHashNormalines(label:string, values:string[], match:boolean = true) {
 			var len = values.length;
 			for (var i = 0; i < len; i++) {
@@ -129,6 +131,8 @@ describe('xm.hash', () => {
 				}
 			}
 		}
+
+		/* tslint:enable:max-line-length */
 
 		it('should return identical hash for similar single line string', () => {
 			var values = [

@@ -26,10 +26,9 @@ module git {
 			xm.assertVar(storeDir, 'string', 'storeDir');
 
 			this.config = config;
-
-			this.storeDir =  path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
-
 			this.urls = new git.GithubURLs(this);
+
+			this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 			this.api = new git.GithubAPI(this, this.storeDir);
 			this.raw = new git.GithubRaw(this, this.storeDir);
 

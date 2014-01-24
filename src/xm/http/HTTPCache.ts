@@ -73,10 +73,14 @@ module xm {
 				this.storeDir = storeDir;
 				this.opts = (opts || new CacheOpts());
 
-				this.manageFile = path.join(this.storeDir, '_info.json');
-
 				this.track = new xm.EventLog('http_cache', 'HTTPCache');
 				this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
+
+				this.setStoreDir(storeDir);
+			}
+
+			setStoreDir(dir:string):void {
+				this.manageFile = path.join(this.storeDir, '_info.json');
 			}
 
 			getObject(request:CacheRequest):Q.Promise<CacheObject> {

@@ -12,8 +12,6 @@ module tsd {
 	 */
 	export class DefInfo {
 		name:string;
-		version:string;
-		submodule:string;
 		description:string;
 		projectUrl:string;
 
@@ -29,8 +27,6 @@ module tsd {
 
 		resetFields() {
 			this.name = '';
-			this.version = '';
-			this.submodule = '';
 			this.description = '';
 			this.projectUrl = '';
 
@@ -46,17 +42,7 @@ module tsd {
 		}
 
 		toString():string {
-			var ret = this.name;
-			if (this.submodule) {
-				ret += ' ' + this.submodule;
-			}
-			if (this.version) {
-				ret += ' ' + this.version;
-			}
-			if (this.description) {
-				ret += ' ' + JSON.stringify(<any>this.description);
-			}
-			return ret;
+			return this.name;
 		}
 
 		// harsh

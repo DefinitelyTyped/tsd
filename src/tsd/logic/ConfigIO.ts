@@ -72,6 +72,7 @@ module tsd {
 				}
 				return xm.file.readJSONPromise(target).then((json) => {
 					this.core.context.config.parseJSON(json, target);
+					this.core.updateConfig();
 					d.resolve(null);
 				});
 			}).fail(d.reject).done();

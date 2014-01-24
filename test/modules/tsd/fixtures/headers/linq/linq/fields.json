@@ -1,9 +1,6 @@
 {
 	"parsed": {
-		"name": "linq.js",
-		"version": "2.2",
-		"submodule": "",
-		"description": "",
+		"name": "linq.js 2.2",
 		"projectUrl": "http://linqjs.codeplex.com",
 		"authors": [
 			{

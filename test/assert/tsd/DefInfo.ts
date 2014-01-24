@@ -12,8 +12,6 @@ module helper {
 
 		var json:any = {};
 		json.name = info.name;
-		json.version = info.version;
-		json.submodule = info.submodule;
 		json.description = info.description;
 		json.projectUrl = info.projectUrl;
 		json.reposUrl = info.reposUrl;
@@ -35,12 +33,6 @@ module helper {
 		assert.instanceOf(info, tsd.DefInfo, message + ': info');
 
 		helper.propStrictEqual(info, values, 'name', message);
-		if (values.version) {
-			helper.propStrictEqual(info, values, 'version', message + ': info');
-		}
-		if (values.submodule) {
-			helper.propStrictEqual(info, values, 'submodule', message + ': info');
-		}
 		if (values.description) {
 			assert.strictEqual(info.description, values.description, message + ': info.description');
 		}

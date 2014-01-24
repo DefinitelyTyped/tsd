@@ -1,10 +1,7 @@
 {
 	"parsed": {
-		"name": "Microsoft.Windows.Azure.MobileService.Web",
-		"version": "1.0.0",
-		"submodule": "",
-		"description": "",
-		"projectUrl": "",
+		"name": "Microsoft.Windows.Azure.MobileService.Web-1.0.0",
+		"projectUrl": "https://your-azure-mobileservice-project.azure-mobile.net/client/MobileServices.Web-1.0.0.min.js",
 		"authors": [
 			{
 				"name": "Morosinotto Daniele",

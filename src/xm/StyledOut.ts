@@ -341,6 +341,12 @@ module xm {
 			return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
 		}
 
+		tweakAll(str:string, muted:boolean = false):StyledOut {
+			return this.tweakURI(str.replace(/[\.,_\[\{\(\<>\)\}\]]/g, (value) => {
+				return this._style.muted(value);
+			}));
+		}
+
 		// TODO add test?
 		tweakExp(str:string, expr:RegExp, muted:boolean = false):StyledOut {
 			if (muted) {

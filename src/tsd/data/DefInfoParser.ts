@@ -25,10 +25,10 @@ module tsd {
 	var anyGreedyCap = /(.*)/;
 	var anyLazyCap = /(.*?)/;
 
-	var identifierCap = /([\w\._-]*(?:[ \t]*[\w\._-]+)*?)/;
-	var versionCap = /-?v?(\d+\.\d+\.?\d*\.?\d*)?/;
-	var wordsCap = /([\w \t_-]+[\w]+)/;
-	var labelCap = /([\w_-]+[\w]+)/;
+	var identifierCap = /(\w+(?:[ \w\.-]*?\w)*?)/;
+	var versionCap = /(?:[ \t:-]?v?(\d+\.\d+\.?\d*\.?\d*))?/;
+	var wordsCap = /([\w \t-]+[\w]+)/;
+	var labelCap = /([\w-]+[\w]+)/;
 
 	var delimStart = /[<\[\{\(]/;
 	var delimStartOpt = /[<\[\{\(]?/;
@@ -63,9 +63,10 @@ module tsd {
 	.join();
 
 	var typeHead = glue(commentStart)
-	.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
-	.append(/[ \t:-]+/, versionCap, spaceOpt)
-	.append(anyGreedy, expEnd)
+	.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyGreedyCap)
+	// .append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
+	// .append(versionCap, spaceOpt)
+	.append(expEnd)
 	.join('i');
 
 	var projectUrl = glue(commentStart)
@@ -161,9 +162,9 @@ module tsd {
 
 			this.parser.addParser(new xm.LineParser('any', anyGreedyCap, 0, null, ['head', 'any']));
 
-			this.parser.addParser(new xm.LineParser('head', typeHead, 2, (match:xm.LineParserMatch) => {
+			this.parser.addParser(new xm.LineParser('head', typeHead, 1, (match:xm.LineParserMatch) => {
 				data.name = match.getGroup(0, data.name);
-				data.version = match.getGroup(1, data.version);
+				// data.version = match.getGroup(1, data.version);
 				// data.submodule = match.getGroup(2, data.submodule);
 			}, fields));
 

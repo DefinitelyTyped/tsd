@@ -59,9 +59,22 @@ module xm {
 			});
 		}
 
-		export function lockProps(object:Object, props:string[]) {
+		export function lockProps(object:Object, props:string[], pub:boolean = true, pref:boolean = true) {
 			props.forEach((property:string) => {
-				Object.defineProperty(object, property, {writable: false});
+				if (/^_/.test(property)) {
+					if (pref) {
+						Object.defineProperty(object, property, {writable: false});
+					}
+				}
+				else if (pub) {
+					Object.defineProperty(object, property, {writable: false});
+				}
+			});
+		}
+
+		export function forceProps(object:Object, props:Object) {
+			Object.keys(props).forEach((property:string) => {
+				Object.defineProperty(object, property, {value:props[property], writable: false});
 			});
 		}
 

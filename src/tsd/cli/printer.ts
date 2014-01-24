@@ -17,6 +17,8 @@ module tsd {
 			output:xm.StyledOut;
 			indent:number = 0;
 
+			private _remainingPrev:number = -1;
+
 			constructor(output:xm.StyledOut, indent:number = 0) {
 				this.output = output;
 				this.indent = indent;
@@ -106,11 +108,11 @@ module tsd {
 					this.output.line();
 					if (file.info.isValid()) {
 						this.output.indent(1).tweakPunc(file.info.toString()).ln();
-						this.output.indent(2).tweakBraces(file.info.projectUrl, true).ln();
+						this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
 
 						file.info.authors.forEach((author:xm.AuthorInfo) => {
 							this.output.ln();
-							this.output.indent(2).tweakBraces(author.toString(), true).ln();
+							this.output.indent(2).tweakAll(author.toString(), true).ln();
 						});
 					}
 					else {
@@ -181,6 +183,14 @@ module tsd {
 			}
 
 			rateInfo(info:git.GitRateInfo, note:boolean = false):xm.StyledOut {
+				if (info.remaining === this._remainingPrev) {
+					return this.output;
+				}
+				this._remainingPrev = info.remaining;
+				if (info.remaining === info.limit) {
+					return this.output;
+				}
+
 				if (note) {
 					this.output.indent(1).report(true).span('rate-limit').sp();
 				}

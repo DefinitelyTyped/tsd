@@ -33,7 +33,7 @@ module git {
 		}
 
 		_initGithubLoader(lock?:string[]):void {
-			xm.object.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
+			xm.object.lockProps(this, ['repo', 'cache', 'track', 'label', 'formatVersion']);
 			if (lock) {
 				xm.object.lockProps(this, lock);
 			}

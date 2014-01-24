@@ -1,9 +1,6 @@
 {
 	"parsed": {
-		"name": "linq.jquery",
-		"version": "",
-		"submodule": "",
-		"description": "",
+		"name": "linq.jquery (from linq.js)",
 		"projectUrl": "http://linqjs.codeplex.com",
 		"authors": [
 			{

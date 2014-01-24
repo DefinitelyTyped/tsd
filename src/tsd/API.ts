@@ -107,19 +107,19 @@ module tsd {
 			var files:tsd.DefVersion[] = tsd.DefUtil.mergeDependencies(selection.selection);
 
 			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
-			.progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
-				if (!written) {
-					throw new Error('expected install paths');
-				}
-				res.written = written;
-			}).then(() => {
-				if (options.saveToConfig) {
-					return this.core.config.saveConfig().progress(d.notify);
-				}
-				return null;
-			}).then(() => {
-				d.resolve(res);
-			}, d.reject).done();
+				.progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
+					if (!written) {
+						throw new Error('expected install paths');
+					}
+					res.written = written;
+				}).then(() => {
+					if (options.saveToConfig) {
+						return this.core.config.saveConfig().progress(d.notify);
+					}
+					return null;
+				}).then(() => {
+					d.resolve(res);
+				}, d.reject).done();
 
 			return d.promise;
 		}
@@ -134,16 +134,16 @@ module tsd {
 			var res = new tsd.InstallResult(options);
 
 			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
-			.progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
-				res.written = map;
-			}).then(() => {
-				if (options.saveToConfig) {
-					return this.core.config.saveConfig().progress(d.notify);
-				}
-				return null;
-			}).then(() => {
-				d.resolve(res);
-			}, d.reject).done();
+				.progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
+					res.written = map;
+				}).then(() => {
+					if (options.saveToConfig) {
+						return this.core.config.saveConfig().progress(d.notify);
+					}
+					return null;
+				}).then(() => {
+					d.resolve(res);
+				}, d.reject).done();
 
 			return d.promise;
 		}

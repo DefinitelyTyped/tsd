@@ -1,8 +1,7 @@
 {
 	"parsed": {
-		"name": "Async v0.1",
-		"description": "",
-		"projectUrl": "https://github.com/caolan/async",
+		"name": "d3JS",
+		"projectUrl": "http://d3js.org",
 		"authors": [
 			{
 				"name": "Boris Yankov",

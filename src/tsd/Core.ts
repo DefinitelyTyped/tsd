@@ -49,10 +49,13 @@ module tsd {
 		track:xm.EventLog;
 
 		_components:tsd.MultiManager;
+		_cacheMode:string;
 
 		constructor(context:tsd.Context) {
 			xm.assertVar(context, tsd.Context, 'context');
 			this.context = context;
+
+			this.track = new xm.EventLog('core', 'Core');
 
 			this._components = new tsd.MultiManager(this);
 			this._components.add([
@@ -71,11 +74,18 @@ module tsd {
 			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
-			this.track = new xm.EventLog('core', 'Core');
 			this.verbose = this.context.verbose;
 
-			xm.object.lockProps(this, Object.keys(this));
 			xm.object.hidePrefixed(this);
+			xm.object.lockProps(this, Object.keys(this), true, false);
+		}
+
+		updateConfig():void {
+			// drop statefull helper
+			this._components.replace({
+				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir)
+			});
+			this.useCacheMode(this._cacheMode);
 		}
 
 		getInstallPath(def:tsd.Def):string {
@@ -83,6 +93,8 @@ module tsd {
 		}
 
 		useCacheMode(modeName:string):void {
+			this._cacheMode = modeName;
+
 			if (modeName in xm.http.CacheMode) {
 				var mode = xm.http.CacheMode[modeName];
 				this.repo.api.cache.opts.applyCacheMode(mode);
@@ -107,7 +119,7 @@ module tsd {
 
 		private _verbose:boolean = false;
 
-		trackables:tsd.ITrackable[] = [];
+		trackables:Set<tsd.ITrackable> = new Set();
 
 		constructor(public core:tsd.Core) {
 			xm.assertVar(core, tsd.Core, 'core');
@@ -115,7 +127,23 @@ module tsd {
 
 		add(list:any[]) {
 			list.forEach((comp) => {
-				this.trackables.push(comp);
+				this.trackables.add(comp);
+			});
+		}
+
+		remove(list:any[]) {
+			while (list.length > 0) {
+				this.trackables.delete(list.pop());
+			}
+		}
+
+		replace(fields:Object):void {
+			Object.keys(fields).forEach((property:string) => {
+				this.trackables.delete(this.core[property]);
+				var trackable = fields[property];
+				Object.defineProperty(this.core, property, {value: trackable, writable: false});
+				trackable.verbose = this._verbose;
+				this.trackables.add(fields[property]);
 			});
 		}
 

@@ -130,7 +130,7 @@ module xm {
 						useCached = !this.request.forceRefresh;
 						if (useCached && xm.isNumber(this.request.httpInterval) && this.cache.opts.cacheWrite) {
 							if (new Date(this.object.info.cacheUpdated).getTime() < Date.now() - this.request.httpInterval) {
-								this._defer.notify(xm.getNote('check on interval: ' + this.request.url + ' -> ' + this.request.key));
+								this._defer.notify(xm.getNote('update: ' + this.request.url + ' -> ' + this.request.key));
 								useCached = false;
 							}
 						}
@@ -138,7 +138,7 @@ module xm {
 
 					if (useCached) {
 						return this.cacheTouch().then(() => {
-							this._defer.notify(xm.getNote('local cache: ' + this.request.url + ' -> ' + this.request.key));
+							this._defer.notify(xm.getNote('local: ' + this.request.url + ' -> ' + this.request.key));
 							this._defer.resolve(this.object);
 						});
 					}

@@ -50,14 +50,14 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// rODO get rid of syncronous io
+	// TODO get rid of syncronous io
 	function getContext(ctx:xm.ExposeContext):Q.Promise<tsd.Context> {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
 		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
 		if (ctx.getOpt(Opt.dev)) {
-			// rODO why not local?
+			// TODO why not local?
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
 		else if (ctx.hasOpt(Opt.cacheDir)) {
@@ -209,6 +209,11 @@ module tsd {
 		return output.line(err);
 	}
 
+	var skipProgress = [
+		/^(?:\w+: )?remote:/,
+		/^(?:\w+: )?local:/
+	];
+
 	function reportProgress(obj:any):xm.StyledOut {
 		// hackytek
 		if (obj instanceof git.GitRateInfo) {
@@ -218,7 +223,18 @@ module tsd {
 			if (obj.data instanceof git.GitRateInfo) {
 				return print.rateInfo(obj.data, true);
 			}
+			// want this?
+			if (obj.message) {
+				if (skipProgress.some((exp:RegExp) => {
+					return exp.test(obj.message);
+				})) {
+					// let's skip this one
+					return output;
+				}
+			}
+
 			output.indent().note(true);
+
 			if (xm.isValid(obj.code)) {
 				output.label(obj.code);
 			}
@@ -290,7 +306,7 @@ module tsd {
 			group.options = [Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
 			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
 				var sort:number;
-				// rODO sane-ify sorting groups
+				// TODO sane-ify sorting groups
 				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.query);
 				if (sort !== 0) {
 					return sort;
@@ -394,7 +410,7 @@ module tsd {
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
-					// rODO expose raw/api/all option
+					// TODO expose raw/api/all option
 					return job.api.purge(true, true).progress(notify).then(() => {
 
 					});
@@ -404,7 +420,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		// rODO abstractify ActionMap / JobSelectionAction into Expose
+		// TODO abstractify ActionMap / JobSelectionAction into Expose
 		var queryActions = new xm.ActionMap<tsd.JobSelectionAction>();
 		queryActions.set(Action.install, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
 			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {

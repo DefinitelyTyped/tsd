@@ -33,41 +33,57 @@ describe('DefInfoParser', () => {
 		filter = null;
 	});
 
-	describe('loop', () => {
+	describe.only('loop', () => {
 		it('data ok', () => {
 			assert.operator(data.length, '>', 0, 'data.length');
 		});
 		it('parse test data', () => {
-			function testProp(def:helper.HeaderAssert, data:Object, parsed:Object, prop:string):void {
-				assert.strictEqual(data[prop], parsed[prop], def.key + ' .' + prop);
+
+			var actuals = [];
+			var expecteds = [];
+
+			function testProp(def:helper.HeaderAssert, actual:Object, expected:Object, data:Object, parsed:Object, prop:string):void {
+				actual[prop] = parsed[prop];
+				expected[prop] = data[prop];
 			}
 
 			data.forEach((def:helper.HeaderAssert) => {
 				assert.ok(def, def.key + ' ok');
 
+				var actual:any = {
+					key:def.key
+				};
+				var expected:any = {
+					key:def.key
+				};
+
 				var data = new tsd.DefInfo();
-				var parser = new tsd.DefInfoParser(false);
+				var parser = new tsd.DefInfoParser(true);
 				parser.parse(data, def.header);
 
 				var parsed = def.fields.parsed;
 				if (def.fields.fields) {
 					def.fields.fields.forEach((field:string) => {
-						testProp(def, data, parsed, field);
+						testProp(def, actual, expected, data, parsed, field);
 					});
 				}
 				else {
-					testProp(def, data, parsed, 'name');
-					testProp(def, data, parsed, 'version');
-					testProp(def, data, parsed, 'submodule');
-					testProp(def, data, parsed, 'description');
-					testProp(def, data, parsed, 'projectUrl');
-					testProp(def, data, parsed, 'reposUrl');
+					testProp(def, actual, expected, data, parsed, 'name');
+					testProp(def, actual, expected, data, parsed, 'projectUrl');
+					testProp(def, actual, expected, data, parsed, 'reposUrl');
 
-					assert.like(data.authors.map((author) => {
+					actual.authors = data.authors.map((author) => {
 						return author.toJSON();
-					}), parsed.authors, def.key + ' .' + 'authors');
+					});
+					expected.authors = parsed.authors;
 				}
+				actuals.push(actual);
+				expecteds.push(expected);
 			});
+
+			//xm.log(actuals);
+
+			assert.deepEqual(actuals, expecteds);
 		});
 	});
 });

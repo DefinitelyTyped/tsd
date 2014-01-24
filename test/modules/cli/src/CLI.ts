@@ -52,13 +52,15 @@ describe('CLI Query', () => {
 			args.push('--style', test.style);
 		}
 		else {
-			args.push('--style', 'no');
+			args.push('--style', 'plain');
 		}
-		args.push('--cacheDir', info.cacheDirTestFixed);
+
 		args.push('--progress', 'no');
 		args.push('--checkUpdate', 'no');
 		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
-		// args.push('--config', info.configFile);
+
+		args.push('--cacheDir', info.cacheDirTestFixed);
+		args.push('--config', path.resolve('./test/fixtures/config/default.json'));
 
 		// TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
 		xm.file.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});

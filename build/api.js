@@ -302,12 +302,27 @@ var xm;
         }
         object.hideProps = hideProps;
 
-        function lockProps(object, props) {
+        function lockProps(object, props, pub, pref) {
+            if (typeof pub === "undefined") { pub = true; }
+            if (typeof pref === "undefined") { pref = true; }
             props.forEach(function (property) {
-                Object.defineProperty(object, property, { writable: false });
+                if (/^_/.test(property)) {
+                    if (pref) {
+                        Object.defineProperty(object, property, { writable: false });
+                    }
+                } else if (pub) {
+                    Object.defineProperty(object, property, { writable: false });
+                }
             });
         }
         object.lockProps = lockProps;
+
+        function forceProps(object, props) {
+            Object.keys(props).forEach(function (property) {
+                Object.defineProperty(object, property, { value: props[property], writable: false });
+            });
+        }
+        object.forceProps = forceProps;
 
         function freezeProps(object, props) {
             props.forEach(function (property) {
@@ -988,6 +1003,14 @@ var xm;
         StyledOut.prototype.tweakBraces = function (str, muted) {
             if (typeof muted === "undefined") { muted = false; }
             return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
+        };
+
+        StyledOut.prototype.tweakAll = function (str, muted) {
+            if (typeof muted === "undefined") { muted = false; }
+            var _this = this;
+            return this.tweakURI(str.replace(/[\.,_\[\{\(\<>\)\}\]]/g, function (value) {
+                return _this._style.muted(value);
+            }));
         };
 
         StyledOut.prototype.tweakExp = function (str, expr, muted) {
@@ -1859,8 +1882,6 @@ var tsd;
         }
         DefInfo.prototype.resetFields = function () {
             this.name = '';
-            this.version = '';
-            this.submodule = '';
             this.description = '';
             this.projectUrl = '';
 
@@ -1876,17 +1897,7 @@ var tsd;
         };
 
         DefInfo.prototype.toString = function () {
-            var ret = this.name;
-            if (this.submodule) {
-                ret += ' ' + this.submodule;
-            }
-            if (this.version) {
-                ret += ' ' + this.version;
-            }
-            if (this.description) {
-                ret += ' ' + JSON.stringify(this.description);
-            }
-            return ret;
+            return this.name;
         };
 
         DefInfo.prototype.isValid = function () {
@@ -3875,7 +3886,7 @@ var xm;
                         useCached = !_this.request.forceRefresh;
                         if (useCached && xm.isNumber(_this.request.httpInterval) && _this.cache.opts.cacheWrite) {
                             if (new Date(_this.object.info.cacheUpdated).getTime() < Date.now() - _this.request.httpInterval) {
-                                _this._defer.notify(xm.getNote('check on interval: ' + _this.request.url + ' -> ' + _this.request.key));
+                                _this._defer.notify(xm.getNote('update: ' + _this.request.url + ' -> ' + _this.request.key));
                                 useCached = false;
                             }
                         }
@@ -3883,7 +3894,7 @@ var xm;
 
                     if (useCached) {
                         return _this.cacheTouch().then(function () {
-                            _this._defer.notify(xm.getNote('local cache: ' + _this.request.url + ' -> ' + _this.request.key));
+                            _this._defer.notify(xm.getNote('local: ' + _this.request.url + ' -> ' + _this.request.key));
                             _this._defer.resolve(_this.object);
                         });
                     }
@@ -4413,11 +4424,15 @@ var xm;
                 this.storeDir = storeDir;
                 this.opts = (opts || new http.CacheOpts());
 
-                this.manageFile = path.join(this.storeDir, '_info.json');
-
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
                 this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
+
+                this.setStoreDir(storeDir);
             }
+            HTTPCache.prototype.setStoreDir = function (dir) {
+                this.manageFile = path.join(this.storeDir, '_info.json');
+            };
+
             HTTPCache.prototype.getObject = function (request) {
                 var _this = this;
                 xm.assertVar(request, xm.http.CacheRequest, 'request');
@@ -4651,7 +4666,7 @@ var git;
             this.track = new xm.EventLog(prefix, label);
         }
         GithubLoader.prototype._initGithubLoader = function (lock) {
-            xm.object.lockProps(this, ['repo', 'track', 'label', 'formatVersion']);
+            xm.object.lockProps(this, ['repo', 'cache', 'track', 'label', 'formatVersion']);
             if (lock) {
                 xm.object.lockProps(this, lock);
             }
@@ -4964,10 +4979,9 @@ var git;
             xm.assertVar(storeDir, 'string', 'storeDir');
 
             this.config = config;
+            this.urls = new git.GithubURLs(this);
 
             this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
-
-            this.urls = new git.GithubURLs(this);
             this.api = new git.GithubAPI(this, this.storeDir);
             this.raw = new git.GithubRaw(this, this.storeDir);
 
@@ -5848,24 +5862,29 @@ var tsd;
         __extends(IndexManager, _super);
         function IndexManager(core) {
             _super.call(this, core, 'index', 'IndexManager');
+            this._defer = new Map();
         }
         IndexManager.prototype.getIndex = function () {
             var _this = this;
-            if (this._defer) {
+            var refKey = this.core.context.config.repoRef;
+            var defer = this._defer[refKey];
+
+            if (defer) {
                 this.track.skip(IndexManager.init);
 
                 var d = Q.defer();
-                this._defer.promise.then(d.resolve, d.reject);
-                return this._defer.promise;
+                defer.promise.then(d.resolve, d.reject);
+                return defer.promise;
             }
             var index = new tsd.DefIndex();
 
-            this._defer = Q.defer();
+            defer = Q.defer();
+            this._defer[refKey] = defer;
 
-            this.track.promise(this._defer.promise, IndexManager.init, this.core.context.config.repoRef);
+            this.track.promise(defer.promise, IndexManager.init, refKey);
             this.track.start(IndexManager.branch_get);
 
-            this.core.repo.api.getBranch(this.core.context.config.ref).progress(this._defer.notify).then(function (branchData) {
+            this.core.repo.api.getBranch(this.core.context.config.ref).progress(defer.notify).then(function (branchData) {
                 _this.track.complete(IndexManager.branch_get);
 
                 if (!branchData) {
@@ -5877,21 +5896,20 @@ var tsd;
                 }
                 _this.track.start(IndexManager.tree_get);
 
-                return _this.core.repo.api.getTree(sha, true).progress(_this._defer.notify).then(function (data) {
+                return _this.core.repo.api.getTree(sha, true).progress(defer.notify).then(function (data) {
                     _this.track.complete(IndexManager.tree_get);
 
                     index.init(branchData, data);
 
                     _this.track.complete(IndexManager.init);
-                    _this._defer.resolve(index);
+                    defer.resolve(index);
                 });
             }).fail(function (err) {
                 _this.track.failure(IndexManager.init, err.message, err);
-                _this._defer.reject(err);
-                _this._defer = null;
+                defer.reject(err);
             }).done();
 
-            return this._defer.promise;
+            return defer.promise;
         };
 
         IndexManager.prototype.procureDef = function (path) {
@@ -6012,6 +6030,7 @@ var tsd;
                 }
                 return xm.file.readJSONPromise(target).then(function (json) {
                     _this.core.context.config.parseJSON(json, target);
+                    _this.core.updateConfig();
                     d.resolve(null);
                 });
             }).fail(d.reject).done();
@@ -6610,10 +6629,10 @@ var tsd;
     var anyGreedyCap = /(.*)/;
     var anyLazyCap = /(.*?)/;
 
-    var identifierCap = /([\w\._-]*(?:[ \t]*[\w\._-]+)*?)/;
-    var versionCap = /-?v?(\d+\.\d+\.?\d*\.?\d*)?/;
-    var wordsCap = /([\w \t_-]+[\w]+)/;
-    var labelCap = /([\w_-]+[\w]+)/;
+    var identifierCap = /(\w+(?:[ \w\.-]*?\w)*?)/;
+    var versionCap = /(?:[ \t:-]?v?(\d+\.\d+\.?\d*\.?\d*))?/;
+    var wordsCap = /([\w \t-]+[\w]+)/;
+    var labelCap = /([\w-]+[\w]+)/;
 
     var delimStart = /[<\[\{\(]/;
     var delimStartOpt = /[<\[\{\(]?/;
@@ -6634,7 +6653,7 @@ var tsd;
 
     var referencePath = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).append(referenceTag).append(spaceOpt, expEnd).join();
 
-    var typeHead = glue(commentStart).append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap).append(/[ \t:-]+/, versionCap, spaceOpt).append(anyGreedy, expEnd).join('i');
+    var typeHead = glue(commentStart).append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyGreedyCap).append(expEnd).join('i');
 
     var projectUrl = glue(commentStart).append(/Project/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
 
@@ -6684,9 +6703,8 @@ var tsd;
 
             this.parser.addParser(new xm.LineParser('any', anyGreedyCap, 0, null, ['head', 'any']));
 
-            this.parser.addParser(new xm.LineParser('head', typeHead, 2, function (match) {
+            this.parser.addParser(new xm.LineParser('head', typeHead, 1, function (match) {
                 data.name = match.getGroup(0, data.name);
-                data.version = match.getGroup(1, data.version);
             }, fields));
 
             fields = mutate(fields, null, ['projectUrl']);
@@ -6922,6 +6940,8 @@ var tsd;
             xm.assertVar(context, tsd.Context, 'context');
             this.context = context;
 
+            this.track = new xm.EventLog('core', 'Core');
+
             this._components = new tsd.MultiManager(this);
             this._components.add([
                 this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir),
@@ -6937,17 +6957,25 @@ var tsd;
             this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
             this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
-            this.track = new xm.EventLog('core', 'Core');
             this.verbose = this.context.verbose;
 
-            xm.object.lockProps(this, Object.keys(this));
             xm.object.hidePrefixed(this);
+            xm.object.lockProps(this, Object.keys(this), true, false);
         }
+        Core.prototype.updateConfig = function () {
+            this._components.replace({
+                repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir)
+            });
+            this.useCacheMode(this._cacheMode);
+        };
+
         Core.prototype.getInstallPath = function (def) {
             return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
         };
 
         Core.prototype.useCacheMode = function (modeName) {
+            this._cacheMode = modeName;
+
             if (modeName in xm.http.CacheMode) {
                 var mode = xm.http.CacheMode[modeName];
                 this.repo.api.cache.opts.applyCacheMode(mode);
@@ -6971,13 +6999,30 @@ var tsd;
         function MultiManager(core) {
             this.core = core;
             this._verbose = false;
-            this.trackables = [];
+            this.trackables = new Set();
             xm.assertVar(core, tsd.Core, 'core');
         }
         MultiManager.prototype.add = function (list) {
             var _this = this;
             list.forEach(function (comp) {
-                _this.trackables.push(comp);
+                _this.trackables.add(comp);
+            });
+        };
+
+        MultiManager.prototype.remove = function (list) {
+            while (list.length > 0) {
+                this.trackables.delete(list.pop());
+            }
+        };
+
+        MultiManager.prototype.replace = function (fields) {
+            var _this = this;
+            Object.keys(fields).forEach(function (property) {
+                _this.trackables.delete(_this.core[property]);
+                var trackable = fields[property];
+                Object.defineProperty(_this.core, property, { value: trackable, writable: false });
+                trackable.verbose = _this._verbose;
+                _this.trackables.add(fields[property]);
             });
         };
 
@@ -7963,6 +8008,7 @@ var tsd;
             function Printer(output, indent) {
                 if (typeof indent === "undefined") { indent = 0; }
                 this.indent = 0;
+                this._remainingPrev = -1;
                 this.output = output;
                 this.indent = indent;
             }
@@ -8051,11 +8097,11 @@ var tsd;
                     this.output.line();
                     if (file.info.isValid()) {
                         this.output.indent(1).tweakPunc(file.info.toString()).ln();
-                        this.output.indent(2).tweakBraces(file.info.projectUrl, true).ln();
+                        this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
 
                         file.info.authors.forEach(function (author) {
                             _this.output.ln();
-                            _this.output.indent(2).tweakBraces(author.toString(), true).ln();
+                            _this.output.indent(2).tweakAll(author.toString(), true).ln();
                         });
                     } else {
                         this.output.indent(1).accent('<invalid info>').line();
@@ -8125,6 +8171,14 @@ var tsd;
 
             Printer.prototype.rateInfo = function (info, note) {
                 if (typeof note === "undefined") { note = false; }
+                if (info.remaining === this._remainingPrev) {
+                    return this.output;
+                }
+                this._remainingPrev = info.remaining;
+                if (info.remaining === info.limit) {
+                    return this.output;
+                }
+
                 if (note) {
                     this.output.indent(1).report(true).span('rate-limit').sp();
                 } else {
@@ -8731,6 +8785,11 @@ var tsd;
         return output.line(err);
     }
 
+    var skipProgress = [
+        /^(?:\w+: )?remote:/,
+        /^(?:\w+: )?local:/
+    ];
+
     function reportProgress(obj) {
         if (obj instanceof git.GitRateInfo) {
             return print.rateInfo(obj, true);
@@ -8739,7 +8798,17 @@ var tsd;
             if (obj.data instanceof git.GitRateInfo) {
                 return print.rateInfo(obj.data, true);
             }
+
+            if (obj.message) {
+                if (skipProgress.some(function (exp) {
+                    return exp.test(obj.message);
+                })) {
+                    return output;
+                }
+            }
+
             output.indent().note(true);
+
             if (xm.isValid(obj.code)) {
                 output.label(obj.code);
             }
