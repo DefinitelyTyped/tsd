@@ -10,6 +10,7 @@ module xm {
 	'use strict';
 
 	var endSlashTrim = /\/?$/;
+	var trim = /(^\s+)|(\s?\/?\s?$)/;
 
 	/*
 	 AuthorInfo: basic info
@@ -18,7 +19,7 @@ module xm {
 
 		constructor(public name:string = '', public url:string = null, public email:string = null) {
 			if (this.url) {
-				this.url = this.url.replace(endSlashTrim, '');
+				this.url = this.url.replace(trim, '');
 			}
 		}
 
@@ -27,7 +28,9 @@ module xm {
 		}
 
 		toJSON():any {
-			var obj:any = {name: this.name};
+			var obj:any = {
+				name: this.name
+			};
 			if (this.url) {
 				obj.url = this.url;
 			}

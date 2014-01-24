@@ -126,36 +126,36 @@ module tsd {
 			}
 			return null;
 		}).then(() => {
-			return getContext(ctx).then((context:tsd.Context) => {
-				var job = new Job();
-				job.context = context;
+				return getContext(ctx).then((context:tsd.Context) => {
+					var job = new Job();
+					job.context = context;
 
-				job.ctx = ctx;
-				job.api = new tsd.API(job.context);
+					job.ctx = ctx;
+					job.api = new tsd.API(job.context);
 
-				job.options = new tsd.Options();
+					job.options = new tsd.Options();
 
-				job.options.timeout = ctx.getOpt(Opt.timeout);
-				job.options.limitApi = ctx.getOpt(Opt.limit);
-				job.options.minMatches = ctx.getOpt(Opt.min);
-				job.options.maxMatches = ctx.getOpt(Opt.max);
+					job.options.timeout = ctx.getOpt(Opt.timeout);
+					job.options.limitApi = ctx.getOpt(Opt.limit);
+					job.options.minMatches = ctx.getOpt(Opt.min);
+					job.options.maxMatches = ctx.getOpt(Opt.max);
 
-				job.options.saveToConfig = ctx.getOpt(Opt.save);
-				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+					job.options.saveToConfig = ctx.getOpt(Opt.save);
+					job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+					job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-				if (ctx.hasOpt(Opt.cacheMode)) {
-					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-				}
+					if (ctx.hasOpt(Opt.cacheMode)) {
+						job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+					}
 
-				var required:boolean = ctx.hasOpt(Opt.config);
-				return job.api.readConfig(!required).progress(d.notify).then(() => {
-					return runUpdateNotifier(ctx, job.context);
-				}).then(() => {
-					d.resolve(job);
+					var required:boolean = ctx.hasOpt(Opt.config);
+					return job.api.readConfig(!required).progress(d.notify).then(() => {
+						return runUpdateNotifier(ctx, job.context);
+					}).then(() => {
+							d.resolve(job);
+						});
 				});
-			});
-		}).fail(d.reject);
+			}).fail(d.reject);
 
 		return d.promise;
 	}
@@ -383,7 +383,7 @@ module tsd {
 						output.ln().info().error('error').sp().span(err.message).ln();
 						throw(err);
 					});
-				}, reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -398,7 +398,7 @@ module tsd {
 					output.ln();
 					return <any> job.api.context.logInfo(true);
 
-				}, reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -414,7 +414,7 @@ module tsd {
 					return job.api.purge(true, true).progress(notify).then(() => {
 
 					});
-				}, reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -480,14 +480,14 @@ module tsd {
 							return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 								return run(ctx, job, selection);
 							}, true).then(() => {
-								// whut?
-							}, (err) => {
-								output.report().span(action).space().error('error!').ln();
-								reportError(err, false);
-							}, notify);
+									// whut?
+								}, (err) => {
+									output.report().span(action).space().error('error!').ln();
+									reportError(err, false);
+								}, notify);
 						});
 					});
-				}, reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -507,7 +507,62 @@ module tsd {
 					return job.api.reinstall(job.options).progress(notify).then((result:tsd.InstallResult) => {
 						print.installResult(result);
 					});
-				}, reportError);
+				}).fail(reportError);
+			};
+		});
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'validate';
+			cmd.label = 'validate data source';
+			cmd.groups = [Group.support];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
+				return getContext(ctx).then((context:tsd.Context) => {
+					var job = new Job();
+					job.context = context;
+
+					job.ctx = ctx;
+					job.api = new tsd.API(job.context);
+
+					job.query = new tsd.Query('*');
+					job.query.parseInfo = true;
+
+					job.options = new tsd.Options();
+					job.options.resolveDependencies = true;
+
+					if (ctx.hasOpt(Opt.cacheMode)) {
+						job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+					}
+
+					var required:boolean = ctx.hasOpt(Opt.config);
+					return job.api.readConfig(!required).progress(notify).then(() => {
+						return job.api.select(job.query, job.options).progress(notify).then((selection:tsd.Selection) => {
+							if (selection.selection.length === 0) {
+								output.ln().report().warning('zero results').ln();
+								return;
+							}
+
+							var invalid = [];
+							selection.selection.forEach((def:tsd.DefVersion) => {
+								if (!def.commit || !def.info) {
+									invalid.push(def);
+									return;
+								}
+								if (!def.info.name || !def.info.projectUrl || def.info.authors.length === 0) {
+									invalid.push(def);
+									return;
+								}
+							});
+							if (invalid.length > 0) {
+								output.line();
+								output.info(true).span('found').space().error(invalid.length).space().span('invalid defs').ln();
+								output.inspect(invalid, 2);
+							}
+						});
+					});
+				}).fail(reportError);
 			};
 		});
 
@@ -523,7 +578,7 @@ module tsd {
 					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
 						print.rateInfo(info);
 					});
-				}, reportError);
+				}).fail(reportError);
 			};
 		});
 

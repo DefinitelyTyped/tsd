@@ -108,8 +108,9 @@ module tsd {
 					this.output.line();
 					if (file.info.isValid()) {
 						this.output.indent(1).tweakPunc(file.info.toString()).ln();
-						this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
-
+						if (file.info.projectUrl) {
+							this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
+						}
 						file.info.authors.forEach((author:xm.AuthorInfo) => {
 							this.output.ln();
 							this.output.indent(2).tweakAll(author.toString(), true).ln();

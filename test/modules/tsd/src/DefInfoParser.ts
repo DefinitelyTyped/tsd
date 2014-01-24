@@ -33,7 +33,7 @@ describe('DefInfoParser', () => {
 		filter = null;
 	});
 
-	describe.only('loop', () => {
+	describe('loop', () => {
 		it('data ok', () => {
 			assert.operator(data.length, '>', 0, 'data.length');
 		});
@@ -42,35 +42,38 @@ describe('DefInfoParser', () => {
 			var actuals = [];
 			var expecteds = [];
 
-			function testProp(def:helper.HeaderAssert, actual:Object, expected:Object, data:Object, parsed:Object, prop:string):void {
+			function testProp(item:helper.HeaderAssert, actual:Object, expected:Object, data:Object, parsed:Object, prop:string):void {
 				actual[prop] = parsed[prop];
 				expected[prop] = data[prop];
 			}
 
-			data.forEach((def:helper.HeaderAssert) => {
-				assert.ok(def, def.key + ' ok');
+			data.forEach((item:helper.HeaderAssert) => {
+				assert.ok(item, item.key + ' ok');
 
 				var actual:any = {
-					key:def.key
+					key:item.key
 				};
 				var expected:any = {
-					key:def.key
+					key:item.key
 				};
 
 				var data = new tsd.DefInfo();
-				var parser = new tsd.DefInfoParser(true);
-				parser.parse(data, def.header);
+				var parser = new tsd.DefInfoParser(false);
+				parser.parse(data, item.header);
 
-				var parsed = def.fields.parsed;
-				if (def.fields.fields) {
-					def.fields.fields.forEach((field:string) => {
-						testProp(def, actual, expected, data, parsed, field);
+				var parsed = item.fields.parsed;
+
+				assert.ok(parsed, item.key + ' parsed (test fixture)');
+
+				if (item.fields.fields) {
+					item.fields.fields.forEach((field:string) => {
+						testProp(item, actual, expected, data, parsed, field);
 					});
 				}
 				else {
-					testProp(def, actual, expected, data, parsed, 'name');
-					testProp(def, actual, expected, data, parsed, 'projectUrl');
-					testProp(def, actual, expected, data, parsed, 'reposUrl');
+					testProp(item, actual, expected, data, parsed, 'name');
+					testProp(item, actual, expected, data, parsed, 'projectUrl');
+					testProp(item, actual, expected, data, parsed, 'reposUrl');
 
 					actual.authors = data.authors.map((author) => {
 						return author.toJSON();
@@ -80,6 +83,9 @@ describe('DefInfoParser', () => {
 				actuals.push(actual);
 				expecteds.push(expected);
 			});
+
+
+
 
 			assert.deepEqual(actuals, expecteds);
 		});

@@ -1838,6 +1838,7 @@ var xm;
     'use strict';
 
     var endSlashTrim = /\/?$/;
+    var trim = /(^\s+)|(\s?\/?\s?$)/;
 
     var AuthorInfo = (function () {
         function AuthorInfo(name, url, email) {
@@ -1848,7 +1849,7 @@ var xm;
             this.url = url;
             this.email = email;
             if (this.url) {
-                this.url = this.url.replace(endSlashTrim, '');
+                this.url = this.url.replace(trim, '');
             }
         }
         AuthorInfo.prototype.toString = function () {
@@ -1856,7 +1857,9 @@ var xm;
         };
 
         AuthorInfo.prototype.toJSON = function () {
-            var obj = { name: this.name };
+            var obj = {
+                name: this.name
+            };
             if (this.url) {
                 obj.url = this.url;
             }
@@ -1873,8 +1876,6 @@ var tsd;
 (function (tsd) {
     'use strict';
 
-    var endSlashTrim = /\/?$/;
-
     var DefInfo = (function () {
         function DefInfo() {
             this.references = [];
@@ -1882,6 +1883,7 @@ var tsd;
         }
         DefInfo.prototype.resetFields = function () {
             this.name = '';
+            this.version = '';
             this.description = '';
             this.projectUrl = '';
 
@@ -6631,6 +6633,7 @@ var tsd;
 
     var identifierCap = /(\w+(?:[ \w\.-]*?\w)*?)/;
     var versionCap = /(?:[ \t:-]?v?(\d+\.\d+\.?\d*\.?\d*))?/;
+    var semwerCap = /[ \(-]+v?(\d+(?:\.\d+)*(?:-[\w-]+(?:\.[\w-]+)?)?)\)?/;
     var wordsCap = /([\w \t-]+[\w]+)/;
     var labelCap = /([\w-]+[\w]+)/;
 
@@ -6641,25 +6644,38 @@ var tsd;
 
     var seperatorOpt = /[,;]?/;
 
-    var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
-    var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)(?:(?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
+    var uft8bom = /\uFEFF/;
+    var uft8bomOpt = /\uFEFF?/;
+
+    var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-]*)?\??(?:[\-\+=&;%@\.\w]*)#?(?:[\.\!\/\\\w]*))?)/;
+    var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)(?:(?:\/[\+~%\/\.\w\-]*)?\??(?:[\-\+=&;%@\.\w]*)#?(?:[\.\!\/\\\w]*))?)/;
+
+    var charsIntl = /[0-9A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02af\u1d00-\u1d25\u1d62-\u1d65\u1d6b-\u1d77\u1d79-\u1d9a\u1e00-\u1eff\u2090-\u2094\u2184-\u2184\u2488-\u2490\u271d-\u271d\u2c60-\u2c7c\u2c7e-\u2c7f\ua722-\ua76f\ua771-\ua787\ua78b-\ua78c\ua7fb-\ua7ff\ufb00-\ufb06]+/;
 
     var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
 
     var commentStart = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).join();
+    var commentStartFirst = glue(expStart, uft8bomOpt, spaceOpt, /\/\/+/, spaceOpt).join();
     var optUrl = glue('(?:', spaceOpt, delimStartOpt, urlFullCap, delimEndOpt, ')?').join();
 
-    var commentLine = glue(commentStart).append(anyLazyCap).append(spaceOpt, expEnd).join();
+    var wordsIntlCap = glue('(', charsIntl, '(?:', /[ _-]+/, charsIntl, ')*', ')').join();
 
-    var referencePath = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).append(referenceTag).append(spaceOpt, expEnd).join();
+    var wordy = /[^ \t\<\(\{\{,;:]+/;
+    var nameHackyCap = glue('(', wordy, '(?:', / /, wordy, ')*', ')').join();
 
-    var typeHead = glue(commentStart).append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyGreedyCap).append(expEnd).join('i');
+    var commentLine = glue(commentStartFirst).append(anyLazyCap).append(spaceOpt, expEnd).join();
+
+    var referencePath = glue(expStart, uft8bomOpt, spaceOpt, /\/\/+/, spaceOpt).append(referenceTag).append(spaceOpt, expEnd).join();
+
+    var typeHead = glue(commentStartFirst).append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyLazyCap, spaceOpt).append(expEnd).join('i');
 
     var projectUrl = glue(commentStart).append(/Project/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
 
-    var defAuthorUrl = glue(commentStart).append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt).append(wordsCap, optUrl).append(spaceOpt, seperatorOpt, spaceOpt, expEnd).join('i');
+    var defAuthorUrl = glue(commentStart).append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt).append(nameHackyCap, optUrl).append(spaceOpt, anyLazyCap, spaceOpt, expEnd).join('i');
 
-    var defAuthorUrlAlt = glue(commentStart).append(/Author[ \t]*:?/, spaceOpt).append(wordsCap, optUrl).append(spaceOpt, seperatorOpt, spaceOpt, expEnd).join('i');
+    var defAuthorFollow = glue(commentStart).append(/[ \t]*/, spaceOpt).append(nameHackyCap, optUrl).append(spaceOpt, anyLazyCap, spaceOpt, expEnd).join('i');
+
+    var defAuthorUrlRest = glue(spaceOpt).append(/(?:,|(?:and))/, spaceOpt).append(nameHackyCap, optUrl).append(spaceOpt).join('gi');
 
     var reposUrl = glue(commentStart).append(/Definitions/, spaceOpt, /:?/, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
 
@@ -6699,12 +6715,18 @@ var tsd;
 
             this.parser = new xm.LineParserCore(this.verbose);
 
-            var fields = ['projectUrl', 'defAuthorUrl', 'defAuthorUrlAlt', 'reposUrl', 'reposUrlAlt', 'referencePath'];
+            var fields = ['projectUrl', 'defAuthorUrl', 'reposUrl', 'reposUrlAlt', 'referencePath'];
 
             this.parser.addParser(new xm.LineParser('any', anyGreedyCap, 0, null, ['head', 'any']));
 
             this.parser.addParser(new xm.LineParser('head', typeHead, 1, function (match) {
                 data.name = match.getGroup(0, data.name);
+
+                semwerCap.lastIndex = 0;
+                var sub = semwerCap.exec(data.name);
+                if (sub) {
+                    data.version = sub[1];
+                }
             }, fields));
 
             fields = mutate(fields, null, ['projectUrl']);
@@ -6713,21 +6735,28 @@ var tsd;
                 data.projectUrl = match.getGroup(0, data.projectUrl).replace(endSlashTrim, '');
             }, fields));
 
-            fields = mutate(fields, ['defAuthorAppend'], ['defAuthorUrl', 'defAuthorUrlAlt']);
+            fields = mutate(fields, ['defAuthorFollow'], null);
 
-            this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 2, function (match) {
+            var author = function (match) {
                 data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-            }, fields));
 
-            this.parser.addParser(new xm.LineParser('defAuthorUrlAlt', defAuthorUrlAlt, 2, function (match) {
-                data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-            }, fields));
+                var rest = match.getGroup(2);
+                var sub;
+                if (rest.length > 0) {
+                    defAuthorUrlRest.lastIndex = 0;
+                    while (sub = defAuthorUrlRest.exec(rest)) {
+                        defAuthorUrlRest.lastIndex = sub.index + sub[0].length + 1;
+                        if (sub.length > 1) {
+                            data.authors.push(new xm.AuthorInfo(sub[1], sub[2]));
+                        }
+                    }
+                }
+            };
+            this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 3, author, fields));
+            this.parser.addParser(new xm.LineParser('defAuthorFollow', defAuthorFollow, 3, author, fields));
 
-            this.parser.addParser(new xm.LineParser('defAuthorAppend', wordsUrl, 2, function (match) {
-                data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-            }, fields));
+            fields = mutate(fields, null, ['defAuthorUrl', 'defAuthorFollow']);
 
-            fields = mutate(fields, null, ['defAuthorAppend']);
             fields = mutate(fields, null, ['reposUrl', 'reposUrlAlt']);
 
             this.parser.addParser(new xm.LineParser('reposUrl', reposUrl, 1, function (match) {
@@ -6974,9 +7003,9 @@ var tsd;
         };
 
         Core.prototype.useCacheMode = function (modeName) {
-            this._cacheMode = modeName;
-
             if (modeName in xm.http.CacheMode) {
+                this._cacheMode = modeName;
+
                 var mode = xm.http.CacheMode[modeName];
                 this.repo.api.cache.opts.applyCacheMode(mode);
                 this.repo.raw.cache.opts.applyCacheMode(mode);
@@ -8097,8 +8126,9 @@ var tsd;
                     this.output.line();
                     if (file.info.isValid()) {
                         this.output.indent(1).tweakPunc(file.info.toString()).ln();
-                        this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
-
+                        if (file.info.projectUrl) {
+                            this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
+                        }
                         file.info.authors.forEach(function (author) {
                             _this.output.ln();
                             _this.output.indent(2).tweakAll(author.toString(), true).ln();
@@ -8941,7 +8971,7 @@ var tsd;
                         output.ln().info().error('error').sp().span(err.message).ln();
                         throw (err);
                     });
-                }, reportError);
+                }).fail(reportError);
             };
         });
 
@@ -8955,7 +8985,7 @@ var tsd;
                 return getAPIJob(ctx).then(function (job) {
                     output.ln();
                     return job.api.context.logInfo(true);
-                }, reportError);
+                }).fail(reportError);
             };
         });
 
@@ -8969,7 +8999,7 @@ var tsd;
                 return getAPIJob(ctx).then(function (job) {
                     return job.api.purge(true, true).progress(notify).then(function () {
                     });
-                }, reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9035,7 +9065,7 @@ var tsd;
                             }, notify);
                         });
                     });
-                }, reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9053,7 +9083,60 @@ var tsd;
                     return job.api.reinstall(job.options).progress(notify).then(function (result) {
                         print.installResult(result);
                     });
-                }, reportError);
+                }).fail(reportError);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'validate';
+            cmd.label = 'validate data source';
+            cmd.groups = [Group.support];
+            cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
+                return getContext(ctx).then(function (context) {
+                    var job = new Job();
+                    job.context = context;
+
+                    job.ctx = ctx;
+                    job.api = new tsd.API(job.context);
+
+                    job.query = new tsd.Query('*');
+                    job.query.parseInfo = true;
+
+                    job.options = new tsd.Options();
+                    job.options.resolveDependencies = true;
+
+                    if (ctx.hasOpt(Opt.cacheMode)) {
+                        job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+                    }
+
+                    var required = ctx.hasOpt(Opt.config);
+                    return job.api.readConfig(!required).progress(notify).then(function () {
+                        return job.api.select(job.query, job.options).progress(notify).then(function (selection) {
+                            if (selection.selection.length === 0) {
+                                output.ln().report().warning('zero results').ln();
+                                return;
+                            }
+
+                            var invalid = [];
+                            selection.selection.forEach(function (def) {
+                                if (!def.commit || !def.info) {
+                                    invalid.push(def);
+                                    return;
+                                }
+                                if (!def.info.name || !def.info.projectUrl || def.info.authors.length === 0) {
+                                    invalid.push(def);
+                                    return;
+                                }
+                            });
+                            if (invalid.length > 0) {
+                                output.line();
+                                output.info(true).span('found').space().error(invalid.length).space().span('invalid defs').ln();
+                                output.inspect(invalid, 2);
+                            }
+                        });
+                    });
+                }).fail(reportError);
             };
         });
 
@@ -9067,7 +9150,7 @@ var tsd;
                     return job.api.getRateInfo().progress(notify).then(function (info) {
                         print.rateInfo(info);
                     });
-                }, reportError);
+                }).fail(reportError);
             };
         });
 

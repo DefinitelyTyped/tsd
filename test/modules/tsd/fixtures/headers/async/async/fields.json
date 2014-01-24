@@ -1,7 +1,7 @@
 {
 	"parsed": {
 		"name": "Async v0.1",
-		"description": "",
+		"version": "0.1",
 		"projectUrl": "https://github.com/caolan/async",
 		"authors": [
 			{

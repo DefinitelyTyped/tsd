@@ -5,13 +5,12 @@
 module tsd {
 	'use strict';
 
-	var endSlashTrim = /\/?$/;
-
 	/*
 	 DefInfo: parsed info from single definition source
 	 */
 	export class DefInfo {
 		name:string;
+		version:string;
 		description:string;
 		projectUrl:string;
 
@@ -27,6 +26,7 @@ module tsd {
 
 		resetFields() {
 			this.name = '';
+			this.version = '';
 			this.description = '';
 			this.projectUrl = '';
 

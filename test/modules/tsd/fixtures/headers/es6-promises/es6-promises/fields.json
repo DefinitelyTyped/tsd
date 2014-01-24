@@ -1,0 +1,14 @@
+{
+	"parsed": {
+		"name": "es6-promises",
+		"version": "",
+		"projectUrl": "https://github.com/jakearchibald/ES6-Promises",
+		"authors": [
+			{
+				"name": "François de Campredon",
+				"url": "https://github.com/fdecampredon"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	}
+}

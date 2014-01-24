@@ -93,9 +93,9 @@ module tsd {
 		}
 
 		useCacheMode(modeName:string):void {
-			this._cacheMode = modeName;
-
 			if (modeName in xm.http.CacheMode) {
+				this._cacheMode = modeName;
+
 				var mode = xm.http.CacheMode[modeName];
 				this.repo.api.cache.opts.applyCacheMode(mode);
 				this.repo.raw.cache.opts.applyCacheMode(mode);

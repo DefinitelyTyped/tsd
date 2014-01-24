@@ -231,6 +231,9 @@ module xm {
 		// params: id, name of a matcher, callback to apply mater's data, optional list of following parsers
 		constructor(public id:string, public exp:RegExp, public groupsMin:number,
 		            public callback:(match:LineParserMatch) => void, public nextIds:string[] = []) {
+
+			// console.log(id);
+			// console.log(exp);
 		}
 
 		match(str:string, offset:number, limit:number):LineParserMatch {

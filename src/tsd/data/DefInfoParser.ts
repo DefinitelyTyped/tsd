@@ -7,6 +7,8 @@
 module tsd {
 	'use strict';
 
+	/* tslint:disable:max-line-length */
+
 	// TODO replace vanilla RegExp with XRegExp? (low prio)
 
 	var endSlashTrim = /\/?$/;
@@ -27,6 +29,7 @@ module tsd {
 
 	var identifierCap = /(\w+(?:[ \w\.-]*?\w)*?)/;
 	var versionCap = /(?:[ \t:-]?v?(\d+\.\d+\.?\d*\.?\d*))?/;
+	var semwerCap = /[ \(-]+v?(\d+(?:\.\d+)*(?:-[\w-]+(?:\.[\w-]+)?)?)\)?/;
 	var wordsCap = /([\w \t-]+[\w]+)/;
 	var labelCap = /([\w-]+[\w]+)/;
 
@@ -37,87 +40,101 @@ module tsd {
 
 	var seperatorOpt = /[,;]?/;
 
+	var uft8bom = /\uFEFF/;
+	var uft8bomOpt = /\uFEFF?/;
 
-	/* tslint:disable:max-line-length */
 	// http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
-	var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
-	var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)(?:(?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
+	var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-]*)?\??(?:[\-\+=&;%@\.\w]*)#?(?:[\.\!\/\\\w]*))?)/;
+	var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)(?:(?:\/[\+~%\/\.\w\-]*)?\??(?:[\-\+=&;%@\.\w]*)#?(?:[\.\!\/\\\w]*))?)/;
 
-	/* tslint:enable:max-line-length */
+	// http://stackoverflow.com/a/12963134/1026362
+	var charsIntl = /[0-9A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02af\u1d00-\u1d25\u1d62-\u1d65\u1d6b-\u1d77\u1d79-\u1d9a\u1e00-\u1eff\u2090-\u2094\u2184-\u2184\u2488-\u2490\u271d-\u271d\u2c60-\u2c7c\u2c7e-\u2c7f\ua722-\ua76f\ua771-\ua787\ua78b-\ua78c\ua7fb-\ua7ff\ufb00-\ufb06]+/;
 
 	// var referencePath = /^[ \t]*\/\/\/\/?[ \t]*<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>[ \t]*$/gm;
 	var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
 
 	// glue long RegExp's from parts
 	var commentStart = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).join();
+	var commentStartFirst = glue(expStart, uft8bomOpt, spaceOpt, /\/\/+/, spaceOpt).join();
 	var optUrl = glue('(?:', spaceOpt, delimStartOpt, urlFullCap, delimEndOpt, ')?').join();
 
-	var commentLine = glue(commentStart)
-	.append(anyLazyCap)
-	.append(spaceOpt, expEnd)
-	.join();
+	var wordsIntlCap = glue('(', charsIntl, '(?:', /[ _-]+/, charsIntl, ')*', ')').join();
 
-	var referencePath = glue(expStart, spaceOpt, /\/\/+/, spaceOpt)
-	.append(referenceTag)
-	.append(spaceOpt, expEnd)
-	.join();
+	// defeat.. just use anything
+	var wordy = /[^ \t\<\(\{\{,;:]+/;
+	var nameHackyCap = glue('(', wordy, '(?:', / /, wordy, ')*', ')').join();
 
-	var typeHead = glue(commentStart)
-	.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyGreedyCap)
-	// .append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
-	// .append(versionCap, spaceOpt)
-	.append(expEnd)
-	.join('i');
+	var commentLine = glue(commentStartFirst)
+		.append(anyLazyCap)
+		.append(spaceOpt, expEnd)
+		.join();
+
+	var referencePath = glue(expStart, uft8bomOpt, spaceOpt, /\/\/+/, spaceOpt)
+		.append(referenceTag)
+		.append(spaceOpt, expEnd)
+		.join();
+
+	var typeHead = glue(commentStartFirst)
+		.append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, anyLazyCap, spaceOpt)
+		// .append(/Type definitions?/, spaceOpt, /(?:for)?:?/, spaceOpt, identifierCap)
+		// .append(versionCap, spaceOpt)
+		.append(expEnd)
+		.join('i');
 
 	var projectUrl = glue(commentStart)
-	.append(/Project/, spaceOpt, /:?/, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
-
+		.append(/Project/, spaceOpt, /:?/, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	var defAuthorUrl = glue(commentStart)
-	.append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt)
-	.append(wordsCap, optUrl)
-	.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
-	.join('i');
+		.append(/Definitions[ \t]+by[ \t]*:?/, spaceOpt)
+		.append(nameHackyCap, optUrl)
+		.append(spaceOpt, anyLazyCap, spaceOpt, expEnd)
+		.join('i');
 
-	var defAuthorUrlAlt = glue(commentStart)
-	.append(/Author[ \t]*:?/, spaceOpt)
-	.append(wordsCap, optUrl)
-	.append(spaceOpt, seperatorOpt, spaceOpt, expEnd)
-	.join('i');
+	var defAuthorFollow = glue(commentStart)
+		.append(/[ \t]*/, spaceOpt)
+		.append(nameHackyCap, optUrl)
+		.append(spaceOpt, anyLazyCap, spaceOpt, expEnd)
+		.join('i');
+
+	var defAuthorUrlRest = glue(spaceOpt)
+		.append(/(?:,|(?:and))/, spaceOpt)
+		.append(nameHackyCap, optUrl)
+		.append(spaceOpt)
+		.join('gi');
 
 	var reposUrl = glue(commentStart)
-	.append(/Definitions/, spaceOpt, /:?/, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
+		.append(/Definitions/, spaceOpt, /:?/, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	var reposUrlAlt = glue(commentStart)
-	.append(/DefinitelyTyped/, spaceOpt, /:?/, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
+		.append(/DefinitelyTyped/, spaceOpt, /:?/, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	var labelUrl = glue(commentStart)
-	.append(labelCap, spaceOpt, /:?/, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
+		.append(labelCap, spaceOpt, /:?/, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	var labelWordsUrl = glue(commentStart)
-	.append(labelCap, spaceOpt, /:?/, spaceOpt)
-	.append(wordsCap, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
+		.append(labelCap, spaceOpt, /:?/, spaceOpt)
+		.append(wordsCap, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	var wordsUrl = glue(commentStart)
-	.append(wordsCap, spaceOpt)
-	.append(delimStartOpt, urlFullCap, delimEndOpt)
-	.append(spaceOpt, expEnd)
-	.join('i');
+		.append(wordsCap, spaceOpt)
+		.append(delimStartOpt, urlFullCap, delimEndOpt)
+		.append(spaceOpt, expEnd)
+		.join('i');
 
 	// dry helper
 	function mutate(base:string[], add:string[], remove:string[]):string[] {
@@ -158,14 +175,18 @@ module tsd {
 			// setup parser
 			this.parser = new xm.LineParserCore(this.verbose);
 
-			var fields = ['projectUrl', 'defAuthorUrl', 'defAuthorUrlAlt', 'reposUrl', 'reposUrlAlt', 'referencePath'];
+			var fields = ['projectUrl', 'defAuthorUrl', 'reposUrl', 'reposUrlAlt', 'referencePath'];
 
 			this.parser.addParser(new xm.LineParser('any', anyGreedyCap, 0, null, ['head', 'any']));
 
 			this.parser.addParser(new xm.LineParser('head', typeHead, 1, (match:xm.LineParserMatch) => {
 				data.name = match.getGroup(0, data.name);
-				// data.version = match.getGroup(1, data.version);
-				// data.submodule = match.getGroup(2, data.submodule);
+
+				semwerCap.lastIndex = 0;
+				var sub = semwerCap.exec(data.name);
+				if (sub) {
+					data.version = sub[1];
+				}
 			}, fields));
 
 			fields = mutate(fields, null, ['projectUrl']);
@@ -174,22 +195,28 @@ module tsd {
 				data.projectUrl = match.getGroup(0, data.projectUrl).replace(endSlashTrim, '');
 			}, fields));
 
+			fields = mutate(fields, ['defAuthorFollow'], null);
 
-			fields = mutate(fields, ['defAuthorAppend'], ['defAuthorUrl', 'defAuthorUrlAlt']);
-
-			this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 2, (match:xm.LineParserMatch) => {
+			var author = (match:xm.LineParserMatch) => {
 				data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-			}, fields));
 
-			this.parser.addParser(new xm.LineParser('defAuthorUrlAlt', defAuthorUrlAlt, 2, (match:xm.LineParserMatch) => {
-				data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-			}, fields));
+				var rest = match.getGroup(2);
+				var sub;
+				if (rest.length > 0) {
+					defAuthorUrlRest.lastIndex = 0;
+					while (sub = defAuthorUrlRest.exec(rest)) {
+						defAuthorUrlRest.lastIndex = sub.index + sub[0].length + 1;
+						if (sub.length > 1) {
+							data.authors.push(new xm.AuthorInfo(sub[1], sub[2]));
+						}
+					}
+				}
+			};
+			this.parser.addParser(new xm.LineParser('defAuthorUrl', defAuthorUrl, 3, author, fields));
+			this.parser.addParser(new xm.LineParser('defAuthorFollow', defAuthorFollow, 3, author, fields));
 
-			this.parser.addParser(new xm.LineParser('defAuthorAppend', wordsUrl, 2, (match:xm.LineParserMatch) => {
-				data.authors.push(new xm.AuthorInfo(match.getGroup(0), match.getGroup(1)));
-			}, fields));
+			fields = mutate(fields, null, ['defAuthorUrl', 'defAuthorFollow']);
 
-			fields = mutate(fields, null, ['defAuthorAppend']);
 			fields = mutate(fields, null, ['reposUrl', 'reposUrlAlt']);
 
 			this.parser.addParser(new xm.LineParser('reposUrl', reposUrl, 1, (match:xm.LineParserMatch) => {
@@ -215,4 +242,6 @@ module tsd {
 			this.parser.parse(source, ['head']);
 		}
 	}
+
+	/* tslint:enable:max-line-length */
 }

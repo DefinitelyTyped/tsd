@@ -1,0 +1,18 @@
+{
+	"parsed": {
+		"name": "Web Audio API",
+		"version": "",
+		"projectUrl": "http://www.w3.org/TR/2012/WD-webaudio-20121213",
+		"authors": [
+			{
+				"name": "Baruch Berger",
+				"url": "https://github.com/bbss"
+			},
+			{
+				"name": "Kon",
+				"url": "http://phyzkit.net"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	}
+}
