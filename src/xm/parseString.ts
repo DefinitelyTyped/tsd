@@ -44,7 +44,7 @@ module xm {
 			case 'null':
 			case 'nan':
 			case 'undefined':
-			//language
+			// language
 			case 'no':
 			case 'off':
 			case 'disabled':
@@ -54,7 +54,7 @@ module xm {
 	};
 	parseStringMap.flag = function (input:string) {
 		if (xm.isUndefined(input) || input === '') {
-			//empty flag is true
+			// empty flag is true
 			return true;
 		}
 		return parseStringMap.boolean(input);

@@ -23,14 +23,14 @@ describe('NameMatcher', () => {
 	var files:tsd.Def[];
 	var select:any = {};
 
-	//get data to generate cases
+	// get data to generate cases
 	select.data = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
 	select.source = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
 	assert.ok(select.data, 'select.data');
 	assert.ok(select.source, 'select.source');
 
 	before(() => {
-		//dummy list
+		// dummy list
 		list = [];
 
 		var badFixtures:string[] = [];

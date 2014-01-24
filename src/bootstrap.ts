@@ -1,6 +1,8 @@
 /// <reference path="_ref.d.ts" />
 
 module tsd {
+	'use strict';
+
 	var Q:typeof Q = require('q');
 	Q.longStackSupport = true;
 
@@ -12,6 +14,6 @@ module tsd {
 	// future is now
 	require('es6-shim');
 
-	//TODO verify process.setMaxListeners() still needs to be this high
+	// TODO verify process.setMaxListeners() still needs to be this high
 	process.setMaxListeners(20);
 }

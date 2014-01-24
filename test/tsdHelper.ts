@@ -85,7 +85,7 @@ module helper {
 					var msg = helper.getPathMessage(actualPath, expectedPath, message);
 
 					helper.assertBufferUTFEqual(fs.readfile(actualPath), fs.readfile(actualPath), msg);
-					//helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
+					// helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
 				}, message);
 			}
 		}).then(() => {

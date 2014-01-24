@@ -18,7 +18,7 @@ module helper {
 		if (recursive >= 0) {
 			json.head = helper.serialiseDefVersion(def.head, recursive);
 		}
-		//version from the DefIndex commit +tree (may be not our edit)
+		// version from the DefIndex commit +tree (may be not our edit)
 		if (def.history && recursive >= 0) {
 			json.history = [];
 			def.history.forEach((file:tsd.DefVersion) => {
@@ -49,7 +49,7 @@ module helper {
 			helper.assertDefVersion(def.head, values.head, message + '.head');
 		}
 		if (values.history) {
-			//exactly this order
+			// exactly this order
 			for (var i = 0, ii = values.history.length; i < ii; i++) {
 				helper.assertDefVersion(def.history[i], values.history[i], '#' + i);
 			}
@@ -57,7 +57,7 @@ module helper {
 		}
 	}
 
-	//TODO should not be 'any' type
+	// TODO should not be 'any' type
 	var assertDefArrayUnordered:any = helper.getAssertUnorderedLike<tsd.Def>(function (act:tsd.Def, exp:tsd.Def):boolean {
 		return (act.path === exp.path);
 	}, function (act:tsd.Def, exp:tsd.Def, message:string) {

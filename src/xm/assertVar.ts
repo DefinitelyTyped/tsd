@@ -41,7 +41,7 @@ module xm {
 		md5: isMd5
 	});
 
-	//TODO test xm.assert()
+	// TODO test xm.assert()
 	export function assert(pass:boolean, message:string, actual?:any, expected?:any, showDiff:boolean = true, ssf?:any):void {
 		if (!!pass) {
 			return;
@@ -81,8 +81,8 @@ module xm {
 	/*
 	 assertVar: assert a variable (like a function argument) and throw informative error on assertion failure
 	 */
-	//TODO expand validation options, add RegExp /string length
-	//TODO use extended xm.typeOf (more types and meta types)
+	// TODO expand validation options, add RegExp /string length
+	// TODO use extended xm.typeOf (more types and meta types)
 	export function assertVar(value:any, type:any, label:string, opt:boolean = false):void {
 		if (arguments.length < 3) {
 			throw new AssertionError('expected at least 3 arguments but got "' + arguments.length + '"');

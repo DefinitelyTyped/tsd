@@ -46,7 +46,7 @@ describe('xm.Logger', () => {
 		log.json({a: {b: 2}});
 	}
 
-	//more?
+	// more?
 	it('global xm.log', () => {
 		assertLoggerShape(xm.log);
 	});

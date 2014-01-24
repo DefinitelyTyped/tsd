@@ -24,7 +24,7 @@ module tsd {
 			this.core.content.loadContent(file).progress(d.notify).then((file:DefVersion) => {
 				var parser = new DefInfoParser();
 				if (file.info) {
-					//TODO why not do an early bail and skip reparse?
+					// TODO why not do an early bail and skip reparse?
 					file.info.resetFields();
 				}
 				else {
@@ -34,8 +34,8 @@ module tsd {
 				parser.parse(file.info, file.blob.content.toString('utf8'));
 
 				if (!file.info.isValid()) {
-					//this.log.warn('bad parse in: ' + file);
-					//TODO print more debug info
+					// this.log.warn('bad parse in: ' + file);
+					// TODO print more debug info
 				}
 				d.resolve(file);
 			}).fail(d.reject);

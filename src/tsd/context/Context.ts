@@ -21,7 +21,7 @@ module tsd {
 		packageInfo:xm.PackageJSON;
 		verbose:boolean;
 
-		//TODO remove or use more of this log? (xm.log is pretty global already)
+		// TODO remove or use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
 		configSchema:any;
 
@@ -36,6 +36,7 @@ module tsd {
 			if (configFile) {
 				this.paths.configFile = path.resolve(configFile);
 			}
+
 			this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
 			this.config = new Config(this.configSchema);
 		}
@@ -44,7 +45,7 @@ module tsd {
 			return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
 		}
 
-		//TODO move this out of this class
+		// TODO move this out of this class
 		logInfo(details:boolean = false):void {
 			this.log(this.packageInfo.getNameVersion());
 			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);

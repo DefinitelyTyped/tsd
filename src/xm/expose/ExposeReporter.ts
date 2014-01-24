@@ -106,7 +106,7 @@ module xm {
 		return 0;
 	}
 
-	//TODO swap ExposeLevel class for enum
+	// TODO swap ExposeLevel class for enum
 	export class ExposeLevel {
 		static min = -1;
 		static med = 0;
@@ -128,7 +128,7 @@ module xm {
 			this.output = (output || new xm.StyledOut());
 		}
 
-		//TODO figure-out proper way to specify/rank detail level
+		// TODO figure-out proper way to specify/rank detail level
 		printCommands(level:string):void {
 			var builder = minitable.getBuilder(this.output.getWrite(), this.output.getStyle());
 			xm.assertVar(builder, 'object', 'builder');
@@ -148,7 +148,7 @@ module xm {
 				rowSpace: 0
 			});
 
-			//start rows
+			// start rows
 			headers.init();
 			divider.init();
 			commands.init();
@@ -259,7 +259,7 @@ module xm {
 			optKeys.forEach((name:string) => {
 				var option:ExposeOption = this.expose.options.get(name);
 				if (option.command) {
-					//addOption(option);
+					// addOption(option);
 					commandOptNames.push(option.name);
 				}
 			});
@@ -267,7 +267,7 @@ module xm {
 			optKeys.forEach((name:string) => {
 				var option:ExposeOption = this.expose.options.get(name);
 				if (option.global && !option.command) {
-					//addOption(option);
+					// addOption(option);
 					globalOptNames.push(option.name);
 				}
 			});
@@ -290,7 +290,7 @@ module xm {
 						});
 
 						if (group.options.length > 0) {
-							//addDivider();
+							// addDivider();
 
 							group.options.filter((name:string) => {
 								return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
@@ -299,7 +299,7 @@ module xm {
 							});
 						}
 					}
-					//xm.eachProp(expose.commands.keys().sort(), (name) => {});
+					// xm.eachProp(expose.commands.keys().sort(), (name) => {});
 				});
 			}
 

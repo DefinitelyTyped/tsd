@@ -50,7 +50,7 @@ describe('xm.http', () => {
 	});
 
 	describe('HTTPCache core', () => {
-		//TODO add more existence tests
+		// TODO add more existence tests
 		it('should exist', () => {
 			assert.isFunction(xm.http.HTTPCache, 'cache');
 			assert.isFunction(xm.http.CacheOpts, 'opts');
@@ -92,7 +92,7 @@ describe('xm.http', () => {
 				opts.cacheWrite = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.lock();
@@ -116,7 +116,7 @@ describe('xm.http', () => {
 				opts.remoteRead = false;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.lock();
@@ -139,7 +139,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.forceRefresh = true;
@@ -164,7 +164,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.localMaxAge = -24 * 3600 * 1000;
@@ -189,7 +189,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.localMaxAge = 24 * 3600 * 1000;
@@ -213,7 +213,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.httpInterval = 24 * 3600 * 1000;
@@ -237,7 +237,7 @@ describe('xm.http', () => {
 				opts.remoteRead = true;
 
 				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				//cache.verbose = true;
+				// cache.verbose = true;
 
 				request = new xm.http.CacheRequest(url, {});
 				request.httpInterval = -24 * 3600 * 1000;

@@ -52,7 +52,7 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
-				//TODO optimise depth: doesn't loop over limit
+				// TODO optimise depth: doesn't loop over limit
 				return '[' + trim(obj.map((value) => {
 					return trim(value, depth);
 				}).join(','), cutoff) + ']';
@@ -62,7 +62,7 @@ module xm {
 				if (depth <= 0) {
 					return '<maximum recursion>';
 				}
-				//TODO optimise depth: doesn't loop over limit
+				// TODO optimise depth: doesn't loop over limit
 				return trim(String(obj) + ' {' + Object.keys(obj).sort().map((key) => {
 					return trim(key) + ':' + toValueStrim(obj[key], depth);
 				}).join(','), cutoff) + '}';

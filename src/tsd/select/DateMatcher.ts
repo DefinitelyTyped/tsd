@@ -75,8 +75,8 @@ module tsd {
 			if (!pattern) {
 				return;
 			}
-			//this.beforeDate = beforeDate;
-			//this.afterDate = afterDate;
+			// this.beforeDate = beforeDate;
+			// this.afterDate = afterDate;
 			termExp.lastIndex = 0;
 			var match:RegExpExecArray;
 			while ((match = termExp.exec(pattern))) {
@@ -84,7 +84,7 @@ module tsd {
 				xm.assert(xm.hasOwnProp(comparators, match[1]), 'not a valid date comparator in filter {a}', match[0]);
 
 				var comp = new DateComp();
-				//cleanup
+				// cleanup
 				comp.date = new Date(match[2].replace(/;_/g, ' '));
 				if (!comp.date) {
 					xm.throwAssert('not a valid date in filter {a}', match[0]);
@@ -100,7 +100,7 @@ module tsd {
 			return (file:tsd.DefVersion) => {
 				var date:Date = file.commit.changeDate;
 				if (!date) {
-					//wyrd
+					// wyrd
 					return false;
 				}
 				for (var i = 0; i < len; i++) {

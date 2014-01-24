@@ -9,8 +9,9 @@
  /// <reference path="typeOf.ts" />
 
 module xm {
+	'use strict';
 
-	//TODO figure out what is actually used at all and cleanup this nightmare (seriously wtf)
+	// TODO figure out what is actually used at all and cleanup this nightmare (seriously wtf)
 
 	var util = require('util');
 	var jsesc = require('jsesc');
@@ -42,7 +43,7 @@ module xm {
 		};
 	}
 
-	//very handy for Array.map
+	// very handy for Array.map
 	export interface IReplacer {
 		(input:string):string;
 	}
@@ -160,8 +161,13 @@ module xm {
 		return xm.wrapQuotes(value, double);
 	}
 
-	//proper JSON-like escape
+	/* tslint:disable:max-line-length */
+
+	// proper JSON-like escape
 	var escapableExp = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+
+	/* tslint:edable:max-line-length */
+
 	var meta = {
 		'\b': '\\b',
 		'\t': '\\t',
@@ -190,7 +196,7 @@ module xm {
 				if (typeof c === 'string') {
 					return c;
 				}
-				//return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+				// return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 				return jsesc(a, jsonNW);
 			});
 		}

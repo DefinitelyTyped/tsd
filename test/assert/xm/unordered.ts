@@ -5,10 +5,10 @@ module helper {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	//TODO test these assertions
+	// TODO test these assertions
 
-	//helper: assert lists of unordered items
-	//first finds an identity match, then applies real assertion
+	// helper: assert lists of unordered items
+	// first finds an identity match, then applies real assertion
 	export function assertUnorderedLike<T>(actual:any[], expected:any[], matcher:IsLikeCB<T>, assertion:AssertCB<T>, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
@@ -16,7 +16,7 @@ module helper {
 		assert.isFunction(assertion, 'assertion');
 		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
 
-		//clones
+		// clones
 		var actualQueue = actual.slice(0);
 		var expectedQueue = expected.slice(0);
 
@@ -25,27 +25,27 @@ module helper {
 			for (var i = 0, ii = expectedQueue.length; i < ii; i++) {
 				var exp = expectedQueue[i];
 
-				//check if this combination should be asserted
+				// check if this combination should be asserted
 				if (matcher(act, exp)) {
-					//do assertion
+					// do assertion
 					assertion(act, exp, message);
 					expectedQueue.splice(i, 1);
-					//jump
+					// jump
 					continue outer;
 				}
 			}
-			//use assert.deepEqual for diff report
-			//assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+			// use assert.deepEqual for diff report
+			// assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 			assert.deepEqual([act], expectedQueue, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
-		//also bad
+		// also bad
 		if (expectedQueue.length > 0) {
-			//use deepEqual for nice report
+			// use deepEqual for nice report
 			assert.deepEqual([], expectedQueue, message + ': remaining expect elements: ' + expectedQueue.length);
 		}
 	}
 
-	//get lazy wrapper for re-use
+	// get lazy wrapper for re-use
 	export function getAssertUnorderedLike<T>(matcher:IsLikeCB<T>, assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
 		return function assertUnorderedLikeWrap(actual:T[], expected:T[], message?:string) {
 			assertUnorderedLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
@@ -54,15 +54,15 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//helper: assert lists of unordered items
-	//naively hammers assertions: every element has to pass at least one comparative assertion
+	// helper: assert lists of unordered items
+	// naively hammers assertions: every element has to pass at least one comparative assertion
 	export function assertUnorderedNaive<T>(actual:T[], expected:T[], assertion:AssertCB<T>, message:string):void {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 		assert.isFunction(assertion, 'assertion');
 		assert.strictEqual(actual.length, expected.length, message + ': length not equal: ' + actual.length + ' != ' + expected.length);
 
-		//clones
+		// clones
 		var actualQueue = actual.slice(0);
 		var expectedQueue = expected.slice(0);
 
@@ -71,36 +71,36 @@ module helper {
 			for (var i = 0, ii = expectedQueue.length; i < ii; i++) {
 				var exp = expectedQueue[i];
 
-				//try every assertion
+				// try every assertion
 				try {
 					assertion(act, exp, message);
 
-					//passed, remove it
+					// passed, remove it
 					expectedQueue.splice(i, 1);
-					//jump
+					// jump
 					continue outer;
 				}
 				catch (err) {
-					//maybe next one
+					// maybe next one
 				}
 			}
 			assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
 		}
-		//also bad
+		// also bad
 		if (expectedQueue.length > 0) {
-			//use assert.deepEqual for diff report
+			// use assert.deepEqual for diff report
 			assert.deepEqual([], expectedQueue, message + ': remaining expect elements: ' + expectedQueue.length);
 		}
 	}
 
-	//get lazy wrapper for re-use
+	// get lazy wrapper for re-use
 	export function getAssertUnorderedNaive<T>(assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
 		return function (actual:T[], expected:T[], message?:string) {
 			assertUnorderedNaive(actual, expected, assertion, preLabel + ': ' + message);
 		};
 	}
 
-	//abominables (use assert.sameMembers instead)
+	// abominables (use assert.sameMembers instead)
 	export function assertUnorderedStrict<T>(actual:T[], expected:T[], message?:string) {
 		assertUnorderedNaive(actual, expected, assert.strictEqual, message);
 	}

@@ -13,9 +13,10 @@ module tsd {
 	/*
 	 DefIndex: holds the data for a repo branch in git
 
-	 for now loosely coupled to the github api version, might be possible to de-couple, at least from the format version (but not really worth it?)
+	 for now loosely coupled to the github api version, might be possible to de-couple,
+	 at least from the format version (but not really worth it?)
 	 */
-	//TODO consider de-coupling with github api fomat or at least verify more
+	// TODO consider de-coupling with github api fomat or at least verify more
 	export class DefIndex {
 
 		private _branchName:string = null;
@@ -28,7 +29,7 @@ module tsd {
 		private _versions = new Map<string, tsd.DefVersion>();
 
 		constructor() {
-			//hide from inspect()
+			// hide from inspect()
 			xm.object.hidePrefixed(this);
 		}
 
@@ -39,8 +40,8 @@ module tsd {
 		/*
 		 init from branch (commit) and tree json, assumes recursive tree
 		 */
-		//TODO add more input data verification
-		//TODO consider decoupling of github api data (low prio)
+		// TODO add more input data verification
+		// TODO consider decoupling of github api data (low prio)
 		init(branch:any, tree:any):void {
 			xm.assertVar(branch, 'object', 'branch');
 			xm.assertVar(tree, 'object', 'tree');
@@ -65,7 +66,7 @@ module tsd {
 			xm.assertVar(treeSha, 'string', 'treeSha');
 			xm.assertVar(commitSha, 'string', 'commitSha');
 
-			//verify tree is from branch (compare sha's)
+			// verify tree is from branch (compare sha's)
 			if (sha !== treeSha) {
 				throw new Error('branch and tree sha mismatch');
 			}
@@ -105,10 +106,10 @@ module tsd {
 			xm.assertVar(def, tsd.Def, 'def');
 			xm.assertVar(commitJsonArray, 'array', 'commits');
 
-			//force reset for robustness
+			// force reset for robustness
 			def.history = [];
 
-			//TODO harden data validation
+			// TODO harden data validation
 			commitJsonArray.map((json) => {
 				if (!json || !json.sha) {
 					xm.log.inspect(json, 1, 'weird: json no sha');
@@ -207,7 +208,7 @@ module tsd {
 
 			if (this._versions.has(key)) {
 				file = this._versions.get(key);
-				//NOTE: should not happen but keep robust
+				// NOTE: should not happen but keep robust
 				if (file.def !== def) {
 					throw new Error('weird: internal data mismatch: version does not belong to file: ' + file.def + ' -> ' + commit);
 				}
@@ -230,7 +231,7 @@ module tsd {
 			if (!def) {
 				xm.log.warn('path not in index, attempt-adding: ' + path);
 
-				//attempt creation
+				// attempt creation
 				def = this.procureDef(path);
 			}
 			if (!def) {
@@ -242,7 +243,7 @@ module tsd {
 				throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
 			}
 			if (!commit.hasMetaData()) {
-				//TODO always load meta data? meh? waste of requests?
+				// TODO always load meta data? meh? waste of requests?
 			}
 			var file = this.procureVersion(def, commit);
 			if (!file) {
@@ -289,7 +290,7 @@ module tsd {
 			var arr = xm.valuesOf(this._definitions);
 			arr.forEach((def:Def) => {
 				ret.push('  ' + def.toString());
-				//ret.push('  ' + def.head.toString());
+				// ret.push('  ' + def.head.toString());
 				/*if (def.history) {
 				 def.history.forEach((file:DefVersion) => {
 				 ret.push('    - ' + file.toString());
@@ -304,7 +305,7 @@ module tsd {
 		}
 
 		get list():Def[] {
-			//need generics :)
+			// need generics :)
 			return <Def[]>xm.valuesOf(this._definitions);
 		}
 

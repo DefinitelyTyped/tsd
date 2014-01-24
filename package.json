@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "tsd",
   "version": "0.5.2-alpha.11",
   "description": "TypeScript definition package manager for DefinitelyTyped.",

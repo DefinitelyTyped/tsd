@@ -15,7 +15,7 @@ describe('DefInfoParser', () => {
 	var filter:string[]; // = ['async', 'expect.js'];
 
 	before((done:(err?) => void) => {
-		//use old tsd-deftools loader
+		// use old tsd-deftools loader
 		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers')).done((res:helper.HeaderAssert[]) => {
 			assert.operator(res.length, '>', 0);
 			data = res;

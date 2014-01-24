@@ -12,9 +12,9 @@ module helper {
 		assert.instanceOf(stat, xm.StatCounter, message + ': stat');
 
 		var obj = {};
-		//only check required values? hmm...
+		// only check required values? hmm...
 		Object.keys(values).forEach((key:string) => {
-			//if (stat.has(key)) {
+			// if (stat.has(key)) {
 			obj[key] = stat.get(key);
 			//}
 		});

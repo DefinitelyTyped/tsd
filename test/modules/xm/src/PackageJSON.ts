@@ -22,5 +22,5 @@ describe('xm.PackageJSON', () => {
 			assert.isObject(info.raw, 'pkg');
 		});
 	});
-	//more in Context
+	// more in Context
 });

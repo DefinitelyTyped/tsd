@@ -51,7 +51,7 @@ module tsd {
 		/*
 		 create default config file
 		 */
-		//TODO add some more options
+		// TODO add some more options
 		initConfig(overwrite:boolean):Q.Promise<string> {
 			var p = this.core.config.initConfig(overwrite);
 			this.track.promise(p, 'config_init');
@@ -61,7 +61,7 @@ module tsd {
 		/*
 		 read the config from Context.path.configFile
 		 */
-		//TODO add some more options
+		// TODO add some more options
 		readConfig(optional:boolean):Q.Promise<void> {
 			var p = this.core.config.readConfig(optional);
 			this.track.promise(p, 'config_read');
@@ -101,12 +101,13 @@ module tsd {
 			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
 			this.track.promise(d.promise, 'install');
 
-			//TODO keep and report more info about what was written/ignored, split by selected vs dependencies
+			// TODO keep and report more info about what was written/ignored, split by selected vs dependencies
 
 			var res = new tsd.InstallResult(options);
 			var files:tsd.DefVersion[] = tsd.DefUtil.mergeDependencies(selection.selection);
 
-			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles).progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
+			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
+			.progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
 				if (!written) {
 					throw new Error('expected install paths');
 				}
@@ -132,7 +133,8 @@ module tsd {
 
 			var res = new tsd.InstallResult(options);
 
-			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles).progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
+			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
+			.progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
 				res.written = map;
 			}).then(() => {
 				if (options.saveToConfig) {
@@ -158,7 +160,7 @@ module tsd {
 		/*
 		 compare repo data with local installed file and check for changes
 		 */
-		//TODO implement compare() command
+		// TODO implement compare() command
 		compare(query:tsd.Query):Q.Promise<CompareResult> {
 			xm.assertVar(query, tsd.Query, 'query');
 			var d:Q.Deferred<CompareResult> = Q.defer();

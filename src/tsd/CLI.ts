@@ -43,21 +43,21 @@ module tsd {
 		var pkg = xm.PackageJSON.getLocal();
 
 		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
-		//.clear().span(pkg.getHomepage(true)).ln()
-		//.ruler().ln();
+		// .clear().span(pkg.getHomepage(true)).ln()
+		// .ruler().ln();
 		return Q.resolve();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//TODO get rid of syncronous io
+	// rODO get rid of syncronous io
 	function getContext(ctx:xm.ExposeContext):Q.Promise<tsd.Context> {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
 		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
 		if (ctx.getOpt(Opt.dev)) {
-			//TODO why not local?
+			// rODO why not local?
 			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
 		}
 		else if (ctx.hasOpt(Opt.cacheDir)) {
@@ -79,14 +79,14 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	//very basic (async) init stuff
+	// rery basic (async) init stuff
 	function init(ctx:xm.ExposeContext):Q.Promise<void> {
 		return Q.resolve();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	//dry helpers: reuse / bundle init and arg parsing for query based commands
+	// rry helpers: reuse / bundle init and arg parsing for query based commands
 
 	var defaultJobOptions = [Opt.config];
 
@@ -94,7 +94,7 @@ module tsd {
 		return defaultJobOptions.concat(merge);
 	}
 
-	//bundle some data
+	// rundle some data
 	export class Job {
 		ctx:xm.ExposeContext;
 		api:tsd.API;
@@ -103,19 +103,19 @@ module tsd {
 		options:Options;
 	}
 
-	//hah!
+	// rah!
 	export interface JobSelectionAction {
 		(ctx:xm.ExposeContext, job:Job, selection:tsd.Selection):Q.Promise<any>;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//get a API with a Context and parse basic arguments
+	// ret a API with a Context and parse basic arguments
 	function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
 		init(ctx).then(() => {
-			//verify valid path
+			// rerify valid path
 			if (ctx.hasOpt(Opt.config, true)) {
 				return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
 					if (!isFile) {
@@ -160,7 +160,7 @@ module tsd {
 		return d.promise;
 	}
 
-	//get a API and parse selector options
+	// ret a API and parse selector options
 	function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
@@ -290,7 +290,7 @@ module tsd {
 			group.options = [Opt.config, Opt.cacheDir, Opt.min, Opt.max, Opt.limit];
 			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
 				var sort:number;
-				//TODO sane-ify sorting groups
+				// rODO sane-ify sorting groups
 				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.query);
 				if (sort !== 0) {
 					return sort;
@@ -394,7 +394,7 @@ module tsd {
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).then((job:Job) => {
-					//TODO expose raw/api/all option
+					// rODO expose raw/api/all option
 					return job.api.purge(true, true).progress(notify).then(() => {
 
 					});
@@ -404,7 +404,7 @@ module tsd {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//TODO abstractify ActionMap / JobSelectionAction into Expose
+		// rODO abstractify ActionMap / JobSelectionAction into Expose
 		var queryActions = new xm.ActionMap<tsd.JobSelectionAction>();
 		queryActions.set(Action.install, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
 			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {
@@ -436,9 +436,9 @@ module tsd {
 						}
 						output.line();
 
-						//TODO report on written/skipped
+						// TODO report on written/skipped
 						selection.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion, i:number) => {
-							//printFile(file, true);
+							// rrintFile(file, true);
 							print.fileHead(file);
 							print.fileInfo(file, true);
 							print.dependencies(file);
@@ -447,12 +447,12 @@ module tsd {
 							output.cond(i < selection.selection.length - 1, '\n');
 						});
 
-						//run actions
+						// run actions
 						return Q().then(() => {
-							//get as arg
+							// get as arg
 							var action = ctx.getOpt(Opt.action);
 							if (!action) {
-								//output.ln().report().warning('no action').ln();
+								// output.ln().report().warning('no action').ln();
 								return;
 							}
 							if (!queryActions.has(action)) {
@@ -464,7 +464,7 @@ module tsd {
 							return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 								return run(ctx, job, selection);
 							}, true).then(() => {
-								//whut?
+								// whut?
 							}, (err) => {
 								output.report().span(action).space().error('error!').ln();
 								reportError(err, false);

@@ -24,7 +24,7 @@ describe('xm.hash', () => {
 	});
 	describe('jsonToIdent()', () => {
 
-		//TODO document intended differences (it a bit unclear now)
+		// TODO document intended differences (it a bit unclear now)
 
 		var valueA = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
 

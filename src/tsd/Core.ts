@@ -67,7 +67,7 @@ module tsd {
 				this.resolver = new tsd.Resolver(this)
 			]);
 
-			//lets be gents
+			// lets be gents
 			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 

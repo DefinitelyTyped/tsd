@@ -107,9 +107,9 @@ module tsd {
 					d.resolve(null);
 					return;
 				}
-				//write
+				// write
 				return this.core.content.loadContent(file).progress(d.notify).then(() => {
-					//check again? (race?)
+					// check again? (race?)
 					return FS.exists(targetPath);
 				}).then((exists) => {
 					if (exists) {
@@ -137,7 +137,7 @@ module tsd {
 			// needed?
 			list = tsd.DefUtil.uniqueDefVersion(list);
 
-			//this could be a bit more then just 'written'
+			// this could be a bit more then just 'written'
 			var written = new Map<string, DefVersion>();
 
 			Q.all(list.map((file:tsd.DefVersion) => {

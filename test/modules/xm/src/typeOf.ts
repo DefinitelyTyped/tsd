@@ -7,7 +7,7 @@ describe('xm.typeOf', () => {
 	var assert:Chai.Assert = require('chai').assert;
 
 	var func = function () {
-		//dummy
+		// dummy
 	};
 
 	var data = (function () {

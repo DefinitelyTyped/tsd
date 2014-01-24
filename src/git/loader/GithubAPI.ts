@@ -15,13 +15,13 @@ module git {
 	/*
 	 GithubAPI: access github rest-api with local cache (evading the non-auth rate-limit)
 	 */
-	//TODO add OAuth support (here or in HTTPCache)
+	// TODO add OAuth support (here or in HTTPCache)
 	export class GithubAPI extends git.GithubLoader {
 
 		static get_cachable = 'get_cachable';
 		static get_rate = 'get_rate';
 
-		//github's version
+		// github's version
 		private apiVersion:string = '3.0.0';
 
 		constructor(repo:GithubRepo, storeDir:string) {
@@ -68,7 +68,7 @@ module git {
 		 */
 
 		getPathCommits(path:string):Q.Promise<any> {
-			//TODO implement result pagination
+			// TODO implement result pagination
 			return this.getCachableURL(this.repo.urls.apiPathCommits(path));
 		}
 
@@ -78,7 +78,7 @@ module git {
 		}
 
 		getCachable<T>(request:xm.http.CacheRequest, addMeta:boolean, koder?:xm.IContentKoder<T>):Q.Promise<T> {
-			//TODO add some specific validation
+			// TODO add some specific validation
 			var koder = (koder || xm.JSONKoder.main);
 			var d:Q.Deferred<T> = Q.defer();
 			this.track.promise(d.promise, GithubAPI.get_cachable, request.url);

@@ -1,19 +1,19 @@
 module git {
 	'use strict';
 
-	//var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
+	// var subjectExp = /^(.*?)[ \t]*(?:[\r\n]+|$)/;
 
 	var subjectMessageExp = /^\s*(\S.*?\S?)(?:\s*[\r\n]\s*([\s\S]*?))?\s*$/;
-	//var cleanMultiLineExp = /(?:[ \t]*\r?\n[ \t]*){3,}/g;
+	// var cleanMultiLineExp = /(?:[ \t]*\r?\n[ \t]*){3,}/g;
 
 	/*
 	 GitCommitMessage: parse git commit message (for subject/body/footer convention etc)
 	 */
 	export class GitCommitMessage {
-		//full test
+		// full test
 		text:string;
 
-		//extracted for text
+		// extracted for text
 		subject:string;
 		body:string;
 

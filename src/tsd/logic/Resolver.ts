@@ -15,8 +15,8 @@ module tsd {
 	/*
 	 Resolver: resolve dependencies for given def versions
 	 */
-	//TODO add unit test, verify race condition solver works properly
-	//TODO 'resolve' not good choice (conflicts with promises)
+	// TODO add unit test, verify race condition solver works properly
+	// TODO 'resolve' not good choice (conflicts with promises)
 	export class Resolver extends tsd.SubCore {
 
 		static active:string = 'active';
@@ -78,7 +78,7 @@ module tsd {
 			this.track.start(Resolver.resolve, file.key);
 
 			var cleanup = () => {
-				//remove solved promise
+				// remove solved promise
 				this._stash.remove(file.key);
 				this.track.event(Resolver.remove);
 			};
@@ -90,12 +90,12 @@ module tsd {
 			]).spread((index:tsd.DefIndex, file:tsd.DefVersion) => {
 				this.track.event(Resolver.parse);
 
-				//force empty for robustness
+				// force empty for robustness
 				file.dependencies.splice(0, file.dependencies.length);
 
 				var queued:Q.Promise<tsd.DefVersion>[] = this.applyResolution(index, file, file.blob.content.toString(file.blob.encoding));
 
-				//keep
+				// keep
 				file.solved = true;
 
 				if (queued.length > 0) {
@@ -125,18 +125,18 @@ module tsd {
 
 			return refs.reduce((memo:any[], refPath:string) => {
 				if (index.hasDef(refPath)) {
-					//use .head (could use same commit but that would be version hell with interdependent definitions)
+					// use .head (could use same commit but that would be version hell with interdependent definitions)
 					var dep:tsd.Def = index.getDef(refPath);
 					file.dependencies.push(dep);
 					this.track.event(Resolver.dep_added, dep.path);
 
-					//TODO decide if always to go with head or not
-					//maybe it need some resolving itself?
+					// TODO decide if always to go with head or not
+					// maybe it need some resolving itself?
 					if (!dep.head.solved && !this._stash.has(dep.head.key)) {
 						this.track.event(Resolver.dep_recurse, dep.path);
-						//xm.log('recurse ' + dep.toString());
+						// xm.log('recurse ' + dep.toString());
 
-						//lets go deeper
+						// lets go deeper
 						var p:Q.Promise<tsd.DefVersion> = this.resolveDeps(dep.head);
 						memo.push(p);
 					}
@@ -144,18 +144,18 @@ module tsd {
 				else {
 					this.track.warning(Resolver.dep_missing);
 					xm.log.warn('path reference not in index: ' + refPath);
-					//TODO weird: could be removed file; add it? beh?
+					// TODO weird: could be removed file; add it? beh?
 				}
 				return memo;
 			}, []);
 		}
 
 		extractPaths(file:tsd.DefVersion, content:string):string[] {
-			//filter reasonable formed paths
+			// filter reasonable formed paths
 			return tsd.DefUtil.extractReferenceTags(content).reduce((memo:string[], refPath:string):any[] => {
-				//TODO harder def-test? why?
+				// TODO harder def-test? why?
 				refPath = refPath.replace(leadingExp, '');
-				//same folder
+				// same folder
 				if (refPath.indexOf('/') < 0) {
 					refPath = file.def.project + '/' + refPath;
 				}

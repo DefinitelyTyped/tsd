@@ -15,7 +15,7 @@ module helper {
 		var expectedStr = expected.toString('utf8');
 
 		if (actualStr !== expectedStr) {
-			//show fancy diffs
+			// show fancy diffs
 			var actualDebug = {
 				sha: git.GitUtil.blobShaHex(actual, 'utf8'),
 				str: actualStr

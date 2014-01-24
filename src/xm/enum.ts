@@ -7,6 +7,8 @@
  * */
 
 module xm {
+	'use strict';
+
 	export function enumNames(enumer:Object):string[] {
 		return Object.keys(enumer).filter((value:string) => {
 			return !/\d+/.test(value);

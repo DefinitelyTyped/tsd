@@ -4,6 +4,7 @@
 /// <reference path="Query.ts" />
 
 module tsd {
+	'use strict';
 
 	export class Selection {
 		query:tsd.Query;

@@ -12,7 +12,7 @@ module helper {
 
 		var json:any = {};
 		json.commitSha = commit.commitSha;
-		//TODO serialise more DefCommit
+		// TODO serialise more DefCommit
 		return json;
 	}
 

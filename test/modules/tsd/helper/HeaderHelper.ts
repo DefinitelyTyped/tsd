@@ -21,9 +21,9 @@ module helper {
 		}
 	}
 
-	//hacky ported from old tsd-deftools fixture loader
+	// hacky ported from old tsd-deftools fixture loader
 
-	//TODO when bored: rewrite using promises (not important)
+	// TODO when bored: rewrite using promises (not important)
 	export function loadHeaderFixtures(src:string):Q.Promise<helper.HeaderAssert[]> {
 		src = path.resolve(src);
 

@@ -4,6 +4,7 @@
 /// <reference path="../xm/Logger.ts"/>
 
 module git {
+	'use strict';
 
 	var Q = require('q');
 	var path = require('path');

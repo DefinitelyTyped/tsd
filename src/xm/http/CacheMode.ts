@@ -22,7 +22,7 @@
 		}
 
 		export class CacheOpts {
-			//TODO implement and integrate compressStore with CacheInfo and streaming downloader
+			// TODO implement and integrate compressStore with CacheInfo and streaming downloader
 			compressStore:boolean = false;
 
 			splitKeyDir:number = 0;

@@ -59,7 +59,7 @@ module tsd {
 						}
 						return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
 							if (query.commitMatcher) {
-								//crude reset
+								// crude reset
 								res.selection = [];
 								res.definitions.forEach((def:tsd.Def) => {
 									res.selection = query.commitMatcher.filter(def.history);
@@ -67,7 +67,7 @@ module tsd {
 								res.definitions = tsd.DefUtil.getDefs(res.selection);
 							}
 							if (query.dateMatcher) {
-								//crude reset
+								// crude reset
 								res.selection = [];
 								res.definitions.forEach((def:tsd.Def) => {
 									var file:tsd.DefVersion = query.dateMatcher.best(def.history);
@@ -87,7 +87,7 @@ module tsd {
 					return null;
 				}).then(() => {
 					if (query.parseInfo || query.infoMatcher) {
-						//TODO use dateMatcher?
+						// TODO use dateMatcher?
 						return this.core.parser.parseDefInfoBulk(res.selection).progress(d.notify);
 					}
 					return null;
@@ -99,7 +99,7 @@ module tsd {
 					return null;
 				}).then(() => {
 					if (options.resolveDependencies) {
-						//TODO use dateMatcher?
+						// TODO use dateMatcher?
 						return this.core.resolver.resolveBulk(res.selection).progress(d.notify);
 					}
 					return null;

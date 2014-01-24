@@ -14,7 +14,7 @@ module helper {
 		// control the cache used as fixture for the tests
 		cache: xm.http.CacheMode.forceLocal
 	};
-	//seriously cool
+	// seriously cool
 	xm.object.deepFreeze(settings);
 
 	xm.log.debug('helper.settings.cache', xm.http.CacheMode[settings.cache]);

@@ -30,7 +30,7 @@ module xm {
 	}
 
 	export module object {
-		//lazy alias for consistency
+		// lazy alias for consistency
 		export function hasOwnProp(obj:any, prop:string):boolean {
 			return Object.prototype.hasOwnProperty.call(obj, prop);
 		}

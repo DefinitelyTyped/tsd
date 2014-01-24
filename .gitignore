@@ -9,6 +9,7 @@ tsd.sln
 /node_modules
 /build/*.map
 
+npm-debug.log
 /cache
 /typings_test
 /tsd-cache

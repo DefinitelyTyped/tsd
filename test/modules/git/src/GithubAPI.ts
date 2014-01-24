@@ -16,7 +16,7 @@ describe('git.GithubAPI', () => {
 	var gitTest = helper.getGitTestInfo();
 
 	beforeEach(() => {
-		//use clean tmp folder in this test module
+		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubAPI');
 		repo = new git.GithubRepo(gitTest.config.repo, gitTest.cacheDir);
 	});
@@ -70,24 +70,24 @@ describe('git.GithubAPI', () => {
 
 	describe('getBranches', () => {
 		it.eventually('should cache and return data from store', () => {
-			//repo.api.verbose = true;
+			// repo.api.verbose = true;
 			repo.api.cache.track.reset();
 			assert.strictEqual(repo.api.cache.track.getItems().length, 0, 'pretest stats');
 
 			return repo.api.getBranches().then((first) => {
 				assert.ok(first, 'first data');
 				assert.isArray(first, 'first data');
-				//assert.jsonSchema(first, metaFields, 'first meta');
-				//fixMeta(first.meta);
+				// assert.jsonSchema(first, metaFields, 'first meta');
+				// fixMeta(first.meta);
 
 				// get again, should be cached
 				return repo.api.getBranches().then((second) => {
 					assert.ok(second, 'second data');
 					assert.isArray(second, 'second data');
-					//assert.jsonSchema(second, metaFields, 'second meta');
-					//fixMeta(second.meta);
+					// assert.jsonSchema(second, metaFields, 'second meta');
+					// fixMeta(second.meta);
 
-					//same data?
+					// same data?
 					assert.deepEqual(first, second, 'first vs second');
 				});
 			});
@@ -96,9 +96,9 @@ describe('git.GithubAPI', () => {
 
 	describe('getBlob', () => {
 		it.eventually('should cache and return data from store', () => {
-			//repo.api.verbose = true;
+			// repo.api.verbose = true;
 			repo.api.cache.track.reset();
-			//assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
+			// assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
 			var expectedJson = xm.file.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;

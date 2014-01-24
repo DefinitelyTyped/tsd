@@ -46,7 +46,7 @@ module tsd {
 			xm.object.defineProp(this, 'content', {writable: false, enumerable: false});
 		}
 
-		//human friendly
+		// human friendly
 		get shaShort():string {
 			return this.sha ? tsd.shaShort(this.sha) : '<no sha>';
 		}

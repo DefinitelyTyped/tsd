@@ -33,8 +33,8 @@ module xm {
 		}, Object.create(null));
 	}
 
-	//some standard levels
-	//TODO replace with proper enum
+	// some standard levels
+	// TODO replace with proper enum
 	export var EventLevel = {
 		start: 'start',
 		complete: 'complete',
@@ -58,7 +58,7 @@ module xm {
 		log: 'log'
 	};
 	EventLevel = xm.valueMap(EventLevel);
-	//subzero
+	// subzero
 	Object.freeze(EventLevel);
 
 	export var startTime = Date.now();
@@ -83,7 +83,7 @@ module xm {
 			this._label = label;
 			this._prefix = (prefix ? prefix + ':' : '');
 
-			//TODO this is not dynamic (style/out not updatable)
+			// TODO this is not dynamic (style/out not updatable)
 			this.logger = logger || (label ? xm.getLogger(this._label) : (xm.log || xm.getLogger()));
 
 			this._startAt = Date.now();
@@ -91,11 +91,11 @@ module xm {
 			xm.object.hidePrefixed(this);
 		}
 
-		//many lazy wrappers
+		// many lazy wrappers
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-		//TODO rethink arguments and add type-filtering
+		// TODO rethink arguments and add type-filtering
 		promise(promise:Q.Promise<any>, type:string, message?:string, data?:any):EventLogItem {
 			if (!this.isMuted(EventLevel.notify)) {
 				promise.progress((note) => {
@@ -118,7 +118,7 @@ module xm {
 			return null;
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		start(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(EventLevel.start, type, message, data);
@@ -144,7 +144,7 @@ module xm {
 			return this.track(EventLevel.share, type, message, data);
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		error(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(EventLevel.error, type, message, data);
@@ -162,7 +162,7 @@ module xm {
 			return this.track(EventLevel.status, type, message, data);
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		log(type:string, message?:string, data?:any):EventLogItem {
 			return this.track(EventLevel.log, type, message, data);
@@ -172,7 +172,7 @@ module xm {
 			return this.track(EventLevel.debug, type, message, data);
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		track(action:string, type:string, message?:string, data?:any, group?:any):EventLogItem {
 			var item = new EventLogItem();
@@ -182,7 +182,7 @@ module xm {
 			item.data = data;
 			item.time = (Date.now() - startTime);
 			item.group = group;
-			//fresh
+			// fresh
 			Object.freeze(item);
 
 			if (this._trackEnabled) {
@@ -195,7 +195,7 @@ module xm {
 			return item;
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		trim(all:boolean = false):void {
 			if (all) {
@@ -211,7 +211,7 @@ module xm {
 			this._items.splice(0, this._items.length);
 		}
 
-		//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+		// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 		isMuted(action:string):boolean {
 			return this._mutePromises.indexOf(action) > -1;
@@ -243,7 +243,7 @@ module xm {
 			this._mutePromises = [];
 		}
 
-		//TODO fix odd NaN default param
+		// TODO fix odd NaN default param
 		setTrack(enabled:boolean, limit:number = NaN, prune:number = NaN):void {
 			this._trackEnabled = enabled;
 			this._trackLimit = (isNaN(limit) ? this._trackLimit : limit);
@@ -252,9 +252,9 @@ module xm {
 
 		getItemString(item:EventLogItem, multiline:boolean = false):string {
 			var msg = '';
-			//msg += padL(item.index, 6, '0') + ' ';
+			// msg += padL(item.index, 6, '0') + ' ';
 			msg += item.action + ' -> ' + item.type;
-			//msg += ' ' + (this._label ? +': ' + this._label : '');
+			// msg += ' ' + (this._label ? +': ' + this._label : '');
 			if (xm.isValid(item.message) && item.message.length > 0) {
 				msg += (multiline ? '\n      ' : ': ') + trimWrap(item.message, 200, true);
 			}

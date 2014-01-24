@@ -21,7 +21,7 @@ module xm {
 
 	export module stack {
 		var stackExp = /^ *at (.*?) \((.*?)(?::(\d+))?(?::(\d+))?\)$/gm;
-		//var absoluteLead = /^((?:\w:[\\\/])|\/)/gm;
+		// var absoluteLead = /^((?:\w:[\\\/])|\/)/gm;
 
 		export class Stackline {
 			call:string;
@@ -48,7 +48,7 @@ module xm {
 		}
 
 		export function getRawStack(err?:Error):string {
-			//snippet from: http://pastebin.com/aRpPr5Sd
+			// snippet from: http://pastebin.com/aRpPr5Sd
 			err = err || new Error();
 			if (err.stack) {
 				// remove one stack level:
@@ -68,7 +68,7 @@ module xm {
 		}
 
 		function isAbsolute(str:string):boolean {
-			//TODO is this isAbsolute rule cross platform correct?
+			// TODO is this isAbsolute rule cross platform correct?
 			str = path.normalize(str);
 			var resolve = path.resolve(str);
 			if (resolve === str) {
@@ -78,7 +78,7 @@ module xm {
 		}
 
 		export function trimInternalLines(lines:Stackline[]):Stackline[] {
-			//trim from bottom upø
+			// trim from bottom upø
 			var cut = lines.length - 1;
 			while (cut > 0) {
 				var line = lines[cut];
@@ -97,10 +97,10 @@ module xm {
 			line.call = match[1];
 
 			line.file = len > 1 ? match[2] : '';
-			//NaN allowed
+			// NaN allowed
 			line.line = len > 2 ? parseInt(match[3], 10) : NaN;
 			line.column = len > 3 ? parseInt(match[4], 10) : NaN;
-			//line.src = match[0];
+			// line.src = match[0];
 			line.link = line.getLink();
 
 			line.absolute = isAbsolute(line.file);
@@ -111,7 +111,7 @@ module xm {
 		export function getStackLines(keep:number = 0, offset:number = 0, trim:boolean = false, err?:any):Stackline[] {
 			var stack = getRawStack(err);
 
-			//cut some lines from stack
+			// cut some lines from stack
 			var trimTop = 2 + offset;
 			var keepBottom = keep + offset;
 

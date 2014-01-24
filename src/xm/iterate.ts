@@ -11,10 +11,11 @@
 module xm {
 	'use strict';
 
-	//TODO decide what to do with this file: seems modern JS + TypeScript 0.9 is good enough with arrays? only keep Object iterators?
-	//TODO add generics
-	//TODO add support for Iterators etc
+	// TODO decide what to do with this file: seems modern JS + TypeScript 0.9 is good enough with arrays? only keep Object iterators?
+	// TODO add generics
+	// TODO add support for Iterators etc
 
+	/* tslint:disable:max-line-length */
 	/*
 	 various simple helpers to iterate stuff, saves including underscore for every use-case
 	 */
@@ -89,4 +90,5 @@ module xm {
 		}
 		return res;
 	}
+	/* tslint:enable:max-line-length */
 }

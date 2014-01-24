@@ -46,7 +46,7 @@ module helper {
 		}
 		if (typeof values.solved !== 'undefined') {
 			assert.isBoolean(values.solved, message + ': values.solved');
-			//helper.propStrictEqual(file, values, 'email', message + ': file');
+			// helper.propStrictEqual(file, values, 'email', message + ': file');
 		}
 		if (values.info) {
 			helper.assertDefInfo(file.info, values.info, message + ': file.info');
@@ -60,7 +60,7 @@ module helper {
 		assertDefVersion(file, values, message);
 	}
 
-	//TODO should not be 'any' type
+	// TODO should not be 'any' type
 	var assertDefVersionArrayUnordered:any = helper.getAssertUnorderedLike((act:tsd.DefVersion, exp:any) => {
 		return (act.def.path === exp.path && exp.commit && act.commit.commitSha === exp.commit.commitSha);
 	}, (act:tsd.DefVersion, exp:any, message?:string) => {

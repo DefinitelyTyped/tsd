@@ -13,6 +13,7 @@
 /// <reference path="encode.ts" />
 
 module xm {
+	'use strict';
 
 	var util = require('util');
 
@@ -23,17 +24,17 @@ module xm {
 	 StyledOut: composite text writer with semantic chainable api and swappable components (unfunkable)
 
 	 */
-	//TODO implement sub printer flow controls (indents, buffers, tables etc)
-	//TODO leverage (yet unimplemented) LineWriter indent-level and word wrap
-	//TODO implement diff (string / object) (extract and re-implement format from mocha-unfunk-reporter)
-	//TODO implement feature to remember if last input closed a line (or otherwise auto close it)
-	//TODO implement abstract line-start/line-end/clear to auto-insert line-breaks, link to indent/layout etc
-	//TODO implement tree/stack-style with push/pop/flush/pointer states?
-	//TODO revise API for common usage scenarios
+	// TODO implement sub printer flow controls (indents, buffers, tables etc)
+	// TODO leverage (yet unimplemented) LineWriter indent-level and word wrap
+	// TODO implement diff (string / object) (extract and re-implement format from mocha-unfunk-reporter)
+	// TODO implement feature to remember if last input closed a line (or otherwise auto close it)
+	// TODO implement abstract line-start/line-end/clear to auto-insert line-breaks, link to indent/layout etc
+	// TODO implement tree/stack-style with push/pop/flush/pointer states?
+	// TODO revise API for common usage scenarios
 	// -final reporting (succes/fail/pending/total + pluralise etc)
 	// -various statuses (expected etc)
-	//TODO split further into semantics and structure
-	//TODO consider dynamicify indent size?
+	// TODO split further into semantics and structure
+	// TODO consider dynamicify indent size?
 	export class StyledOut {
 
 		private _style:MiniStyle.Style;
@@ -84,7 +85,7 @@ module xm {
 			return this;
 		}
 
-		//short sugar
+		// short sugar
 		ln():StyledOut {
 			this._line.writeln('');
 			return this;
@@ -195,13 +196,13 @@ module xm {
 			return this;
 		}
 
-		//TODO should not be writeln(
+		// TODO should not be writeln(
 		inspect(value:any, depth:number = 4, showHidden:boolean = false):StyledOut {
 			this._line.writeln(this._style.plain(util.inspect(value, <any>{showHidden: showHidden, depth: depth})));
 			return this;
 		}
 
-		//TODO add test?
+		// TODO add test?
 		stringWrap(str:string):StyledOut {
 			this._line.write(this._style.plain(xm.wrapIfComplex(str)));
 			return this;
@@ -290,7 +291,7 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
+		// TODO add test?
 		dash(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.dash));
@@ -301,7 +302,7 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
+		// TODO add test?
 		edge(accent:boolean = false):StyledOut {
 			if (accent) {
 				this._line.write(this._style.accent(this.nibs.edge));
@@ -314,10 +315,10 @@ module xm {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//TODO add test?
+		// TODO add test?
 		tweakURI(str:string):StyledOut {
 			var repAccent = this._style.accent('/');
-			//lame tricks
+			// lame tricks
 			this._line.write(str.split(/:\/\//).map((str) => {
 				return str.replace(/\//g, repAccent);
 
@@ -325,22 +326,22 @@ module xm {
 			return this;
 		}
 
-		//TODO add test?
+		// TODO add test?
 		tweakPath(str:string, muted:boolean = false):StyledOut {
 			return this.tweakExp(str, /\//g, muted);
 		}
 
-		//TODO add test?
+		// TODO add test?
 		tweakPunc(str:string, muted:boolean = false):StyledOut {
 			return this.tweakExp(str, /[\/\.,_-]/g, muted);
 		}
 
-		//TODO add test?
+		// TODO add test?
 		tweakBraces(str:string, muted:boolean = false):StyledOut {
 			return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
 		}
 
-		//TODO add test?
+		// TODO add test?
 		tweakExp(str:string, expr:RegExp, muted:boolean = false):StyledOut {
 			if (muted) {
 				this._line.write(str.replace(expr, (value) => {
@@ -356,15 +357,15 @@ module xm {
 
 		// - - - - - extra api - - - - -
 
-		//activate super-plain mode
+		// activate super-plain mode
 		unfunk():StyledOut {
 			this._line.flush();
 			this._style = ministyle.plain();
 			return this;
 		}
 
-		//flush writer
-		//TODO drop finalise() cargo-cult artifact? (could be usefull although migt as well go through .writer reference)
+		// flush writer
+		// TODO drop finalise() cargo-cult artifact? (could be usefull although migt as well go through .writer reference)
 		finalise():void {
 			this._line.flush();
 		}

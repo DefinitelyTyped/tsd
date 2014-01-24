@@ -18,7 +18,7 @@ module xm {
 	var fs = require('fs');
 	var path = require('path');
 
-	//partial from pkginfo
+	// partial from pkginfo
 	function findInfo(pmodule:NodeModule, dir?:string):string {
 		if (!dir) {
 			dir = path.dirname(pmodule.filename);
@@ -35,16 +35,16 @@ module xm {
 		else if (!dir || dir === '.') {
 			throw new Error('Cannot find package.json from unspecified directory');
 		}
-		//one-up
+		// one-up
 		return findInfo(pmodule, path.dirname(dir));
 	}
 
 	/*
 	 PackageJSON: wrap a package.json
 	 */
-	//TODO add typed json-pointers? (low prio)
-	//TODO add validation with the json schema
-	//TODO extract io to promise based module
+	// TODO add typed json-pointers? (low prio)
+	// TODO add validation with the json schema
+	// TODO extract io to promise based module
 	export class PackageJSON {
 
 		private _pkg:any;

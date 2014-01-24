@@ -18,7 +18,7 @@ module tsd {
 		projectUrl:string;
 
 		authors:xm.AuthorInfo[];
-		//reposName:string;
+		// reposName:string;
 		reposUrl:string;
 
 		references:string[] = [];
@@ -35,7 +35,7 @@ module tsd {
 			this.projectUrl = '';
 
 			this.authors = [];
-			//this.reposName = '';
+			// this.reposName = '';
 			this.reposUrl = '';
 		}
 
@@ -59,7 +59,7 @@ module tsd {
 			return ret;
 		}
 
-		//harsh
+		// harsh
 		isValid():boolean {
 			// || !this.description
 			if (!this.name) {

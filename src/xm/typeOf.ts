@@ -139,7 +139,7 @@
 
 	// - - - - meta types
 
-	//TODO add more array-likes?? DOM???
+	// TODO add more array-likes?? DOM???
 	export function isArrayLike(obj:any):boolean {
 		return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
 	}
@@ -167,7 +167,7 @@
 
 	// - - - -
 
-	//clone/extend the map
+	// clone/extend the map
 	export function getTypeOfMap(add?:any) {
 		var name:string;
 		var obj = {};
@@ -186,7 +186,7 @@
 		return obj;
 	}
 
-	//get a wrapper to check in the cloned/extended map
+	// get a wrapper to check in the cloned/extended map
 	export function getTypeOfWrap(add?:any):(obj:any, type:string) => boolean {
 		var typeMap = getTypeOfMap(add);
 

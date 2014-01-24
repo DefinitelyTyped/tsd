@@ -82,12 +82,12 @@ module xm {
 			var log = this.verbose ? (...rest:any[]) => {
 				console.log.apply(console, rest);
 			} : (...rest:any[]) => {
-				//ignore
+				// ignore
 			};
 
 			log('source.length: ' + source.length);
 			log('asType: ' + asType);
-			//link all
+			// link all
 			this.link();
 
 			var res:LineParserMatch[] = [];
@@ -117,7 +117,7 @@ module xm {
 				}
 
 
-				//pre-advance cursor
+				// pre-advance cursor
 				cursor = line.index + line[0].length;
 				trimmedLine.lastIndex = cursor;
 
@@ -129,9 +129,9 @@ module xm {
 				 console.log('cursor: ' + cursor);
 				 */
 
-				//break some development loops :)
+				// break some development loops :)
 				if (lineCount > safetyBreak) {
-					//report this better?
+					// report this better?
 					console.log('\n\n\n\nsafetyBreak bail at ' + lineCount + '> ' + safetyBreak + '!\n\n\n\n\n');
 					throw('parser safetyBreak bail!');
 				}
@@ -158,7 +158,7 @@ module xm {
 							log(parser.getName() + ' -> match!');
 							log(match.match);
 							choice.push(match);
-							//we could break after first?
+							// we could break after first?
 							break;
 						}
 						else {
@@ -177,7 +177,7 @@ module xm {
 					else if (choice.length === 1) {
 						log('single match line');
 						log('using ' + choice[0].parser.id);
-						//console.log(choice[0].match);
+						// console.log(choice[0].match);
 
 						res.push(choice[0]);
 						possibles = choice[0].parser.next;
@@ -186,22 +186,22 @@ module xm {
 					else {
 						log('multi match line');
 						log('using ' + choice[0].parser.id);
-						//console.log(choice[0].match);
+						// console.log(choice[0].match);
 
-						//TODO pick one!
-						//why not first?
+						// TODO pick one!
+						// why not first?
 						res.push(choice[0]);
 						possibles = choice[0].parser.next;
 						log('switching possibles: [' + this.listIds(possibles) + ']');
 					}
 				}
-				//keep looping?
+				// keep looping?
 				if (possibles.length === 0) {
 					log('no more possibles, break');
 					break;
 				}
 				if (cursor >= length) {
-					//done
+					// done
 					log('done ' + cursor + ' >= ' + length + ' lineCount: ' + lineCount);
 					break;
 				}
@@ -210,7 +210,7 @@ module xm {
 
 			log('total lineCount: ' + lineCount);
 			log('procLineCount: ' + procLineCount);
-			//console.log(util.inspect(res, false, 10));
+			// console.log(util.inspect(res, false, 10));
 			log('res.length: ' + res.length);
 			log(' ');
 
@@ -228,8 +228,9 @@ module xm {
 
 		next:LineParser[] = [];
 
-		//params: id, name of a matcher, callback to apply mater's data, optional list of following parsers
-		constructor(public id:string, public exp:RegExp, public groupsMin:number, public callback:(match:LineParserMatch) => void, public nextIds:string[] = []) {
+		// params: id, name of a matcher, callback to apply mater's data, optional list of following parsers
+		constructor(public id:string, public exp:RegExp, public groupsMin:number,
+		            public callback:(match:LineParserMatch) => void, public nextIds:string[] = []) {
 		}
 
 		match(str:string, offset:number, limit:number):LineParserMatch {
@@ -238,7 +239,7 @@ module xm {
 			if (!match || match.length < 1) {
 				return null;
 			}
-			//move this to constructor?
+			// move this to constructor?
 			if (this.groupsMin >= 0 && match.length < this.groupsMin) {
 				throw(new Error(this.getName() + 'bad match expected ' + this.groupsMin + ' groups, got ' + (this.match.length - 1)));
 			}
@@ -258,14 +259,14 @@ module xm {
 		}
 
 		extract():void {
-			//hoop hoop!
+			// hoop hoop!
 			if (this.parser.callback) {
 				this.parser.callback(this);
 			}
 		}
 
 		getGroup(num:number, alt:string = ''):string {
-			//validate for sanity
+			// validate for sanity
 			if (num >= this.match.length - 1) {
 				throw(new Error(this.parser.getName() + ' group index ' + num + ' > ' + (this.match.length - 2)));
 			}

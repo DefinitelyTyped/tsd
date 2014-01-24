@@ -2,6 +2,7 @@
 /// <reference path="../../../typings/date-utils/date-utils.d.ts" />
 
 module git {
+	'use strict';
 
 	require('date-utils');
 

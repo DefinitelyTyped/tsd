@@ -3,6 +3,7 @@
 /// <reference path="../../xm/StyledOut.ts" />
 
 module tsd {
+	'use strict';
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');

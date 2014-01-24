@@ -26,8 +26,8 @@ module xm {
 		return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
 	}
 
-	//don't trim additional whitespace
-	//var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
+	// don't trim additional whitespace
+	// var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
 	var hashNormExp = /[\r\n]+/g;
 	var hashNew = '\n';
 

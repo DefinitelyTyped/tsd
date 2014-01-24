@@ -17,8 +17,8 @@ module xm {
 	// will be set below
 	export var log:xm.Logger;
 
-	//TODO consider merging Logger for StyledOut
-	//TODO find pattern to use sub-loggers that auto-update when .out changes) (o.a xm.EventLog need this)
+	// TODO consider merging Logger for StyledOut
+	// TODO find pattern to use sub-loggers that auto-update when .out changes) (o.a xm.EventLog need this)
 	export interface Logger {
 		(...args:any[]):void;
 		ok(...args:any[]):void;
@@ -30,7 +30,7 @@ module xm {
 
 		level(level:string, ...args:any[]):void;
 
-		//TODO flip depth/label order
+		// TODO flip depth/label order
 		inspect(value:any, depth?:number, label?:string):void;
 		json(value:any):void;
 		enabled:boolean;
@@ -66,7 +66,7 @@ module xm {
 		}
 	}
 
-	//TODO should be createLogger as there is no storage
+	// TODO should be createLogger as there is no storage
 	export function getLogger(label?:string):xm.Logger {
 
 		label = arguments.length > 0 ? (String(label) + ' ') : '';

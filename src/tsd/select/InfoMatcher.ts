@@ -6,7 +6,7 @@ module tsd {
 	/*
 	 InfoMatcher: test against DefInfo
 	 */
-	//TODO implement InfoMatcher
+	// TODO implement InfoMatcher
 	export class InfoMatcher {
 		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
 			return list;

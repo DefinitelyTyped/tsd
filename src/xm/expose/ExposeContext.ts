@@ -22,9 +22,9 @@ module xm {
 	/*
 	 ExposeContext: access the parameters of a single call
 	 */
-	//TODO should have a reject/resolve method
-	//TODO add assertion mode (hardcore verification for dev/test)
-	//TODO drop optimist for something simpler
+	// TODO should have a reject/resolve method
+	// TODO add assertion mode (hardcore verification for dev/test)
+	// TODO drop optimist for something simpler
 	export class ExposeContext {
 
 		expose:Expose;
@@ -36,7 +36,7 @@ module xm {
 			this.expose = expose;
 			this.command = command;
 			this.argv = argv;
-			//TODO maybe keep reporter instead of out?
+			// TODO maybe keep reporter instead of out?
 			this.out = this.expose.reporter.output;
 		}
 
@@ -60,10 +60,14 @@ module xm {
 		getOpt(name:string, alt?:any):any {
 			if (this.hasOpt(name)) {
 				var option = this.expose.options.get(name);
-				if (option ) {
+				if (option) {
 					if (option.type) {
 						// unhack optimist flags
-						if (!xm.isUndefined(option.default) && typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
+						if (!xm.isUndefined(option.default)
+								&& typeof this.argv[name] === 'boolean'
+								&& (option.type !== 'boolean'
+								&& option.type !== 'flag')) {
+
 							return this.getDefault(name, xm.parseStringTo(this.argv[name], option.type));
 						}
 						return xm.parseStringTo(this.argv[name], option.type);
@@ -125,7 +129,7 @@ module xm {
 			return alt;
 		}
 
-		//(booya!)
+		// (booya!)
 		getArgAtAs(index:number, type:string, alt?:any):any {
 			if (index >= 0 && index < this.argv._.length) {
 				return xm.parseStringTo(this.argv._[index], type);
@@ -133,7 +137,7 @@ module xm {
 			return alt;
 		}
 
-		//(gasp!)
+		// (gasp!)
 		getArgsAs(type:string):any[] {
 			return this.argv._.map((value:string) => {
 				return xm.parseStringTo(value, type);

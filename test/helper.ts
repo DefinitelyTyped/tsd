@@ -36,27 +36,27 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//helper to get a readable debug message (useful when comparing things absed on 2 paths)
-	//can be improved freely (as required as it is for visualisation only)
+	// helper to get a readable debug message (useful when comparing things absed on 2 paths)
+	// can be improved freely (as required as it is for visualisation only)
 	export function getPathMessage(pathA:string, pathB:string, message:string):string {
-		//make absolute
+		// make absolute
 		pathA = path.resolve(pathA);
 		pathB = path.resolve(pathB);
 		var elemsA = pathA.split(path.sep);
 		var elemsB = pathB.split(path.sep);
 
-		//remove identical parts
+		// remove identical parts
 		while (elemsA.length > 0 && elemsB.length > 0 && elemsA[0] === elemsB[0]) {
 			elemsA.shift();
 			elemsB.shift();
 		}
 
-		//same paths?
+		// same paths?
 		if (elemsA.length === 0 && elemsA.length === elemsB.length) {
 			return message + ': \'' + path.basename(pathA) + '\'';
 		}
 
-		//different, print remains
+		// different, print remains
 		return message + ': ' + '\'' + elemsA.join(path.sep) + '\' vs \'' + elemsB.join(path.sep) + '\'';
 	}
 
@@ -111,7 +111,7 @@ module helper {
 		assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');
 	}
 
-	//hackish to get more ingot then assert.throws()
+	// hackish to get more ingot then assert.throws()
 	export function assertError(exec:() => void, expected:any, msg?:string):void {
 		msg = (msg ? msg + ': ' : '');
 		try {
@@ -137,12 +137,12 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//for safety
+	// for safety
 	function promiseDoneMistake():void {
 		throw new Error('don\'t use a done() callback when using it.eventually()');
 	}
 
-	//monkey patch
+	// monkey patch
 	it.eventually = function eventually(expectation:string, assertion?:(call:() => void) => void):void {
 		it(expectation, (done) => {
 			Q(assertion(promiseDoneMistake)).done(() => {
@@ -164,7 +164,7 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	//TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
+	// TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
 	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string):void {
 		var stats = cache.track;
 
@@ -175,7 +175,7 @@ module helper {
 		});
 		assert.operator(items, '>=', 0, 'items');
 
-		//TOOD yuk.. rewrite for new caching system with EventLog
+		// TOOD yuk.. rewrite for new caching system with EventLog
 		///var sum:number;
 		/*switch (helper.settings.cache) {
 		 case CacheMode.forceRemote:

@@ -7,13 +7,13 @@
 module tsd {
 	'use strict';
 
-	//TODO replace vanilla RegExp with XRegExp? (low prio)
+	// TODO replace vanilla RegExp with XRegExp? (low prio)
 
 	var endSlashTrim = /\/?$/;
 
 	var glue = xm.RegExpGlue.get;
 
-	//define some reusble RegExps
+	// define some reusble RegExps
 	var expStart = /^/;
 	var expEnd = /$/;
 	var spaceReq = /[ \t]+/;
@@ -38,14 +38,17 @@ module tsd {
 	var seperatorOpt = /[,;]?/;
 
 
-	//http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
+	/* tslint:disable:max-line-length */
+	// http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
 	var urlGroupsCap = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
 	var urlFullCap = /((?:(?:[A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)(?:(?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/;
 
-	//var referencePath = /^[ \t]*\/\/\/\/?[ \t]*<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>[ \t]*$/gm;
+	/* tslint:enable:max-line-length */
+
+	// var referencePath = /^[ \t]*\/\/\/\/?[ \t]*<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>[ \t]*$/gm;
 	var referenceTag = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/;
 
-	//glue long RegExp's from parts
+	// glue long RegExp's from parts
 	var commentStart = glue(expStart, spaceOpt, /\/\/+/, spaceOpt).join();
 	var optUrl = glue('(?:', spaceOpt, delimStartOpt, urlFullCap, delimEndOpt, ')?').join();
 
@@ -145,13 +148,13 @@ module tsd {
 
 		}
 
-		//TODO evolve a better solution to the way line parsers are chained
+		// TODO evolve a better solution to the way line parsers are chained
 		parse(data:tsd.DefInfo, source:string):void {
-			//xm.log('parse: ', data.combi());
+			// xm.log('parse: ', data.combi());
 
 			data.resetFields();
 
-			//setup parser
+			// setup parser
 			this.parser = new xm.LineParserCore(this.verbose);
 
 			var fields = ['projectUrl', 'defAuthorUrl', 'defAuthorUrlAlt', 'reposUrl', 'reposUrlAlt', 'referencePath'];
@@ -161,7 +164,7 @@ module tsd {
 			this.parser.addParser(new xm.LineParser('head', typeHead, 2, (match:xm.LineParserMatch) => {
 				data.name = match.getGroup(0, data.name);
 				data.version = match.getGroup(1, data.version);
-				//data.submodule = match.getGroup(2, data.submodule);
+				// data.submodule = match.getGroup(2, data.submodule);
 			}, fields));
 
 			fields = mutate(fields, null, ['projectUrl']);
@@ -202,7 +205,7 @@ module tsd {
 
 			this.parser.addParser(new xm.LineParser('comment', commentLine, 0, null, ['comment']));
 
-			//xm.log(this.parser.getInfo());
+			// xm.log(this.parser.getInfo());
 
 			if (this.verbose) {
 				xm.log(this.parser.getInfo());

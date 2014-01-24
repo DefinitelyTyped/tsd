@@ -21,7 +21,7 @@ module git {
 			xm.assertVar(json.name, 'string', ' json.name');
 			xm.assertVar(json.email, 'string', ' json.email');
 
-			//TODO verify json data
+			// TODO verify json data
 			var ret = new git.GitUserCommit();
 			ret.name = json.name;
 			ret.email = json.email;

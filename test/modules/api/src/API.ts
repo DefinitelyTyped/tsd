@@ -187,7 +187,7 @@ describe('API', () => {
 
 							return helper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing').then(() => {
 
-								//extra check (partially covered by combinations of previous)
+								// extra check (partially covered by combinations of previous)
 
 								return helper.listDefPaths(info.typingsDir).then((typings:string[]) => {
 									assert.includeMembers(typings, context.config.getInstalledPaths(), 'saved installed file');

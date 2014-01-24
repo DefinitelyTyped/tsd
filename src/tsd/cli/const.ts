@@ -2,6 +2,7 @@
 /// <reference path="../../xm/expose/Expose.ts" />
 
 module tsd {
+	'use strict';
 
 	export module cli {
 

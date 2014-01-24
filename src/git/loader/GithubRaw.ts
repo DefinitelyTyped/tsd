@@ -3,6 +3,7 @@
 /// <reference path="../../xm/hash.ts" />
 
 module git {
+	'use strict';
 
 	var path = require('path');
 	var Q = require('q');
@@ -43,7 +44,7 @@ module git {
 		}
 
 		getFile<T>(commitSha:string, filePath:string, koder:xm.IContentKoder<T>):Q.Promise<T> {
-			//should be a low hex
+			// should be a low hex
 			xm.assertVar(commitSha, 'sha1', 'commitSha');
 			xm.assertVar(filePath, 'string', 'filePath');
 			xm.assertVar(koder, 'object', 'koder');

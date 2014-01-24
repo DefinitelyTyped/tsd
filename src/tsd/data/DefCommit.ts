@@ -13,7 +13,7 @@ module tsd {
 	 */
 	export class DefCommit {
 
-		//NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
+		// NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
 
 		commitSha:string;
 		hasMeta:boolean = false;
@@ -26,7 +26,7 @@ module tsd {
 		gitAuthor:git.GitUserCommit;
 		gitCommitter:git.GitUserCommit;
 
-		//moar fields?
+		// moar fields?
 
 		constructor(commitSha:string) {
 			xm.assertVar(commitSha, 'sha1', 'commitSha');
@@ -41,7 +41,7 @@ module tsd {
 			xm.assertVar(commit, 'object', 'commit');
 			xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
-			//TODO add a bit of checking? error? beh?
+			// TODO add a bit of checking? error? beh?
 			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
 			this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
 
@@ -72,7 +72,7 @@ module tsd {
 			return null;
 		}
 
-		//human friendly
+		// human friendly
 		get commitShort():string {
 			return this.commitSha ? tsd.shaShort(this.commitSha) : '<no sha>';
 		}

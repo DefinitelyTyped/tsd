@@ -18,7 +18,7 @@ describe('Def', () => {
 		if (expectMatch) {
 			assert(tsd.Def.isDefPath(path), 'expected "' + path + '" to be a Def path');
 
-			//double check
+			// double check
 			var def = tsd.Def.getFrom(path);
 			assert.instanceOf(def, tsd.Def);
 		}

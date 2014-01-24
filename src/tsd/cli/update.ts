@@ -1,8 +1,9 @@
 /// <reference path="../_ref.ts" />
 
 module tsd {
+	'use strict';
+
 	export module cli {
-		'use strict';
 
 		var path = require('path');
 		var Q = require('q');
@@ -36,8 +37,8 @@ module tsd {
 					packageName: context.packageInfo.name,
 					packageVersion: context.packageInfo.version,
 					updateCheckInterval: 86400000,
-					//updateCheckTimeout: null,
-					//registryUrl: null,
+					// updateCheckTimeout: null,
+					// registryUrl: null,
 					callback: callback
 				};
 				notifier = updateNotifier(settings);

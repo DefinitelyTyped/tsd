@@ -11,7 +11,7 @@
 
 module xm {
 	'use strict';
-	//TODO consider expanding to work on every collection type
+	// TODO consider expanding to work on every collection type
 
 	export function keysOf<K, V>(map:Map<K, V>):K[] {
 		return toArray<K>(map.keys());

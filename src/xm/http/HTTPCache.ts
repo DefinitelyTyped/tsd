@@ -124,7 +124,7 @@ module xm {
 					this.remove.set(key, setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
-						this.jobs.get(key).destruct();;
+						this.jobs.get(key).destruct();
 
 						this.jobs.delete(key);
 
@@ -264,7 +264,7 @@ module xm {
 							if (stat.node.atime.getTime() > limit) {
 								return false;
 							}
-							//kill it
+							// kill it
 							return true;
 						}
 						return false;

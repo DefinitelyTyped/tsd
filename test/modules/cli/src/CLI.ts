@@ -58,9 +58,9 @@ describe('CLI Query', () => {
 		args.push('--progress', 'no');
 		args.push('--checkUpdate', 'no');
 		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
-		//args.push('--config', info.configFile);
+		// args.push('--config', info.configFile);
 
-		//TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
+		// TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
 		xm.file.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
 
 		return args;

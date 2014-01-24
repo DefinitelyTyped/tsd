@@ -231,7 +231,7 @@ describe('xm.StyledOut', () => {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//output.unfunk()
+		// output.unfunk()
 
 		var file = name + '.json';
 

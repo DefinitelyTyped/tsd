@@ -32,11 +32,11 @@ module tsd {
 		}
 
 		filter(list:tsd.Def[]):tsd.Def[] {
-			//easy
+			// easy
 			if (!this.range || this.range === VersionMatcher.all) {
 				return list.slice(0);
 			}
-			//bake map
+			// bake map
 			var map = list.reduce((map:any, def:tsd.Def) => {
 				var id = def.project + '/' + def.name;
 				if (id in map) {
@@ -48,14 +48,14 @@ module tsd {
 				return map;
 			}, Object.create(null));
 
-			//filter
+			// filter
 			if (this.range === VersionMatcher.latest) {
 				return Object.keys(map).map((key) => {
 					return this.getLatest(map[key]);
 				});
 			}
 
-			//all that satisfy
+			// all that satisfy
 			return Object.keys(map).reduce((memo:tsd.Def[], key:string) => {
 				map[key].forEach((def:tsd.Def) => {
 					if (!def.semver) {
@@ -76,11 +76,11 @@ module tsd {
 			for (var i = 0, ii = list.length; i < ii; i++) {
 				var def = list[i];
 				if (!def.semver) {
-					//no semver means latest, bail
+					// no semver means latest, bail
 					return def;
 				}
 				else if (!latest) {
-					//first latest
+					// first latest
 					latest = def;
 				}
 				else if (semver.gt(def.semver, latest.semver)) {

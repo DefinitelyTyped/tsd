@@ -46,13 +46,13 @@ module xm {
 			}
 			catch (err) {
 				if (err.name === 'SyntaxError') {
-					//TODO find/write module to pretty print parse errors
+					// TODO find/write module to pretty print parse errors
 					xm.log.error(err);
 					xm.log.status('---');
 					xm.log.status(text);
 					xm.log.status('---');
 				}
-				//rethrow
+				// rethrow
 				throw (err);
 			}
 			return json;
@@ -103,12 +103,12 @@ module xm {
 			return d.promise;
 		}
 
-		//lazy wrapper as alternative to readJSONSync
+		// lazy wrapper as alternative to readJSONSync
 		export function readFileSync(dest:string, encoding:string = 'utf8') {
 			return fs.readFileSync(dest, {encoding: encoding});
 		}
 
-		//lazy wrapper as alternative to writeJSONSync
+		// lazy wrapper as alternative to writeJSONSync
 		export function writeFileSync(dest:string, data:any, encoding:string = 'utf8') {
 			dest = path.resolve(dest);
 			xm.file.mkdirCheckSync(path.dirname(dest));
@@ -118,7 +118,7 @@ module xm {
 		/*
 		 mkdirCheck: like mkdirp but with writable rights and verification, synchronous
 		 */
-		//TODO unit test this
+		// TODO unit test this
 		export function mkdirCheckSync(dir:string, writable:boolean = false, testWritable:boolean = false):string {
 			dir = path.resolve(dir);
 			if (fs.existsSync(dir)) {
@@ -144,7 +144,7 @@ module xm {
 					fs.unlinkSync(testFile);
 				}
 				catch (e) {
-					//rethrow
+					// rethrow
 					throw new Error('no write access to: ' + dir + ' -> ' + e);
 				}
 			}
@@ -154,8 +154,8 @@ module xm {
 		/*
 		 mkdirCheckQ: like mkdirp but with writable rights and verification, returns a promise
 		 */
-		//TODO unit test this
-		//TODO why not by default make writable? why ever use this without writable?
+		// TODO unit test this
+		// TODO why not by default make writable? why ever use this without writable?
 		export function mkdirCheckQ(dir:string, writable:boolean = false, testWritable:boolean = false):Q.Promise<string> {
 			dir = path.resolve(dir);
 
@@ -204,7 +204,7 @@ module xm {
 					if (isFile) {
 						return overwrite;
 					}
-					//TODO add folder write test?
+					// TODO add folder write test?
 					return false;
 				});
 			});
@@ -230,7 +230,7 @@ module xm {
 			return d.promise;
 		}
 
-		//TODO what about directories?
+		// TODO what about directories?
 		export function touchFile(src:string, atime?:Date, mtime?:Date):Q.Promise<void> {
 			var d:Q.Deferred<void> = Q.defer();
 			FS.stat(src).then((stat:QioFS.Stats) => {
@@ -259,7 +259,7 @@ module xm {
 					d.resolve(file);
 					return;
 				}
-				//one-up
+				// one-up
 				var dirName = path.dirname(dir);
 				if (dirName === dir) {
 					d.reject(new Error('cannot find file: ' + name));

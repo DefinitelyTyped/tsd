@@ -26,7 +26,7 @@ module xm {
 	var optimist = require('optimist');
 	var jsesc = require('jsesc');
 	var Q:typeof Q = require('q');
-	//TODO ditch node-exit if node ever get fixed..
+	// TODO ditch node-exit if node ever get fixed..
 	var exitProcess:(code:number) => void = require('exit');
 
 	export interface ExposeHook {
@@ -47,7 +47,7 @@ module xm {
 		error:ExposeError;
 	}
 
-	//TODO add some extra properties?
+	// TODO add some extra properties?
 	export interface ExposeError extends Error {
 	}
 
@@ -91,11 +91,11 @@ module xm {
 		default:any;
 		command:string;
 		global:boolean = false;
-		//TODO implement optional
+		// TODO implement optional
 		optional:boolean = true;
 		enum:any[] = [];
 		note:string[] = [];
-		//TODO implement example
+		// TODO implement example
 		example:string[] = [];
 		apply:ExposeOptionApply;
 	}
@@ -103,12 +103,12 @@ module xm {
 	/*
 	 Expose: cli command manager, wraps optimist with better usage generator and other utils
 	 */
-	//TODO add detail level switch / more/less flag
-	//TODO add per-command sub-help like npm
-	//TODO add feature for printable placeholder sub-info (format etc)
-	//TODO unify Actions and Commands (same thing really)
-	//TODO implement Actions/Commands queue
-	//TODO drop optimist for something simpler (minimist)
+	// TODO add detail level switch / more/less flag
+	// TODO add per-command sub-help like npm
+	// TODO add feature for printable placeholder sub-info (format etc)
+	// TODO unify Actions and Commands (same thing really)
+	// TODO implement Actions/Commands queue
+	// TODO drop optimist for something simpler (minimist)
 	export class Expose {
 
 		commands = new Map<string, ExposeCommand>();
@@ -199,7 +199,7 @@ module xm {
 				if (option.short) {
 					optimist.alias(option.name, option.short);
 				}
-				//TODO get rid of optimist's defaults
+				// TODO get rid of optimist's defaults
 			});
 
 			xm.valuesOf(this.groups).forEach((group:xm.ExposeGroup) => {
@@ -222,12 +222,12 @@ module xm {
 				this.reporter.output.ln().error('Closing with exit code ' + code).clear();
 			}
 			else {
-				//this.reporter.output.ln().success('Closing with exit code ' + code).clear();
+				// this.reporter.output.ln().success('Closing with exit code ' + code).clear();
 			}
 			exitProcess(code);
 		}
 
-		//execute and exit
+		// execute and exit
 		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
 			Q(this.executeRaw(argvRaw, alt).then((res:ExposeResult) => {
 				if (res.error) {
@@ -242,7 +242,7 @@ module xm {
 					this.exit(res.code);
 				}
 			}).fail((err) => {
-				//TODO what to do? with final error?
+				// TODO what to do? with final error?
 				if (err.stack) {
 					this.reporter.output.span(err.stack).clear();
 				}
@@ -253,7 +253,7 @@ module xm {
 			}));
 		}
 
-		//parse and execute args, promise result
+		// parse and execute args, promise result
 		executeRaw(argvRaw:any, alt?:string):Q.Promise<ExposeResult> {
 			this.init();
 
@@ -270,7 +270,7 @@ module xm {
 				return this.executeCommand(alt);
 			}
 
-			//command options (option that takes priority, like --version etc)
+			// command options (option that takes priority, like --version etc)
 			for (i = 0, ii = options.length; i < ii; i++) {
 				opt = options[i];
 				if (opt.command && ctx.hasOpt(opt.name, true)) {
@@ -278,16 +278,16 @@ module xm {
 				}
 			}
 
-			//clean argv 'bin' padding
-			//node
+			// clean argv 'bin' padding
+			// node
 			var cmd = ctx.shiftArg();
-			//script
+			// script
 			cmd = ctx.shiftArg();
 			if (ctx.numArgs === 0) {
-				//this.output.warning('undefined command').clear();
+				// this.output.warning('undefined command').clear();
 				return this.executeCommand(alt, ctx);
 			}
-			//command
+			// command
 			cmd = ctx.shiftArg();
 			if (this.commands.has(cmd)) {
 				// actual command
@@ -299,7 +299,7 @@ module xm {
 			}
 		}
 
-		//execute command, promise result
+		// execute command, promise result
 		executeCommand(name:string, ctx:xm.ExposeContext = null):Q.Promise<ExposeResult> {
 			this.init();
 

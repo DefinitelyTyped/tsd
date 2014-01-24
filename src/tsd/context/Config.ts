@@ -49,8 +49,8 @@ module tsd {
 	/*
 	 Config: local config file
 	 */
-	//TODO extract loading io to own class
-	//TODO move parse/to/validate code to Koder (or it's replacement)
+	// TODO extract loading io to own class
+	// TODO move parse/to/validate code to Koder (or it's replacement)
 	export class Config implements git.GithubRepoConfig {
 
 		path:string;
@@ -69,7 +69,7 @@ module tsd {
 
 			this._schema = schema;
 
-			//import defaults
+			// import defaults
 			this.reset();
 
 			xm.object.hidePrefixed(this);
@@ -77,7 +77,7 @@ module tsd {
 		}
 
 		reset():void {
-			//import defaults
+			// import defaults
 			this.path = tsd.Const.typingsDir;
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
@@ -90,10 +90,10 @@ module tsd {
 			var typings = this.path.replace(/[\\\/]/g, path.sep);
 
 			if (/^([\\\/]|\w:)/.test(this.path)) {
-				//absolute path
+				// absolute path
 				return typings;
 			}
-			//relative
+			// relative
 			return path.resolve(cfgFull, typings);
 		}
 
@@ -166,10 +166,10 @@ module tsd {
 				var file = this._installed.get(key);
 				json.installed[file.path] = {
 					commit: file.commitSha
-					//what more?
+					// what more?
 				};
 			});
-			//self-test (no corruption)
+			// self-test (no corruption)
 			this.validateJSON(json, this._schema);
 
 			return json;
@@ -180,7 +180,7 @@ module tsd {
 
 			this.validateJSON(json, this._schema, label);
 
-			//TODO harden validation besides schema
+			// TODO harden validation besides schema
 
 			this._installed.clear();
 
@@ -192,7 +192,7 @@ module tsd {
 			if (json.installed) {
 				xm.eachProp(json.installed, (data:any, filePath:string) => {
 					var installed = new tsd.InstalledDef(filePath);
-					//TODO validate some more
+					// TODO validate some more
 					installed.commitSha = data.commit;
 					this._installed.set(filePath, installed);
 				});

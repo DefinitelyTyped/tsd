@@ -58,7 +58,7 @@ describe('Core', () => {
 	});
 
 	describe('readConfig', () => {
-		//TODO use the actual default
+		// TODO use the actual default
 		it('should load default config data', () => {
 			return testConfig('./test/fixtures/config/default.json');
 		});
@@ -81,15 +81,15 @@ describe('Core', () => {
 	});
 	describe('saveConfig', () => {
 		it('should save modified data', () => {
-			//copy temp for saving
+			// copy temp for saving
 			var saveFile = path.resolve(__dirname, 'save-config.json');
 			fs.writeFileSync(saveFile, fs.readFileSync('./test/fixtures/config/valid.json', {encoding: 'utf8'}), {encoding: 'utf8'});
 			context.paths.configFile = saveFile;
 
 			core = getCore(context);
-			//core.verbose = true;
+			// core.verbose = true;
 
-			//modify test data
+			// modify test data
 			var source = xm.file.readJSONSync(saveFile);
 			var changed = xm.file.readJSONSync(saveFile);
 
@@ -100,7 +100,7 @@ describe('Core', () => {
 			return core.config.readConfig(false).then(() => {
 				helper.assertConfig(core.context.config, source, 'core.context.config');
 
-				//modify data
+				// modify data
 				core.context.config.path = 'some/other/path';
 				core.context.config.getInstalled()[0].path = 'bleh/blah.d.ts';
 
@@ -119,13 +119,13 @@ describe('Core', () => {
 	describe('updateIndex', () => {
 		it.eventually('should return data', () => {
 			core = getCore(context);
-			//core.verbose = true;
+			// core.verbose = true;
 
 			return core.index.getIndex().then((index:tsd.DefIndex) => {
 				assert.isTrue(index.hasIndex(), 'index.hasIndex');
 				assert.operator(index.list.length, '>', 200, 'index.list');
-				//xm.log(index.toDump());
-				//TODO validate index data
+				// xm.log(index.toDump());
+				// TODO validate index data
 				return null;
 			});
 		});

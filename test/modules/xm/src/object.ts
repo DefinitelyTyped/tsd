@@ -13,7 +13,7 @@ describe('xm.object', () => {
 
 	var assert:Chai.Assert = require('chai').assert;
 
-	//TODO add tests for more methods
+	// TODO add tests for more methods
 	describe('hidePrefixed()', () => {
 		it('should return formatted string', () => {
 			var keys;

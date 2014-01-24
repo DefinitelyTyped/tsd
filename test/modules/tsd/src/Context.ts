@@ -14,7 +14,7 @@ describe('Context', () => {
 		it('is defined as function', () => {
 			assert.isFunction(tsd.Paths);
 		});
-		//more in Context
+		// more in Context
 	});
 
 	describe('Context', () => {
@@ -55,7 +55,7 @@ describe('Context', () => {
 			assert.isString(ctx.config.version, 'version');
 			assert.isString(ctx.config.repo, 'repo');
 			assert.isString(ctx.config.ref, 'ref');
-			//assert.isObject(ctx.config.installed, 'installed');
+			// assert.isObject(ctx.config.installed, 'installed');
 		});
 		it('has valid default', () => {
 			var json = xm.file.readJSONSync('./test/fixtures/config/default.json');

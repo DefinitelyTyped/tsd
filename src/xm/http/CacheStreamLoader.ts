@@ -44,10 +44,10 @@ module xm {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		//TODO rework downloader to write directly to disk using streams
+		// TODO rework downloader to write directly to disk using streams
 		// - this may require a switch on whether we want to update disk
 		// - integrate with CacheOpts.compressStore
-		//TODO rework this to allow to keep stale content if we can't get new
+		// TODO rework this to allow to keep stale content if we can't get new
 		export class CacheStreamLoader {
 
 			static get_object = 'get_object';
@@ -113,7 +113,7 @@ module xm {
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
 			getObject():Q.Promise<CacheObject> {
-				//cache/load flow, the clousure  is only called when no matching keyTerm was found (or cache was locked)
+				// cache/load flow, the clousure  is only called when no matching keyTerm was found (or cache was locked)
 				if (this._defer) {
 					this.track.skip(CacheStreamLoader.get_object);
 					return this._defer.promise;
@@ -176,7 +176,7 @@ module xm {
 						// either bad or just stale
 						this.track.event(CacheStreamLoader.local_info_bad, 'cache-info unsatisfactory', err);
 						d.notify(xm.getNote('cache info unsatisfactory: ' + err.message, xm.LogLevel.status, err));
-						//TODO rework this to allow to keep stale content if request fails (see note above class)
+						// TODO rework this to allow to keep stale content if request fails (see note above class)
 						throw err;
 					}
 
@@ -188,23 +188,23 @@ module xm {
 						this.object.body = buffer;
 					});
 				}).then(() => {
-					//validate it
+					// validate it
 					try {
 						this.bodyCacheValidator.assert(this.object);
-						//valid local cache hit
+						// valid local cache hit
 						this.track.event(CacheStreamLoader.local_cache_hit);
 						d.resolve();
 						return;
 					}
 					catch (err) {
-						//this is bad
+						// this is bad
 						this.track.error(CacheStreamLoader.local_body_bad, 'cache-body invalid:' + err.message, err);
 						this.track.logger.error('cache invalid');
 						this.track.logger.inspect(err);
 						throw err;
 					}
 				}).fail((err) => {
-					//clean up bad cache
+					// clean up bad cache
 					this.object.info = null;
 					this.object.body = null;
 					this.object.bodyChecksum = null;
@@ -286,7 +286,7 @@ module xm {
 							d.reject(new Error('flow error: http 304 but no local info on: ' + this.request.url));
 							return;
 						}
-						//cache hit!
+						// cache hit!
 						this.track.event(CacheStreamLoader.http_cache_hit);
 
 						this._defer.notify(xm.getNote('remote: ' + this.request.url + ' -> ' + this.request.key, res.statusCode));
@@ -324,7 +324,8 @@ module xm {
 
 						if (this.object.info) {
 							if (this.object.info.contentChecksum) {
-								//xm.assert(checksum === this.object.info.contentChecksum, '{a} !== {b}', checksum, this.object.info.contentChecksum);
+								// xm.assert(checksum === this.object.info.contentChecksum,
+								//  '{a} !== {b}', checksum, this.object.info.contentChecksum);
 							}
 							this.updateInfo(res, checksum);
 						}
@@ -339,7 +340,7 @@ module xm {
 						this.cacheWrite(false).done(d.resolve, d.reject, d.notify);
 					});
 
-					//restart stream with proper setup
+					// restart stream with proper setup
 					pause.resume();
 
 				}).pipe(pause).on('error', (err) => {
@@ -465,7 +466,7 @@ module xm {
 				info.url = this.request.url;
 				info.key = this.request.key;
 				info.contentType = res.headers['content-type'];
-				//TODO why not keep http date format? (reformatting is safest?)
+				// TODO why not keep http date format? (reformatting is safest?)
 				info.cacheCreated = xm.date.getISOString(Date.now());
 				info.cacheUpdated = xm.date.getISOString(Date.now());
 				this.updateInfo(res, checksum);
@@ -474,7 +475,7 @@ module xm {
 			private updateInfo(res:QioHTTP.Response, checksum:string) {
 				var info = this.object.info;
 				info.httpETag = (res.headers['etag'] || info.httpETag);
-				//TODO why not keep http date format? (reformatting is safest?)
+				// TODO why not keep http date format? (reformatting is safest?)
 				info.httpModified = xm.date.getISOString((res.headers['last-modified'] ? new Date(res.headers['last-modified']) : new Date()));
 				info.cacheUpdated = xm.date.getISOString(Date.now());
 				info.contentChecksum = checksum;
@@ -496,7 +497,7 @@ module xm {
 							return null;
 						}
 						return this.cache.infoKoder.decode(buffer).then((info:CacheInfo) => {
-							//TODO do we need this test?
+							// TODO do we need this test?
 							xm.assert((info.url === this.request.url), 'info.url {a} is not {e}', info.url, this.request.url);
 							xm.assert((info.key === this.request.key), 'info.key {a} is not {e}', info.key, this.request.key);
 

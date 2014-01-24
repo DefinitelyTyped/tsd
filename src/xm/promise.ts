@@ -10,8 +10,9 @@
 /// <reference path="assertVar.ts" />
 
 module xm {
+	'use strict';
 
-	//TODO add interesting helpers based on weak-map
+	// TODO add interesting helpers based on weak-map
 
 	var Q = require('q');
 
@@ -29,7 +30,7 @@ module xm {
 
 		run(id:string, call:(value:T) => any, optional:boolean = false):Q.Promise<T> {
 			if (this._map.has(id)) {
-				//cast as any
+				// cast as any
 				return Q(call(this._map.get(id)));
 			}
 			else if (!optional) {
@@ -38,7 +39,7 @@ module xm {
 			return Q();
 		}
 
-		//TODO verify progress/notify bubbles correctly
+		// TODO verify progress/notify bubbles correctly
 		runSerial(ids:string[], call:(value:T) => any, optional:boolean = false):Q.Promise<T> {
 			var queue = ids.slice(0);
 

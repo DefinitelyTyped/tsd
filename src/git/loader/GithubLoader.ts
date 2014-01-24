@@ -6,6 +6,7 @@
 /// <reference path="../GithubRepo.ts" />
 
 module git {
+	'use strict';
 
 	var path = require('path');
 

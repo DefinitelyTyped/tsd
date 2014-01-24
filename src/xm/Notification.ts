@@ -1,6 +1,8 @@
 /// <reference path="typeOf.ts" />
 
 module xm {
+	'use strict';
+
 	export interface Notification {
 		code:string;
 		message:string;

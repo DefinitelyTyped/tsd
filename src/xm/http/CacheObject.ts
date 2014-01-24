@@ -69,7 +69,7 @@ module xm {
 				};
 				this.key = xm.jsonToIdentHash(keyHash);
 				xm.object.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
-				//TODO maybe we should clone before freeze?
+				// TODO maybe we should clone before freeze?
 				xm.object.deepFreeze(this.headers);
 				return this;
 			}

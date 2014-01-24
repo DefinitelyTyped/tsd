@@ -86,10 +86,10 @@ describe('Config', () => {
 
 					var json = xm.file.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 					assert.throws(() => {
-						//xm.log(json);
+						// xm.log(json);
 						config.parseJSON(json, (<string>tuple[0]));
 
-						//borky cast
+						// borky cast
 					}, (<string>tuple[1]));
 				});
 			});

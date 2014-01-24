@@ -12,21 +12,21 @@ module tsd {
 
 	 NOTE: for practical reasons linked to a commit (tree) instead of a blob
 	 */
-	//TODO rename DefVersion to DefRevision / DefRev
+	// TODO rename DefVersion to DefRevision / DefRev
 	export class DefVersion {
-		//TODO swap for non-writable properties?
+		// TODO swap for non-writable properties?
 		private _def:tsd.Def = null;
 		private _commit:tsd.DefCommit = null;
 
-		//NOTE blobs are impractical to work with: api rate-limits and no access over raw.github
+		// NOTE blobs are impractical to work with: api rate-limits and no access over raw.github
 		private _blob:tsd.DefBlob = null;
 
-		//parse from tags
-		//TODO shouldn't this be DefVersion? from same commit? (still could easily get the head)
+		// parse from tags
+		// TODO shouldn't this be DefVersion? from same commit? (still could easily get the head)
 		dependencies:tsd.Def[] = [];
 		solved:boolean = false;
 
-		//parsed from header
+		// parsed from header
 		info:tsd.DefInfo;
 
 		constructor(def:tsd.Def, commit:tsd.DefCommit) {
@@ -70,7 +70,7 @@ module tsd {
 			return this._blob;
 		}
 
-		//human friendly
+		// human friendly
 		get blobShaShort():string {
 			return this._blob ? this._blob.shaShort : '<no blob>';
 		}

@@ -22,7 +22,7 @@ describe('git.Github', () => {
 	var gitTest = helper.getGitTestInfo();
 
 	beforeEach(() => {
-		//use clean tmp folder in this test module
+		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'git-api');
 		repo = new git.GithubRepo(gitTest.config.repo, gitTest.cacheDir);
 	});
@@ -42,7 +42,7 @@ describe('git.Github', () => {
 			return;
 		}
 		it('should return data raw identical to api: "' + label + '"', () => {
-			//raw.debug = true;
+			// raw.debug = true;
 
 			var filePath = test.filePath;
 			var commitSha = test.commitSha;
@@ -73,10 +73,10 @@ describe('git.Github', () => {
 					assert.strictEqual(rawSha, blobSha, 'rawSha vs blobSha');
 					assert.strictEqual(apiSha, rawSha, 'apiSha vs rawSha');
 
-					//this explodes.. weird!
-					//assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
+					// this explodes.. weird!
+					// assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
-					//temp hackish
+					// temp hackish
 					return xm.file.mkdirCheckQ(gitTest.extraDir, true).then(() => {
 						return FS.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
 					}).then(() => {

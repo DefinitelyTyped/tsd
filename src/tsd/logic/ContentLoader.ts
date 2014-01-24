@@ -41,7 +41,7 @@ module tsd {
 		 lazy load a single DefVersion file content
 		 promise: DefVersion; with raw .blob loaded
 		 */
-		//TODO this should not keep the content in memory
+		// TODO this should not keep the content in memory
 		loadContent(file:tsd.DefVersion):Q.Promise<DefVersion> {
 			if (file.hasContent()) {
 				this.track.skip('content_load', file.key);
@@ -64,7 +64,7 @@ module tsd {
 								xm.log.debug('path', file.def.path);
 								xm.log.debug('commitSha', file.commit.commitSha);
 								xm.log.error('failed to set content');
-								//throw new Error('failed to set content');
+								// throw new Error('failed to set content');
 								throw err;
 							}
 						}
@@ -110,8 +110,8 @@ module tsd {
 			}
 			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
 				return this.core.repo.api.getPathCommits(def.path).progress(d.notify).then((content:any[]) => {
-					//this.log.inspect(content, null, 2);
-					//TODO add pagination support (see github api docs)
+					// this.log.inspect(content, null, 2);
+					// TODO add pagination support (see github api docs)
 					index.setHistory(def, content);
 					d.resolve(def);
 				});

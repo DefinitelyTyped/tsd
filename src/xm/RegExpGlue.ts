@@ -13,12 +13,12 @@ module xm {
 
 	var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
 	var flagFilter = /[gim]/;
-	//var flagFilter = /[gixsm]/;
+	// var flagFilter = /[gixsm]/;
 
 	/*
 	 RegExpGlue: glue RegExp's and strings together into longer RegExps
 	 */
-	//TODO refactor API to work better with optional escaping string chars
+	// TODO refactor API to work better with optional escaping string chars
 	export class RegExpGlue {
 
 		parts:any[] = [];
@@ -35,7 +35,7 @@ module xm {
 		}
 
 		static escapeChars(str:string):string {
-			//http://stackoverflow.com/a/1144788/1026362
+			// http://stackoverflow.com/a/1144788/1026362
 			return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 		}
 

@@ -8,7 +8,7 @@ module tsd {
 
 	var path = require('path');
 
-	//sourced paths from npm and its dependencies (osenv/osenv.js, npmconf/config-defs.js)
+	// sourced paths from npm and its dependencies (osenv/osenv.js, npmconf/config-defs.js)
 	export class Paths {
 
 		configFile:string;

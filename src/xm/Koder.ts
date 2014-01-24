@@ -26,8 +26,8 @@
 	/*
 	 IContentKoder: transcode NodeBuffers (mostly all about JSONKoder)
 	 */
-	//TODO simplified this (not both ways)
-	//TODO scheduled for reimplementation using streams (with next-gen HTTP cache)
+	// TODO simplified this (not both ways)
+	// TODO scheduled for reimplementation using streams (with next-gen HTTP cache)
 	export interface IContentKoder<T> {
 		decode(content:NodeBuffer):Q.Promise<T>;
 		encode(value:T):Q.Promise<NodeBuffer>;
@@ -60,7 +60,7 @@
 		static utf8 = new StringKoder('utf8');
 	}
 
-	//this looks weird...
+	// this looks weird...
 	export class ByteKoder implements IContentKoder<NodeBuffer> {
 
 		decode(content:NodeBuffer):Q.Promise<NodeBuffer> {
@@ -109,7 +109,7 @@
 		assert(value:T):void {
 			xm.assert(xm.isJSONValue(value), 'is not a JSON value {a}', value);
 			if (this.schema) {
-				//validate schema
+				// validate schema
 				var res:TV4SingleResult = tv4.validateResult(value, this.schema);
 				if (!res.valid || res.missing.length > 0) {
 					var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());

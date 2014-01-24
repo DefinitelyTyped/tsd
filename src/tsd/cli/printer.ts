@@ -6,6 +6,8 @@
 /// <reference path="../../tsd/API.ts" />
 
 module tsd {
+	'use strict';
+
 	export module cli {
 
 		var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
@@ -169,7 +171,7 @@ module tsd {
 					this.output.ln().report(true).span('written ').accent(keys.length).span(' files:').ln().ln();
 				}
 
-				//TODO report on written/skipped
+				// TODO report on written/skipped
 				keys.sort().forEach((path:string) => {
 					var file:tsd.DefVersion = result.written.get(path);
 					this.output.indent().bullet(true).glue(this.file(file)).ln();
@@ -186,6 +188,7 @@ module tsd {
 					this.output.line();
 					this.output.report(true).span('rate-limit').sp();
 				}
+				/* tslint:disable:max-line-length */
 				if (info.limit > 0) {
 					if (info.remaining === 0) {
 						this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
@@ -200,6 +203,7 @@ module tsd {
 						this.output.span('remaining ').accent(info.remaining).span(' / ').accent(info.limit);
 					}
 				}
+				/* tslint:enable:max-line-length */
 				else {
 					this.output.success(info.getResetString());
 				}

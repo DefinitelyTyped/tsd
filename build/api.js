@@ -1,5 +1,7 @@
 var tsd;
 (function (tsd) {
+    'use strict';
+
     var Q = require('q');
     Q.longStackSupport = true;
 
@@ -335,6 +337,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     var util = require('util');
     var jsesc = require('jsesc');
 
@@ -502,6 +506,7 @@ var xm;
     xm.trimWrap = trimWrap;
 
     var escapableExp = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+
     var meta = {
         '\b': '\\b',
         '\t': '\\t',
@@ -704,6 +709,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     var util = require('util');
 
     var miniwrite = require('miniwrite');
@@ -2320,6 +2327,7 @@ var tsd;
             if (configFile) {
                 this.paths.configFile = path.resolve(configFile);
             }
+
             this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
             this.config = new tsd.Config(this.configSchema);
         }
@@ -3051,8 +3059,14 @@ var git;
     })(xm.URLManager);
     git.GithubURLs = GithubURLs;
 })(git || (git = {}));
+var git;
+(function (git) {
+    'use strict';
+})(git || (git = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     var Q = require('q');
 
     var ActionMap = (function () {
@@ -3716,6 +3730,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     function getNote(message, code, data) {
         return {
             code: (xm.isValid(code) ? String(code) : null),
@@ -3822,17 +3838,20 @@ var xm;
                 } else {
                     this.infoCacheValidator = new http.CacheValidator(this.cache.infoSchema);
                 }
+                this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
-                this.object = new http.CacheObject(request);
+                this.object = new http.CacheObject(this.request);
                 this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
 
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
 
-                this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
-
                 xm.object.lockProps(this, ['cache', 'request', 'object']);
             }
+            CacheStreamLoader.prototype.destruct = function () {
+                this._defer = null;
+            };
+
             CacheStreamLoader.prototype.canUpdate = function () {
                 if (this.cache.opts.cacheRead && this.cache.opts.remoteRead && this.cache.opts.cacheWrite) {
                     return true;
@@ -4444,6 +4463,8 @@ var xm;
                     this.remove.set(key, setTimeout(function () {
                         _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
 
+                        _this.jobs.get(key).destruct();
+
                         _this.jobs.delete(key);
                     }, this.jobTimeout));
                 }
@@ -4615,6 +4636,8 @@ var xm;
 })(xm || (xm = {}));
 var git;
 (function (git) {
+    'use strict';
+
     var path = require('path');
 
     var GithubLoader = (function () {
@@ -4657,6 +4680,8 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
+
     require('date-utils');
 
     function pad(input) {
@@ -4858,6 +4883,8 @@ var git;
 })(git || (git = {}));
 var git;
 (function (git) {
+    'use strict';
+
     var path = require('path');
     var Q = require('q');
     var FS = require('q-io/fs');
@@ -4968,6 +4995,8 @@ var git;
 })(git || (git = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     var Options = (function () {
         function Options() {
             this.minMatches = 0;
@@ -6761,6 +6790,8 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     var Selection = (function () {
         function Selection(query) {
             if (typeof query === "undefined") { query = null; }
@@ -7923,6 +7954,8 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     (function (cli) {
         var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
 
@@ -8098,6 +8131,7 @@ var tsd;
                     this.output.line();
                     this.output.report(true).span('rate-limit').sp();
                 }
+
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
                         this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
@@ -8121,9 +8155,9 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
-    (function (cli) {
-        'use strict';
+    'use strict';
 
+    (function (cli) {
         var path = require('path');
         var Q = require('q');
 
@@ -8190,6 +8224,8 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
 
@@ -8262,6 +8298,8 @@ var tsd;
 })(tsd || (tsd = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     function enumNames(enumer) {
         return Object.keys(enumer).filter(function (value) {
             return !/\d+/.test(value);
@@ -8271,6 +8309,8 @@ var xm;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     (function (cli) {
         (function (Opt) {
             Opt.version = 'version';
@@ -8323,6 +8363,8 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     (function (cli) {
         function addCommon(expose, print, style) {
             expose.defineOption(function (opt) {
@@ -8971,6 +9013,8 @@ var tsd;
 })(tsd || (tsd = {}));
 var tsd;
 (function (tsd) {
+    'use strict';
+
     function getAPI(configPath, verbose) {
         if (typeof verbose === "undefined") { verbose = false; }
         xm.assertVar(configPath, 'string', 'configPath');

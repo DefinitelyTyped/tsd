@@ -72,14 +72,14 @@ describe('koders', () => {
 				return objectCoder.decode(numBuffer).then((actual:any) => {
 					assert(false, 'shall not pass');
 				}, (err) => {
-					//ignore
+					// ignore
 				});
 			});
 			it.eventually('should not encode invalid schema', () => {
 				return objectCoder.encode(nums).then((actual:any) => {
 					assert(false, 'shall not pass');
 				}, (err) => {
-					//ignore
+					// ignore
 				});
 			});
 		});

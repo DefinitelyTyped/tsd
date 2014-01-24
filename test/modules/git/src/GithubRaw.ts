@@ -14,7 +14,7 @@ describe('git.GithubRaw', () => {
 	var gitTest = helper.getGitTestInfo();
 
 	beforeEach(() => {
-		//use clean tmp folder in this test module
+		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubRaw');
 		repo = new git.GithubRepo(gitTest.config.repo, cacheDir);
 	});
@@ -38,13 +38,13 @@ describe('git.GithubRaw', () => {
 		helper.assertFormatSHA1(commitSha, 'commitSha');
 
 		it.eventually('should cache and return data', () => {
-			//repo.raw.verbose = true;
+			// repo.raw.verbose = true;
 			repo.raw.track.setTrack(true);
 			repo.raw.cache.track.setTrack(true);
 			repo.raw.track.reset();
 			repo.raw.cache.track.reset();
 
-			//assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
+			// assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
 
 			repo.raw.track.start('first');
 

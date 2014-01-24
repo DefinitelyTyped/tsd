@@ -103,15 +103,15 @@ module tsd {
 			}
 
 			xm.file.mkdirCheckQ(dir, true).then(() => {
-				//TODO un-voodoo
+				// TODO un-voodoo
 				return FS.write(target, json).then(() => {
-					//VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).
-					//this might me a Node + Windows issue, or just my crappy workstation
+					// VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).
+					// this might me a Node + Windows issue, or just my crappy workstation
 					return FS.stat(target);
 				}).then(() => {
 					return Q.delay(50);
 				}).then(() => {
-					//now do the real check
+					// now do the real check
 					return FS.stat(target).then((stat) => {
 						if (stat.size === 0) {
 							throw new Error('saveConfig written zero bytes to: ' + target + ' (looks lie');

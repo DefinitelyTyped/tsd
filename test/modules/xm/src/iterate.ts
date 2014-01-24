@@ -42,7 +42,7 @@ describe('xm.iterate', () => {
 			var expected = [4, 9, 16];
 			var i = 0;
 			var actual = xm.reduceArray(input, [], (memo:number[], elem:number, index:number, collection) => {
-				//copy for test
+				// copy for test
 				memo = memo.slice(0);
 				memo.push(elem * elem);
 				assert.strictEqual(index, i, 'index');

@@ -1,6 +1,6 @@
 /// <reference path="../_ref.ts" />
 
-//TODO remove inlined Date definition (weird priority failure)
+// TODO remove inlined Date definition (weird priority failure)
 declare var Date:{
 	compare(date1:Date, date2:Date):number; // -1 if date1 is smaller than date2, 0 if equal, 1 if date2 is smaller than date1
 };
@@ -10,7 +10,7 @@ module tsd {
 
 	require('date-utils');
 
-	//TODO replace reference node RegExp with a xml parser (tony the pony)
+	// TODO replace reference node RegExp with a xml parser (tony the pony)
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
 	var leadingExp = /^\.\.\//;
@@ -18,7 +18,7 @@ module tsd {
 	/*
 	 DefUtil: static helpers
 	 */
-	//TODO why is DefUtil not a module with global functions instead?
+	// TODO why is DefUtil not a module with global functions instead?
 	export class DefUtil {
 
 		static getDefs(list:tsd.DefVersion[]):tsd.Def[] {
@@ -193,7 +193,7 @@ module tsd {
 			else if (aa.def.path > bb.def.path) {
 				return 1;
 			}
-			//hmm.. now what?
+			// hmm.. now what?
 			return -1;
 		}
 
@@ -210,7 +210,7 @@ module tsd {
 			else if (aa.path > bb.path) {
 				return 1;
 			}
-			//hmm.. now what?
+			// hmm.. now what?
 			return -1;
 		}
 

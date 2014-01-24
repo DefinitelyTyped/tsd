@@ -16,14 +16,14 @@ module tsd {
 	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
 
 	function escapeRegExpChars(str:string):string {
-		//http://stackoverflow.com/a/1144788/1026362
+		// http://stackoverflow.com/a/1144788/1026362
 		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 	}
 	/*
 	 NameMatcher: match name pattern (globs etc)
 	 */
-	//TODO use minimatch or replace RegExpGlue with XRegExp
-	//TODO add negation
+	// TODO use minimatch or replace RegExpGlue with XRegExp
+	// TODO add negation
 	export class NameMatcher {
 
 		pattern:string;
@@ -52,16 +52,16 @@ module tsd {
 			this.nameExp = null;
 
 			if (this.pattern.indexOf('/') > -1) {
-				//get a project/file filter
+				// get a project/file filter
 				this.compileSplit();
 			}
 			else {
-				//just look at the names
+				// just look at the names
 				this.compileSingle();
 			}
 
-			//xm.log(this.projectExp);
-			//xm.log(this.nameExp);
+			// xm.log(this.projectExp);
+			// xm.log(this.nameExp);
 		}
 
 		private compileSingle():void {

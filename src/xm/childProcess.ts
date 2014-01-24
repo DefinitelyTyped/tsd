@@ -18,8 +18,8 @@ module xm {
 		args:string[];
 	}
 
-	//TODO decide runCLI use fork(), exec() or spawn() (fork slightly faster? does it matter?)
-	//TODO fix code to properly show errors
+	// TODO decide runCLI use fork(), exec() or spawn() (fork slightly faster? does it matter?)
+	// TODO fix code to properly show errors
 	export function runCLI(modulePath:string, args:string[], debug:boolean = false, cwd:string = './'):Q.Promise<RunCLIResult> {
 		xm.assertVar(modulePath, 'string', 'modulePath');
 		xm.assertVar(args, 'array', 'args');
@@ -82,7 +82,7 @@ module xm {
 				xm.log.error('child process exited with code ' + err.code);
 				xm.log.error(err);
 			}
-			//never fail (we might test for cli failure after all)
+			// never fail (we might test for cli failure after all)
 			d.resolve(getResult(1, err));
 		});
 
