@@ -81,8 +81,6 @@ describe('DefInfoParser', () => {
 				expecteds.push(expected);
 			});
 
-			//xm.log(actuals);
-
 			assert.deepEqual(actuals, expecteds);
 		});
 	});

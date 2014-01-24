@@ -5,6 +5,7 @@
 /// <reference path="../../../../src/xm/Koder.ts" />
 
 describe('koders', () => {
+	'use strict';
 
 	var assert:Chai.Assert = require('chai').assert;
 	var path = require('path');
@@ -27,6 +28,7 @@ describe('koders', () => {
 	});
 
 	describe('JSONKoder', () => {
+
 		var objs = [
 			{yo: 123},
 			{oi: 321},

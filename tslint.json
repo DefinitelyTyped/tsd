@@ -19,9 +19,6 @@
 		"jsdoc-format": true,
 		"label-position": true,
 		"label-undefined": true,
-		"x__max-line-length": [
-			"for legacy reasons this is insanely high, should be < ~120"
-		],
 		"max-line-length": [true, 140],
 		"no-arg": true,
 		"no-bitwise": true,

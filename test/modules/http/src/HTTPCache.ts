@@ -5,6 +5,7 @@
 /// <reference path="../../../../src/xm/encode.ts" />
 
 module helper {
+	'use strict';
 
 	export class HttpTest {
 		storeTmpDir:string;
@@ -15,6 +16,8 @@ module helper {
 }
 
 describe('xm.http', () => {
+	'use strict';
+
 	var track:xm.EventLog;
 	before(() => {
 		track = new xm.EventLog('xm.http');
