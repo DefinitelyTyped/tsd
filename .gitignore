@@ -1,23 +1,19 @@
-tsd.csproj
-tsd.csproj.user
-tsd.v11.suo
-tsd.sln
-
 /.idea
 /.vagrant
 
 /node_modules
 /build/*.map
 
-npm-debug.log
 /cache
-/typings_test
 /tsd-cache
 /test/tmp
-_tmp.*
+
+/tscommand.*
+/*.tgz
 
 tmp/
 dump/
 
-/tscommand.*
-/*.tgz
+_tmp.*
+
+npm-debug.log
