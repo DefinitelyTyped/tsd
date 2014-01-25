@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
-> TypeScript Definition package manager for DefinitelyTyped
+> TypeScript Definition manager for DefinitelyTyped
 
 TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
@@ -10,17 +10,17 @@ TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/)
 
 *	Version `0.5.x` is functional and usable but still in development:
 	*	If you decide to use it be sure to update regularly.
-	*	There will be bugs and quirks. We do out best to remove some bugs.
+	*	There will be bugs and quirks.
 *	It is recommended you check-in the definitions you install into your VCS:
 	*	The `tsd.json` file saves [repo + commit + path] so usually we can find the file but you might want to make local changes.
-	*	Don't forget to push your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) (maybe one day TSD will help you with this).
-*	Not backwards compatible with the config files from earlier versions (as the data source changed so much).
+	*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) (see .
+*	Not backwards compatible with the config files from earlier versions.
 *	API and options are incomplete and not 100% final.
 *	See below for legacy version.
 
 #### Rate limit
 
-The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over no-limited Github RAW urls. 
+The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over unlimited Github RAW urls. 
 
 We are looking into a fallback to bypass the occasional burst mode for when you'd do something silly like `$ tsd query * --history --limit 500 --cacheMode forceRemote`.
 
@@ -73,7 +73,7 @@ It looks like this:
 * [`$ tsd query async --info --history --install`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/async.png)
 * [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/angular.png)
 
-### Selector explained
+### Selectors
 
 TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index, where the definition name takes priority:
 
@@ -99,27 +99,28 @@ Notice the pattern, and ignore the `.d.ts` extension:
 
 Select definitions using only the module name:
 
-	module
-	module-addon
+	$ tsd query module
+	$ tsd query module-addon
 
 Or use a selector derived from the path format:
 
-	project/module
+	$ tsd query project/module
+
+### Globbing filter
 
 The selector also supports globbing, for example:
 
-
-	project/*
-	project*
-	module*
-	project/module*
-	project-*/plugin*
-	project*/*-*
-	project/plugin*
-	other/module
-	*/module
-	*/module-*
-	*/*plugin
+	$ tsd query project/*
+	$ tsd query project*
+	$ tsd query module*
+	$ tsd query project/module*
+	$ tsd query project-*/plugin*
+	$ tsd query project*/*-*
+	$ tsd query project/plugin*
+	$ tsd query other/module
+	$ tsd query */module
+	$ tsd query */module-*
+	$ tsd query */*plugin
 
 :bangbang: Globbing implements only leading and trailing (for now).
 
@@ -151,6 +152,7 @@ Use the `--date` / `-d` option to set a date-range (find dates using `--history`
 ````
 $ tsd query d3 --history
 $ tsd query d3 --date ">=2012-01-01"
+$ tsd query d3 --date "<2012-01-01"
 ````
 
 ### Commit filter
@@ -272,15 +274,15 @@ Shout-out to essential modules used to build TSD:
 
 The old TSD `v0.3.0` had it's own repository data file that mapped module names to url's of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
 
-The DefinitelyTyped group is working on a meta-data source that will solve this.
+The DefinitelyTyped [group](https://github.com/DefinitelyTyped/tsd/issues) is working on a meta-data source that will solve this.
 
 ### Can TSD install the definitions for the correct module version or fork?
 
-Yes, and no, (and later yes again) 
+Yes, and no (and later yes again) 
 
 There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
 
-It works well but is not used much in the current DefinitelyTyped repository. The DefinitelyTyped group is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
+It works well but is not used much in the current DefinitelyTyped repository. The DefinitelyTyped [group](https://github.com/DefinitelyTyped/tsd/issues) is working on a meta-data source that will solve this (the [Nuget exporter](https://github.com/DefinitelyTyped/NugetAutomation) is waiting for this too).
 
 ### What is the location of the cache folders?
 
@@ -290,17 +292,13 @@ The cache is stored in the users home directory (like `$ npm`). Use `$ tsd setti
 
 Of course! The official plugin is aptly named [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
-### What is all this non-tsd stuff in `./src` and `./lib`?
-
-Author @Bartvds is incubating some modules and helpers in this project. Most of these will be moved to their own packages at some point. 
-
 ### Where do you keep background and work docs?
 
 * Some more about the [code](CODE.md).
 * Extra background [info](INFO.md) about the conceptual choices (old).
 * Internal list of things [todo](TODO.md).
 
-### I have a suggestion or idea
+### I have a suggestion or contribution
 
 Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
 
@@ -324,7 +322,7 @@ Copyright (c) 2013 by [Bart van der Schoor](https://github.com/Bartvds).
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt). 
 
-* note: there is some imported MIT licensed code by myself, [Bart van der Schoor](https://github.com/Bartvds), but I grant myself perpetual licence of my own work)
+* note: there is some imported MIT licensed code by myself, [Bart van der Schoor](https://github.com/Bartvds)
 
 Copyright (c) 2012 by [Diullei Gomes](https://github.com/Diullei).
 
