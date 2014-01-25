@@ -174,11 +174,10 @@ module tsd {
 				job.query.addNamePattern(ctx.getArgAt(i));
 			}
 
+			job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
+
 			if (ctx.hasOpt(Opt.commit)) {
 				job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
-			}
-			if (ctx.hasOpt(Opt.semver)) {
-				job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
 			}
 			if (ctx.hasOpt(Opt.date)) {
 				job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
@@ -210,6 +209,8 @@ module tsd {
 	}
 
 	var skipProgress = [
+		/^(?:\w+: )?written zero/,
+		/^(?:\w+: )?missing info/,
 		/^(?:\w+: )?remote:/,
 		/^(?:\w+: )?local:/
 	];
@@ -514,8 +515,25 @@ module tsd {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'rate';
+			cmd.label = 'check github rate-limit';
+			cmd.groups = [Group.support];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
+				return getAPIJob(ctx).then((job:Job) => {
+					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
+						print.rateInfo(info);
+					});
+				}).fail(reportError);
+			};
+		});
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'validate';
 			cmd.label = 'validate data source';
+			cmd.hidden = true;
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
@@ -558,25 +576,9 @@ module tsd {
 							if (invalid.length > 0) {
 								output.line();
 								output.info(true).span('found').space().error(invalid.length).space().span('invalid defs').ln();
-								output.inspect(invalid, 2);
+								output.inspect(invalid, 3);
 							}
 						});
-					});
-				}).fail(reportError);
-			};
-		});
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		expose.defineCommand((cmd:xm.ExposeCommand) => {
-			cmd.name = 'rate';
-			cmd.label = 'check github rate-limit';
-			cmd.groups = [Group.support];
-			cmd.execute = (ctx:xm.ExposeContext) => {
-				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
-					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
-						print.rateInfo(info);
 					});
 				}).fail(reportError);
 			};

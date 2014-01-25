@@ -61,6 +61,7 @@ module xm {
 		index:number;
 
 		label:string;
+		hidden:boolean;
 		options:string[] = [];
 		variadic:string[] = [];
 		groups:string[] = [];

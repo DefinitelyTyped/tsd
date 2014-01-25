@@ -57,22 +57,24 @@ module tsd {
 						if (options.limitApi > 0 && res.definitions.length > options.limitApi) {
 							throw new Error('match count ' + res.definitions.length + ' over api limit ' + options.limitApi);
 						}
+
 						return this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(() => {
 							if (query.commitMatcher) {
-								// crude reset
 								res.selection = [];
 								res.definitions.forEach((def:tsd.Def) => {
-									res.selection = query.commitMatcher.filter(def.history);
+									def.history = query.commitMatcher.filter(def.history);
+									if (def.history.length > 0) {
+										res.selection.push(tsd.DefUtil.getLatest(def.history));
+									}
 								});
 								res.definitions = tsd.DefUtil.getDefs(res.selection);
 							}
 							if (query.dateMatcher) {
-								// crude reset
 								res.selection = [];
 								res.definitions.forEach((def:tsd.Def) => {
-									var file:tsd.DefVersion = query.dateMatcher.best(def.history);
-									if (file) {
-										res.selection.push(file);
+									def.history = query.dateMatcher.filter(def.history);
+									if (def.history.length > 0) {
+										res.selection.push(tsd.DefUtil.getLatest(def.history));
 									}
 								});
 								res.definitions = tsd.DefUtil.getDefs(res.selection);

@@ -35,11 +35,46 @@ module tsd {
 
 		static getHistoryTop(list:tsd.Def[]):tsd.DefVersion[] {
 			return list.map((def:Def) => {
-				if (def.history.length > 0) {
+				if (def.history.length === 1) {
 					return def.history[0];
+				}
+				else if (def.history.length > 0) {
+					return def.history.sort(DefUtil.fileCompare)[0];
 				}
 				return def.head;
 			});
+		}
+
+		static getHistoryBottom(list:tsd.Def[]):tsd.DefVersion[] {
+			return list.map((def:Def) => {
+				if (def.history.length === 1) {
+					return def.history[0];
+				}
+				else if (def.history.length > 0) {
+					return def.history.sort(DefUtil.fileCompare)[def.history.length - 1];
+				}
+				return def.head;
+			});
+		}
+
+		static getLatest(list:tsd.DefVersion[]):tsd.DefVersion {
+			if (list.length === 1) {
+				return list[0];
+			}
+			else if (list.length > 1) {
+				return list.sort(DefUtil.fileCompare)[0];
+			}
+			return null;
+		}
+
+		static getRecent(list:tsd.DefVersion[]):tsd.DefVersion {
+			if (list.length === 1) {
+				return list[0];
+			}
+			else if (list.length > 1) {
+				return list.sort(DefUtil.fileCompare)[list.length - 1];
+			}
+			return null;
 		}
 
 		static getPaths(list:tsd.Def[]):string[] {

@@ -981,12 +981,24 @@ var xm;
             return this;
         };
 
-        StyledOut.prototype.tweakURI = function (str) {
+        StyledOut.prototype.tweakURI = function (str, trimHttp, wrapAngles) {
+            if (typeof trimHttp === "undefined") { trimHttp = false; }
+            if (typeof wrapAngles === "undefined") { wrapAngles = false; }
             var repAccent = this._style.accent('/');
 
-            this._line.write(str.split(/:\/\//).map(function (str) {
-                return str.replace(/\//g, repAccent);
-            }).join(this._style.accent('://')));
+            if (wrapAngles) {
+                this._line.write(this._style.muted('<'));
+            }
+            if (trimHttp) {
+                this._line.write(str.replace(/^\w+?:\/\//, '').replace(/\//g, repAccent));
+            } else {
+                this._line.write(str.split(/:\/\//).map(function (str) {
+                    return str.replace(/\//g, repAccent);
+                }).join(this._style.accent('://')));
+            }
+            if (wrapAngles) {
+                this._line.write(this._style.muted('>'));
+            }
             return this;
         };
 
@@ -1003,14 +1015,6 @@ var xm;
         StyledOut.prototype.tweakBraces = function (str, muted) {
             if (typeof muted === "undefined") { muted = false; }
             return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
-        };
-
-        StyledOut.prototype.tweakAll = function (str, muted) {
-            if (typeof muted === "undefined") { muted = false; }
-            var _this = this;
-            return this.tweakURI(str.replace(/[\.,_\[\{\(\<>\)\}\]]/g, function (value) {
-                return _this._style.muted(value);
-            }));
         };
 
         StyledOut.prototype.tweakExp = function (str, expr, muted) {
@@ -2743,11 +2747,13 @@ var tsd;
         function VersionMatcher(range) {
             if (range === VersionMatcher.latest || range === VersionMatcher.all) {
                 this.range = range;
-            } else {
+            } else if (range) {
                 this.range = semver.validRange(range, true);
                 if (!this.range) {
                     xm.throwAssert('expected {a} to be a valid semver-range', range);
                 }
+            } else {
+                this.range = VersionMatcher.latest;
             }
         }
         VersionMatcher.prototype.filter = function (list) {
@@ -2819,7 +2825,9 @@ var tsd;
     var CommitMatcher = (function () {
         function CommitMatcher(commitSha) {
             this.minimumShaLen = 2;
-            this.commitSha = String(commitSha).toLowerCase();
+            if (commitSha) {
+                this.commitSha = String(commitSha).toLowerCase();
+            }
         }
         CommitMatcher.prototype.filter = function (list) {
             if (!this.commitSha) {
@@ -5097,11 +5105,42 @@ var tsd;
 
         DefUtil.getHistoryTop = function (list) {
             return list.map(function (def) {
-                if (def.history.length > 0) {
+                if (def.history.length === 1) {
                     return def.history[0];
+                } else if (def.history.length > 0) {
+                    return def.history.sort(DefUtil.fileCompare)[0];
                 }
                 return def.head;
             });
+        };
+
+        DefUtil.getHistoryBottom = function (list) {
+            return list.map(function (def) {
+                if (def.history.length === 1) {
+                    return def.history[0];
+                } else if (def.history.length > 0) {
+                    return def.history.sort(DefUtil.fileCompare)[def.history.length - 1];
+                }
+                return def.head;
+            });
+        };
+
+        DefUtil.getLatest = function (list) {
+            if (list.length === 1) {
+                return list[0];
+            } else if (list.length > 1) {
+                return list.sort(DefUtil.fileCompare)[0];
+            }
+            return null;
+        };
+
+        DefUtil.getRecent = function (list) {
+            if (list.length === 1) {
+                return list[0];
+            } else if (list.length > 1) {
+                return list.sort(DefUtil.fileCompare)[list.length - 1];
+            }
+            return null;
         };
 
         DefUtil.getPaths = function (list) {
@@ -6901,20 +6940,24 @@ var tsd;
                         if (options.limitApi > 0 && res.definitions.length > options.limitApi) {
                             throw new Error('match count ' + res.definitions.length + ' over api limit ' + options.limitApi);
                         }
+
                         return _this.core.content.loadHistoryBulk(res.definitions).progress(d.notify).then(function () {
                             if (query.commitMatcher) {
                                 res.selection = [];
                                 res.definitions.forEach(function (def) {
-                                    res.selection = query.commitMatcher.filter(def.history);
+                                    def.history = query.commitMatcher.filter(def.history);
+                                    if (def.history.length > 0) {
+                                        res.selection.push(tsd.DefUtil.getLatest(def.history));
+                                    }
                                 });
                                 res.definitions = tsd.DefUtil.getDefs(res.selection);
                             }
                             if (query.dateMatcher) {
                                 res.selection = [];
                                 res.definitions.forEach(function (def) {
-                                    var file = query.dateMatcher.best(def.history);
-                                    if (file) {
-                                        res.selection.push(file);
+                                    def.history = query.dateMatcher.filter(def.history);
+                                    if (def.history.length > 0) {
+                                        res.selection.push(tsd.DefUtil.getLatest(def.history));
                                     }
                                 });
                                 res.definitions = tsd.DefUtil.getDefs(res.selection);
@@ -7520,6 +7563,9 @@ var xm;
             };
 
             var addCommand = function (cmd, group) {
+                if (cmd.hidden) {
+                    return;
+                }
                 commands.next();
                 var command = commands.row.command.out;
                 command.indent(1).plain(cmd.name);
@@ -8125,14 +8171,22 @@ var tsd;
                 if (file.info) {
                     this.output.line();
                     if (file.info.isValid()) {
-                        this.output.indent(1).tweakPunc(file.info.toString()).ln();
+                        this.output.indent(1).tweakPunc(file.info.toString());
                         if (file.info.projectUrl) {
-                            this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
+                            this.output.space().tweakURI(file.info.projectUrl, true, true);
                         }
-                        file.info.authors.forEach(function (author) {
-                            _this.output.ln();
-                            _this.output.indent(2).tweakAll(author.toString(), true).ln();
-                        });
+                        this.output.ln();
+
+                        if (file.info.authors) {
+                            this.output.ln();
+                            file.info.authors.forEach(function (author) {
+                                _this.output.indent(1).bullet(true).span(author.name);
+                                if (author.url) {
+                                    _this.output.space().tweakURI(author.url, true, true);
+                                }
+                                _this.output.ln();
+                            });
+                        }
                     } else {
                         this.output.indent(1).accent('<invalid info>').line();
                     }
@@ -8195,7 +8249,7 @@ var tsd;
                     var file = result.written.get(path);
                     _this.output.indent().bullet(true).glue(_this.file(file)).ln();
                 });
-                this.output.ln().report(true).span('install').space().success('success!').ln();
+
                 return this.output;
             };
 
@@ -8210,11 +8264,11 @@ var tsd;
                 }
 
                 if (note) {
-                    this.output.indent(1).report(true).span('rate-limit').sp();
+                    this.output.indent(1);
                 } else {
                     this.output.line();
-                    this.output.report(true).span('rate-limit').sp();
                 }
+                this.output.note(true).span('rate-limit').sp();
 
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
@@ -8781,11 +8835,10 @@ var tsd;
                 job.query.addNamePattern(ctx.getArgAt(i));
             }
 
+            job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
+
             if (ctx.hasOpt(Opt.commit)) {
                 job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
-            }
-            if (ctx.hasOpt(Opt.semver)) {
-                job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
             }
             if (ctx.hasOpt(Opt.date)) {
                 job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
@@ -8816,6 +8869,8 @@ var tsd;
     }
 
     var skipProgress = [
+        /^(?:\w+: )?written zero/,
+        /^(?:\w+: )?missing info/,
         /^(?:\w+: )?remote:/,
         /^(?:\w+: )?local:/
     ];
@@ -9088,8 +9143,23 @@ var tsd;
         });
 
         expose.defineCommand(function (cmd) {
+            cmd.name = 'rate';
+            cmd.label = 'check github rate-limit';
+            cmd.groups = [Group.support];
+            cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
+                return getAPIJob(ctx).then(function (job) {
+                    return job.api.getRateInfo().progress(notify).then(function (info) {
+                        print.rateInfo(info);
+                    });
+                }).fail(reportError);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
             cmd.name = 'validate';
             cmd.label = 'validate data source';
+            cmd.hidden = true;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
@@ -9132,23 +9202,9 @@ var tsd;
                             if (invalid.length > 0) {
                                 output.line();
                                 output.info(true).span('found').space().error(invalid.length).space().span('invalid defs').ln();
-                                output.inspect(invalid, 2);
+                                output.inspect(invalid, 3);
                             }
                         });
-                    });
-                }).fail(reportError);
-            };
-        });
-
-        expose.defineCommand(function (cmd) {
-            cmd.name = 'rate';
-            cmd.label = 'check github rate-limit';
-            cmd.groups = [Group.support];
-            cmd.execute = function (ctx) {
-                var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
-                    return job.api.getRateInfo().progress(notify).then(function (info) {
-                        print.rateInfo(info);
                     });
                 }).fail(reportError);
             };

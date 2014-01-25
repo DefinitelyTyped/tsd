@@ -23,11 +23,14 @@ module tsd {
 			if (range === VersionMatcher.latest || range === VersionMatcher.all) {
 				this.range = range;
 			}
-			else {
+			else if (range) {
 				this.range = semver.validRange(range, true);
 				if (!this.range) {
 					xm.throwAssert('expected {a} to be a valid semver-range', range);
 				}
+			}
+			else {
+				this.range = VersionMatcher.latest;
 			}
 		}
 

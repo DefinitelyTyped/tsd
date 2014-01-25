@@ -17,7 +17,9 @@ module tsd {
 		minimumShaLen:number = 2;
 
 		constructor(commitSha?:string) {
-			this.commitSha = String(commitSha).toLowerCase();
+			if (commitSha) {
+				this.commitSha = String(commitSha).toLowerCase();
+			}
 		}
 
 		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {

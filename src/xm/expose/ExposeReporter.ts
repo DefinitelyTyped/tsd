@@ -229,6 +229,9 @@ module xm {
 			};
 
 			var addCommand = (cmd:ExposeCommand, group:ExposeGroup) => {
+				if (cmd.hidden) {
+					return;
+				}
 				commands.next();
 				var command = commands.row.command.out;
 				command.indent(1).plain(cmd.name);

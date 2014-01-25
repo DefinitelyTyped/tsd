@@ -107,14 +107,22 @@ module tsd {
 				if (file.info) {
 					this.output.line();
 					if (file.info.isValid()) {
-						this.output.indent(1).tweakPunc(file.info.toString()).ln();
+						this.output.indent(1).tweakPunc(file.info.toString());
 						if (file.info.projectUrl) {
-							this.output.indent(2).tweakAll(file.info.projectUrl, true).ln();
+							this.output.space().tweakURI(file.info.projectUrl, true, true);
 						}
-						file.info.authors.forEach((author:xm.AuthorInfo) => {
+						this.output.ln();
+
+						if (file.info.authors) {
 							this.output.ln();
-							this.output.indent(2).tweakAll(author.toString(), true).ln();
-						});
+							file.info.authors.forEach((author:xm.AuthorInfo) => {
+								this.output.indent(1).bullet(true).span(author.name);
+								if (author.url) {
+									this.output.space().tweakURI(author.url, true, true);
+								}
+								this.output.ln();
+							});
+						}
 					}
 					else {
 						this.output.indent(1).accent('<invalid info>').line();
@@ -179,7 +187,7 @@ module tsd {
 					var file:tsd.DefVersion = result.written.get(path);
 					this.output.indent().bullet(true).glue(this.file(file)).ln();
 				});
-				this.output.ln().report(true).span('install').space().success('success!').ln();
+				// this.output.ln().report(true).span('install').space().success('success!').ln();
 				return this.output;
 			}
 
@@ -193,12 +201,13 @@ module tsd {
 				}
 
 				if (note) {
-					this.output.indent(1).report(true).span('rate-limit').sp();
+					this.output.indent(1);
 				}
 				else {
 					this.output.line();
-					this.output.report(true).span('rate-limit').sp();
 				}
+				this.output.note(true).span('rate-limit').sp();
+
 				/* tslint:disable:max-line-length */
 				if (info.limit > 0) {
 					if (info.remaining === 0) {

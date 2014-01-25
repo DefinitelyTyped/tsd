@@ -316,13 +316,23 @@ module xm {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		// TODO add test?
-		tweakURI(str:string):StyledOut {
+		tweakURI(str:string, trimHttp:boolean = false, wrapAngles:boolean = false):StyledOut {
 			var repAccent = this._style.accent('/');
 			// lame tricks
-			this._line.write(str.split(/:\/\//).map((str) => {
-				return str.replace(/\//g, repAccent);
-
-			}).join(this._style.accent('://')));
+			if (wrapAngles) {
+				this._line.write(this._style.muted('<'));
+			}
+			if (trimHttp) {
+				this._line.write(str.replace(/^\w+?:\/\//, '').replace(/\//g, repAccent));
+			}
+			else {
+				this._line.write(str.split(/:\/\//).map((str) => {
+					return str.replace(/\//g, repAccent);
+				}).join(this._style.accent('://')));
+			}
+			if (wrapAngles) {
+				this._line.write(this._style.muted('>'));
+			}
 			return this;
 		}
 
@@ -339,12 +349,6 @@ module xm {
 		// TODO add test?
 		tweakBraces(str:string, muted:boolean = false):StyledOut {
 			return this.tweakExp(str, /[\[\{\(\<>\)\}\]]/g, muted);
-		}
-
-		tweakAll(str:string, muted:boolean = false):StyledOut {
-			return this.tweakURI(str.replace(/[\.,_\[\{\(\<>\)\}\]]/g, (value) => {
-				return this._style.muted(value);
-			}));
 		}
 
 		// TODO add test?
