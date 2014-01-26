@@ -225,20 +225,22 @@ module xm {
 			else {
 				// this.reporter.output.ln().success('Closing with exit code ' + code).clear();
 			}
-			exitProcess(code);
+			// exitProcess(code);
 		}
 
 		// execute and exit
 		executeArgv(argvRaw:any, alt?:string, exitAfter:boolean = true):void {
-			Q(this.executeRaw(argvRaw, alt).then((res:ExposeResult) => {
-				if (res.error) {
-					throw(res.error);
-				}
+			Q(this.executeRaw(argvRaw, alt)).then((res:ExposeResult) => {
 				if (this.end) {
-					return this.end.call(null, res).thenResolve(res);
+					return Q(this.end.call(null, res)).then((over:ExposeResult) => {
+						return over || res;
+					});
 				}
 				return res;
 			}).then((res:ExposeResult) => {
+				if (res.error) {
+					throw(res.error);
+				}
 				if (exitAfter) {
 					this.exit(res.code);
 				}
@@ -251,7 +253,7 @@ module xm {
 					this.reporter.output.error(err.toString()).clear();
 				}
 				this.exit(1);
-			}));
+			});
 		}
 
 		// parse and execute args, promise result
@@ -332,6 +334,7 @@ module xm {
 					ctx: ctx
 				};
 			}, (err:any) => {
+				xm.log.error('err', err);
 				return {
 					code: (err.code && err.code !== 0 ? err.code : 1),
 					error: err,

@@ -552,6 +552,11 @@ var xm;
         return str;
     }
     xm.escapeSimple = escapeSimple;
+
+    function escapeHTML(html) {
+        return String(html).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    xm.escapeHTML = escapeHTML;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -757,7 +762,7 @@ var xm;
             xm.object.hidePrefixed(this);
         }
         StyledOut.prototype.write = function (str) {
-            this._line.write(this._style.plain(str));
+            this._line.write(str);
             return this;
         };
 
@@ -7957,21 +7962,22 @@ var xm;
                 this.reporter.output.ln().error('Closing with exit code ' + code).clear();
             } else {
             }
-            exitProcess(code);
         };
 
         Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
             if (typeof exitAfter === "undefined") { exitAfter = true; }
             var _this = this;
-            Q(this.executeRaw(argvRaw, alt).then(function (res) {
-                if (res.error) {
-                    throw (res.error);
-                }
+            Q(this.executeRaw(argvRaw, alt)).then(function (res) {
                 if (_this.end) {
-                    return _this.end.call(null, res).thenResolve(res);
+                    return Q(_this.end.call(null, res)).then(function (over) {
+                        return over || res;
+                    });
                 }
                 return res;
             }).then(function (res) {
+                if (res.error) {
+                    throw (res.error);
+                }
                 if (exitAfter) {
                     _this.exit(res.code);
                 }
@@ -7982,7 +7988,7 @@ var xm;
                     _this.reporter.output.error(err.toString()).clear();
                 }
                 _this.exit(1);
-            }));
+            });
         };
 
         Expose.prototype.executeRaw = function (argvRaw, alt) {
@@ -8057,6 +8063,7 @@ var xm;
                     ctx: ctx
                 };
             }, function (err) {
+                xm.log.error('err', err);
                 return {
                     code: (err.code && err.code !== 0 ? err.code : 1),
                     error: err,
@@ -8083,9 +8090,18 @@ var tsd;
             function Printer(output, indent) {
                 if (typeof indent === "undefined") { indent = 0; }
                 this.indent = 0;
+                this.skipProgress = [
+                    /^(?:\w+: )?written zero/,
+                    /^(?:\w+: )?missing info/,
+                    /^(?:\w+: )?remote:/,
+                    /^(?:\w+: )?local:/
+                ];
                 this._remainingPrev = -1;
                 this.output = output;
                 this.indent = indent;
+
+                this.reportError = this.reportError.bind(this);
+                this.reportProgress = this.reportProgress.bind(this);
             }
             Printer.prototype.fmtSortKey = function (key) {
                 return String(key).substr(0, 6);
@@ -8285,6 +8301,64 @@ var tsd;
                 }
                 return this.output.ln();
             };
+
+            Printer.prototype.reportError = function (err, head) {
+                if (typeof head === "undefined") { head = true; }
+                if (head) {
+                    this.output.ln().info().error('an error occured!').clear();
+                }
+
+                if (err.stack) {
+                    return this.output.block(err.stack);
+                }
+                return this.output.line(err);
+            };
+
+            Printer.prototype.reportProgress = function (obj) {
+                var _this = this;
+                if (obj instanceof git.GitRateInfo) {
+                    return this.rateInfo(obj, true);
+                }
+                if (xm.isObject(obj)) {
+                    if (obj.data instanceof git.GitRateInfo) {
+                        return this.rateInfo(obj.data, true);
+                    }
+
+                    if (obj.message) {
+                        if (this.skipProgress.some(function (exp) {
+                            return exp.test(obj.message);
+                        })) {
+                            return this.output;
+                        }
+                    }
+
+                    this.output.indent().note(true);
+
+                    if (xm.isValid(obj.code)) {
+                        this.output.label(obj.code);
+                    }
+                    if (obj.message) {
+                        var msg = this.fmtGitURI(String(obj.message));
+                        msg = xm.escapeHTML(msg).replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
+                            return p1 + _this.output.getStyle().accent(p2) + p3;
+                        });
+                        msg = msg.replace(' -> ', this.output.getStyle().accent(' -> '));
+                        this.output.write(msg);
+                    } else {
+                        this.output.span('<no message>');
+                    }
+                    if (obj.data) {
+                        this.output.sp().inspect(obj, 3);
+                    } else {
+                        this.output.ln();
+                    }
+
+                    return this.output;
+                } else {
+                    return this.output.indent().note(true).span(String(obj)).ln();
+                }
+                return this.output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
+            };
             return Printer;
         })();
         cli.Printer = Printer;
@@ -8324,9 +8398,10 @@ var tsd;
                 var settings = {
                     packageName: context.packageInfo.name,
                     packageVersion: context.packageInfo.version,
-                    updateCheckInterval: 86400000,
+                    updateCheckInterval: 1000,
                     callback: callback
                 };
+
                 notifier = updateNotifier(settings);
                 if (!callback) {
                     defer.resolve(notifier);
@@ -8572,7 +8647,7 @@ var tsd;
 
             expose.defineOption(function (opt) {
                 opt.name = cli.Opt.checkUpdate;
-                opt.description = 'check for updates';
+                opt.description = 'check for TSD updates';
                 opt.type = 'flag';
                 opt.default = true;
                 opt.global = true;
@@ -8856,77 +8931,12 @@ var tsd;
         return d.promise;
     }
 
-    function reportError(err, head) {
-        if (typeof head === "undefined") { head = true; }
-        if (head) {
-            output.ln().info().error('an error occured!').clear();
-        }
-
-        if (err.stack) {
-            return output.block(err.stack);
-        }
-        return output.line(err);
-    }
-
-    var skipProgress = [
-        /^(?:\w+: )?written zero/,
-        /^(?:\w+: )?missing info/,
-        /^(?:\w+: )?remote:/,
-        /^(?:\w+: )?local:/
-    ];
-
-    function reportProgress(obj) {
-        if (obj instanceof git.GitRateInfo) {
-            return print.rateInfo(obj, true);
-        }
-        if (xm.isObject(obj)) {
-            if (obj.data instanceof git.GitRateInfo) {
-                return print.rateInfo(obj.data, true);
-            }
-
-            if (obj.message) {
-                if (skipProgress.some(function (exp) {
-                    return exp.test(obj.message);
-                })) {
-                    return output;
-                }
-            }
-
-            output.indent().note(true);
-
-            if (xm.isValid(obj.code)) {
-                output.label(obj.code);
-            }
-            if (obj.message) {
-                var msg = print.fmtGitURI(String(obj.message));
-                msg = msg.replace(' -> ', output.getStyle().accent(' -> '));
-                msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
-                    return p1 + output.getStyle().accent(p2) + p3;
-                });
-                output.span(msg);
-            } else {
-                output.span('<no message>');
-            }
-            if (obj.data) {
-                output.sp().inspect(obj, 3);
-            } else {
-                output.ln();
-            }
-            return output;
-        } else {
-            return output.indent().note(true).span(String(obj)).ln();
-        }
-        return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
-    }
-
     function getExpose() {
         var expose = new xm.Expose(output);
 
         function getProgress(ctx) {
             if (ctx.getOpt(Opt.progress)) {
-                return function (note) {
-                    reportProgress(note);
-                };
+                return print.reportProgress;
             }
             return function (note) {
             };
@@ -8945,7 +8955,10 @@ var tsd;
         };
 
         expose.end = function (ctx) {
-            return tsd.cli.showUpdateNotifier(output);
+            if (!ctx.error) {
+                return tsd.cli.showUpdateNotifier(output);
+            }
+            return null;
         };
 
         expose.defineGroup(function (group) {
@@ -8994,7 +9007,7 @@ var tsd;
                     ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 
                     return runUpdateNotifier(ctx, context);
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9008,7 +9021,7 @@ var tsd;
                     ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
                     return runUpdateNotifier(ctx, context);
-                }).fail(reportError);
+                }).fail(print.reportError);
             });
         });
 
@@ -9026,7 +9039,7 @@ var tsd;
                         output.ln().info().error('error').sp().span(err.message).ln();
                         throw (err);
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9040,7 +9053,7 @@ var tsd;
                 return getAPIJob(ctx).then(function (job) {
                     output.ln();
                     return job.api.context.logInfo(true);
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9054,7 +9067,7 @@ var tsd;
                 return getAPIJob(ctx).then(function (job) {
                     return job.api.purge(true, true).progress(notify).then(function () {
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9116,11 +9129,11 @@ var tsd;
                             }, true).then(function () {
                             }, function (err) {
                                 output.report().span(action).space().error('error!').ln();
-                                reportError(err, false);
+                                print.reportError(err, false);
                             }, notify);
                         });
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9138,7 +9151,7 @@ var tsd;
                     return job.api.reinstall(job.options).progress(notify).then(function (result) {
                         print.installResult(result);
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9152,7 +9165,7 @@ var tsd;
                     return job.api.getRateInfo().progress(notify).then(function (info) {
                         print.rateInfo(info);
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 
@@ -9206,7 +9219,7 @@ var tsd;
                             }
                         });
                     });
-                }).fail(reportError);
+                }).fail(print.reportError);
             };
         });
 

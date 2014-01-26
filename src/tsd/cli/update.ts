@@ -1,4 +1,5 @@
 /// <reference path="../_ref.ts" />
+/// <reference path="../../xm/StyledOut.ts" />
 
 module tsd {
 	'use strict';
@@ -21,7 +22,7 @@ module tsd {
 				if (notifier) {
 					return Q.resolve(notifier);
 				}
-				// switch it we want to wait for this
+				// switch if we want to wait for this
 				var callback = (promise ? (err, update) => {
 					if (err) {
 						notifier = null;
@@ -36,11 +37,12 @@ module tsd {
 				var settings:any = {
 					packageName: context.packageInfo.name,
 					packageVersion: context.packageInfo.version,
-					updateCheckInterval: 86400000,
+					updateCheckInterval: 24 * 3600 * 1000,
 					// updateCheckTimeout: null,
 					// registryUrl: null,
 					callback: callback
 				};
+
 				notifier = updateNotifier(settings);
 				if (!callback) {
 					defer.resolve(notifier);

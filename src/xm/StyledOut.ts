@@ -69,7 +69,7 @@ module xm {
 		// - - - - - core (inline) - - - - -
 
 		write(str:any):StyledOut {
-			this._line.write(this._style.plain(str));
+			this._line.write(str);
 			return this;
 		}
 

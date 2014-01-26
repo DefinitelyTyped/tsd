@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema",
 	"id": "tsd-v4-dev-5",
-	"description": "TSD - TypeScript Definition Package Manager: config file",
+	"description": "TSD - TypeScript Definition Manager: config & data file",
 	"type": "object",
 	"required": ["version", "repo", "ref", "path"],
 	"properties": {

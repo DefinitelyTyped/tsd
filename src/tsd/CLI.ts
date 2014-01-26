@@ -6,6 +6,7 @@
 /// <reference path="../xm/date.ts" />
 /// <reference path="../xm/object.ts" />
 /// <reference path="../xm/promise.ts" />
+/// <reference path="../xm/encode.ts" />
 /// <reference path="context/Context.ts" />
 /// <reference path="select/Query.ts" />
 /// <reference path="cli/printer.ts" />
@@ -115,7 +116,7 @@ module tsd {
 		var d:Q.Deferred<Job> = Q.defer();
 
 		init(ctx).then(() => {
-			// rerify valid path
+			// verify valid path
 			if (ctx.hasOpt(Opt.config, true)) {
 				return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
 					if (!isFile) {
@@ -126,36 +127,36 @@ module tsd {
 			}
 			return null;
 		}).then(() => {
-				return getContext(ctx).then((context:tsd.Context) => {
-					var job = new Job();
-					job.context = context;
+			return getContext(ctx).then((context:tsd.Context) => {
+				var job = new Job();
+				job.context = context;
 
-					job.ctx = ctx;
-					job.api = new tsd.API(job.context);
+				job.ctx = ctx;
+				job.api = new tsd.API(job.context);
 
-					job.options = new tsd.Options();
+				job.options = new tsd.Options();
 
-					job.options.timeout = ctx.getOpt(Opt.timeout);
-					job.options.limitApi = ctx.getOpt(Opt.limit);
-					job.options.minMatches = ctx.getOpt(Opt.min);
-					job.options.maxMatches = ctx.getOpt(Opt.max);
+				job.options.timeout = ctx.getOpt(Opt.timeout);
+				job.options.limitApi = ctx.getOpt(Opt.limit);
+				job.options.minMatches = ctx.getOpt(Opt.min);
+				job.options.maxMatches = ctx.getOpt(Opt.max);
 
-					job.options.saveToConfig = ctx.getOpt(Opt.save);
-					job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-					job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+				job.options.saveToConfig = ctx.getOpt(Opt.save);
+				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 
-					if (ctx.hasOpt(Opt.cacheMode)) {
-						job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-					}
+				if (ctx.hasOpt(Opt.cacheMode)) {
+					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+				}
 
-					var required:boolean = ctx.hasOpt(Opt.config);
-					return job.api.readConfig(!required).progress(d.notify).then(() => {
-						return runUpdateNotifier(ctx, job.context);
-					}).then(() => {
-							d.resolve(job);
-						});
+				var required:boolean = ctx.hasOpt(Opt.config);
+				return job.api.readConfig(!required).progress(d.notify).then(() => {
+					return runUpdateNotifier(ctx, job.context);
+				}).then(() => {
+					d.resolve(job);
 				});
-			}).fail(d.reject);
+			});
+		}).fail(d.reject);
 
 		return d.promise;
 	}
@@ -197,72 +198,6 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	function reportError(err:any, head:boolean = true):xm.StyledOut {
-		if (head) {
-			output.ln().info().error('an error occured!').clear();
-		}
-
-		if (err.stack) {
-			return output.block(err.stack);
-		}
-		return output.line(err);
-	}
-
-	var skipProgress = [
-		/^(?:\w+: )?written zero/,
-		/^(?:\w+: )?missing info/,
-		/^(?:\w+: )?remote:/,
-		/^(?:\w+: )?local:/
-	];
-
-	function reportProgress(obj:any):xm.StyledOut {
-		// hackytek
-		if (obj instanceof git.GitRateInfo) {
-			return print.rateInfo(obj, true);
-		}
-		if (xm.isObject(obj)) {
-			if (obj.data instanceof git.GitRateInfo) {
-				return print.rateInfo(obj.data, true);
-			}
-			// want this?
-			if (obj.message) {
-				if (skipProgress.some((exp:RegExp) => {
-					return exp.test(obj.message);
-				})) {
-					// let's skip this one
-					return output;
-				}
-			}
-
-			output.indent().note(true);
-
-			if (xm.isValid(obj.code)) {
-				output.label(obj.code);
-			}
-			if (obj.message) {
-				var msg = print.fmtGitURI(String(obj.message));
-				msg = msg.replace(' -> ', output.getStyle().accent(' -> '));
-				msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
-					return p1 + output.getStyle().accent(p2) + p3;
-				});
-				output.span(msg);
-			}
-			else {
-				output.span('<no message>');
-			}
-			if (obj.data) {
-				output.sp().inspect(obj, 3);
-			}
-			else {
-				output.ln();
-			}
-			return output;
-		}
-		else {
-			return output.indent().note(true).span(String(obj)).ln();
-		}
-		return output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
-	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -273,9 +208,7 @@ module tsd {
 
 		function getProgress(ctx:xm.ExposeContext):(note:any) => void {
 			if (ctx.getOpt(Opt.progress)) {
-				return function (note:any):void {
-					reportProgress(note);
-				};
+				return print.reportProgress;
 			}
 			return function (note:any) {
 				// ignore
@@ -296,7 +229,10 @@ module tsd {
 		};
 
 		expose.end = (ctx:xm.ExposeResult) => {
-			return tsd.cli.showUpdateNotifier(output);
+			if (!ctx.error) {
+				return tsd.cli.showUpdateNotifier(output);
+			}
+			return null;
 		};
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -352,7 +288,7 @@ module tsd {
 					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 
 					return runUpdateNotifier(ctx, context);
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -366,7 +302,7 @@ module tsd {
 					ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
 					return runUpdateNotifier(ctx, context);
-				}).fail(reportError);
+				}).fail(print.reportError);
 			});
 		});
 
@@ -384,7 +320,7 @@ module tsd {
 						output.ln().info().error('error').sp().span(err.message).ln();
 						throw(err);
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -399,7 +335,7 @@ module tsd {
 					output.ln();
 					return <any> job.api.context.logInfo(true);
 
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -415,7 +351,7 @@ module tsd {
 					return job.api.purge(true, true).progress(notify).then(() => {
 
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -484,11 +420,11 @@ module tsd {
 									// whut?
 								}, (err) => {
 									output.report().span(action).space().error('error!').ln();
-									reportError(err, false);
+									print.reportError(err, false);
 								}, notify);
 						});
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -508,7 +444,7 @@ module tsd {
 					return job.api.reinstall(job.options).progress(notify).then((result:tsd.InstallResult) => {
 						print.installResult(result);
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -524,7 +460,7 @@ module tsd {
 					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
 						print.rateInfo(info);
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 
@@ -580,7 +516,7 @@ module tsd {
 							}
 						});
 					});
-				}).fail(reportError);
+				}).fail(print.reportError);
 			};
 		});
 

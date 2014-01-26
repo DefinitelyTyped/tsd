@@ -1,5 +1,5 @@
 {
-  "write": "[plain|foo]<end>\n",
+  "write": "foo<end>\n",
   "line": "[plain|foo]\n<end>\n",
   "line_opt": "\n<end>\n",
   "ln": "\n<end>\n",

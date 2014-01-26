@@ -208,6 +208,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     var util = require('util');
     var jsesc = require('jsesc');
 
@@ -375,6 +377,7 @@ var xm;
     xm.trimWrap = trimWrap;
 
     var escapableExp = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+
     var meta = {
         '\b': '\\b',
         '\t': '\\t',
@@ -405,6 +408,10 @@ var xm;
         return str;
     }
     xm.escapeSimple = escapeSimple;
+    function escapeHTML(html) {
+        return String(html).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    xm.escapeHTML = escapeHTML;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -631,12 +638,27 @@ var xm;
         }
         object.hideProps = hideProps;
 
-        function lockProps(object, props) {
+        function lockProps(object, props, pub, pref) {
+            if (typeof pub === "undefined") { pub = true; }
+            if (typeof pref === "undefined") { pref = true; }
             props.forEach(function (property) {
-                Object.defineProperty(object, property, { writable: false });
+                if (/^_/.test(property)) {
+                    if (pref) {
+                        Object.defineProperty(object, property, { writable: false });
+                    }
+                } else if (pub) {
+                    Object.defineProperty(object, property, { writable: false });
+                }
             });
         }
         object.lockProps = lockProps;
+
+        function forceProps(object, props) {
+            Object.keys(props).forEach(function (property) {
+                Object.defineProperty(object, property, { value: props[property], writable: false });
+            });
+        }
+        object.forceProps = forceProps;
 
         function freezeProps(object, props) {
             props.forEach(function (property) {
@@ -666,6 +688,8 @@ var xm;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
+    'use strict';
+
     var util = require('util');
 
     var miniwrite = require('miniwrite');
@@ -697,7 +721,7 @@ var xm;
             xm.object.hidePrefixed(this);
         }
         StyledOut.prototype.write = function (str) {
-            this._line.write(this._style.plain(str));
+            this._line.write(str);
             return this;
         };
 
@@ -921,12 +945,24 @@ var xm;
             return this;
         };
 
-        StyledOut.prototype.tweakURI = function (str) {
+        StyledOut.prototype.tweakURI = function (str, trimHttp, wrapAngles) {
+            if (typeof trimHttp === "undefined") { trimHttp = false; }
+            if (typeof wrapAngles === "undefined") { wrapAngles = false; }
             var repAccent = this._style.accent('/');
 
-            this._line.write(str.split(/:\/\//).map(function (str) {
-                return str.replace(/\//g, repAccent);
-            }).join(this._style.accent('://')));
+            if (wrapAngles) {
+                this._line.write(this._style.muted('<'));
+            }
+            if (trimHttp) {
+                this._line.write(str.replace(/^\w+?:\/\//, '').replace(/\//g, repAccent));
+            } else {
+                this._line.write(str.split(/:\/\//).map(function (str) {
+                    return str.replace(/\//g, repAccent);
+                }).join(this._style.accent('://')));
+            }
+            if (wrapAngles) {
+                this._line.write(this._style.muted('>'));
+            }
             return this;
         };
 

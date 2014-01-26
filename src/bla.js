@@ -1,9 +1,9 @@
-require('es6-shim');
-
 var updateNotifier = require('update-notifier');
+
 var notifier = updateNotifier({
 	packageName: 'update-notifier-tester',
-	packageVersion: '0.0.2'
+	updateCheckInterval: 1,
+	packageVersion: '0.0.1'
 });
 
 if (notifier.update) {

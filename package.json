@@ -2,7 +2,7 @@
   "private": true,
   "name": "tsd",
   "version": "0.5.2-alpha.12",
-  "description": "TypeScript definition manager for DefinitelyTyped.",
+  "description": "TypeScript Definition manager for DefinitelyTyped.",
   "keywords": [
     "typescript",
     "definition",
@@ -65,7 +65,7 @@
     "request": "~2.29.0",
     "event-stream": "~3.0.18",
     "bufferstream": "~0.6.2",
-    "update-notifier": "~0.1.7"
+    "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

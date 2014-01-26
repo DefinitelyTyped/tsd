@@ -12,16 +12,26 @@ module tsd {
 
 		var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
 
+
 		export class Printer {
 
 			output:xm.StyledOut;
 			indent:number = 0;
+			skipProgress = [
+				/^(?:\w+: )?written zero/,
+				/^(?:\w+: )?missing info/,
+				/^(?:\w+: )?remote:/,
+				/^(?:\w+: )?local:/
+			];
 
 			private _remainingPrev:number = -1;
 
 			constructor(output:xm.StyledOut, indent:number = 0) {
 				this.output = output;
 				this.indent = indent;
+
+				this.reportError = this.reportError.bind(this);
+				this.reportProgress = this.reportProgress.bind(this);
 			}
 
 			fmtSortKey(key:string):string {
@@ -228,6 +238,67 @@ module tsd {
 					this.output.success(info.getResetString());
 				}
 				return this.output.ln();
+			}
+
+			reportError(err:any, head:boolean = true):xm.StyledOut {
+				if (head) {
+					this.output.ln().info().error('an error occured!').clear();
+				}
+
+				if (err.stack) {
+					return this.output.block(err.stack);
+				}
+				return this.output.line(err);
+			}
+
+			reportProgress(obj:any):xm.StyledOut {
+				// hackytek
+				if (obj instanceof git.GitRateInfo) {
+					return this.rateInfo(obj, true);
+				}
+				if (xm.isObject(obj)) {
+					if (obj.data instanceof git.GitRateInfo) {
+						return this.rateInfo(obj.data, true);
+					}
+					// want this?
+					if (obj.message) {
+						if (this.skipProgress.some((exp:RegExp) => {
+							return exp.test(obj.message);
+						})) {
+							// let's skip this one
+							return this.output;
+						}
+					}
+
+					this.output.indent().note(true);
+
+					if (xm.isValid(obj.code)) {
+						this.output.label(obj.code);
+					}
+					if (obj.message) {
+						var msg = this.fmtGitURI(String(obj.message));
+						msg = xm.escapeHTML(msg).replace(/([\w\\\/])(: )([\w\\\/\.-])/g, (match, p1, p2, p3) => {
+							return p1 + this.output.getStyle().accent(p2) + p3;
+						});
+						msg = msg.replace(' -> ', this.output.getStyle().accent(' -> '));
+						this.output.write(msg);
+					}
+					else {
+						this.output.span('<no message>');
+					}
+					if (obj.data) {
+						this.output.sp().inspect(obj, 3);
+					}
+					else {
+						this.output.ln();
+					}
+
+					return this.output;
+				}
+				else {
+					return this.output.indent().note(true).span(String(obj)).ln();
+				}
+				return this.output.indent().note(true).label(xm.typeOf(obj)).inspect(obj, 3);
 			}
 		}
 	}
