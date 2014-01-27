@@ -8577,6 +8577,189 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    var ua = require('universal-analytics');
+    var uuid = require('uuid');
+
+    (function (cli) {
+        var Tracker = (function () {
+            function Tracker() {
+                this._client = getDummy();
+                this._eventQueue = [];
+                this._workers = [];
+                this._workersMax = 50;
+                this._workersGrow = 8;
+            }
+            Tracker.prototype.init = function (context, debug) {
+                if (typeof debug === "undefined") { debug = false; }
+                xm.assertVar(context, tsd.Context, 'context');
+
+                this._context = context;
+                this._accountID = context.settings.getString('tracker/accountID');
+                this._enabled = context.settings.getBoolean('tracker/enabled');
+
+                this._minor = this._context.packageInfo.version.match(/^\d+\.\d+/)[0];
+                this._page = [
+                    '',
+                    this._context.packageInfo.name,
+                    this._context.packageInfo.version,
+                    this._context.config.repoOwner,
+                    this._context.config.repoProject,
+                    this._context.config.ref
+                ].join('/');
+
+                if (!this._enabled) {
+                    return;
+                }
+                if (!this._accountID || !/^UA-\d+-\d+$/.test(this._accountID)) {
+                    throw new Error('invalid accountID: ' + this._accountID);
+                }
+
+                this._client = ua(this._accountID, uuid.v4());
+                if (debug) {
+                    this._client = this._client.debug();
+                }
+            };
+
+            Tracker.prototype.getPage = function (parts) {
+                return this._page + (parts && parts.length > 0 ? '/' + parts.join('/') : '');
+            };
+
+            Tracker.prototype.pageview = function () {
+                var parts = [];
+                for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                    parts[_i] = arguments[_i + 0];
+                }
+                this._client.pageview(this.getPage(parts)).send();
+            };
+
+            Tracker.prototype.command = function (ctx) {
+                this.sendEvent({
+                    ec: 'command',
+                    ea: (ctx.command ? ctx.command.name : ''),
+                    dp: this.getPage()
+                });
+            };
+
+            Tracker.prototype.query = function (query) {
+                this.sendEvent({
+                    ec: 'query',
+                    ea: query.patterns.map(function (matcher) {
+                        return matcher.pattern;
+                    }).join(' '),
+                    dp: this.getPage()
+                });
+            };
+
+            Tracker.prototype.install = function (action, result) {
+                var _this = this;
+                result.written.forEach(function (value) {
+                    _this.sendEvent({
+                        ec: action,
+                        ea: value.def.path,
+                        dp: _this.getPage()
+                    });
+                });
+            };
+
+            Tracker.prototype.error = function (err) {
+                if (err) {
+                    if (err.message) {
+                        this._client.exception(err.message).send();
+                    } else {
+                        this._client.exception(String(err.message)).send();
+                    }
+                }
+            };
+
+            Tracker.prototype.sendEvent = function (event) {
+                var _this = this;
+                if (event) {
+                    this._eventQueue.push(event);
+                }
+
+                var grow = 0;
+
+                while (this._eventQueue.length > 0 && this._workers.length < this._workersMax && grow < this._workersGrow) {
+                    var event = this._eventQueue.pop();
+                    this._workers.push(event);
+
+                    this._client.event(event, function (err) {
+                        var i = _this._workers.indexOf(event);
+                        if (i > -1) {
+                            _this._workers.splice(i, 1);
+                        }
+                        if (!err) {
+                            _this.sendEvent();
+                        }
+                    });
+
+                    grow++;
+                }
+            };
+
+            Tracker.prototype.getTimer = function (variable, label) {
+                var _this = this;
+                if (!this._enabled || !this._client) {
+                    return function (err) {
+                    };
+                }
+                var start = Date.now();
+                return function (err) {
+                    if (!err) {
+                        var duration = Date.now() - start;
+                        _this._client.timing(_this.getPage(), variable, duration, label).send();
+                    }
+                };
+            };
+
+            Object.defineProperty(Tracker.prototype, "client", {
+                get: function () {
+                    return this._client;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            return Tracker;
+        })();
+        cli.Tracker = Tracker;
+
+        function getDummy() {
+            var dummy = {
+                debug: function () {
+                    return dummy;
+                },
+                send: function () {
+                    return dummy;
+                },
+                pageview: function () {
+                    return dummy;
+                },
+                event: function () {
+                    return dummy;
+                },
+                transaction: function () {
+                    return dummy;
+                },
+                item: function () {
+                    return dummy;
+                },
+                exception: function () {
+                    return dummy;
+                },
+                timing: function () {
+                    return dummy;
+                }
+            };
+            return dummy;
+        }
+        cli.getDummy = getDummy;
+    })(tsd.cli || (tsd.cli = {}));
+    var cli = tsd.cli;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
 
@@ -8938,6 +9121,7 @@ var tsd;
     var output = new xm.StyledOut();
     var print = new tsd.cli.Printer(output);
     var styles = new tsd.cli.StyleMap(output);
+    var tracker = new tsd.cli.Tracker();
 
     function showHeader() {
         var pkg = xm.PackageJSON.getLocal();
@@ -8951,6 +9135,9 @@ var tsd;
         xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
         var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
+
+        tracker.init(context, ctx.getOpt(Opt.verbose));
+        tracker.command(ctx);
 
         if (ctx.getOpt(Opt.dev)) {
             context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
@@ -9088,6 +9275,12 @@ var tsd;
             return Q.resolve();
         }
 
+        function reportError(err, head) {
+            if (typeof head === "undefined") { head = true; }
+            tracker.error(err);
+            print.reportError(err, head);
+        }
+
         expose.before = function (ctx) {
             return showHeader();
         };
@@ -9145,7 +9338,7 @@ var tsd;
                     ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 
                     return runUpdateNotifier(ctx, context);
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9159,7 +9352,7 @@ var tsd;
                     ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
                     return runUpdateNotifier(ctx, context);
-                }).fail(print.reportError);
+                }).fail(reportError);
             });
         });
 
@@ -9170,14 +9363,14 @@ var tsd;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
+                return getAPIJob(ctx).progress(notify).then(function (job) {
                     return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(notify).then(function (target) {
                         output.ln().info().success('written').sp().span(target).ln();
                     }, function (err) {
                         output.ln().info().error('error').sp().span(err.message).ln();
                         throw (err);
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9188,10 +9381,10 @@ var tsd;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
+                return getAPIJob(ctx).progress(notify).then(function (job) {
                     output.ln();
                     return job.api.context.logInfo(true);
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9202,10 +9395,10 @@ var tsd;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
+                return getAPIJob(ctx).progress(notify).then(function (job) {
                     return job.api.purge(true, true).progress(notify).then(function () {
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9213,6 +9406,8 @@ var tsd;
         queryActions.set(Action.install, function (ctx, job, selection) {
             return job.api.install(selection, job.options).then(function (result) {
                 print.installResult(result);
+
+                tracker.install('install', result);
             });
         });
 
@@ -9235,6 +9430,8 @@ var tsd;
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
                 return getSelectorJob(ctx).then(function (job) {
+                    tracker.query(job.query);
+
                     return job.api.select(job.query, job.options).progress(notify).then(function (selection) {
                         if (selection.selection.length === 0) {
                             output.ln().report().warning('zero results').ln();
@@ -9264,14 +9461,13 @@ var tsd;
 
                             return queryActions.run(action, function (run) {
                                 return run(ctx, job, selection);
-                            }, true).then(function () {
-                            }, function (err) {
+                            }, true).progress(notify).fail(function (err) {
                                 output.report().span(action).space().error('error!').ln();
-                                print.reportError(err, false);
-                            }, notify);
+                                reportError(err, false);
+                            });
                         });
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9282,14 +9478,16 @@ var tsd;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
+                return getAPIJob(ctx).progress(notify).then(function (job) {
                     output.line();
                     output.info(true).span('running').space().accent(cmd.name).ln();
 
                     return job.api.reinstall(job.options).progress(notify).then(function (result) {
                         print.installResult(result);
+
+                        tracker.install('reinstall', result);
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9299,11 +9497,11 @@ var tsd;
             cmd.groups = [Group.support];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
-                return getAPIJob(ctx).then(function (job) {
+                return getAPIJob(ctx).progress(notify).then(function (job) {
                     return job.api.getRateInfo().progress(notify).then(function (info) {
                         print.rateInfo(info);
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 
@@ -9357,7 +9555,7 @@ var tsd;
                             }
                         });
                     });
-                }).fail(print.reportError);
+                }).fail(reportError);
             };
         });
 

@@ -8,21 +8,25 @@ TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/)
 
 #### 0.5.x Preview notes :warning: 
 
-*	Version `0.5.x` is functional and usable but still in development:
-	*	If you decide to use it be sure to update regularly.
-	*	There will be bugs and quirks.
+*	Version `0.5.x` is usable but still in development..
 *	It is recommended you check-in the definitions you install into your VCS:
-	*	The `tsd.json` file saves [repo + commit + path] so usually we can find the file but you might want to make local changes.
-	*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) (see .
+	*	The `tsd.json` file saves [repo + commit + path] but you might want to make local changes.
+	*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
 *	Not backwards compatible with the config files from earlier versions.
-*	API and options are incomplete and not 100% final.
+*	API and options are work-in-progress.
 *	See below for legacy version.
 
 #### Rate limit
 
 The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over unlimited Github RAW urls. 
 
-We are looking into a fallback to bypass the occasional burst mode for when you'd do something silly like `$ tsd query * --history --limit 500 --cacheMode forceRemote`.
+We are looking into a fallback to bypass the occasional burst mode.
+
+#### Anonymous stats & update-check
+
+The CLI tool tracks some *anonymous* usage statistics in Google Analytics using [universal-analytics](https://npmjs.org/package/universal-analytics). For now this is always-on; if this is a problem then leave an Issue and we'll prioritize an opt-out. 
+
+There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to notify of TSD updates, this runs every few days in a background process of the CLI (also anonymous).
 
 ## Usage as CLI command
 

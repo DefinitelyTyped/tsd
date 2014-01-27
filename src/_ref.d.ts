@@ -9,3 +9,4 @@
 /// <reference path="../typings/miniwrite/miniwrite.d.ts" />
 /// <reference path="../typings/ministyle/ministyle.d.ts" />
 /// <reference path="../typings/json-pointer/json-pointer.d.ts" />
+/// <reference path="../typings/universal-analytics/universal-analytics.d.ts" />

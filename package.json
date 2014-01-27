@@ -65,7 +65,9 @@
     "request": "~2.29.0",
     "event-stream": "~3.0.18",
     "bufferstream": "~0.6.2",
-    "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork"
+    "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork",
+    "universal-analytics": "~0.3.2",
+    "uuid": "~1.4.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

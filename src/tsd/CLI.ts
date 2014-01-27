@@ -11,6 +11,7 @@
 /// <reference path="select/Query.ts" />
 /// <reference path="cli/printer.ts" />
 /// <reference path="cli/update.ts" />
+/// <reference path="cli/tracker.ts" />
 /// <reference path="cli/style.ts" />
 /// <reference path="cli/printer.ts" />
 /// <reference path="cli/options.ts" />
@@ -37,6 +38,7 @@ module tsd {
 	var output = new xm.StyledOut();
 	var print = new tsd.cli.Printer(output);
 	var styles = new tsd.cli.StyleMap(output);
+	var tracker = new tsd.cli.Tracker();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -56,6 +58,9 @@ module tsd {
 		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
 		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
+
+		tracker.init(context, ctx.getOpt(Opt.verbose));
+		tracker.command(ctx);
 
 		if (ctx.getOpt(Opt.dev)) {
 			// TODO why not local?
@@ -222,6 +227,11 @@ module tsd {
 			return Q.resolve();
 		}
 
+		function reportError(err:any, head:boolean = true):void {
+			tracker.error(err);
+			print.reportError(err, head);
+		}
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		expose.before = (ctx:xm.ExposeContext) => {
@@ -288,7 +298,7 @@ module tsd {
 					ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
 
 					return runUpdateNotifier(ctx, context);
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -302,7 +312,7 @@ module tsd {
 					ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
 					return runUpdateNotifier(ctx, context);
-				}).fail(print.reportError);
+				}).fail(reportError);
 			});
 		});
 
@@ -313,14 +323,14 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					return job.api.initConfig(ctx.getOpt(Opt.overwrite)).progress(notify).then((target:string) => {
 						output.ln().info().success('written').sp().span(target).ln();
 					}, (err) => {
 						output.ln().info().error('error').sp().span(err.message).ln();
 						throw(err);
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -331,11 +341,11 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					output.ln();
 					return <any> job.api.context.logInfo(true);
 
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -346,12 +356,12 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					// TODO expose raw/api/all option
 					return job.api.purge(true, true).progress(notify).then(() => {
 
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -362,6 +372,8 @@ module tsd {
 		queryActions.set(Action.install, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
 			return job.api.install(selection, job.options).then((result:tsd.InstallResult) => {
 				print.installResult(result);
+
+				tracker.install('install', result);
 			});
 		});
 		/*queryActions.set(Action.open, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
@@ -382,7 +394,10 @@ module tsd {
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getSelectorJob(ctx).then((job:Job) => {
+					tracker.query(job.query);
+
 					return job.api.select(job.query, job.options).progress(notify).then((selection:tsd.Selection) => {
+
 						if (selection.selection.length === 0) {
 							output.ln().report().warning('zero results').ln();
 							return;
@@ -416,15 +431,14 @@ module tsd {
 
 							return queryActions.run(action, (run:tsd.JobSelectionAction) => {
 								return run(ctx, job, selection);
-							}, true).then(() => {
-									// whut?
-								}, (err) => {
-									output.report().span(action).space().error('error!').ln();
-									print.reportError(err, false);
-								}, notify);
+
+							}, true).progress(notify).fail((err) => {
+								output.report().span(action).space().error('error!').ln();
+								reportError(err, false);
+							});
 						});
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -437,14 +451,16 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					output.line();
 					output.info(true).span('running').space().accent(cmd.name).ln();
 
 					return job.api.reinstall(job.options).progress(notify).then((result:tsd.InstallResult) => {
 						print.installResult(result);
+
+						tracker.install('reinstall', result);
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -456,11 +472,11 @@ module tsd {
 			cmd.groups = [Group.support];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
-				return getAPIJob(ctx).then((job:Job) => {
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
 						print.rateInfo(info);
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 
@@ -516,7 +532,7 @@ module tsd {
 							}
 						});
 					});
-				}).fail(print.reportError);
+				}).fail(reportError);
 			};
 		});
 

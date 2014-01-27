@@ -33,6 +33,10 @@
 			}
 		}
 	},
+	"tracker": {
+		"enabled": true,
+		"accountID" : "UA-47495295-1"
+	},
 	"update-notifier": {
 		"enabled": true,
 		"registryUrl": "http://registry.npmjs.org/%s",
@@ -40,7 +44,7 @@
 			"seconds": 20
 		},
 		"updateCheckInterval": {
-			"days": 5
+			"days": 1
 		}
 	}
 }
