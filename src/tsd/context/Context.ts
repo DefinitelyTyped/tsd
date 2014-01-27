@@ -24,7 +24,7 @@ module tsd {
 		settings:xm.JSONPointer;
 
 		// TODO remove or use more of this log? (xm.log is pretty global already)
-		log:xm.Logger = xm.getLogger('Context');
+		// log:xm.Logger = xm.getLogger('Context');
 		configSchema:any;
 
 		constructor(configFile:string = null, verbose:boolean = false) {
@@ -50,15 +50,18 @@ module tsd {
 		}
 
 		// TODO move this out of this class
-		logInfo(details:boolean = false):void {
-			this.log(this.packageInfo.getNameVersion());
-			this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
+		getInfo(details:boolean = false):Object {
+			var info:any = {
+				version: this.packageInfo.getNameVersion(),
+				repo: this.config.repo + ' #' + this.config.ref
+			};
 			if (details) {
-				this.log('paths: ' + JSON.stringify(this.paths, null, 3));
-				this.log('config: ' + JSON.stringify(this.config, null, 3));
-				this.log('resolved typings: ' + JSON.stringify(this.config.resolveTypingsPath(path.dirname(this.paths.configFile)), null, 3));
-				this.log('installed: ' + JSON.stringify(this.config.getInstalled(), null, 3));
+				info.paths = this.paths;
+				info.config = this.config;
+				info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+				info.installed = this.config.getInstalled();
 			}
+			return info;
 		}
 	}
 }

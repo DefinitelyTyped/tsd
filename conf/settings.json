@@ -13,7 +13,7 @@
 				"days": 1
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		},
 		"api": {
@@ -29,7 +29,7 @@
 				"minutes": 5
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		}
 	},

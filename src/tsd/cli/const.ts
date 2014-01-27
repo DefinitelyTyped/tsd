@@ -31,7 +31,7 @@ module tsd {
 			export var info = 'info';
 			export var history = 'history';
 			export var detail = 'detail';
-			export var checkUpdate = 'checkUpdate';
+			export var allowUpdate = 'allowUpdate';s
 		}
 		xm.object.lockPrimitives(Opt);
 

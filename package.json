@@ -67,7 +67,8 @@
     "bufferstream": "~0.6.2",
     "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork",
     "universal-analytics": "~0.3.2",
-    "uuid": "~1.4.1"
+    "uuid": "~1.4.1",
+    "js-yaml": "~3.0.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

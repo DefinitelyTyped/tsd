@@ -18,10 +18,11 @@ module tsd {
 			output:xm.StyledOut;
 			indent:number = 0;
 			skipProgress = [
-				/^(?:\w+: )?written zero/,
-				/^(?:\w+: )?missing info/,
-				/^(?:\w+: )?remote:/,
-				/^(?:\w+: )?local:/
+				/^(?:\w+: )?written zero \w+ bytes /,
+				/^(?:\w+: )?missing \w+ file /,
+				/^(?:\w+: )?remote: /,
+				/^(?:\w+: )?local: /,
+				/^(?:\w+: )?update: /
 			];
 
 			private _remainingPrev:number = -1;
@@ -30,7 +31,6 @@ module tsd {
 				this.output = output;
 				this.indent = indent;
 
-				this.reportError = this.reportError.bind(this);
 				this.reportProgress = this.reportProgress.bind(this);
 			}
 
@@ -277,7 +277,7 @@ module tsd {
 					}
 					if (obj.message) {
 						var msg = this.fmtGitURI(String(obj.message));
-						msg = xm.escapeHTML(msg).replace(/([\w\\\/])(: )([\w\\\/\.-])/g, (match, p1, p2, p3) => {
+						msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, (match, p1, p2, p3) => {
 							return p1 + this.output.getStyle().accent(p2) + p3;
 						});
 						msg = msg.replace(' -> ', this.output.getStyle().accent(' -> '));

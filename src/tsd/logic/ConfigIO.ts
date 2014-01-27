@@ -22,6 +22,7 @@ module tsd {
 		constructor(core:tsd.Core) {
 			super(core, 'config', 'ConfigIO');
 		}
+
 		/*
 		 load the current configFile, optional to not throw error on missing file
 		 promise: path of config file

@@ -23,6 +23,7 @@ module tsd {
 	var path = require('path');
 	var Q = require('q');
 	var FS = (<typeof QioFS> require('q-io/fs'));
+	var yaml = require('js-yaml');
 
 	var miniwrite = <typeof MiniWrite> require('miniwrite');
 	var ministyle = <typeof MiniStyle> require('ministyle');
@@ -77,7 +78,7 @@ module tsd {
 	}
 
 	function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context):Q.Promise<any> {
-		if (ctx.getOpt(Opt.checkUpdate)) {
+		if (ctx.getOpt(Opt.allowUpdate)) {
 			return tsd.cli.runUpdateNotifier(context, false);
 		}
 		return Q.resolve();
@@ -221,7 +222,7 @@ module tsd {
 		}
 
 		function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context, promise:boolean = false):Q.Promise<any> {
-			if (ctx.getOpt(Opt.checkUpdate)) {
+			if (ctx.getOpt(Opt.allowUpdate)) {
 				return tsd.cli.runUpdateNotifier(context, promise);
 			}
 			return Q.resolve();
@@ -343,7 +344,11 @@ module tsd {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					output.ln();
-					return <any> job.api.context.logInfo(true);
+					var opts = {
+						indent: 3,
+						flowLevel: -1
+					};
+					return output.plain(yaml.safeDump(job.api.context.getInfo(true)));
 
 				}).fail(reportError);
 			};

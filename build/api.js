@@ -2460,7 +2460,6 @@ var tsd;
         function Context(configFile, verbose) {
             if (typeof configFile === "undefined") { configFile = null; }
             if (typeof verbose === "undefined") { verbose = false; }
-            this.log = xm.getLogger('Context');
             xm.assertVar(configFile, 'string', 'configFile', true);
             xm.assertVar(verbose, 'boolean', 'verbose');
 
@@ -2481,16 +2480,19 @@ var tsd;
             return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
         };
 
-        Context.prototype.logInfo = function (details) {
+        Context.prototype.getInfo = function (details) {
             if (typeof details === "undefined") { details = false; }
-            this.log(this.packageInfo.getNameVersion());
-            this.log('repo: ' + this.config.repo + ' #' + this.config.ref);
+            var info = {
+                version: this.packageInfo.getNameVersion(),
+                repo: this.config.repo + ' #' + this.config.ref
+            };
             if (details) {
-                this.log('paths: ' + JSON.stringify(this.paths, null, 3));
-                this.log('config: ' + JSON.stringify(this.config, null, 3));
-                this.log('resolved typings: ' + JSON.stringify(this.config.resolveTypingsPath(path.dirname(this.paths.configFile)), null, 3));
-                this.log('installed: ' + JSON.stringify(this.config.getInstalled(), null, 3));
+                info.paths = this.paths;
+                info.config = this.config;
+                info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+                info.installed = this.config.getInstalled();
             }
+            return info;
         };
         return Context;
     })();
@@ -8225,16 +8227,16 @@ var tsd;
                 if (typeof indent === "undefined") { indent = 0; }
                 this.indent = 0;
                 this.skipProgress = [
-                    /^(?:\w+: )?written zero/,
-                    /^(?:\w+: )?missing info/,
-                    /^(?:\w+: )?remote:/,
-                    /^(?:\w+: )?local:/
+                    /^(?:\w+: )?written zero \w+ bytes /,
+                    /^(?:\w+: )?missing \w+ file /,
+                    /^(?:\w+: )?remote: /,
+                    /^(?:\w+: )?local: /,
+                    /^(?:\w+: )?update: /
                 ];
                 this._remainingPrev = -1;
                 this.output = output;
                 this.indent = indent;
 
-                this.reportError = this.reportError.bind(this);
                 this.reportProgress = this.reportProgress.bind(this);
             }
             Printer.prototype.fmtSortKey = function (key) {
@@ -8473,7 +8475,7 @@ var tsd;
                     }
                     if (obj.message) {
                         var msg = this.fmtGitURI(String(obj.message));
-                        msg = xm.escapeHTML(msg).replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
+                        msg = msg.replace(/([\w\\\/])(: )([\w\\\/\.-])/g, function (match, p1, p2, p3) {
                             return p1 + _this.output.getStyle().accent(p2) + p3;
                         });
                         msg = msg.replace(' -> ', this.output.getStyle().accent(' -> '));
@@ -8870,7 +8872,8 @@ var tsd;
             Opt.info = 'info';
             Opt.history = 'history';
             Opt.detail = 'detail';
-            Opt.checkUpdate = 'checkUpdate';
+            Opt.allowUpdate = 'allowUpdate';
+            s;
         })(cli.Opt || (cli.Opt = {}));
         var Opt = cli.Opt;
         xm.object.lockPrimitives(Opt);
@@ -8967,8 +8970,8 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.checkUpdate;
-                opt.description = 'check for TSD updates';
+                opt.name = cli.Opt.allowUpdate;
+                opt.description = 'allow check for TSD updates';
                 opt.type = 'flag';
                 opt.default = true;
                 opt.global = true;
@@ -9110,6 +9113,7 @@ var tsd;
     var path = require('path');
     var Q = require('q');
     var FS = (require('q-io/fs'));
+    var yaml = require('js-yaml');
 
     var miniwrite = require('miniwrite');
     var ministyle = require('ministyle');
@@ -9151,7 +9155,7 @@ var tsd;
     }
 
     function runUpdateNotifier(ctx, context) {
-        if (ctx.getOpt(Opt.checkUpdate)) {
+        if (ctx.getOpt(Opt.allowUpdate)) {
             return tsd.cli.runUpdateNotifier(context, false);
         }
         return Q.resolve();
@@ -9269,7 +9273,7 @@ var tsd;
 
         function runUpdateNotifier(ctx, context, promise) {
             if (typeof promise === "undefined") { promise = false; }
-            if (ctx.getOpt(Opt.checkUpdate)) {
+            if (ctx.getOpt(Opt.allowUpdate)) {
                 return tsd.cli.runUpdateNotifier(context, promise);
             }
             return Q.resolve();
@@ -9383,7 +9387,11 @@ var tsd;
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).progress(notify).then(function (job) {
                     output.ln();
-                    return job.api.context.logInfo(true);
+                    var opts = {
+                        indent: 3,
+                        flowLevel: -1
+                    };
+                    return output.plain(yaml.safeDump(job.api.context.getInfo(true)));
                 }).fail(reportError);
             };
         });
