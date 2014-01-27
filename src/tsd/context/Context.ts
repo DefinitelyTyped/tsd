@@ -2,6 +2,7 @@
 /// <reference path="../../xm/iterate.ts" />
 /// <reference path="../../xm/Logger.ts" />
 /// <reference path="../../xm/data/PackageJSON.ts" />
+/// <reference path="../../xm/json-pointer.ts" />
 /// <reference path="Config.ts" />
 /// <reference path="Paths.ts" />
 /// <reference path="Const.ts" />
@@ -20,6 +21,7 @@ module tsd {
 		config:Config;
 		packageInfo:xm.PackageJSON;
 		verbose:boolean;
+		settings:xm.JSONPointer;
 
 		// TODO remove or use more of this log? (xm.log is pretty global already)
 		log:xm.Logger = xm.getLogger('Context');
@@ -30,6 +32,8 @@ module tsd {
 			xm.assertVar(verbose, 'boolean', 'verbose');
 
 			this.packageInfo = xm.PackageJSON.getLocal();
+			this.settings = new xm.JSONPointer(xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
+
 			this.verbose = verbose;
 
 			this.paths = new Paths();

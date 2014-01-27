@@ -169,6 +169,29 @@ var xm;
     }
     xm.isOk = isOk;
 
+    function isFlagOn(obj) {
+        if (!xm.isValid(obj)) {
+            return false;
+        }
+        obj = ('' + obj).toLowerCase();
+        if (obj === '' || obj === '0') {
+            return false;
+        }
+        switch (obj) {
+            case 'false':
+            case 'null':
+            case 'nan':
+            case 'undefined':
+
+            case 'no':
+            case 'off':
+            case 'disabled':
+                return false;
+        }
+        return true;
+    }
+    xm.isFlagOn = isFlagOn;
+
     function isValid(obj) {
         var type = typeOf(obj);
         return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));
@@ -1246,6 +1269,7 @@ var tsd;
         configFile: 'tsd.json',
         typingsDir: 'typings',
         cacheDir: 'tsd-cache',
+        settings: 'settings.json',
         configVersion: 'v4',
         configSchemaFile: 'tsd-v4.json',
         definitelyRepo: 'borisyankov/DefinitelyTyped',
@@ -1731,6 +1755,104 @@ var xm;
         return PackageJSON;
     })();
     xm.PackageJSON = PackageJSON;
+})(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var pointer = require('json-pointer');
+
+    var JSONPointer = (function () {
+        function JSONPointer(object) {
+            xm.assertVar(object, 'object', 'object');
+            this.object = object;
+        }
+        JSONPointer.prototype.getValue = function (path, alt) {
+            if (!/^\//.test(path)) {
+                path = '/' + path;
+            }
+            if (pointer.has(this.object, path)) {
+                return pointer.get(this.object, path);
+            }
+            return alt;
+        };
+
+        JSONPointer.prototype.getChild = function (path, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            var value = this.getValue(path);
+            if (typeof value === 'object' && value) {
+                return new JSONPointer(value);
+            }
+            return alt;
+        };
+
+        JSONPointer.prototype.getNumber = function (path, alt) {
+            if (typeof alt === "undefined") { alt = NaN; }
+            var value = this.getValue(path);
+            if (typeof value === 'number') {
+                return value;
+            }
+            return alt;
+        };
+
+        JSONPointer.prototype.getBoolean = function (path, alt) {
+            if (typeof alt === "undefined") { alt = false; }
+            return xm.isFlagOn(this.getValue(path, alt));
+        };
+
+        JSONPointer.prototype.getString = function (path, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            var value = this.getValue(path);
+            if (typeof value === 'string') {
+                return value;
+            } else if (typeof value === 'number') {
+                return String(value);
+            }
+            return alt;
+        };
+
+        JSONPointer.prototype.getDate = function (path, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            var value = this.getValue(path);
+            if (typeof value === 'string') {
+                return new Date(value);
+            }
+            return alt;
+        };
+
+        JSONPointer.prototype.getDurationSecs = function (path, alt) {
+            if (typeof alt === "undefined") { alt = 0; }
+            var value = this.getValue(path);
+            if (typeof value === 'object') {
+                var d = 0;
+                if (typeof value.years !== 'undefined') {
+                    d += 31557600;
+                }
+                if (typeof value.months !== 'undefined') {
+                    d += 31557600 / 12;
+                }
+                if (typeof value.weeks !== 'undefined') {
+                    d += 7 * 24 * 3600;
+                }
+                if (typeof value.days !== 'undefined') {
+                    d += 24 * 3600;
+                }
+                if (typeof value.hours !== 'undefined') {
+                    d += 3600;
+                }
+                if (typeof value.minutes !== 'undefined') {
+                    d += 60;
+                }
+                if (typeof value.seconds !== 'undefined') {
+                    d += value.seconds;
+                }
+                return d;
+            }
+            return alt;
+        };
+        return JSONPointer;
+    })();
+    xm.JSONPointer = JSONPointer;
 })(xm || (xm = {}));
 var tsd;
 (function (tsd) {
@@ -2317,12 +2439,12 @@ var tsd;
             return (process.env.HOME || process.env.USERPROFILE);
         };
 
-        Paths.getUserCacheRoot = function () {
+        Paths.getUserRoot = function () {
             return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
         };
 
         Paths.getUserCacheDir = function () {
-            return path.resolve(Paths.getUserCacheRoot(), Paths.getCacheDirName());
+            return path.resolve(Paths.getUserRoot(), Paths.getCacheDirName());
         };
         return Paths;
     })();
@@ -2343,6 +2465,8 @@ var tsd;
             xm.assertVar(verbose, 'boolean', 'verbose');
 
             this.packageInfo = xm.PackageJSON.getLocal();
+            this.settings = new xm.JSONPointer(xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
+
             this.verbose = verbose;
 
             this.paths = new tsd.Paths();
@@ -4430,14 +4554,13 @@ var xm;
     (function (http) {
         var HTTPCache = (function () {
             function HTTPCache(storeDir, opts) {
-                this.jobTimeout = 1000;
                 this.jobs = new Map();
-                this.remove = new Map();
+                this.jobCache = new Map();
                 xm.assertVar(storeDir, 'string', 'storeDir');
-                xm.assertVar(opts, http.CacheOpts, 'opts', true);
+                xm.assertVar(opts, http.CacheOpts, 'opts');
 
                 this.storeDir = storeDir;
-                this.opts = (opts || new http.CacheOpts());
+                this.opts = opts;
 
                 this.track = new xm.EventLog('http_cache', 'HTTPCache');
                 this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
@@ -4487,16 +4610,20 @@ var xm;
             HTTPCache.prototype.scheduleRelease = function (key) {
                 var _this = this;
                 if (this.jobs.has(key)) {
-                    if (this.remove.has(key)) {
-                        clearTimeout(this.remove.get(key));
+                    if (this.jobCache.has(key)) {
+                        clearTimeout(this.jobCache.get(key));
                     }
-                    this.remove.set(key, setTimeout(function () {
+
+                    var timer = setTimeout(function () {
                         _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
 
                         _this.jobs.get(key).destruct();
-
                         _this.jobs.delete(key);
-                    }, this.jobTimeout));
+                    }, this.opts.jobTimeout);
+
+                    timer.unref();
+
+                    this.jobCache.set(key, timer);
                 }
             };
 
@@ -4671,22 +4798,39 @@ var git;
     var path = require('path');
 
     var GithubLoader = (function () {
-        function GithubLoader(repo, prefix, label) {
+        function GithubLoader(repo, options, storeDir, prefix, label) {
             this.label = 'github-loader';
             this.formatVersion = '0.0.0';
             this.headers = {};
             xm.assertVar(repo, git.GithubRepo, 'repo');
+            xm.assertVar(options, xm.JSONPointer, 'options');
+            xm.assertVar(storeDir, 'string', 'storeDir');
+
             this.repo = repo;
+            this.options = options;
+            this.storeDir = storeDir;
             this.label = label;
             this.track = new xm.EventLog(prefix, label);
         }
         GithubLoader.prototype._initGithubLoader = function (lock) {
-            xm.object.lockProps(this, ['repo', 'cache', 'track', 'label', 'formatVersion']);
+            var opts = new xm.http.CacheOpts();
+            opts.allowClean = this.options.getBoolean('allowClean');
+            opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
+            opts.splitKeyDir = this.options.getNumber('splitKeyDir');
+            opts.jobTimeout = this.options.getNumber('jobTimeout');
+
+            this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
+
+            xm.object.lockProps(this, ['repo', 'cache', 'options', 'storeDir', 'track', 'label', 'formatVersion']);
             if (lock) {
                 xm.object.lockProps(this, lock);
             }
 
             this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+        };
+
+        GithubLoader.prototype.getCacheKey = function () {
+            return 'loader';
         };
 
         GithubLoader.prototype.copyHeadersTo = function (target, source) {
@@ -4805,17 +4949,11 @@ var git;
 
     var GithubAPI = (function (_super) {
         __extends(GithubAPI, _super);
-        function GithubAPI(repo, storeDir) {
-            _super.call(this, repo, 'github-api', 'GithubAPI');
+        function GithubAPI(repo, options, storeDir) {
+            _super.call(this, repo, options, storeDir, 'github-api', 'GithubAPI');
             this.apiVersion = '3.0.0';
-            xm.assertVar(storeDir, 'string', 'storeDir');
 
             this.formatVersion = '1.0';
-
-            var opts = new xm.http.CacheOpts();
-            opts.allowClean = true;
-            opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
-            this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader(['apiVersion']);
         }
@@ -4854,10 +4992,10 @@ var git;
             this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
             if (!xm.isNumber(request.localMaxAge)) {
-                request.localMaxAge = 60 * 60 * 1000;
+                request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
             }
             if (!xm.isNumber(request.httpInterval)) {
-                request.httpInterval = 5 * 60 * 1000;
+                request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
             }
             this.copyHeadersTo(request.headers);
 
@@ -4922,16 +5060,10 @@ var git;
 
     var GithubRaw = (function (_super) {
         __extends(GithubRaw, _super);
-        function GithubRaw(repo, storeDir) {
-            _super.call(this, repo, 'github-raw', 'GithubRaw');
-            xm.assertVar(storeDir, 'string', 'storeDir');
+        function GithubRaw(repo, options, storeDir) {
+            _super.call(this, repo, options, storeDir, 'github-raw', 'GithubRaw');
 
             this.formatVersion = '1.0';
-
-            var opts = new xm.http.CacheOpts();
-            opts.allowClean = true;
-            opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
-            this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
             this._initGithubLoader();
         }
@@ -4960,8 +5092,8 @@ var git;
             var headers = {};
 
             var request = new xm.http.CacheRequest(url, headers);
-            request.localMaxAge = 30 * 24 * 3600 * 1000;
-            request.httpInterval = 24 * 3600 * 1000;
+            request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+            request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
@@ -4989,16 +5121,18 @@ var git;
     var path = require('path');
 
     var GithubRepo = (function () {
-        function GithubRepo(config, storeDir) {
+        function GithubRepo(config, storeDir, opts) {
             xm.assertVar(config, 'object', 'config');
             xm.assertVar(storeDir, 'string', 'storeDir');
+            xm.assertVar(opts, xm.JSONPointer, 'opts');
 
             this.config = config;
             this.urls = new git.GithubURLs(this);
 
             this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
-            this.api = new git.GithubAPI(this, this.storeDir);
-            this.raw = new git.GithubRaw(this, this.storeDir);
+
+            this.api = new git.GithubAPI(this, opts.getChild('api'), this.storeDir);
+            this.raw = new git.GithubRaw(this, opts.getChild('raw'), this.storeDir);
 
             xm.object.lockProps(this, Object.keys(this));
         }
@@ -7021,7 +7155,7 @@ var tsd;
 
             this._components = new tsd.MultiManager(this);
             this._components.add([
-                this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir),
+                this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('git')),
                 this.index = new tsd.IndexManager(this),
                 this.config = new tsd.ConfigIO(this),
                 this.selector = new tsd.SelectorQuery(this),
@@ -7041,7 +7175,7 @@ var tsd;
         }
         Core.prototype.updateConfig = function () {
             this._components.replace({
-                repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir)
+                repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
             });
             this.useCacheMode(this._cacheMode);
         };
@@ -8379,9 +8513,11 @@ var tsd;
 
         function runUpdateNotifier(context, promise) {
             if (typeof promise === "undefined") { promise = false; }
+            var opts = context.settings.getChild('update-notifier');
+
             return Q.resolve().then(function () {
                 var defer = Q.defer();
-                if (notifier) {
+                if (notifier || !opts.getBoolean('enabled', true)) {
                     return Q.resolve(notifier);
                 }
 
@@ -8398,7 +8534,9 @@ var tsd;
                 var settings = {
                     packageName: context.packageInfo.name,
                     packageVersion: context.packageInfo.version,
-                    updateCheckInterval: 1000,
+                    updateCheckInterval: opts.getDurationSecs('updateCheckInterval', 24 * 3600) * 1000,
+                    updateCheckTimeout: opts.getDurationSecs('updateCheckTimeout', 10) * 1000,
+                    registryUrl: opts.getString('registryUrl'),
                     callback: callback
                 };
 

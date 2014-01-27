@@ -1,4 +1,5 @@
 /// <reference path="../xm/assertVar.ts" />
+/// <reference path="../xm/json-pointer.ts" />
 /// <reference path="GithubURLs.ts" />
 /// <reference path="GithubRepoConfig.ts" />
 /// <reference path="loader/GithubAPI.ts" />
@@ -21,16 +22,18 @@ module git {
 		api:git.GithubAPI;
 		raw:git.GithubRaw;
 
-		constructor(config:git.GithubRepoConfig, storeDir:string) {
+		constructor(config:git.GithubRepoConfig, storeDir:string, opts:xm.JSONPointer) {
 			xm.assertVar(config, 'object', 'config');
 			xm.assertVar(storeDir, 'string', 'storeDir');
+			xm.assertVar(opts, xm.JSONPointer, 'opts');
 
 			this.config = config;
 			this.urls = new git.GithubURLs(this);
 
 			this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
-			this.api = new git.GithubAPI(this, this.storeDir);
-			this.raw = new git.GithubRaw(this, this.storeDir);
+
+			this.api = new git.GithubAPI(this, opts.getChild('api'), this.storeDir);
+			this.raw = new git.GithubRaw(this, opts.getChild('raw'), this.storeDir);
 
 			xm.object.lockProps(this, Object.keys(this));
 		}

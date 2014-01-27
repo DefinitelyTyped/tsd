@@ -29,12 +29,12 @@ module tsd {
 			return (process.env.HOME || process.env.USERPROFILE);
 		}
 
-		static getUserCacheRoot():string {
+		static getUserRoot():string {
 			return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
 		}
 
 		static getUserCacheDir():string {
-			return path.resolve(Paths.getUserCacheRoot(), Paths.getCacheDirName());
+			return path.resolve(Paths.getUserRoot(), Paths.getCacheDirName());
 		}
 	}
 }

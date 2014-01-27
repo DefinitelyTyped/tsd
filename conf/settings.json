@@ -1,7 +1,4 @@
 {
-	"cli": {
-		"style": "ansi"
-	},
 	"git": {
 		"raw": {
 			"allowClean": true,
@@ -10,13 +7,13 @@
 				"days": 2
 			},
 			"localMaxAge": {
-				"days": 14
+				"days": 7
 			},
 			"httpInterval": {
 				"days": 1
 			},
 			"jobTimeout": {
-				"seconds": 5
+				"seconds": 10
 			}
 		},
 		"api": {
@@ -32,7 +29,7 @@
 				"minutes": 5
 			},
 			"jobTimeout": {
-				"seconds": 5
+				"seconds": 10
 			}
 		}
 	},

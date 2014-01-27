@@ -60,7 +60,7 @@
     "date-utils": "~1.2.14",
     "ministyle": "~0.1.3",
     "miniwrite": "~0.1.3",
-    "minitable": "~0.0.1",
+    "minitable": "~0.0.2",
     "es6-shim": "~0.9.1",
     "request": "~2.29.0",
     "event-stream": "~3.0.18",

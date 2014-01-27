@@ -24,16 +24,10 @@ module git {
 		// github's version
 		private apiVersion:string = '3.0.0';
 
-		constructor(repo:GithubRepo, storeDir:string) {
-			super(repo, 'github-api', 'GithubAPI');
-			xm.assertVar(storeDir, 'string', 'storeDir');
+		constructor(repo:GithubRepo, options:xm.JSONPointer, storeDir:string) {
+			super(repo, options, storeDir, 'github-api', 'GithubAPI');
 
 			this.formatVersion = '1.0';
-
-			var opts = new xm.http.CacheOpts();
-			opts.allowClean = true;
-			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
-			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
 			this._initGithubLoader(['apiVersion']);
 		}
@@ -84,10 +78,10 @@ module git {
 			this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
 			if (!xm.isNumber(request.localMaxAge)) {
-				request.localMaxAge = 60 * 60 * 1000;
+				request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
 			}
 			if (!xm.isNumber(request.httpInterval)) {
-				request.httpInterval = 5 * 60 * 1000;
+				request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
 			}
 			this.copyHeadersTo(request.headers);
 

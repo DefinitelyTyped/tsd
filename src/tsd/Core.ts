@@ -59,7 +59,7 @@ module tsd {
 
 			this._components = new tsd.MultiManager(this);
 			this._components.add([
-				this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir),
+				this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('git')),
 
 				this.index = new tsd.IndexManager(this),
 				this.config = new tsd.ConfigIO(this),
@@ -83,7 +83,7 @@ module tsd {
 		updateConfig():void {
 			// drop statefull helper
 			this._components.replace({
-				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir)
+				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
 			});
 			this.useCacheMode(this._cacheMode);
 		}

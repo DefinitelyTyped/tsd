@@ -80,14 +80,14 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	// rery basic (async) init stuff
+	// very basic (async) init stuff
 	function init(ctx:xm.ExposeContext):Q.Promise<void> {
 		return Q.resolve();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-	// rry helpers: reuse / bundle init and arg parsing for query based commands
+	// dry helpers: reuse / bundle init and arg parsing for query based commands
 
 	var defaultJobOptions = [Opt.config];
 
@@ -95,7 +95,7 @@ module tsd {
 		return defaultJobOptions.concat(merge);
 	}
 
-	// rundle some data
+	// bundle some data
 	export class Job {
 		ctx:xm.ExposeContext;
 		api:tsd.API;
@@ -111,7 +111,7 @@ module tsd {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// ret a API with a Context and parse basic arguments
+	// get a API with a Context and parse basic arguments
 	function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
@@ -161,7 +161,7 @@ module tsd {
 		return d.promise;
 	}
 
-	// ret a API and parse selector options
+	// get a API and parse selector options
 	function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
 		var d:Q.Deferred<Job> = Q.defer();
 
@@ -391,7 +391,7 @@ module tsd {
 
 						// TODO report on written/skipped
 						selection.selection.sort(tsd.DefUtil.fileCompare).forEach((file:tsd.DefVersion, i:number) => {
-							// rrintFile(file, true);
+							// printFile(file, true);
 							print.fileHead(file);
 							print.fileInfo(file, true);
 							print.dependencies(file);

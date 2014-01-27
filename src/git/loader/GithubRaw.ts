@@ -17,16 +17,10 @@ module git {
 
 		static get_file:string = 'get_file';
 
-		constructor(repo:git.GithubRepo, storeDir:string) {
-			super(repo, 'github-raw', 'GithubRaw');
-			xm.assertVar(storeDir, 'string', 'storeDir');
+		constructor(repo:GithubRepo, options:xm.JSONPointer, storeDir:string) {
+			super(repo, options, storeDir, 'github-raw', 'GithubRaw');
 
 			this.formatVersion = '1.0';
-
-			var opts = new xm.http.CacheOpts();
-			opts.allowClean = true;
-			opts.cacheCleanInterval = 30 * 24 * 3600 * 1000;
-			this.cache = new xm.http.HTTPCache(path.join(storeDir, this.getCacheKey()), opts);
 
 			this._initGithubLoader();
 		}
@@ -56,8 +50,8 @@ module git {
 			var headers = {};
 
 			var request = new xm.http.CacheRequest(url, headers);
-			request.localMaxAge = 30 * 24 * 3600 * 1000;
-			request.httpInterval = 24 * 3600 * 1000;
+			request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+			request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
 			request.lock();
 
 			this.cache.getObject(request).progress(d.notify).then((object:xm.http.CacheObject) => {

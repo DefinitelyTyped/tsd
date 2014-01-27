@@ -52,12 +52,8 @@ module xm {
 			infoKoder:IContentKoder<CacheInfo>;
 			infoSchema:any;
 
-			// linger & clear
-			jobTimeout:number = 1000;
-
 			private jobs = new Map<string, CacheStreamLoader>();
-			private remove = new Map<string, NodeTimer>();
-
+			private jobCache = new Map<string, NodeTimer>();
 
 			private _init:Q.Promise<void>;
 
@@ -68,10 +64,10 @@ module xm {
 
 			constructor(storeDir:string, opts?:CacheOpts) {
 				xm.assertVar(storeDir, 'string', 'storeDir');
-				xm.assertVar(opts, CacheOpts, 'opts', true);
+				xm.assertVar(opts, CacheOpts, 'opts');
 
 				this.storeDir = storeDir;
-				this.opts = (opts || new CacheOpts());
+				this.opts = opts;
 
 				this.track = new xm.EventLog('http_cache', 'HTTPCache');
 				this.track.unmuteActions([xm.EventLevel.reject, xm.EventLevel.notify]);
@@ -122,17 +118,22 @@ module xm {
 
 			private scheduleRelease(key:string):void {
 				if (this.jobs.has(key)) {
-					if (this.remove.has(key)) {
-						clearTimeout(this.remove.get(key));
+					if (this.jobCache.has(key)) {
+						clearTimeout(this.jobCache.get(key));
 					}
-					this.remove.set(key, setTimeout(() => {
+
+					var timer = setTimeout(() => {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
 						this.jobs.get(key).destruct();
-
 						this.jobs.delete(key);
 
-					}, this.jobTimeout));
+					}, this.opts.jobTimeout);
+
+					// non-block
+					timer.unref();
+
+					this.jobCache.set(key, timer);
 				}
 			}
 

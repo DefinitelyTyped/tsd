@@ -41,8 +41,6 @@ interface TV4 {
 	getSchemaUris(exp?:RegExp):string[];
 	getSchemaMap():TV4SchemaMap;
 	errorCodes:TV4ErrorCodes;
-	missing:string[];
-	error:TV4Error;
 }
 declare module "tv4" {
 export = TV4;

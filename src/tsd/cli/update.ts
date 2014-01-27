@@ -17,9 +17,11 @@ module tsd {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		export function runUpdateNotifier(context:tsd.Context, promise:boolean = false):Q.Promise<any> {
+			var opts = context.settings.getChild('update-notifier');
+
 			return Q.resolve().then(() => {
 				var defer = Q.defer();
-				if (notifier) {
+				if (notifier || !opts.getBoolean('enabled', true)) {
 					return Q.resolve(notifier);
 				}
 				// switch if we want to wait for this
@@ -37,9 +39,9 @@ module tsd {
 				var settings:any = {
 					packageName: context.packageInfo.name,
 					packageVersion: context.packageInfo.version,
-					updateCheckInterval: 24 * 3600 * 1000,
-					// updateCheckTimeout: null,
-					// registryUrl: null,
+					updateCheckInterval: opts.getDurationSecs('updateCheckInterval', 24 * 3600) * 1000,
+					updateCheckTimeout: opts.getDurationSecs('updateCheckTimeout', 10) * 1000,
+					registryUrl: opts.getString('registryUrl'),
 					callback: callback
 				};
 

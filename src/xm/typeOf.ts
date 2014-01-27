@@ -148,6 +148,28 @@
 		return !!obj;
 	}
 
+	export function isFlagOn(obj:any):boolean {
+		if (!xm.isValid(obj)) {
+			return false;
+		}
+		obj = ('' + obj).toLowerCase();
+		if (obj === '' || obj === '0') {
+			return false;
+		}
+		switch (obj) {
+			case 'false':
+			case 'null':
+			case 'nan':
+			case 'undefined':
+			// language
+			case 'no':
+			case 'off':
+			case 'disabled':
+				return false;
+		}
+		return true;
+	}
+
 	export function isValid(obj:any):boolean {
 		var type = typeOf(obj);
 		return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));

@@ -19,26 +19,47 @@ module git {
 		track:xm.EventLog;
 
 		cache:xm.http.HTTPCache;
+		options:xm.JSONPointer;
+
+		storeDir:string;
 
 		label:string = 'github-loader';
 		formatVersion:string = '0.0.0';
 
 		headers = {};
 
-		constructor(repo:git.GithubRepo, prefix:string, label:string) {
+		constructor(repo:git.GithubRepo, options:xm.JSONPointer, storeDir:string, prefix:string, label:string) {
 			xm.assertVar(repo, git.GithubRepo, 'repo');
+			xm.assertVar(options, xm.JSONPointer, 'options');
+			xm.assertVar(storeDir, 'string', 'storeDir');
+
 			this.repo = repo;
+			this.options = options;
+			this.storeDir = storeDir;
 			this.label = label;
 			this.track = new xm.EventLog(prefix, label);
 		}
 
 		_initGithubLoader(lock?:string[]):void {
-			xm.object.lockProps(this, ['repo', 'cache', 'track', 'label', 'formatVersion']);
+			var opts = new xm.http.CacheOpts();
+			opts.allowClean = this.options.getBoolean('allowClean');
+			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
+			opts.splitKeyDir = this.options.getNumber('splitKeyDir');
+			opts.jobTimeout = this.options.getNumber('jobTimeout');
+
+			this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
+
+			xm.object.lockProps(this, ['repo', 'cache', 'options', 'storeDir', 'track', 'label', 'formatVersion']);
 			if (lock) {
 				xm.object.lockProps(this, lock);
 			}
 			// required to have some header
 			this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+		}
+
+		getCacheKey():string {
+			// override
+			return 'loader';
 		}
 
 		copyHeadersTo(target:any, source?:any) {

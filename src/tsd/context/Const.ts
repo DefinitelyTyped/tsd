@@ -7,6 +7,8 @@ module tsd {
 		typingsDir : 'typings',
 		cacheDir : 'tsd-cache',
 
+		settings : 'settings.json',
+
 		configVersion: 'v4',
 		configSchemaFile : 'tsd-v4.json',
 		definitelyRepo: 'borisyankov/DefinitelyTyped',
