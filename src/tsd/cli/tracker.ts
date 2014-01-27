@@ -99,7 +99,7 @@ module tsd {
 						this._client.exception(err.message).send();
 					}
 					else {
-						this._client.exception(String(err.message)).send();
+						this._client.exception(String(err)).send();
 					}
 				}
 			}
