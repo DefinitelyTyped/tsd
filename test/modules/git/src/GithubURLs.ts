@@ -24,11 +24,11 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 		});
 		it('should throw on bad params', () => {
 			assert.throws(() => {
-				repo = new git.GithubRepo({repoOwner: null, repoProject: null}, null);
+				repo = new git.GithubRepo({repoOwner: null, repoProject: null}, null, null);
 			});
 		});
 		it('should be constructor', () => {
-			repo = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz');
+			repo = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts);
 			urls = repo.urls;
 			assert.ok(urls, 'instance');
 		});
@@ -44,7 +44,7 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 			});
 		});
 		it('should return replaced urls', () => {
-			urls = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz').urls;
+			urls = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
 			var api = 'https://api.github.com/repos/foo/bar';
 			var raw = 'https://raw.github.com/foo/bar';
 			var base = 'https://github.com/foo/bar';
@@ -55,7 +55,7 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 		});
 		it('should return correctly replaced urls if repoConfig is modified after repo creation', () => {
 			var repoConfig = {repoOwner: 'foo', repoProject: 'bar'};
-			urls = new git.GithubRepo(repoConfig, 'baz').urls;
+			urls = new git.GithubRepo(repoConfig, 'baz', gitTest.opts).urls;
 			repoConfig.repoOwner = 'correctOwner';
 			repoConfig.repoProject = 'correctProject';
 			var api = 'https://api.github.com/repos/correctOwner/correctProject';
@@ -65,7 +65,7 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 			assert.strictEqual(urls.base(), base, 'base');
 		});
 		it('should return no trailing slash', () => {
-			urls = new git.GithubRepo({repoOwner:'foo', repoProject: 'bar'}, 'baz').urls;
+			urls = new git.GithubRepo({repoOwner:'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
 			assert.notMatch(urls.apiBranches(), /\/$/, 'apiBranches');
 			assert.notMatch(urls.apiBranch('abc'), /\/$/, 'apiBranch');
 		});
