@@ -157,12 +157,12 @@ module tsd {
 						}).sort(tsd.DefUtil.fileCompare).forEach((refer:tsd.DefVersion) => {
 							this.output.indent(1).report(true).glue(this.file(refer)).ln();
 
-							if (refer.dependencies.length > 0) {
+							/*if (refer.dependencies.length > 0) {
 								refer.dependencies.sort(tsd.DefUtil.defCompare).forEach((dep:tsd.Def) => {
 									this.output.indent(2).bullet(true).tweakPath(dep.path).ln();
 								});
 								this.output.ln();
-							}
+							}*/
 						});
 					}
 				}

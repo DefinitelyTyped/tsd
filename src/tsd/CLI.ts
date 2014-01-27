@@ -20,86 +20,8 @@
 module tsd {
 	'use strict';
 
-	var path = require('path');
-	var Q = require('q');
-	var FS = (<typeof QioFS> require('q-io/fs'));
-	var yaml = require('js-yaml');
-
-	var miniwrite = <typeof MiniWrite> require('miniwrite');
-	var ministyle = <typeof MiniStyle> require('ministyle');
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-	var Opt = tsd.cli.Opt;
-	var Group = tsd.cli.Group;
-	var Action = tsd.cli.Action;
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	var output = new xm.StyledOut();
-	var print = new tsd.cli.Printer(output);
-	var styles = new tsd.cli.StyleMap(output);
-	var tracker = new tsd.cli.Tracker();
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-	function showHeader():Q.Promise<void> {
-		var pkg = xm.PackageJSON.getLocal();
-
-		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
-		// .clear().span(pkg.getHomepage(true)).ln()
-		// .ruler().ln();
-		return Q.resolve();
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	// TODO get rid of syncronous io
-	function getContext(ctx:xm.ExposeContext):Q.Promise<tsd.Context> {
-		xm.assertVar(ctx, xm.ExposeContext, 'ctx');
-
-		var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
-
-		tracker.init(context, ctx.getOpt(Opt.verbose));
-		tracker.command(ctx);
-
-		if (ctx.getOpt(Opt.dev)) {
-			// TODO why not local?
-			context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
-		}
-		else if (ctx.hasOpt(Opt.cacheDir)) {
-			context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
-		}
-		else {
-			context.paths.cacheDir = tsd.Paths.getUserCacheDir();
-		}
-
-		return Q.resolve(context);
-	}
-
-	function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context):Q.Promise<any> {
-		if (ctx.getOpt(Opt.allowUpdate)) {
-			return tsd.cli.runUpdateNotifier(context, false);
-		}
-		return Q.resolve();
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-	// very basic (async) init stuff
-	function init(ctx:xm.ExposeContext):Q.Promise<void> {
-		return Q.resolve();
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-	// dry helpers: reuse / bundle init and arg parsing for query based commands
-
-	var defaultJobOptions = [Opt.config];
-
-	function jobOptions(merge:string[] = []):string[] {
-		return defaultJobOptions.concat(merge);
-	}
 
 	// bundle some data
 	export class Job {
@@ -110,106 +32,184 @@ module tsd {
 		options:Options;
 	}
 
-	// rah!
+	// hah!
 	export interface JobSelectionAction {
 		(ctx:xm.ExposeContext, job:Job, selection:tsd.Selection):Q.Promise<any>;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// get a API with a Context and parse basic arguments
-	function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
-		var d:Q.Deferred<Job> = Q.defer();
-
-		init(ctx).then(() => {
-			// verify valid path
-			if (ctx.hasOpt(Opt.config, true)) {
-				return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
-					if (!isFile) {
-						throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
-					}
-					return null;
-				});
-			}
-			return null;
-		}).then(() => {
-			return getContext(ctx).then((context:tsd.Context) => {
-				var job = new Job();
-				job.context = context;
-
-				job.ctx = ctx;
-				job.api = new tsd.API(job.context);
-
-				job.options = new tsd.Options();
-
-				job.options.timeout = ctx.getOpt(Opt.timeout);
-				job.options.limitApi = ctx.getOpt(Opt.limit);
-				job.options.minMatches = ctx.getOpt(Opt.min);
-				job.options.maxMatches = ctx.getOpt(Opt.max);
-
-				job.options.saveToConfig = ctx.getOpt(Opt.save);
-				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
-
-				if (ctx.hasOpt(Opt.cacheMode)) {
-					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-				}
-
-				var required:boolean = ctx.hasOpt(Opt.config);
-				return job.api.readConfig(!required).progress(d.notify).then(() => {
-					return runUpdateNotifier(ctx, job.context);
-				}).then(() => {
-					d.resolve(job);
-				});
-			});
-		}).fail(d.reject);
-
-		return d.promise;
-	}
-
-	// get a API and parse selector options
-	function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
-		var d:Q.Deferred<Job> = Q.defer();
-
-		// callback for easy error reporting
-		getAPIJob(ctx).progress(d.notify).then((job:Job) => {
-			if (ctx.numArgs < 1) {
-				throw new Error('pass at least one query pattern');
-			}
-			job.query = new Query();
-			for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
-				job.query.addNamePattern(ctx.getArgAt(i));
-			}
-
-			job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
-
-			if (ctx.hasOpt(Opt.commit)) {
-				job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
-			}
-			if (ctx.hasOpt(Opt.date)) {
-				job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
-			}
-
-			job.query.parseInfo = ctx.getOpt(Opt.info);
-			job.query.loadHistory = ctx.getOpt(Opt.history);
-
-			if (ctx.getOptAs(Opt.verbose, 'boolean')) {
-				output.span('CLI job.query').info().inspect(job.query, 3);
-			}
-			return job;
-		}).then(d.resolve, d.reject);
-
-		return d.promise;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
 	// the fun starts here
 
 	export function getExpose():xm.Expose {
+
+		// late init
+
+		var path = require('path');
+		var Q = require('q');
+		var FS = (<typeof QioFS> require('q-io/fs'));
+		var yaml = require('js-yaml');
+
+		var miniwrite = <typeof MiniWrite> require('miniwrite');
+		var ministyle = <typeof MiniStyle> require('ministyle');
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		var Opt = tsd.cli.Opt;
+		var Group = tsd.cli.Group;
+		var Action = tsd.cli.Action;
+
+		var output = new xm.StyledOut();
+		var print = new tsd.cli.Printer(output);
+		var styles = new tsd.cli.StyleMap(output);
+		var tracker = new tsd.cli.Tracker();
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		// very basic (async) init stuff
+		function init(ctx:xm.ExposeContext):Q.Promise<void> {
+			return Q.resolve();
+		}
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		function showHeader():Q.Promise<void> {
+			var pkg = xm.PackageJSON.getLocal();
+
+			output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
+			// .clear().span(pkg.getHomepage(true)).ln()
+			// .ruler().ln();
+			return Q.resolve();
+		}
+
+		function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context):Q.Promise<any> {
+			if (ctx.getOpt(Opt.allowUpdate)) {
+				return tsd.cli.runUpdateNotifier(context, false);
+			}
+			return Q.resolve();
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		// TODO get rid of syncronous io
+		function getContext(ctx:xm.ExposeContext):Q.Promise<tsd.Context> {
+			xm.assertVar(ctx, xm.ExposeContext, 'ctx');
+
+			var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
+
+			tracker.init(context, ctx.getOpt(Opt.verbose));
+			tracker.command(ctx);
+
+			if (ctx.getOpt(Opt.dev)) {
+				// TODO why not local?
+				context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+			}
+			else if (ctx.hasOpt(Opt.cacheDir)) {
+				context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
+			}
+			else {
+				context.paths.cacheDir = tsd.Paths.getUserCacheDir();
+			}
+
+			return Q.resolve(context);
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		var defaultJobOptions = [Opt.config];
+
+		function jobOptions(merge:string[] = []):string[] {
+			return defaultJobOptions.concat(merge);
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		// get a API with a Context and parse basic arguments
+		function getAPIJob(ctx:xm.ExposeContext):Q.Promise<Job> {
+			var d:Q.Deferred<Job> = Q.defer();
+
+			init(ctx).then(() => {
+				// verify valid path
+				if (ctx.hasOpt(Opt.config, true)) {
+					return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
+						if (!isFile) {
+							throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
+						}
+						return null;
+					});
+				}
+				return null;
+			}).then(() => {
+					return getContext(ctx).then((context:tsd.Context) => {
+						var job = new Job();
+						job.context = context;
+
+						job.ctx = ctx;
+						job.api = new tsd.API(job.context);
+
+						job.options = new tsd.Options();
+
+						job.options.timeout = ctx.getOpt(Opt.timeout);
+						job.options.limitApi = ctx.getOpt(Opt.limit);
+						job.options.minMatches = ctx.getOpt(Opt.min);
+						job.options.maxMatches = ctx.getOpt(Opt.max);
+
+						job.options.saveToConfig = ctx.getOpt(Opt.save);
+						job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+						job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+
+						if (ctx.hasOpt(Opt.cacheMode)) {
+							job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+						}
+
+						var required:boolean = ctx.hasOpt(Opt.config);
+						return job.api.readConfig(!required).progress(d.notify).then(() => {
+							return runUpdateNotifier(ctx, job.context);
+						}).then(() => {
+								d.resolve(job);
+							});
+					});
+				}).fail(d.reject);
+
+			return d.promise;
+		}
+
+		// get a API and parse selector options
+		function getSelectorJob(ctx:xm.ExposeContext):Q.Promise<Job> {
+			var d:Q.Deferred<Job> = Q.defer();
+
+			// callback for easy error reporting
+			getAPIJob(ctx).progress(d.notify).then((job:Job) => {
+				if (ctx.numArgs < 1) {
+					throw new Error('pass at least one query pattern');
+				}
+				job.query = new Query();
+				for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
+					job.query.addNamePattern(ctx.getArgAt(i));
+				}
+
+				job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
+
+				if (ctx.hasOpt(Opt.commit)) {
+					job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
+				}
+				if (ctx.hasOpt(Opt.date)) {
+					job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
+				}
+
+				job.query.parseInfo = ctx.getOpt(Opt.info);
+				job.query.loadHistory = ctx.getOpt(Opt.history);
+
+				if (ctx.getOptAs(Opt.verbose, 'boolean')) {
+					output.span('CLI job.query').info().inspect(job.query, 3);
+				}
+				return job;
+			}).then(d.resolve, d.reject);
+
+			return d.promise;
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		var expose = new xm.Expose(output);
 
 		function getProgress(ctx:xm.ExposeContext):(note:any) => void {
@@ -219,13 +219,6 @@ module tsd {
 			return function (note:any) {
 				// ignore
 			};
-		}
-
-		function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context, promise:boolean = false):Q.Promise<any> {
-			if (ctx.getOpt(Opt.allowUpdate)) {
-				return tsd.cli.runUpdateNotifier(context, promise);
-			}
-			return Q.resolve();
 		}
 
 		function reportError(err:any, head:boolean = true):void {
@@ -388,6 +381,11 @@ module tsd {
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';
 			cmd.label = 'search definitions using globbing pattern';
+			cmd.note = [
+				'knockout:         $ tsd query knockout',
+				'jquery plugins:   $ tsd query jquery.*/*',
+				'angularjs bundle: $ tsd query angular* -r'
+			];
 			cmd.variadic = ['pattern'];
 			cmd.groups = [Group.primary, Group.query];
 			cmd.options = [
@@ -438,9 +436,9 @@ module tsd {
 								return run(ctx, job, selection);
 
 							}, true).progress(notify).fail((err) => {
-								output.report().span(action).space().error('error!').ln();
-								reportError(err, false);
-							});
+									output.report().span(action).space().error('error!').ln();
+									reportError(err, false);
+								});
 						});
 					});
 				}).fail(reportError);

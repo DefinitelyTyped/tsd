@@ -110,7 +110,7 @@ module tsd {
 				opt.description = 'filter on commit date';
 				opt.type = 'string';
 				opt.placeholder = 'range';
-				opt.note = ['example: ">2012-12-31"'];
+				opt.note = ['example: "<2012-12-31"'];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {

@@ -8361,13 +8361,6 @@ var tsd;
                             return refer.def.path !== file.def.path;
                         }).sort(tsd.DefUtil.fileCompare).forEach(function (refer) {
                             _this.output.indent(1).report(true).glue(_this.file(refer)).ln();
-
-                            if (refer.dependencies.length > 0) {
-                                refer.dependencies.sort(tsd.DefUtil.defCompare).forEach(function (dep) {
-                                    _this.output.indent(2).bullet(true).tweakPath(dep.path).ln();
-                                });
-                                _this.output.ln();
-                            }
                         });
                     }
                 }
@@ -8873,7 +8866,6 @@ var tsd;
             Opt.history = 'history';
             Opt.detail = 'detail';
             Opt.allowUpdate = 'allowUpdate';
-            s;
         })(cli.Opt || (cli.Opt = {}));
         var Opt = cli.Opt;
         xm.object.lockPrimitives(Opt);
@@ -8993,7 +8985,7 @@ var tsd;
                 opt.description = 'filter on commit date';
                 opt.type = 'string';
                 opt.placeholder = 'range';
-                opt.note = ['example: ">2012-12-31"'];
+                opt.note = ['example: "<2012-12-31"'];
             });
 
             expose.defineOption(function (opt) {
@@ -9110,68 +9102,6 @@ var tsd;
 (function (tsd) {
     'use strict';
 
-    var path = require('path');
-    var Q = require('q');
-    var FS = (require('q-io/fs'));
-    var yaml = require('js-yaml');
-
-    var miniwrite = require('miniwrite');
-    var ministyle = require('ministyle');
-
-    var Opt = tsd.cli.Opt;
-    var Group = tsd.cli.Group;
-    var Action = tsd.cli.Action;
-
-    var output = new xm.StyledOut();
-    var print = new tsd.cli.Printer(output);
-    var styles = new tsd.cli.StyleMap(output);
-    var tracker = new tsd.cli.Tracker();
-
-    function showHeader() {
-        var pkg = xm.PackageJSON.getLocal();
-
-        output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
-
-        return Q.resolve();
-    }
-
-    function getContext(ctx) {
-        xm.assertVar(ctx, xm.ExposeContext, 'ctx');
-
-        var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
-
-        tracker.init(context, ctx.getOpt(Opt.verbose));
-        tracker.command(ctx);
-
-        if (ctx.getOpt(Opt.dev)) {
-            context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
-        } else if (ctx.hasOpt(Opt.cacheDir)) {
-            context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
-        } else {
-            context.paths.cacheDir = tsd.Paths.getUserCacheDir();
-        }
-
-        return Q.resolve(context);
-    }
-
-    function runUpdateNotifier(ctx, context) {
-        if (ctx.getOpt(Opt.allowUpdate)) {
-            return tsd.cli.runUpdateNotifier(context, false);
-        }
-        return Q.resolve();
-    }
-
-    function init(ctx) {
-        return Q.resolve();
-    }
-
-    var defaultJobOptions = [Opt.config];
-
-    function jobOptions(merge) {
-        if (typeof merge === "undefined") { merge = []; }
-        return defaultJobOptions.concat(merge);
-    }
-
     var Job = (function () {
         function Job() {
         }
@@ -9179,88 +9109,150 @@ var tsd;
     })();
     tsd.Job = Job;
 
-    function getAPIJob(ctx) {
-        var d = Q.defer();
+    function getExpose() {
+        var path = require('path');
+        var Q = require('q');
+        var FS = (require('q-io/fs'));
+        var yaml = require('js-yaml');
 
-        init(ctx).then(function () {
-            if (ctx.hasOpt(Opt.config, true)) {
-                return FS.isFile(ctx.getOpt(Opt.config)).then(function (isFile) {
-                    if (!isFile) {
-                        throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
-                    }
-                    return null;
-                });
+        var miniwrite = require('miniwrite');
+        var ministyle = require('ministyle');
+
+        var Opt = tsd.cli.Opt;
+        var Group = tsd.cli.Group;
+        var Action = tsd.cli.Action;
+
+        var output = new xm.StyledOut();
+        var print = new tsd.cli.Printer(output);
+        var styles = new tsd.cli.StyleMap(output);
+        var tracker = new tsd.cli.Tracker();
+
+        function init(ctx) {
+            return Q.resolve();
+        }
+
+        function showHeader() {
+            var pkg = xm.PackageJSON.getLocal();
+
+            output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
+
+            return Q.resolve();
+        }
+
+        function runUpdateNotifier(ctx, context) {
+            if (ctx.getOpt(Opt.allowUpdate)) {
+                return tsd.cli.runUpdateNotifier(context, false);
             }
-            return null;
-        }).then(function () {
-            return getContext(ctx).then(function (context) {
-                var job = new Job();
-                job.context = context;
+            return Q.resolve();
+        }
 
-                job.ctx = ctx;
-                job.api = new tsd.API(job.context);
+        function getContext(ctx) {
+            xm.assertVar(ctx, xm.ExposeContext, 'ctx');
 
-                job.options = new tsd.Options();
+            var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-                job.options.timeout = ctx.getOpt(Opt.timeout);
-                job.options.limitApi = ctx.getOpt(Opt.limit);
-                job.options.minMatches = ctx.getOpt(Opt.min);
-                job.options.maxMatches = ctx.getOpt(Opt.max);
+            tracker.init(context, ctx.getOpt(Opt.verbose));
+            tracker.command(ctx);
 
-                job.options.saveToConfig = ctx.getOpt(Opt.save);
-                job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-                job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+            if (ctx.getOpt(Opt.dev)) {
+                context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
+            } else if (ctx.hasOpt(Opt.cacheDir)) {
+                context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
+            } else {
+                context.paths.cacheDir = tsd.Paths.getUserCacheDir();
+            }
 
-                if (ctx.hasOpt(Opt.cacheMode)) {
-                    job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+            return Q.resolve(context);
+        }
+
+        var defaultJobOptions = [Opt.config];
+
+        function jobOptions(merge) {
+            if (typeof merge === "undefined") { merge = []; }
+            return defaultJobOptions.concat(merge);
+        }
+
+        function getAPIJob(ctx) {
+            var d = Q.defer();
+
+            init(ctx).then(function () {
+                if (ctx.hasOpt(Opt.config, true)) {
+                    return FS.isFile(ctx.getOpt(Opt.config)).then(function (isFile) {
+                        if (!isFile) {
+                            throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
+                        }
+                        return null;
+                    });
+                }
+                return null;
+            }).then(function () {
+                return getContext(ctx).then(function (context) {
+                    var job = new Job();
+                    job.context = context;
+
+                    job.ctx = ctx;
+                    job.api = new tsd.API(job.context);
+
+                    job.options = new tsd.Options();
+
+                    job.options.timeout = ctx.getOpt(Opt.timeout);
+                    job.options.limitApi = ctx.getOpt(Opt.limit);
+                    job.options.minMatches = ctx.getOpt(Opt.min);
+                    job.options.maxMatches = ctx.getOpt(Opt.max);
+
+                    job.options.saveToConfig = ctx.getOpt(Opt.save);
+                    job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+                    job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+
+                    if (ctx.hasOpt(Opt.cacheMode)) {
+                        job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+                    }
+
+                    var required = ctx.hasOpt(Opt.config);
+                    return job.api.readConfig(!required).progress(d.notify).then(function () {
+                        return runUpdateNotifier(ctx, job.context);
+                    }).then(function () {
+                        d.resolve(job);
+                    });
+                });
+            }).fail(d.reject);
+
+            return d.promise;
+        }
+
+        function getSelectorJob(ctx) {
+            var d = Q.defer();
+
+            getAPIJob(ctx).progress(d.notify).then(function (job) {
+                if (ctx.numArgs < 1) {
+                    throw new Error('pass at least one query pattern');
+                }
+                job.query = new tsd.Query();
+                for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
+                    job.query.addNamePattern(ctx.getArgAt(i));
                 }
 
-                var required = ctx.hasOpt(Opt.config);
-                return job.api.readConfig(!required).progress(d.notify).then(function () {
-                    return runUpdateNotifier(ctx, job.context);
-                }).then(function () {
-                    d.resolve(job);
-                });
-            });
-        }).fail(d.reject);
+                job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
 
-        return d.promise;
-    }
+                if (ctx.hasOpt(Opt.commit)) {
+                    job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
+                }
+                if (ctx.hasOpt(Opt.date)) {
+                    job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
+                }
 
-    function getSelectorJob(ctx) {
-        var d = Q.defer();
+                job.query.parseInfo = ctx.getOpt(Opt.info);
+                job.query.loadHistory = ctx.getOpt(Opt.history);
 
-        getAPIJob(ctx).progress(d.notify).then(function (job) {
-            if (ctx.numArgs < 1) {
-                throw new Error('pass at least one query pattern');
-            }
-            job.query = new tsd.Query();
-            for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
-                job.query.addNamePattern(ctx.getArgAt(i));
-            }
+                if (ctx.getOptAs(Opt.verbose, 'boolean')) {
+                    output.span('CLI job.query').info().inspect(job.query, 3);
+                }
+                return job;
+            }).then(d.resolve, d.reject);
 
-            job.query.versionMatcher = new tsd.VersionMatcher(ctx.getOpt(Opt.semver));
+            return d.promise;
+        }
 
-            if (ctx.hasOpt(Opt.commit)) {
-                job.query.commitMatcher = new tsd.CommitMatcher(ctx.getOpt(Opt.commit));
-            }
-            if (ctx.hasOpt(Opt.date)) {
-                job.query.dateMatcher = new tsd.DateMatcher(ctx.getOpt(Opt.date));
-            }
-
-            job.query.parseInfo = ctx.getOpt(Opt.info);
-            job.query.loadHistory = ctx.getOpt(Opt.history);
-
-            if (ctx.getOptAs(Opt.verbose, 'boolean')) {
-                output.span('CLI job.query').info().inspect(job.query, 3);
-            }
-            return job;
-        }).then(d.resolve, d.reject);
-
-        return d.promise;
-    }
-
-    function getExpose() {
         var expose = new xm.Expose(output);
 
         function getProgress(ctx) {
@@ -9269,14 +9261,6 @@ var tsd;
             }
             return function (note) {
             };
-        }
-
-        function runUpdateNotifier(ctx, context, promise) {
-            if (typeof promise === "undefined") { promise = false; }
-            if (ctx.getOpt(Opt.allowUpdate)) {
-                return tsd.cli.runUpdateNotifier(context, promise);
-            }
-            return Q.resolve();
         }
 
         function reportError(err, head) {
@@ -9422,6 +9406,11 @@ var tsd;
         expose.defineCommand(function (cmd) {
             cmd.name = 'query';
             cmd.label = 'search definitions using globbing pattern';
+            cmd.note = [
+                'jquery:           $ tsd query jquery',
+                'jquery plugins:   $ tsd query jquery.*/*',
+                'angularjs bundle: $ tsd query angular* -r'
+            ];
             cmd.variadic = ['pattern'];
             cmd.groups = [Group.primary, Group.query];
             cmd.options = [
