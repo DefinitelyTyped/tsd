@@ -18,11 +18,11 @@ module tsd {
 			output:xm.StyledOut;
 			indent:number = 0;
 			skipProgress = [
-				/^(?:\w+: )?written zero \w+ bytes /,
-				/^(?:\w+: )?missing \w+ file /,
-				/^(?:\w+: )?remote: /,
-				/^(?:\w+: )?local: /,
-				/^(?:\w+: )?update: /
+				/^(?:\w+: )?written zero \w+ bytes/,
+				/^(?:\w+: )?missing \w+ file/,
+				/^(?:\w+: )?remote:/,
+				/^(?:\w+: )?local:/,
+				/^(?:\w+: )?update:/
 			];
 
 			private _remainingPrev:number = -1;

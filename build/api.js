@@ -5499,6 +5499,7 @@ var tsd;
 
     var Q = require('q');
 
+    var localExp = /^\.\//;
     var leadingExp = /^\.\.\//;
 
     var Resolver = (function (_super) {
@@ -5604,8 +5605,7 @@ var tsd;
         Resolver.prototype.extractPaths = function (file, content) {
             var _this = this;
             return tsd.DefUtil.extractReferenceTags(content).reduce(function (memo, refPath) {
-                refPath = refPath.replace(leadingExp, '');
-
+                refPath = refPath.replace(localExp, '').replace(leadingExp, '');
                 if (refPath.indexOf('/') < 0) {
                     refPath = file.def.project + '/' + refPath;
                 }
@@ -8263,11 +8263,11 @@ var tsd;
                 if (typeof indent === "undefined") { indent = 0; }
                 this.indent = 0;
                 this.skipProgress = [
-                    /^(?:\w+: )?written zero \w+ bytes /,
-                    /^(?:\w+: )?missing \w+ file /,
-                    /^(?:\w+: )?remote: /,
-                    /^(?:\w+: )?local: /,
-                    /^(?:\w+: )?update: /
+                    /^(?:\w+: )?written zero \w+ bytes/,
+                    /^(?:\w+: )?missing \w+ file/,
+                    /^(?:\w+: )?remote:/,
+                    /^(?:\w+: )?local:/,
+                    /^(?:\w+: )?update:/
                 ];
                 this._remainingPrev = -1;
                 this.output = output;

@@ -10,6 +10,7 @@ module tsd {
 
 	var Q:typeof Q = require('q');
 
+	var localExp = /^\.\//;
 	var leadingExp = /^\.\.\//;
 
 	/*
@@ -154,9 +155,9 @@ module tsd {
 			// filter reasonable formed paths
 			return tsd.DefUtil.extractReferenceTags(content).reduce((memo:string[], refPath:string):any[] => {
 				// TODO harder def-test? why?
-				refPath = refPath.replace(leadingExp, '');
-				// same folder
+				refPath = refPath.replace(localExp, '').replace(leadingExp, '');
 				if (refPath.indexOf('/') < 0) {
+					// same folder
 					refPath = file.def.project + '/' + refPath;
 				}
 				if (tsd.Def.isDefPath(refPath) && memo.indexOf(refPath) < 0) {
