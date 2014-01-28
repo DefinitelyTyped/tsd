@@ -10,6 +10,7 @@ module tsd {
 	var util = require('util');
 	var Q:typeof Q = require('q');
 	var FS:typeof QioFS = require('q-io/fs');
+	var openInApp = require('open');
 
 	export class InstallResult {
 
@@ -166,6 +167,36 @@ module tsd {
 			var d:Q.Deferred<CompareResult> = Q.defer();
 			this.track.promise(d.promise, 'compare');
 			d.reject(new Error('not implemented yet'));
+
+			return d.promise;
+		}
+
+		/*
+		 browse selection in browser
+		 */
+		browse(selection:tsd.Selection):Q.Promise<string[]> {
+			xm.assertVar(selection, tsd.Selection, 'selection');
+
+			var d:Q.Deferred<string[]> = Q.defer();
+			this.track.promise(d.promise, 'browse');
+
+			if (selection.selection.length > 2) {
+				d.reject(new Error('to many results to open in browser'));
+			}
+
+			var opened = [];
+
+			selection.selection.forEach((file:tsd.DefVersion) => {
+				var ref = file.commit.commitSha;
+				// same?
+				if (file.commit.commitSha === file.def.head.commit.commitSha) {
+					ref = this.core.context.config.ref;
+				}
+				var url = this.core.repo.urls.htmlFile(ref, file.def.path);
+				opened.push(url);
+				openInApp(url);
+			});
+			d.resolve(opened);
 
 			return d.promise;
 		}

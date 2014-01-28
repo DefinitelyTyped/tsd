@@ -97,7 +97,6 @@ module tsd {
 			var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
 			tracker.init(context, ctx.getOpt(Opt.verbose));
-			tracker.command(ctx);
 
 			if (ctx.getOpt(Opt.dev)) {
 				// TODO why not local?
@@ -374,9 +373,17 @@ module tsd {
 				tracker.install('install', result);
 			});
 		});
-		/*queryActions.set(Action.open, (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) => {
-		 return job.api.install(selection);
-		 });*/
+		queryActions.set(Action.browse, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
+			return job.api.browse(selection).then((opened:string[]) => {
+				if (opened.length > 0) {
+					print.output.ln();
+					opened.forEach((url:string) => {
+						print.output.note(true).line(url);
+						tracker.browser(url);
+					});
+				}
+			});
+		});
 
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';

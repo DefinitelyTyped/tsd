@@ -8,6 +8,7 @@ module tsd {
 
 	var ua:UniversalAnalytics = require('universal-analytics');
 	var uuid = require('uuid');
+	var urlMod = require('url');
 
 	export module cli {
 
@@ -22,7 +23,7 @@ module tsd {
 			private _eventQueue:any[] = [];
 			private _workers:any[] = [];
 			private _workersMax:number = 50;
-			private _workersGrow:number = 8;
+			private _workersGrow:number = 10;
 
 			constructor() {
 			}
@@ -65,14 +66,6 @@ module tsd {
 				this._client.pageview(this.getPage(parts)).send();
 			}
 
-			command(ctx:xm.ExposeContext):void {
-				this.sendEvent({
-					ec: 'command',
-					ea: (ctx.command ? ctx.command.name : ''),
-					dp: this.getPage()
-				});
-			}
-
 			query(query:tsd.Query):void {
 				this.sendEvent({
 					ec: 'query',
@@ -90,6 +83,16 @@ module tsd {
 						ea: value.def.path,
 						dp: this.getPage()
 					});
+				});
+			}
+
+			browser(url:string):void {
+				var parts = urlMod.parse(url);
+
+				this.sendEvent({
+					ec: 'browser',
+					ea: (parts.path + (parts.hash || '')),
+					dp: this.getPage()
 				});
 			}
 
@@ -111,27 +114,29 @@ module tsd {
 
 				// sanity limit
 				var grow = 0;
-
 				while (this._eventQueue.length > 0 && this._workers.length < this._workersMax && grow < this._workersGrow) {
-					var event = this._eventQueue.pop();
-					this._workers.push(event);
-
-					this._client.event(event, (err) => {
-						var i = this._workers.indexOf(event);
-						if (i > -1) {
-							this._workers.splice(i, 1);
-						}
-						if (!err) {
-							this.sendEvent();
-						}
-					});
-
+					// for closure
+					this.doEvent(this._eventQueue.pop());
 					grow++;
 				}
 			}
 
+			private doEvent(event):void {
+				this._workers.push(event);
+				// xm.log.debug(event);
+				this._client.event(event, (err) => {
+					var i = this._workers.indexOf(event);
+					if (i > -1) {
+						this._workers.splice(i, 1);
+					}
+					if (!err) {
+						this.sendEvent();
+					}
+				});
+			}
+
 			getTimer(variable:string, label?:string):(err?:any) => void {
-				if (!this._enabled || !this._client) {
+				if (!this._enabled) {
 					return (err?:any) => {
 						// noop
 					};

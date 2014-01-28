@@ -3130,6 +3130,8 @@ var git;
             this.addTemplate('raw', this._raw);
             this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
 
+            this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
+
             this.addTemplate('api', this._api);
             this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
             this.addTemplate('apiBranch', this._api + '/branches/{branch}');
@@ -3166,6 +3168,16 @@ var git;
             xm.assertVar(path, 'string', 'path');
 
             return this.getURL('rawFile', {
+                ref: ref,
+                path: path
+            });
+        };
+
+        GithubURLs.prototype.htmlFile = function (ref, path) {
+            xm.assertVar(ref, 'string', 'ref');
+            xm.assertVar(path, 'string', 'path');
+
+            return this.getURL('htmlFile', {
                 ref: ref,
                 path: path
             });
@@ -7298,6 +7310,7 @@ var tsd;
     var util = require('util');
     var Q = require('q');
     var FS = require('q-io/fs');
+    var openInApp = require('open');
 
     var InstallResult = (function () {
         function InstallResult(options) {
@@ -7420,6 +7433,34 @@ var tsd;
             var d = Q.defer();
             this.track.promise(d.promise, 'compare');
             d.reject(new Error('not implemented yet'));
+
+            return d.promise;
+        };
+
+        API.prototype.browse = function (selection) {
+            var _this = this;
+            xm.assertVar(selection, tsd.Selection, 'selection');
+
+            var d = Q.defer();
+            this.track.promise(d.promise, 'browse');
+
+            if (selection.selection.length > 2) {
+                d.reject(new Error('to many results to open in browser'));
+            }
+
+            var opened = [];
+
+            selection.selection.forEach(function (file) {
+                var ref = file.commit.commitSha;
+
+                if (file.commit.commitSha === file.def.head.commit.commitSha) {
+                    ref = _this.core.context.config.ref;
+                }
+                var url = _this.core.repo.urls.htmlFile(ref, file.def.path);
+                opened.push(url);
+                openInApp(url);
+            });
+            d.resolve(opened);
 
             return d.promise;
         };
@@ -8610,6 +8651,7 @@ var tsd;
 
     var ua = require('universal-analytics');
     var uuid = require('uuid');
+    var urlMod = require('url');
 
     (function (cli) {
         var Tracker = (function () {
@@ -8618,7 +8660,7 @@ var tsd;
                 this._eventQueue = [];
                 this._workers = [];
                 this._workersMax = 50;
-                this._workersGrow = 8;
+                this._workersGrow = 10;
             }
             Tracker.prototype.init = function (context, debug) {
                 if (typeof debug === "undefined") { debug = false; }
@@ -8663,14 +8705,6 @@ var tsd;
                 this._client.pageview(this.getPage(parts)).send();
             };
 
-            Tracker.prototype.command = function (ctx) {
-                this.sendEvent({
-                    ec: 'command',
-                    ea: (ctx.command ? ctx.command.name : ''),
-                    dp: this.getPage()
-                });
-            };
-
             Tracker.prototype.query = function (query) {
                 this.sendEvent({
                     ec: 'query',
@@ -8692,6 +8726,16 @@ var tsd;
                 });
             };
 
+            Tracker.prototype.browser = function (url) {
+                var parts = urlMod.parse(url);
+
+                this.sendEvent({
+                    ec: 'browser',
+                    ea: (parts.path + (parts.hash || '')),
+                    dp: this.getPage()
+                });
+            };
+
             Tracker.prototype.error = function (err) {
                 if (err) {
                     if (err.message) {
@@ -8703,34 +8747,35 @@ var tsd;
             };
 
             Tracker.prototype.sendEvent = function (event) {
-                var _this = this;
                 if (event) {
                     this._eventQueue.push(event);
                 }
 
                 var grow = 0;
-
                 while (this._eventQueue.length > 0 && this._workers.length < this._workersMax && grow < this._workersGrow) {
-                    var event = this._eventQueue.pop();
-                    this._workers.push(event);
-
-                    this._client.event(event, function (err) {
-                        var i = _this._workers.indexOf(event);
-                        if (i > -1) {
-                            _this._workers.splice(i, 1);
-                        }
-                        if (!err) {
-                            _this.sendEvent();
-                        }
-                    });
-
+                    this.doEvent(this._eventQueue.pop());
                     grow++;
                 }
             };
 
+            Tracker.prototype.doEvent = function (event) {
+                var _this = this;
+                this._workers.push(event);
+
+                this._client.event(event, function (err) {
+                    var i = _this._workers.indexOf(event);
+                    if (i > -1) {
+                        _this._workers.splice(i, 1);
+                    }
+                    if (!err) {
+                        _this.sendEvent();
+                    }
+                });
+            };
+
             Tracker.prototype.getTimer = function (variable, label) {
                 var _this = this;
-                if (!this._enabled || !this._client) {
+                if (!this._enabled) {
                     return function (err) {
                     };
                 }
@@ -8918,6 +8963,7 @@ var tsd;
         (function (Action) {
             Action.install = 'install';
             Action.open = 'open';
+            Action.browse = 'browse';
             Action.compare = 'compare';
             Action.update = 'update';
         })(cli.Action || (cli.Action = {}));
@@ -9188,7 +9234,6 @@ var tsd;
             var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
             tracker.init(context, ctx.getOpt(Opt.verbose));
-            tracker.command(ctx);
 
             if (ctx.getOpt(Opt.dev)) {
                 context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
@@ -9436,6 +9481,17 @@ var tsd;
                 print.installResult(result);
 
                 tracker.install('install', result);
+            });
+        });
+        queryActions.set(Action.browse, function (ctx, job, selection) {
+            return job.api.browse(selection).then(function (opened) {
+                if (opened.length > 0) {
+                    print.output.ln();
+                    opened.forEach(function (url) {
+                        print.output.note(true).line(url);
+                        tracker.browser(url);
+                    });
+                }
             });
         });
 

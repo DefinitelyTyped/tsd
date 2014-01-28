@@ -46,6 +46,7 @@ module tsd {
 		export module Action {
 			export var install = 'install';
 			export var open = 'open';
+			export var browse = 'browse';
 			export var compare = 'compare';
 			export var update = 'update';
 		}

@@ -154,6 +154,29 @@ var xm;
     }
     xm.isOk = isOk;
 
+    function isFlagOn(obj) {
+        if (!xm.isValid(obj)) {
+            return false;
+        }
+        obj = ('' + obj).toLowerCase();
+        if (obj === '' || obj === '0') {
+            return false;
+        }
+        switch (obj) {
+            case 'false':
+            case 'null':
+            case 'nan':
+            case 'undefined':
+
+            case 'no':
+            case 'off':
+            case 'disabled':
+                return false;
+        }
+        return true;
+    }
+    xm.isFlagOn = isFlagOn;
+
     function isValid(obj) {
         var type = typeOf(obj);
         return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));
@@ -408,6 +431,7 @@ var xm;
         return str;
     }
     xm.escapeSimple = escapeSimple;
+
     function escapeHTML(html) {
         return String(html).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }

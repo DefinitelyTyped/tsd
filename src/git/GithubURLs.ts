@@ -29,6 +29,8 @@ module git {
 			this.addTemplate('raw', this._raw);
 			this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
 
+			this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
+
 			this.addTemplate('api', this._api);
 			this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
 			this.addTemplate('apiBranch', this._api + '/branches/{branch}');
@@ -66,6 +68,16 @@ module git {
 			xm.assertVar(path, 'string', 'path');
 
 			return this.getURL('rawFile', {
+				ref: ref,
+				path: path
+			});
+		}
+
+		htmlFile(ref:string, path:string):string {
+			xm.assertVar(ref, 'string', 'ref');
+			xm.assertVar(path, 'string', 'path');
+
+			return this.getURL('htmlFile', {
 				ref: ref,
 				path: path
 			});
