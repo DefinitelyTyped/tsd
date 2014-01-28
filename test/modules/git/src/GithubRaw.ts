@@ -17,6 +17,7 @@ describe('git.GithubRaw', () => {
 		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubRaw');
 		repo = new git.GithubRepo(gitTest.config.repo, cacheDir, gitTest.opts);
+		helper.enableTrack(repo);
 	});
 
 	afterEach(() => {
@@ -30,47 +31,85 @@ describe('git.GithubRaw', () => {
 		assert.isTrue(repo.raw.cache.opts.remoteRead, 'options.remoteRead');
 	});
 
-	describe('getFile', () => {
-
-		var filePath = gitTest.config.data.async.filePath;
-		var commitSha = gitTest.config.data.async.commitSha;
-		assert.isString(filePath, 'filePath');
-		helper.assertFormatSHA1(commitSha, 'commitSha');
-
+	describe('getFile commit', () => {
 		it.eventually('should cache and return data', () => {
 			// repo.raw.verbose = true;
-			repo.raw.track.setTrack(true);
-			repo.raw.cache.track.setTrack(true);
-			repo.raw.track.reset();
-			repo.raw.cache.track.reset();
 
-			// assert.isTrue(raw.stats.hasAllZero(), 'pretest stats');
+			var filePath = gitTest.config.data.async.filePath;
+			assert.isString(filePath, 'filePath');
 
-			repo.raw.track.start('first');
+			var commitSha = gitTest.config.data.async.commitSha;
+			helper.assertFormatSHA1(commitSha, 'commitSha');
 
-			return repo.raw.getBinary(commitSha, filePath).then((firstData:NodeBuffer) => {
-				assert.ok(firstData, 'first callback data');
+			var notes = [];
+
+			return repo.raw.getBinary(commitSha, filePath).progress((note:any) => {
+				notes.push(note);
+			}).then((firstData:NodeBuffer) => {
 				assert.instanceOf(firstData, Buffer, 'first callback data');
 				assert.operator(firstData.length, '>', 0, 'first callback data');
 
-				repo.raw.track.complete('first');
-				repo.raw.track.start('second');
-
 				// get again, should be cached
-				return repo.raw.getBinary(commitSha, filePath).then((secondData:NodeBuffer) => {
-					assert.ok(secondData, 'second callback data');
+				return repo.raw.getBinary(commitSha, filePath).progress((note:any) => {
+					notes.push(note);
+				}).then((secondData:NodeBuffer) => {
 					assert.instanceOf(secondData, Buffer, 'second callback data');
-					assert.operator(secondData.length, '>', 0, 'second callback data');
-
 					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
 
 					repo.raw.track.complete('second');
 
-					/*xm.log(repo.raw.track.getHistory());
-					xm.log(repo.raw.track.getReport());
+					helper.assertNotes(notes, [
+						{
+							message: /^remote: /,
+							code: 'http 200'
+						},
+						{
+							message: /^local: /,
+							code: null
+						}
+					], 'second');
+				});
+			});
+		});
+	});
 
-					xm.log(repo.raw.cache.track.getHistory());
-					xm.log(repo.raw.cache.track.getReport());*/
+	describe('getFile ref', () => {
+		it.eventually('should cache and return data', () => {
+			// repo.raw.verbose = true;
+
+			var filePath = gitTest.config.data.async.filePath;
+			assert.isString(filePath, 'filePath');
+
+			var ref = gitTest.config.repo.ref;
+			assert.isString(ref, 'ref');
+
+			var notes = [];
+
+			return repo.raw.getBinary(ref, filePath).progress((note:any) => {
+				notes.push(note);
+			}).then((firstData:NodeBuffer) => {
+				assert.instanceOf(firstData, Buffer, 'first callback data');
+				assert.operator(firstData.length, '>', 0, 'first callback data');
+
+				// get again, should be cached
+				return repo.raw.getBinary(ref, filePath).progress((note:any) => {
+					notes.push(note);
+				}).then((secondData:NodeBuffer) => {
+					assert.instanceOf(secondData, Buffer, 'second callback data');
+					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
+
+					repo.raw.track.complete('second');
+
+					helper.assertNotes(notes, [
+						{
+							message: /^remote: /,
+							code: 'http 200'
+						},
+						{
+							message: /^local: /,
+							code: null
+						}
+					], 'second');
 				});
 			});
 		});

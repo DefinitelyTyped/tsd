@@ -53,7 +53,7 @@ module xm {
 			infoSchema:any;
 
 			private jobs = new Map<string, CacheStreamLoader>();
-			private jobCache = new Map<string, NodeTimer>();
+			private jobTimers = new Map<string, NodeTimer>();
 
 			private _init:Q.Promise<void>;
 
@@ -118,22 +118,29 @@ module xm {
 
 			private scheduleRelease(key:string):void {
 				if (this.jobs.has(key)) {
-					if (this.jobCache.has(key)) {
-						clearTimeout(this.jobCache.get(key));
+					if (this.jobTimers.has(key)) {
+						clearTimeout(this.jobTimers.get(key));
 					}
 
-					var timer = setTimeout(() => {
+					if (this.opts.jobTimeout <= 0) {
 						this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
-
 						this.jobs.get(key).destruct();
 						this.jobs.delete(key);
+					}
+					else {
+						var timer = setTimeout(() => {
+							this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
-					}, this.opts.jobTimeout);
+							this.jobs.get(key).destruct();
+							this.jobs.delete(key);
 
-					// non-block
-					timer.unref();
+						}, this.opts.jobTimeout);
 
-					this.jobCache.set(key, timer);
+						// non-block
+						timer.unref();
+
+						this.jobTimers.set(key, timer);
+					}
 				}
 			}
 

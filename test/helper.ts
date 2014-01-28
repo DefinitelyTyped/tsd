@@ -111,6 +111,61 @@ module helper {
 		assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');
 	}
 
+	export function assertObjectValues(actual:Object, expected:Object, msg?:string):void {
+		assert.isObject(actual, msg + ': actual');
+		assert.isObject(expected, msg + ': expected');
+		var test:any = {};
+		Object.keys(expected).forEach((prop:string) => {
+			if (typeof actual[prop] !== 'undefined') {
+				test[prop] = actual[prop];
+			}
+			else {
+				test[prop] = 0;
+			}
+		});
+		assert.deepEqual(test, expected, msg);
+	}
+
+	export function assertNotes(actual:Object[], expected:Object[], msg:string):void {
+		assert.isArray(actual, msg + ': actual');
+		assert.isArray(expected, msg + ': expected');
+
+		actual = actual.slice(0);
+		expected = expected.slice(0);
+
+		var next:any;
+		while (expected.length > 0) {
+			next = expected.shift();
+
+			while (actual.length > 0) {
+				var act:any = actual.shift();
+				var codeOK = (typeof next.code !== 'undefined') && (next.code === act.code)
+				var messageOK = (typeof next.message !== 'undefined') && (next.message.test(act.message))
+				if (codeOK && messageOK) {
+					next = null;
+					break;
+				}
+			}
+			if (actual.length === 0) {
+				break;
+			}
+		}
+
+		// report
+		if (next) {
+			expected.unshift(next);
+		}
+		if (expected.length > 0) {
+			expected.forEach((item:any) => {
+				item.message = String(item.message);
+			});
+			actual.forEach((item:any) => {
+				item.message = String(item.message);
+			});
+			assert.fail(actual, expected, 'expected more notes')
+		}
+	}
+
 	// hackish to get more ingot then assert.throws()
 	export function assertError(exec:() => void, expected:any, msg?:string):void {
 		msg = (msg ? msg + ': ' : '');
@@ -164,51 +219,4 @@ module helper {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// TODO update to verify exacter using the event/log solution when it's ready (xm.EventLog)
-	export function assertUpdateStat(cache:xm.http.HTTPCache, message:string):void {
-		var stats = cache.track;
-
-		var items = cache.track.getItems().filter((item:xm.EventLogItem) => {
-			return true;
-		}).map((item:xm.EventLogItem) => {
-			return item.action;
-		});
-		assert.operator(items, '>=', 0, 'items');
-
-		// TOOD yuk.. rewrite for new caching system with EventLog
-		///var sum:number;
-		/*switch (helper.settings.cache) {
-		 case CacheMode.forceRemote:
-		 assert.operator(stats.get('cache-hit'), '===', 0, message + ': allRemote: cache-hit');
-		 assert.operator(stats.get('load-success'), '>', 0, message + ': allRemote: load-success');
-		 assert.operator(stats.get('write-success'), '===', 0, message + ': allRemote: write-success');
-		 break;
-		 case CacheMode.forceUpdate:
-		 assert.operator(stats.get('cache-hit'), '===', 0, message + ': forceUpdate: cache-hit');
-
-		 sum = stats.get('load-success') + stats.get('write-success');
-		 assert.operator(sum, '>', 0, message + ': forceUpdate: sum (load-success + write-success)');
-		 break;
-		 case CacheMode.allowUpdate:
-		 //assert.operator(stats.get('cache-hit'), '>=', 0, message + ': allowUpdate: cache-hit');
-		 //assert.operator(stats.get('load-success'), '>=', 0, message + ': allowUpdate: load-success');
-		 //assert.operator(stats.get('write-success'), '>=', 0, message + ': allowUpdate: write-success');
-
-		 sum = stats.get('load-success') + stats.get('write-success') + stats.get('cache-hit');
-		 assert.operator(sum, '>', 0, message + ': allowUpdate: sum (load-success + write-success + cache-hit)');
-		 break;
-		 case CacheMode.allowRemote:
-		 assert.operator(stats.get('write-success'), '==', 0, message + ': allowRemote: write-success');
-
-		 sum = stats.get('load-success') + stats.get('cache-hit');
-		 assert.operator(sum, '>', 0, message + ': allowRemote: sum (load-success + cache-hit)');
-		 break;
-		 case CacheMode.forceLocal:
-		 default:
-		 assert.operator(stats.get('cache-hit'), '>', 0, message + ': noUpdate: cache-hit');
-		 assert.operator(stats.get('load-success'), '===', 0, message + ': noUpdate: load-success');
-		 assert.operator(stats.get('write-success'), '===', 0, message + ': noUpdate: write-success');
-		 break;
-		 }*/
-	}
 }

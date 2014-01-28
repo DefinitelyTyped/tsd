@@ -12,6 +12,9 @@
 			"httpInterval": {
 				"days": 1
 			},
+			"httpIntervalRef": {
+				"minutes": 5
+			},
 			"jobTimeout": {
 				"seconds": 5
 			}

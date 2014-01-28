@@ -1777,6 +1777,13 @@ var xm;
             return alt;
         };
 
+        JSONPointer.prototype.setValue = function (path, value) {
+            if (!/^\//.test(path)) {
+                path = '/' + path;
+            }
+            pointer.set(this.object, path, value);
+        };
+
         JSONPointer.prototype.getChild = function (path, alt) {
             if (typeof alt === "undefined") { alt = null; }
             var value = this.getValue(path);
@@ -3121,7 +3128,7 @@ var git;
             this.addTemplate('base', this._base);
 
             this.addTemplate('raw', this._raw);
-            this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
+            this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
 
             this.addTemplate('api', this._api);
             this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
@@ -3154,11 +3161,12 @@ var git;
             return this.getURL('raw');
         };
 
-        GithubURLs.prototype.rawFile = function (commit, path) {
-            xm.assertVar(commit, 'sha1', 'commit');
+        GithubURLs.prototype.rawFile = function (ref, path) {
+            xm.assertVar(ref, 'string', 'ref');
             xm.assertVar(path, 'string', 'path');
+
             return this.getURL('rawFile', {
-                commit: commit,
+                ref: ref,
                 path: path
             });
         };
@@ -3413,6 +3421,14 @@ var xm;
                 memo.push(id + ': ' + _this.stats[id]);
                 return memo;
             }, []).join('\n');
+        };
+
+        StatCounter.prototype.getObject = function () {
+            var _this = this;
+            return Object.keys(this.stats).sort().reduce(function (memo, id) {
+                memo[id] = _this.stats[id];
+                return memo;
+            }, Object.create(null));
         };
         return StatCounter;
     })();
@@ -4432,15 +4448,6 @@ var xm;
     (function (http) {
         var CacheRequest = (function () {
             function CacheRequest(url, headers) {
-                this.keyHeaders = [
-                    'accept',
-                    'accept-charset',
-                    'accept-language',
-                    'content-md5',
-                    'content-type',
-                    'cookie',
-                    'host'
-                ];
                 this.url = url;
                 this.headers = headers || {};
             }
@@ -4451,18 +4458,36 @@ var xm;
                 var keyHash = {
                     url: this.url,
                     headers: Object.keys(this.headers).reduce(function (memo, key) {
-                        if (_this.keyHeaders.indexOf(key) > -1) {
+                        if (CacheRequest.keyHeaders.indexOf(key) > -1) {
                             memo[key] = _this.headers[key];
                         }
                         return memo;
                     }, Object.create(null))
                 };
                 this.key = xm.jsonToIdentHash(keyHash);
-                xm.object.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
+                xm.object.lockProps(this, CacheRequest.lockProps);
 
                 xm.object.deepFreeze(this.headers);
                 return this;
             };
+            CacheRequest.lockProps = [
+                'key',
+                'url',
+                'headers',
+                'localMaxAge',
+                'httpInterval',
+                'forceRefresh',
+                'locked'
+            ];
+            CacheRequest.keyHeaders = [
+                'accept',
+                'accept-charset',
+                'accept-language',
+                'content-md5',
+                'content-type',
+                'cookie',
+                'host'
+            ];
             return CacheRequest;
         })();
         http.CacheRequest = CacheRequest;
@@ -4557,7 +4582,7 @@ var xm;
         var HTTPCache = (function () {
             function HTTPCache(storeDir, opts) {
                 this.jobs = new Map();
-                this.jobCache = new Map();
+                this.jobTimers = new Map();
                 xm.assertVar(storeDir, 'string', 'storeDir');
                 xm.assertVar(opts, http.CacheOpts, 'opts');
 
@@ -4612,20 +4637,26 @@ var xm;
             HTTPCache.prototype.scheduleRelease = function (key) {
                 var _this = this;
                 if (this.jobs.has(key)) {
-                    if (this.jobCache.has(key)) {
-                        clearTimeout(this.jobCache.get(key));
+                    if (this.jobTimers.has(key)) {
+                        clearTimeout(this.jobTimers.get(key));
                     }
 
-                    var timer = setTimeout(function () {
-                        _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
+                    if (this.opts.jobTimeout <= 0) {
+                        this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
+                        this.jobs.get(key).destruct();
+                        this.jobs.delete(key);
+                    } else {
+                        var timer = setTimeout(function () {
+                            _this.track.event(HTTPCache.drop_job, 'droppped ' + key, _this.jobs.get(key));
 
-                        _this.jobs.get(key).destruct();
-                        _this.jobs.delete(key);
-                    }, this.opts.jobTimeout);
+                            _this.jobs.get(key).destruct();
+                            _this.jobs.delete(key);
+                        }, this.opts.jobTimeout);
 
-                    timer.unref();
+                        timer.unref();
 
-                    this.jobCache.set(key, timer);
+                        this.jobTimers.set(key, timer);
+                    }
                 }
             };
 
@@ -5069,33 +5100,38 @@ var git;
 
             this._initGithubLoader();
         }
-        GithubRaw.prototype.getText = function (commitSha, filePath) {
-            return this.getFile(commitSha, filePath, xm.StringKoder.utf8);
+        GithubRaw.prototype.getText = function (ref, filePath) {
+            return this.getFile(ref, filePath, xm.StringKoder.utf8);
         };
 
-        GithubRaw.prototype.getJSON = function (commitSha, filePath) {
-            return this.getFile(commitSha, filePath, xm.JSONKoder.main);
+        GithubRaw.prototype.getJSON = function (ref, filePath) {
+            return this.getFile(ref, filePath, xm.JSONKoder.main);
         };
 
-        GithubRaw.prototype.getBinary = function (commitSha, filePath) {
-            return this.getFile(commitSha, filePath, xm.ByteKoder.main);
+        GithubRaw.prototype.getBinary = function (ref, filePath) {
+            return this.getFile(ref, filePath, xm.ByteKoder.main);
         };
 
-        GithubRaw.prototype.getFile = function (commitSha, filePath, koder) {
+        GithubRaw.prototype.getFile = function (ref, filePath, koder) {
             var _this = this;
-            xm.assertVar(commitSha, 'sha1', 'commitSha');
             xm.assertVar(filePath, 'string', 'filePath');
             xm.assertVar(koder, 'object', 'koder');
+            xm.assertVar(ref, 'string', 'ref', true);
 
             var d = Q.defer();
 
-            var url = this.repo.urls.rawFile(commitSha, filePath);
+            var url = this.repo.urls.rawFile(ref, filePath);
             this.track.promise(d.promise, GithubRaw.get_file, url);
-            var headers = {};
 
+            var headers = {};
             var request = new xm.http.CacheRequest(url, headers);
-            request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
-            request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
+            if (xm.isSha(ref)) {
+                request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+                request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
+            } else {
+                request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+                request.httpInterval = this.options.getDurationSecs('httpIntervalRef') * 1000;
+            }
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
@@ -8661,7 +8697,7 @@ var tsd;
                     if (err.message) {
                         this._client.exception(err.message).send();
                     } else {
-                        this._client.exception(String(err.message)).send();
+                        this._client.exception(String(err)).send();
                     }
                 }
             };
@@ -9407,7 +9443,7 @@ var tsd;
             cmd.name = 'query';
             cmd.label = 'search definitions using globbing pattern';
             cmd.note = [
-                'jquery:           $ tsd query jquery',
+                'knockout:         $ tsd query knockout',
                 'jquery plugins:   $ tsd query jquery.*/*',
                 'angularjs bundle: $ tsd query angular* -r'
             ];

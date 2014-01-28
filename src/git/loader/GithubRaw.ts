@@ -25,33 +25,39 @@ module git {
 			this._initGithubLoader();
 		}
 
-		getText(commitSha:string, filePath:string):Q.Promise<string> {
-			return this.getFile<string>(commitSha, filePath, xm.StringKoder.utf8);
+		getText(ref:string, filePath:string):Q.Promise<string> {
+			return this.getFile<string>(ref, filePath, xm.StringKoder.utf8);
 		}
 
-		getJSON(commitSha:string, filePath:string):Q.Promise<any> {
-			return this.getFile<any>(commitSha, filePath, xm.JSONKoder.main);
+		getJSON(ref:string, filePath:string):Q.Promise<any> {
+			return this.getFile<any>(ref, filePath, xm.JSONKoder.main);
 		}
 
-		getBinary(commitSha:string, filePath:string):Q.Promise<NodeBuffer> {
-			return this.getFile<NodeBuffer>(commitSha, filePath, xm.ByteKoder.main);
+		getBinary(ref:string, filePath:string):Q.Promise<NodeBuffer> {
+			return this.getFile<NodeBuffer>(ref, filePath, xm.ByteKoder.main);
 		}
 
-		getFile<T>(commitSha:string, filePath:string, koder:xm.IContentKoder<T>):Q.Promise<T> {
+		getFile<T>(ref:string, filePath:string, koder:xm.IContentKoder<T>):Q.Promise<T> {
 			// should be a low hex
-			xm.assertVar(commitSha, 'sha1', 'commitSha');
 			xm.assertVar(filePath, 'string', 'filePath');
 			xm.assertVar(koder, 'object', 'koder');
+			xm.assertVar(ref, 'string', 'ref', true);
 
 			var d:Q.Deferred<T> = Q.defer();
 
-			var url = this.repo.urls.rawFile(commitSha, filePath);
+			var url = this.repo.urls.rawFile(ref, filePath);
 			this.track.promise(d.promise, GithubRaw.get_file, url);
-			var headers = {};
 
+			var headers = {};
 			var request = new xm.http.CacheRequest(url, headers);
-			request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
-			request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
+			if (xm.isSha(ref)) {
+				request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+				request.httpInterval = this.options.getDurationSecs('httpInterval') * 1000;
+			}
+			else {
+				request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
+				request.httpInterval = this.options.getDurationSecs('httpIntervalRef') * 1000;
+			}
 			request.lock();
 
 			this.cache.getObject(request).progress(d.notify).then((object:xm.http.CacheObject) => {

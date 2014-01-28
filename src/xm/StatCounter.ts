@@ -73,5 +73,12 @@ module xm {
 				return memo;
 			}, []).join('\n');
 		}
+
+		getObject():any {
+			return Object.keys(this.stats).sort().reduce((memo:any, id:string) => {
+				memo[id] = this.stats[id];
+				return memo;
+			}, Object.create(null));
+		}
 	}
 }

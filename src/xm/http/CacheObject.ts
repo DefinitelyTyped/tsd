@@ -40,7 +40,16 @@ module xm {
 			httpInterval:number;
 			forceRefresh:boolean;
 
-			keyHeaders:string[] = [
+			static lockProps:string[] = [
+				'key',
+				'url',
+				'headers',
+				'localMaxAge',
+				'httpInterval',
+				'forceRefresh',
+				'locked'
+			];
+			static keyHeaders:string[] = [
 				'accept',
 				'accept-charset',
 				'accept-language',
@@ -61,14 +70,14 @@ module xm {
 				var keyHash = {
 					url: this.url,
 					headers: Object.keys(this.headers).reduce((memo:any, key:string) => {
-						if (this.keyHeaders.indexOf(key) > -1) {
+						if (CacheRequest.keyHeaders.indexOf(key) > -1) {
 							memo[key] = this.headers[key];
 						}
 						return memo;
 					}, Object.create(null))
 				};
 				this.key = xm.jsonToIdentHash(keyHash);
-				xm.object.lockProps(this, ['key', 'url', 'headers', 'localMaxAge', 'httpInterval', 'forceRefresh', 'locked']);
+				xm.object.lockProps(this, CacheRequest.lockProps);
 				// TODO maybe we should clone before freeze?
 				xm.object.deepFreeze(this.headers);
 				return this;

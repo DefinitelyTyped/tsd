@@ -25,6 +25,13 @@ module xm {
 			return alt;
 		}
 
+		setValue(path:string, value?:any):void {
+			if (!/^\//.test(path)) {
+				path = '/' + path;
+			}
+			pointer.set(this.object, path, value);
+		}
+
 		getChild(path:string, alt:any = null):JSONPointer {
 			var value = this.getValue(path);
 			if (typeof value === 'object' && value) {

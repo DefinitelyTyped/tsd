@@ -19,6 +19,7 @@ describe('git.GithubAPI', () => {
 		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubAPI');
 		repo = new git.GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
+		helper.enableTrack(repo);
 	});
 	afterEach(() => {
 		repo = null;
@@ -104,11 +105,13 @@ describe('git.GithubAPI', () => {
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');
 
-			return repo.api.getBlob(expectedSha).then((first) => {
+			var notes = [];
+
+			return repo.api.getBlob(expectedSha).progress((note:any) => {
+				notes.push(note);
+			}).then((first) => {
 				assert.ok(first, 'first data');
 				assert.isObject(first, 'first data');
-
-
 				assert.strictEqual(first.sha, expectedSha, 'first.sha vs expectedSha');
 
 				assert.jsonSchema(first, metaFields, 'first meta');
@@ -122,20 +125,28 @@ describe('git.GithubAPI', () => {
 				assert.strictEqual(firstSha, expectedSha, 'firstSha vs expected');
 
 				// get again, should be cached
-				return repo.api.getBlob(expectedSha).then((second) => {
+				return repo.api.getBlob(expectedSha).progress((note:any) => {
+					notes.push(note);
+				}).then((second) => {
 					assert.ok(second, 'second data');
 					assert.isObject(second, 'second data');
-
 					assert.strictEqual(second.sha, expectedSha, 'second.sha vs expectedSha');
-
-					assert.jsonSchema(second, metaFields, 'second meta');
-					fixMeta(second.meta);
-					assert.jsonOf(expectedJson, second, 'second vs expectedJson');
 
 					var secondBuffer = git.GitUtil.decodeBlobJson(first);
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');
 					var secondSha = git.GitUtil.blobShaHex(secondBuffer, 'utf8');
 					assert.strictEqual(secondSha, expectedSha, 'secondSha vs expected');
+
+					helper.assertNotes(notes, [
+						{
+							message: /^remote: /,
+							code: 'http 200'
+						},
+						{
+							message: /^local: /,
+							code: null
+						}
+					], 'second');
 				});
 			});
 		});

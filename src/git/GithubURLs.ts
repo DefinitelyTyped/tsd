@@ -27,7 +27,7 @@ module git {
 			this.addTemplate('base', this._base);
 
 			this.addTemplate('raw', this._raw);
-			this.addTemplate('rawFile', this._raw + '/{commit}/{+path}');
+			this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
 
 			this.addTemplate('api', this._api);
 			this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
@@ -61,11 +61,12 @@ module git {
 			return this.getURL('raw');
 		}
 
-		rawFile(commit:string, path:string):string {
-			xm.assertVar(commit, 'sha1', 'commit');
+		rawFile(ref:string, path:string):string {
+			xm.assertVar(ref, 'string', 'ref');
 			xm.assertVar(path, 'string', 'path');
+
 			return this.getURL('rawFile', {
-				commit: commit,
+				ref: ref,
 				path: path
 			});
 		}
