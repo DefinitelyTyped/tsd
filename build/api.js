@@ -2507,13 +2507,12 @@ var tsd;
             if (typeof details === "undefined") { details = false; }
             var info = {
                 version: this.packageInfo.getNameVersion(),
-                repo: this.config.repo + ' #' + this.config.ref
+                repo: 'http://github.com/' + this.config.repo + ' #' + this.config.ref
             };
             if (details) {
                 info.paths = this.paths;
-                info.config = this.config;
                 info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
-                info.installed = this.config.getInstalled();
+                info.config = this.config.toJSON();
             }
             return info;
         };
@@ -9743,8 +9742,6 @@ var tsd;
             var d = Q.defer();
 
             init(ctx).then(function () {
-                return null;
-            }).then(function () {
                 return getContext(ctx).then(function (context) {
                     var job = new Job();
                     job.context = context;
@@ -9939,7 +9936,11 @@ var tsd;
                         indent: 3,
                         flowLevel: -1
                     };
-                    return output.plain(yaml.safeDump(job.api.context.getInfo(true)));
+                    return output.plain(yaml.safeDump(job.api.context.getInfo(true), {
+                        skipInvalid: false,
+                        schema: yaml.DEFAULT_FULL_SCHEMA,
+                        indent: 3
+                    }));
                 }).fail(reportError);
             };
         });

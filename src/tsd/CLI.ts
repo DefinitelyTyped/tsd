@@ -70,6 +70,7 @@ module tsd {
 		function init(ctx:xm.ExposeContext):Q.Promise<void> {
 			return Q.resolve();
 		}
+
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		function showHeader():Q.Promise<void> {
@@ -127,17 +128,6 @@ module tsd {
 			var d:Q.Deferred<Job> = Q.defer();
 
 			init(ctx).then(() => {
-				/*// verify valid path
-				if (ctx.hasOpt(Opt.config, true)) {
-					return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
-						if (!isFile) {
-							throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
-						}
-						return null;
-					});
-				}*/
-				return null;
-			}).then(() => {
 				return getContext(ctx).then((context:tsd.Context) => {
 					var job = new Job();
 					job.context = context;
@@ -345,7 +335,11 @@ module tsd {
 						indent: 3,
 						flowLevel: -1
 					};
-					return output.plain(yaml.safeDump(job.api.context.getInfo(true)));
+					return output.plain(yaml.safeDump(job.api.context.getInfo(true), {
+						skipInvalid : false,
+						schema: yaml.DEFAULT_FULL_SCHEMA,
+						indent : 3
+					}));
 
 				}).fail(reportError);
 			};

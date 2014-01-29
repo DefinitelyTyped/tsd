@@ -53,13 +53,12 @@ module tsd {
 		getInfo(details:boolean = false):Object {
 			var info:any = {
 				version: this.packageInfo.getNameVersion(),
-				repo: this.config.repo + ' #' + this.config.ref
+				repo: 'http://github.com/' + this.config.repo + ' #' + this.config.ref
 			};
 			if (details) {
 				info.paths = this.paths;
-				info.config = this.config;
 				info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
-				info.installed = this.config.getInstalled();
+				info.config = this.config.toJSON();
 			}
 			return info;
 		}
