@@ -242,7 +242,7 @@ module tsd {
 				opt.description = 'run action on selection';
 				opt.type = 'string';
 				opt.placeholder = 'name';
-				opt.enum = [Action.install, Action.browse]; // , Action.compare, Action.update, Action.open];
+				opt.enum = [Action.install, Action.browse, Action.visit]; // , Action.compare, Action.update, Action.open];
 			});
 		}
 	}

@@ -7797,20 +7797,20 @@ var tsd;
             return d.promise;
         };
 
-        API.prototype.browse = function (selection) {
+        API.prototype.browse = function (list) {
             var _this = this;
-            xm.assertVar(selection, tsd.Selection, 'selection');
+            xm.assertVar(list, tsd.Selection, 'selection');
 
             var d = Q.defer();
             this.track.promise(d.promise, 'browse');
-
-            if (selection.selection.length > 2) {
+            if (list.length > 2) {
                 d.reject(new Error('to many results to open in browser'));
+                return d.promise;
             }
 
             var opened = [];
 
-            selection.selection.forEach(function (file) {
+            list.forEach(function (file) {
                 var ref = file.commit.commitSha;
 
                 if (file.commit.commitSha === file.def.head.commit.commitSha) {
@@ -7821,6 +7821,43 @@ var tsd;
                 openInApp(url);
             });
             d.resolve(opened);
+
+            return d.promise;
+        };
+
+        API.prototype.visit = function (list) {
+            var _this = this;
+            xm.assertVar(list, tsd.Selection, 'selection');
+
+            var d = Q.defer();
+            this.track.promise(d.promise, 'visit');
+            if (list.length > 2) {
+                d.reject(new Error('to many results to open in browser'));
+                return d.promise;
+            }
+
+            var opened = [];
+
+            Q.all(list.map(function (file) {
+                if (!file.info) {
+                    return _this.core.parser.parseDefInfo(file).progress(d.notify);
+                }
+                return Q(file);
+            })).then(function () {
+                list.forEach(function (file) {
+                    var url;
+                    if (file.info && file.info.projectUrl) {
+                        url = file.info.projectUrl;
+                    } else if (file.def.head.info && file.def.head.info.projectUrl) {
+                        url = file.def.head.info.projectUrl;
+                    }
+                    if (url) {
+                        opened.push(url);
+                        openInApp(url);
+                    }
+                });
+                d.resolve(opened);
+            }).fail(d.reject);
 
             return d.promise;
         };
@@ -9160,6 +9197,14 @@ var tsd;
                 });
             };
 
+            Tracker.prototype.visit = function (url) {
+                this.sendEvent({
+                    ec: 'visit',
+                    ea: url,
+                    dp: this.getPage()
+                });
+            };
+
             Tracker.prototype.error = function (err) {
                 if (err) {
                     if (err.message) {
@@ -9394,6 +9439,7 @@ var tsd;
             Action.install = 'install';
             Action.open = 'open';
             Action.browse = 'browse';
+            Action.visit = 'visit';
             Action.compare = 'compare';
             Action.update = 'update';
         })(cli.Action || (cli.Action = {}));
@@ -9613,7 +9659,7 @@ var tsd;
                 opt.description = 'run action on selection';
                 opt.type = 'string';
                 opt.placeholder = 'name';
-                opt.enum = [cli.Action.install, cli.Action.browse];
+                opt.enum = [cli.Action.install, cli.Action.browse, cli.Action.visit];
             });
         }
         cli.addCommon = addCommon;
@@ -9921,12 +9967,23 @@ var tsd;
             });
         });
         queryActions.set(Action.browse, function (ctx, job, selection) {
-            return job.api.browse(selection).then(function (opened) {
+            return job.api.browse(selection.selection).then(function (opened) {
                 if (opened.length > 0) {
                     print.output.ln();
                     opened.forEach(function (url) {
                         print.output.note(true).line(url);
                         tracker.browser(url);
+                    });
+                }
+            });
+        });
+        queryActions.set(Action.visit, function (ctx, job, selection) {
+            return job.api.visit(selection.selection).then(function (opened) {
+                if (opened.length > 0) {
+                    print.output.ln();
+                    opened.forEach(function (url) {
+                        print.output.note(true).line(url);
+                        tracker.visit(url);
                     });
                 }
             });

@@ -379,12 +379,23 @@ module tsd {
 			});
 		});
 		queryActions.set(Action.browse, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
-			return job.api.browse(selection).then((opened:string[]) => {
+			return job.api.browse(selection.selection).then((opened:string[]) => {
 				if (opened.length > 0) {
 					print.output.ln();
 					opened.forEach((url:string) => {
 						print.output.note(true).line(url);
 						tracker.browser(url);
+					});
+				}
+			});
+		});
+		queryActions.set(Action.visit, function (ctx:xm.ExposeContext, job:Job, selection:tsd.Selection) {
+			return job.api.visit(selection.selection).then((opened:string[]) => {
+				if (opened.length > 0) {
+					print.output.ln();
+					opened.forEach((url:string) => {
+						print.output.note(true).line(url);
+						tracker.visit(url);
 					});
 				}
 			});

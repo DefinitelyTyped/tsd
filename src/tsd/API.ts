@@ -241,19 +241,19 @@ module tsd {
 		/*
 		 browse selection in browser
 		 */
-		browse(selection:tsd.Selection):Q.Promise<string[]> {
-			xm.assertVar(selection, tsd.Selection, 'selection');
+		browse(list:tsd.DefVersion[]):Q.Promise<string[]> {
+			xm.assertVar(list, tsd.Selection, 'selection');
 
 			var d:Q.Deferred<string[]> = Q.defer();
 			this.track.promise(d.promise, 'browse');
-
-			if (selection.selection.length > 2) {
+			if (list.length > 2) {
 				d.reject(new Error('to many results to open in browser'));
+				return d.promise;
 			}
 
 			var opened = [];
 
-			selection.selection.forEach((file:tsd.DefVersion) => {
+			list.forEach((file:tsd.DefVersion) => {
 				var ref = file.commit.commitSha;
 				// same?
 				if (file.commit.commitSha === file.def.head.commit.commitSha) {
@@ -264,6 +264,46 @@ module tsd {
 				openInApp(url);
 			});
 			d.resolve(opened);
+
+			return d.promise;
+		}
+
+		/*
+		 visit selection's project-url in browser
+		 */
+		visit(list:tsd.DefVersion[]):Q.Promise<string[]> {
+			xm.assertVar(list, tsd.Selection, 'selection');
+
+			var d:Q.Deferred<string[]> = Q.defer();
+			this.track.promise(d.promise, 'visit');
+			if (list.length > 2) {
+				d.reject(new Error('to many results to open in browser'));
+				return d.promise;
+			}
+
+			var opened = [];
+
+			Q.all(list.map((file:tsd.DefVersion) => {
+				if (!file.info) {
+					return this.core.parser.parseDefInfo(file).progress(d.notify);
+				}
+				return Q(file);
+			})).then(() => {
+				list.forEach((file:tsd.DefVersion) => {
+					var url;
+					if (file.info && file.info.projectUrl) {
+						url = file.info.projectUrl;
+					}
+					else if (file.def.head.info && file.def.head.info.projectUrl) {
+						url = file.def.head.info.projectUrl;
+					}
+					if (url) {
+						opened.push(url);
+						openInApp(url);
+					}
+				});
+				d.resolve(opened);
+			}).fail(d.reject);
 
 			return d.promise;
 		}

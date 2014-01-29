@@ -100,6 +100,14 @@ module tsd {
 				});
 			}
 
+			visit(url:string):void {
+				this.sendEvent({
+					ec: 'visit',
+					ea: url,
+					dp: this.getPage()
+				});
+			}
+
 			error(err:any):void {
 				if (err) {
 					if (err.message) {

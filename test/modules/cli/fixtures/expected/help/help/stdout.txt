@@ -11,7 +11,7 @@
        $ tsd query angular* --resolve        : list angularjs bundle
 
     --action <name>      -a    > run action on selection (string)
-                                  [ install, browse ]
+                                  [ install, browse, visit ]
     --bundle             -b    > save to reference bundle (string[])
     --commit <sha1>      -c    > filter on commit hash (string)
     --date <range>       -d    > filter on commit date (string)
