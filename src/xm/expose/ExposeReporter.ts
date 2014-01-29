@@ -147,11 +147,24 @@ module xm {
 				inner: '   ',
 				rowSpace: 0
 			});
+			var lines = builder.createType('line', [
+				{ name: 'label'}
+			], {
+				rowSpace: 0
+			});
+			var examples = builder.createType('examples', [
+				{ name: 'command'},
+				{ name: 'label'}
+			], {
+				inner: '   '
+			});
 
 			// start rows
 			headers.init();
 			divider.init();
 			commands.init();
+			lines.init();
+			examples.init();
 
 			var commandOptNames:string[] = [];
 			var globalOptNames:string[] = [];
@@ -243,6 +256,7 @@ module xm {
 				commands.row.label.out.line(cmd.label);
 
 				addNote(cmd.note);
+				addExamples(cmd.examples);
 
 				cmd.options.filter((name:string) => {
 					return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
@@ -256,6 +270,31 @@ module xm {
 					note.forEach((note:string) => {
 						commands.row.label.out.indent().accent(' : ').line(String(note));
 					});
+				}
+			};
+
+			var addExamples = (list:string[][]) => {
+				if (list && list.length > 0) {
+					builder.closeAll();
+					lines.next();
+					lines.row.label.out.line();
+					lines.close();
+
+					list.forEach((cols:string[]) => {
+						if (cols.length === 1) {
+							lines.next();
+							lines.row.label.out.indent().line(String(cols[0]));
+						}
+						else if (cols.length > 1) {
+							examples.next();
+							examples.row.command.out.indent(2).accent(' $ ').line(String(cols[0]));
+							examples.row.label.out.accent(' : ').line(String(cols[1]));
+						}
+					});
+					examples.close();
+
+					lines.next();
+					lines.row.label.out.line();
 				}
 			};
 

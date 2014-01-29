@@ -21,6 +21,7 @@ module tsd {
 				/^(?:\w+: )?written zero \w+ bytes/,
 				/^(?:\w+: )?missing \w+ file/,
 				/^(?:\w+: )?remote:/,
+				/^(?:\w+: )?dropped from cache:/,
 				/^(?:\w+: )?local:/,
 				/^(?:\w+: )?update:/
 			];
@@ -194,8 +195,15 @@ module tsd {
 
 				// TODO report on written/skipped
 				keys.sort().forEach((path:string) => {
+					this.output.indent().bullet(true);
 					var file:tsd.DefVersion = result.written.get(path);
-					this.output.indent().bullet(true).glue(this.file(file)).ln();
+					if (file.def) {
+						this.output.tweakPath(file.def.path);
+					}
+					else {
+						this.output.accent('<no def>');
+					}
+					this.output.ln();
 				});
 				// this.output.ln().report(true).span('install').space().success('success!').ln();
 				return this.output;

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "tsd",
-  "version": "0.5.2-alpha.13",
+  "version": "0.5.2-alpha.14",
   "description": "TypeScript Definition manager for DefinitelyTyped.",
   "keywords": [
     "typescript",

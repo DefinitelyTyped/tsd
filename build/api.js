@@ -4808,11 +4808,14 @@ var xm;
                         }
                         return false;
                     }).then(function (tree) {
-                        return Q.all(tree.reduce(function (memo, src) {
-                            memo.push(xm.file.removeFile(src));
-                            memo.push(xm.file.removeFile(src.replace(/\.json$/, '.raw')));
-                            return memo;
-                        }, []));
+                        return Q.all(tree.map(function (src) {
+                            return Q.all([
+                                xm.file.removeFile(src),
+                                xm.file.removeFile(src.replace(/\.json$/, '.raw'))
+                            ]).then(function () {
+                                d.notify('dropped from cache: ' + src);
+                            });
+                        }));
                     });
                 }).done(function () {
                     d.resolve();
@@ -7422,6 +7425,27 @@ var tsd;
             return d.promise;
         };
 
+        API.prototype.update = function (options, version) {
+            if (typeof version === "undefined") { version = 'latest'; }
+            var _this = this;
+            var d = Q.defer();
+            this.track.promise(d.promise, 'update');
+
+            var query = new tsd.Query();
+            this.context.config.getInstalled().forEach(function (inst) {
+                query.addNamePattern(tsd.Def.getFrom(inst.path).pathTerm);
+            });
+            query.versionMatcher = new tsd.VersionMatcher(version);
+
+            this.select(query, options).progress(d.notify).then(function (selection) {
+                return _this.install(selection, options).progress(d.notify).then(function (res) {
+                    d.resolve(res);
+                });
+            }).fail(d.reject);
+
+            return d.promise;
+        };
+
         API.prototype.getRateInfo = function () {
             var p = this.core.repo.api.getRateInfo();
             this.track.promise(p, 'rate_info');
@@ -7471,10 +7495,10 @@ var tsd;
             var queue = [];
 
             if (raw) {
-                queue.push(this.core.repo.raw.cache.cleanupCacheAge(0));
+                queue.push(this.core.repo.raw.cache.cleanupCacheAge(0).progress(d.notify));
             }
             if (api) {
-                queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
+                queue.push(this.core.repo.api.cache.cleanupCacheAge(0).progress(d.notify));
             }
 
             if (queue.length > 0) {
@@ -7701,10 +7725,23 @@ var xm;
                 inner: '   ',
                 rowSpace: 0
             });
+            var lines = builder.createType('line', [
+                { name: 'label' }
+            ], {
+                rowSpace: 0
+            });
+            var examples = builder.createType('examples', [
+                { name: 'command' },
+                { name: 'label' }
+            ], {
+                inner: '   '
+            });
 
             headers.init();
             divider.init();
             commands.init();
+            lines.init();
+            examples.init();
 
             var commandOptNames = [];
             var globalOptNames = [];
@@ -7795,6 +7832,7 @@ var xm;
                 commands.row.label.out.line(cmd.label);
 
                 addNote(cmd.note);
+                addExamples(cmd.examples);
 
                 cmd.options.filter(function (name) {
                     return (commandOptNames.indexOf(name) < 0) && (globalOptNames.indexOf(name) < 0);
@@ -7808,6 +7846,30 @@ var xm;
                     note.forEach(function (note) {
                         commands.row.label.out.indent().accent(' : ').line(String(note));
                     });
+                }
+            };
+
+            var addExamples = function (list) {
+                if (list && list.length > 0) {
+                    builder.closeAll();
+                    lines.next();
+                    lines.row.label.out.line();
+                    lines.close();
+
+                    list.forEach(function (cols) {
+                        if (cols.length === 1) {
+                            lines.next();
+                            lines.row.label.out.indent().line(String(cols[0]));
+                        } else if (cols.length > 1) {
+                            examples.next();
+                            examples.row.command.out.indent(2).accent(' $ ').line(String(cols[0]));
+                            examples.row.label.out.accent(' : ').line(String(cols[1]));
+                        }
+                    });
+                    examples.close();
+
+                    lines.next();
+                    lines.row.label.out.line();
                 }
             };
 
@@ -8042,6 +8104,7 @@ var xm;
             this.options = [];
             this.variadic = [];
             this.groups = [];
+            this.examples = [];
             this.note = [];
         }
         return ExposeCommand;
@@ -8468,8 +8531,14 @@ var tsd;
                 }
 
                 keys.sort().forEach(function (path) {
+                    _this.output.indent().bullet(true);
                     var file = result.written.get(path);
-                    _this.output.indent().bullet(true).glue(_this.file(file)).ln();
+                    if (file.def) {
+                        _this.output.tweakPath(file.def.path);
+                    } else {
+                        _this.output.accent('<no def>');
+                    }
+                    _this.output.ln();
                 });
 
                 return this.output;
@@ -8667,6 +8736,7 @@ var tsd;
                 xm.assertVar(context, tsd.Context, 'context');
 
                 this._context = context;
+                this._debug = debug;
                 this._accountID = context.settings.getString('tracker/accountID');
                 this._enabled = context.settings.getBoolean('tracker/enabled');
 
@@ -8687,9 +8757,10 @@ var tsd;
                     throw new Error('invalid accountID: ' + this._accountID);
                 }
 
-                this._client = ua(this._accountID, uuid.v4());
-                if (debug) {
+                if (this._debug) {
                     this._client = this._client.debug();
+                } else {
+                    this._client = ua(this._accountID, uuid.v4());
                 }
             };
 
@@ -8761,7 +8832,9 @@ var tsd;
             Tracker.prototype.doEvent = function (event) {
                 var _this = this;
                 this._workers.push(event);
-
+                if (this._debug) {
+                    xm.log.debug('event', event);
+                }
                 this._client.event(event, function (err) {
                     var i = _this._workers.indexOf(event);
                     if (i > -1) {
@@ -8783,6 +8856,9 @@ var tsd;
                 return function (err) {
                     if (!err) {
                         var duration = Date.now() - start;
+                        if (_this._debug) {
+                            xm.log.debug('timer', duration + 'ms');
+                        }
                         _this._client.timing(_this.getPage(), variable, duration, label).send();
                     }
                 };
@@ -9173,7 +9249,7 @@ var tsd;
                 opt.description = 'run action on selection';
                 opt.type = 'string';
                 opt.placeholder = 'name';
-                opt.enum = [cli.Action.install];
+                opt.enum = [cli.Action.install, cli.Action.browse];
             });
         }
         cli.addCommon = addCommon;
@@ -9372,14 +9448,6 @@ var tsd;
                 if (sort !== 0) {
                     return sort;
                 }
-                sort = xm.exposeSortHasElem(one.groups, two.groups, Group.support);
-                if (sort !== 0) {
-                    return sort;
-                }
-                sort = xm.exposeSortHasElem(one.groups, two.groups, Group.help);
-                if (sort !== 0) {
-                    return sort;
-                }
                 return xm.exposeSortIndex(one, two);
             };
         });
@@ -9388,6 +9456,19 @@ var tsd;
             group.name = Group.support;
             group.label = 'support';
             group.options = [];
+            group.sorter = function (one, two) {
+                var sort;
+
+                sort = xm.exposeSortHasElem(one.groups, two.groups, Group.primary);
+                if (sort !== 0) {
+                    return sort;
+                }
+                sort = xm.exposeSortHasElem(one.groups, two.groups, Group.support);
+                if (sort !== 0) {
+                    return sort;
+                }
+                return xm.exposeSortIndex(one, two);
+            };
         });
 
         expose.defineGroup(function (group) {
@@ -9429,7 +9510,7 @@ var tsd;
             cmd.name = 'init';
             cmd.label = 'create empty config file';
             cmd.options = [Opt.config, Opt.overwrite];
-            cmd.groups = [Group.support];
+            cmd.groups = [Group.support, Group.primary];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).progress(notify).then(function (job) {
@@ -9498,10 +9579,11 @@ var tsd;
         expose.defineCommand(function (cmd) {
             cmd.name = 'query';
             cmd.label = 'search definitions using globbing pattern';
-            cmd.note = [
-                'knockout:         $ tsd query knockout',
-                'jquery plugins:   $ tsd query jquery.*/*',
-                'angularjs bundle: $ tsd query angular* -r'
+            cmd.examples = [
+                ['tsd query d3 --info -history', 'view d3 info & history'],
+                ['tsd query mocha --action install', 'install mocha'],
+                ['tsd query jquery.*/*', 'search jquery plugins'],
+                ['tsd query angular* --resolve', 'list angularjs bundle']
             ];
             cmd.variadic = ['pattern'];
             cmd.groups = [Group.primary, Group.query];
@@ -9563,8 +9645,8 @@ var tsd;
         expose.defineCommand(function (cmd) {
             cmd.name = 'reinstall';
             cmd.label = 're-install definitions from config';
-            cmd.options = [Opt.overwrite, Opt.config, Opt.cacheDir];
-            cmd.groups = [Group.support];
+            cmd.options = [Opt.overwrite, Opt.save];
+            cmd.groups = [Group.support, Group.primary];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).progress(notify).then(function (job) {
@@ -9575,6 +9657,26 @@ var tsd;
                         print.installResult(result);
 
                         tracker.install('reinstall', result);
+                    });
+                }).fail(reportError);
+            };
+        });
+
+        expose.defineCommand(function (cmd) {
+            cmd.name = 'update';
+            cmd.label = 'update definitions from config';
+            cmd.options = [Opt.overwrite, Opt.save];
+            cmd.groups = [Group.support, Group.primary];
+            cmd.execute = function (ctx) {
+                var notify = getProgress(ctx);
+                return getAPIJob(ctx).progress(notify).then(function (job) {
+                    output.line();
+                    output.info(true).span('running').space().accent(cmd.name).ln();
+
+                    return job.api.update(job.options).progress(notify).then(function (result) {
+                        print.installResult(result);
+
+                        tracker.install('update', result);
                     });
                 }).fail(reportError);
             };

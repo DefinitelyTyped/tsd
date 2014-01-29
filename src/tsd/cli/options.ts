@@ -232,7 +232,7 @@ module tsd {
 				opt.description = 'run action on selection';
 				opt.type = 'string';
 				opt.placeholder = 'name';
-				opt.enum = [Action.install]; // , Action.compare, Action.update, Action.open];
+				opt.enum = [Action.install, Action.browse]; // , Action.compare, Action.update, Action.open];
 				// opt.note = ['partially implemented'];
 				/*opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();

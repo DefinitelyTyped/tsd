@@ -65,6 +65,7 @@ module xm {
 		options:string[] = [];
 		variadic:string[] = [];
 		groups:string[] = [];
+		examples:string[][] = [];
 		note:string[] = [];
 		internal:boolean;
 

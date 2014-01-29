@@ -251,14 +251,6 @@ module tsd {
 				if (sort !== 0) {
 					return sort;
 				}
-				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.support);
-				if (sort !== 0) {
-					return sort;
-				}
-				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.help);
-				if (sort !== 0) {
-					return sort;
-				}
 				return xm.exposeSortIndex(one, two);
 			};
 		});
@@ -267,6 +259,19 @@ module tsd {
 			group.name = Group.support;
 			group.label = 'support';
 			group.options = [];
+			group.sorter = (one:xm.ExposeCommand, two:xm.ExposeCommand):number => {
+				var sort:number;
+				// TODO sane-ify sorting groups
+				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.primary);
+				if (sort !== 0) {
+					return sort;
+				}
+				sort = xm.exposeSortHasElem(one.groups, two.groups, Group.support);
+				if (sort !== 0) {
+					return sort;
+				}
+				return xm.exposeSortIndex(one, two);
+			};
 		});
 
 		expose.defineGroup((group:xm.ExposeGroup) => {
@@ -313,7 +318,7 @@ module tsd {
 			cmd.name = 'init';
 			cmd.label = 'create empty config file';
 			cmd.options = [Opt.config, Opt.overwrite];
-			cmd.groups = [Group.support];
+			cmd.groups = [Group.support, Group.primary];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).progress(notify).then((job:Job) => {
@@ -388,10 +393,11 @@ module tsd {
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'query';
 			cmd.label = 'search definitions using globbing pattern';
-			cmd.note = [
-				'knockout:         $ tsd query knockout',
-				'jquery plugins:   $ tsd query jquery.*/*',
-				'angularjs bundle: $ tsd query angular* -r'
+			cmd.examples = [
+				['tsd query d3 --info -history', 'view d3 info & history'],
+				['tsd query mocha --action install', 'install mocha'],
+				['tsd query jquery.*/*', 'search jquery plugins'],
+				['tsd query angular* --resolve', 'list angularjs bundle']
 			];
 			cmd.variadic = ['pattern'];
 			cmd.groups = [Group.primary, Group.query];
@@ -457,8 +463,8 @@ module tsd {
 		expose.defineCommand((cmd:xm.ExposeCommand) => {
 			cmd.name = 'reinstall';
 			cmd.label = 're-install definitions from config';
-			cmd.options = [Opt.overwrite, Opt.config, Opt.cacheDir];
-			cmd.groups = [Group.support];
+			cmd.options = [Opt.overwrite, Opt.save];
+			cmd.groups = [Group.support, Group.primary];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).progress(notify).then((job:Job) => {
@@ -469,6 +475,28 @@ module tsd {
 						print.installResult(result);
 
 						tracker.install('reinstall', result);
+					});
+				}).fail(reportError);
+			};
+		});
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		expose.defineCommand((cmd:xm.ExposeCommand) => {
+			cmd.name = 'update';
+			cmd.label = 'update definitions from config';
+			cmd.options = [Opt.overwrite, Opt.save];
+			cmd.groups = [Group.support, Group.primary];
+			cmd.execute = (ctx:xm.ExposeContext) => {
+				var notify = getProgress(ctx);
+				return getAPIJob(ctx).progress(notify).then((job:Job) => {
+					output.line();
+					output.info(true).span('running').space().accent(cmd.name).ln();
+
+					return job.api.update(job.options).progress(notify).then((result:tsd.InstallResult) => {
+						print.installResult(result);
+
+						tracker.install('update', result);
 					});
 				}).fail(reportError);
 			};

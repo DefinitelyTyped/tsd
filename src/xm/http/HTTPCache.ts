@@ -281,11 +281,14 @@ module xm {
 						}
 						return false;
 					}).then((tree:string[]) => {
-						return Q.all(tree.reduce((memo:any[], src:string) => {
-							memo.push(xm.file.removeFile(src));
-							memo.push(xm.file.removeFile(src.replace(/\.json$/, '.raw')));
-							return memo;
-						}, []));
+						return Q.all(tree.map((src:string) => {
+							return Q.all([
+								xm.file.removeFile(src),
+								xm.file.removeFile(src.replace(/\.json$/, '.raw'))
+							]).then(() => {
+								d.notify('dropped from cache: ' + src);
+							});
+						}));
 					});
 				}).done(() => {
 					d.resolve();

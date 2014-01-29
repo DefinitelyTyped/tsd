@@ -4,11 +4,16 @@
 >> main
    
    query <pattern>            search definitions using globbing pattern
+       $ tsd query d3 --info -history        : view d3 info & history
+       $ tsd query mocha --action install    : install mocha
+       $ tsd query jquery.*/*                : search jquery plugins
+       $ tsd query angular* --resolve        : list angularjs bundle
+
     --action <name>      -a    > run action on selection (string)
                                   [ install ]
     --commit <sha1>      -c    > filter on commit hash (string)
     --date <range>       -d    > filter on commit date (string)
-                                  : example: ">2012-12-31"
+                                  : example: "<2012-12-31"
     --info               -i    > display definition file info (flag)
     --overwrite          -o    > overwrite existing files (flag)
     --resolve            -r    > include reference dependencies (flag)

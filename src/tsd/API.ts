@@ -150,6 +150,28 @@ module tsd {
 		}
 
 		/*
+		 update from config
+		 */
+		update(options?:tsd.Options, version:string = 'latest'):Q.Promise<tsd.InstallResult> {
+			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
+			this.track.promise(d.promise, 'update');
+
+			var query = new tsd.Query();
+			this.context.config.getInstalled().forEach((inst:tsd.InstalledDef) => {
+				query.addNamePattern(tsd.Def.getFrom(inst.path).pathTerm);
+			});
+			query.versionMatcher = new tsd.VersionMatcher(version);
+
+			this.select(query, options).progress(d.notify).then((selection:tsd.Selection) => {
+				return this.install(selection, options).progress(d.notify).then((res:tsd.InstallResult) => {
+					d.resolve(res);
+				});
+			}).fail(d.reject);
+
+			return d.promise;
+		}
+
+		/*
 		 get rate-info
 		 */
 		getRateInfo():Q.Promise<git.GitRateInfo> {
@@ -211,10 +233,10 @@ module tsd {
 			var queue = [];
 
 			if (raw) {
-				queue.push(this.core.repo.raw.cache.cleanupCacheAge(0));
+				queue.push(this.core.repo.raw.cache.cleanupCacheAge(0).progress(d.notify));
 			}
 			if (api) {
-				queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
+				queue.push(this.core.repo.api.cache.cleanupCacheAge(0).progress(d.notify));
 			}
 
 			// run?

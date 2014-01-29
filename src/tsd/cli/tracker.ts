@@ -15,6 +15,7 @@ module tsd {
 		export class Tracker {
 
 			private _enabled:boolean;
+			private _debug:boolean;
 			private _accountID:string;
 			private _client:UniversalAnalytics.Client = getDummy();
 			private _context:tsd.Context;
@@ -32,6 +33,7 @@ module tsd {
 				xm.assertVar(context, tsd.Context, 'context');
 
 				this._context = context;
+				this._debug = debug;
 				this._accountID = context.settings.getString('tracker/accountID');
 				this._enabled = context.settings.getBoolean('tracker/enabled');
 
@@ -52,9 +54,11 @@ module tsd {
 					throw new Error('invalid accountID: ' + this._accountID);
 				}
 				// force anonymous
-				this._client = ua(this._accountID, uuid.v4());
-				if (debug) {
+				if (this._debug) {
 					this._client = this._client.debug();
+				}
+				else {
+					this._client = ua(this._accountID, uuid.v4());
 				}
 			}
 
@@ -123,7 +127,9 @@ module tsd {
 
 			private doEvent(event):void {
 				this._workers.push(event);
-				// xm.log.debug(event);
+				if (this._debug) {
+					xm.log.debug('event', event);
+				}
 				this._client.event(event, (err) => {
 					var i = this._workers.indexOf(event);
 					if (i > -1) {
@@ -145,6 +151,9 @@ module tsd {
 				return (err?:any) => {
 					if (!err) {
 						var duration = Date.now() - start;
+						if (this._debug) {
+							xm.log.debug('timer', duration + 'ms');
+						}
 						this._client.timing(this.getPage(), variable, duration, label).send();
 					}
 				};
