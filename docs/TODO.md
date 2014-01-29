@@ -62,17 +62,17 @@ Local selector commands
 * :o:	Add **local** (search local files)
 * :o:	Add **uninstall** (remove local files)
 * :o:	Add **compare** (check for updates)
-* :o:	Add **update** (apply updates)
+* :m:	Add **update** (apply updates)
 
 Browser commands
 
-* :o:	Add feature to open a browser to see the pages on github? (diffs, comments etc) :zap:
+* :m:	Add feature to open a browser to see the pages on github? (diffs, comments etc)
 * :o:	Add feature to open a browser at a project's url (from info) :zap:
 
 UIX commands
 
 * :o:	Add auto/scan command (suggest appropriate definitions from package.json/bower.json) (@seanhess: see [codeplex](https://typescript.codeplex.com/discussions/461449) and [TPM](https://github.com/seanhess/TPM))
-* :id:	Consider adding reference/bundle command to generate typing collections (save in config)
+* :m:	Consider adding reference/bundle ~~command~~ to generate typing collections (save in config) (`--bundle` option)
 * :id:	Add stash save/pop type of snapshot command.
 
 Cache commands
@@ -106,7 +106,8 @@ Functionality
 
 * :m:	Report rate-limit properly
 * :id:	Add github credentials (or tsdpm-proxy) to bypass busted rate limits (for bulk commands)
-* :a:	Add promise progress events + CLI display (http actions, cache hits)
+* :ab:	~~Add~~ *Re-enable* promise progress events + CLI display (http actions, cache hits)
+	*	:a: Make part of `--detail` option. 
 
 CLI
 
@@ -114,11 +115,11 @@ CLI
 * :m:   Improve Expose to order/group commands :zap:
 * :m:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
 * :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
-* :o:	Add TSD release/updates news to CLI console (periodically from github) (easy with cache using GithubAPI) :zap:
+* :m:	Add TSD ~release/updates news to CLI console (periodically from github) (using [update-notifier](https://npmjs.org/package/update-notifier))
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
 * :a:	Add [inquirer](https://npmjs.org/package/inquirer) for interactive control
-* :a:	Add [insight](https://npmjs.org/package/insight) for analytics
-* :a:	Add [update-notifier](https://npmjs.org/package/update-notifier) for auto update notifications
+* :m:	Add ~~[insight](https://npmjs.org/package/insight) for analytics~~ [universal-analytics](https://github.com/peaksandpies/universal-analytics) is better (events).
+* :m:	Add [update-notifier](https://npmjs.org/package/update-notifier) for auto update notifications
 
 API
 
@@ -133,11 +134,13 @@ Data model/repo
 * :o:	Harden JSON import (there is some prototype schema in `./schema`)
 * :id:	Consider decoupling from Github json format (abstract service)
 * :id:	Consider adapting core to work from a git-checkout (abstract service)
+	* :id:	Look into [js-git](https://github.com/creationix/js-git)
 
 Info
 
 * :m:	Import tests for header parser from tsd-deftools @bartvds
-* :o:	Improve `DefInfo`/`Parser` to extract more info from more files :zap:
+* :m:	Improve `DefInfo`/`Parser` to extract more info from more files
+* :o:	Rewrite `DefInfo`/`Parser` (maybe based on XRegExp) for robust parsing.
 * :id:	Consider dropping  `DefInfo`/`Parser` complications for cruder as-is report? :zap:
 
 Config
@@ -150,7 +153,7 @@ Config
 	* :ng: ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit
 * :m:	Validate config save-data before writing to diskk, catch invalid json
 * :m:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
-* :m:	Consider renaming 'tsd-config.json' to 'tsd.json'
+* :m:	Rename `tsd-config.json` to `tsd.json`
 * :ab:	Add caching parameters to config
 * :id:	Consider adding `.tsdrc` global config.
 * :o2:	Writer config using [detect-indent](https://npmjs.org/package/detect-indent)
@@ -184,8 +187,8 @@ Internals
 * :ng:	Consider global store for JSON pointers and RegExps etc (meh)
 * :m:	Add xm ~~interface~~ class for debug/log/event tracking (`xm.EventLog`)
 * :id:	Consider unifying `xm.EventLog` with promise progress/notify?
-* :o2:	Use promise notifiy/progress for event tracking (being implemented)
-	* :a:	Needs a standard model (event-like) 
+* :m:	Use promise notifiy/progress for event tracking
+	* :m:	~~Needs a standard model~~ (collect notifications and use `helper.assertNotes()`)
 * :m:	Unify `xm.StatCounter` & `xm.Logger` into event tracker (and link child objects) (started in`xm.EventLog`)
 
 Technical
@@ -197,7 +200,7 @@ Technical
 
 Infrastructure
 
-* :o2:	Add npm pre-publish tests hook :zap:
+* :m:	Add npm pre-publish tests hook :zap:
 * :o2:	Add git pre-commit test hook :zap:
 * :id:	Lint TypeScript JS output (using JSHint or ESlint)
 * :m:	Validate `package.json` (and others) using json-schema.
@@ -208,19 +211,19 @@ Infrastructure
 * 
 Cleanup
 
-* :ab:	Sweep and enable `tslint.json` rules
-* :cl:	Clean `package.json`: fix some ~tildes before release
+* :m:	Sweep and enable `tslint.json` rules
+* :m:	Clean `package.json`: fix some ~tildes before release
 * :cl:	Sweep used modules: `require()` and `package.json`, dev vs runtime, npm prune 
 * :cl:	Sweep facing code (API / Context etc) for input parameter checking(`xm.assertVar`) :zap:
 * :cl:	Sweep and optimise reference-paths (but how? find auto-tool?) :zap:
-* :cl:	Verify "use strict" (needed in node?)
+* :m:	Verify "use strict" (added to TSLint)
 
 Publishing
 
 * :a:	Keep `./deploy/repository.json` for `v0.3.0`.
 * :ok:	~~Decide docs use of name-casing: use either 'TSD' or 'tsd'? (npm and bower are lowercase)~~ Use uppercase 'TSD' (looks like a type otherwise) 
-* :vs:	Decide & sweep title/description text (package.json, cli/api, github etc)
-* :vs:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku. Use TSD's Git module to proxy API request
+* :a:	Decide & sweep title/description text (package.json, cli/api, github etc)
+* :a:	Decide solution to update TSDPM.com: module and authenticated github with a DefinitelyTyped hook to heroku. Use TSD's Git module to proxy API request
 * :m:	Fix bin/cli `$ npm install . -g` 
 * :m:	Fix bin/cli `$ npm install git://github.com/Diullei/tsd#develop-0.5.x -g`
 * :x:	Compile a build number + date into application :zap:
@@ -233,17 +236,11 @@ Dependencies
 * :cl:	Swap `optimist` for ~~minimist~~ npm/yo's [`nopt`](https://npmjs.org/package/nopt).
 * :m:	Consider dropping `underscore`?
 * :m:	Update `Q` with generics
-* :o:	Sweep recent xm `package changes for new tests 
-
-Bugs:
-
-* :m:	Installing `$ tsd install chai` gives content error
-* :m:	Installing `$ tsd search q` / `$ tsd search q/*` doesn't work properly
-* :o:	Underscore.d.ts header has multiple authors
+* :m:	Sweep recent xm `package changes for new tests 
 
 More.. always more :rocket:
 
-## Local changes
+## Local TODO's
 
 Browse the code in `/src` and `/test` for `//TODO` comments,
 

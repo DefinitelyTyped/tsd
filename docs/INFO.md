@@ -2,6 +2,8 @@
 
 > Some development notes that will help understanding how TDS 0.5.x is rebuild
 
+:point_right: This is valid but outdated. Next generation migth use [js-git](https://github.com/creationix/js-git) for improved access to the repository data. 
+
 See also:
 
 * Main [readme](../README.md)

@@ -39,18 +39,6 @@ Data structure files in `/tsd/data`
 * The other files are support or data objects uses by these main types. 
 	* `DefUtils` has many utility helpers.   
 
-Context and config model in `/tsd/context`
-
-* `Context` bundles all settings sub-objects (very handy with testing).
-
-Logical building blocks in `/tsd/logic`
-
-Selector stuff `/tsd/select`
-
-* `Selector` and related data objects:
-	* `NameMatcher` matches the project/name-glob (needs expansion, see note in class)  
-
-
 ## Sub projects
 
 TSD is also a incubator and proving-ground for some of @Bartvds's sub-projects:
