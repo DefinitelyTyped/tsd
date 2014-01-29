@@ -73,9 +73,17 @@ module.exports = function (grunt) {
 			},
 			tsd: {
 				options: {
+					multi: true,
 					root: 'schema/tsd-v4.json'
 				},
 				src: ['tsd.json']
+			},
+			schemas: {
+				options: {
+					multi: true,
+					root: 'http://json-schema.org/draft-04/schema#'
+				},
+				src: ['schema/*.json']
 			}
 		},
 		mochaTest: {
@@ -202,13 +210,18 @@ module.exports = function (grunt) {
 		http: 9090
 	}, 'lib');
 
+	gtx.alias('prepublish', [
+		'tv4:tsd',
+		'tv4:packjson',
+		'tv4:schemas',
+		'mochaTest:integrity'
+	]);
+
 	// assemble!
 	gtx.alias('prep', [
 		'clean:tmp',
 		'jshint:support',
 		'jshint:fixtures',
-		'tv4:tsd',
-		'tv4:packjson',
 		'mocha_unfunk:dev'
 	]);
 	gtx.alias('build', [
@@ -311,7 +324,7 @@ module.exports = function (grunt) {
 			'help'
 		],
 		small: true,
-		smallHeight: 300
+		smallHeight: 400
 	});
 	/*gtx.create('index', 'capture', {
 	 args: [

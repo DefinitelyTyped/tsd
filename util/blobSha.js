@@ -588,11 +588,11 @@ var git;
             }
             switch (blobJSON.encoding) {
                 case 'base64':
-                    return new Buffer(blobJSON.content, 'base64');
+                    return new Buffer(blobJSON.lines, 'base64');
                 case 'utf-8':
                 case 'utf8':
                 default:
-                    return new Buffer(blobJSON.content, 'utf8');
+                    return new Buffer(blobJSON.lines, 'utf8');
             }
         }
         GitUtil.decodeBlobJson = decodeBlobJson;

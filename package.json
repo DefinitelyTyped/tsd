@@ -41,7 +41,8 @@
     "tsd": "./build/cli.js"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "prepublish": "grunt test"
   },
   "dependencies": {
     "q": "0.9.7",
