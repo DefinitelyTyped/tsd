@@ -82,7 +82,7 @@ module tsd {
 		}
 
 		function runUpdateNotifier(ctx:xm.ExposeContext, context:tsd.Context):Q.Promise<any> {
-			if (ctx.getOpt(Opt.allowUpdate)) {
+			if (ctx.getOpt(Opt.services)) {
 				return tsd.cli.runUpdateNotifier(context, false);
 			}
 			return Q.resolve();
@@ -96,7 +96,7 @@ module tsd {
 
 			var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-			tracker.init(context, ctx.getOpt(Opt.verbose));
+			tracker.init(context, ctx.getOpt(Opt.services), ctx.getOpt(Opt.verbose));
 
 			if (ctx.getOpt(Opt.dev)) {
 				// TODO why not local?

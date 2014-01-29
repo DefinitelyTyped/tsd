@@ -56,7 +56,7 @@ describe('CLI Query', () => {
 		}
 
 		args.push('--progress', 'no');
-		args.push('--checkUpdate', 'no');
+		args.push('--services', 'no');
 		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
 
 		args.push('--cacheDir', info.cacheDirTestFixed);

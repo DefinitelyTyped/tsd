@@ -8584,6 +8584,8 @@ var xm;
         Expose.prototype.exit = function (code) {
             if (code !== 0) {
                 this.reporter.output.ln().error('Closing with exit code ' + code).clear();
+
+                exitProcess(code);
             } else {
             }
         };
@@ -9080,12 +9082,16 @@ var tsd;
                 this._workersMax = 50;
                 this._workersGrow = 10;
             }
-            Tracker.prototype.init = function (context, debug) {
+            Tracker.prototype.init = function (context, enabled, debug) {
+                if (typeof enabled === "undefined") { enabled = true; }
                 if (typeof debug === "undefined") { debug = false; }
                 xm.assertVar(context, tsd.Context, 'context');
+                xm.assertVar(enabled, 'boolean', 'enabled');
 
                 this._context = context;
+                this._enabled = enabled;
                 this._debug = debug;
+
                 this._accountID = context.settings.getString('tracker/accountID');
                 this._enabled = context.settings.getBoolean('tracker/enabled');
 
@@ -9147,7 +9153,6 @@ var tsd;
 
             Tracker.prototype.browser = function (url) {
                 var parts = urlMod.parse(url);
-
                 this.sendEvent({
                     ec: 'browser',
                     ea: (parts.path + (parts.hash || '')),
@@ -9371,7 +9376,7 @@ var tsd;
             Opt.info = 'info';
             Opt.history = 'history';
             Opt.detail = 'detail';
-            Opt.allowUpdate = 'allowUpdate';
+            Opt.services = 'allowUpdate';
         })(cli.Opt || (cli.Opt = {}));
         var Opt = cli.Opt;
         xm.object.lockPrimitives(Opt);
@@ -9469,8 +9474,8 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.allowUpdate;
-                opt.description = 'allow check for TSD updates';
+                opt.name = cli.Opt.services;
+                opt.description = 'allow usage-tracker, TSD updates etc';
                 opt.type = 'flag';
                 opt.default = true;
                 opt.global = true;
@@ -9657,7 +9662,7 @@ var tsd;
         }
 
         function runUpdateNotifier(ctx, context) {
-            if (ctx.getOpt(Opt.allowUpdate)) {
+            if (ctx.getOpt(Opt.services)) {
                 return tsd.cli.runUpdateNotifier(context, false);
             }
             return Q.resolve();
@@ -9668,7 +9673,7 @@ var tsd;
 
             var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-            tracker.init(context, ctx.getOpt(Opt.verbose));
+            tracker.init(context, ctx.getOpt(Opt.services), ctx.getOpt(Opt.verbose));
 
             if (ctx.getOpt(Opt.dev)) {
                 context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);

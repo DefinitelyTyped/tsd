@@ -85,8 +85,8 @@ module tsd {
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
-				opt.name = Opt.allowUpdate;
-				opt.description = 'allow check for TSD updates';
+				opt.name = Opt.services;
+				opt.description = 'allow usage-tracker, TSD updates etc';
 				opt.type = 'flag';
 				opt.default = true;
 				opt.global = true;

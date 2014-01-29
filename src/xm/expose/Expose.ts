@@ -221,11 +221,13 @@ module xm {
 		exit(code:number):void {
 			if (code !== 0) {
 				this.reporter.output.ln().error('Closing with exit code ' + code).clear();
+
+				// only exit if bad (leave services etc in normal use)
+				exitProcess(code);
 			}
 			else {
 				// this.reporter.output.ln().success('Closing with exit code ' + code).clear();
 			}
-			// exitProcess(code);
 		}
 
 		// execute and exit

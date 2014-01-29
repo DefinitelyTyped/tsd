@@ -139,8 +139,8 @@ module helper {
 
 			while (actual.length > 0) {
 				var act:any = actual.shift();
-				var codeOK = (typeof next.code !== 'undefined') && (next.code === act.code)
-				var messageOK = (typeof next.message !== 'undefined') && (next.message.test(act.message))
+				var codeOK = (typeof next.code !== 'undefined') && (next.code === act.code);
+				var messageOK = (typeof next.message !== 'undefined') && (next.message.test(act.message));
 				if (codeOK && messageOK) {
 					next = null;
 					break;
@@ -162,7 +162,7 @@ module helper {
 			actual.forEach((item:any) => {
 				item.message = String(item.message);
 			});
-			assert.fail(actual, expected, 'expected more notes')
+			assert.fail(actual, expected, 'expected more notes');
 		}
 	}
 

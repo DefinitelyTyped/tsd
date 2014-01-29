@@ -29,11 +29,14 @@ module tsd {
 			constructor() {
 			}
 
-			init(context:tsd.Context, debug:boolean = false):void {
+			init(context:tsd.Context, enabled:boolean = true, debug:boolean = false):void {
 				xm.assertVar(context, tsd.Context, 'context');
+				xm.assertVar(enabled, 'boolean', 'enabled');
 
 				this._context = context;
+				this._enabled = enabled;
 				this._debug = debug;
+
 				this._accountID = context.settings.getString('tracker/accountID');
 				this._enabled = context.settings.getBoolean('tracker/enabled');
 
@@ -90,7 +93,6 @@ module tsd {
 
 			browser(url:string):void {
 				var parts = urlMod.parse(url);
-
 				this.sendEvent({
 					ec: 'browser',
 					ea: (parts.path + (parts.hash || '')),
@@ -113,7 +115,6 @@ module tsd {
 				if (event) {
 					this._eventQueue.push(event);
 				}
-
 				// sanity limit
 				var grow = 0;
 				while (this._eventQueue.length > 0 && this._workers.length < this._workersMax && grow < this._workersGrow) {
