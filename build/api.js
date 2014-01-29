@@ -6254,7 +6254,6 @@ var tsd;
                 return null;
             }).then(function () {
                 _this.core.context.config.reset();
-
                 return _this.saveConfig().then(function (target) {
                     d.resolve(target);
                 });
