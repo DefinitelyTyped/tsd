@@ -1,8 +1,9 @@
 {
-  "path": "./typings",
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
+  "path": "./typings",
+  "bundle": "./typings/tsd.d.ts",
   "installed": {
     "mocha/mocha.d.ts": {
       "commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
@@ -17,7 +18,7 @@
       "commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
     },
     "semver/semver.d.ts": {
-      "commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
+      "commit": "a53d50e91a454ba5b90906568f59f444ac71f9fd"
     }
   }
 }

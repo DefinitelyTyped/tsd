@@ -3,11 +3,14 @@ var tsd;
     'use strict';
 
     var Q = require('q');
+
     Q.longStackSupport = true;
 
     require('source-map-support').install();
 
     require('bufferstream').fn.warn = false;
+
+    require('date-utils');
 
     require('es6-shim');
 
@@ -1269,6 +1272,7 @@ var tsd;
         configFile: 'tsd.json',
         typingsDir: 'typings',
         cacheDir: 'tsd-cache',
+        bundleFile: 'tsd.d.ts',
         settings: 'settings.json',
         configVersion: 'v4',
         configSchemaFile: 'tsd-v4.json',
@@ -2278,6 +2282,9 @@ var tsd;
             this.version = tsd.Const.configVersion;
             this.repo = tsd.Const.definitelyRepo;
             this.ref = tsd.Const.mainBranch;
+
+            this.bundle = tsd.Const.typingsDir + '/' + tsd.Const.bundleFile;
+
             this._installed.clear();
         };
 
@@ -2366,12 +2373,16 @@ var tsd;
         Config.prototype.toJSON = function () {
             var _this = this;
             var json = {
-                path: this.path,
                 version: this.version,
                 repo: this.repo,
                 ref: this.ref,
-                installed: {}
+                path: this.path
             };
+            if (this.bundle) {
+                json.bundle = this.bundle;
+            }
+            ;
+            json.installed = {};
 
             xm.keysOf(this._installed).forEach(function (key) {
                 var file = _this._installed.get(key);
@@ -2385,11 +2396,12 @@ var tsd;
             return json;
         };
 
-        Config.prototype.parseJSON = function (json, label) {
+        Config.prototype.parseJSON = function (json, label, log) {
+            if (typeof log === "undefined") { log = true; }
             var _this = this;
             xm.assertVar(json, 'object', 'json');
 
-            this.validateJSON(json, this._schema, label);
+            this.validateJSON(json, this._schema, label, log);
 
             this._installed.clear();
 
@@ -2397,6 +2409,7 @@ var tsd;
             this.version = json.version;
             this.repo = json.repo;
             this.ref = json.ref;
+            this.bundle = json.bundle;
 
             if (json.installed) {
                 xm.eachProp(json.installed, function (data, filePath) {
@@ -2408,16 +2421,19 @@ var tsd;
             }
         };
 
-        Config.prototype.validateJSON = function (json, schema, label) {
+        Config.prototype.validateJSON = function (json, schema, label, log) {
+            if (typeof log === "undefined") { log = true; }
             xm.assertVar(schema, 'object', 'schema');
 
             label = (label || '<config json>');
             var res = tv4.validateMultiple(json, schema);
             if (!res.valid || res.missing.length > 0) {
-                xm.log.out.ln();
-                var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-                report.reportResult(report.createTest(schema, json, label, res, true), '   ');
-                xm.log.out.ln();
+                if (log) {
+                    xm.log.out.ln();
+                    var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+                    report.reportResult(report.createTest(schema, json, label, res, true), '   ');
+                    xm.log.out.ln();
+                }
                 throw (new Error('malformed config: doesn\'t comply with schema'));
             }
             return json;
@@ -4076,6 +4092,7 @@ var xm;
                     });
                 }).fail(function (err) {
                     _this._defer.reject(err);
+                    _this._defer = null;
                 }).done();
 
                 return this._defer.promise;
@@ -5221,6 +5238,7 @@ var tsd;
             this.resolveDependencies = false;
             this.overwriteFiles = false;
             this.saveToConfig = false;
+            this.addToBundles = [];
             this.timeout = 10000;
         }
         Options.fromJSON = function (json) {
@@ -6236,6 +6254,7 @@ var tsd;
                 return null;
             }).then(function () {
                 _this.core.context.config.reset();
+
                 return _this.saveConfig().then(function (target) {
                     d.resolve(target);
                 });
@@ -6523,7 +6542,7 @@ var tsd;
             xm.file.canWriteFile(targetPath, overwrite).then(function (canWrite) {
                 if (!canWrite) {
                     if (!overwrite) {
-                        d.notify(xm.getNote('skipped existing file: ' + file.def.path));
+                        d.notify(xm.getNote('skipped existing: ' + file.def.path));
                     }
                     d.resolve(null);
                     return;
@@ -7193,6 +7212,277 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    var path = require('path');
+    var splitExp = /(?:(.*)(\r?\n))|(?:(.+)($))/g;
+
+    var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+
+    var Bundle = (function () {
+        function Bundle(target) {
+            this.target = target;
+            this.target = target.replace(/^\.\//, '');
+        }
+        Bundle.prototype.parse = function (content) {
+            this.head = null;
+            this.eol = '\n';
+
+            var lineMatch;
+            var refMatch;
+            var line;
+            var prev = null;
+
+            var eolWin = 0;
+            var eolNix = 0;
+
+            splitExp.lastIndex = 0;
+            while ((lineMatch = splitExp.exec(content))) {
+                splitExp.lastIndex = lineMatch.index + lineMatch[0].length;
+
+                line = new BundleLine(lineMatch[1]);
+                if (prev) {
+                    line.prev = prev;
+                    prev.next = line;
+                }
+                prev = line;
+                if (!this.head) {
+                    this.head = line;
+                }
+
+                if (/\r\n/.test(lineMatch[2])) {
+                    eolWin++;
+                } else {
+                    eolNix++;
+                }
+
+                referenceTagExp.lastIndex = 0;
+                refMatch = referenceTagExp.exec(lineMatch[1]);
+                if (refMatch && refMatch.length > 1) {
+                    line.ref = refMatch[1];
+                }
+            }
+
+            this.eol = (eolWin > eolNix ? '\r\n' : '\n');
+        };
+
+        Bundle.prototype.has = function (ref) {
+            var line = this.head;
+            while (line) {
+                if (line.ref === ref) {
+                    return true;
+                }
+                line = line.next;
+            }
+            return false;
+        };
+
+        Bundle.prototype.append = function (ref) {
+            if (!this.has(ref)) {
+                var line = new BundleLine('', ref);
+                if (this.head) {
+                    var last = this.last();
+                    if (last) {
+                        last.addAfter(line);
+                    } else {
+                        this.head.prev = line;
+                        line.next = this.head;
+                        this.head = line;
+                    }
+                } else {
+                    this.head = line;
+                }
+            }
+        };
+
+        Bundle.prototype.remove = function (ref) {
+            var line = this.head;
+            while (line) {
+                if (line.ref === ref) {
+                    if (line === this.head) {
+                        this.head = line.next;
+                    }
+                    line.removeSelf();
+                    return;
+                }
+                line = line.next;
+            }
+        };
+
+        Bundle.prototype.toArray = function (all) {
+            if (typeof all === "undefined") { all = false; }
+            var line = this.head;
+            var ret = [];
+            while (line) {
+                if (all || line.ref) {
+                    ret.push(line.ref);
+                }
+                line = line.next;
+            }
+            return ret;
+        };
+
+        Bundle.prototype.first = function (all) {
+            if (typeof all === "undefined") { all = false; }
+            var line = this.head;
+            while (line) {
+                if (all || line.ref) {
+                    return line;
+                }
+                line = line.next;
+            }
+            return null;
+        };
+
+        Bundle.prototype.last = function (all) {
+            if (typeof all === "undefined") { all = false; }
+            var line = this.head;
+            var ret = null;
+            while (line) {
+                if (all || line.ref) {
+                    ret = line;
+                }
+                line = line.next;
+            }
+            return ret;
+        };
+
+        Bundle.prototype.getContent = function () {
+            var content = [];
+
+            var line = this.head;
+            while (line) {
+                content.push(line.getValue(), this.eol);
+                line = line.next;
+            }
+            return content.join('');
+        };
+        return Bundle;
+    })();
+    tsd.Bundle = Bundle;
+
+    var BundleLine = (function () {
+        function BundleLine(value, ref) {
+            this.value = value;
+            this.ref = ref;
+        }
+        BundleLine.prototype.getValue = function () {
+            if (this.ref) {
+                return '/// <reference path="' + this.ref + '" />';
+            }
+            return this.value;
+        };
+
+        BundleLine.prototype.addAfter = function (add) {
+            add.prev = this;
+            add.next = this.next;
+            if (this.next) {
+                this.next.prev = add;
+            }
+            this.next = add;
+        };
+
+        BundleLine.prototype.removeSelf = function () {
+            if (this.prev) {
+                this.prev.next = this.next;
+            }
+            if (this.next) {
+                this.next.prev = this.prev;
+            }
+            this.next = null;
+            this.prev = null;
+        };
+        return BundleLine;
+    })();
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
+    var Q = require('q');
+    var fs = require('fs');
+    var path = require('path');
+    var FS = require('q-io/fs');
+
+    var BundleManager = (function (_super) {
+        __extends(BundleManager, _super);
+        function BundleManager(core) {
+            _super.call(this, core, 'bundle', 'BundleManager');
+        }
+        BundleManager.prototype.addToBundle = function (target, refs, save) {
+            var _this = this;
+            var d = Q.defer();
+            this.track.promise(d.promise, BundleManager.bundle_add, target);
+
+            this.readBundle(target, true).then(function (bundle) {
+                refs.forEach(function (ref) {
+                    bundle.append(ref);
+                });
+                if (save) {
+                    return _this.saveBundle(bundle).progress(d.notify).then(function () {
+                        d.resolve(bundle);
+                    });
+                }
+                d.resolve(bundle);
+            }).fail(d.reject);
+
+            return d.promise;
+        };
+
+        BundleManager.prototype.readBundle = function (target, optional) {
+            var d = Q.defer();
+            this.track.promise(d.promise, BundleManager.bundle_read, target);
+
+            var bundle = new tsd.Bundle(target);
+
+            target = path.resolve(target);
+
+            FS.exists(target).then(function (exists) {
+                if (!exists) {
+                    if (!optional) {
+                        d.reject(new Error('cannot locate file: ' + target));
+                    } else {
+                        d.resolve(bundle);
+                    }
+                    return;
+                }
+
+                return FS.read(target, { flags: 'rb' }).then(function (buffer) {
+                    bundle.parse(buffer.toString('utf8'));
+                    d.resolve(bundle);
+                });
+            }).fail(d.reject);
+
+            return d.promise;
+        };
+
+        BundleManager.prototype.saveBundle = function (bundle) {
+            var d = Q.defer();
+
+            var target = path.resolve(bundle.target);
+            var dir = path.dirname(target);
+
+            this.track.promise(d.promise, BundleManager.bundle_save, target);
+
+            xm.file.mkdirCheckQ(dir, true).then(function () {
+                return FS.write(target, bundle.getContent()).then(function () {
+                    d.notify(xm.getNote('saved bundle: ' + bundle.target));
+                    d.resolve();
+                });
+            }).fail(d.reject);
+
+            return d.promise;
+        };
+        BundleManager.bundle_init = 'bundle_init';
+        BundleManager.bundle_read = 'bundle_read';
+        BundleManager.bundle_save = 'bundle_save';
+        BundleManager.bundle_add = 'bundle_add';
+        return BundleManager;
+    })(tsd.SubCore);
+    tsd.BundleManager = BundleManager;
+})(tsd || (tsd = {}));
+var tsd;
+(function (tsd) {
+    'use strict';
+
     var Q = require('q');
     var FS = require('q-io/fs');
     var path = require('path');
@@ -7208,18 +7498,17 @@ var tsd;
 
             this._components = new tsd.MultiManager(this);
             this._components.add([
-                this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('git')),
                 this.index = new tsd.IndexManager(this),
                 this.config = new tsd.ConfigIO(this),
                 this.selector = new tsd.SelectorQuery(this),
                 this.content = new tsd.ContentLoader(this),
                 this.parser = new tsd.InfoParser(this),
                 this.installer = new tsd.Installer(this),
-                this.resolver = new tsd.Resolver(this)
+                this.resolver = new tsd.Resolver(this),
+                this.bundle = new tsd.BundleManager(this)
             ]);
 
-            this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
-            this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+            this.updateConfig();
 
             this.verbose = this.context.verbose;
 
@@ -7230,6 +7519,10 @@ var tsd;
             this._components.replace({
                 repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
             });
+
+            this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+            this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+
             this.useCacheMode(this._cacheMode);
         };
 
@@ -7238,9 +7531,9 @@ var tsd;
         };
 
         Core.prototype.useCacheMode = function (modeName) {
-            if (modeName in xm.http.CacheMode) {
-                this._cacheMode = modeName;
+            this._cacheMode = modeName;
 
+            if (modeName in xm.http.CacheMode) {
                 var mode = xm.http.CacheMode[modeName];
                 this.repo.api.cache.opts.applyCacheMode(mode);
                 this.repo.raw.cache.opts.applyCacheMode(mode);
@@ -7284,6 +7577,9 @@ var tsd;
             Object.keys(fields).forEach(function (property) {
                 _this.trackables.delete(_this.core[property]);
                 var trackable = fields[property];
+                if (!_this.core[property]) {
+                    _this.core[property] = trackable;
+                }
                 Object.defineProperty(_this.core, property, { value: trackable, writable: false });
                 trackable.verbose = _this._verbose;
                 _this.trackables.add(fields[property]);
@@ -7398,8 +7694,47 @@ var tsd;
                 }
                 return null;
             }).then(function () {
+                return _this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
+            }).then(function () {
                 d.resolve(res);
-            }, d.reject).done();
+            }, d.reject);
+
+            return d.promise;
+        };
+
+        API.prototype.saveBundles = function (files, options) {
+            var _this = this;
+            xm.assertVar(files, 'array', 'files');
+            xm.assertVar(options, tsd.Options, 'options', true);
+            options = options || tsd.Options.main;
+
+            var d = Q.defer();
+            this.track.promise(d.promise, 'bundle_save');
+
+            var bundles = [];
+            if (options.addToBundles) {
+                options.addToBundles.forEach(function (bundle) {
+                    bundle = path.join(_this.context.config.path, bundle);
+                    if (!/\.ts$/.test(bundle)) {
+                        bundle += '.d.ts';
+                    }
+                    bundles.push(bundle);
+                });
+            }
+            var refs = [];
+            files.forEach(function (file) {
+                refs.push(file.def.path);
+            });
+
+            Q.all(bundles.map(function (target) {
+                return _this.core.bundle.addToBundle(target, refs, true).progress(d.notify);
+            })).then(function () {
+                if (options.saveToConfig && _this.context.config.bundle) {
+                    return _this.core.bundle.addToBundle(_this.context.config.bundle, refs, true);
+                }
+            }).then(function () {
+                d.resolve();
+            }, d.reject);
 
             return d.promise;
         };
@@ -7419,8 +7754,10 @@ var tsd;
                 }
                 return null;
             }).then(function () {
+                return _this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
+            }).then(function () {
                 d.resolve(res);
-            }, d.reject).done();
+            }, d.reject);
 
             return d.promise;
         };
@@ -7575,19 +7912,31 @@ var xm;
         return xm.parseStringMap.boolean(input);
     };
     xm.parseStringMap['number[]'] = function (input) {
+        if (!xm.isString(input)) {
+            return [];
+        }
         return input.split(splitSV).map(function (value) {
             return xm.parseStringMap.number(value);
         });
     };
     xm.parseStringMap['int[]'] = function (input) {
+        if (!xm.isString(input)) {
+            return [];
+        }
         return input.split(splitSV).map(function (value) {
             return xm.parseStringMap.int(value);
         });
     };
     xm.parseStringMap['string[]'] = function (input) {
+        if (!xm.isString(input)) {
+            return [];
+        }
         return input.split(splitSV);
     };
     xm.parseStringMap.json = function (input) {
+        if (!xm.isString(input)) {
+            return null;
+        }
         return JSON.parse(input);
     };
 
@@ -7595,7 +7944,8 @@ var xm;
         if (xm.hasOwnProp(xm.parseStringMap, type)) {
             return xm.parseStringMap[type](input);
         }
-        return input;
+
+        return String(input);
     }
     xm.parseStringTo = parseStringTo;
 })(xm || (xm = {}));
@@ -8126,7 +8476,6 @@ var xm;
             this.optional = true;
             this.enum = [];
             this.note = [];
-            this.example = [];
         }
         return ExposeOption;
     })();
@@ -8370,6 +8719,7 @@ var tsd;
                     /^(?:\w+: )?written zero \w+ bytes/,
                     /^(?:\w+: )?missing \w+ file/,
                     /^(?:\w+: )?remote:/,
+                    /^(?:\w+: )?dropped from cache:/,
                     /^(?:\w+: )?local:/,
                     /^(?:\w+: )?update:/
                 ];
@@ -9008,6 +9358,7 @@ var tsd;
             Opt.cacheMode = 'cacheMode';
             Opt.resolve = 'resolve';
             Opt.save = 'save';
+            Opt.bundle = 'bundle';
             Opt.overwrite = 'overwrite';
             Opt.min = 'min';
             Opt.max = 'max';
@@ -9134,7 +9485,10 @@ var tsd;
                 opt.type = 'string';
                 opt.placeholder = 'range';
                 opt.default = 'latest';
-                opt.note = ['semver-range | latest | all'];
+                opt.note = [
+                    'semver-range | latest | all',
+                    'example: ">0.2.4"'
+                ];
             });
 
             expose.defineOption(function (opt) {
@@ -9244,6 +9598,13 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
+                opt.name = cli.Opt.bundle;
+                opt.short = 'b';
+                opt.description = 'save to reference bundle';
+                opt.type = 'string[]';
+            });
+
+            expose.defineOption(function (opt) {
                 opt.name = cli.Opt.action;
                 opt.short = 'a';
                 opt.description = 'run action on selection';
@@ -9333,14 +9694,6 @@ var tsd;
             var d = Q.defer();
 
             init(ctx).then(function () {
-                if (ctx.hasOpt(Opt.config, true)) {
-                    return FS.isFile(ctx.getOpt(Opt.config)).then(function (isFile) {
-                        if (!isFile) {
-                            throw new Error('specified --config is not a file: ' + ctx.getOpt(Opt.config));
-                        }
-                        return null;
-                    });
-                }
                 return null;
             }).then(function () {
                 return getContext(ctx).then(function (context) {
@@ -9360,13 +9713,13 @@ var tsd;
                     job.options.saveToConfig = ctx.getOpt(Opt.save);
                     job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
                     job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+                    job.options.addToBundles = ctx.getOpt(Opt.bundle);
 
                     if (ctx.hasOpt(Opt.cacheMode)) {
                         job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
                     }
 
-                    var required = ctx.hasOpt(Opt.config);
-                    return job.api.readConfig(!required).progress(d.notify).then(function () {
+                    return job.api.readConfig(true).progress(d.notify).then(function () {
                         return runUpdateNotifier(ctx, job.context);
                     }).then(function () {
                         d.resolve(job);
@@ -9596,7 +9949,8 @@ var tsd;
                 Opt.action,
                 Opt.resolve,
                 Opt.overwrite,
-                Opt.save
+                Opt.save,
+                Opt.bundle
             ];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);
@@ -9720,8 +10074,7 @@ var tsd;
                         job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
                     }
 
-                    var required = ctx.hasOpt(Opt.config);
-                    return job.api.readConfig(!required).progress(notify).then(function () {
+                    return job.api.readConfig(true).progress(notify).then(function () {
                         return job.api.select(job.query, job.options).progress(notify).then(function (selection) {
                             if (selection.selection.length === 0) {
                                 output.ln().report().warning('zero results').ln();

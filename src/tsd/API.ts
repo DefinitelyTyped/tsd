@@ -119,8 +119,51 @@ module tsd {
 					}
 					return null;
 				}).then(() => {
+					return this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
+				}).then(() => {
 					d.resolve(res);
-				}, d.reject).done();
+				}, d.reject);
+
+			return d.promise;
+		}
+
+		/*
+		 helper saves files to bundles
+		 */
+		private saveBundles(files:tsd.DefVersion[], options:tsd.Options):Q.Promise<void> {
+			xm.assertVar(files, 'array', 'files');
+			xm.assertVar(options, tsd.Options, 'options', true);
+			options = options || Options.main;
+
+			var d:Q.Deferred<void> = Q.defer();
+			this.track.promise(d.promise, 'bundle_save');
+
+			var bundles:string[] = [];
+			if (options.addToBundles) {
+				options.addToBundles.forEach((bundle:string) => {
+					bundle = path.join(this.context.config.path, bundle);
+					if (!/\.ts$/.test(bundle)) {
+						bundle += '.d.ts';
+					}
+					bundles.push(bundle);
+				});
+			}
+			var refs:string[] = [];
+			files.forEach((file:tsd.DefVersion) => {
+				refs.push(file.def.path);
+			});
+
+			Q.all(bundles.map((target:string) => {
+				return this.core.bundle.addToBundle(target, refs, true).progress(d.notify);
+			})).then(() => {
+				// TODO re-use config var?
+				if (options.saveToConfig && this.context.config.bundle) {
+					// no progress?
+					return this.core.bundle.addToBundle(this.context.config.bundle, refs, true);
+				}
+			}).then(() => {
+				d.resolve();
+			}, d.reject);
 
 			return d.promise;
 		}
@@ -143,8 +186,10 @@ module tsd {
 					}
 					return null;
 				}).then(() => {
+					return this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
+				}).then(() => {
 					d.resolve(res);
-				}, d.reject).done();
+				}, d.reject);
 
 			return d.promise;
 		}

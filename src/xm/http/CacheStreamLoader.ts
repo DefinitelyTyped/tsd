@@ -152,6 +152,7 @@ module xm {
 					});
 				}).fail((err) => {
 					this._defer.reject(err);
+					this._defer = null;
 				}).done();
 
 				return this._defer.promise;

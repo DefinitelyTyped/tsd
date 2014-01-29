@@ -13,6 +13,7 @@
 /// <reference path="logic/InfoParser.ts" />
 /// <reference path="logic/ContentLoader.ts" />
 /// <reference path="logic/SelectorQuery.ts" />
+/// <reference path="logic/BundleManager.ts" />
 /// <reference path="select/Query.ts" />
 
 /// <reference path="API.ts" />
@@ -45,6 +46,7 @@ module tsd {
 		parser:tsd.InfoParser;
 		installer:tsd.Installer;
 		resolver:tsd.Resolver;
+		bundle:tsd.BundleManager;
 
 		track:xm.EventLog;
 
@@ -59,20 +61,17 @@ module tsd {
 
 			this._components = new tsd.MultiManager(this);
 			this._components.add([
-				this.repo = new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('git')),
-
 				this.index = new tsd.IndexManager(this),
 				this.config = new tsd.ConfigIO(this),
 				this.selector = new tsd.SelectorQuery(this),
 				this.content = new tsd.ContentLoader(this),
 				this.parser = new tsd.InfoParser(this),
 				this.installer = new tsd.Installer(this),
-				this.resolver = new tsd.Resolver(this)
+				this.resolver = new tsd.Resolver(this),
+				this.bundle = new tsd.BundleManager(this)
 			]);
 
-			// lets be gents
-			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
-			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+			this.updateConfig();
 
 			this.verbose = this.context.verbose;
 
@@ -85,6 +84,11 @@ module tsd {
 			this._components.replace({
 				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
 			});
+
+			// lets be gents
+			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+
 			this.useCacheMode(this._cacheMode);
 		}
 
@@ -93,9 +97,9 @@ module tsd {
 		}
 
 		useCacheMode(modeName:string):void {
-			if (modeName in xm.http.CacheMode) {
-				this._cacheMode = modeName;
+			this._cacheMode = modeName;
 
+			if (modeName in xm.http.CacheMode) {
 				var mode = xm.http.CacheMode[modeName];
 				this.repo.api.cache.opts.applyCacheMode(mode);
 				this.repo.raw.cache.opts.applyCacheMode(mode);
@@ -141,6 +145,9 @@ module tsd {
 			Object.keys(fields).forEach((property:string) => {
 				this.trackables.delete(this.core[property]);
 				var trackable = fields[property];
+				if (!this.core[property]) {
+					this.core[property] = trackable;
+				}
 				Object.defineProperty(this.core, property, {value: trackable, writable: false});
 				trackable.verbose = this._verbose;
 				this.trackables.add(fields[property]);

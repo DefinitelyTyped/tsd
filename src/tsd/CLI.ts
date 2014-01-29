@@ -127,7 +127,7 @@ module tsd {
 			var d:Q.Deferred<Job> = Q.defer();
 
 			init(ctx).then(() => {
-				// verify valid path
+				/*// verify valid path
 				if (ctx.hasOpt(Opt.config, true)) {
 					return FS.isFile(ctx.getOpt(Opt.config)).then((isFile:boolean) => {
 						if (!isFile) {
@@ -135,39 +135,39 @@ module tsd {
 						}
 						return null;
 					});
-				}
+				}*/
 				return null;
 			}).then(() => {
-					return getContext(ctx).then((context:tsd.Context) => {
-						var job = new Job();
-						job.context = context;
+				return getContext(ctx).then((context:tsd.Context) => {
+					var job = new Job();
+					job.context = context;
 
-						job.ctx = ctx;
-						job.api = new tsd.API(job.context);
+					job.ctx = ctx;
+					job.api = new tsd.API(job.context);
 
-						job.options = new tsd.Options();
+					job.options = new tsd.Options();
 
-						job.options.timeout = ctx.getOpt(Opt.timeout);
-						job.options.limitApi = ctx.getOpt(Opt.limit);
-						job.options.minMatches = ctx.getOpt(Opt.min);
-						job.options.maxMatches = ctx.getOpt(Opt.max);
+					job.options.timeout = ctx.getOpt(Opt.timeout);
+					job.options.limitApi = ctx.getOpt(Opt.limit);
+					job.options.minMatches = ctx.getOpt(Opt.min);
+					job.options.maxMatches = ctx.getOpt(Opt.max);
 
-						job.options.saveToConfig = ctx.getOpt(Opt.save);
-						job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
-						job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+					job.options.saveToConfig = ctx.getOpt(Opt.save);
+					job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
+					job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
+					job.options.addToBundles = ctx.getOpt(Opt.bundle);
 
-						if (ctx.hasOpt(Opt.cacheMode)) {
-							job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-						}
+					if (ctx.hasOpt(Opt.cacheMode)) {
+						job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
+					}
 
-						var required:boolean = ctx.hasOpt(Opt.config);
-						return job.api.readConfig(!required).progress(d.notify).then(() => {
-							return runUpdateNotifier(ctx, job.context);
-						}).then(() => {
-								d.resolve(job);
-							});
-					});
-				}).fail(d.reject);
+					return job.api.readConfig(true).progress(d.notify).then(() => {
+						return runUpdateNotifier(ctx, job.context);
+					}).then(() => {
+							d.resolve(job);
+						});
+				});
+			}).fail(d.reject);
 
 			return d.promise;
 		}
@@ -405,7 +405,7 @@ module tsd {
 				Opt.info, Opt.history,
 				Opt.semver, Opt.date, Opt.commit,
 				Opt.action,
-				Opt.resolve, Opt.overwrite, Opt.save
+				Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
 			];
 			cmd.execute = (ctx:xm.ExposeContext) => {
 				var notify = getProgress(ctx);
@@ -544,8 +544,7 @@ module tsd {
 						job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
 					}
 
-					var required:boolean = ctx.hasOpt(Opt.config);
-					return job.api.readConfig(!required).progress(notify).then(() => {
+					return job.api.readConfig(true).progress(notify).then(() => {
 						return job.api.select(job.query, job.options).progress(notify).then((selection:tsd.Selection) => {
 							if (selection.selection.length === 0) {
 								output.ln().report().warning('zero results').ln();

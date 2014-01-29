@@ -101,7 +101,10 @@ module tsd {
 				opt.type = 'string';
 				opt.placeholder = 'range';
 				opt.default = 'latest';
-				opt.note = ['semver-range | latest | all'];
+				opt.note = [
+					'semver-range | latest | all',
+					'example: ">0.2.4"'
+				];
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
@@ -227,16 +230,19 @@ module tsd {
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
+				opt.name = Opt.bundle;
+				opt.short = 'b';
+				opt.description = 'save to reference bundle';
+				opt.type = 'string[]';
+			});
+
+			expose.defineOption((opt:xm.ExposeOption) => {
 				opt.name = Opt.action;
 				opt.short = 'a';
 				opt.description = 'run action on selection';
 				opt.type = 'string';
 				opt.placeholder = 'name';
 				opt.enum = [Action.install, Action.browse]; // , Action.compare, Action.update, Action.open];
-				// opt.note = ['partially implemented'];
-				/*opt.apply = (value:any, ctx:xm.ExposeContext) => {
-					ctx.out.ln().indent().warning('--action install write/skip reporting not 100%').ln();
-				};*/
 			});
 		}
 	}

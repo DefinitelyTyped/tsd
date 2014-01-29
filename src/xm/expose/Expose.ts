@@ -98,7 +98,6 @@ module xm {
 		enum:any[] = [];
 		note:string[] = [];
 		// TODO implement example
-		example:string[] = [];
 		apply:ExposeOptionApply;
 	}
 

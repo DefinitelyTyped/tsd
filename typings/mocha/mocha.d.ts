@@ -67,6 +67,9 @@ declare var it: {
     skip(expectation: string, assertion?: () => void): void;
     skip(expectation: string, assertion?: (done: mocha.Done) => void): void;
     timeout(ms: number): void;
+
+    //monkey patched returns promise
+	eventually(expectation: string, assertion?: () => any): void;
 };
 
 declare function before(action: () => void): void;

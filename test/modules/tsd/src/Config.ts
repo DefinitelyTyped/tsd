@@ -87,7 +87,7 @@ describe('Config', () => {
 					var json = xm.file.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 					assert.throws(() => {
 						// xm.log(json);
-						config.parseJSON(json, (<string>tuple[0]));
+						config.parseJSON(json, (<string>tuple[0]), false);
 
 						// borky cast
 					}, (<string>tuple[1]));

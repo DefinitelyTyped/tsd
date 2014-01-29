@@ -57,6 +57,7 @@ module tsd {
 		version:string;
 		repo:string;
 		ref:string;
+		bundle:string;
 
 		private _installed:Map<string, tsd.InstalledDef> = new Map();
 		private _schema:any;
@@ -82,6 +83,10 @@ module tsd {
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
 			this.ref = tsd.Const.mainBranch;
+
+			// use linux seperator
+			this.bundle = tsd.Const.typingsDir + '/' + tsd.Const.bundleFile;
+
 			this._installed.clear();
 		}
 
@@ -154,13 +159,16 @@ module tsd {
 		}
 
 		toJSON():any {
-			var json = {
-				path: this.path,
+			var json:any = {
 				version: this.version,
 				repo: this.repo,
 				ref: this.ref,
-				installed: {}
+				path: this.path
 			};
+			if (this.bundle) {
+				json.bundle = this.bundle;
+			};
+			json.installed = {};
 
 			xm.keysOf(this._installed).forEach((key:string) => {
 				var file = this._installed.get(key);
@@ -175,10 +183,10 @@ module tsd {
 			return json;
 		}
 
-		parseJSON(json:any, label?:string):any {
+		parseJSON(json:any, label?:string, log:boolean = true):any {
 			xm.assertVar(json, 'object', 'json');
 
-			this.validateJSON(json, this._schema, label);
+			this.validateJSON(json, this._schema, label, log);
 
 			// TODO harden validation besides schema
 
@@ -188,6 +196,7 @@ module tsd {
 			this.version = json.version;
 			this.repo = json.repo;
 			this.ref = json.ref;
+			this.bundle = json.bundle;
 
 			if (json.installed) {
 				xm.eachProp(json.installed, (data:any, filePath:string) => {
@@ -199,16 +208,18 @@ module tsd {
 			}
 		}
 
-		validateJSON(json:any, schema:any, label?:string):any {
+		validateJSON(json:any, schema:any, label?:string, log:boolean = true):any {
 			xm.assertVar(schema, 'object', 'schema');
 
 			label = (label || '<config json>');
 			var res = tv4.validateMultiple(json, schema);
 			if (!res.valid || res.missing.length > 0) {
-				xm.log.out.ln();
-				var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
-				report.reportResult(report.createTest(schema, json, label, res, true), '   ');
-				xm.log.out.ln();
+				if (log) {
+					xm.log.out.ln();
+					var report = reporter.getReporter(xm.log.out.getWrite(), xm.log.out.getStyle());
+					report.reportResult(report.createTest(schema, json, label, res, true), '   ');
+					xm.log.out.ln();
+				}
 				throw (new Error('malformed config: doesn\'t comply with schema'));
 			}
 			return json;

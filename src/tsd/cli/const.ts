@@ -16,6 +16,7 @@ module tsd {
 			export var cacheMode = 'cacheMode';
 			export var resolve = 'resolve';
 			export var save = 'save';
+			export var bundle = 'bundle';
 			export var overwrite = 'overwrite';
 			export var min = 'min';
 			export var max = 'max';

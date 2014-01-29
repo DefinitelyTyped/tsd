@@ -6,6 +6,7 @@ module tsd {
 		configFile : 'tsd.json',
 		typingsDir : 'typings',
 		cacheDir : 'tsd-cache',
+		bundleFile: 'tsd.d.ts',
 
 		settings : 'settings.json',
 

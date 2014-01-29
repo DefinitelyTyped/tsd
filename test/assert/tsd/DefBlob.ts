@@ -26,8 +26,8 @@ module helper {
 
 		helper.propStrictEqual(blob, values, 'sha', message);
 
-		if (values.content) {
-			assert.strictEqual(blob.content.toString('base64'), values.content, message + ': content');
+		if (values.lines) {
+			assert.strictEqual(blob.content.toString('base64'), values.lines, message + ': content');
 		}
 	}
 }

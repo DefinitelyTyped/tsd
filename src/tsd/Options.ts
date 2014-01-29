@@ -15,6 +15,7 @@ module tsd {
 		resolveDependencies:boolean = false;
 		overwriteFiles:boolean = false;
 		saveToConfig:boolean = false;
+		addToBundles:string[] = [];
 
 		// TODO implement timeout (limitless powerr!)
 		timeout:number = 10000;

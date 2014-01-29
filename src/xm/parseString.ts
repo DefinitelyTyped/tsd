@@ -60,26 +60,40 @@ module xm {
 		return parseStringMap.boolean(input);
 	};
 	parseStringMap['number[]'] = function (input:string) {
+		if (!xm.isString(input)) {
+			return [];
+		}
 		return input.split(splitSV).map((value) => {
 			return parseStringMap.number(value);
 		});
 	};
 	parseStringMap['int[]'] = function (input:string) {
+		if (!xm.isString(input)) {
+			return [];
+		}
 		return input.split(splitSV).map((value) => {
 			return parseStringMap.int(value);
 		});
 	};
 	parseStringMap['string[]'] = function (input:string) {
+		if (!xm.isString(input)) {
+			return [];
+		}
 		return input.split(splitSV);
 	};
 	parseStringMap.json = function (input:string) {
+		if (!xm.isString(input)) {
+			return null;
+		}
 		return JSON.parse(input);
 	};
 
 	export function parseStringTo(input:string, type:string):any {
+		// only if real string
 		if (xm.hasOwnProp(parseStringMap, type)) {
 			return parseStringMap[type](input);
 		}
-		return input;
+		// always string
+		return String(input);
 	}
 }
