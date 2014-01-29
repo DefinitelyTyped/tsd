@@ -54,11 +54,9 @@ module tsd {
 					throw new Error('invalid accountID: ' + this._accountID);
 				}
 				// force anonymous
+				this._client = ua(this._accountID, uuid.v4());
 				if (this._debug) {
 					this._client = this._client.debug();
-				}
-				else {
-					this._client = ua(this._accountID, uuid.v4());
 				}
 			}
 
