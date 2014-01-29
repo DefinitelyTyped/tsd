@@ -213,7 +213,7 @@ module.exports = function (grunt) {
 	gtx.alias('pre_publish', [
 		'tv4:tsd',
 		'tv4:packjson',
-		'tv4:schemas',
+		/*'tv4:schemas',*/
 		'mochaTest:integrity'
 	]);
 
