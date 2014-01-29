@@ -9,7 +9,6 @@ module tsd {
 	var Q = require('q');
 	var path = require('path');
 	var FS:typeof QioFS = require('q-io/fs');
-	var pointer = require('json-pointer');
 
 	export class Installer extends tsd.SubCore {
 

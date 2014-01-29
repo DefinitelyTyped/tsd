@@ -27,7 +27,7 @@ module git {
 			this.addTemplate('base', this._base);
 
 			this.addTemplate('raw', this._raw);
-			this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
+			this.addTemplate('rawFile', this._raw + '/{+ref}/{+path}');
 
 			this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
 

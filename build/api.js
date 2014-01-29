@@ -3143,7 +3143,7 @@ var git;
             this.addTemplate('base', this._base);
 
             this.addTemplate('raw', this._raw);
-            this.addTemplate('rawFile', this._raw + '/{ref}/{+path}');
+            this.addTemplate('rawFile', this._raw + '/{+ref}/{+path}');
 
             this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
 
@@ -6363,7 +6363,8 @@ var tsd;
             return d.promise;
         };
 
-        ContentLoader.prototype.loadContent = function (file) {
+        ContentLoader.prototype.loadContent = function (file, tryHead) {
+            if (typeof tryHead === "undefined") { tryHead = false; }
             var _this = this;
             if (file.hasContent()) {
                 this.track.skip('content_load', file.key);
@@ -6374,7 +6375,12 @@ var tsd;
             this.track.promise(d.promise, 'content_load', file.key);
 
             this.core.index.getIndex().progress(d.notify).then(function (index) {
-                return _this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).progress(d.notify).then(function (content) {
+                var ref = file.commit.commitSha;
+
+                if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
+                    ref = _this.core.context.config.ref;
+                }
+                return _this.core.repo.raw.getBinary(ref, file.def.path).progress(d.notify).then(function (content) {
                     if (file.blob) {
                         if (!file.blob.hasContent()) {
                             try  {
@@ -6456,7 +6462,6 @@ var tsd;
     var Q = require('q');
     var path = require('path');
     var FS = require('q-io/fs');
-    var pointer = require('json-pointer');
 
     var Installer = (function (_super) {
         __extends(Installer, _super);

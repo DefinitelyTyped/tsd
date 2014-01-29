@@ -42,7 +42,7 @@ module tsd {
 		 promise: DefVersion; with raw .blob loaded
 		 */
 		// TODO this should not keep the content in memory
-		loadContent(file:tsd.DefVersion):Q.Promise<DefVersion> {
+		loadContent(file:tsd.DefVersion, tryHead:boolean = false):Q.Promise<DefVersion> {
 			if (file.hasContent()) {
 				this.track.skip('content_load', file.key);
 				return Q(file);
@@ -52,7 +52,12 @@ module tsd {
 			this.track.promise(d.promise, 'content_load', file.key);
 
 			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
-				return this.core.repo.raw.getBinary(file.commit.commitSha, file.def.path).progress(d.notify).then((content:NodeBuffer) => {
+				var ref = file.commit.commitSha;
+				// re-cycle head
+				if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
+					ref = this.core.context.config.ref;
+				}
+				return this.core.repo.raw.getBinary(ref, file.def.path).progress(d.notify).then((content:NodeBuffer) => {
 					if (file.blob) {
 						// race
 						if (!file.blob.hasContent()) {
@@ -88,11 +93,11 @@ module tsd {
 			this.track.promise(d.promise, 'content_load_bulk');
 
 			Q.all(list.map((file:DefVersion) => {
-				return this.loadContent(file).progress(d.notify);
+					return this.loadContent(file).progress(d.notify);
 
-			})).then((list:tsd.DefVersion[]) => {
-				d.resolve(list);
-			}, d.reject);
+				})).then((list:tsd.DefVersion[]) => {
+					d.resolve(list);
+				}, d.reject);
 
 			return d.promise;
 		}
@@ -131,10 +136,10 @@ module tsd {
 			list = tsd.DefUtil.uniqueDefs(list);
 
 			Q.all(list.map((file:Def) => {
-				return this.loadHistory(file).progress(d.notify);
-			})).then((list:DefVersion[]) => {
-				d.resolve(list);
-			}, d.reject);
+					return this.loadHistory(file).progress(d.notify);
+				})).then((list:DefVersion[]) => {
+					d.resolve(list);
+				}, d.reject);
 
 			return d.promise;
 		}

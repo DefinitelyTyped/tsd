@@ -13,7 +13,7 @@
 				"days": 1
 			},
 			"httpIntervalRef": {
-				"minutes": 5
+				"minutes": 1
 			},
 			"jobTimeout": {
 				"seconds": 10
