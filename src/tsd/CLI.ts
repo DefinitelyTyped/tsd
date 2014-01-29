@@ -405,7 +405,7 @@ module tsd {
 			cmd.name = 'query';
 			cmd.label = 'search definitions using globbing pattern';
 			cmd.examples = [
-				['tsd query d3 --info -history', 'view d3 info & history'],
+				['tsd query d3 --info --history', 'view d3 info & history'],
 				['tsd query mocha --action install', 'install mocha'],
 				['tsd query jquery.*/*', 'search jquery plugins'],
 				['tsd query angular* --resolve', 'list angularjs bundle']
