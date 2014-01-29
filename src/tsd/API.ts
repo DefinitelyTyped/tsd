@@ -242,7 +242,7 @@ module tsd {
 		 browse selection in browser
 		 */
 		browse(list:tsd.DefVersion[]):Q.Promise<string[]> {
-			xm.assertVar(list, tsd.Selection, 'selection');
+			xm.assertVar(list, 'array', 'list');
 
 			var d:Q.Deferred<string[]> = Q.defer();
 			this.track.promise(d.promise, 'browse');
@@ -272,7 +272,7 @@ module tsd {
 		 visit selection's project-url in browser
 		 */
 		visit(list:tsd.DefVersion[]):Q.Promise<string[]> {
-			xm.assertVar(list, tsd.Selection, 'selection');
+			xm.assertVar(list, 'array', 'list');
 
 			var d:Q.Deferred<string[]> = Q.defer();
 			this.track.promise(d.promise, 'visit');

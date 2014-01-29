@@ -7798,7 +7798,7 @@ var tsd;
 
         API.prototype.browse = function (list) {
             var _this = this;
-            xm.assertVar(list, tsd.Selection, 'selection');
+            xm.assertVar(list, 'array', 'list');
 
             var d = Q.defer();
             this.track.promise(d.promise, 'browse');
@@ -7826,7 +7826,7 @@ var tsd;
 
         API.prototype.visit = function (list) {
             var _this = this;
-            xm.assertVar(list, tsd.Selection, 'selection');
+            xm.assertVar(list, 'array', 'list');
 
             var d = Q.defer();
             this.track.promise(d.promise, 'visit');
