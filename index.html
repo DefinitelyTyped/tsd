@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" ng-app="tsdApp">
+<head>
+	<meta charset="utf-8">
+	<title>TSD</title>
+	<meta name="description" content="TypeScript Definition manager for DefinitelyTyped">
+	<meta name="author" content="Diullei Gomes">
+	<meta name="author" content="Bart van der Schoor">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="css/build.css" rel="stylesheet">
+	<!--[if lt IE 9]>
+	<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>    <![endif]-->
+</head>
+<body>
+<!--[if lt IE 7]><p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade
+	your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a>
+	to better experience this site.</p><![endif]--><a href="https://github.com/Definitelytyped/tsd"><img
+		style="position: absolute; top: 0; right: 0; border: 0;"
+		src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+<div class="wrapper">
+	<div class="container">
+		<header class="header row">
+			<div class="page-header">
+				<h1>TSD
+					<small>TypeScript Definition manager for DefinitelyTyped</small>
+				</h1>
+			</div>
+		</header>
+
+		<section>
+			<ul class="nav nav-pills">
+				<li><a href="https://github.com/Definitelytyped/tsd#install"> <span
+						class="glyphicon-download-alt glyphicon"></span> Get TSD</a></li>
+				<li><a href="https://github.com/Definitelytyped/tsd#contribute"> <span
+						class="glyphicon-random glyphicon"></span> Contribute</a></li>
+				<li><a href="https://github.com/borisyankov/DefinitelyTyped"> <span
+						class="glyphicon-share-alt glyphicon"></span> DefinitelyTyped</a></li>
+				<li><a href="http://nuget.org/packages?q=Definitelytyped"> <span
+						class="glyphicon-search glyphicon"></span> NuGet</a></li>
+				<li><a href="https://github.com/Definitelytyped/tsd#readme"> <span
+						class="glyphicon-book glyphicon"></span> Readme</a></li>
+				<li><a href="https://github.com/Definitelytyped/tsd/issues/new"> <span
+						class="glyphicon-exclamation-sign glyphicon"></span> Issues</a></li>
+			</ul>
+		</section>
+		<section>
+			<h3>screenshots</h3>
+			<ul>
+				<li>
+					<a href="https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help.png">help</a>
+				</li>
+				<li>
+					<a href="https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/async.png">async</a>
+				</li>
+				<li>
+					<a href="https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/angular.png">angular</a>
+				</li>
+			</ul>
+		</section>
+
+		<section class="main" ng-controller="TSDListCtrl">
+			<script type="text/javascript">
+				var sortingOrder = 'name';
+			</script>
+
+			<h3>browse</h3>
+
+			<div class="row">
+				<div class="col-xs-6 col-md-4">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<form class="form-inline" role="form" action="">
+								<input type="search" ng-model="query" ng-change="search()" class="form-control input-sm"
+									   placeholder="Search in {{items.length}} files...">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="host">
+				<table id="defs" class="table table-striped table-bordered table-hover">
+					<thead>
+						<tr>
+							<th><a ng-click="sort_by('project')">project</a></th>
+							<th><a ng-click="sort_by('name')">name</a></th>
+							<th>Version</th>
+							<th>View</th>
+							<th>Homepage</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="def in pagedItems[currentPage] | orderBy:sortingOrder:reverse">
+							<td>{{ def.project }}</td>
+							<td>{{ def.name }}</td>
+							<td style="width:5em;">{{ def.semver || def.info.version }}</td>
+							<td style="width:7em;"><a href="{{ def.url }}" target="_blank">github</a>
+							<td style="width:7em;"><a href="{{ def.info.projectUrl }}" target="_blank">project</a></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div id="paginator">
+					<ul class="pagination">
+
+						<li ng-class="{disabled: currentPage == 0}">
+							<a href ng-click="prevPage()">«</a>
+						</li>
+						<li ng-repeat="n in range(pagedItems.length, currentPage)"
+							ng-class="{active: n == currentPage}"
+							ng-click="setPage()">
+							<a href ng-bind="n + 1">1</a>
+						</li>
+						<li ng-class="{disabled: currentPage == pagedItems.length - 1}">
+							<a href ng-click="nextPage()">»</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<footer>
+			<p class="text-center">
+				Brought to you by <a href="https://github.com/diullei"><img
+					src="http://gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?s=40" width="40" height="40"
+					alt="Diullei Gomes"> Diullei Gomes</a> & <a href="https://github.com/bartvds"><img
+					src="http://gravatar.com/avatar/967fd44ed43e85a227dc855d1209eb48?s=40" width="40" height="40"
+					alt="Bart van der Schoor">Bart van der Schoor</a> - Thanks to the <a
+					href="https://github.com/borisyankov/DefinitelyTyped">DefinitelyTyped</a> project.
+			</p>
+		</footer>
+	</div>
+</div>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
+<script src="js/controllers.js"></script>
+</body>
+</html>
