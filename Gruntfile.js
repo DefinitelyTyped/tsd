@@ -210,7 +210,7 @@ module.exports = function (grunt) {
 		http: 9090
 	}, 'lib');
 
-	gtx.alias('prepublish', [
+	gtx.alias('pre_publish', [
 		'tv4:tsd',
 		'tv4:packjson',
 		'tv4:schemas',

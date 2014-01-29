@@ -42,7 +42,7 @@
   },
   "scripts": {
     "test": "grunt test",
-    "prepublish": "grunt test"
+    "prepublish": "grunt pre_publish"
   },
   "dependencies": {
     "q": "0.9.7",
