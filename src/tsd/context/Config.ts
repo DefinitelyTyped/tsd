@@ -3,6 +3,7 @@
 /// <reference path="../../xm/iterate.ts" />
 /// <reference path="../../xm/object.ts" />
 /// <reference path="../../xm/Logger.ts" />
+/// <reference path="../../xm/json-stabilizer.ts" />
 /// <reference path="../../xm/data/PackageJSON.ts" />
 /// <reference path="../data/DefVersion.ts" />
 
@@ -49,6 +50,11 @@ module tsd {
 	/*
 	 Config: local config file
 	 */
+	// TODO decide, this is annooying.. how to keep data?
+	//  - as simple object straight from JSON?
+	//  - or parse and typed into and object?
+	//  - maybe worth to keep class (tsd.json is an important part of whole UIX after all)
+	//  - quite a lot of code neded for nice output (JSONStabilizer etc)
 	// TODO extract loading io to own class
 	// TODO move parse/to/validate code to Koder (or it's replacement)
 	export class Config implements git.GithubRepoConfig {
@@ -61,6 +67,8 @@ module tsd {
 
 		private _installed:Map<string, tsd.InstalledDef> = new Map();
 		private _schema:any;
+
+		private _stable:xm.JSONStabilizer = new xm.JSONStabilizer();
 
 		log:xm.Logger = xm.getLogger('Config');
 
@@ -181,6 +189,15 @@ module tsd {
 			this.validateJSON(json, this._schema);
 
 			return json;
+		}
+
+		toJSONString():string {
+			return this._stable.toJSONString(this.toJSON(), false);
+		}
+
+		parseJSONString(input:string, label?:string, log:boolean = true):any {
+			xm.assertVar(input, 'string', 'input');
+			this.parseJSON(this._stable.parseString(input));
 		}
 
 		parseJSON(json:any, label?:string, log:boolean = true):any {

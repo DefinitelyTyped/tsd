@@ -271,8 +271,9 @@ To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/bl
 
 ## Notable modules
 
-Shout-out to essential modules used to build TSD:
+Some essential modules used to build TSD:
 
+* [es6-shim](https://github.com/paulmillr/es6-shim) & [weak-map](https://github.com/drses/weak-map) - Map, Sets and some usefull things.
 * [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
 * [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (contribute some rules!)
 * [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (by author).
@@ -316,7 +317,7 @@ TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to test separ
 
 It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a properly powerful workstation.
 
-Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don't really care, because [smart-tabs](http://www.emacswiki.org/SmartTabs) are awesome like that). The gruntfile uses slightly harsh [JSHint](https://github.com/jshint/jshint) and [TSLint](https://github.com/palantir/tslint) settings to enforce code style, but there is an `.editorconfig`(http://editorconfig.org/) to elevate some of the pain.
+Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don't really care, because [smart-tabs](http://www.emacswiki.org/SmartTabs) are awesome like that). The gruntfile uses slightly harsh [JSHint](https://github.com/jshint/jshint) and [TSLint](https://github.com/palantir/tslint) settings to enforce code style, but there is an [`.editorconfig`](http://editorconfig.org/) to elevate some of the pain.
 
 ## Contribute
 

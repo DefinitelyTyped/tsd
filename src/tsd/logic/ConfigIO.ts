@@ -71,8 +71,8 @@ module tsd {
 					}
 					return;
 				}
-				return xm.file.readJSONPromise(target).then((json) => {
-					this.core.context.config.parseJSON(json, target);
+				return FS.read(target, {flags: 'r'}).then((json:string) => {
+					this.core.context.config.parseJSONString(json, target);
 					this.core.updateConfig();
 					d.resolve(null);
 				});
@@ -93,20 +93,11 @@ module tsd {
 
 			this.track.promise(d.promise, ConfigIO.config_save, target);
 
-			var obj = this.core.context.config.toJSON();
-			if (!obj) {
-				d.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
-				return d.promise;
-			}
-			var json = JSON.stringify(obj, null, 2);
-			if (!json) {
-				d.reject(new Error('config could not be serialised to JSON'));
-				return d.promise;
-			}
-
 			xm.file.mkdirCheckQ(dir, true).then(() => {
+				var output = this.core.context.config.toJSONString();
+
 				// TODO un-voodoo
-				return FS.write(target, json).then(() => {
+				return FS.write(target, output).then(() => {
 					// VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).
 					// this might me a Node + Windows issue, or just my crappy workstation
 					return FS.stat(target);

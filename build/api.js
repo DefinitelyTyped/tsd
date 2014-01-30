@@ -14,6 +14,8 @@ var tsd;
 
     require('es6-shim');
 
+    global.WeakMap = require('weak-map');
+
     process.setMaxListeners(20);
 })(tsd || (tsd = {}));
 var xm;
@@ -1865,6 +1867,212 @@ var xm;
     })();
     xm.JSONPointer = JSONPointer;
 })(xm || (xm = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    var sniffExp = /([ \t]*).*((?:\r?\n)|$)/g;
+    var lastEnd = /(\r?\n)$/;
+
+    var detectIndent = require('detect-indent');
+
+    var JSONStabilizer = (function () {
+        function JSONStabilizer(depth, style) {
+            if (typeof depth === "undefined") { depth = 2; }
+            if (typeof style === "undefined") { style = null; }
+            this.keys = [];
+            this.parent = null;
+            this.children = new Map();
+            this.depth = depth;
+            this.style = style || new CodeStyle();
+        }
+        Object.defineProperty(JSONStabilizer.prototype, "root", {
+            get: function () {
+                if (this.parent) {
+                    return this.parent.root;
+                }
+                return this;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        JSONStabilizer.prototype.parseString = function (jsonString) {
+            var object = JSON.parse(jsonString);
+            this.style = new CodeStyle();
+            this.sniff(jsonString);
+            this.snapshot(object);
+            return object;
+        };
+
+        JSONStabilizer.prototype.sniff = function (jsonString) {
+            xm.assertVar(jsonString, 'string', 'jsonString');
+
+            var eolWin = 0;
+            var eolNix = 0;
+
+            var sampleLines = 10;
+
+            var match;
+            sniffExp.lastIndex = 0;
+
+            while (sampleLines > 0 && (match = sniffExp.exec(jsonString))) {
+                sniffExp.lastIndex = match.index + (match[0].length || 1);
+                sampleLines--;
+
+                if (match[2].length > 0) {
+                    if (match[2] === '\r\n') {
+                        eolWin++;
+                    } else {
+                        eolNix++;
+                    }
+                }
+            }
+
+            this.style.trailingEOL = false;
+
+            if (jsonString.length > 2) {
+                lastEnd.lastIndex = 0;
+                match = lastEnd.exec(jsonString);
+                if (match && match[1].length > 0) {
+                    this.style.trailingEOL = true;
+                    if (match[1] === '\r\n') {
+                        eolWin++;
+                    } else {
+                        eolNix++;
+                    }
+                }
+            }
+
+            this.style.indent = detectIndent(jsonString, '  ');
+            this.style.eol = (eolWin > eolNix ? '\r\n' : '\n');
+        };
+
+        JSONStabilizer.prototype.snapshot = function (object) {
+            var _this = this;
+            xm.assertVar(object, 'object', 'object');
+
+            this.keys = Object.keys(object);
+            this.children = new Map();
+
+            if (this.depth > 0) {
+                this.keys.forEach(function (key) {
+                    if (xm.isObject(object[key])) {
+                        var child = new JSONStabilizer(_this.depth - 1);
+                        child.parent = _this;
+                        _this.children[key] = child;
+                        child.snapshot(object[key]);
+                    }
+                });
+            }
+        };
+
+        JSONStabilizer.prototype.getStablized = function (json) {
+            var _this = this;
+            xm.assertVar(json, 'object', 'json');
+
+            var ret = {};
+            var have = Object.keys(json);
+
+            this.keys.forEach(function (key) {
+                var i = have.indexOf(key);
+                if (i > -1) {
+                    have.splice(i, 1);
+                    if (key in _this.children && xm.isObject(json[key])) {
+                        ret[key] = _this.children[key].getStablized(json[key]);
+                    } else {
+                        ret[key] = json[key];
+                    }
+                }
+            });
+            have.forEach(function (key) {
+                _this.keys.push(key);
+                ret[key] = json[key];
+            });
+
+            return ret;
+        };
+
+        JSONStabilizer.prototype.toJSONString = function (json, assumeStable) {
+            if (typeof assumeStable === "undefined") { assumeStable = false; }
+            xm.assertVar(json, 'object', 'json');
+            if (!assumeStable) {
+                json = this.getStablized(json);
+            }
+            var str = JSON.stringify(json, null, this.style.indent);
+            if (this.style.eol !== '\n') {
+                str = str.replace(/\n/g, this.style.eol);
+            }
+            if (this.style.trailingEOL) {
+                str += this.style.eol;
+            }
+            return str;
+        };
+        return JSONStabilizer;
+    })();
+    xm.JSONStabilizer = JSONStabilizer;
+
+    var CodeStyle = (function () {
+        function CodeStyle() {
+            this.eol = '\n';
+            this.indent = '  ';
+            this.trailingEOL = true;
+        }
+        CodeStyle.prototype.clone = function () {
+            var style = new CodeStyle();
+            style.eol = this.eol;
+            style.indent = this.indent;
+            style.trailingEOL = this.trailingEOL;
+            return style;
+        };
+        return CodeStyle;
+    })();
+    xm.CodeStyle = CodeStyle;
+
+    var JSONStabilizerMap = (function () {
+        function JSONStabilizerMap(depth, style) {
+            if (typeof depth === "undefined") { depth = 2; }
+            if (typeof style === "undefined") { style = null; }
+            this.map = new WeakMap();
+            this.depth = depth;
+            this.style = style || new CodeStyle();
+        }
+        JSONStabilizerMap.prototype.parseString = function (jsonString) {
+            var stable = new JSONStabilizer(this.depth, this.style.clone());
+            this.map.set(xm.object, stable);
+            return stable.parseString(jsonString);
+        };
+
+        JSONStabilizerMap.prototype.associate = function (object, snapshotNow) {
+            if (typeof snapshotNow === "undefined") { snapshotNow = true; }
+            var stable;
+            if (!this.map.has(object)) {
+                stable = new JSONStabilizer(this.depth, this.style.clone());
+                this.map.set(object, stable);
+            } else {
+                stable = this.map.get(object);
+            }
+            if (snapshotNow) {
+                stable.snapshot(object);
+            }
+            return stable;
+        };
+
+        JSONStabilizerMap.prototype.toJSONString = function (object) {
+            var stable;
+            if (!this.map.has(object)) {
+                stable = new JSONStabilizer(this.depth, this.style.clone());
+                this.map.set(object, stable);
+                stable.snapshot(object);
+            } else {
+                stable = this.map.get(object);
+            }
+            return stable.toJSONString(object);
+        };
+        return JSONStabilizerMap;
+    })();
+    xm.JSONStabilizerMap = JSONStabilizerMap;
+})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     'use strict';
@@ -2266,6 +2474,7 @@ var tsd;
     var Config = (function () {
         function Config(schema) {
             this._installed = new Map();
+            this._stable = new xm.JSONStabilizer();
             this.log = xm.getLogger('Config');
             xm.assertVar(schema, 'object', 'schema');
             xm.assert((schema.version !== tsd.Const.configVersion), 'bad schema config version', schema.version, tsd.Const.configVersion, true);
@@ -2394,6 +2603,16 @@ var tsd;
             this.validateJSON(json, this._schema);
 
             return json;
+        };
+
+        Config.prototype.toJSONString = function () {
+            return this._stable.toJSONString(this.toJSON(), false);
+        };
+
+        Config.prototype.parseJSONString = function (input, label, log) {
+            if (typeof log === "undefined") { log = true; }
+            xm.assertVar(input, 'string', 'input');
+            this.parseJSON(this._stable.parseString(input));
         };
 
         Config.prototype.parseJSON = function (json, label, log) {
@@ -6278,8 +6497,8 @@ var tsd;
                     }
                     return;
                 }
-                return xm.file.readJSONPromise(target).then(function (json) {
-                    _this.core.context.config.parseJSON(json, target);
+                return FS.read(target, { flags: 'r' }).then(function (json) {
+                    _this.core.context.config.parseJSONString(json, target);
                     _this.core.updateConfig();
                     d.resolve(null);
                 });
@@ -6289,6 +6508,7 @@ var tsd;
         };
 
         ConfigIO.prototype.saveConfig = function (target) {
+            var _this = this;
             var d = Q.defer();
 
             target = target || this.core.context.paths.configFile;
@@ -6296,19 +6516,10 @@ var tsd;
 
             this.track.promise(d.promise, ConfigIO.config_save, target);
 
-            var obj = this.core.context.config.toJSON();
-            if (!obj) {
-                d.reject(new Error('config exported null json (if this is reproducible please send a support ticket)'));
-                return d.promise;
-            }
-            var json = JSON.stringify(obj, null, 2);
-            if (!json) {
-                d.reject(new Error('config could not be serialised to JSON'));
-                return d.promise;
-            }
-
             xm.file.mkdirCheckQ(dir, true).then(function () {
-                return FS.write(target, json).then(function () {
+                var output = _this.core.context.config.toJSONString();
+
+                return FS.write(target, output).then(function () {
                     return FS.stat(target);
                 }).then(function () {
                     return Q.delay(50);

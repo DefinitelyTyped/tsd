@@ -19,6 +19,9 @@ module tsd {
 	// future is now
 	require('es6-shim');
 
+	// booya
+	global.WeakMap = require('weak-map');
+
 	// TODO verify process.setMaxListeners() still needs to be this high
 	process.setMaxListeners(20);
 }

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "tsd",
-  "version": "0.5.2-alpha.15",
+  "version": "0.5.2-alpha.16",
   "description": "TypeScript Definition manager for DefinitelyTyped.",
   "keywords": [
     "typescript",
@@ -70,7 +70,9 @@
     "bufferstream": "~0.6.2",
     "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork",
     "universal-analytics": "~0.3.2",
-    "uuid": "~1.4.1"
+    "uuid": "~1.4.1",
+    "weak-map": "~1.0.3",
+    "detect-indent": "~0.1.3"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
