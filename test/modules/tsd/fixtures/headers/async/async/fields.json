@@ -1,0 +1,14 @@
+{
+	"parsed": {
+		"name": "Async v0.1",
+		"version": "0.1",
+		"projectUrl": "https://github.com/caolan/async",
+		"authors": [
+			{
+				"name": "Boris Yankov",
+				"url": "https://github.com/borisyankov"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	}
+}

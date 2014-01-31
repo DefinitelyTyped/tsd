@@ -1,0 +1,38 @@
+{
+	"not needed": {
+		"a/b.d.ts": {
+			"project": "a",
+			"name": "b",
+			"semver": null
+		}
+	},
+	"basic": {
+		"aa/a/b-321.d.ts": {
+			"project": "a",
+			"name": "b-321",
+			"semver": null
+		},
+		"aa/bb/aa/a/b-321.d.ts": {
+			"project": "a",
+			"name": "b-321",
+			"semver": null
+		},
+		"d:/aa/bb/aa/a/b-321.d.ts": {
+			"project": "a",
+			"name": "b-321",
+			"semver": null
+		},
+		"/aa/bb/aa/a/b-321.d.ts": {
+			"project": "a",
+			"name": "b-321",
+			"semver": null
+		}
+	},
+	"semver": {
+		"a/b/a/b-v1.2.d.ts": {
+			"project": "a",
+			"name": "b",
+			"semver": "1.2.0"
+		}
+	}
+}

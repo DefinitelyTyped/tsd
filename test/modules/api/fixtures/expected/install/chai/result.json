@@ -1,0 +1,18 @@
+{
+  "written": {
+    "chai/chai.d.ts": {
+      "path": "chai/chai.d.ts",
+      "key": "chai/chai.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": true,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "059e835b84504d6a1314b97ee80dd28bc83132d2"
+      },
+      "dependencies": []
+    }
+  },
+  "removed": {},
+  "skipped": {}
+}

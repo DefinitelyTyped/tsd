@@ -1,0 +1,167 @@
+{
+  "selection": [
+    {
+      "path": "angularjs/angular-cookies.d.ts",
+      "key": "angularjs/angular-cookies.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "60eebbacb02fad10c66df953fbd7c546adb4464f"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-mocks.d.ts",
+      "key": "angularjs/angular-mocks.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "a607422dd44e906d7e883197c3e00ae28ba3f36d"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-resource.d.ts",
+      "key": "angularjs/angular-resource.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "f3a8870cdc69a87624f1efc79be8e46e03738688"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-route.d.ts",
+      "key": "angularjs/angular-route.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "b8d1db50b58d7665e97aa622920a8259e800383d"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-sanitize.d.ts",
+      "key": "angularjs/angular-sanitize.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "a28bdb0d77cb62805903ca78cc7d02b2810e6e9f"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular-scenario.d.ts",
+      "key": "angularjs/angular-scenario.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "abd5709db6e05dda28aa441a93a3e554b8284cc1"
+      },
+      "dependencies": []
+    },
+    {
+      "path": "angularjs/angular.d.ts",
+      "key": "angularjs/angular.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "12742a531d9833c0b401d82a157e885a3a0ee92d"
+      },
+      "dependencies": []
+    }
+  ],
+  "definitions": [
+    {
+      "path": "angularjs/angular-cookies.d.ts",
+      "project": "angularjs",
+      "name": "angular-cookies",
+      "head": {
+        "path": "angularjs/angular-cookies.d.ts",
+        "key": "angularjs/angular-cookies.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-mocks.d.ts",
+      "project": "angularjs",
+      "name": "angular-mocks",
+      "head": {
+        "path": "angularjs/angular-mocks.d.ts",
+        "key": "angularjs/angular-mocks.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-resource.d.ts",
+      "project": "angularjs",
+      "name": "angular-resource",
+      "head": {
+        "path": "angularjs/angular-resource.d.ts",
+        "key": "angularjs/angular-resource.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-route.d.ts",
+      "project": "angularjs",
+      "name": "angular-route",
+      "head": {
+        "path": "angularjs/angular-route.d.ts",
+        "key": "angularjs/angular-route.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-sanitize.d.ts",
+      "project": "angularjs",
+      "name": "angular-sanitize",
+      "head": {
+        "path": "angularjs/angular-sanitize.d.ts",
+        "key": "angularjs/angular-sanitize.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular-scenario.d.ts",
+      "project": "angularjs",
+      "name": "angular-scenario",
+      "head": {
+        "path": "angularjs/angular-scenario.d.ts",
+        "key": "angularjs/angular-scenario.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    },
+    {
+      "path": "angularjs/angular.d.ts",
+      "project": "angularjs",
+      "name": "angular",
+      "head": {
+        "path": "angularjs/angular.d.ts",
+        "key": "angularjs/angular.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    }
+  ]
+}

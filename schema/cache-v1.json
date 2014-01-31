@@ -1,0 +1,58 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema",
+	"description": "Track caching info for a single (hashed) request",
+	"type": "object",
+	"required": [
+		"url",
+		"key",
+		"contentType",
+		"httpETag",
+		"httpModified",
+		"cacheCreated",
+		"cacheUpdated",
+		"contentChecksum"
+	],
+	"properties": {
+		"url": {
+			"$ref": "#/definitions/uri"
+		},
+		"key": {
+			"$ref": "#/definitions/sha1"
+		},
+		"contentType": {
+			"$ref": "#/definitions/string"
+		},
+		"httpETag": {
+			"$ref": "#/definitions/string"
+		},
+		"httpModified": {
+			"$ref": "#/definitions/dateUTCISO"
+		},
+		"cacheCreated": {
+			"$ref": "#/definitions/dateUTCISO"
+		},
+		"cacheUpdated": {
+			"$ref": "#/definitions/dateUTCISO"
+		},
+		"contentChecksum": {
+			"$ref": "#/definitions/sha1"
+		}
+	},
+	"definitions": {
+		"string": {
+			"type": "string"
+		},
+		"uri": {
+			"type": "string",
+			"pattern": "^https?:\/\/"
+		},
+		"sha1": {
+			"type": "string",
+			"pattern": "^[0-9a-f]{40}$"
+		},
+		"dateUTCISO": {
+			"type": "string",
+			"pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+		}
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"parsed": {
+		"name": "Breeze 1.2.7",
+		"version": "1.2.7",
+		"projectUrl": "http://www.breezejs.com",
+		"authors": [
+			{
+				"name": "Boris Yankov",
+				"url": "https://github.com/borisyankov"
+			},
+			{
+				"name": "IdeaBlade",
+				"url": "https://github.com/IdeaBlade/Breeze"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	}
+}

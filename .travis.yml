@@ -3,8 +3,15 @@ node_js:
   - "0.10"
 
 notifications:
-  email: false
+  email:
+    - bartvanderschoor@gmail.com
 
 branches:
   only:
+    - develop-0.5.x
     - develop-0.4.x
+    - master
+    - travis-debug
+
+env:
+  - TRAVIS=true

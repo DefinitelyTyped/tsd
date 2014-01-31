@@ -1,0 +1,26 @@
+{
+	"version": "v4",
+	"path": "./typings",
+	"repo": "borisyankov/DefinitelyTyped",
+	"ref": "master",
+	"installed": {
+		"universal-analytics/universal-analytics.d.ts": {
+			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
+		},
+		"mocha/mocha.d.ts": {
+			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
+		},
+		"node/node.d.ts": {
+			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
+		},
+		"q/Q.d.ts": {
+			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
+		},
+		"semver/semver.d.ts": {
+			"commit": "a53d50e91a454ba5b90906568f59f444ac71f9fd"
+		},
+		"async/async.d.ts": {
+			"commit": "45d36a4a783fac46f980b919f1a0bb754b9e68ed"
+		}
+	}
+}

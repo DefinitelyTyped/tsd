@@ -1,0 +1,14 @@
+{
+	"parsed": {
+		"name": "PreloadJS 0.4.1",
+		"version": "0.4.1",
+		"projectUrl": "http://www.createjs.com/#!/PreloadJS",
+		"authors": [
+			{
+				"name": "Pedro Ferreira",
+				"url": "https://bitbucket.org/drk4"
+			}
+		],
+		"reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+	}
+}

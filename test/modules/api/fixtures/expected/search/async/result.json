@@ -1,0 +1,29 @@
+{
+  "selection": [
+    {
+      "path": "async/async.d.ts",
+      "key": "async/async.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+      "solved": false,
+      "commit": {
+        "commitSha": "baa8c189422bc60b58f67885efd99361edb3973c"
+      },
+      "blob": {
+        "sha": "12aa4123f3e68a5ef9a45108c55abd9e1b645851"
+      },
+      "dependencies": []
+    }
+  ],
+  "definitions": [
+    {
+      "path": "async/async.d.ts",
+      "project": "async",
+      "name": "async",
+      "head": {
+        "path": "async/async.d.ts",
+        "key": "async/async.d.ts-baa8c189422bc60b58f67885efd99361edb3973c",
+        "solved": false
+      },
+      "history": []
+    }
+  ]
+}
