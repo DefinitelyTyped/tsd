@@ -71,7 +71,8 @@ describe('xm.http', () => {
 			assert.isTrue(opts.cacheWrite, 'cacheWrite');
 
 			assert.isFalse(opts.compressStore, 'compressStore');
-			assert.strictEqual(opts.splitKeyDir, 0, 'splitKeyDir');
+			assert.strictEqual(opts.splitDirLevel, 0, 'splitDirLevel');
+			assert.strictEqual(opts.splitDirChunk, 1, 'splitDirChunk');
 		});
 	});
 	describe('cache', () => {
