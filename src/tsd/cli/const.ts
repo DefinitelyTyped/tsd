@@ -32,7 +32,7 @@ module tsd {
 			export var info = 'info';
 			export var history = 'history';
 			export var detail = 'detail';
-			export var services = 'allowUpdate';
+			export var services = 'services';
 		}
 		xm.object.lockPrimitives(Opt);
 

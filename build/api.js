@@ -9641,7 +9641,7 @@ var tsd;
             Opt.info = 'info';
             Opt.history = 'history';
             Opt.detail = 'detail';
-            Opt.services = 'allowUpdate';
+            Opt.services = 'services';
         })(cli.Opt || (cli.Opt = {}));
         var Opt = cli.Opt;
         xm.object.lockPrimitives(Opt);
