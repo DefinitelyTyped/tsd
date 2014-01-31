@@ -1,8 +1,7 @@
 {
-  "private": true,
   "name": "tsd",
-  "version": "0.5.2-beta.1",
-  "description": "TypeScript Definition manager for DefinitelyTyped.",
+  "version": "0.5.2",
+  "description": "TypeScript Definition manager for DefinitelyTyped",
   "keywords": [
     "typescript",
     "definition",
@@ -26,7 +25,7 @@
   "licenses": [
     {
       "type": "Apache 2.0",
-      "url": "https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt"
+      "url": "https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt"
     }
   ],
   "bugs": {

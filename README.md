@@ -25,17 +25,13 @@ The CLI tool tracks some *anonymous* usage statistics about what definitions are
 
 ## Install
 
-Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
+Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):
 
 	$ npm install tsd -g
 
-For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
+For previews check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
-	$ npm install git://github.com/DefinitelyTyped/tsd#{{pick-a-tag}} -g
-
-If you really must you can install directly from github (only if you feel particularly adventurous):
-
-	$ npm install git://github.com/DefinitelyTyped/tsd#master -g
+	$ npm install git://github.com/DefinitelyTyped/tsd#{{tag}} -g
 
 If you need to install the legacy `v0.3.x`:
 
