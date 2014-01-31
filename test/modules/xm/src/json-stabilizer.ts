@@ -123,6 +123,31 @@ describe('JSON', () => {
 						a: 11
 					};
 				}
+			},
+			'remove': {
+				snapshot: true,
+				style: {
+					eol: '\n',
+					indent: '\t',
+					trailingEOL: true
+				},
+				base: [
+					'{\n',
+					'\t"a": 1,\n',
+					'\t"b": 2,\n',
+					'\t"c": 3\n',
+					'}\n'
+				],
+				expected: [
+					'{\n',
+					'\t"a": 1,\n',
+					'\t"c": 3\n',
+					'}\n'
+				],
+				func: (base, stable, name) => {
+					delete base.b;
+					return base;
+				}
 			}
 		};
 

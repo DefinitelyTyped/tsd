@@ -44,7 +44,8 @@ module git {
 			var opts = new xm.http.CacheOpts();
 			opts.allowClean = this.options.getBoolean('allowClean');
 			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
-			opts.splitKeyDir = this.options.getNumber('splitKeyDir');
+			opts.splitDirLevel = this.options.getNumber('splitDirLevel');
+			opts.splitDirChunk = this.options.getNumber('splitDirChunk');
 			opts.jobTimeout = this.options.getNumber('jobTimeout');
 
 			this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);

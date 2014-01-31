@@ -89,7 +89,8 @@ module xm {
 				this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
 				this.object = new CacheObject(this.request);
-				this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+				this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key,
+					this.cache.opts.splitDirLevel, this.cache.opts.splitDirChunk);
 
 				this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
 				this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');

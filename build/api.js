@@ -1316,6 +1316,9 @@ var xm;
             if (levels === 0) {
                 return base;
             }
+            if (chunk === 0) {
+                return base;
+            }
             var arr = [base];
             var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
             for (var i = 0; i < steps; i += chunk) {
@@ -4172,7 +4175,8 @@ var xm;
         var CacheOpts = (function () {
             function CacheOpts(mode) {
                 this.compressStore = false;
-                this.splitKeyDir = 0;
+                this.splitDirLevel = 0;
+                this.splitDirChunk = 1;
                 this.cacheRead = true;
                 this.cacheWrite = true;
                 this.remoteRead = true;
@@ -4255,7 +4259,7 @@ var xm;
                 this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
                 this.object = new http.CacheObject(this.request);
-                this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitKeyDir);
+                this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitDirLevel, this.cache.opts.splitDirChunk);
 
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
                 this.object.infoFile = path.join(this.object.storeDir, this.request.key + '.json');
@@ -5099,7 +5103,8 @@ var git;
             var opts = new xm.http.CacheOpts();
             opts.allowClean = this.options.getBoolean('allowClean');
             opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
-            opts.splitKeyDir = this.options.getNumber('splitKeyDir');
+            opts.splitDirLevel = this.options.getNumber('splitDirLevel');
+            opts.splitDirChunk = this.options.getNumber('splitDirChunk');
             opts.jobTimeout = this.options.getNumber('jobTimeout');
 
             this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);

@@ -2,7 +2,8 @@
 	"git": {
 		"raw": {
 			"allowClean": true,
-			"splitKeyDir": 0,
+			"splitDirLevel": 1,
+			"splitDirChunk": 2,
 			"cacheCleanInterval": {
 				"days": 2
 			},
@@ -21,7 +22,8 @@
 		},
 		"api": {
 			"allowClean": true,
-			"splitKeyDir": 0,
+			"splitDirLevel": 1,
+			"splitDirChunk": 2,
 			"cacheCleanInterval": {
 				"days": 2
 			},

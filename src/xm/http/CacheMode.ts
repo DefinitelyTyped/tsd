@@ -25,7 +25,8 @@
 			// TODO implement and integrate compressStore with CacheInfo and streaming downloader
 			compressStore:boolean = false;
 
-			splitKeyDir:number = 0;
+			splitDirLevel:number = 0;
+			splitDirChunk:number = 1;
 
 			cacheRead = true;
 			cacheWrite = true;

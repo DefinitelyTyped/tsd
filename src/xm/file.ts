@@ -31,6 +31,9 @@ module xm {
 			if (levels === 0) {
 				return base;
 			}
+			if (chunk === 0) {
+				return base;
+			}
 			var arr = [base];
 			var steps = Math.max(0, Math.min(name.length - 2, levels * chunk));
 			for (var i = 0; i < steps; i += chunk) {
