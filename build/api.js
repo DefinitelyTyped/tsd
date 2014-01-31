@@ -6,7 +6,10 @@ var tsd;
 
     Q.longStackSupport = true;
 
-    require('source-map-support').install();
+    try  {
+        require('source-map-support').install();
+    } catch (e) {
+    }
 
     require('bufferstream').fn.warn = false;
 

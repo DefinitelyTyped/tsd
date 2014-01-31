@@ -56,12 +56,37 @@ module.exports = function (grunt) {
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
+			sourcemap: ['build/*.js.map'],
 			build: ['build/*.js', 'build/*.js.map']
 		},
 		copy: {
 			cli: {
 				src: ['src/cli.js'],
 				dest: 'build/cli.js'
+			}
+		},
+		'regex-replace': {
+			cli: {
+				src: ['build/cli.js'],
+				actions: [
+					{
+						name: 'eol',
+						search: '((?:\\r\\n)|\n|\r)',
+						replace: '\n',
+						flags: 'g'
+					}
+				]
+			},
+			build: {
+				src: ['build/*.js'],
+				actions: [
+					{
+						name: 'map',
+						search: '\r?\n?\\\/\\\/# sourceMappingURL=.*',
+						replace: '',
+						flags: 'g'
+					}
+				]
 			}
 		},
 		tv4: {
@@ -213,6 +238,9 @@ module.exports = function (grunt) {
 	gtx.alias('pre_publish', [
 		'tv4:tsd',
 		'tv4:packjson',
+		'regex-replace:build',
+		'regex-replace:cli',
+		'clean:sourcemap',
 		/*'tv4:schemas',*/
 		'mochaTest:integrity'
 	]);
@@ -229,6 +257,7 @@ module.exports = function (grunt) {
 		'prep',
 		'ts:api',
 		'copy:cli',
+		'regex-replace:cli',
 		'tslint:source',
 		'mochaTest:integrity',
 		'shell:demo_help'
