@@ -1,3 +1,0 @@
-this directory exists only for the legacy v0.3.0 repository file (hardcode url)
-
-https://raw.github.com/DefinitelyTyped/tsd/master/deploy/repository.json

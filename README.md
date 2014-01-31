@@ -1,12 +1,12 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=develop-0.5.x)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
+[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=master)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
 > TypeScript Definition manager for DefinitelyTyped
 
-TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
+TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
-#### 0.5.x Preview notes :warning: 
+#### 0.5.x notes
 
 *	It is recommended you check-in the definitions you install into your VCS:
 	*	The `tsd.json` file saves [repo + commit + path] but you might want to make local changes.
@@ -17,7 +17,7 @@ TSD is a package manager to install [TypeScript](http://www.typescriptlang.org/)
 
 #### Github rate-limit
 
-The Github API has a 60 requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over unlimited Github RAW urls. We are looking into a fallback to bypass the occasional burst mode.
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over unlimited Github RAW urls. We are looking into a fallback to bypass the occasional burst mode.
 
 #### Usage stats & update-check
 
@@ -25,19 +25,19 @@ The CLI tool tracks some *anonymous* usage statistics about what definitions are
 
 ## Install
 
-:x: Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
+Not yet on npm. ~~Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):~~
 
 	$ npm install tsd -g
 
-:rocket: For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
+For preview check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
 	$ npm install git://github.com/DefinitelyTyped/tsd#{{pick-a-tag}} -g
 
-:wrench: If you really must you can install directly from github (only if you feel particularly adventurous):
+If you really must you can install directly from github (only if you feel particularly adventurous):
 
-	$ npm install git://github.com/DefinitelyTyped/tsd#develop-0.5.x -g
+	$ npm install git://github.com/DefinitelyTyped/tsd#master -g
 
-:ghost: If you need to install the legacy `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
+If you need to install the legacy `v0.3.x`:
 
 	$ npm install tsd@0.3.0 -g
 
@@ -47,22 +47,22 @@ Global `tsd` binary:
 
 	$ tsd
 
-:wrench: For development from a local install/checkout:
+For development from a local install/checkout:
 
 	$ node ./build/cli.js
 
 It looks like this:
 
-* [`$ tsd --help`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help.png)
-* [`$ tsd query async --info --history --install`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/async.png)
-* [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/angular.png)
+* [`$ tsd --help`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
+* [`$ tsd query async --info --history --install`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png)
+* [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png)
 
 
 ### Help
 
 	$ tsd -h
 
-[![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/media/capture/help.png)
+[![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
 
 ### Practical examples
 
@@ -149,7 +149,7 @@ The selector also supports globbing, for example:
 	$ tsd query */module-*
 	$ tsd query */*plugin
 
-:bangbang: Globbing implements only leading and trailing (for now).
+Globbing implements only leading and trailing (for now).
 
 ### Semver filter
 
@@ -198,7 +198,7 @@ Notes:
 
 ## Usage as module
 
-:bangbang: Outdated info until after we push out the preview release, but intended to work (as it is a key to some planned dependencies).
+Outdated info until after we push out the preview release, but intended to work (as it is a key to some planned dependencies).
  
 TSD can be used as any JavaScript npm dependency in your project: the API used to implement the CLI is exposed: 
 
@@ -218,7 +218,7 @@ TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [krisko
 
 ### API docs 
 
-:x: Not yet. 
+Not yet. 
 
 ## FAQ & Info
 
@@ -264,7 +264,7 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 * Original version by @[Diullei](https://github.com/Diullei).
 
-To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/bbbbdde7bfdf3efecd22c848fb318b2435f7dd48/README.md)):
+To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/legacy/README.md)):
 
 	$ npm install tsd@0.3.0 -g
 
@@ -283,7 +283,7 @@ Some essential modules used to build TSD:
 
 ## Build
 
-TSD is written in [TypeScript](http://www.typescriptlang.org/) `0.9.x` and build using [Grunt](http://www.gruntjs.com).
+TSD is written in [TypeScript](http://www.typescriptlang.org/) `0.9.0` and build using [Grunt](http://www.gruntjs.com).
 
 To rebuild clone or fork the repos:
 
@@ -323,7 +323,7 @@ Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don
 
 Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first (or risk the basis of your work being re-factored). 
 
-**Note:** TSD no longer maintains it's own data sources, contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+**Note:** TSD no longer maintains it's own data sources: contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
 ## Privacy statement
 
@@ -331,15 +331,13 @@ The TSD CLI tool collects definition usage information, like the queries made to
 
 TSD uses [Google Analytics](http://www.google.com/analytics/) by the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
 
-
-
 Changes to the policy should be announced in release notes, and ideally ask confirmation on the first CLI use.
 
 ## License
 
 Copyright (c) 2013 by [Bart van der Schoor](https://github.com/Bartvds).
 
-Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/develop-0.5.x/LICENSE.txt). 
+Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt). 
 
 * note: there is some imported MIT licensed code by myself, [Bart van der Schoor](https://github.com/Bartvds)
 
