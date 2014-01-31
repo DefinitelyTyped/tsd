@@ -68,11 +68,10 @@ describe('CLI Query', () => {
 		return args;
 	}
 
-	var trimHeaderExp = /^[.\s]*?(-> tsd.*)\s+?-*\s*/;
-	var versionNumber = /(\d+-[a-z]+.\d+)/;
+	var trimHeaderExp = /^\s*?(>> tsd) (\d+\.\d+\.\d+)(\S+)?([ \S]+(?:\r?\n)+)/;
 
 	function trimHeader(str:string):string {
-		return str.replace(trimHeaderExp, '').replace(versionNumber, 'x');
+		return str.replace(trimHeaderExp, '');
 	}
 
 	function assertCLIResult(result:xm.RunCLIResult, test, info:helper.TestInfo, args):void {
