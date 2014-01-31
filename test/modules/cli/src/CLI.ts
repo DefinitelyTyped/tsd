@@ -69,7 +69,7 @@ describe('CLI Query', () => {
 	}
 
 	var trimHeaderExp = /^[.\s]*?(-> tsd.*)\s+?-*\s*/;
-	var versionNumber = /(\d+-alpha.\d+)/;
+	var versionNumber = /(\d+-[a-z]+.\d+)/;
 
 	function trimHeader(str:string):string {
 		return str.replace(trimHeaderExp, '').replace(versionNumber, 'x');
