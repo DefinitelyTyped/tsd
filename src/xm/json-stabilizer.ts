@@ -199,7 +199,7 @@ module xm {
 		}
 
 		/**
-		 *  track existing object
+		 *  associate existing object
 		 */
 		associate(object:Object, snapshotNow:boolean = true):JSONStabilizer {
 			var stable:JSONStabilizer;
@@ -217,7 +217,7 @@ module xm {
 		}
 
 		/**
-		 * wrapper: parse string to an object and sniff/snapshot and associate
+		 * wrapper: convert object to stabilized string
 		 */
 		toJSONString(object:Object):string {
 			var stable:JSONStabilizer;
