@@ -8,7 +8,13 @@ module tsd {
 	// TODO make this optional?
 	Q.longStackSupport = true;
 
-	require('source-map-support').install();
+	// optional
+	try {
+		require('source-map-support').install();
+	}
+	catch (e) {
+		// whatever
+	}
 
 	// kill warning
 	require('bufferstream').fn.warn = false;
