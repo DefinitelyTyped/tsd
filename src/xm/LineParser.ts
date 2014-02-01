@@ -42,7 +42,7 @@ module xm {
 		}
 
 		private link() {
-			xm.valuesOf(this.parsers).forEach((parser:LineParser) => {
+			this.parsers.forEach((parser:LineParser) => {
 				xm.eachElem(parser.nextIds, (id:string) => {
 					var p = this.parsers.get(id);
 					if (p) {

@@ -14,6 +14,8 @@
 	"node": true,
 	"browser": true,
 	"laxcomma": true,
+	"quotmark": true,
+	"indent": 4,
 	"globals": {
 		"describe": true,
 		"it": true,

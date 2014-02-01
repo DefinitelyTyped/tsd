@@ -19,14 +19,14 @@ describe('tsd', function () {
 		describe('api module', function () {
 			it('is defined', function () {
 				assert.property(pkg, 'main', 'pkg.main');
-				assert.isFile(pkg.main, 'pkg.bin');
+				assert.isFile(pkg.main, 'pkg.main');
 			});
 		});
 		describe('cli module', function () {
 			it('cli module', function () {
 				assert.property(pkg, 'bin', 'pkg.bin');
 				assert.property(pkg.bin, 'tsd', 'pkg.bin');
-				assert.isFile(pkg.bin.tsd, 'pkg.bin');
+				assert.isFile(pkg.bin.tsd, 'pkg.bin.tsd');
 			});
 		});
 	});
