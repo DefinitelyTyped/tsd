@@ -70,6 +70,8 @@ List *everything*:
 		
 	$ tsd query *
 
+Tips: If you are using Linux or Mac OS X, use `$ tsd query "*"` command.
+
 Get some info about 'jquery':
 		
 	$ tsd query jquery --info --history --resolve
