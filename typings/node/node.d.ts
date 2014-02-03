@@ -98,6 +98,7 @@ interface WritableStream extends EventEmitter {
     end(buffer: NodeBuffer): void;
     destroy(): void;
     destroySoon(): void;
+    isTTY: boolean;
 }
 
 interface ReadableStream extends EventEmitter {
@@ -1051,6 +1052,7 @@ declare module "stream" {
         end(buffer: NodeBuffer): void;
         destroy(): void;
         destroySoon(): void;
+	    isTTY: boolean;
     }
 
     export interface ReadableStream extends events.NodeEventEmitter {

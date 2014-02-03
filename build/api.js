@@ -6842,7 +6842,7 @@ var xm;
 
         LineParserCore.prototype.link = function () {
             var _this = this;
-            xm.valuesOf(this.parsers).forEach(function (parser) {
+            this.parsers.forEach(function (parser) {
                 xm.eachElem(parser.nextIds, function (id) {
                     var p = _this.parsers.get(id);
                     if (p) {
@@ -8819,17 +8819,17 @@ var xm;
             }
             this._isInit = true;
 
-            xm.valuesOf(this.options).forEach(function (option) {
+            this.options.forEach(function (option) {
                 if (option.short) {
                     optimist.alias(option.name, option.short);
                 }
             });
 
-            xm.valuesOf(this.groups).forEach(function (group) {
+            this.groups.forEach(function (group) {
                 _this.validateOptions(group.options);
             });
 
-            xm.valuesOf(this.commands).forEach(function (cmd) {
+            this.commands.forEach(function (cmd) {
                 _this.validateOptions(cmd.options);
             });
         };
@@ -9540,7 +9540,7 @@ var tsd;
         var StyleMap = (function () {
             function StyleMap(output) {
                 var _this = this;
-                this.outputs = [];
+                this.outputs = new Set();
                 xm.assertVar(output, xm.StyledOut, 'output');
 
                 this.addOutput(output);
@@ -9581,16 +9581,14 @@ var tsd;
                 });
             }
             StyleMap.prototype.addOutput = function (output) {
-                if (this.outputs.indexOf(output) < 0) {
-                    this.outputs.push(output);
-                }
+                this.outputs.add(output);
             };
 
             StyleMap.prototype.getKeys = function () {
                 return xm.keysOf(this._styleMap);
             };
 
-            StyleMap.prototype.useColor = function (color, ctx) {
+            StyleMap.prototype.useStyle = function (color, ctx) {
                 if (this._styleMap.has(color)) {
                     this._styleMap.get(color)(ctx);
                 } else {
@@ -9709,9 +9707,9 @@ var tsd;
                 opt.placeholder = 'name';
                 opt.global = true;
                 opt.enum = style.getKeys();
-                opt.default = 'ansi';
+                opt.default = (process.stdout.isTTY ? 'no' : 'ansi');
                 opt.apply = function (value, ctx) {
-                    style.useColor(value, ctx);
+                    style.useStyle(value, ctx);
                 };
             });
 
@@ -9914,6 +9912,9 @@ var tsd;
         var Action = tsd.cli.Action;
 
         var output = new xm.StyledOut();
+        if (!process.stdout.isTTY) {
+            output.useStyle(ministyle.plain());
+        }
         var print = new tsd.cli.Printer(output);
         var styles = new tsd.cli.StyleMap(output);
         var tracker = new tsd.cli.Tracker();
@@ -10410,3 +10411,4 @@ var tsd;
 })(tsd || (tsd = {}));
 
 module.exports = tsd;
+//# sourceMappingURL=api.js.map

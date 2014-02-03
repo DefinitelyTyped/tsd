@@ -162,7 +162,8 @@ module.exports = function (grunt) {
 				command: [
 					'node', './build/cli.js',
 					'-h',
-					'--capture'
+					'--capture',
+					'--style', 'ansi'
 				].join(' '),
 				options: {
 				}

@@ -12,8 +12,8 @@ module tsd {
 
 		export class StyleMap {
 
-			outputs:xm.StyledOut[] = [];
-			_styleMap:Map<string, (ctx:xm.ExposeContext) => void>;
+			outputs:Set<xm.StyledOut> = new Set();
+			private _styleMap:Map<string, (ctx:xm.ExposeContext) => void>;
 
 			constructor(output:xm.StyledOut) {
 				xm.assertVar(output, xm.StyledOut, 'output');
@@ -57,16 +57,14 @@ module tsd {
 			}
 
 			addOutput(output:xm.StyledOut) {
-				if (this.outputs.indexOf(output) < 0) {
-					this.outputs.push(output);
-				}
+				this.outputs.add(output);
 			}
 
 			getKeys():string[] {
 				return xm.keysOf(this._styleMap);
 			}
 
-			useColor(color:string, ctx:xm.ExposeContext) {
+			useStyle(color:string, ctx:xm.ExposeContext) {
 				if (this._styleMap.has(color)) {
 					this._styleMap.get(color)(ctx);
 				}
