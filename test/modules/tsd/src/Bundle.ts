@@ -20,6 +20,13 @@ describe.only('Bundle', () => {
 
 	describe('bulk', () => {
 		var list = {
+			'create-single': (bundle:tsd.Bundle) => {
+				bundle.append('tango.d.ts');
+			},
+			'create-multi': (bundle:tsd.Bundle) => {
+				bundle.append('tango.d.ts');
+				bundle.append('victor.d.ts');
+			},
 			'noop-single': null,
 			'noop-multi': null,
 			'noop-footer': null,
@@ -47,12 +54,20 @@ describe.only('Bundle', () => {
 		Object.keys(list).forEach((name:string)=> {
 			it('"' + name + '"', () => {
 				var value = list[name];
-				var base = xm.file.readFileSync(path.join(fixtures, name, 'base.d.ts'));
+				var base = '';
+				var src = path.join(fixtures, name, 'base.d.ts');
+				var bundle = new tsd.Bundle(path.join(tmp, name, 'result.d.ts'));
+				if (fs.existsSync(src)) {
+					base = xm.file.readFileSync(src);
+					bundle.parse(base);
+				}
+				else {
+
+				}
 				var expected = xm.file.readFileSync(path.join(fixtures, name, 'result.d.ts'));
 
-				var bundle = new tsd.Bundle(path.join(tmp, name, 'result.d.ts'));
-				bundle.parse(base);
 				if (xm.isFunction(value)) {
+					 // do it
 					value.call(null, bundle, name);
 				}
 				var actual = bundle.getContent();

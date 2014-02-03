@@ -7442,6 +7442,7 @@ var tsd;
     var Bundle = (function () {
         function Bundle(target) {
             this.target = target;
+            this.eol = '\n';
             this.target = target.replace(/^\.\//, '');
         }
         Bundle.prototype.parse = function (content) {

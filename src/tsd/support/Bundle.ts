@@ -20,7 +20,7 @@ module tsd {
 	export class Bundle {
 
 		private head:BundleLine;
-		private eol:string;
+		private eol:string = '\n';
 
 		constructor(public target:string) {
 			this.target = target.replace(/^\.\//, '');
