@@ -287,8 +287,7 @@ module tsd {
 		toDump():string {
 			var ret:string[] = [];
 			ret.push(this.toString());
-			var arr = xm.valuesOf(this._definitions);
-			arr.forEach((def:Def) => {
+			this._definitions.forEach((def:Def) => {
 				ret.push('  ' + def.toString());
 				// ret.push('  ' + def.head.toString());
 				/*if (def.history) {
@@ -297,7 +296,7 @@ module tsd {
 				 });
 				 }*/
 			});
-			return ret.join('\n') + '\n' + 'total ' + arr.length + ' definitions';
+			return ret.join('\n') + '\n' + 'total ' + this._definitions.size + ' definitions';
 		}
 
 		get branchName():string {

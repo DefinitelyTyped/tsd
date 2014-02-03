@@ -6288,11 +6288,10 @@ var tsd;
         DefIndex.prototype.toDump = function () {
             var ret = [];
             ret.push(this.toString());
-            var arr = xm.valuesOf(this._definitions);
-            arr.forEach(function (def) {
+            this._definitions.forEach(function (def) {
                 ret.push('  ' + def.toString());
             });
-            return ret.join('\n') + '\n' + 'total ' + arr.length + ' definitions';
+            return ret.join('\n') + '\n' + 'total ' + this._definitions.size + ' definitions';
         };
 
         Object.defineProperty(DefIndex.prototype, "branchName", {

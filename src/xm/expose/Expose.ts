@@ -196,18 +196,18 @@ module xm {
 			}
 			this._isInit = true;
 
-			xm.valuesOf(this.options).forEach((option:ExposeOption) => {
+			this.options.forEach((option:ExposeOption) => {
 				if (option.short) {
 					optimist.alias(option.name, option.short);
 				}
 				// TODO get rid of optimist's defaults
 			});
 
-			xm.valuesOf(this.groups).forEach((group:xm.ExposeGroup) => {
+			this.groups.forEach((group:xm.ExposeGroup) => {
 				this.validateOptions(group.options);
 			});
 
-			xm.valuesOf(this.commands).forEach((cmd:xm.ExposeCommand) => {
+			this.commands.forEach((cmd:xm.ExposeCommand) => {
 				this.validateOptions(cmd.options);
 			});
 		}
