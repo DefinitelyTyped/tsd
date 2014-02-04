@@ -71,7 +71,7 @@ module.exports = function (grunt) {
 				actions: [
 					{
 						name: 'eol',
-						search: '((?:\\r\\n)|\n|\r)',
+						search: '\\r\\n',
 						replace: '\n',
 						flags: 'g'
 					}
