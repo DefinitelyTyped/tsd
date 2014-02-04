@@ -1052,7 +1052,6 @@ declare module "stream" {
         end(buffer: NodeBuffer): void;
         destroy(): void;
         destroySoon(): void;
-	    isTTY: boolean;
     }
 
     export interface ReadableStream extends events.NodeEventEmitter {
