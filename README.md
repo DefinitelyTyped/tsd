@@ -273,7 +273,7 @@ Some essential modules used to build TSD:
 
 * [es6-shim](https://github.com/paulmillr/es6-shim) & [weak-map](https://github.com/drses/weak-map) - Map, Sets and some usefull things.
 * [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
-* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunttslint) - TypeScript linter (contribute some rules!)
+* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunt-tslint) - TypeScript linter (contribute some rules!)
 * [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (by author).
 * [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
 * [q](https://github.com/kriskowal/q) and [q-io](https://github.com/kriskowal/q-io) - Promises as promised.
