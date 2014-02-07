@@ -40,6 +40,7 @@ module tsd {
 			if (configFile) {
 				this.paths.configFile = path.resolve(configFile);
 			}
+			this.paths.cacheDir = tsd.Paths.getUserCacheDir();
 
 			this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
 			this.config = new Config(this.configSchema);
