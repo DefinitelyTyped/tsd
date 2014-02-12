@@ -49,7 +49,7 @@
 			"seconds": 20
 		},
 		"updateCheckInterval": {
-			"days": 1
+			"days": 4
 		}
 	}
 }
