@@ -45,7 +45,7 @@ module tsd {
 				opt.placeholder = 'name';
 				opt.global = true;
 				opt.enum = style.getKeys();
-				opt.default = (process.stdout.isTTY ? 'no' : 'ansi');
+				opt.default = (process.stdout.isTTY ? 'ansi' : 'no');
 				opt.apply = (value:any, ctx:xm.ExposeContext) => {
 					style.useStyle(value, ctx);
 				};

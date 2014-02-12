@@ -60,18 +60,8 @@ module xm {
 		getOpt(name:string, alt?:any):any {
 			if (this.hasOpt(name)) {
 				var option = this.expose.options.get(name);
-				if (option) {
-					if (option.type) {
-						// unhack optimist flags
-						if (!xm.isUndefined(option.default)
-								&& typeof this.argv[name] === 'boolean'
-								&& (option.type !== 'boolean'
-								&& option.type !== 'flag')) {
-
-							return this.getDefault(name, xm.parseStringTo(this.argv[name], option.type));
-						}
-						return xm.parseStringTo(this.argv[name], option.type);
-					}
+				if (option && option.type) {
+					return xm.parseStringTo(this.argv[name], option.type);
 				}
 				return this.argv[name];
 			}

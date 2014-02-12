@@ -2720,6 +2720,7 @@ var tsd;
             if (configFile) {
                 this.paths.configFile = path.resolve(configFile);
             }
+            this.paths.cacheDir = tsd.Paths.getUserCacheDir();
 
             this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
             this.config = new tsd.Config(this.configSchema);
@@ -8587,13 +8588,8 @@ var xm;
         ExposeContext.prototype.getOpt = function (name, alt) {
             if (this.hasOpt(name)) {
                 var option = this.expose.options.get(name);
-                if (option) {
-                    if (option.type) {
-                        if (!xm.isUndefined(option.default) && typeof this.argv[name] === 'boolean' && (option.type !== 'boolean' && option.type !== 'flag')) {
-                            return this.getDefault(name, xm.parseStringTo(this.argv[name], option.type));
-                        }
-                        return xm.parseStringTo(this.argv[name], option.type);
-                    }
+                if (option && option.type) {
+                    return xm.parseStringTo(this.argv[name], option.type);
                 }
                 return this.argv[name];
             }
@@ -8702,7 +8698,7 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var optimist = require('optimist');
+    var minimist = require('minimist');
     var jsesc = require('jsesc');
     var Q = require('q');
 
@@ -8800,7 +8796,27 @@ var xm;
 
         Expose.prototype.applyOptions = function (argv) {
             var _this = this;
-            argv = optimist.parse(argv);
+            var opts = {
+                string: [],
+                boolean: [],
+                alias: {},
+                default: {}
+            };
+
+            this.options.forEach(function (option) {
+                if (option.short) {
+                    opts.alias[option.name] = option.short;
+                }
+                if (option.default) {
+                    opts.default[option.name] = option.default;
+                }
+
+                if (option.type !== 'number') {
+                    opts.string.push(option.name);
+                }
+            });
+
+            argv = minimist(argv, opts);
             var ctx = new xm.ExposeContext(this, argv, null);
 
             ctx.getOptNames(true).forEach(function (name) {
@@ -8818,12 +8834,6 @@ var xm;
                 return;
             }
             this._isInit = true;
-
-            this.options.forEach(function (option) {
-                if (option.short) {
-                    optimist.alias(option.name, option.short);
-                }
-            });
 
             this.groups.forEach(function (group) {
                 _this.validateOptions(group.options);
@@ -9707,7 +9717,7 @@ var tsd;
                 opt.placeholder = 'name';
                 opt.global = true;
                 opt.enum = style.getKeys();
-                opt.default = (process.stdout.isTTY ? 'no' : 'ansi');
+                opt.default = (process.stdout.isTTY ? 'ansi' : 'no');
                 opt.apply = function (value, ctx) {
                     style.useStyle(value, ctx);
                 };

@@ -57,6 +57,6 @@
                                   : partially implemented
     --dev                      > development mode (flag)
     --services                 > allow usage-tracker, TSD updates etc (flag, default: true)
-    --style <name>             > specify CLI style (string, default: ansi)
+    --style <name>             > specify CLI style (string, default: no)
                                   [ no, plain, ansi, html, css, dev ]
     --verbose                  > verbose output (flag)

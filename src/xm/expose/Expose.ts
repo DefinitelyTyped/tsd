@@ -23,7 +23,7 @@
 module xm {
 	'use strict';
 
-	var optimist = require('optimist');
+	var minimist = require('minimist');
 	var jsesc = require('jsesc');
 	var Q:typeof Q = require('q');
 	// TODO ditch node-exit if node ever get fixed..
@@ -109,7 +109,6 @@ module xm {
 	// TODO add feature for printable placeholder sub-info (format etc)
 	// TODO unify Actions and Commands (same thing really)
 	// TODO implement Actions/Commands queue
-	// TODO drop optimist for something simpler (minimist)
 	export class Expose {
 
 		commands = new Map<string, ExposeCommand>();
@@ -178,7 +177,27 @@ module xm {
 		}
 
 		applyOptions(argv:any):ExposeContext {
-			argv = optimist.parse(argv);
+			var opts = {
+				string: [],
+				boolean: [],
+				alias: {},
+				default: {}
+			};
+
+			this.options.forEach((option:ExposeOption) => {
+				if (option.short) {
+					opts.alias[option.name] = option.short;
+				}
+				if (option.default) {
+					opts.default[option.name] = option.default;
+				}
+				// we parse our own types
+				if (option.type !== 'number') {
+					opts.string.push(option.name);
+				}
+			});
+
+			argv = minimist(argv, opts);
 			var ctx = new ExposeContext(this, argv, null);
 
 			ctx.getOptNames(true).forEach((name:string) => {
@@ -195,13 +214,6 @@ module xm {
 				return;
 			}
 			this._isInit = true;
-
-			this.options.forEach((option:ExposeOption) => {
-				if (option.short) {
-					optimist.alias(option.name, option.short);
-				}
-				// TODO get rid of optimist's defaults
-			});
 
 			this.groups.forEach((group:xm.ExposeGroup) => {
 				this.validateOptions(group.options);
