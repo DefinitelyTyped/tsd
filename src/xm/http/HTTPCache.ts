@@ -42,6 +42,16 @@ module xm {
 
 			static get_object = 'get_object';
 			static drop_job = 'drop_job';
+			static cache_clean = 'cache_clean';
+
+			static check_cache_clean = 'check_cache_clean';
+			static clean_cache_age = 'clean_cache_age';
+
+			static dir_create = 'dir_create';
+			static dir_exists = 'dir_exists';
+			static dir_error = 'dir_error';
+
+			static ignore_error = 'ignore_error';
 
 			storeDir:string;
 			opts:CacheOpts;
@@ -157,16 +167,16 @@ module xm {
 				// first create directory
 				FS.exists(this.storeDir).then((exists:boolean) => {
 					if (!exists) {
-						this.track.event('dir_create', this.storeDir);
+						this.track.event(HTTPCache.dir_create, this.storeDir);
 						return xm.file.mkdirCheckQ(this.storeDir, true, true);
 					}
 
 					return FS.isDirectory(this.storeDir).then((isDir:boolean) => {
 						if (!isDir) {
-							this.track.error('dir_error', this.storeDir);
+							this.track.error(HTTPCache.dir_error, this.storeDir);
 							throw new Error('is not a directory: ' + this.storeDir);
 						}
-						this.track.event('dir_exists', this.storeDir);
+						this.track.event(HTTPCache.dir_exists, this.storeDir);
 					});
 				}).then(() => {					// find module directory
 					return file.findup(path.dirname((module).filename), 'package.json').then((src:string) => {
@@ -202,12 +212,12 @@ module xm {
 					return d.promise;
 				}
 				if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cacheCleanInterval) {
-					this.track.skip('cache_clean', this.storeDir);
+					this.track.skip(HTTPCache.check_cache_clean, this.storeDir);
 					d.resolve();
 					return d.promise;
 				}
 
-				this.track.event('cache_clean', this.storeDir);
+				this.track.event(HTTPCache.check_cache_clean, this.storeDir);
 
 				var manageInfo;
 
@@ -220,7 +230,10 @@ module xm {
 							manageInfo = info;
 						}).fail((err) => {
 							this.track.logger.warn('removing bad manageFile: ' + this.manageFile + ' -> ' + err.message);
-							return xm.file.removeFile(this.manageFile);
+							return xm.file.removeFile(this.manageFile).fail((err) => {
+								// eat error
+								this.track.event(HTTPCache.ignore_error, err.message, err);
+							});
 						});
 					});
 				}).then(() => {
@@ -256,7 +269,7 @@ module xm {
 				xm.assertVar(maxAge, 'number', 'maxAge');
 
 				var d:Q.Deferred<void> = Q.defer();
-				this.track.promise(d.promise, 'clean_cache_age');
+				this.track.promise(d.promise, HTTPCache.clean_cache_age);
 
 				this.init().then(() => {
 					var limit = Date.now() - maxAge;
@@ -285,6 +298,9 @@ module xm {
 								xm.file.removeFile(src.replace(/\.json$/, '.raw'))
 							]).then(() => {
 								d.notify('dropped from cache: ' + src);
+							}, (err) => {
+								// eat error
+								this.track.event(HTTPCache.ignore_error, err.message, err);
 							});
 						}));
 					});
