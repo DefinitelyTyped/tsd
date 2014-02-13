@@ -5521,8 +5521,6 @@ var tsd;
 
     var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
-    var leadingExp = /^\.\.\//;
-
     var DefUtil = (function () {
         function DefUtil() {
         }
