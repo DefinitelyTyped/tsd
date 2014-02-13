@@ -1,6 +1,6 @@
 >> main
    
-   query <pattern>            search definitions using globbing pattern
+   query <...pattern>         search definitions using one or more globbing patterns
 
        $ tsd query d3 --info --history       : view d3 info & history
        $ tsd query mocha --action install    : install mocha

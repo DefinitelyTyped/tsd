@@ -10144,14 +10144,14 @@ var tsd;
             cmd.name = 'version';
             cmd.label = 'display tsd version info';
             cmd.groups = [Group.support];
-            cmd.execute = (function (ctx) {
+            cmd.execute = function (ctx) {
                 return getContext(ctx).then(function (context) {
                     ctx.out.ln();
                     ctx.out.line(xm.PackageJSON.getLocal().getNameVersion());
 
                     return runUpdateNotifier(ctx, context);
                 }).fail(reportError);
-            });
+            };
         });
 
         expose.defineCommand(function (cmd) {
@@ -10241,14 +10241,14 @@ var tsd;
 
         expose.defineCommand(function (cmd) {
             cmd.name = 'query';
-            cmd.label = 'search definitions using globbing pattern';
+            cmd.label = 'search definitions using one or more globbing patterns';
             cmd.examples = [
                 ['tsd query d3 --info --history', 'view d3 info & history'],
                 ['tsd query mocha --action install', 'install mocha'],
                 ['tsd query jquery.*/*', 'search jquery plugins'],
                 ['tsd query angular* --resolve', 'list angularjs bundle']
             ];
-            cmd.variadic = ['pattern'];
+            cmd.variadic = ['...pattern'];
             cmd.groups = [Group.primary, Group.query];
             cmd.options = [
                 Opt.info,

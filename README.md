@@ -17,11 +17,11 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 #### Github rate-limit
 
-The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses heavy local and http caching and the definition files are downloaded over unlimited Github RAW urls. We are looking into a fallback to bypass the occasional burst mode.
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses caching layers and the definition files are downloaded over unlimited Github RAW urls.
 
 #### Usage stats & update-check
 
-The CLI tool tracks some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates. Both are enabled by default: use the `--services no` option to suppress. A future update will bring some improved controls over this.
+The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates. Both are enabled by default: use the `--services no` option to suppress (for now).
 
 ## Install
 
@@ -30,8 +30,6 @@ Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):
 	$ npm install tsd -g
 
 For previews check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
-
-	$ npm install git://github.com/DefinitelyTyped/tsd#{{tag}} -g
 
 If you need to install the legacy `v0.3.x`:
 
@@ -42,10 +40,6 @@ If you need to install the legacy `v0.3.x`:
 Global `tsd` binary:
 
 	$ tsd
-
-For development from a local install/checkout:
-
-	$ node ./build/cli.js
 
 It looks like this:
 
@@ -62,7 +56,7 @@ It looks like this:
 
 ### Practical examples
 
-Minimal query for 'd3':
+Minimal query for `d3`:
 		
 	$ tsd query d3
 
@@ -70,32 +64,36 @@ List *everything*:
 		
 	$ tsd query *
 
-Tips: If you are using Linux or Mac OS X, use `$ tsd query "*"` command.
+Tip: if you are using Linux or Mac OS X, use `$ tsd query "*"`.
 
-Get some info about 'jquery':
+Get some info about `jquery`:
 		
 	$ tsd query jquery --info --history --resolve
 	$ tsd query jquery -i -h -r
 	
-Install 'bootstrap' definitions:
+Install `bootstrap` definitions:
 
 	$ tsd query bootstrap --action install
 	$ tsd query bootstrap -a install
 
-Solve the reference to 'jquery', overwrite existing files and save to the tsd.config:
+Install `mocha`, `chai` and `sinon` definitions all at once:
+
+	$ tsd query mocha chai sinon -a install
+
+Solve the reference to `jquery`, overwrite existing files and save to the tsd.config:
 
 	$ tsd query angular --resolve --overwrite --save --action install
 	$ tsd query angular -r -o -s -a install
 
-Search for jquery plugins:
+Search for `jquery` plugins:
 		
 	$ tsd query */jquery.*
 
-Install and save to 'test.d.ts' `<reference/>` bundle:
+Install and save to `test.d.ts` as `<reference/>` bundle:
 		
 	$ tsd query mocha chai -a install -r -o -s -b test
 
-Open 'pixi' in your browser on github:
+Open `pixi` in your browser on github:
 		
 	$ tsd query pixi -a browse
 
@@ -182,8 +180,7 @@ $ tsd query d3 --date "<2012-01-01"
 
 ### Commit filter
 
-Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), 
-for convenience a shortened sha1 hash is supported. 
+Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), for convenience a shortened sha1 hash is supported. 
 
 ````
 $ tsd query youtube --history
@@ -195,8 +192,6 @@ Notes:
 1. For now this only works with commits that actually changed the definition file you selected (eg, from `--history`) This will be expanded to allow selecting from any commit at a later date.
 
 ## Usage as module
-
-Outdated info until after we push out the preview release, but intended to work (as it is a key to some planned dependencies).
  
 TSD can be used as any JavaScript npm dependency in your project: the API used to implement the CLI is exposed: 
 
@@ -211,6 +206,7 @@ api.search(new tsd.Selector('jquery/*')).then(function(res) {
 	// no
 });
 ````
+For a practical example see [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
 TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
 
@@ -240,7 +236,7 @@ The cache is stored in the users home directory (like `$ npm`). Use `$ tsd setti
 
 ### Do you have a grunt task to automate some TSD tasks?
 
-Of course! The official plugin is aptly named [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
 ### Where do you keep background and work docs?
 
@@ -265,7 +261,6 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/legacy/README.md)):
 
 	$ npm install tsd@0.3.0 -g
-
 
 ## Notable modules
 
