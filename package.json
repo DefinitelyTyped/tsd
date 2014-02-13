@@ -50,7 +50,7 @@
     "exit": "~0.1.1",
     "mkdirp": "~0.3.5",
     "semver": "~2.2.1",
-    "tv4": "~1.0.12",
+    "tv4": "~1.0.14",
     "tv4-reporter": "0.0.3",
     "uri-templates": "0.1.2",
     "minimist": "0.0.7",
@@ -97,7 +97,7 @@
     "buffer-equal": "0.0.0",
     "ansidiff": "~1.0.0",
     "lodash-template": "~1.0.0",
-    "grunt-webshot": "~0.1.0",
+    "grunt-webshot": "~0.2.0",
     "grunt-regex-replace": "~0.2.5"
   }
 }
