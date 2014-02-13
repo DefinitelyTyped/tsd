@@ -114,7 +114,7 @@ CLI
 * :m:	Improve Expose for crisper CLI help screen layout (table/columns)
 * :m:   Improve Expose to order/group commands :zap:
 * :m:	Optimise and unify CLI output (expande `StyledOut.ts`)(indenting/seperator/headers etc) :zap:
-* :o:	Improve CLI with [w-m/pleonasm](http://w-m.github.io/pleonasm/) :zap:
+* :o:	Improve CLI with ~~[w-m/pleonasm](http://w-m.github.io/pleonasm/)~~ [pleonasm-node](https://github.com/Bartvds/pleonasm-node/) :zap:
 * :m:	Add TSD ~release/updates news to CLI console (periodically from github) (using [update-notifier](https://npmjs.org/package/update-notifier))
 * :o:	Expand Expose to generate CLI documentation (using `StyledOut.ts` and a HTML/Markdown Styler + Writer)
 * :a:	Add [inquirer](https://npmjs.org/package/inquirer) for interactive control
@@ -151,12 +151,12 @@ Config
 	* :m: Update ~~typingsPath~~ ('path' now): should be 1 length
 	* :m: Update commit: should be (7-40) length (as per git convention)
 	* :ng: ~~Update blob: should be optional, still fixed at 40 (as per concept commit is leading)~~ Killed: newline hell and redundant vs path+commit
-* :m:	Validate config save-data before writing to diskk, catch invalid json
+* :m:	Validate config save-data before writing to disk, catch invalid json
 * :m:	Improve config validation reporting (see `tv4`, `chai-json-schema`)
 * :m:	Rename `tsd-config.json` to `tsd.json`
 * :ab:	Add caching parameters to config
 * :id:	Consider adding `.tsdrc` global config.
-* :o2:	Writer config using [detect-indent](https://npmjs.org/package/detect-indent)
+* :m:	Writer config using [detect-indent](https://npmjs.org/package/detect-indent)
 
 Cache
 
