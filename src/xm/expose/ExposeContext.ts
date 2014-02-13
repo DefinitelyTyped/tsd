@@ -61,9 +61,16 @@ module xm {
 			if (this.hasOpt(name)) {
 				var option = this.expose.options.get(name);
 				if (option && option.type) {
-					return xm.parseStringTo(this.argv[name], option.type);
+					try {
+						return xm.parseStringTo(this.argv[name], option.type);
+					}
+					catch (e) {
+						// what?
+					}
 				}
-				return this.argv[name];
+				else {
+					return this.argv[name];
+				}
 			}
 			return this.getDefault(name, alt);
 		}

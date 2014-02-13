@@ -4,10 +4,10 @@ var tsd;
 
     var Q = require('q');
 
-    Q.longStackSupport = true;
-
     try  {
         require('source-map-support').install();
+
+        Q.longStackSupport = true;
     } catch (e) {
     }
 
@@ -4932,16 +4932,16 @@ var xm;
 
                 FS.exists(this.storeDir).then(function (exists) {
                     if (!exists) {
-                        _this.track.event('dir_create', _this.storeDir);
+                        _this.track.event(HTTPCache.dir_create, _this.storeDir);
                         return xm.file.mkdirCheckQ(_this.storeDir, true, true);
                     }
 
                     return FS.isDirectory(_this.storeDir).then(function (isDir) {
                         if (!isDir) {
-                            _this.track.error('dir_error', _this.storeDir);
+                            _this.track.error(HTTPCache.dir_error, _this.storeDir);
                             throw new Error('is not a directory: ' + _this.storeDir);
                         }
-                        _this.track.event('dir_exists', _this.storeDir);
+                        _this.track.event(HTTPCache.dir_exists, _this.storeDir);
                     });
                 }).then(function () {
                     return xm.file.findup(path.dirname((module).filename), 'package.json').then(function (src) {
@@ -4977,12 +4977,12 @@ var xm;
                     return d.promise;
                 }
                 if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cacheCleanInterval) {
-                    this.track.skip('cache_clean', this.storeDir);
+                    this.track.skip(HTTPCache.check_cache_clean, this.storeDir);
                     d.resolve();
                     return d.promise;
                 }
 
-                this.track.event('cache_clean', this.storeDir);
+                this.track.event(HTTPCache.check_cache_clean, this.storeDir);
 
                 var manageInfo;
 
@@ -4995,7 +4995,9 @@ var xm;
                             manageInfo = info;
                         }).fail(function (err) {
                             _this.track.logger.warn('removing bad manageFile: ' + _this.manageFile + ' -> ' + err.message);
-                            return xm.file.removeFile(_this.manageFile);
+                            return xm.file.removeFile(_this.manageFile).fail(function (err) {
+                                _this.track.event(HTTPCache.ignore_error, err.message, err);
+                            });
                         });
                     });
                 }).then(function () {
@@ -5030,7 +5032,7 @@ var xm;
                 xm.assertVar(maxAge, 'number', 'maxAge');
 
                 var d = Q.defer();
-                this.track.promise(d.promise, 'clean_cache_age');
+                this.track.promise(d.promise, HTTPCache.clean_cache_age);
 
                 this.init().then(function () {
                     var limit = Date.now() - maxAge;
@@ -5059,6 +5061,8 @@ var xm;
                                 xm.file.removeFile(src.replace(/\.json$/, '.raw'))
                             ]).then(function () {
                                 d.notify('dropped from cache: ' + src);
+                            }, function (err) {
+                                _this.track.event(HTTPCache.ignore_error, err.message, err);
                             });
                         }));
                     });
@@ -5078,6 +5082,16 @@ var xm;
             });
             HTTPCache.get_object = 'get_object';
             HTTPCache.drop_job = 'drop_job';
+            HTTPCache.cache_clean = 'cache_clean';
+
+            HTTPCache.check_cache_clean = 'check_cache_clean';
+            HTTPCache.clean_cache_age = 'clean_cache_age';
+
+            HTTPCache.dir_create = 'dir_create';
+            HTTPCache.dir_exists = 'dir_exists';
+            HTTPCache.dir_error = 'dir_error';
+
+            HTTPCache.ignore_error = 'ignore_error';
             return HTTPCache;
         })();
         http.HTTPCache = HTTPCache;
@@ -8585,9 +8599,13 @@ var xm;
             if (this.hasOpt(name)) {
                 var option = this.expose.options.get(name);
                 if (option && option.type) {
-                    return xm.parseStringTo(this.argv[name], option.type);
+                    try  {
+                        return xm.parseStringTo(this.argv[name], option.type);
+                    } catch (e) {
+                    }
+                } else {
+                    return this.argv[name];
                 }
-                return this.argv[name];
             }
             return this.getDefault(name, alt);
         };
@@ -9955,7 +9973,7 @@ var tsd;
                 context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
             } else if (ctx.hasOpt(Opt.cacheDir)) {
                 context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
-            } else {
+            } else if (!context.paths.cacheDir) {
                 context.paths.cacheDir = tsd.Paths.getUserCacheDir();
             }
 

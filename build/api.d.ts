@@ -882,6 +882,13 @@ declare module xm {
         class HTTPCache {
             static get_object: string;
             static drop_job: string;
+            static cache_clean: string;
+            static check_cache_clean: string;
+            static clean_cache_age: string;
+            static dir_create: string;
+            static dir_exists: string;
+            static dir_error: string;
+            static ignore_error: string;
             public storeDir: string;
             public opts: http.CacheOpts;
             public track: xm.EventLog;

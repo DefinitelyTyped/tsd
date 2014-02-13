@@ -109,7 +109,7 @@ module tsd {
 			else if (ctx.hasOpt(Opt.cacheDir)) {
 				context.paths.cacheDir = path.resolve(ctx.getOpt(Opt.cacheDir));
 			}
-			else {
+			else if (!context.paths.cacheDir) {
 				context.paths.cacheDir = tsd.Paths.getUserCacheDir();
 			}
 
