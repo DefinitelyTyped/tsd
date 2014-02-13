@@ -5,12 +5,12 @@ module tsd {
 
 	var Q:typeof Q = require('q');
 
-	// TODO make this optional?
-	Q.longStackSupport = true;
-
 	// optional
 	try {
 		require('source-map-support').install();
+
+		// have dev-dependencies
+		Q.longStackSupport = true;
 	}
 	catch (e) {
 		// whatever
