@@ -2,8 +2,6 @@
 
 /// <reference path="fixes.d.ts" />
 
-/// <reference path="date-utils/date-utils.d.ts" />
-
 /// <reference path="q/Q.d.ts" />
 /// <reference path="q/Q-io.d.ts" />
 /// <reference path="tv4/tv4.d.ts" />

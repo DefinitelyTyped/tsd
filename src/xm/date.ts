@@ -11,8 +11,6 @@
 module xm {
 	'use strict';
 
-	require('date-utils');
-
 	function pad(input:number):string {
 		var r = String(input);
 		if (r.length === 1) {
@@ -38,12 +36,33 @@ module xm {
 		}
 
 		// human friendly compact UTC time (maybe append 'UTC'?)
-		export function toNiceUTC(date:Date) {
+		export function toNiceUTC(date:Date):string {
 			return date.getUTCFullYear()
-			+ '-' + pad(date.getUTCMonth() + 1)
-			+ '-' + pad(date.getUTCDate())
-			+ ' ' + pad(date.getUTCHours())
-			+ ':' + pad(date.getUTCMinutes());
+				+ '-' + pad(date.getUTCMonth() + 1)
+				+ '-' + pad(date.getUTCDate())
+				+ ' ' + pad(date.getUTCHours())
+				+ ':' + pad(date.getUTCMinutes());
+		}
+
+		export function isBeforeDate(actual:Date, base:Date):boolean {
+			return actual.getUTCFullYear() < base.getUTCFullYear()
+				|| actual.getUTCMonth() < base.getUTCMonth()
+				|| actual.getUTCDate() < base.getUTCDate();
+		}
+
+		export function isAfterDate(actual:Date, base:Date):boolean {
+			return actual.getUTCFullYear() > base.getUTCFullYear()
+				|| actual.getUTCMonth() > base.getUTCMonth()
+				|| actual.getUTCDate() > base.getUTCDate();
+		}
+
+		export function isEqualDate(actual:Date, base:Date):boolean {
+			return actual.toDateString() === base.toDateString();
+		}
+
+		// -n if date1 is smaller than date2, 0 if equal, +n if date2 is smaller than date1
+		export function compare(date1:Date, date2:Date):number {
+			return date1.getTime() - date2.getTime();
 		}
 	}
 }

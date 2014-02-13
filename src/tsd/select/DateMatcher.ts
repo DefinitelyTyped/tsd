@@ -1,28 +1,21 @@
 /// <reference path="../_ref.ts" />
+/// <reference path="../../xm/date.ts" />
 
 module tsd {
 	'use strict';
-
-	require('date-utils');
 
 	var termExp = /(>=?|<=?|==) *(\d+[\d:;_ \-]+\d)/g;
 
 	var comparators = {
 		'<=': function lte(date1:Date, date2:Date) {
-			return date1.isBefore(date2) || date1.equals(date2);
+			return xm.date.isBeforeDate(date1, date2) || xm.date.isEqualDate(date1, date2);
 		},
-		'<': function lt(date1:Date, date2:Date) {
-			return date1.isBefore(date2);
-		},
+		'<': xm.date.isBeforeDate,
 		'>=': function gte(date1:Date, date2:Date) {
-			return date1.isAfter(date2) || date1.equals(date2);
+			return xm.date.isAfterDate(date1, date2) || xm.date.isEqualDate(date1, date2);
 		},
-		'>': function gt(date1:Date, date2:Date) {
-			return date1.isAfter(date2);
-		},
-		'==': function eqeq(date1:Date, date2:Date) {
-			return date1.equals(date2);
-		}
+		'>': xm.date.isAfterDate,
+		'==': xm.date.isEqualDate
 	};
 
 	export class DateComp {

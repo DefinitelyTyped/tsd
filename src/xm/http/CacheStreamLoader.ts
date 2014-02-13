@@ -33,8 +33,6 @@ module xm {
 	var request = require('request');
 	var BufferStream = require('bufferstream');
 
-	require('date-utils');
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 

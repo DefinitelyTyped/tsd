@@ -3,8 +3,6 @@
 module tsd {
 	'use strict';
 
-	require('date-utils');
-
 	var fullSha = /^[0-9a-f]{40}$/;
 	var hex = /^[0-9a-f]+$/;
 

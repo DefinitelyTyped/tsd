@@ -13,11 +13,11 @@ var tsd;
 
     require('bufferstream').fn.warn = false;
 
-    require('date-utils');
-
     require('es6-shim');
 
-    global.WeakMap = require('weak-map');
+    if (!global.WeakMap) {
+        global.WeakMap = require('weak-map');
+    }
 
     process.setMaxListeners(20);
 })(tsd || (tsd = {}));
@@ -3003,30 +3003,73 @@ var tsd;
     })();
     tsd.InfoMatcher = InfoMatcher;
 })(tsd || (tsd = {}));
+var xm;
+(function (xm) {
+    'use strict';
+
+    function pad(input) {
+        var r = String(input);
+        if (r.length === 1) {
+            r = '0' + r;
+        }
+        return r;
+    }
+
+    (function (date) {
+        function getISOString(input) {
+            var date;
+            if (xm.isDate(input)) {
+                date = input;
+            } else if (xm.isString(input) || xm.isNumber(input)) {
+                date = new Date(input);
+            }
+            return (date ? date.toISOString() : null);
+        }
+        date.getISOString = getISOString;
+
+        function toNiceUTC(date) {
+            return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
+        }
+        date.toNiceUTC = toNiceUTC;
+
+        function isBeforeDate(actual, base) {
+            return actual.getUTCFullYear() < base.getUTCFullYear() || actual.getUTCMonth() < base.getUTCMonth() || actual.getUTCDate() < base.getUTCDate();
+        }
+        date.isBeforeDate = isBeforeDate;
+
+        function isAfterDate(actual, base) {
+            return actual.getUTCFullYear() > base.getUTCFullYear() || actual.getUTCMonth() > base.getUTCMonth() || actual.getUTCDate() > base.getUTCDate();
+        }
+        date.isAfterDate = isAfterDate;
+
+        function isEqualDate(actual, base) {
+            return actual.toDateString() === base.toDateString();
+        }
+        date.isEqualDate = isEqualDate;
+
+        function compare(date1, date2) {
+            return date1.getTime() - date2.getTime();
+        }
+        date.compare = compare;
+    })(xm.date || (xm.date = {}));
+    var date = xm.date;
+})(xm || (xm = {}));
 var tsd;
 (function (tsd) {
     'use strict';
-
-    require('date-utils');
 
     var termExp = /(>=?|<=?|==) *(\d+[\d:;_ \-]+\d)/g;
 
     var comparators = {
         '<=': function lte(date1, date2) {
-            return date1.isBefore(date2) || date1.equals(date2);
+            return xm.date.isBeforeDate(date1, date2) || xm.date.isEqualDate(date1, date2);
         },
-        '<': function lt(date1, date2) {
-            return date1.isBefore(date2);
-        },
+        '<': xm.date.isBeforeDate,
         '>=': function gte(date1, date2) {
-            return date1.isAfter(date2) || date1.equals(date2);
+            return xm.date.isAfterDate(date1, date2) || xm.date.isEqualDate(date1, date2);
         },
-        '>': function gt(date1, date2) {
-            return date1.isAfter(date2);
-        },
-        '==': function eqeq(date1, date2) {
-            return date1.equals(date2);
-        }
+        '>': xm.date.isAfterDate,
+        '==': xm.date.isEqualDate
     };
 
     var DateComp = (function () {
@@ -3195,8 +3238,6 @@ var tsd;
 var tsd;
 (function (tsd) {
     'use strict';
-
-    require('date-utils');
 
     var fullSha = /^[0-9a-f]{40}$/;
     var hex = /^[0-9a-f]+$/;
@@ -3574,39 +3615,6 @@ var xm;
         return PromiseStash;
     })();
     xm.PromiseStash = PromiseStash;
-})(xm || (xm = {}));
-var xm;
-(function (xm) {
-    'use strict';
-
-    require('date-utils');
-
-    function pad(input) {
-        var r = String(input);
-        if (r.length === 1) {
-            r = '0' + r;
-        }
-        return r;
-    }
-
-    (function (date) {
-        function getISOString(input) {
-            var date;
-            if (xm.isDate(input)) {
-                date = input;
-            } else if (xm.isString(input) || xm.isNumber(input)) {
-                date = new Date(input);
-            }
-            return (date ? date.toISOString() : null);
-        }
-        date.getISOString = getISOString;
-
-        function toNiceUTC(date) {
-            return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
-        }
-        date.toNiceUTC = toNiceUTC;
-    })(xm.date || (xm.date = {}));
-    var date = xm.date;
 })(xm || (xm = {}));
 var xm;
 (function (xm) {
@@ -4245,8 +4253,6 @@ var xm;
     var request = require('request');
     var BufferStream = require('bufferstream');
 
-    require('date-utils');
-
     (function (http) {
         var CacheStreamLoader = (function () {
             function CacheStreamLoader(cache, request) {
@@ -4698,8 +4704,6 @@ var xm;
 (function (xm) {
     'use strict';
 
-    require('date-utils');
-
     (function (http) {
         var CacheRequest = (function () {
             function CacheRequest(url, headers) {
@@ -4830,8 +4834,6 @@ var xm;
     var path = require('path');
     var FS = require('q-io/fs');
     var HTTP = require('q-io/http');
-
-    require('date-utils');
 
     (function (http) {
         var HTTPCache = (function () {
@@ -5147,8 +5149,6 @@ var git;
 var git;
 (function (git) {
     'use strict';
-
-    require('date-utils');
 
     function pad(input) {
         var r = String(input);
@@ -5519,8 +5519,6 @@ var tsd;
 (function (tsd) {
     'use strict';
 
-    require('date-utils');
-
     var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
     var leadingExp = /^\.\.\//;
@@ -5747,7 +5745,7 @@ var tsd;
             if (!aaDate) {
                 return -1;
             }
-            return Date.compare(aaDate, bbDate);
+            return xm.date.compare(aaDate, bbDate);
         };
         return DefUtil;
     })();

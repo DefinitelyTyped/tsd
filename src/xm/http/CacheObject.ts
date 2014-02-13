@@ -22,8 +22,6 @@
 module xm {
 	'use strict';
 
-	require('date-utils');
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export module http {

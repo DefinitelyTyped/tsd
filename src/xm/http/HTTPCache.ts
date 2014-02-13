@@ -28,8 +28,6 @@ module xm {
 	var FS:typeof QioFS = require('q-io/fs');
 	var HTTP:typeof QioHTTP = require('q-io/http');
 
-	require('date-utils');
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	export module http {

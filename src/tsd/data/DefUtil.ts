@@ -1,19 +1,12 @@
 /// <reference path="../_ref.ts" />
+/// <reference path="../../xm/date.ts" />
 
-// TODO remove inlined Date definition (weird priority failure)
-declare var Date:{
-	compare(date1:Date, date2:Date):number; // -1 if date1 is smaller than date2, 0 if equal, 1 if date2 is smaller than date1
-};
 
 module tsd {
 	'use strict';
 
-	require('date-utils');
-
 	// TODO replace reference node RegExp with a xml parser (tony the pony)
 	var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
-
-	var leadingExp = /^\.\.\//;
 
 	/*
 	 DefUtil: static helpers
@@ -258,7 +251,7 @@ module tsd {
 			if (!aaDate) {
 				return -1;
 			}
-			return Date.compare(aaDate, bbDate);
+			return xm.date.compare(aaDate, bbDate);
 		}
 	}
 }

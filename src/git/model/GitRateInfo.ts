@@ -1,10 +1,7 @@
 /// <reference path="../../xm/typeOf.ts" />
-/// <reference path="../../../typings/date-utils/date-utils.d.ts" />
 
 module git {
 	'use strict';
-
-	require('date-utils');
 
 	function pad(input:number):string {
 		var r = String(input);

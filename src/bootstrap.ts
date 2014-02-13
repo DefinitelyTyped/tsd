@@ -19,14 +19,13 @@ module tsd {
 	// kill warning
 	require('bufferstream').fn.warn = false;
 
-	// improve time
-	require('date-utils');
-
 	// future is now
 	require('es6-shim');
 
 	// booya
-	global.WeakMap = require('weak-map');
+	if (!global.WeakMap) {
+		global.WeakMap = require('weak-map');
+	}
 
 	// TODO verify process.setMaxListeners() still needs to be this high
 	process.setMaxListeners(20);
