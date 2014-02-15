@@ -92,7 +92,9 @@ module.exports = function (grunt) {
 		tv4: {
 			packjson: {
 				options: {
-					root: 'schema/package-v1.json'
+					root: function() {
+						return require('package.json-schema').get();
+					}
 				},
 				src: ['package.json']
 			},

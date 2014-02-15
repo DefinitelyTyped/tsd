@@ -10,7 +10,7 @@
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
     "type": "git",
-    "url": "http://github.com/DefinitelyTyped/tsd.git"
+    "url": "https://github.com/DefinitelyTyped/tsd.git"
   },
   "author": {
     "name": "Bart van der Schoor",
@@ -51,7 +51,7 @@
     "mkdirp": "~0.3.5",
     "semver": "~2.2.1",
     "tv4": "~1.0.14",
-    "tv4-reporter": "0.0.3",
+    "tv4-reporter": "~0.0.4",
     "uri-templates": "0.1.2",
     "minimist": "0.0.7",
     "assertion-error": "1.0.0",
@@ -83,7 +83,7 @@
     "grunt-ts": "~1.4.6",
     "grunt-tslint": "~0.4.0",
     "tslint-path-formatter": "0.1",
-    "grunt-tv4": "~0.3.1",
+    "grunt-tv4": "~0.4.0",
     "grunt-shell": "~0.6.1",
     "grunt-contrib-connect": "~0.5.0",
     "grunt-todos": "git://github.com/Bartvds/grunt-todos/#master",
@@ -98,6 +98,7 @@
     "ansidiff": "~1.0.0",
     "lodash-template": "~1.0.0",
     "grunt-webshot": "~0.2.0",
-    "grunt-regex-replace": "~0.2.5"
+    "grunt-regex-replace": "~0.2.5",
+    "package.json-schema": "~0.1.0"
   }
 }
