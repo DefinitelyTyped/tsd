@@ -222,7 +222,7 @@ The old TSD `v0.3.0` had it's own repository data file that mapped module names 
 
 The DefinitelyTyped [group](https://github.com/DefinitelyTyped/tsd/issues) is working on a meta-data source that will solve this.
 
-### Can TSD install the definitions for the correct module version or fork?
+### Can TSD auto-install definitions for a specific package version?
 
 Yes, and no (and later yes again) 
 
@@ -234,7 +234,7 @@ It works well but is not used much in the current DefinitelyTyped repository. Th
 
 The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
 
-### Do you have a grunt task to automate some TSD tasks?
+### Do you have a grunt task?
 
 Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
@@ -316,7 +316,7 @@ Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don
 
 Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first (or risk the basis of your work being re-factored). 
 
-**Note:** TSD no longer maintains it's own data sources: contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+**Note:** Contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
 ## Privacy statement
 
