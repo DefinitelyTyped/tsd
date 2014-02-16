@@ -3,6 +3,7 @@
 	"path": "./typings",
 	"repo": "borisyankov/DefinitelyTyped",
 	"ref": "master",
+	"stats": false,
 	"installed": {
 		"universal-analytics/universal-analytics.d.ts": {
 			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
