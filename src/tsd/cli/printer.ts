@@ -209,12 +209,12 @@ module tsd {
 				return this.output;
 			}
 
-			rateInfo(info:git.GitRateInfo, note:boolean = false):xm.StyledOut {
-				if (info.remaining === this._remainingPrev) {
+			rateInfo(info:git.GitRateInfo, note:boolean = false, force:boolean = false):xm.StyledOut {
+				if (info.remaining === this._remainingPrev && !force) {
 					return this.output;
 				}
 				this._remainingPrev = info.remaining;
-				if (info.remaining === info.limit) {
+				if (info.remaining === info.limit && !force) {
 					return this.output;
 				}
 
@@ -229,16 +229,19 @@ module tsd {
 				/* tslint:disable:max-line-length */
 				if (info.limit > 0) {
 					if (info.remaining === 0) {
-						this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
+						this.output.error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
 					}
 					else if (info.remaining < 15) {
-						this.output.span('remaining ').warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
+						this.output.warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
 					}
 					else if (info.remaining < info.limit - 15) {
-						this.output.span('remaining ').success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
+						this.output.success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
 					}
 					else {
-						this.output.span('remaining ').accent(info.remaining).span(' / ').accent(info.limit);
+						this.output.accent(info.remaining).span(' / ').accent(info.limit);
+						if (force) {
+							this.output.span(' -> ').success(info.getResetString());
+						}
 					}
 				}
 				/* tslint:enable:max-line-length */

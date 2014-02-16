@@ -14,6 +14,7 @@ module tsd {
 		configSchemaFile : 'tsd-v4.json',
 		definitelyRepo: 'borisyankov/DefinitelyTyped',
 		mainBranch: 'master',
+		statsDefault: true,
 
 		shaShorten: 6
 	 };

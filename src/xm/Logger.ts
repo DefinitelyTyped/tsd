@@ -120,7 +120,7 @@ module xm {
 		};
 		logger.status = function (...args:any[]) {
 			if (logger.enabled) {
-				logger.out.accent('-> ').span(label + ' ');
+				logger.out.accent('-> ').span(label + 'status ');
 				doLog(logger, args);
 			}
 		};

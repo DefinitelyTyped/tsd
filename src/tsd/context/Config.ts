@@ -13,7 +13,6 @@ module tsd {
 	var fs = require('fs');
 	var path = require('path');
 	var util = require('util');
-	var AssertionError = require('assertion-error');
 	var tv4:TV4 = require('tv4');
 	var reporter = require('tv4-reporter');
 
@@ -63,6 +62,7 @@ module tsd {
 		version:string;
 		repo:string;
 		ref:string;
+		stats:boolean;
 		bundle:string;
 
 		private _installed:Map<string, tsd.InstalledDef> = new Map();
@@ -91,6 +91,7 @@ module tsd {
 			this.version = tsd.Const.configVersion;
 			this.repo = tsd.Const.definitelyRepo;
 			this.ref = tsd.Const.mainBranch;
+			this.stats = tsd.Const.statsDefault;
 
 			// use linux seperator
 			this.bundle = tsd.Const.typingsDir + '/' + tsd.Const.bundleFile;
@@ -175,11 +176,13 @@ module tsd {
 			};
 			if (this.bundle) {
 				json.bundle = this.bundle;
-			};
+			}
+			if (this.stats !== tsd.Const.statsDefault) {
+				json.stats = this.stats;
+			}
 			json.installed = {};
 
-			xm.keysOf(this._installed).forEach((key:string) => {
-				var file = this._installed.get(key);
+			this._installed.forEach((file:InstalledDef, key:string) => {
 				json.installed[file.path] = {
 					commit: file.commitSha
 					// what more?
@@ -214,6 +217,7 @@ module tsd {
 			this.repo = json.repo;
 			this.ref = json.ref;
 			this.bundle = json.bundle;
+			this.stats = (xm.isBoolean(json.stats) ? json.stats : tsd.Const.statsDefault);
 
 			if (json.installed) {
 				xm.eachProp(json.installed, (data:any, filePath:string) => {

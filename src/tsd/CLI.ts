@@ -79,7 +79,7 @@ module tsd {
 		function showHeader():Q.Promise<void> {
 			var pkg = xm.PackageJSON.getLocal();
 
-			output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
+			output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().muted('(').accent('beta').muted(')').ln();
 			// .clear().span(pkg.getHomepage(true)).ln()
 			// .ruler().ln();
 			return Q.resolve();
@@ -100,7 +100,7 @@ module tsd {
 
 			var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-			tracker.init(context, ctx.getOpt(Opt.services), ctx.getOpt(Opt.verbose));
+			tracker.init(context, (ctx.getOpt(Opt.services) && context.config.stats), ctx.getOpt(Opt.verbose));
 
 			if (ctx.getOpt(Opt.dev)) {
 				// TODO why not local?
@@ -155,6 +155,8 @@ module tsd {
 					}
 
 					return job.api.readConfig(true).progress(d.notify).then(() => {
+						tracker.enabled = (tracker.enabled && job.context.config.stats);
+
 						return runUpdateNotifier(ctx, job.context);
 					}).then(() => {
 							d.resolve(job);
@@ -520,7 +522,7 @@ module tsd {
 				var notify = getProgress(ctx);
 				return getAPIJob(ctx).progress(notify).then((job:Job) => {
 					return job.api.getRateInfo().progress(notify).then((info:git.GitRateInfo) => {
-						print.rateInfo(info);
+						print.rateInfo(info, false, true);
 					});
 				}).fail(reportError);
 			};

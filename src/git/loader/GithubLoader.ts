@@ -42,11 +42,11 @@ module git {
 
 		_initGithubLoader(lock?:string[]):void {
 			var opts = new xm.http.CacheOpts();
-			opts.allowClean = this.options.getBoolean('allowClean');
-			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
-			opts.splitDirLevel = this.options.getNumber('splitDirLevel');
-			opts.splitDirChunk = this.options.getNumber('splitDirChunk');
-			opts.jobTimeout = this.options.getNumber('jobTimeout');
+			opts.allowClean = this.options.getBoolean('allowClean', opts.allowClean);
+			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval', opts.cacheCleanInterval / 1000) * 1000;
+			opts.splitDirLevel = this.options.getNumber('splitDirLevel', opts.splitDirLevel);
+			opts.splitDirChunk = this.options.getNumber('splitDirChunk', opts.splitDirChunk);
+			opts.jobTimeout = this.options.getDurationSecs('jobTimeout', opts.jobTimeout / 1000) * 1000;
 
 			this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
 

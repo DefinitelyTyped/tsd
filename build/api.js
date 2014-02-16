@@ -1222,7 +1222,7 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                logger.out.accent('-> ').span(label + ' ');
+                logger.out.accent('-> ').span(label + 'status ');
                 doLog(logger, args);
             }
         };
@@ -1283,6 +1283,7 @@ var tsd;
         configSchemaFile: 'tsd-v4.json',
         definitelyRepo: 'borisyankov/DefinitelyTyped',
         mainBranch: 'master',
+        statsDefault: true,
         shaShorten: 6
     };
 
@@ -2449,7 +2450,6 @@ var tsd;
     var fs = require('fs');
     var path = require('path');
     var util = require('util');
-    var AssertionError = require('assertion-error');
     var tv4 = require('tv4');
     var reporter = require('tv4-reporter');
 
@@ -2497,6 +2497,7 @@ var tsd;
             this.version = tsd.Const.configVersion;
             this.repo = tsd.Const.definitelyRepo;
             this.ref = tsd.Const.mainBranch;
+            this.stats = tsd.Const.statsDefault;
 
             this.bundle = tsd.Const.typingsDir + '/' + tsd.Const.bundleFile;
 
@@ -2586,7 +2587,6 @@ var tsd;
         };
 
         Config.prototype.toJSON = function () {
-            var _this = this;
             var json = {
                 version: this.version,
                 repo: this.repo,
@@ -2596,11 +2596,12 @@ var tsd;
             if (this.bundle) {
                 json.bundle = this.bundle;
             }
-            ;
+            if (this.stats !== tsd.Const.statsDefault) {
+                json.stats = this.stats;
+            }
             json.installed = {};
 
-            xm.keysOf(this._installed).forEach(function (key) {
-                var file = _this._installed.get(key);
+            this._installed.forEach(function (file, key) {
                 json.installed[file.path] = {
                     commit: file.commitSha
                 };
@@ -2635,6 +2636,7 @@ var tsd;
             this.repo = json.repo;
             this.ref = json.ref;
             this.bundle = json.bundle;
+            this.stats = (xm.isBoolean(json.stats) ? json.stats : tsd.Const.statsDefault);
 
             if (json.installed) {
                 xm.eachProp(json.installed, function (data, filePath) {
@@ -4193,6 +4195,7 @@ var xm;
                 this.cacheWrite = true;
                 this.remoteRead = true;
                 this.allowClean = false;
+                this.jobTimeout = 0;
                 if (mode) {
                     this.applyCacheMode(mode);
                 }
@@ -5121,11 +5124,11 @@ var git;
         }
         GithubLoader.prototype._initGithubLoader = function (lock) {
             var opts = new xm.http.CacheOpts();
-            opts.allowClean = this.options.getBoolean('allowClean');
-            opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval') * 1000;
-            opts.splitDirLevel = this.options.getNumber('splitDirLevel');
-            opts.splitDirChunk = this.options.getNumber('splitDirChunk');
-            opts.jobTimeout = this.options.getNumber('jobTimeout');
+            opts.allowClean = this.options.getBoolean('allowClean', opts.allowClean);
+            opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval', opts.cacheCleanInterval / 1000) * 1000;
+            opts.splitDirLevel = this.options.getNumber('splitDirLevel', opts.splitDirLevel);
+            opts.splitDirChunk = this.options.getNumber('splitDirChunk', opts.splitDirChunk);
+            opts.jobTimeout = this.options.getDurationSecs('jobTimeout', opts.jobTimeout / 1000) * 1000;
 
             this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
 
@@ -9179,13 +9182,14 @@ var tsd;
                 return this.output;
             };
 
-            Printer.prototype.rateInfo = function (info, note) {
+            Printer.prototype.rateInfo = function (info, note, force) {
                 if (typeof note === "undefined") { note = false; }
-                if (info.remaining === this._remainingPrev) {
+                if (typeof force === "undefined") { force = false; }
+                if (info.remaining === this._remainingPrev && !force) {
                     return this.output;
                 }
                 this._remainingPrev = info.remaining;
-                if (info.remaining === info.limit) {
+                if (info.remaining === info.limit && !force) {
                     return this.output;
                 }
 
@@ -9198,13 +9202,16 @@ var tsd;
 
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
-                        this.output.span('remaining ').error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
+                        this.output.error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
                     } else if (info.remaining < 15) {
-                        this.output.span('remaining ').warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
+                        this.output.warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
                     } else if (info.remaining < info.limit - 15) {
-                        this.output.span('remaining ').success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
+                        this.output.success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
                     } else {
-                        this.output.span('remaining ').accent(info.remaining).span(' / ').accent(info.limit);
+                        this.output.accent(info.remaining).span(' / ').accent(info.limit);
+                        if (force) {
+                            this.output.span(' -> ').success(info.getResetString());
+                        }
                     }
                 } else {
                     this.output.success(info.getResetString());
@@ -9397,6 +9404,7 @@ var tsd;
                 }
 
                 this._client = ua(this._accountID, uuid.v4());
+
                 if (this._debug) {
                     this._client = this._client.debug();
                 }
@@ -9516,6 +9524,23 @@ var tsd;
                 enumerable: true,
                 configurable: true
             });
+
+            Object.defineProperty(Tracker.prototype, "enabled", {
+                get: function () {
+                    return this._enabled;
+                },
+                set: function (enabled) {
+                    if (enabled !== this._enabled) {
+                        this._enabled = enabled;
+                        if (this._debug) {
+                            xm.log.status('Tracker ' + (this._enabled ? 'enabled' : 'disabled'));
+                        }
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+
             return Tracker;
         })();
         cli.Tracker = Tracker;
@@ -9950,7 +9975,7 @@ var tsd;
         function showHeader() {
             var pkg = xm.PackageJSON.getLocal();
 
-            output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().accent('(preview)').ln();
+            output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().muted('(').accent('beta').muted(')').ln();
 
             return Q.resolve();
         }
@@ -9967,7 +9992,7 @@ var tsd;
 
             var context = new tsd.Context(ctx.getOpt(Opt.config), ctx.getOpt(Opt.verbose));
 
-            tracker.init(context, ctx.getOpt(Opt.services), ctx.getOpt(Opt.verbose));
+            tracker.init(context, (ctx.getOpt(Opt.services) && context.config.stats), ctx.getOpt(Opt.verbose));
 
             if (ctx.getOpt(Opt.dev)) {
                 context.paths.cacheDir = path.resolve(path.dirname(xm.PackageJSON.find()), tsd.Const.cacheDir);
@@ -10015,6 +10040,8 @@ var tsd;
                     }
 
                     return job.api.readConfig(true).progress(d.notify).then(function () {
+                        tracker.enabled = (tracker.enabled && job.context.config.stats);
+
                         return runUpdateNotifier(ctx, job.context);
                     }).then(function () {
                         d.resolve(job);
@@ -10354,7 +10381,7 @@ var tsd;
                 var notify = getProgress(ctx);
                 return getAPIJob(ctx).progress(notify).then(function (job) {
                     return job.api.getRateInfo().progress(notify).then(function (info) {
-                        print.rateInfo(info);
+                        print.rateInfo(info, false, true);
                     });
                 }).fail(reportError);
             };

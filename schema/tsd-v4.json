@@ -35,6 +35,10 @@
 			"type": "string",
 			"pattern": "\\w+\\.ts$"
 		},
+		"stats": {
+			"description": "enable stats tracking",
+			"type": "boolean"
+		},
 		"installed": {
 			"description": "index of installed definitions",
 			"type": "object",
@@ -45,6 +49,7 @@
 					"required": ["commit"],
 					"properties": {
 						"commit": {
+							"description": "sha1 hex",
 							"type": "string",
 							"pattern": "^[0-9a-f]{6,40}$"
 						}

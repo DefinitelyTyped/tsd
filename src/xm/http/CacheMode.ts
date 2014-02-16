@@ -36,7 +36,7 @@
 			allowClean = false;
 			cacheCleanInterval:number;
 
-			jobTimeout:number;
+			jobTimeout:number = 0;
 
 			constructor(mode?:CacheMode) {
 				if (mode) {

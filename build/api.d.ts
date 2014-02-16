@@ -197,6 +197,7 @@ declare module tsd {
         configSchemaFile: string;
         definitelyRepo: string;
         mainBranch: string;
+        statsDefault: boolean;
         shaShorten: number;
     };
 }
@@ -392,6 +393,7 @@ declare module tsd {
         public version: string;
         public repo: string;
         public ref: string;
+        public stats: boolean;
         public bundle: string;
         private _installed;
         private _schema;
@@ -1504,7 +1506,7 @@ declare module tsd {
             public dependencies(file: tsd.DefVersion): xm.StyledOut;
             public history(file: tsd.DefVersion): xm.StyledOut;
             public installResult(result: tsd.InstallResult): xm.StyledOut;
-            public rateInfo(info: git.GitRateInfo, note?: boolean): xm.StyledOut;
+            public rateInfo(info: git.GitRateInfo, note?: boolean, force?: boolean): xm.StyledOut;
             public reportError(err: any, head?: boolean): xm.StyledOut;
             public reportProgress(obj: any): xm.StyledOut;
         }
@@ -1543,6 +1545,7 @@ declare module tsd {
             private doEvent(event);
             public getTimer(variable: string, label?: string): (err?: any) => void;
             public client : UniversalAnalytics.Client;
+            public enabled : boolean;
         }
         function getDummy(): any;
     }

@@ -169,6 +169,19 @@ module tsd {
 			get client():UniversalAnalytics.Client {
 				return this._client;
 			}
+
+			get enabled():boolean {
+				return this._enabled;
+			}
+
+			set enabled(enabled:boolean) {
+				if (enabled !== this._enabled) {
+					this._enabled = enabled;
+					if (this._debug) {
+						xm.log.status('Tracker ' + (this._enabled ? 'enabled' : 'disabled'));
+					}
+				}
+			}
 		}
 
 		export function getDummy():any {
