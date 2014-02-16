@@ -22,9 +22,9 @@ module.exports = function (grunt) {
 
 	//defaults and one-off tasks
 	gtx.config({
-		pkg: grunt.file.readJSON('package.json'),
+		pkg: gtx.readJSON('package.json'),
 		jshint: {
-			options: grunt.util._.defaults(grunt.file.readJSON('.jshintrc'), {
+			options: gtx.readJSON('.jshintrc', {
 				reporter: './node_modules/jshint-path-reporter'
 			}),
 			support: ['Gruntfile.js', 'test/*.js', 'lib/**/*.js'],
@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 		},
 		tslint: {
 			options: {
-				configuration: grunt.file.readJSON('tslint.json'),
+				configuration: gtx.readJSON('tslint.json'),
 				formatter: 'tslint-path-formatter'
 			},
 			source: ['src/**/*.ts'],
