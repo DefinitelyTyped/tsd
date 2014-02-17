@@ -82,7 +82,7 @@
     "jshint-path-reporter": "~0.1",
     "grunt-ts": "~1.4.6",
     "grunt-tslint": "~0.4.0",
-    "tslint-path-formatter": "0.1",
+    "tslint-path-formatter": "~0.1.0",
     "grunt-tv4": "~0.4.0",
     "grunt-shell": "~0.6.1",
     "grunt-contrib-connect": "~0.5.0",

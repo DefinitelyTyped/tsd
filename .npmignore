@@ -26,7 +26,6 @@
 .travis.yml
 .jshintrc
 .vagrant
-.jslintrc
 .editorconfig
 
 tscommand.*
