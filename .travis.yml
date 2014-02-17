@@ -5,6 +5,3 @@ node_js:
 notifications:
   email:
     - bartvanderschoor@gmail.com
-
-env:
-  - TRAVIS=true
