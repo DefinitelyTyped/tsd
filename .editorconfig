@@ -11,6 +11,6 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 # generated json is using 2 spaces
-{package.json, tsd.json}
+{package.json}
 indent_style = space
 indent_size = 2
