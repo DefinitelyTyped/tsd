@@ -234,6 +234,7 @@ module tsd {
 				opt.short = 'b';
 				opt.description = 'save to reference bundle';
 				opt.type = 'string[]';
+				opt.placeholder = 'name';
 			});
 
 			expose.defineOption((opt:xm.ExposeOption) => {
