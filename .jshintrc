@@ -8,7 +8,6 @@
 	"sub": true,
 	"undef": true,
 	"unused": true,
-	"boss": true,
 	"eqnull": true,
 	"smarttabs": true,
 	"node": true,
