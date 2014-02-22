@@ -9404,7 +9404,6 @@ var tsd;
                 }
 
                 this._client = ua(this._accountID, uuid.v4());
-
                 if (this._debug) {
                     this._client = this._client.debug();
                 }
@@ -9921,6 +9920,7 @@ var tsd;
                 opt.short = 'b';
                 opt.description = 'save to reference bundle';
                 opt.type = 'string[]';
+                opt.placeholder = 'name';
             });
 
             expose.defineOption(function (opt) {

@@ -75,12 +75,13 @@
     "source-map-support": "~0.2.5",
     "grunt": "~0.4.2",
     "grunt-cli": "~0.1.11",
-    "gruntfile-gtx": "~0.2.4",
+    "gruntfile-gtx": "~0.2.5",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-copy": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
     "jshint-path-reporter": "~0.1",
-    "grunt-ts": "~1.4.6",
+    "typescript": "0.9.1-1",
+    "grunt-ts": "git://github.com/basarat/grunt-ts#efac776240b4f8d40e3e0f75060020633d83022e",
     "grunt-tslint": "~0.4.0",
     "tslint-path-formatter": "~0.1.0",
     "grunt-tv4": "~0.4.0",
@@ -99,6 +100,6 @@
     "lodash-template": "~1.0.0",
     "grunt-webshot": "~0.2.0",
     "grunt-regex-replace": "~0.2.5",
-    "package.json-schema": "~0.1.0"
+    "package.json-schema": "~0.2.0"
   }
 }
