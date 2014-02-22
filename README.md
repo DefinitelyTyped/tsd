@@ -19,7 +19,7 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses caching layers and the definition files are downloaded over unlimited Github RAW urls.
 
-#### Usage stats & update-check
+#### Usage stats & update check
 
 The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates. Both are enabled by default: use the `--services no` option to suppress (for now).
 
@@ -27,123 +27,168 @@ The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd
 
 Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):
 
-	$ npm install tsd -g
+````bash
+$ npm install tsd -g
+````
 
 For previews check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
 If you need to install the legacy `v0.3.x`:
 
-	$ npm install tsd@0.3.0 -g
+````bash
+$ npm install tsd@0.3.0 -g
+````
 
 ## Usage as CLI command
 
 Global `tsd` binary:
 
-	$ tsd
+````bash
+$ tsd -h
+````
+
+[![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
 
 It looks like this:
 
 * [`$ tsd --help`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
-* [`$ tsd query async --info --history --install`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png)
+* [`$ tsd query async --info --history --action install`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png)
 * [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png)
 
 
-### Help
-
-	$ tsd -h
-
-[![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
 
 ### Practical examples
 
+#### Search
+
 Minimal query for `d3`:
-		
-	$ tsd query d3
+
+````bash
+$ tsd query d3
+````
 
 List *everything*:
-		
-	$ tsd query *
+
+````bash
+$ tsd query *
+````
 
 Tip: if you are using Linux or Mac OS X, use `$ tsd query "*"`.
 
 Get some info about `jquery`:
-		
-	$ tsd query jquery --info --history --resolve
-	$ tsd query jquery -i -h -r
-	
-Install `bootstrap` definitions:
 
-	$ tsd query bootstrap --action install
-	$ tsd query bootstrap -a install
+````bash
+$ tsd query jquery --info --history --resolve
+$ tsd query jquery -i -h -r
+$ tsd query jquery -ihr
+````
+
+Search for `jquery` plugins:
+
+````bash
+$ tsd query */jquery.*
+````
+#### Install
 
 Install `mocha`, `chai` and `sinon` definitions all at once:
 
-	$ tsd query mocha chai sinon -a install
+````bash
+$ tsd query mocha chai sinon -a install
+````
+
+Install `bootstrap` definitions:
+
+````bash
+$ tsd query bootstrap --action install
+$ tsd query bootstrap -a install
+````
 
 Solve the reference to `jquery`, overwrite existing files and save to the tsd.config:
 
-	$ tsd query angular --resolve --overwrite --save --action install
-	$ tsd query angular -r -o -s -a install
-
-Search for `jquery` plugins:
-		
-	$ tsd query */jquery.*
-
+````bash
+$ tsd query angular --resolve --overwrite --save --action install
+$ tsd query angular -r -o -s -a install
+$ tsd query angular -rosa install
+````
 Install and save to `test.d.ts` as `<reference/>` bundle:
-		
-	$ tsd query mocha chai -a install -r -o -s -b test
 
-Open `pixi` in your browser on github:
-		
-	$ tsd query pixi -a browse
+````bash
+$ tsd query mocha chai -r -o -s -a install -b test
+````
+
+### Navigate
+
+Browse `pixi` definition on github:
+
+````bash
+$ tsd query pixi -a browse
+````
+
+Visit `gruntjs` homepage:
+
+````bash
+$ tsd query gruntjs -a visit
+````
 
 ### Selectors
 
 TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index, where the definition name takes priority:
 
-	$ tsd query module
-	$ tsd query project/module
+````bash
+$ tsd query module
+$ tsd query project/module
+````
 
 Consider these definitions:
-	
-	project/module.d.ts
-	project/module-0.1.2.d.ts
-	project/module-addon.d.ts
 
-	project-plugin/plugin.d.ts
+````
+project/module.d.ts
+project/module-0.1.2.d.ts
+project/module-addon.d.ts
 
-	other/module.d.ts
-	other/plugin.d.ts
+project-plugin/plugin.d.ts
+
+other/module.d.ts
+other/plugin.d.ts
+````
 
 Notice the pattern, and ignore the `.d.ts` extension:
 
-	<project>/<module><semver>.d.ts	
+````html
+<project>/<module><semver>.d.ts	
+````
 
 Select definitions using only the module name:
 
-	$ tsd query module
-	$ tsd query module-addon
+````bash
+$ tsd query module
+$ tsd query module-addon
+````
 
 Or use a selector derived from the path format:
 
-	$ tsd query project/module
-	$ tsd query other/module
+````bash
+$ tsd query project/module
+$ tsd query other/module
+````
 
 ### Globbing filter
 
 The selector also supports globbing, for example:
 
-	$ tsd query project/*
-	$ tsd query project*
-	$ tsd query module*
-	$ tsd query project/module*
-	$ tsd query project-*/plugin*
-	$ tsd query *project*/*
-	$ tsd query project/plugin*
-	$ tsd query other/module
-	$ tsd query */module
-	$ tsd query */module-*
-	$ tsd query */*plugin
+````bash
+$ tsd query project/*
+$ tsd query project*
+$ tsd query module*
+$ tsd query project/module*
+$ tsd query project-*/plugin*
+$ tsd query *project*/*
+$ tsd query project/plugin*
+$ tsd query other/module
+$ tsd query */module
+$ tsd query */module-*
+$ tsd query */*plugin
+````
 
 Globbing implements only leading and trailing (for now).
 
@@ -151,9 +196,11 @@ Globbing implements only leading and trailing (for now).
 
 Note: the [semver](https://github.com/isaacs/node-semver) postfix of definition files is expected to be separated by a dash and possibly a `'v'`
 
-	module-0.1.2
-	module-v0.1.2
-	module-v0.1.2-alpha
+````
+module-0.1.2
+module-v0.1.2
+module-v0.1.2-alpha
+````
 
 If there are multiple matches with same module name they will be prioritised:
 
@@ -161,7 +208,7 @@ If there are multiple matches with same module name they will be prioritised:
 2.	Then versions are compared as expected following these [comparison](https://github.com/isaacs/node-semver#comparison) rules.
 3.	Use the `--version` / `-v` option to set a semver-range:
 
-````
+````bash
 $ tsd query node -v latest
 $ tsd query node -v all
 $ tsd query node -v ">=0.8 <0.10"
@@ -172,7 +219,7 @@ $ tsd query node -v "<0.10"
 
 Use the `--date` / `-d` option to set a date-range (find dates using `--history`):
 
-````
+````bash
 $ tsd query d3 --history
 $ tsd query d3 --date ">=2012-01-01"
 $ tsd query d3 --date "<2012-01-01"
@@ -182,7 +229,7 @@ $ tsd query d3 --date "<2012-01-01"
 
 Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), for convenience a shortened sha1 hash is supported. 
 
-````
+````bash
 $ tsd query youtube --history
 $ tsd query youtube --commit d6ff
 ````
@@ -193,7 +240,7 @@ Notes:
 
 ## Usage as module
  
-TSD can be used as any JavaScript npm dependency in your project: the API used to implement the CLI is exposed: 
+TSD can be used as any JavaScript npm dependency in your project: 
 
 ````js
 var tsd = require('tsd');
@@ -206,9 +253,14 @@ api.search(new tsd.Selector('jquery/*')).then(function(res) {
 	// no
 });
 ````
+
 For a practical example see [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
 TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
+
+Note: Keep in mind this project started as a `<reference>` style TypeScript `v0.8.x` single-file compile target, which makes it harder to limit the exported API compared to `import` multi-file style. This is also why the definitions include more then just the `tsd` namespace. 
+
+API export is somewhat experimental; take care to lock versions and test on upgrade. If you plan to use TSD as module in a tool or project then feel free to [leave a message](https://github.com/DefinitelyTyped/tsd/issues) and coordinate stuff.
 
 ### API docs 
 
@@ -224,7 +276,7 @@ The DefinitelyTyped [group](https://github.com/DefinitelyTyped/tsd/issues) is wo
 
 ### Can TSD auto-install definitions for a specific package version?
 
-Yes, and no (and later yes again) 
+Yes, and no (and later yes again)
 
 There is basic support for parsing semver-postfixes from the definition file names, and you can filter on this using [semver](https://github.com/isaacs/node-semver) ranges with the `--version` option: Try it with the 'node' definitions.
 
@@ -237,12 +289,6 @@ The cache is stored in the users home directory (like `$ npm`). Use `$ tsd setti
 ### Do you have a grunt task?
 
 Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
-
-### Where do you keep background and work docs?
-
-* Some more about the [code](CODE.md).
-* Extra background [info](INFO.md) about the conceptual choices (old).
-* Internal list of things [todo](TODO.md).
 
 ### I have a suggestion or contribution
 
@@ -260,7 +306,9 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/blob/legacy/README.md)):
 
-	$ npm install tsd@0.3.0 -g
+````bash
+$ npm install tsd@0.3.0 -g
+````
 
 ## Notable modules
 
@@ -276,37 +324,57 @@ Some essential modules used to build TSD:
 
 ## Build
 
-TSD is written in [TypeScript](http://www.typescriptlang.org/) `0.9.0` and build using [Grunt](http://www.gruntjs.com).
+TSD is written in [TypeScript](http://www.typescriptlang.org/) `v0.9.1-1` and build using [Grunt](http://www.gruntjs.com).
 
 To rebuild clone or fork the repos:
 
-	// install dependencies
-	$ npm install
+Install dependencies
 
-	// build, lint and test
-	$ grunt test
+````bash
+$ npm install
+````
 
-	// only rebuild (and run cli)
-	$ grunt build
+Build, lint and test
+
+````bash
+$ grunt test
+````
+
+Only rebuild (and run cli)
+
+````bash
+$ grunt build
+````
 
 Either install global or use in dev folder:
 
-	// run in dev folder
-	$ node ./build/cli.js query d3 --dev
+Run in dev folder
 
-	// install to global cli
-	$ npm install . -g
+````bash
+$ node ./build/cli.js query d3 --dev
+````
+
+Install to global cli
+
+````bash
+$ npm install . -g
+````
 
 TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to test separate test suites sets during development:
-	
-	// list aliases
-	$ grunt -h
 
-	// for example: run only api tests
-	$ grunt gtx:api
-	$ grunt gtx:cli
-	$ grunt gtx:tsd
-	//.. etc
+List aliases
+
+````bash
+$ grunt -h
+````
+
+Example: run only api tests
+
+````bash
+$ grunt gtx:api
+$ grunt gtx:cli
+$ grunt gtx:tsd
+````
 
 It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a properly powerful workstation.
 
@@ -314,13 +382,15 @@ Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don
 
 ## Contribute
 
-Contributions will be welcome once the application architecture stabilises a bit more. If you want to fix some isolated thing in the development version then that is already appreciated, but please discuss in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first (or risk the basis of your work being re-factored). 
+Contributions are very welcome, please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first, and of course bug fixes and simple enhancements are always much appreciated. 
 
-**Note:** Contributions on definitions files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+**Note:** Contributions on the definition files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
 ## Privacy statement
 
-The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed from the repos. The information collected amounts to about same level of detail as services like npm or github would collect (even less; as we don't track account id's). The API does not track anything. 
+The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed from the repos. The information collected amounts to about same level of detail as services like npm or github would collect (even less; as we don't track account id's). 
+
+The API does not track anything. 
 
 TSD uses [Google Analytics](http://www.google.com/analytics/) by the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
 
