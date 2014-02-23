@@ -52,7 +52,7 @@ module xm {
 					// TODO find/write module to pretty print parse errors
 					xm.log.error(err);
 					xm.log.status('---');
-					xm.log.status(text);
+					xm.log.status(text.substr(1024));
 					xm.log.status('---');
 				}
 				// rethrow
