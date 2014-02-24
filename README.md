@@ -79,8 +79,8 @@ Get some info about `jquery`:
 
 ````bash
 $ tsd query jquery --info --history --resolve
-$ tsd query jquery -i -h -r
-$ tsd query jquery -ihr
+$ tsd query jquery -i -y -r
+$ tsd query jquery -iyr
 ````
 
 Search for `jquery` plugins:
@@ -116,7 +116,7 @@ Install and save to `test.d.ts` as `<reference/>` bundle:
 $ tsd query mocha chai -r -o -s -a install -b test
 ````
 
-### Navigate
+### Open a browser
 
 Browse `pixi` definition on github:
 
@@ -130,7 +130,7 @@ Visit `gruntjs` homepage:
 $ tsd query gruntjs -a visit
 ````
 
-### Selectors
+## Selectors
 
 TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index, where the definition name takes priority:
 
@@ -217,12 +217,14 @@ $ tsd query node -v "<0.10"
 
 ### Date filter
 
-Use the `--date` / `-d` option to set a date-range (find dates using `--history`):
+Use the `--date` / `-d` option to set a date-range (find dates using `--history` / `-y`):
 
 ````bash
 $ tsd query d3 --history
 $ tsd query d3 --date ">=2012-01-01"
-$ tsd query d3 --date "<2012-01-01"
+
+$ tsd query d3 -y
+$ tsd query d3 -d "<2012-01-01"
 ````
 
 ### Commit filter
@@ -231,12 +233,15 @@ Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit 
 
 ````bash
 $ tsd query youtube --history
-$ tsd query youtube --commit d6ff
+$ tsd query youtube --date d6ff
+
+$ tsd query youtube -y
+$ tsd query youtube -c d6ff
 ````
 
 Notes:
 
-1. For now this only works with commits that actually changed the definition file you selected (eg, from `--history`) This will be expanded to allow selecting from any commit at a later date.
+1. For now this only works with commits that actually changed the definition file you selected (eg, listed in `--history`) This will be expanded to allow selecting from any commit at a later date.
 
 ## Usage as module
  
