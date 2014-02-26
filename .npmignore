@@ -28,7 +28,7 @@
 .vagrant
 .editorconfig
 
-tscommand.*
+/tscommand*
 
 tmp/
 
