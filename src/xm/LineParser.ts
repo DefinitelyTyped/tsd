@@ -215,7 +215,7 @@ module xm {
 			log(' ');
 
 			if (res.length > 0) {
-				xm.eachElem(res, (match:LineParserMatch) => {
+				res.forEach((match:LineParserMatch) => {
 					match.extract();
 				});
 			}
