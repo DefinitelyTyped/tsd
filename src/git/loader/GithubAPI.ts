@@ -85,7 +85,8 @@ module git {
 			}
 			this.copyHeadersTo(request.headers);
 
-			request.headers['accept'] = 'application/json';
+			request.headers['accept'] = 'application/vnd.github.beta+json';
+
 			request.lock();
 
 			this.cache.getObject(request).progress(d.notify).then((object:xm.http.CacheObject) => {
