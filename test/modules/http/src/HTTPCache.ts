@@ -35,7 +35,7 @@ describe('xm.http', () => {
 		var info = new helper.HttpTest();
 		info.storeTmpDir = path.join(helper.getDirNameTmp(), name);
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
-		info.wwwHTTP = 'http://localhost:9090/';
+		info.wwwHTTP = 'http://127.0.0.1:9090/';
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
 		return info;
 	}
