@@ -8,7 +8,7 @@
 	<meta name="author" content="Bart van der Schoor">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="css/build.css" rel="stylesheet">
+	<link href="../public/css/build.css" rel="stylesheet">
 	<!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
 	<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>    <![endif]-->
@@ -46,19 +46,11 @@
 						class="glyphicon-exclamation-sign glyphicon"></span> Issues</a></li>
 			</ul>
 		</section>
+
 		<section>
-			<h3>screenshots</h3>
-			<ul>
-				<li>
-					<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png">help</a>
-				</li>
-				<li>
-					<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png">async</a>
-				</li>
-				<li>
-					<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png">angular</a>
-				</li>
-			</ul>
+			<div class="well">
+				<b>Got web skills?</b> TSD is looking for a developer to improve this site. Leave a message <a href="https://github.com/DefinitelyTyped/tsd-site/issues">here</a> if you like Grunt, github and big json.
+			</div>
 		</section>
 
 		<section class="main" ng-controller="TSDListCtrl">
@@ -66,10 +58,23 @@
 				var sortingOrder = 'name';
 			</script>
 
-			<h3>browse</h3>
-
 			<div class="row">
-				<div class="col-xs-6 col-md-4">
+				<div class="col-md-3">
+					<h3>screenshots</h3>
+					<ul>
+						<li>
+							<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png">help</a>
+						</li>
+						<li>
+							<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png">async</a>
+						</li>
+						<li>
+							<a href="https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png">angular</a>
+						</li>
+					</ul>
+				</div>
+				<div class="col-md-9">
+					<h3>browse</h3>
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<form class="form-inline" role="form" action="">
@@ -118,6 +123,9 @@
 							<a href ng-click="nextPage()">»</a>
 						</li>
 					</ul>
+					<div class="well">
+						This paginator is freaky.
+					</div>
 				</div>
 			</div>
 		</section>
@@ -135,8 +143,8 @@
 	</div>
 </div>
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="js/bootstrap.js"></script>
+<script src="../public/js/bootstrap.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
-<script src="js/controllers.js"></script>
+<script src="../public/js/controllers.js"></script>
 </body>
 </html>
