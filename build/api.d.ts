@@ -1275,10 +1275,11 @@ declare module tsd {
 }
 declare module tsd {
     class Bundle {
-        public target: string;
         private head;
         private eol;
-        constructor(target: string);
+        public target: string;
+        public baseDir: string;
+        constructor(target: string, baseDir?: string);
         public parse(content: string): void;
         public has(ref: string): boolean;
         public append(ref: string): void;

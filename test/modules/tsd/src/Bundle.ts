@@ -1,6 +1,7 @@
 /// <reference path='../../../globals.ts' />
 /// <reference path='../../../../src/xm/hash.ts' />
 /// <reference path='../../../../src/xm/file.ts' />
+/// <reference path='../../../../src/xm/Logger.ts' />
 
 /// <reference path='../../../../src/tsd/support/Bundle.ts' />
 
@@ -16,6 +17,45 @@ describe.only('Bundle', () => {
 
 	it('is constructor', () => {
 		assert.isFunction(tsd.Bundle);
+	});
+
+	describe('mangle paths', () => {
+		it('same dir', () => {
+			var p = path.resolve(tmp, 'result.d.ts');
+			var bundle = new tsd.Bundle(p);
+			bundle.append('aa/bb.d.ts');
+			var actual = bundle.getContent();
+			var expected = '/// <reference path="aa/bb.d.ts" />\n';
+			assert.strictEqual(actual, expected);
+		});
+
+		it('relative up', () => {
+			var p = path.resolve(tmp, 'result.d.ts');
+			var bundle = new tsd.Bundle(p);
+			bundle.append('../aa/bb.d.ts');
+			var actual = bundle.getContent();
+			var expected = '/// <reference path="../aa/bb.d.ts" />\n';
+			assert.strictEqual(actual, expected);
+		});
+
+		it('absolute', () => {
+			var p = path.resolve(tmp, 'result.d.ts');
+			var bundle = new tsd.Bundle(p);
+			bundle.append(path.resolve(tmp, 'aa/bb.d.ts'));
+			var actual = bundle.getContent();
+			var expected = '/// <reference path="aa/bb.d.ts" />\n';
+			assert.strictEqual(actual, expected);
+		});
+
+		it('different baseDir', () => {
+			var p = path.resolve(tmp, 'result.d.ts');
+			var d = path.resolve(tmp, '..', 'alt');
+			var bundle = new tsd.Bundle(p, d);
+			bundle.append('aa/bb.d.ts');
+			var actual = bundle.getContent();
+			var expected = '/// <reference path="../alt/aa/bb.d.ts" />\n';
+			assert.strictEqual(actual, expected);
+		});
 	});
 
 	describe('bulk', () => {
@@ -60,9 +100,6 @@ describe.only('Bundle', () => {
 				if (fs.existsSync(src)) {
 					base = xm.file.readFileSync(src);
 					bundle.parse(base);
-				}
-				else {
-
 				}
 				var expected = xm.file.readFileSync(path.join(fixtures, name, 'result.d.ts'));
 

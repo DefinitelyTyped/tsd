@@ -53,9 +53,9 @@ module tsd {
 			var d:Q.Deferred<tsd.Bundle> = Q.defer();
 			this.track.promise(d.promise, BundleManager.bundle_read, target);
 
-			var bundle = new Bundle(target);
-
 			target = path.resolve(target);
+
+			var bundle = new Bundle(target, this.core.context.getTypingsDir());
 
 			FS.exists(target).then((exists:boolean) => {
 				if (!exists) {

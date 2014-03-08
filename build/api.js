@@ -7515,10 +7515,11 @@ var tsd;
     var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
     var Bundle = (function () {
-        function Bundle(target) {
-            this.target = target;
+        function Bundle(target, baseDir) {
             this.eol = '\n';
+            xm.assertVar(target, 'string', 'target');
             this.target = target.replace(/^\.\//, '');
+            this.baseDir = baseDir || path.dirname(this.target);
         }
         Bundle.prototype.parse = function (content) {
             this.head = null;
@@ -7555,7 +7556,7 @@ var tsd;
                 referenceTagExp.lastIndex = 0;
                 refMatch = referenceTagExp.exec(lineMatch[1]);
                 if (refMatch && refMatch.length > 1) {
-                    line.ref = refMatch[1];
+                    line.ref = path.resolve(this.baseDir, refMatch[1]);
                 }
             }
 
@@ -7563,6 +7564,8 @@ var tsd;
         };
 
         Bundle.prototype.has = function (ref) {
+            ref = path.resolve(this.baseDir, ref);
+
             var line = this.head;
             while (line) {
                 if (line.ref === ref) {
@@ -7574,6 +7577,8 @@ var tsd;
         };
 
         Bundle.prototype.append = function (ref) {
+            ref = path.resolve(this.baseDir, ref);
+
             if (!this.has(ref)) {
                 var line = new BundleLine('', ref);
                 if (this.head) {
@@ -7592,6 +7597,8 @@ var tsd;
         };
 
         Bundle.prototype.remove = function (ref) {
+            ref = path.resolve(this.baseDir, ref);
+
             var line = this.head;
             while (line) {
                 if (line.ref === ref) {
@@ -7607,11 +7614,12 @@ var tsd;
 
         Bundle.prototype.toArray = function (all) {
             if (typeof all === "undefined") { all = false; }
-            var line = this.head;
             var ret = [];
+            var base = path.dirname(this.target);
+            var line = this.head;
             while (line) {
                 if (all || line.ref) {
-                    ret.push(line.ref);
+                    ret.push(line.getRef(base));
                 }
                 line = line.next;
             }
@@ -7632,8 +7640,8 @@ var tsd;
 
         Bundle.prototype.last = function (all) {
             if (typeof all === "undefined") { all = false; }
-            var line = this.head;
             var ret = null;
+            var line = this.head;
             while (line) {
                 if (all || line.ref) {
                     ret = line;
@@ -7646,9 +7654,10 @@ var tsd;
         Bundle.prototype.getContent = function () {
             var content = [];
 
+            var base = path.dirname(this.target);
             var line = this.head;
             while (line) {
-                content.push(line.getValue(), this.eol);
+                content.push(line.getValue(base), this.eol);
                 line = line.next;
             }
             return content.join('');
@@ -7662,9 +7671,20 @@ var tsd;
             this.value = value;
             this.ref = ref;
         }
-        BundleLine.prototype.getValue = function () {
+        BundleLine.prototype.getRef = function (base) {
+            var ref = this.ref;
+            if (base) {
+                ref = path.relative(base, ref);
+            }
+            if (path.sep === '\\') {
+                ref = ref.replace(/\\/g, '/');
+            }
+            return ref;
+        };
+
+        BundleLine.prototype.getValue = function (base) {
             if (this.ref) {
-                return '/// <reference path="' + this.ref + '" />';
+                return '/// <reference path="' + this.getRef(base) + '" />';
             }
             return this.value;
         };
@@ -7729,9 +7749,9 @@ var tsd;
             var d = Q.defer();
             this.track.promise(d.promise, BundleManager.bundle_read, target);
 
-            var bundle = new tsd.Bundle(target);
-
             target = path.resolve(target);
+
+            var bundle = new tsd.Bundle(target, this.core.context.getTypingsDir());
 
             FS.exists(target).then(function (exists) {
                 if (!exists) {

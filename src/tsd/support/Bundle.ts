@@ -1,4 +1,5 @@
 /// <reference path="../../_ref.d.ts" />
+/// <reference path="../../xm/assertVar.ts" />
 
 module tsd {
 	'use strict';
@@ -22,8 +23,15 @@ module tsd {
 		private head:BundleLine;
 		private eol:string = '\n';
 
-		constructor(public target:string) {
+		// location of the .d.ts file
+		public target:string;
+		// base folder when adding relative refs
+		public baseDir:string;
+
+		constructor(target:string, baseDir?:string) {
+			xm.assertVar(target, 'string', 'target');
 			this.target = target.replace(/^\.\//, '');
+			this.baseDir = baseDir || path.dirname(this.target);
 		}
 
 		parse(content:string):void {
@@ -62,7 +70,8 @@ module tsd {
 				referenceTagExp.lastIndex = 0;
 				refMatch = referenceTagExp.exec(lineMatch[1]);
 				if (refMatch && refMatch.length > 1) {
-					line.ref = refMatch[1];
+					// clean-up path
+					line.ref = path.resolve(this.baseDir, refMatch[1]);
 				}
 			}
 
@@ -71,6 +80,8 @@ module tsd {
 		}
 
 		has(ref:string):boolean {
+			ref = path.resolve(this.baseDir, ref);
+
 			var line = this.head;
 			while (line) {
 				if (line.ref === ref) {
@@ -82,6 +93,8 @@ module tsd {
 		}
 
 		append(ref:string):void {
+			ref = path.resolve(this.baseDir, ref);
+
 			if (!this.has(ref)) {
 				var line = new BundleLine('', ref);
 				if (this.head) {
@@ -103,6 +116,8 @@ module tsd {
 		}
 
 		remove(ref:string):void {
+			ref = path.resolve(this.baseDir, ref);
+
 			var line = this.head;
 			while (line) {
 				if (line.ref === ref) {
@@ -117,11 +132,12 @@ module tsd {
 		}
 
 		toArray(all:boolean = false):string[] {
-			var line = this.head;
 			var ret:string[] = [];
+			var base = path.dirname(this.target);
+			var line = this.head;
 			while (line) {
 				if (all || line.ref) {
-					ret.push(line.ref);
+					ret.push(line.getRef(base));
 				}
 				line = line.next;
 			}
@@ -140,8 +156,8 @@ module tsd {
 		}
 
 		private last(all:boolean = false):BundleLine {
-			var line = this.head;
 			var ret:BundleLine = null;
+			var line = this.head;
 			while (line) {
 				if (all || line.ref) {
 					ret = line;
@@ -153,10 +169,11 @@ module tsd {
 
 		getContent():string {
 			var content:string[] = [];
-
+			// make relative paths from target to files
+			var base = path.dirname(this.target);
 			var line = this.head;
 			while (line) {
-				content.push(line.getValue(), this.eol);
+				content.push(line.getValue(base), this.eol);
 				line = line.next;
 			}
 			return content.join('');
@@ -168,14 +185,29 @@ module tsd {
 
 		next:BundleLine;
 		prev:BundleLine;
+		value:string;
+		ref:string;
 
-		constructor(public value:string, public ref?:string) {
-
+		constructor(value:string, ref?:string) {
+			this.value = value;
+			this.ref = ref;
 		}
 
-		getValue():string {
+		getRef(base?:string):string {
+			var ref = this.ref;
+			if (base) {
+				ref = path.relative(base, ref);
+			}
+			if (path.sep === '\\') {
+				// TODO is this correct?
+				ref = ref.replace(/\\/g, '/');
+			}
+			return ref;
+		}
+
+		getValue(base?:string):string {
 			if (this.ref) {
-				return '/// <reference path="' + this.ref + '" />';
+				return '/// <reference path="' + this.getRef(base) + '" />';
 			}
 			return this.value;
 		}
