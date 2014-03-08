@@ -68,13 +68,13 @@ module git {
 
 		getCachableURL(url:string):Q.Promise<any> {
 			var request = new xm.http.CacheRequest(url);
-			return this.getCachable<any>(request, true);
+			return this.getCachable(request, true);
 		}
 
-		getCachable<T>(request:xm.http.CacheRequest, addMeta:boolean, koder?:xm.IContentKoder<T>):Q.Promise<T> {
+		getCachable(request:xm.http.CacheRequest, addMeta:boolean):Q.Promise<any> {
 			// TODO add some specific validation
-			var koder = (koder || xm.JSONKoder.main);
-			var d:Q.Deferred<T> = Q.defer();
+			var koder:xm.IContentKoder<any> = xm.JSONKoder.main;
+			var d:Q.Deferred<any> = Q.defer();
 			this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
 			if (!xm.isNumber(request.localMaxAge)) {

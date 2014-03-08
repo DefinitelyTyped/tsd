@@ -201,7 +201,7 @@ module xm {
 		export function canWriteFile(targetPath:string, overwrite:boolean) {
 			return FS.exists(targetPath).then((exists:boolean) => {
 				if (!exists) {
-					return true;
+					return Q(true);
 				}
 				return FS.isFile(targetPath).then((isFile:boolean) => {
 					if (isFile) {

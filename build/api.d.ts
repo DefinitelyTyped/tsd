@@ -173,7 +173,7 @@ declare module xm {
         inspect(value: any, depth?: number, label?: string): void;
         json(value: any): void;
         enabled: boolean;
-        out: xm.StyledOut;
+        out: StyledOut;
     }
     class LogLevel {
         static ok: string;
@@ -214,11 +214,11 @@ declare module xm {
         function readJSONPromise(src: string): Q.Promise<any>;
         function writeJSONSync(dest: string, data: any): void;
         function writeJSONPromise(dest: string, data: any): Q.Promise<void>;
-        function readFileSync(dest: string, encoding?: string);
+        function readFileSync(dest: string, encoding?: string): any;
         function writeFileSync(dest: string, data: any, encoding?: string): void;
         function mkdirCheckSync(dir: string, writable?: boolean, testWritable?: boolean): string;
         function mkdirCheckQ(dir: string, writable?: boolean, testWritable?: boolean): Q.Promise<string>;
-        function canWriteFile(targetPath: string, overwrite: boolean): Q.Promise<{}>;
+        function canWriteFile(targetPath: string, overwrite: boolean): Q.Promise<any>;
         function removeFile(target: string): Q.Promise<void>;
         function touchFile(src: string, atime?: Date, mtime?: Date): Q.Promise<void>;
         function findup(dir: string, name: string): Q.Promise<string>;
@@ -310,8 +310,8 @@ declare module tsd {
         public project: string;
         public name: string;
         public semver: string;
-        public head: tsd.DefVersion;
-        public history: tsd.DefVersion[];
+        public head: DefVersion;
+        public history: DefVersion[];
         constructor(path: string);
         public toString(): string;
         public pathTerm : string;
@@ -370,16 +370,16 @@ declare module tsd {
         private _def;
         private _commit;
         private _blob;
-        public dependencies: tsd.Def[];
+        public dependencies: Def[];
         public solved: boolean;
-        public info: tsd.DefInfo;
-        constructor(def: tsd.Def, commit: tsd.DefCommit);
-        public setContent(blob: tsd.DefBlob): void;
+        public info: DefInfo;
+        constructor(def: Def, commit: DefCommit);
+        public setContent(blob: DefBlob): void;
         public hasContent(): boolean;
         public key : string;
-        public def : tsd.Def;
-        public commit : tsd.DefCommit;
-        public blob : tsd.DefBlob;
+        public def : Def;
+        public commit : DefCommit;
+        public blob : DefBlob;
         public blobShaShort : string;
         public toString(): string;
     }
@@ -389,7 +389,7 @@ declare module tsd {
         public path: string;
         public commitSha: string;
         constructor(path: string);
-        public update(file: tsd.DefVersion): void;
+        public update(file: DefVersion): void;
         public toString(): string;
     }
     class Config implements git.GithubRepoConfig {
@@ -410,7 +410,7 @@ declare module tsd {
         public repoProject : string;
         public repoRef : string;
         public schema : any;
-        public addFile(file: tsd.DefVersion): void;
+        public addFile(file: DefVersion): void;
         public hasFile(filePath: string): boolean;
         public getFile(filePath: string): InstalledDef;
         public removeFile(filePath: string): void;
@@ -437,8 +437,8 @@ declare module tsd {
 }
 declare module tsd {
     class Context {
-        public paths: tsd.Paths;
-        public config: tsd.Config;
+        public paths: Paths;
+        public config: Config;
         public packageInfo: xm.PackageJSON;
         public verbose: boolean;
         public settings: xm.JSONPointer;
@@ -468,7 +468,7 @@ declare module tsd {
         private projectExp;
         private nameExp;
         constructor(pattern: string);
-        public filter(list: tsd.Def[], current: tsd.Def[]): tsd.Def[];
+        public filter(list: Def[], current: Def[]): Def[];
         public toString(): string;
         private compile();
         private compileSingle();
@@ -478,7 +478,7 @@ declare module tsd {
 }
 declare module tsd {
     class InfoMatcher {
-        public filter(list: tsd.DefVersion[]): tsd.DefVersion[];
+        public filter(list: DefVersion[]): DefVersion[];
     }
 }
 declare module xm {
@@ -501,9 +501,9 @@ declare module tsd {
     class DateMatcher {
         public comparators: DateComp[];
         constructor(pattern?: string);
-        public filter(list: tsd.DefVersion[]): tsd.DefVersion[];
-        public best(list: tsd.DefVersion[]): tsd.DefVersion;
-        public latest(list: tsd.DefVersion[]): tsd.DefVersion;
+        public filter(list: DefVersion[]): DefVersion[];
+        public best(list: DefVersion[]): DefVersion;
+        public latest(list: DefVersion[]): DefVersion;
         public extractSelector(pattern: string): void;
         private getFilterFunc();
     }
@@ -514,7 +514,7 @@ declare module tsd {
         static all: string;
         public range: string;
         constructor(range: string);
-        public filter(list: tsd.Def[]): tsd.Def[];
+        public filter(list: Def[]): Def[];
         private getLatest(list);
     }
 }
@@ -523,17 +523,17 @@ declare module tsd {
         public commitSha: string;
         public minimumShaLen: number;
         constructor(commitSha?: string);
-        public filter(list: tsd.DefVersion[]): tsd.DefVersion[];
-        public getFilterFunc(commitSha: string): (file: tsd.DefVersion) => boolean;
+        public filter(list: DefVersion[]): DefVersion[];
+        public getFilterFunc(commitSha: string): (file: DefVersion) => boolean;
     }
 }
 declare module tsd {
     class Query {
-        public patterns: tsd.NameMatcher[];
-        public versionMatcher: tsd.VersionMatcher;
-        public dateMatcher: tsd.DateMatcher;
-        public infoMatcher: tsd.InfoMatcher;
-        public commitMatcher: tsd.CommitMatcher;
+        public patterns: NameMatcher[];
+        public versionMatcher: VersionMatcher;
+        public dateMatcher: DateMatcher;
+        public infoMatcher: InfoMatcher;
+        public commitMatcher: CommitMatcher;
         public parseInfo: boolean;
         public loadHistory: boolean;
         constructor(pattern?: string);
@@ -571,7 +571,7 @@ declare module git {
         private _api;
         private _raw;
         private _repo;
-        constructor(repo: git.GithubRepo);
+        constructor(repo: GithubRepo);
         public getURL(id: string, vars?: any): string;
         public api(): string;
         public base(): string;
@@ -622,8 +622,8 @@ declare module xm {
         public stats: {
             [id: string]: number;
         };
-        public log: xm.Logger;
-        constructor(log?: xm.Logger);
+        public log: Logger;
+        constructor(log?: Logger);
         public count(id: string, label?: string): number;
         public get(id: string): number;
         public has(id: string): boolean;
@@ -662,13 +662,13 @@ declare module xm {
         private _label;
         private _prefix;
         private _startAt;
-        public logger: xm.Logger;
+        public logger: Logger;
         public logEnabled: boolean;
         private _trackEnabled;
         private _trackLimit;
         private _trackPrune;
         private _mutePromises;
-        constructor(prefix?: string, label?: string, logger?: xm.Logger);
+        constructor(prefix?: string, label?: string, logger?: Logger);
         public promise(promise: Q.Promise<any>, type: string, message?: string, data?: any): EventLogItem;
         public start(type: string, message?: string, data?: any): EventLogItem;
         public complete(type: string, message?: string, data?: any): EventLogItem;
@@ -692,7 +692,7 @@ declare module xm {
         public setTrack(enabled: boolean, limit?: number, prune?: number): void;
         public getItemString(item: EventLogItem, multiline?: boolean): string;
         public getHistory(): string;
-        public getStats(): xm.StatCounter;
+        public getStats(): StatCounter;
         public getItems(): EventLogItem[];
         public getReport(label?: string): string;
     }
@@ -754,10 +754,10 @@ declare module xm {
     module http {
         enum CacheMode {
             forceLocal = 1,
-            forceRemote,
-            forceUpdate,
-            allowRemote,
-            allowUpdate,
+            forceRemote = 2,
+            forceUpdate = 3,
+            allowRemote = 4,
+            allowUpdate = 5,
         }
         class CacheOpts {
             public compressStore: boolean;
@@ -791,17 +791,17 @@ declare module xm {
             static local_body_empty: string;
             static local_cache_hit: string;
             static http_cache_hit: string;
-            public cache: http.HTTPCache;
-            public request: http.CacheRequest;
-            public object: http.CacheObject;
-            public infoCacheValidator: http.IObjectValidator;
-            public bodyCacheValidator: http.IObjectValidator;
-            public track: xm.EventLog;
+            public cache: HTTPCache;
+            public request: CacheRequest;
+            public object: CacheObject;
+            public infoCacheValidator: IObjectValidator;
+            public bodyCacheValidator: IObjectValidator;
+            public track: EventLog;
             private _defer;
-            constructor(cache: http.HTTPCache, request: http.CacheRequest);
+            constructor(cache: HTTPCache, request: CacheRequest);
             public destruct(): void;
             private canUpdate();
-            public getObject(): Q.Promise<http.CacheObject>;
+            public getObject(): Q.Promise<CacheObject>;
             private cacheRead();
             private httpLoad(httpCache?);
             private cacheWrite(cacheWasFresh);
@@ -866,14 +866,14 @@ declare module xm {
             static main: SimpleValidator;
         }
         class CacheValidator implements IObjectValidator {
-            public schema;
-            constructor(schema);
+            public schema: any;
+            constructor(schema: any);
             public assert(object: CacheObject): void;
         }
         class CacheAgeValidator implements IObjectValidator {
-            public schema;
+            public schema: any;
             public maxAgeMili: number;
-            constructor(schema, maxAgeMili?: number);
+            constructor(schema: any, maxAgeMili?: number);
             public assert(object: CacheObject): void;
         }
         class ChecksumValidator implements IObjectValidator {
@@ -897,9 +897,9 @@ declare module xm {
             static dir_error: string;
             static ignore_error: string;
             public storeDir: string;
-            public opts: http.CacheOpts;
-            public track: xm.EventLog;
-            public infoKoder: xm.IContentKoder<http.CacheInfo>;
+            public opts: CacheOpts;
+            public track: EventLog;
+            public infoKoder: IContentKoder<CacheInfo>;
             public infoSchema: any;
             public proxy: string;
             private jobs;
@@ -909,9 +909,9 @@ declare module xm {
             private manageKoder;
             private manageSchema;
             private cacheSweepLast;
-            constructor(storeDir: string, opts?: http.CacheOpts);
+            constructor(storeDir: string, opts?: CacheOpts);
             public setStoreDir(dir: string): void;
-            public getObject(request: http.CacheRequest): Q.Promise<http.CacheObject>;
+            public getObject(request: CacheRequest): Q.Promise<CacheObject>;
             private scheduleRelease(key);
             private init();
             public checkCleanCache(): Q.Promise<void>;
@@ -922,7 +922,7 @@ declare module xm {
 }
 declare module git {
     class GithubLoader {
-        public repo: git.GithubRepo;
+        public repo: GithubRepo;
         public track: xm.EventLog;
         public cache: xm.http.HTTPCache;
         public options: xm.JSONPointer;
@@ -930,7 +930,7 @@ declare module git {
         public label: string;
         public formatVersion: string;
         public headers: {};
-        constructor(repo: git.GithubRepo, options: xm.JSONPointer, storeDir: string, prefix: string, label: string);
+        constructor(repo: GithubRepo, options: xm.JSONPointer, storeDir: string, prefix: string, label: string);
         public _initGithubLoader(lock?: string[]): void;
         public getCacheKey(): string;
         public copyHeadersTo(target: any, source?: any): void;
@@ -956,11 +956,11 @@ declare module git {
     }
 }
 declare module git {
-    class GithubAPI extends git.GithubLoader {
+    class GithubAPI extends GithubLoader {
         static get_cachable: string;
         static get_rate: string;
         private apiVersion;
-        constructor(repo: git.GithubRepo, options: xm.JSONPointer, storeDir: string);
+        constructor(repo: GithubRepo, options: xm.JSONPointer, storeDir: string);
         public getBranches(): Q.Promise<any>;
         public getBranch(branch: string): Q.Promise<any>;
         public getTree(sha: string, recursive: boolean): Q.Promise<any>;
@@ -968,15 +968,15 @@ declare module git {
         public getBlob(sha: string): Q.Promise<any>;
         public getPathCommits(path: string): Q.Promise<any>;
         public getCachableURL(url: string): Q.Promise<any>;
-        public getCachable<T>(request: xm.http.CacheRequest, addMeta: boolean, koder?: xm.IContentKoder<T>): Q.Promise<T>;
-        public getRateInfo(): Q.Promise<git.GitRateInfo>;
+        public getCachable(request: xm.http.CacheRequest, addMeta: boolean): Q.Promise<any>;
+        public getRateInfo(): Q.Promise<GitRateInfo>;
         public getCacheKey(): string;
     }
 }
 declare module git {
-    class GithubRaw extends git.GithubLoader {
+    class GithubRaw extends GithubLoader {
         static get_file: string;
-        constructor(repo: git.GithubRepo, options: xm.JSONPointer, storeDir: string);
+        constructor(repo: GithubRepo, options: xm.JSONPointer, storeDir: string);
         public getText(ref: string, filePath: string): Q.Promise<string>;
         public getJSON(ref: string, filePath: string): Q.Promise<any>;
         public getBinary(ref: string, filePath: string): Q.Promise<NodeBuffer>;
@@ -986,12 +986,12 @@ declare module git {
 }
 declare module git {
     class GithubRepo {
-        public config: git.GithubRepoConfig;
+        public config: GithubRepoConfig;
         public storeDir: string;
-        public urls: git.GithubURLs;
-        public api: git.GithubAPI;
-        public raw: git.GithubRaw;
-        constructor(config: git.GithubRepoConfig, storeDir: string, opts: xm.JSONPointer);
+        public urls: GithubURLs;
+        public api: GithubAPI;
+        public raw: GithubRaw;
+        constructor(config: GithubRepoConfig, storeDir: string, opts: xm.JSONPointer);
         public getCacheKey(): string;
         public toString(): string;
         public verbose : boolean;
@@ -1008,44 +1008,44 @@ declare module tsd {
         public addToBundles: string[];
         public timeout: number;
         static fromJSON(json: Object): Options;
-        static main;
+        static main: any;
     }
 }
 declare module tsd {
     class SubCore {
-        public core: tsd.Core;
+        public core: Core;
         public track: xm.EventLog;
         private _verbose;
-        constructor(core: tsd.Core, track: string, label: string);
+        constructor(core: Core, track: string, label: string);
         public verbose : boolean;
     }
 }
 declare module tsd {
     class DefUtil {
-        static getDefs(list: tsd.DefVersion[]): tsd.Def[];
-        static getHeads(list: tsd.Def[]): tsd.DefVersion[];
-        static getHistoryTop(list: tsd.Def[]): tsd.DefVersion[];
-        static getHistoryBottom(list: tsd.Def[]): tsd.DefVersion[];
-        static getLatest(list: tsd.DefVersion[]): tsd.DefVersion;
-        static getRecent(list: tsd.DefVersion[]): tsd.DefVersion;
-        static getPaths(list: tsd.Def[]): string[];
-        static getPathsOf(list: tsd.DefVersion[]): string[];
-        static uniqueDefVersion(list: tsd.DefVersion[]): tsd.DefVersion[];
-        static uniqueDefs(list: tsd.Def[]): tsd.Def[];
+        static getDefs(list: DefVersion[]): Def[];
+        static getHeads(list: Def[]): DefVersion[];
+        static getHistoryTop(list: Def[]): DefVersion[];
+        static getHistoryBottom(list: Def[]): DefVersion[];
+        static getLatest(list: DefVersion[]): DefVersion;
+        static getRecent(list: DefVersion[]): DefVersion;
+        static getPaths(list: Def[]): string[];
+        static getPathsOf(list: DefVersion[]): string[];
+        static uniqueDefVersion(list: DefVersion[]): DefVersion[];
+        static uniqueDefs(list: Def[]): Def[];
         static extractReferenceTags(source: string): string[];
-        static contains(list: tsd.DefVersion[], file: tsd.DefVersion): boolean;
-        static containsDef(list: tsd.Def[], def: tsd.Def): boolean;
-        static mergeDependencies(list: tsd.DefVersion[], target?: tsd.DefVersion[]): tsd.DefVersion[];
-        static mergeDependenciesOf(list: tsd.Def[], target?: tsd.DefVersion[]): tsd.DefVersion[];
-        static matchCommit(list: tsd.DefVersion[], commitSha: string): tsd.DefVersion[];
-        static haveContent(list: tsd.DefVersion[]): tsd.DefVersion[];
-        static fileCompare(aa: tsd.DefVersion, bb: tsd.DefVersion): number;
-        static defCompare(aa: tsd.Def, bb: tsd.Def): number;
-        static fileCommitCompare(aa: tsd.DefVersion, bb: tsd.DefVersion): number;
+        static contains(list: DefVersion[], file: DefVersion): boolean;
+        static containsDef(list: Def[], def: Def): boolean;
+        static mergeDependencies(list: DefVersion[], target?: DefVersion[]): DefVersion[];
+        static mergeDependenciesOf(list: Def[], target?: DefVersion[]): DefVersion[];
+        static matchCommit(list: DefVersion[], commitSha: string): DefVersion[];
+        static haveContent(list: DefVersion[]): DefVersion[];
+        static fileCompare(aa: DefVersion, bb: DefVersion): number;
+        static defCompare(aa: Def, bb: Def): number;
+        static fileCommitCompare(aa: DefVersion, bb: DefVersion): number;
     }
 }
 declare module tsd {
-    class Resolver extends tsd.SubCore {
+    class Resolver extends SubCore {
         static active: string;
         static solved: string;
         static remove: string;
@@ -1057,11 +1057,11 @@ declare module tsd {
         static dep_added: string;
         static dep_missing: string;
         private _stash;
-        constructor(core: tsd.Core);
-        public resolveBulk(list: tsd.DefVersion[]): Q.Promise<tsd.DefVersion[]>;
-        public resolveDeps(file: tsd.DefVersion): Q.Promise<tsd.DefVersion>;
-        public applyResolution(index: tsd.DefIndex, file: tsd.DefVersion, content: string): Q.Promise<tsd.DefVersion>[];
-        public extractPaths(file: tsd.DefVersion, content: string): string[];
+        constructor(core: Core);
+        public resolveBulk(list: DefVersion[]): Q.Promise<DefVersion[]>;
+        public resolveDeps(file: DefVersion): Q.Promise<DefVersion>;
+        public applyResolution(index: DefIndex, file: DefVersion, content: string): Q.Promise<DefVersion>[];
+        public extractPaths(file: DefVersion, content: string): string[];
     }
 }
 declare module git {
@@ -1139,29 +1139,29 @@ declare module tsd {
         constructor();
         public hasIndex(): boolean;
         public init(branch: any, tree: any): void;
-        public setHistory(def: tsd.Def, commitJsonArray: any[]): void;
-        public procureCommit(commitSha: string): tsd.DefCommit;
-        public procureBlob(blobSha: string): tsd.DefBlob;
-        public procureBlobFor(content: NodeBuffer, encoding?: string): tsd.DefBlob;
-        public procureDef(path: string): tsd.Def;
-        public procureVersion(def: tsd.Def, commit: tsd.DefCommit): tsd.DefVersion;
-        public procureVersionFromSha(path: string, commitSha: string): tsd.DefVersion;
-        public getDef(path: string): tsd.Def;
+        public setHistory(def: Def, commitJsonArray: any[]): void;
+        public procureCommit(commitSha: string): DefCommit;
+        public procureBlob(blobSha: string): DefBlob;
+        public procureBlobFor(content: NodeBuffer, encoding?: string): DefBlob;
+        public procureDef(path: string): Def;
+        public procureVersion(def: Def, commit: DefCommit): DefVersion;
+        public procureVersionFromSha(path: string, commitSha: string): DefVersion;
+        public getDef(path: string): Def;
         public hasDef(path: string): boolean;
-        public getBlob(sha: string): tsd.DefBlob;
+        public getBlob(sha: string): DefBlob;
         public hasBlob(sha: string): boolean;
-        public getCommit(sha: string): tsd.DefCommit;
+        public getCommit(sha: string): DefCommit;
         public hasCommit(sha: string): boolean;
         public getPaths(): string[];
         public toDump(): string;
         public branchName : string;
-        public list : tsd.Def[];
-        public indexCommit : tsd.DefCommit;
+        public list : Def[];
+        public indexCommit : DefCommit;
         public toString(): string;
     }
 }
 declare module tsd {
-    class IndexManager extends tsd.SubCore {
+    class IndexManager extends SubCore {
         static init: string;
         static tree_get: string;
         static branch_get: string;
@@ -1169,43 +1169,43 @@ declare module tsd {
         static procure_file: string;
         static procure_commit: string;
         private _defer;
-        constructor(core: tsd.Core);
-        public getIndex(): Q.Promise<tsd.DefIndex>;
-        public procureDef(path: string): Q.Promise<tsd.Def>;
-        public procureFile(path: string, commitSha: string): Q.Promise<tsd.DefVersion>;
-        public procureCommit(commitSha: string): Q.Promise<tsd.DefCommit>;
-        public findFile(path: string, commitShaFragment: string): Q.Promise<tsd.DefVersion>;
+        constructor(core: Core);
+        public getIndex(): Q.Promise<DefIndex>;
+        public procureDef(path: string): Q.Promise<Def>;
+        public procureFile(path: string, commitSha: string): Q.Promise<DefVersion>;
+        public procureCommit(commitSha: string): Q.Promise<DefCommit>;
+        public findFile(path: string, commitShaFragment: string): Q.Promise<DefVersion>;
     }
 }
 declare module tsd {
-    class ConfigIO extends tsd.SubCore {
+    class ConfigIO extends SubCore {
         static config_init: string;
         static config_read: string;
         static config_save: string;
-        constructor(core: tsd.Core);
+        constructor(core: Core);
         public initConfig(overwrite: boolean): Q.Promise<string>;
         public readConfig(optional?: boolean): Q.Promise<void>;
         public saveConfig(target?: string): Q.Promise<string>;
     }
 }
 declare module tsd {
-    class ContentLoader extends tsd.SubCore {
-        constructor(core: tsd.Core);
-        public loadCommitMetaData(commit: tsd.DefCommit): Q.Promise<tsd.DefCommit>;
-        public loadContent(file: tsd.DefVersion, tryHead?: boolean): Q.Promise<tsd.DefVersion>;
-        public loadContentBulk(list: tsd.DefVersion[]): Q.Promise<tsd.DefVersion[]>;
-        public loadHistory(def: tsd.Def): Q.Promise<tsd.Def>;
-        public loadHistoryBulk(list: tsd.Def[]): Q.Promise<tsd.DefVersion[]>;
+    class ContentLoader extends SubCore {
+        constructor(core: Core);
+        public loadCommitMetaData(commit: DefCommit): Q.Promise<DefCommit>;
+        public loadContent(file: DefVersion, tryHead?: boolean): Q.Promise<DefVersion>;
+        public loadContentBulk(list: DefVersion[]): Q.Promise<DefVersion[]>;
+        public loadHistory(def: Def): Q.Promise<Def>;
+        public loadHistoryBulk(list: Def[]): Q.Promise<DefVersion[]>;
     }
 }
 declare module tsd {
-    class Installer extends tsd.SubCore {
-        constructor(core: tsd.Core);
-        public installFile(file: tsd.DefVersion, addToConfig?: boolean, overwrite?: boolean): Q.Promise<string>;
-        public installFileBulk(list: tsd.DefVersion[], addToConfig?: boolean, overwrite?: boolean): Q.Promise<Map<string, tsd.DefVersion>>;
-        public reinstallBulk(list: tsd.InstalledDef[], overwrite?: boolean): Q.Promise<Map<string, tsd.DefVersion>>;
-        public useFile(file: tsd.DefVersion, overwrite: boolean): Q.Promise<string>;
-        public useFileBulk(list: tsd.DefVersion[], overwrite?: boolean): Q.Promise<Map<string, tsd.DefVersion>>;
+    class Installer extends SubCore {
+        constructor(core: Core);
+        public installFile(file: DefVersion, addToConfig?: boolean, overwrite?: boolean): Q.Promise<string>;
+        public installFileBulk(list: DefVersion[], addToConfig?: boolean, overwrite?: boolean): Q.Promise<Map<string, DefVersion>>;
+        public reinstallBulk(list: InstalledDef[], overwrite?: boolean): Q.Promise<Map<string, DefVersion>>;
+        public useFile(file: DefVersion, overwrite: boolean): Q.Promise<string>;
+        public useFileBulk(list: DefVersion[], overwrite?: boolean): Q.Promise<Map<string, DefVersion>>;
     }
 }
 declare module xm {
@@ -1214,7 +1214,7 @@ declare module xm {
         public parsers: Map<string, LineParser>;
         constructor(verbose?: boolean);
         public addParser(parser: LineParser): void;
-        public getInfo();
+        public getInfo(): any;
         public getParser(id: string): LineParser;
         private link();
         public get(ids: string[]): LineParser[];
@@ -1248,29 +1248,29 @@ declare module tsd {
         public verbose: boolean;
         public parser: xm.LineParserCore;
         constructor(verbose?: boolean);
-        public parse(data: tsd.DefInfo, source: string): void;
+        public parse(data: DefInfo, source: string): void;
     }
 }
 declare module tsd {
-    class InfoParser extends tsd.SubCore {
-        constructor(core: tsd.Core);
-        public parseDefInfo(file: tsd.DefVersion): Q.Promise<tsd.DefVersion>;
-        public parseDefInfoBulk(list: tsd.DefVersion[]): Q.Promise<tsd.DefVersion[]>;
+    class InfoParser extends SubCore {
+        constructor(core: Core);
+        public parseDefInfo(file: DefVersion): Q.Promise<DefVersion>;
+        public parseDefInfoBulk(list: DefVersion[]): Q.Promise<DefVersion[]>;
     }
 }
 declare module tsd {
     class Selection {
-        public query: tsd.Query;
-        public definitions: tsd.Def[];
-        public selection: tsd.DefVersion[];
+        public query: Query;
+        public definitions: Def[];
+        public selection: DefVersion[];
         public error: any;
-        constructor(query?: tsd.Query);
+        constructor(query?: Query);
     }
 }
 declare module tsd {
-    class SelectorQuery extends tsd.SubCore {
-        constructor(core: tsd.Core);
-        public select(query: tsd.Query, options: tsd.Options): Q.Promise<tsd.Selection>;
+    class SelectorQuery extends SubCore {
+        constructor(core: Core);
+        public select(query: Query, options: Options): Q.Promise<Selection>;
     }
 }
 declare module tsd {
@@ -1291,35 +1291,35 @@ declare module tsd {
     }
 }
 declare module tsd {
-    class BundleManager extends tsd.SubCore {
+    class BundleManager extends SubCore {
         static bundle_init: string;
         static bundle_read: string;
         static bundle_save: string;
         static bundle_add: string;
-        constructor(core: tsd.Core);
-        public addToBundle(target: string, refs: string[], save: boolean): Q.Promise<tsd.Bundle>;
-        public readBundle(target: string, optional: boolean): Q.Promise<tsd.Bundle>;
-        public saveBundle(bundle: tsd.Bundle): Q.Promise<void>;
+        constructor(core: Core);
+        public addToBundle(target: string, refs: string[], save: boolean): Q.Promise<Bundle>;
+        public readBundle(target: string, optional: boolean): Q.Promise<Bundle>;
+        public saveBundle(bundle: Bundle): Q.Promise<void>;
     }
 }
 declare module tsd {
     class Core {
-        public context: tsd.Context;
+        public context: Context;
         public repo: git.GithubRepo;
-        public index: tsd.IndexManager;
-        public selector: tsd.SelectorQuery;
-        public config: tsd.ConfigIO;
-        public content: tsd.ContentLoader;
-        public parser: tsd.InfoParser;
-        public installer: tsd.Installer;
-        public resolver: tsd.Resolver;
-        public bundle: tsd.BundleManager;
+        public index: IndexManager;
+        public selector: SelectorQuery;
+        public config: ConfigIO;
+        public content: ContentLoader;
+        public parser: InfoParser;
+        public installer: Installer;
+        public resolver: Resolver;
+        public bundle: BundleManager;
         public track: xm.EventLog;
         public _components: MultiManager;
         public _cacheMode: string;
-        constructor(context: tsd.Context);
+        constructor(context: Context);
         public updateConfig(): void;
-        public getInstallPath(def: tsd.Def): string;
+        public getInstallPath(def: Def): string;
         public useCacheMode(modeName: string): void;
         public verbose : boolean;
     }
@@ -1340,31 +1340,31 @@ declare module tsd {
 }
 declare module tsd {
     class InstallResult {
-        public options: tsd.Options;
-        public written: Map<string, tsd.DefVersion>;
-        public removed: Map<string, tsd.DefVersion>;
-        public skipped: Map<string, tsd.DefVersion>;
-        constructor(options: tsd.Options);
+        public options: Options;
+        public written: Map<string, DefVersion>;
+        public removed: Map<string, DefVersion>;
+        public skipped: Map<string, DefVersion>;
+        constructor(options: Options);
     }
     class CompareResult {
     }
     class API {
-        public context: tsd.Context;
-        public core: tsd.Core;
+        public context: Context;
+        public core: Core;
         public track: xm.EventLog;
-        constructor(context: tsd.Context);
+        constructor(context: Context);
         public initConfig(overwrite: boolean): Q.Promise<string>;
         public readConfig(optional: boolean): Q.Promise<void>;
         public saveConfig(): Q.Promise<string>;
-        public select(query: tsd.Query, options?: tsd.Options): Q.Promise<tsd.Selection>;
-        public install(selection: tsd.Selection, options?: tsd.Options): Q.Promise<InstallResult>;
+        public select(query: Query, options?: Options): Q.Promise<Selection>;
+        public install(selection: Selection, options?: Options): Q.Promise<InstallResult>;
         private saveBundles(files, options);
-        public reinstall(options?: tsd.Options): Q.Promise<InstallResult>;
-        public update(options?: tsd.Options, version?: string): Q.Promise<InstallResult>;
+        public reinstall(options?: Options): Q.Promise<InstallResult>;
+        public update(options?: Options, version?: string): Q.Promise<InstallResult>;
         public getRateInfo(): Q.Promise<git.GitRateInfo>;
-        public compare(query: tsd.Query): Q.Promise<CompareResult>;
-        public browse(list: tsd.DefVersion[]): Q.Promise<string[]>;
-        public visit(list: tsd.DefVersion[]): Q.Promise<string[]>;
+        public compare(query: Query): Q.Promise<CompareResult>;
+        public browse(list: DefVersion[]): Q.Promise<string[]>;
+        public visit(list: DefVersion[]): Q.Promise<string[]>;
         public purge(raw: boolean, api: boolean): Q.Promise<void>;
         public verbose : boolean;
     }
@@ -1385,19 +1385,19 @@ declare module xm {
         static max: number;
     }
     class ExposeReporter {
-        public output: xm.StyledOut;
-        public expose: xm.Expose;
-        constructor(expose: xm.Expose, output?: xm.StyledOut);
+        public output: StyledOut;
+        public expose: Expose;
+        constructor(expose: Expose, output?: StyledOut);
         public printCommands(level: string): void;
     }
 }
 declare module xm {
     class ExposeContext {
-        public expose: xm.Expose;
-        public command: xm.ExposeCommand;
+        public expose: Expose;
+        public command: ExposeCommand;
         public argv: any;
-        public out: xm.StyledOut;
-        constructor(expose: xm.Expose, argv: any, command?: xm.ExposeCommand);
+        public out: StyledOut;
+        constructor(expose: Expose, argv: any, command?: ExposeCommand);
         public hasOpt(name: string, strict?: boolean): any;
         public getOptRaw(name: string, alt?: any): any;
         public getOpt(name: string, alt?: any): any;
@@ -1417,17 +1417,17 @@ declare module xm {
 }
 declare module xm {
     interface ExposeHook {
-        (ctx: xm.ExposeContext): any;
+        (ctx: ExposeContext): any;
     }
     interface ExposeHandle {
         (res: ExposeResult): any;
     }
     interface ExposeOptionApply {
-        (value: any, ctx: xm.ExposeContext): void;
+        (value: any, ctx: ExposeContext): void;
     }
     interface ExposeResult {
         code: number;
-        ctx: xm.ExposeContext;
+        ctx: ExposeContext;
         error: ExposeError;
     }
     interface ExposeError extends Error {
@@ -1478,21 +1478,21 @@ declare module xm {
         public mainGroup: ExposeGroup;
         private _isInit;
         private _index;
-        public reporter: xm.ExposeReporter;
+        public reporter: ExposeReporter;
         public before: ExposeHook;
         public after: ExposeHook;
         public end: ExposeHandle;
-        constructor(output?: xm.StyledOut);
+        constructor(output?: StyledOut);
         public defineOption(build: (opt: ExposeOption) => void): void;
         public defineCommand(build: (cmd: ExposeCommand) => void): void;
         public defineGroup(build: (group: ExposeGroup) => void): void;
-        public applyOptions(argv: any): xm.ExposeContext;
+        public applyOptions(argv: any): ExposeContext;
         public init(): void;
         public validateOptions(opts: string[]): void;
         public exit(code: number): void;
         public executeArgv(argvRaw: any, alt?: string, exitAfter?: boolean): void;
         public executeRaw(argvRaw: any, alt?: string): Q.Promise<ExposeResult>;
-        public executeCommand(name: string, ctx?: xm.ExposeContext): Q.Promise<ExposeResult>;
+        public executeCommand(name: string, ctx?: ExposeContext): Q.Promise<ExposeResult>;
     }
 }
 declare module tsd {
@@ -1505,14 +1505,14 @@ declare module tsd {
             constructor(output: xm.StyledOut, indent?: number);
             public fmtSortKey(key: string): string;
             public fmtGitURI(str: string): string;
-            public file(file: tsd.DefVersion, sep?: string): xm.StyledOut;
-            public fileEnd(file: tsd.DefVersion, sep?: string): xm.StyledOut;
-            public fileCommit(file: tsd.DefVersion, skipNull?: boolean): xm.StyledOut;
-            public fileHead(file: tsd.DefVersion): xm.StyledOut;
-            public fileInfo(file: tsd.DefVersion, skipNull?: boolean): xm.StyledOut;
-            public dependencies(file: tsd.DefVersion): xm.StyledOut;
-            public history(file: tsd.DefVersion): xm.StyledOut;
-            public installResult(result: tsd.InstallResult): xm.StyledOut;
+            public file(file: DefVersion, sep?: string): xm.StyledOut;
+            public fileEnd(file: DefVersion, sep?: string): xm.StyledOut;
+            public fileCommit(file: DefVersion, skipNull?: boolean): xm.StyledOut;
+            public fileHead(file: DefVersion): xm.StyledOut;
+            public fileInfo(file: DefVersion, skipNull?: boolean): xm.StyledOut;
+            public dependencies(file: DefVersion): xm.StyledOut;
+            public history(file: DefVersion): xm.StyledOut;
+            public installResult(result: InstallResult): xm.StyledOut;
             public rateInfo(info: git.GitRateInfo, note?: boolean, force?: boolean): xm.StyledOut;
             public reportError(err: any, head?: boolean): xm.StyledOut;
             public reportProgress(obj: any): xm.StyledOut;
@@ -1521,8 +1521,8 @@ declare module tsd {
 }
 declare module tsd {
     module cli {
-        function runUpdateNotifier(context: tsd.Context, promise?: boolean): Q.Promise<any>;
-        function showUpdateNotifier(output: xm.StyledOut, context?: tsd.Context, promise?: boolean): Q.Promise<void>;
+        function runUpdateNotifier(context: Context, promise?: boolean): Q.Promise<any>;
+        function showUpdateNotifier(output: xm.StyledOut, context?: Context, promise?: boolean): Q.Promise<void>;
     }
 }
 declare module tsd {
@@ -1540,11 +1540,11 @@ declare module tsd {
             private _workersMax;
             private _workersGrow;
             constructor();
-            public init(context: tsd.Context, enabled?: boolean, debug?: boolean): void;
+            public init(context: Context, enabled?: boolean, debug?: boolean): void;
             public getPage(parts?: string[]): string;
             public pageview(...parts: string[]): void;
-            public query(query: tsd.Query): void;
-            public install(action: string, result: tsd.InstallResult): void;
+            public query(query: Query): void;
+            public install(action: string, result: InstallResult): void;
             public browser(url: string): void;
             public visit(url: string): void;
             public error(err: any): void;
@@ -1624,13 +1624,13 @@ declare module tsd {
 declare module tsd {
     class Job {
         public ctx: xm.ExposeContext;
-        public api: tsd.API;
-        public context: tsd.Context;
-        public query: tsd.Query;
-        public options: tsd.Options;
+        public api: API;
+        public context: Context;
+        public query: Query;
+        public options: Options;
     }
     interface JobSelectionAction {
-        (ctx: xm.ExposeContext, job: Job, selection: tsd.Selection): Q.Promise<any>;
+        (ctx: xm.ExposeContext, job: Job, selection: Selection): Q.Promise<any>;
     }
     function getExpose(): xm.Expose;
     function runARGV(argvRaw: any): void;

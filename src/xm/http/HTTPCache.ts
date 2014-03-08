@@ -22,6 +22,9 @@
 module xm {
 	'use strict';
 
+	declare function setTimeout(callback: (...args: any[]) => void , ms: number , ...args: any[]): NodeTimer;
+	declare function clearTimeout(timeoutId: NodeTimer): void;
+
 	var Q = require('q');
 	var fs = require('fs');
 	var path = require('path');
@@ -137,7 +140,7 @@ module xm {
 						this.jobs.delete(key);
 					}
 					else {
-						var timer = setTimeout(() => {
+						var timer:NodeTimer = setTimeout(() => {
 							this.track.event(HTTPCache.drop_job, 'droppped ' + key, this.jobs.get(key));
 
 							this.jobs.get(key).destruct();
@@ -171,7 +174,7 @@ module xm {
 						this.track.event(HTTPCache.dir_create, this.storeDir);
 						return xm.file.mkdirCheckQ(this.storeDir, true, true);
 					}
-
+				}).then(() => {
 					return FS.isDirectory(this.storeDir).then((isDir:boolean) => {
 						if (!isDir) {
 							this.track.error(HTTPCache.dir_error, this.storeDir);

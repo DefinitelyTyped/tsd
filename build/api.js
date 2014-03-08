@@ -298,23 +298,23 @@ var xm;
         }
     }
 
-    (function (object) {
+    (function (_object) {
         function hasOwnProp(obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
         }
-        object.hasOwnProp = hasOwnProp;
+        _object.hasOwnProp = hasOwnProp;
 
         function defineProp(object, property, settings) {
             Object.defineProperty(object, property, settings);
         }
-        object.defineProp = defineProp;
+        _object.defineProp = defineProp;
 
         function defineProps(object, propertyNames, settings) {
             propertyNames.forEach(function (property) {
                 xm.object.defineProp(object, property, settings);
             });
         }
-        object.defineProps = defineProps;
+        _object.defineProps = defineProps;
 
         function hidePrefixed(object, ownOnly) {
             if (typeof ownOnly === "undefined") { ownOnly = true; }
@@ -324,14 +324,14 @@ var xm;
                 }
             }
         }
-        object.hidePrefixed = hidePrefixed;
+        _object.hidePrefixed = hidePrefixed;
 
         function hideProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { enumerable: false });
             });
         }
-        object.hideProps = hideProps;
+        _object.hideProps = hideProps;
 
         function lockProps(object, props, pub, pref) {
             if (typeof pub === "undefined") { pub = true; }
@@ -346,14 +346,14 @@ var xm;
                 }
             });
         }
-        object.lockProps = lockProps;
+        _object.lockProps = lockProps;
 
         function forceProps(object, props) {
             Object.keys(props).forEach(function (property) {
                 Object.defineProperty(object, property, { value: props[property], writable: false });
             });
         }
-        object.forceProps = forceProps;
+        _object.forceProps = forceProps;
 
         function freezeProps(object, props) {
             props.forEach(function (property) {
@@ -361,7 +361,7 @@ var xm;
                 Object.freeze(object[property]);
             });
         }
-        object.freezeProps = freezeProps;
+        _object.freezeProps = freezeProps;
 
         function lockPrimitives(object) {
             Object.keys(object).forEach(function (property) {
@@ -370,14 +370,14 @@ var xm;
                 }
             });
         }
-        object.lockPrimitives = lockPrimitives;
+        _object.lockPrimitives = lockPrimitives;
 
         function deepFreeze(object) {
             if (xm.isObject(object) || xm.isArray(object)) {
                 deepFreezeRecursive(object, []);
             }
         }
-        object.deepFreeze = deepFreeze;
+        _object.deepFreeze = deepFreeze;
     })(xm.object || (xm.object = {}));
     var object = xm.object;
 })(xm || (xm = {}));
@@ -415,6 +415,8 @@ var xm;
         };
     }
     xm.getReplacerFunc = getReplacerFunc;
+
+    
 
     function getEscaper(vars) {
         var values = (xm.isString(vars.values) ? vars.values.split('') : vars.values);
@@ -1054,8 +1056,8 @@ var xm;
         };
 
         StyledOut.prototype.tweakExp = function (str, expr, muted) {
-            if (typeof muted === "undefined") { muted = false; }
             var _this = this;
+            if (typeof muted === "undefined") { muted = false; }
             if (muted) {
                 this._line.write(str.replace(expr, function (value) {
                     return _this._style.muted(value);
@@ -1110,6 +1112,8 @@ var xm;
     xm.consoleOut = new xm.StyledOut();
 
     xm.log;
+
+    
 
     var LogLevel = (function () {
         function LogLevel() {
@@ -1314,7 +1318,7 @@ var xm;
     var FS = require('q-io/fs');
     var mkdirp = require('mkdirp');
 
-    (function (file) {
+    (function (_file) {
         function distributeDir(base, name, levels, chunk) {
             if (typeof chunk === "undefined") { chunk = 1; }
             name = name.replace(/(^[\\\/]+)|([\\\/]+$)/g, '');
@@ -1331,7 +1335,7 @@ var xm;
             }
             return path.join.apply(path, arr);
         }
-        file.distributeDir = distributeDir;
+        _file.distributeDir = distributeDir;
 
         function parseJson(text) {
             var json;
@@ -1349,12 +1353,12 @@ var xm;
             }
             return json;
         }
-        file.parseJson = parseJson;
+        _file.parseJson = parseJson;
 
         function readJSONSync(src) {
             return parseJson(fs.readFileSync(src, { encoding: 'utf8' }));
         }
-        file.readJSONSync = readJSONSync;
+        _file.readJSONSync = readJSONSync;
 
         function readJSON(src, callback) {
             fs.readFile(path.resolve(src), { encoding: 'utf8' }, function (err, text) {
@@ -1370,21 +1374,21 @@ var xm;
                 return callback(null, json);
             });
         }
-        file.readJSON = readJSON;
+        _file.readJSON = readJSON;
 
         function readJSONPromise(src) {
             return FS.read(src, { encoding: 'utf8' }).then(function (text) {
                 return parseJson(text);
             });
         }
-        file.readJSONPromise = readJSONPromise;
+        _file.readJSONPromise = readJSONPromise;
 
         function writeJSONSync(dest, data) {
             dest = path.resolve(dest);
             xm.file.mkdirCheckSync(path.dirname(dest));
             fs.writeFileSync(dest, JSON.stringify(data, null, 2), { encoding: 'utf8' });
         }
-        file.writeJSONSync = writeJSONSync;
+        _file.writeJSONSync = writeJSONSync;
 
         function writeJSONPromise(dest, data) {
             var d = Q.defer();
@@ -1398,13 +1402,13 @@ var xm;
 
             return d.promise;
         }
-        file.writeJSONPromise = writeJSONPromise;
+        _file.writeJSONPromise = writeJSONPromise;
 
         function readFileSync(dest, encoding) {
             if (typeof encoding === "undefined") { encoding = 'utf8'; }
             return fs.readFileSync(dest, { encoding: encoding });
         }
-        file.readFileSync = readFileSync;
+        _file.readFileSync = readFileSync;
 
         function writeFileSync(dest, data, encoding) {
             if (typeof encoding === "undefined") { encoding = 'utf8'; }
@@ -1412,7 +1416,7 @@ var xm;
             xm.file.mkdirCheckSync(path.dirname(dest));
             fs.writeFileSync(dest, data, { encoding: encoding });
         }
-        file.writeFileSync = writeFileSync;
+        _file.writeFileSync = writeFileSync;
 
         function mkdirCheckSync(dir, writable, testWritable) {
             if (typeof writable === "undefined") { writable = false; }
@@ -1443,7 +1447,7 @@ var xm;
             }
             return dir;
         }
-        file.mkdirCheckSync = mkdirCheckSync;
+        _file.mkdirCheckSync = mkdirCheckSync;
 
         function mkdirCheckQ(dir, writable, testWritable) {
             if (typeof writable === "undefined") { writable = false; }
@@ -1484,12 +1488,12 @@ var xm;
             });
             return d.promise;
         }
-        file.mkdirCheckQ = mkdirCheckQ;
+        _file.mkdirCheckQ = mkdirCheckQ;
 
         function canWriteFile(targetPath, overwrite) {
             return FS.exists(targetPath).then(function (exists) {
                 if (!exists) {
-                    return true;
+                    return Q(true);
                 }
                 return FS.isFile(targetPath).then(function (isFile) {
                     if (isFile) {
@@ -1500,7 +1504,7 @@ var xm;
                 });
             });
         }
-        file.canWriteFile = canWriteFile;
+        _file.canWriteFile = canWriteFile;
 
         function removeFile(target) {
             var d = Q.defer();
@@ -1521,7 +1525,7 @@ var xm;
 
             return d.promise;
         }
-        file.removeFile = removeFile;
+        _file.removeFile = removeFile;
 
         function touchFile(src, atime, mtime) {
             var d = Q.defer();
@@ -1534,7 +1538,7 @@ var xm;
             }, d.reject);
             return d.promise;
         }
-        file.touchFile = touchFile;
+        _file.touchFile = touchFile;
 
         function findup(dir, name) {
             var d = Q.defer();
@@ -1563,7 +1567,7 @@ var xm;
             }, d.reject);
             return d.promise;
         }
-        file.findup = findup;
+        _file.findup = findup;
     })(xm.file || (xm.file = {}));
     var file = xm.file;
 })(xm || (xm = {}));
@@ -2657,8 +2661,8 @@ var tsd;
         };
 
         Config.prototype.parseJSON = function (json, label, log) {
-            if (typeof log === "undefined") { log = true; }
             var _this = this;
+            if (typeof log === "undefined") { log = true; }
             xm.assertVar(json, 'object', 'json');
 
             this.validateJSON(json, this._schema, label, log);
@@ -2831,11 +2835,11 @@ var xm;
         };
 
         RegExpGlue.prototype.append = function () {
+            var _this = this;
             var exp = [];
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 exp[_i] = arguments[_i + 0];
             }
-            var _this = this;
             exp.forEach(function (value) {
                 _this.parts.push(value);
             }, this);
@@ -3068,7 +3072,7 @@ var xm;
         return r;
     }
 
-    (function (date) {
+    (function (_date) {
         function getISOString(input) {
             var date;
             if (xm.isDate(input)) {
@@ -3078,32 +3082,32 @@ var xm;
             }
             return (date ? date.toISOString() : null);
         }
-        date.getISOString = getISOString;
+        _date.getISOString = getISOString;
 
         function toNiceUTC(date) {
             return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate()) + ' ' + pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
         }
-        date.toNiceUTC = toNiceUTC;
+        _date.toNiceUTC = toNiceUTC;
 
         function isBeforeDate(actual, base) {
             return actual.getUTCFullYear() < base.getUTCFullYear() || actual.getUTCMonth() < base.getUTCMonth() || actual.getUTCDate() < base.getUTCDate();
         }
-        date.isBeforeDate = isBeforeDate;
+        _date.isBeforeDate = isBeforeDate;
 
         function isAfterDate(actual, base) {
             return actual.getUTCFullYear() > base.getUTCFullYear() || actual.getUTCMonth() > base.getUTCMonth() || actual.getUTCDate() > base.getUTCDate();
         }
-        date.isAfterDate = isAfterDate;
+        _date.isAfterDate = isAfterDate;
 
         function isEqualDate(actual, base) {
             return actual.toDateString() === base.toDateString();
         }
-        date.isEqualDate = isEqualDate;
+        _date.isEqualDate = isEqualDate;
 
         function compare(date1, date2) {
             return date1.getTime() - date2.getTime();
         }
-        date.compare = compare;
+        _date.compare = compare;
     })(xm.date || (xm.date = {}));
     var date = xm.date;
 })(xm || (xm = {}));
@@ -3597,8 +3601,8 @@ var xm;
         };
 
         ActionMap.prototype.runSerial = function (ids, call, optional) {
-            if (typeof optional === "undefined") { optional = false; }
             var _this = this;
+            if (typeof optional === "undefined") { optional = false; }
             var queue = ids.slice(0);
 
             var defer = Q.defer();
@@ -3607,7 +3611,7 @@ var xm;
                 if (queue.length > 0) {
                     return _this.run(queue.pop(), call, optional).progress(defer.notify).then(runOne);
                 }
-                return defer.resolve(value);
+                defer.resolve(value);
             };
             Q(runOne()).progress(defer.notify).fail(defer.reject);
 
@@ -4103,6 +4107,8 @@ var xm;
     var tv4 = require('tv4');
     var reporter = require('tv4-reporter');
 
+    
+
     var StringKoder = (function () {
         function StringKoder(encoding) {
             if (typeof encoding === "undefined") { encoding = 'utf8'; }
@@ -4253,31 +4259,31 @@ var xm;
             }
             CacheOpts.prototype.applyCacheMode = function (mode) {
                 switch (mode) {
-                    case CacheMode.forceRemote:
+                    case 2 /* forceRemote */:
                         this.cacheRead = false;
                         this.remoteRead = true;
                         this.cacheWrite = false;
                         this.allowClean = false;
                         break;
-                    case CacheMode.forceUpdate:
+                    case 3 /* forceUpdate */:
                         this.cacheRead = false;
                         this.remoteRead = true;
                         this.cacheWrite = true;
                         this.allowClean = true;
                         break;
-                    case CacheMode.allowUpdate:
+                    case 5 /* allowUpdate */:
                         this.cacheRead = true;
                         this.remoteRead = true;
                         this.cacheWrite = true;
                         this.allowClean = true;
                         break;
-                    case CacheMode.allowRemote:
+                    case 4 /* allowRemote */:
                         this.cacheRead = true;
                         this.remoteRead = true;
                         this.cacheWrite = false;
                         this.allowClean = false;
                         break;
-                    case CacheMode.forceLocal:
+                    case 1 /* forceLocal */:
                     default:
                         this.cacheRead = true;
                         this.remoteRead = false;
@@ -4313,16 +4319,16 @@ var xm;
                 this.cache = cache;
                 this.request = request;
 
-                this.bodyCacheValidator = new http.ChecksumValidator();
+                this.bodyCacheValidator = new xm.http.ChecksumValidator();
 
                 if (this.cache.opts.remoteRead) {
-                    this.infoCacheValidator = new http.CacheAgeValidator(this.cache.infoSchema, request.localMaxAge);
+                    this.infoCacheValidator = new xm.http.CacheAgeValidator(this.cache.infoSchema, request.localMaxAge);
                 } else {
-                    this.infoCacheValidator = new http.CacheValidator(this.cache.infoSchema);
+                    this.infoCacheValidator = new xm.http.CacheValidator(this.cache.infoSchema);
                 }
                 this.track = new xm.EventLog('http_load', 'CacheStreamLoader');
 
-                this.object = new http.CacheObject(this.request);
+                this.object = new xm.http.CacheObject(this.request);
                 this.object.storeDir = xm.file.distributeDir(this.cache.storeDir, this.request.key, this.cache.opts.splitDirLevel, this.cache.opts.splitDirChunk);
 
                 this.object.bodyFile = path.join(this.object.storeDir, this.request.key + '.raw');
@@ -4438,8 +4444,8 @@ var xm;
             };
 
             CacheStreamLoader.prototype.httpLoad = function (httpCache) {
-                if (typeof httpCache === "undefined") { httpCache = true; }
                 var _this = this;
+                if (typeof httpCache === "undefined") { httpCache = true; }
                 if (!this.cache.opts.remoteRead) {
                     this.track.skip(CacheStreamLoader.http_load);
                     return Q().thenResolve();
@@ -4489,7 +4495,7 @@ var xm;
                         _this.track.logger.inspect(res.headers);
                     }
 
-                    _this.object.response = new http.ResponseInfo();
+                    _this.object.response = new xm.http.ResponseInfo();
                     _this.object.response.status = res.statusCode;
                     _this.object.response.headers = res.headers;
 
@@ -4827,6 +4833,10 @@ var xm;
         })();
         http.ResponseInfo = ResponseInfo;
 
+        
+
+        
+
         var SimpleValidator = (function () {
             function SimpleValidator() {
             }
@@ -4900,7 +4910,7 @@ var xm;
                 this.jobs = new Map();
                 this.jobTimers = new Map();
                 xm.assertVar(storeDir, 'string', 'storeDir');
-                xm.assertVar(opts, http.CacheOpts, 'opts');
+                xm.assertVar(opts, xm.http.CacheOpts, 'opts');
 
                 this.storeDir = storeDir;
                 this.opts = opts;
@@ -4930,7 +4940,7 @@ var xm;
 
                         return job.getObject().progress(d.notify).then(d.resolve);
                     } else {
-                        job = new http.CacheStreamLoader(_this, request);
+                        job = new xm.http.CacheStreamLoader(_this, request);
                         _this.jobs.set(request.key, job);
 
                         job.track.logEnabled = _this.track.logEnabled;
@@ -4994,7 +5004,7 @@ var xm;
                         _this.track.event(HTTPCache.dir_create, _this.storeDir);
                         return xm.file.mkdirCheckQ(_this.storeDir, true, true);
                     }
-
+                }).then(function () {
                     return FS.isDirectory(_this.storeDir).then(function (isDir) {
                         if (!isDir) {
                             _this.track.error(HTTPCache.dir_error, _this.storeDir);
@@ -5351,8 +5361,8 @@ var git;
             return this.getCachable(request, true);
         };
 
-        GithubAPI.prototype.getCachable = function (request, addMeta, koder) {
-            var koder = (koder || xm.JSONKoder.main);
+        GithubAPI.prototype.getCachable = function (request, addMeta) {
+            var koder = xm.JSONKoder.main;
             var d = Q.defer();
             this.track.promise(d.promise, GithubAPI.get_cachable, request.url);
 
@@ -5969,6 +5979,8 @@ var tsd;
 var git;
 (function (git) {
     'use strict';
+
+    
 })(git || (git = {}));
 var git;
 (function (git) {
@@ -6564,8 +6576,8 @@ var tsd;
         };
 
         ConfigIO.prototype.readConfig = function (optional) {
-            if (typeof optional === "undefined") { optional = false; }
             var _this = this;
+            if (typeof optional === "undefined") { optional = false; }
             var d = Q.defer();
             var target = this.core.context.paths.configFile;
 
@@ -6658,8 +6670,8 @@ var tsd;
         };
 
         ContentLoader.prototype.loadContent = function (file, tryHead) {
-            if (typeof tryHead === "undefined") { tryHead = false; }
             var _this = this;
+            if (typeof tryHead === "undefined") { tryHead = false; }
             if (file.hasContent()) {
                 this.track.skip('content_load', file.key);
                 return Q(file);
@@ -6763,9 +6775,9 @@ var tsd;
             _super.call(this, core, 'install', 'Installer');
         }
         Installer.prototype.installFile = function (file, addToConfig, overwrite) {
+            var _this = this;
             if (typeof addToConfig === "undefined") { addToConfig = true; }
             if (typeof overwrite === "undefined") { overwrite = false; }
-            var _this = this;
             var d = Q.defer();
             this.track.promise(d.promise, 'file');
 
@@ -6784,9 +6796,9 @@ var tsd;
         };
 
         Installer.prototype.installFileBulk = function (list, addToConfig, overwrite) {
+            var _this = this;
             if (typeof addToConfig === "undefined") { addToConfig = true; }
             if (typeof overwrite === "undefined") { overwrite = true; }
-            var _this = this;
             var d = Q.defer();
             this.track.promise(d.promise, 'file_bulk');
 
@@ -6806,8 +6818,8 @@ var tsd;
         };
 
         Installer.prototype.reinstallBulk = function (list, overwrite) {
-            if (typeof overwrite === "undefined") { overwrite = false; }
             var _this = this;
+            if (typeof overwrite === "undefined") { overwrite = false; }
             var d = Q.defer();
             this.track.promise(d.promise, 'reinstall_bulk');
 
@@ -6851,6 +6863,7 @@ var tsd;
                     if (exists) {
                         return FS.remove(targetPath);
                     }
+                }).then(function () {
                     return xm.file.mkdirCheckQ(path.dirname(targetPath), true);
                 }).then(function () {
                     return FS.write(targetPath, file.blob.content);
@@ -6863,8 +6876,8 @@ var tsd;
         };
 
         Installer.prototype.useFileBulk = function (list, overwrite) {
-            if (typeof overwrite === "undefined") { overwrite = true; }
             var _this = this;
+            if (typeof overwrite === "undefined") { overwrite = true; }
             var d = Q.defer();
             this.track.promise(d.promise, 'use_bulk');
 
@@ -7235,7 +7248,7 @@ var tsd;
     var wordsUrl = glue(commentStart).append(wordsCap, spaceOpt).append(delimStartOpt, urlFullCap, delimEndOpt).append(spaceOpt, expEnd).join('i');
 
     function mutate(base, add, remove) {
-        var res = (base ? base.slice(0) : ([]));
+        var res = (base ? base.slice(0) : []);
         var i, ii, index;
         if (add) {
             for (i = 0, ii = add.length; i < ii; i++) {
@@ -7870,6 +7883,8 @@ var tsd;
     })();
     tsd.Core = Core;
 
+    
+
     var MultiManager = (function () {
         function MultiManager(core) {
             this.core = core;
@@ -8081,8 +8096,8 @@ var tsd;
         };
 
         API.prototype.update = function (options, version) {
-            if (typeof version === "undefined") { version = 'latest'; }
             var _this = this;
+            if (typeof version === "undefined") { version = 'latest'; }
             var d = Q.defer();
             this.track.promise(d.promise, 'update');
 
@@ -8703,8 +8718,8 @@ var xm;
         };
 
         ExposeContext.prototype.getOptNames = function (strict) {
-            if (typeof strict === "undefined") { strict = false; }
             var _this = this;
+            if (typeof strict === "undefined") { strict = false; }
             return Object.keys(this.argv).filter(function (name) {
                 return (name !== '_' && _this.hasOpt(name, strict));
             });
@@ -8802,6 +8817,8 @@ var xm;
     var Q = require('q');
 
     var exitProcess = require('exit');
+
+    
 
     var ExposeCommand = (function () {
         function ExposeCommand() {
@@ -8960,8 +8977,8 @@ var xm;
         };
 
         Expose.prototype.executeArgv = function (argvRaw, alt, exitAfter) {
-            if (typeof exitAfter === "undefined") { exitAfter = true; }
             var _this = this;
+            if (typeof exitAfter === "undefined") { exitAfter = true; }
             Q(this.executeRaw(argvRaw, alt)).then(function (res) {
                 if (_this.end) {
                     return Q(_this.end.call(null, res)).then(function (over) {
@@ -9026,8 +9043,8 @@ var xm;
         };
 
         Expose.prototype.executeCommand = function (name, ctx) {
-            if (typeof ctx === "undefined") { ctx = null; }
             var _this = this;
+            if (typeof ctx === "undefined") { ctx = null; }
             this.init();
 
             if (!this.commands.has(name)) {
@@ -9142,8 +9159,8 @@ var tsd;
             };
 
             Printer.prototype.fileCommit = function (file, skipNull) {
-                if (typeof skipNull === "undefined") { skipNull = false; }
                 var _this = this;
+                if (typeof skipNull === "undefined") { skipNull = false; }
                 var sep = '  |  ';
                 if (file.commit) {
                     this.output.indent(1).glue(this.fileEnd(file, sep));
@@ -9178,8 +9195,8 @@ var tsd;
             };
 
             Printer.prototype.fileInfo = function (file, skipNull) {
-                if (typeof skipNull === "undefined") { skipNull = false; }
                 var _this = this;
+                if (typeof skipNull === "undefined") { skipNull = false; }
                 if (file.info) {
                     this.output.line();
                     if (file.info.isValid()) {
@@ -9818,7 +9835,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.version;
+                opt.name = tsd.cli.Opt.version;
                 opt.short = 'V';
                 opt.description = 'display version information';
                 opt.type = 'flag';
@@ -9827,27 +9844,27 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.dev;
+                opt.name = tsd.cli.Opt.dev;
                 opt.description = 'development mode';
                 opt.type = 'flag';
                 opt.global = true;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.style;
+                opt.name = tsd.cli.Opt.style;
                 opt.description = 'specify CLI style';
                 opt.type = 'string';
                 opt.placeholder = 'name';
                 opt.global = true;
                 opt.enum = style.getKeys();
-                opt.default = (process.stdout.isTTY ? 'ansi' : 'no');
+                opt.default = (process.stdout['isTTY'] ? 'ansi' : 'no');
                 opt.apply = function (value, ctx) {
                     style.useStyle(value, ctx);
                 };
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.progress;
+                opt.name = tsd.cli.Opt.progress;
                 opt.short = 'p';
                 opt.description = 'display progress notifications';
                 opt.type = 'flag';
@@ -9856,14 +9873,14 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.verbose;
+                opt.name = tsd.cli.Opt.verbose;
                 opt.description = 'verbose output';
                 opt.type = 'flag';
                 opt.global = true;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.detail;
+                opt.name = tsd.cli.Opt.detail;
                 opt.description = 'modify reporting detail level';
                 opt.type = 'string';
                 opt.global = true;
@@ -9874,7 +9891,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.services;
+                opt.name = tsd.cli.Opt.services;
                 opt.description = 'allow usage-tracker, TSD updates etc';
                 opt.type = 'flag';
                 opt.default = true;
@@ -9882,7 +9899,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.semver;
+                opt.name = tsd.cli.Opt.semver;
                 opt.short = 'v';
                 opt.description = 'filter on version postfix';
                 opt.type = 'string';
@@ -9895,7 +9912,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.date;
+                opt.name = tsd.cli.Opt.date;
                 opt.short = 'd';
                 opt.description = 'filter on commit date';
                 opt.type = 'string';
@@ -9904,7 +9921,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.commit;
+                opt.name = tsd.cli.Opt.commit;
                 opt.short = 'c';
                 opt.description = 'filter on commit hash';
                 opt.type = 'string';
@@ -9912,28 +9929,28 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.info;
+                opt.name = tsd.cli.Opt.info;
                 opt.short = 'i';
                 opt.description = 'display definition file info';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.history;
+                opt.name = tsd.cli.Opt.history;
                 opt.short = 'y';
                 opt.description = 'display commit history';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.resolve;
+                opt.name = tsd.cli.Opt.resolve;
                 opt.short = 'r';
                 opt.description = 'include reference dependencies';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.config;
+                opt.name = tsd.cli.Opt.config;
                 opt.description = 'path to config file';
                 opt.type = 'string';
                 opt.placeholder = 'path';
@@ -9941,7 +9958,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.cacheDir;
+                opt.name = tsd.cli.Opt.cacheDir;
                 opt.description = 'path to cache directory';
                 opt.type = 'string';
                 opt.placeholder = 'path';
@@ -9949,24 +9966,24 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.cacheMode;
+                opt.name = tsd.cli.Opt.cacheMode;
                 opt.description = 'change cache behaviour';
                 opt.type = 'string';
                 opt.placeholder = 'mode';
-                opt.default = xm.http.CacheMode[xm.http.CacheMode.allowUpdate];
+                opt.default = xm.http.CacheMode[5 /* allowUpdate */];
                 opt.enum = xm.enumNames(xm.http.CacheMode);
                 opt.global = true;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.overwrite;
+                opt.name = tsd.cli.Opt.overwrite;
                 opt.short = 'o';
                 opt.description = 'overwrite existing files';
                 opt.type = 'flag';
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.limit;
+                opt.name = tsd.cli.Opt.limit;
                 opt.short = 'l';
                 opt.description = 'sanity limit for expensive API calls';
                 opt.type = 'int';
@@ -9976,7 +9993,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.max;
+                opt.name = tsd.cli.Opt.max;
                 opt.description = 'enforce a maximum amount of results';
                 opt.type = 'int';
                 opt.default = 0;
@@ -9985,7 +10002,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.min;
+                opt.name = tsd.cli.Opt.min;
                 opt.description = 'enforce a minimum amount of results';
                 opt.type = 'int';
                 opt.default = 0;
@@ -9993,7 +10010,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.save;
+                opt.name = tsd.cli.Opt.save;
                 opt.short = 's';
                 opt.description = 'save changes to config file';
                 opt.type = 'flag';
@@ -10001,7 +10018,7 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.bundle;
+                opt.name = tsd.cli.Opt.bundle;
                 opt.short = 'b';
                 opt.description = 'save to reference bundle';
                 opt.type = 'string[]';
@@ -10009,12 +10026,12 @@ var tsd;
             });
 
             expose.defineOption(function (opt) {
-                opt.name = cli.Opt.action;
+                opt.name = tsd.cli.Opt.action;
                 opt.short = 'a';
                 opt.description = 'run action on selection';
                 opt.type = 'string';
                 opt.placeholder = 'name';
-                opt.enum = [cli.Action.install, cli.Action.browse, cli.Action.visit];
+                opt.enum = [tsd.cli.Action.install, tsd.cli.Action.browse, tsd.cli.Action.visit];
             });
         }
         cli.addCommon = addCommon;
@@ -10032,10 +10049,12 @@ var tsd;
     })();
     tsd.Job = Job;
 
+    
+
     function getExpose() {
         var path = require('path');
         var Q = require('q');
-        var FS = (require('q-io/fs'));
+        var FS = require('q-io/fs');
         var yaml = require('js-yaml');
 
         var miniwrite = require('miniwrite');
@@ -10046,7 +10065,7 @@ var tsd;
         var Action = tsd.cli.Action;
 
         var output = new xm.StyledOut();
-        if (!process.stdout.isTTY) {
+        if (!process.stdout['isTTY']) {
             output.useStyle(ministyle.plain());
         }
         var print = new tsd.cli.Printer(output);
@@ -10363,16 +10382,10 @@ var tsd;
             cmd.variadic = ['...pattern'];
             cmd.groups = [Group.primary, Group.query];
             cmd.options = [
-                Opt.info,
-                Opt.history,
-                Opt.semver,
-                Opt.date,
-                Opt.commit,
+                Opt.info, Opt.history,
+                Opt.semver, Opt.date, Opt.commit,
                 Opt.action,
-                Opt.resolve,
-                Opt.overwrite,
-                Opt.save,
-                Opt.bundle
+                Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
             ];
             cmd.execute = function (ctx) {
                 var notify = getProgress(ctx);

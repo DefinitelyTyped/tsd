@@ -65,7 +65,7 @@ module tsd {
 		stats:boolean;
 		bundle:string;
 
-		private _installed:Map<string, tsd.InstalledDef> = new Map();
+		private _installed = new Map<string, tsd.InstalledDef>();
 		private _schema:any;
 
 		private _stable:xm.JSONStabilizer = new xm.JSONStabilizer();

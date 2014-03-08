@@ -30,7 +30,7 @@ module xm {
 		keys:string[] = [];
 
 		parent:JSONStabilizer = null;
-		children:Map<string, JSONStabilizer> = new Map();
+		children = new Map<string, JSONStabilizer>();
 
 		constructor(depth:number = 2, style:CodeStyle = null) {
 			this.depth = depth;
@@ -101,7 +101,7 @@ module xm {
 			xm.assertVar(object, 'object', 'object');
 
 			this.keys = Object.keys(object);
-			this.children = new Map();
+			this.children = new Map<string, JSONStabilizer>();
 
 			if (this.depth > 0) {
 				this.keys.forEach((key) => {
@@ -182,7 +182,7 @@ module xm {
 		depth:number;
 		style:CodeStyle;
 
-		map:WeakMap<Object, JSONStabilizer> = new WeakMap();
+		map = new WeakMap<Object, JSONStabilizer>();
 
 		constructor(depth:number = 2, style:CodeStyle = null) {
 			this.depth = depth;

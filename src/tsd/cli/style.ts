@@ -20,7 +20,7 @@ module tsd {
 
 				this.addOutput(output);
 
-				this._styleMap = new Map();
+				this._styleMap = new Map<any, any>();
 
 				this._styleMap.set('no', (ctx:xm.ExposeContext) => {
 					this.outputs.forEach((output) => {

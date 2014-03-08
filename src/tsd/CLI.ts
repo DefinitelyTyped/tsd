@@ -60,7 +60,7 @@ module tsd {
 		var Action = tsd.cli.Action;
 
 		var output = new xm.StyledOut();
-		if (!process.stdout.isTTY) {
+		if (!process.stdout['isTTY']) {
 			output.useStyle(ministyle.plain());
 		}
 		var print = new tsd.cli.Printer(output);

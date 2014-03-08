@@ -15,9 +15,9 @@ module tsd {
 	export class InstallResult {
 
 		options:tsd.Options;
-		written:Map<string, tsd.DefVersion> = new Map();
-		removed:Map<string, tsd.DefVersion> = new Map();
-		skipped:Map<string, tsd.DefVersion> = new Map();
+		written = new Map<string, tsd.DefVersion>();
+		removed = new Map<string, tsd.DefVersion>();
+		skipped = new Map<string, tsd.DefVersion>();
 
 		constructor(options:tsd.Options) {
 			xm.assertVar(options, tsd.Options, 'options');

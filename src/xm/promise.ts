@@ -22,7 +22,7 @@ module xm {
 
 		constructor(data?:any) {
 			if (data) {
-				Object.keys(data).forEach((key:string, value:T) => {
+				Object.keys(data).forEach((key:string, value:any) => {
 					this._map.set(key, value);
 				});
 			}
@@ -49,7 +49,7 @@ module xm {
 				if (queue.length > 0) {
 					return this.run(queue.pop(), call, optional).progress(defer.notify).then(runOne);
 				}
-				return defer.resolve(value);
+				defer.resolve(value);
 			};
 			Q(runOne()).progress(defer.notify).fail(defer.reject);
 
@@ -113,7 +113,7 @@ module xm {
 			if (this._stash.has(key)) {
 				return null;
 			}
-			var d:Q.Deferred<T> = Q.defer<T>();
+			var d:Q.Deferred<T> = Q.defer();
 			this._stash.set(key, d);
 			return d;
 		}

@@ -101,7 +101,7 @@ module tsd {
 
 				if (queued.length > 0) {
 					this.track.event(Resolver.subload);
-					queued.forEach((p:Q.Promise) => {
+					queued.forEach((p:Q.Promise<any>) => {
 						p.progress(d.notify);
 					});
 					return Q.all(queued);

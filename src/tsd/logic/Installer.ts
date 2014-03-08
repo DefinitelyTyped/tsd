@@ -114,6 +114,7 @@ module tsd {
 					if (exists) {
 						return FS.remove(targetPath);
 					}
+				}).then(() => {
 					return xm.file.mkdirCheckQ(path.dirname(targetPath), true);
 				}).then(() => {
 					return FS.write(targetPath, file.blob.content);

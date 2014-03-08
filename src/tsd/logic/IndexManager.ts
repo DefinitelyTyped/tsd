@@ -20,7 +20,7 @@ module tsd {
 		static procure_file:string = 'procure_file';
 		static procure_commit:string = 'procure_commit';
 
-		private _defer:Map<string, Q.Deferred<tsd.DefIndex>> = new Map();
+		private _defer = new Map<string, Q.Deferred<tsd.DefIndex>>();
 
 		constructor(core:tsd.Core) {
 			super(core, 'index', 'IndexManager');
@@ -38,13 +38,13 @@ module tsd {
 				this.track.skip(IndexManager.init);
 				// TODO fix progress properly and remove hack
 				// lame bypass notify
-				var d = Q.defer<tsd.DefIndex>();
+				var d:Q.Deferred<tsd.DefIndex> = Q.defer();
 				defer.promise.then(d.resolve, d.reject);
 				return defer.promise;
 			}
 			var index = new tsd.DefIndex();
 
-			defer = Q.defer<tsd.DefIndex>();
+			defer = Q.defer();
 			this._defer[refKey] = defer;
 
 			this.track.promise(defer.promise, IndexManager.init, refKey);

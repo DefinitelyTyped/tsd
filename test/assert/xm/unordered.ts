@@ -9,7 +9,7 @@ module helper {
 
 	// helper: assert lists of unordered items
 	// first finds an identity match, then applies real assertion
-	export function assertUnorderedLike<T>(actual:any[], expected:any[], matcher:IsLikeCB<T>, assertion:AssertCB<T>, message:string) {
+	export function assertUnorderedLike<T>(actual:T[], expected:T[], matcher:IsLikeCB<T>, assertion:AssertCB<T>, message:string) {
 		assert.isArray(actual, 'actual');
 		assert.isArray(expected, 'expected');
 		assert.isFunction(matcher, 'matcher');
@@ -46,8 +46,8 @@ module helper {
 	}
 
 	// get lazy wrapper for re-use
-	export function getAssertUnorderedLike<T>(matcher:IsLikeCB<T>, assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
-		return function assertUnorderedLikeWrap(actual:T[], expected:T[], message?:string) {
+	export function getAssertUnorderedLike<T>(matcher:IsLikeCB<T>, assertion:AssertCB<T>, preLabel:string):AssertCBA<T> {
+		return function assertUnorderedLikeWrap<T>(actual:T[], expected:T[], message?:string) {
 			assertUnorderedLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
 		};
 	}
@@ -94,7 +94,7 @@ module helper {
 	}
 
 	// get lazy wrapper for re-use
-	export function getAssertUnorderedNaive<T>(assertion:AssertCB<T>, preLabel:string):AssertCB<T> {
+	export function getAssertUnorderedNaive<T>(assertion:AssertCB<T>, preLabel:string):AssertCBA<T> {
 		return function (actual:T[], expected:T[], message?:string) {
 			assertUnorderedNaive(actual, expected, assertion, preLabel + ': ' + message);
 		};
