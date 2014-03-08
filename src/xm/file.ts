@@ -51,9 +51,9 @@ module xm {
 				if (err.name === 'SyntaxError') {
 					// TODO find/write module to pretty print parse errors
 					xm.log.error(err);
-					xm.log.status('---');
-					xm.log.status(text.substr(1024));
-					xm.log.status('---');
+					xm.log('---');
+					xm.log(text.substr(0, 1024));
+					xm.log('---');
 				}
 				// rethrow
 				throw (err);

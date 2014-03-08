@@ -187,6 +187,7 @@ declare module xm {
 }
 declare module tsd {
     var Const: {
+        rc: string;
         ident: string;
         configFile: string;
         typingsDir: string;
@@ -253,9 +254,12 @@ declare module xm {
 }
 declare module xm {
     class JSONPointer {
-        public object: Object;
-        constructor(object: Object);
+        public objects: Object[];
+        public prefix: string;
+        constructor(object?: Object, prefix?: string);
+        public hasValue(path: string): boolean;
         public getValue(path: string, alt?: any): any;
+        public addSource(object: Object): any;
         public setValue(path: string, value?: any): void;
         public getChild(path: string, alt?: any): JSONPointer;
         public getNumber(path: string, alt?: number): number;
@@ -440,6 +444,7 @@ declare module tsd {
         public settings: xm.JSONPointer;
         public configSchema: any;
         constructor(configFile?: string, verbose?: boolean);
+        public stackSettings(src: string): void;
         public getTypingsDir(): string;
         public getInfo(details?: boolean): Object;
     }
@@ -896,6 +901,7 @@ declare module xm {
             public track: xm.EventLog;
             public infoKoder: xm.IContentKoder<http.CacheInfo>;
             public infoSchema: any;
+            public proxy: string;
             private jobs;
             private jobTimers;
             private _init;

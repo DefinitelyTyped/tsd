@@ -1,4 +1,5 @@
 {
+	"proxy" : null,
 	"git": {
 		"raw": {
 			"allowClean": true,

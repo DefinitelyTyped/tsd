@@ -1273,6 +1273,7 @@ var tsd;
     'use strict';
 
     tsd.Const = {
+        rc: '.tsdrc',
         ident: 'tsd',
         configFile: 'tsd.json',
         typingsDir: 'typings',
@@ -1339,9 +1340,9 @@ var xm;
             } catch (err) {
                 if (err.name === 'SyntaxError') {
                     xm.log.error(err);
-                    xm.log.status('---');
-                    xm.log.status(text);
-                    xm.log.status('---');
+                    xm.log('---');
+                    xm.log(text.substr(0, 1024));
+                    xm.log('---');
                 }
 
                 throw (err);
@@ -1776,32 +1777,65 @@ var xm;
     var pointer = require('json-pointer');
 
     var JSONPointer = (function () {
-        function JSONPointer(object) {
-            xm.assertVar(object, 'object', 'object');
-            this.object = object;
+        function JSONPointer(object, prefix) {
+            if (typeof prefix === "undefined") { prefix = ''; }
+            this.prefix = '';
+            this.objects = object ? [object] : [];
+            if (prefix && !/^\//.test(prefix)) {
+                prefix = '/' + prefix;
+            }
+            this.prefix = prefix;
         }
-        JSONPointer.prototype.getValue = function (path, alt) {
+        JSONPointer.prototype.hasValue = function (path) {
             if (!/^\//.test(path)) {
                 path = '/' + path;
             }
-            if (pointer.has(this.object, path)) {
-                return pointer.get(this.object, path);
+            path = this.prefix + path;
+            for (var i = 0, ii = this.objects.length; i < ii; i++) {
+                if (pointer.has(this.objects[i], path)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        JSONPointer.prototype.getValue = function (path, alt) {
+            if (typeof alt === "undefined") { alt = null; }
+            if (!/^\//.test(path)) {
+                path = '/' + path;
+            }
+            path = this.prefix + path;
+            for (var i = 0, ii = this.objects.length; i < ii; i++) {
+                var obj = this.objects[i];
+                if (pointer.has(obj, path)) {
+                    return pointer.get(obj, path);
+                }
             }
             return alt;
+        };
+
+        JSONPointer.prototype.addSource = function (object) {
+            this.objects.unshift(object);
         };
 
         JSONPointer.prototype.setValue = function (path, value) {
             if (!/^\//.test(path)) {
                 path = '/' + path;
             }
-            pointer.set(this.object, path, value);
+            path = this.prefix + path;
+            pointer.set(this.objects[0], path, value);
         };
 
         JSONPointer.prototype.getChild = function (path, alt) {
             if (typeof alt === "undefined") { alt = null; }
-            var value = this.getValue(path);
-            if (typeof value === 'object' && value) {
-                return new JSONPointer(value);
+            if (!/^\//.test(path)) {
+                path = '/' + path;
+            }
+            if (this.hasValue(path)) {
+                var p = new JSONPointer();
+                p.objects = this.objects.slice(0);
+                p.prefix = this.prefix + path;
+                return p;
             }
             return alt;
         };
@@ -1834,7 +1868,7 @@ var xm;
         JSONPointer.prototype.getDate = function (path, alt) {
             if (typeof alt === "undefined") { alt = null; }
             var value = this.getValue(path);
-            if (typeof value === 'string') {
+            if (typeof value === 'string' || typeof value === 'number') {
                 return new Date(value);
             }
             return alt;
@@ -1845,25 +1879,25 @@ var xm;
             var value = this.getValue(path);
             if (typeof value === 'object') {
                 var d = 0;
-                if (typeof value.years !== 'undefined') {
-                    d += 31557600;
+                if (typeof value.years === 'number') {
+                    d += value.years * 31557600;
                 }
-                if (typeof value.months !== 'undefined') {
-                    d += 31557600 / 12;
+                if (typeof value.months === 'number') {
+                    d += value.months * 31557600 / 12;
                 }
-                if (typeof value.weeks !== 'undefined') {
-                    d += 7 * 24 * 3600;
+                if (typeof value.weeks === 'number') {
+                    d += value.weeks * 7 * 24 * 3600;
                 }
-                if (typeof value.days !== 'undefined') {
-                    d += 24 * 3600;
+                if (typeof value.days === 'number') {
+                    d += value.days * 24 * 3600;
                 }
-                if (typeof value.hours !== 'undefined') {
-                    d += 3600;
+                if (typeof value.hours === 'number') {
+                    d += value.hours * 3600;
                 }
-                if (typeof value.minutes !== 'undefined') {
-                    d += 60;
+                if (typeof value.minutes === 'number') {
+                    d += value.minutes * 60;
                 }
-                if (typeof value.seconds !== 'undefined') {
+                if (typeof value.seconds === 'number') {
                     d += value.seconds;
                 }
                 return d;
@@ -2704,6 +2738,7 @@ var tsd;
 (function (tsd) {
     'use strict';
 
+    var fs = require('fs');
     var path = require('path');
 
     var Context = (function () {
@@ -2716,6 +2751,9 @@ var tsd;
             this.packageInfo = xm.PackageJSON.getLocal();
             this.settings = new xm.JSONPointer(xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
 
+            this.stackSettings(path.resolve(tsd.Paths.getUserHome(), tsd.Const.rc));
+            this.stackSettings(path.resolve(process.cwd(), tsd.Const.rc));
+
             this.verbose = verbose;
 
             this.paths = new tsd.Paths();
@@ -2727,6 +2765,19 @@ var tsd;
             this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
             this.config = new tsd.Config(this.configSchema);
         }
+        Context.prototype.stackSettings = function (src) {
+            if (fs.existsSync(src)) {
+                if (this.verbose) {
+                    xm.log.status('using rc: ' + src);
+                }
+                this.settings.addSource(xm.file.readJSONSync(src));
+            } else {
+                if (this.verbose) {
+                    xm.log.status('cannot find rc: ' + src);
+                }
+            }
+        };
+
         Context.prototype.getTypingsDir = function () {
             return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
         };
@@ -4400,6 +4451,11 @@ var xm;
                     url: this.request.url,
                     headers: {}
                 };
+
+                if (this.cache.proxy) {
+                    req.proxy = this.cache.proxy;
+                }
+
                 Object.keys(this.request.headers).forEach(function (key) {
                     req.headers[key] = String(_this.request.headers[key]);
                 });
@@ -5308,7 +5364,8 @@ var git;
             }
             this.copyHeadersTo(request.headers);
 
-            request.headers['accept'] = 'application/json';
+            request.headers['accept'] = 'application/vnd.github.beta+json';
+
             request.lock();
 
             this.cache.getObject(request).progress(d.notify).then(function (object) {
@@ -5445,8 +5502,15 @@ var git;
 
             this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
-            this.api = new git.GithubAPI(this, opts.getChild('api'), this.storeDir);
-            this.raw = new git.GithubRaw(this, opts.getChild('raw'), this.storeDir);
+            this.api = new git.GithubAPI(this, opts.getChild('git/api'), this.storeDir);
+            this.raw = new git.GithubRaw(this, opts.getChild('git/raw'), this.storeDir);
+
+            var proxy = (opts.getString('proxy') || process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy);
+
+            this.api.cache.proxy = proxy;
+            this.raw.cache.proxy = proxy;
+
+            xm.log.status('proxy', proxy);
 
             xm.object.lockProps(this, Object.keys(this));
         }
@@ -7015,7 +7079,7 @@ var xm;
             log(' ');
 
             if (res.length > 0) {
-                xm.eachElem(res, function (match) {
+                res.forEach(function (match) {
                     match.extract();
                 });
             }
@@ -7753,7 +7817,7 @@ var tsd;
         }
         Core.prototype.updateConfig = function () {
             this._components.replace({
-                repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
+                repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings)
             });
 
             this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
@@ -9470,6 +9534,9 @@ var tsd;
             };
 
             Tracker.prototype.sendEvent = function (event) {
+                if (!this._enabled) {
+                    return;
+                }
                 if (event) {
                     this._eventQueue.push(event);
                 }
@@ -10462,3 +10529,4 @@ var tsd;
 })(tsd || (tsd = {}));
 
 module.exports = tsd;
+//# sourceMappingURL=api.js.map
