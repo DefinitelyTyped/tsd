@@ -13,17 +13,17 @@ module helper {
 		fixtureDir = path.resolve(__dirname, '..', 'fixtures');
 		config = xm.file.readJSONSync(path.join(this.fixtureDir, 'config.json'));
 		extraDir = path.join(__dirname, 'extra');
-		opts = new xm.JSONPointer(xm.file.readJSONSync(path.join(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json'))).getChild('git');
+		opts = new xm.JSONPointer(xm.file.readJSONSync(path.join(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
 
 		constructor() {
-			this.opts.setValue('api/allowClean', false);
-			this.opts.setValue('raw/allowClean', false);
+			this.opts.setValue('git/api/allowClean', false);
+			this.opts.setValue('git/raw/allowClean', false);
 
-			this.opts.setValue('api/jobTimeout', 0);
-			this.opts.setValue('raw/jobTimeout', 0);
+			this.opts.setValue('git/api/jobTimeout', 0);
+			this.opts.setValue('git/raw/jobTimeout', 0);
 
-			this.opts.setValue('api/splitKeyDir', 0);
-			this.opts.setValue('raw/splitKeyDir', 0);
+			this.opts.setValue('git/api/splitKeyDir', 0);
+			this.opts.setValue('git/raw/splitKeyDir', 0);
 		}
 	}
 
