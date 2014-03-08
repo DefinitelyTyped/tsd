@@ -9,7 +9,7 @@ interface JSON_Pointer {
 	/**
 	 *  Looks up a JSON pointer in an object.
 	 */
-	get(object:Object, pointer):any;
+	get(object:Object, pointer:string):any;
 	/**
 	 *  Set a value for a JSON pointer on object.
 	 */
@@ -29,7 +29,7 @@ interface JSON_Pointer {
 	/**
 	 *  Tests if an object has a value for a JSON pointer.
 	 */
-	has(object:Object, pointer:string):any;
+	has(object:Object, pointer:string):boolean;
 	/**
 	 *  Escapes a reference token.
 	 */
@@ -52,9 +52,9 @@ interface JSON_PointerWrap {
 	/**
 	 *  Looks up a JSON pointer in an object.
 	 */
-	get(pointer):any;
+	get(pointer:string):any;
 	/**
-	 *  xxxx
+	 *  Set a value for a JSON pointer on object.
 	 */
 	set(pointer:string, value:any):any;
 	/**
@@ -72,7 +72,7 @@ interface JSON_PointerWrap {
 	/**
 	 *  Tests if an object has a value for a JSON pointer.
 	 */
-	has(pointer:string):any;
+	has(pointer:string):boolean;
 }
 
 declare module "json-pointer" {
