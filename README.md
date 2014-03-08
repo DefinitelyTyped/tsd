@@ -21,7 +21,7 @@ The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.c
 
 #### Usage stats & update check
 
-The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates. Both are enabled by default: use the `--services no` option to suppress (for now).
+The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates.
 
 ## Install
 
@@ -271,6 +271,28 @@ API export is somewhat experimental; take care to lock versions and test on upgr
 
 Not yet. 
 
+## Special files
+
+### tsd.json
+
+The `tsd.json` file is automatically created in the root of each project: it configures TSD for the project and it tracks the definitions that are installed (using `--save`). There is a JSON Schema with some more information [here](https://github.com/DefinitelyTyped/tsd/tree/master/schema).
+
+### tsd.d.ts
+
+This project file is an optional bundle where every definition that is installed (with `--save`) is added for easy `/// <reference path="../typings/tsd.json" />` from your code. By default it is created in the typings folder but it is configurable in `tsd.json`. It is possible to re-order the references.
+
+### .tsdrc
+
+This is a optional JSON encoded file for global options: place it in the user home directory (eg: `$HOME` or `%USERPROFILE%`).
+
+Set a http `proxy`:
+
+````json
+{
+	"proxy": "http://proxy.example.com:88"
+}
+````
+
 ## FAQ & Info
 
 ### Why does the install / search command not work like in TSD 0.3.0?
@@ -291,7 +313,14 @@ It works well but is not used much in the current DefinitelyTyped repository. Th
 
 The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
 
-### Do you have a grunt task?
+### Does TSD work behind a (corporate) http proxy?
+
+Sure. There are two ways to configure the location of the proxy server:
+
+1. Use a environment variable. TSD support the conventional fields: pick one of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY` or `http_proxy`.
+1. Use a global `.tsdrc` file and set a `proxy` value (see the tsdrc-section elsewhere in the readme).
+
+### Is there a grunt task available?
 
 Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
