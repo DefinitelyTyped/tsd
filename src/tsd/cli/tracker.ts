@@ -120,6 +120,9 @@ module tsd {
 			}
 
 			sendEvent(event?:any):void {
+				if (!this._enabled) {
+					return;
+				}
 				if (event) {
 					this._eventQueue.push(event);
 				}
