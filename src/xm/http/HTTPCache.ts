@@ -59,6 +59,7 @@ module xm {
 
 			infoKoder:IContentKoder<CacheInfo>;
 			infoSchema:any;
+			proxy:string;
 
 			private jobs = new Map<string, CacheStreamLoader>();
 			private jobTimers = new Map<string, NodeTimer>();

@@ -18,6 +18,7 @@
 
 /// <reference path="API.ts" />
 
+// TODO get rid of hacky updateConfig()
 module tsd {
 	'use strict';
 
@@ -82,7 +83,7 @@ module tsd {
 		updateConfig():void {
 			// drop statefull helper
 			this._components.replace({
-				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings.getChild('/git'))
+				repo: new git.GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings)
 			});
 
 			// lets be gents

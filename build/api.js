@@ -5510,8 +5510,6 @@ var git;
             this.api.cache.proxy = proxy;
             this.raw.cache.proxy = proxy;
 
-            xm.log.status('proxy', proxy);
-
             xm.object.lockProps(this, Object.keys(this));
         }
         GithubRepo.prototype.getCacheKey = function () {

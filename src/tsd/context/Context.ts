@@ -10,6 +10,7 @@
 module tsd {
 	'use strict';
 
+	var fs = require('fs');
 	var path = require('path');
 
 	/*
@@ -27,12 +28,16 @@ module tsd {
 		// log:xm.Logger = xm.getLogger('Context');
 		configSchema:any;
 
+		// TODO extract IO
 		constructor(configFile:string = null, verbose:boolean = false) {
 			xm.assertVar(configFile, 'string', 'configFile', true);
 			xm.assertVar(verbose, 'boolean', 'verbose');
 
 			this.packageInfo = xm.PackageJSON.getLocal();
 			this.settings = new xm.JSONPointer(xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
+
+			this.stackSettings(path.resolve(tsd.Paths.getUserHome(), tsd.Const.rc));
+			this.stackSettings(path.resolve(process.cwd(), tsd.Const.rc));
 
 			this.verbose = verbose;
 
@@ -44,6 +49,20 @@ module tsd {
 
 			this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
 			this.config = new Config(this.configSchema);
+		}
+
+		stackSettings(src:string):void {
+			if (fs.existsSync(src)) {
+				if (this.verbose) {
+					xm.log.status('using rc: ' + src);
+				}
+				this.settings.addSource(xm.file.readJSONSync(src));
+			}
+			else {
+				if (this.verbose) {
+					xm.log.status('cannot find rc: ' + src);
+				}
+			}
 		}
 
 		getTypingsDir():string {

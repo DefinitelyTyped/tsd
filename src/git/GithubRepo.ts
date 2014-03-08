@@ -32,8 +32,19 @@ module git {
 
 			this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
-			this.api = new git.GithubAPI(this, opts.getChild('api'), this.storeDir);
-			this.raw = new git.GithubRaw(this, opts.getChild('raw'), this.storeDir);
+			this.api = new git.GithubAPI(this, opts.getChild('git/api'), this.storeDir);
+			this.raw = new git.GithubRaw(this, opts.getChild('git/raw'), this.storeDir);
+
+			var proxy = (
+				opts.getString('proxy')
+				|| process.env.HTTPS_PROXY
+				|| process.env.https_proxy
+				|| process.env.HTTP_PROXY
+				|| process.env.http_proxy
+			);
+
+			this.api.cache.proxy = proxy;
+			this.raw.cache.proxy = proxy;
 
 			xm.object.lockProps(this, Object.keys(this));
 		}

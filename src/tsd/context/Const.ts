@@ -2,6 +2,7 @@ module tsd {
 	'use strict';
 
 	export var Const = {
+		rc : '.tsdrc',
 		ident : 'tsd',
 		configFile : 'tsd.json',
 		typingsDir : 'typings',

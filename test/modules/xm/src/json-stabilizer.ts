@@ -4,7 +4,7 @@
 
 /// <reference path='../../../../src/xm/json-stabilizer.ts' />
 
-describe('JSON', () => {
+describe('JSONStabilizer', () => {
 	'use strict';
 
 	var fs = require('fs');

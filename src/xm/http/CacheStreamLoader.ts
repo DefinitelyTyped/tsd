@@ -225,10 +225,15 @@ module xm {
 				this.track.promise(d.promise, CacheStreamLoader.http_load);
 
 				// assemble request
-				var req = {
+				var req:any = {
 					url: this.request.url,
 					headers: {},
 				};
+
+				if (this.cache.proxy) {
+					req.proxy = this.cache.proxy;
+				}
+
 				Object.keys(this.request.headers).forEach((key) => {
 					req.headers[key] = String(this.request.headers[key]);
 				});
