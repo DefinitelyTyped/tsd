@@ -4,7 +4,7 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "count": 371,
+  "count": 376,
   "content": [
     {
       "project": "accounting",
@@ -1314,6 +1314,20 @@
       }
     },
     {
+      "project": "dock-spawn",
+      "name": "dock-spawn",
+      "path": "dock-spawn/dock-spawn.d.ts",
+      "info": {
+        "references": [],
+        "name": "Dock Spawn",
+        "version": "",
+        "description": "",
+        "projectUrl": "http://dockspawn.com",
+        "authors": [],
+        "reposUrl": ""
+      }
+    },
+    {
       "project": "domo",
       "name": "domo",
       "path": "domo/domo.d.ts",
@@ -2243,6 +2257,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "googlemaps.infobubble",
+      "name": "google.maps.infobubble",
+      "path": "googlemaps.infobubble/google.maps.infobubble.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
@@ -3325,6 +3353,25 @@
       }
     },
     {
+      "project": "jquery.jsignature",
+      "name": "jquery.jsignature",
+      "path": "jquery.jsignature/jquery.jsignature.d.ts",
+      "info": {
+        "references": [],
+        "name": "jQuery.jsignature v2",
+        "version": "2",
+        "description": "",
+        "projectUrl": "https://github.com/willowsystems/jSignature",
+        "authors": [
+          {
+            "name": "Patrick Magee",
+            "url": "https://github.com/pjmagee"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "jquery.livestampjs",
       "name": "jquery.livestampjs",
       "path": "jquery.livestampjs/jquery.livestampjs.d.ts",
@@ -3647,6 +3694,27 @@
           {
             "name": "Christiaan Rakowski",
             "url": "https://github.com/csrakowski"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "jquery.tooltipster",
+      "name": "jquery.tooltipster",
+      "path": "jquery.tooltipster/jquery.tooltipster.d.ts",
+      "info": {
+        "references": [
+          "../jquery/jquery.d.ts"
+        ],
+        "name": "jQuery Tooltipster 3.0.5",
+        "version": "3.0.5",
+        "description": "",
+        "projectUrl": "https://github.com/iamceege/tooltipster",
+        "authors": [
+          {
+            "name": "Patrick Magee",
+            "url": "https://github.com/pjmagee"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -5286,14 +5354,18 @@
       "path": "phantomjs/phantomjs.d.ts",
       "info": {
         "references": [],
-        "name": "PlantomJS v1.8.0 API",
-        "version": "1.8.0",
+        "name": "PhantomJS v1.9.0 API",
+        "version": "1.9.0",
         "description": "",
         "projectUrl": "https://github.com/ariya/phantomjs/wiki/API-Reference",
         "authors": [
           {
             "name": "Jed Hunsaker",
             "url": "https://github.com/jedhunsaker"
+          },
+          {
+            "name": "Mike Keesey",
+            "url": "https://github.com/keesey"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -5682,7 +5754,9 @@
       "name": "restify",
       "path": "restify/restify.d.ts",
       "info": {
-        "references": [],
+        "references": [
+          "../node/node.d.ts"
+        ],
         "name": "node.js REST framework 2.0",
         "version": "2.0",
         "description": "",
@@ -6789,12 +6863,26 @@
       }
     },
     {
+      "project": "test-module",
+      "name": "test-module",
+      "path": "test-module/test-module.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
+      }
+    },
+    {
       "project": "threejs",
       "name": "three",
       "path": "threejs/three.d.ts",
       "info": {
         "references": [],
-        "name": "three.js",
+        "name": "three.js -- r66",
         "version": "",
         "description": "",
         "projectUrl": "http://mrdoob.github.com/three.js",
@@ -6802,6 +6890,10 @@
           {
             "name": "Kon",
             "url": "http://phyzkit.net"
+          },
+          {
+            "name": "Satoru Kimura",
+            "url": "https://github.com/gyohk"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
