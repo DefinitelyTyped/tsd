@@ -17,9 +17,9 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 #### Github rate-limit
 
-The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses caching layers and the definition files are downloaded over unlimited Github RAW urls.
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. Optionally a limited-scope Github OAuth token can be used to boost the rate-limit to 5000.
 
-#### Usage stats & update check
+#### Usage stats & update-notifier
 
 The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates.
 
@@ -31,13 +31,7 @@ Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):
 $ npm install tsd -g
 ````
 
-For previews check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
-
-If you need to install the legacy `v0.3.x`:
-
-````bash
-$ npm install tsd@0.3.0 -g
-````
+For previews and history check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
 ## Usage as CLI command
 
@@ -49,15 +43,19 @@ $ tsd -h
 
 [![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
 
-It looks like this:
+Sometimes it looks like this:
 
 * [`$ tsd --help`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
 * [`$ tsd query async --info --history --action install`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png)
 * [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png)
 
-
-
 ### Practical examples
+
+Create a new `tsd.json`:
+
+````bash
+$ tsd init
+````
 
 #### Search
 
@@ -67,20 +65,14 @@ Minimal query for `d3`:
 $ tsd query d3
 ````
 
-List *everything*:
-
-````bash
-$ tsd query *
-````
-
 Tip: if you are using Linux or Mac OS X, use `$ tsd query "*"`.
 
 Get some info about `jquery`:
 
 ````bash
-$ tsd query jquery --info --history --resolve
-$ tsd query jquery -i -y -r
-$ tsd query jquery -iyr
+$ tsd query jquery --info --resolve
+$ tsd query jquery -i -r
+$ tsd query jquery -ir
 ````
 
 Search for `jquery` plugins:
@@ -88,11 +80,42 @@ Search for `jquery` plugins:
 ````bash
 $ tsd query */jquery.*
 ````
-#### Install
+
+View `mocha` history:
+
+````bash
+$ tsd query mocha --history
+$ tsd query mocha -y
+````
+
+List *everything*:
+
+````bash
+$ tsd query *
+````
+
+### Open in browser
+
+Browse `pixi` definition on github:
+
+````bash
+$ tsd query pixi --action browse
+$ tsd query pixi -a browse
+````
+
+Visit `gruntjs` homepage:
+
+````bash
+$ tsd query gruntjs --action visit
+$ tsd query gruntjs -a visit
+````
+
+#### Install to project
 
 Install `mocha`, `chai` and `sinon` definitions all at once:
 
 ````bash
+$ tsd query mocha chai sinon --action install
 $ tsd query mocha chai sinon -a install
 ````
 
@@ -116,30 +139,19 @@ Install and save to `test.d.ts` as `<reference/>` bundle:
 $ tsd query mocha chai -r -o -s -a install -b test
 ````
 
-### Open a browser
+## Query
 
-Browse `pixi` definition on github:
+TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
 
-````bash
-$ tsd query pixi -a browse
-````
-
-Visit `gruntjs` homepage:
-
-````bash
-$ tsd query gruntjs -a visit
-````
-
-## Selectors
-
-TSD uses a (globbing) path + filename selector to query the DefinitelyTyped index, where the definition name takes priority:
+Note how the definition filename takes priority:
 
 ````bash
 $ tsd query module
 $ tsd query project/module
 ````
 
-Consider these definitions:
+
+For example, consider these definitions:
 
 ````
 project/module.d.ts
@@ -275,17 +287,25 @@ Not yet.
 
 ### tsd.json
 
-The `tsd.json` file is automatically created in the root of each project: it configures TSD for the project and it tracks the definitions that are installed (using `--save`). There is a JSON Schema with some more information [here](https://github.com/DefinitelyTyped/tsd/tree/master/schema).
+The `tsd.json` file is automatically created in the root of each project: it configures TSD and it tracks the definitions that are installed (using `--save`). See the [JSON Schema](https://github.com/DefinitelyTyped/tsd/tree/master/schema) for more info.
 
 ### tsd.d.ts
 
-This project file is an optional bundle where every definition that is installed (with `--save`) is added for easy `/// <reference path="../typings/tsd.json" />` from your code. By default it is created in the typings folder but it is configurable in `tsd.json`. It is possible to re-order the references.
+The `tsd.d.ts` file links every definition that is installed (with `--save`) for convenient reference:
+
+````
+/// <reference path="../typings/tsd.d.ts" />
+```` 
+
+By default it is created in the typings folder but it is configurable in `tsd.json`. TSD will check the existing references and respects re-ordering.
 
 ### .tsdrc
 
-This is a optional JSON encoded file for global options: place it in the user home directory (eg: `$HOME` or `%USERPROFILE%`).
+This is a optional JSON encoded file to define global settings. TSD looks for it in the  user's home director (eg: `%USERPROFILE%` on Windows, `$HOME` / `~` on Linux), and in the current working directory.
 
-Set a http `proxy`:
+- "**proxy**" - Use a http `proxy`
+
+Any standard http-proxy as supported by the [request](https://github.com/mikeal/request) package.
 
 ````json
 {
@@ -293,7 +313,51 @@ Set a http `proxy`:
 }
 ````
 
+- "**token**" - Github OAuth token:
+
+The OAuth token can be used to boost the Github API rate-limit from 60 to 5000 (non-cached) requests per hour. The is token needs just ['read-only access to public information'](http://developer.github.com/v3/oauth/#scopes) so no additional OAuth scopes are necessary.
+
+````json
+{
+	"token": "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"
+}
+````
+
+You can create this token on Github.com:
+
+1. Go to https://github.com/settings/tokens/new
+3. *Deselect* all scopes to create a token with just basic authentication.
+	1. (verify you *really* deselected all scopes) 
+	5. (wonder why these presets were set??)
+2. Enter a identifying name, something like "`TSD Turbo 5000`"
+5. Create the token.
+6. Copy the hex-string to the `token` element in the `.tsdrc` file.
+6. Verify enhanced rate-limit using `$ tsd rate`
+
+Change or revoke the token at any time on https://github.com/settings/applications
+
+Note: keep in mind the `.tsdrc` file is *not* secured. Don't use a token with additional scope unless you know what you are doing. 
+
+The bare 'no scope' token is *relatively* harmless as it gives 'read-only access to public information', same as any non-autenticated access. But it does *identify* any requests done with it as being *yours*, so it is still *your* responsibility to keep the token private.
+
 ## FAQ & Info
+
+### Is there a grunt task available?
+
+Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+
+### I hit the rate-limit: now what?
+
+If TSD is used in a way that needs many unique API calls in a short period (like using `--history` on big selections), or shares an internet-connection with multiple users (like in an office) then the rate limit blocks the API. It blocks for 60 minutes after the *first* request of the total 60.
+
+For these cases TSD has an option to use a Github OAuth token and raise your local rate-limit from 60 to 5000 per hour. See the `.tsdrc`-section elsewhere in the readme.
+
+### Does TSD work behind a (corporate) http proxy?
+
+As of `v0.5.7` there are two ways to configure the location of the proxy server:
+
+1. Use a environment variable. TSD support the conventional fields: pick one of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY` or `http_proxy`.
+1. Use a global `.tsdrc` file and set a `proxy` value (see the tsdrc-section elsewhere in the readme).
 
 ### Why does the install / search command not work like in TSD 0.3.0?
 
@@ -313,17 +377,6 @@ It works well but is not used much in the current DefinitelyTyped repository. Th
 
 The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
 
-### Does TSD work behind a (corporate) http proxy?
-
-Sure. There are two ways to configure the location of the proxy server:
-
-1. Use a environment variable. TSD support the conventional fields: pick one of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY` or `http_proxy`.
-1. Use a global `.tsdrc` file and set a `proxy` value (see the tsdrc-section elsewhere in the readme).
-
-### Is there a grunt task available?
-
-Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
-
 ### I have a suggestion or contribution
 
 Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
@@ -331,6 +384,8 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 ## History
 
 ### v0.5.x ( > 2013-08)
+
+For previews and history check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
 * `0.5.x` - `current` - Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
@@ -358,7 +413,7 @@ Some essential modules used to build TSD:
 
 ## Build
 
-TSD is written in [TypeScript](http://www.typescriptlang.org/) `v0.9.1-1` and build using [Grunt](http://www.gruntjs.com).
+TSD is build with [TypeScript](http://www.typescriptlang.org/) `v0.9.7` and managed using [Grunt](http://www.gruntjs.com).
 
 To rebuild clone or fork the repos:
 
@@ -422,11 +477,15 @@ Contributions are very welcome, please discuss larger changes in a [ticket](http
 
 ## Privacy statement
 
-The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed from the repos. The information collected amounts to about same level of detail as services like npm or github would collect (even less; as we don't track account id's). 
+The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed. The information collected amounts to about same level of detail as services like npm or github would collect (maybe even less as we don't track a user id). 
 
 The API does not track anything. 
 
-TSD uses [Google Analytics](http://www.google.com/analytics/) by the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
+To store this TSD uses [Google Analytics](http://www.google.com/analytics/) in the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
+
+The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
+
+Using an OAuth token with additional scope is *not advised nor supported* (even though it could make TSD work with private repositories). But it might also leak repo or content names to analytics or leave a bare http cache in your temp dir. If this bothers you please review the license and/or leave a message.
 
 Changes to the policy should be announced in release notes, and ideally ask confirmation on the first CLI use.
 
