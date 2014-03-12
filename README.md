@@ -94,7 +94,7 @@ List *everything*:
 $ tsd query *
 ````
 
-### Open in browser
+#### Open browser
 
 Browse `pixi` definition on github:
 
@@ -257,7 +257,7 @@ Notes:
 
 ## Usage as module
  
-TSD can be used as any JavaScript npm dependency in your project: 
+TSD can be used as a JavaScript npm dependency: 
 
 ````js
 var tsd = require('tsd');
