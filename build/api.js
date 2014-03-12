@@ -7854,6 +7854,13 @@ var tsd;
             this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
             this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
+            var token = this.context.settings.getValue('/token');
+            if (xm.isString(token)) {
+                this.repo.api.headers['authorization'] = 'token ' + token;
+            } else {
+                delete this.repo.api.headers['authorization'];
+            }
+
             this.useCacheMode(this._cacheMode);
         };
 
@@ -9284,11 +9291,18 @@ var tsd;
             Printer.prototype.rateInfo = function (info, note, force) {
                 if (typeof note === "undefined") { note = false; }
                 if (typeof force === "undefined") { force = false; }
+                var warnLim = 10;
+                var goodLim = 30;
+                var stealthLim = 45;
+
                 if (info.remaining === this._remainingPrev && !force) {
                     return this.output;
                 }
                 this._remainingPrev = info.remaining;
                 if (info.remaining === info.limit && !force) {
+                    return this.output;
+                }
+                if (info.remaining > stealthLim && !force) {
                     return this.output;
                 }
 
@@ -9302,9 +9316,9 @@ var tsd;
                 if (info.limit > 0) {
                     if (info.remaining === 0) {
                         this.output.error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
-                    } else if (info.remaining < 15) {
+                    } else if (info.remaining <= warnLim) {
                         this.output.warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
-                    } else if (info.remaining < info.limit - 15) {
+                    } else if (info.remaining <= goodLim) {
                         this.output.success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
                     } else {
                         this.output.accent(info.remaining).span(' / ').accent(info.limit);
@@ -10079,7 +10093,7 @@ var tsd;
         function showHeader() {
             var pkg = xm.PackageJSON.getLocal();
 
-            output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().muted('(').accent('beta').muted(')').ln();
+            output.ln().report(true).tweakPunc(pkg.getNameVersion()).ln();
 
             return Q.resolve();
         }

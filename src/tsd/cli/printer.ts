@@ -210,11 +210,18 @@ module tsd {
 			}
 
 			rateInfo(info:git.GitRateInfo, note:boolean = false, force:boolean = false):xm.StyledOut {
+				var warnLim = 10;
+				var goodLim = 30;
+				var stealthLim = 45;
+
 				if (info.remaining === this._remainingPrev && !force) {
 					return this.output;
 				}
 				this._remainingPrev = info.remaining;
 				if (info.remaining === info.limit && !force) {
+					return this.output;
+				}
+				if (info.remaining > stealthLim && !force) {
 					return this.output;
 				}
 
@@ -228,13 +235,14 @@ module tsd {
 
 				/* tslint:disable:max-line-length */
 				if (info.limit > 0) {
+
 					if (info.remaining === 0) {
 						this.output.error(info.remaining).span(' / ').error(info.limit).span(' -> ').error(info.getResetString());
 					}
-					else if (info.remaining < 15) {
+					else if (info.remaining <= warnLim) {
 						this.output.warning(info.remaining).span(' / ').warning(info.limit).span(' -> ').warning(info.getResetString());
 					}
-					else if (info.remaining < info.limit - 15) {
+					else if (info.remaining <= goodLim) {
 						this.output.success(info.remaining).span(' / ').success(info.limit).span(' -> ').success(info.getResetString());
 					}
 					else {

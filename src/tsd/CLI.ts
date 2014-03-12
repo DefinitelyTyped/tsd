@@ -79,7 +79,7 @@ module tsd {
 		function showHeader():Q.Promise<void> {
 			var pkg = xm.PackageJSON.getLocal();
 
-			output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().muted('(').accent('beta').muted(')').ln();
+			output.ln().report(true).tweakPunc(pkg.getNameVersion()).ln(); // .space().muted('(').accent('beta').muted(')').ln();
 			// .clear().span(pkg.getHomepage(true)).ln()
 			// .ruler().ln();
 			return Q.resolve();
