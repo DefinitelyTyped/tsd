@@ -1,11 +1,12 @@
 {
   "name": "tsd",
-  "version": "0.5.7",
+  "version": "0.5.7-alpha",
   "description": "TypeScript Definition manager for DefinitelyTyped",
   "keywords": [
     "typescript",
     "definition",
-    "package"
+    "package",
+    "manager"
   ],
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
