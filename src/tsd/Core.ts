@@ -90,6 +90,14 @@ module tsd {
 			this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 			this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
+			var token = this.context.settings.getValue('/token');
+			if (xm.isString(token)) {
+				this.repo.api.headers['authorization'] = 'token ' + token;
+			}
+			else {
+				delete this.repo.api.headers['authorization'];
+			}
+
 			this.useCacheMode(this._cacheMode);
 		}
 
