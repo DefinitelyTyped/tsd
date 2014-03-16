@@ -1,8 +1,8 @@
 /// <reference path="../../../globals.ts" />
 /// <reference path="../../../helper.ts" />
 /// <reference path="../../../../src/xm/iterate.ts" />
-/// <reference path="../../../../src/xm/assertVar.ts" />
-/// <reference path="../../../../src/xm/Koder.ts" />
+/// <reference path="../../../../src/xm/assert.ts" />
+/// <reference path="../../../../src/xm/lib/Koder.ts" />
 
 describe('koders', () => {
 	'use strict';

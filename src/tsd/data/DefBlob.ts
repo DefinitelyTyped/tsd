@@ -1,58 +1,58 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../../../typings/fixes.d.ts" />
-/// <reference path="../../git/GitUtil.ts" />
-/// <reference path="../../xm/typeOf.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import typeOf = require('../../xm/typeOf');
+import assertVar = require('../../xm/assertVar');
+import assert = require('../../xm/assert');
+import objectUtils = require('../../xm/objectUtils');
+import gitUtil = require('../../git/gitUtil');
+import tsdUtil = require('../util/tsdUtil');
 
-	export class DefBlob {
-		sha:string = null;
-		content:NodeBuffer = null;
-		encoding:string = 'utf8';
+class DefBlob {
+	sha: string = null;
+	content: NodeBuffer = null;
+	encoding: string = 'utf8';
 
-		constructor(sha:string, content:any = null, encoding:string = null) {
-			xm.assertVar(sha, 'sha1', 'sha');
-			this.sha = sha;
-			this.encoding = encoding;
+	constructor(sha: string, content: any = null, encoding: string = null) {
+		assertVar(sha, 'sha1', 'sha');
+		this.sha = sha;
+		this.encoding = encoding;
 
-			xm.object.defineProps(this, ['sha', 'encoding'], {writable: false});
+		objectUtils.defineProps(this, ['sha', 'encoding'], {writable: false});
 
-			if (content) {
-				this.setContent(content);
-			}
-			else {
-				Object.defineProperty(this, 'content', {enumerable: false});
-			}
+		if (content) {
+			this.setContent(content);
 		}
-
-		hasContent():boolean {
-			return xm.isValid(this.content);
-		}
-
-		setContent(content:NodeBuffer, encoding?:string):void {
-			xm.assertVar(content, Buffer, 'content');
-			if (xm.isValid(this.content)) {
-				throw new Error('content already set: ' + this.sha);
-			}
-
-			var sha = git.GitUtil.blobShaHex(content, encoding || this.encoding);
-			if (sha !== this.sha) {
-				xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
-			}
-
-			xm.object.defineProp(this, 'content', {writable: true});
-			this.content = content;
-			xm.object.defineProp(this, 'content', {writable: false, enumerable: false});
-		}
-
-		// human friendly
-		get shaShort():string {
-			return this.sha ? tsd.shaShort(this.sha) : '<no sha>';
-		}
-
-		toString():string {
-			return this.shaShort;
+		else {
+			Object.defineProperty(this, 'content', {enumerable: false});
 		}
 	}
+
+	hasContent(): boolean {
+		return typeOf.isValid(this.content);
+	}
+
+	setContent(content: NodeBuffer, encoding?: string): void {
+		assertVar(content, Buffer, 'content');
+		if (typeOf.isValid(this.content)) {
+			throw new Error('content already set: ' + this.sha);
+		}
+
+		var sha = gitUtil.blobShaHex(content, encoding || this.encoding);
+		assert(sha === this.sha, 'blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
+
+		objectUtils.defineProp(this, 'content', {writable: true});
+		this.content = content;
+		objectUtils.defineProp(this, 'content', {writable: false, enumerable: false});
+	}
+
+	// human friendly
+	get shaShort(): string {
+		return this.sha ? tsdUtil.shaShort(this.sha) : '<no sha>';
+	}
+
+	toString(): string {
+		return this.shaShort;
+	}
 }
+
+export = DefBlob;

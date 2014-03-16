@@ -1,33 +1,36 @@
-/*
- * imported from typescript-xm package
- *
- * Bart van der Schoor
- * https://github.com/Bartvds/typescript-xm
- * License: MIT - 2013
- * */
+/// <reference path="./_ref.d.ts" />
 
-/// <reference path="typeOf.ts" />
-/// <reference path="../../typings/fixes.d.ts" />
+// TODO consider expanding to work on every collection type
+// TODO ditch for Lazy.js or Highland
 
-module xm {
-	'use strict';
-	// TODO consider expanding to work on every collection type
+export function keysOf<K, V>(map: Map<K, V>): K[] {
+	var ret: K[] = [];
+	map.forEach((v, k) => {
+		ret.push(k);
+	});
+	return ret;
+}
 
-	export function keysOf<K, V>(map:Map<K, V>):K[] {
-		return toArray<K>(map.keys());
+export function valuesOf<K, V>(map: Map<K, V>): V[] {
+	var ret: V[] = [];
+	map.forEach((v) => {
+		ret.push(v);
+	});
+	return ret;
+}
+
+export function toArray<T>(iterator: ArrayIterator<T>): T[] {
+	var result = iterator.next();
+	var ret: T[] = [];
+	while (!result.done) {
+		ret.push(result.value);
+		result = iterator.next();
 	}
+	return ret;
+}
 
-	export function valuesOf<K, V>(map:Map<K, V>):V[] {
-		return toArray<V>(map.values());
-	}
-
-	export function toArray<T>(iterator:ArrayIterator<T>):T[] {
-		var result = iterator.next();
-		var ret:T[] = [];
-		while (!result.done) {
-			ret.push(result.value);
-			result = iterator.next();
-		}
-		return ret;
-	}
+export function enumNames(enumer: Object): string[] {
+	return Object.keys(enumer).filter((value: string) => {
+		return !/\d+/.test(value);
+	});
 }

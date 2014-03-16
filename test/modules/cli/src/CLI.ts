@@ -5,7 +5,6 @@ describe('CLI Query', () => {
 	'use strict';
 
 	var fs = require('fs');
-	var FS = require('q-io/fs');
 	var path = require('path');
 	var assert:Chai.Assert = require('chai').assert;
 

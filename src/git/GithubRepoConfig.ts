@@ -1,8 +1,8 @@
-module git {
-	'use strict';
+/// <reference path="./_ref.d.ts" />
 
-	export interface GithubRepoConfig {
-		repoOwner: string;
-		repoProject: string;
-	}
+interface GithubRepoConfig {
+	repoOwner: string;
+	repoProject: string;
 }
+
+export = GithubRepoConfig;

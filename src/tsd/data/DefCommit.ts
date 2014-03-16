@@ -1,80 +1,82 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../../git/model/GithubJSON.ts" />
-/// <reference path="../../git/model/GithubUser.ts" />
-/// <reference path="../../git/model/GitCommitMessage.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import pointer = require('json-pointer');
 
-	var pointer = require('json-pointer');
+import assert = require('../../xm/assert');
+import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
 
-	/*
-	 DefCommit: meta-data for a single github commit
-	 */
-	export class DefCommit {
+import GithubUser = require('../../git/model/GithubUser');
+import GitCommitUser = require('../../git/model/GitCommitUser');
+import GitCommitMessage = require('../../git/model/GitCommitMessage');
 
-		// NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
+import tsdUtil = require('../util/tsdUtil');
 
-		commitSha:string;
-		hasMeta:boolean = false;
+/*
+ DefCommit: meta-data for a single github commit
+ */
+class DefCommit {
 
-		message:git.GitCommitMessage = new git.GitCommitMessage();
+	// NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
 
-		hubAuthor:git.GithubUser;
-		hubCommitter:git.GithubUser;
+	commitSha: string;
+	hasMeta: boolean = false;
 
-		gitAuthor:git.GitUserCommit;
-		gitCommitter:git.GitUserCommit;
+	message: GitCommitMessage = new GitCommitMessage();
 
-		// moar fields?
+	hubAuthor: GithubUser;
+	hubCommitter: GithubUser;
 
-		constructor(commitSha:string) {
-			xm.assertVar(commitSha, 'sha1', 'commitSha');
+	gitAuthor: GitCommitUser;
+	gitCommitter: GitCommitUser;
 
-			this.commitSha = commitSha;
+	// moar fields?
 
-			xm.object.hidePrefixed(this);
-			xm.object.lockProps(this, ['commitSha']);
+	constructor(commitSha: string) {
+		assertVar(commitSha, 'sha1', 'commitSha');
+
+		this.commitSha = commitSha;
+	}
+
+	parseJSON(commit: any): void {
+		assertVar(commit, 'object', 'commit');
+		assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
+
+		// TODO add a bit of checking? error? beh?
+		this.hubAuthor = GithubUser.fromJSON(commit.author);
+		this.hubCommitter = GithubUser.fromJSON(commit.committer);
+
+		this.gitAuthor = GitCommitUser.fromJSON(commit.commit.author);
+		this.gitCommitter = GitCommitUser.fromJSON(commit.commit.committer);
+
+		this.message.parse(commit.commit.message);
+		this.hasMeta = true;
+
+		objectUtils.lockProps(this, ['commitSha', 'hasMeta']);
+	}
+
+	hasMetaData(): boolean {
+		return this.hasMeta;
+	}
+
+	toString(): string {
+		return this.commitSha;
+	}
+
+	get changeDate(): Date {
+		if (this.gitAuthor) {
+			return this.gitAuthor.date;
 		}
-
-		parseJSON(commit:any):void {
-			xm.assertVar(commit, 'object', 'commit');
-			xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
-
-			// TODO add a bit of checking? error? beh?
-			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
-			this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
-
-			this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
-			this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
-
-			this.message.parse(commit.commit.message);
-			this.hasMeta = true;
-
-			xm.object.lockProps(this, ['commitSha', 'hasMeta']);
+		if (this.gitCommitter) {
+			return this.gitCommitter.date;
 		}
+		return null;
+	}
 
-		hasMetaData():boolean {
-			return this.hasMeta;
-		}
-
-		toString():string {
-			return this.commitSha;
-		}
-
-		get changeDate():Date {
-			if (this.gitAuthor) {
-				return this.gitAuthor.date;
-			}
-			if (this.gitCommitter) {
-				return this.gitCommitter.date;
-			}
-			return null;
-		}
-
-		// human friendly
-		get commitShort():string {
-			return this.commitSha ? tsd.shaShort(this.commitSha) : '<no sha>';
-		}
+	// human friendly
+	get commitShort(): string {
+		return this.commitSha ? tsdUtil.shaShort(this.commitSha) : '<no sha>';
 	}
 }
+
+export = DefCommit;

@@ -264,6 +264,8 @@ var xm;
     }
     xm.getReplacerFunc = getReplacerFunc;
 
+    
+
     function getEscaper(vars) {
         var values = (xm.isString(vars.values) ? vars.values.split('') : vars.values);
         var matches = (xm.isString(vars.matches) ? vars.matches.split('') : vars.matches);
@@ -627,23 +629,23 @@ var xm;
         }
     }
 
-    (function (object) {
+    (function (_object) {
         function hasOwnProp(obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
         }
-        object.hasOwnProp = hasOwnProp;
+        _object.hasOwnProp = hasOwnProp;
 
         function defineProp(object, property, settings) {
             Object.defineProperty(object, property, settings);
         }
-        object.defineProp = defineProp;
+        _object.defineProp = defineProp;
 
         function defineProps(object, propertyNames, settings) {
             propertyNames.forEach(function (property) {
                 xm.object.defineProp(object, property, settings);
             });
         }
-        object.defineProps = defineProps;
+        _object.defineProps = defineProps;
 
         function hidePrefixed(object, ownOnly) {
             if (typeof ownOnly === "undefined") { ownOnly = true; }
@@ -653,14 +655,14 @@ var xm;
                 }
             }
         }
-        object.hidePrefixed = hidePrefixed;
+        _object.hidePrefixed = hidePrefixed;
 
         function hideProps(object, props) {
             props.forEach(function (property) {
                 Object.defineProperty(object, property, { enumerable: false });
             });
         }
-        object.hideProps = hideProps;
+        _object.hideProps = hideProps;
 
         function lockProps(object, props, pub, pref) {
             if (typeof pub === "undefined") { pub = true; }
@@ -675,14 +677,14 @@ var xm;
                 }
             });
         }
-        object.lockProps = lockProps;
+        _object.lockProps = lockProps;
 
         function forceProps(object, props) {
             Object.keys(props).forEach(function (property) {
                 Object.defineProperty(object, property, { value: props[property], writable: false });
             });
         }
-        object.forceProps = forceProps;
+        _object.forceProps = forceProps;
 
         function freezeProps(object, props) {
             props.forEach(function (property) {
@@ -690,7 +692,7 @@ var xm;
                 Object.freeze(object[property]);
             });
         }
-        object.freezeProps = freezeProps;
+        _object.freezeProps = freezeProps;
 
         function lockPrimitives(object) {
             Object.keys(object).forEach(function (property) {
@@ -699,14 +701,14 @@ var xm;
                 }
             });
         }
-        object.lockPrimitives = lockPrimitives;
+        _object.lockPrimitives = lockPrimitives;
 
         function deepFreeze(object) {
             if (xm.isObject(object) || xm.isArray(object)) {
                 deepFreezeRecursive(object, []);
             }
         }
-        object.deepFreeze = deepFreeze;
+        _object.deepFreeze = deepFreeze;
     })(xm.object || (xm.object = {}));
     var object = xm.object;
 })(xm || (xm = {}));
@@ -1006,8 +1008,8 @@ var xm;
         };
 
         StyledOut.prototype.tweakExp = function (str, expr, muted) {
-            if (typeof muted === "undefined") { muted = false; }
             var _this = this;
+            if (typeof muted === "undefined") { muted = false; }
             if (muted) {
                 this._line.write(str.replace(expr, function (value) {
                     return _this._style.muted(value);
@@ -1062,6 +1064,8 @@ var xm;
     xm.consoleOut = new xm.StyledOut();
 
     xm.log;
+
+    
 
     var LogLevel = (function () {
         function LogLevel() {
@@ -1174,7 +1178,7 @@ var xm;
                 args[_i] = arguments[_i + 0];
             }
             if (logger.enabled) {
-                logger.out.accent('-> ').span(label + ' ');
+                logger.out.accent('-> ').span(label + 'status ');
                 doLog(logger, args);
             }
         };
@@ -1224,8 +1228,10 @@ var xm;
 (function (xm) {
     'use strict';
 
-    var Q = require('q');
+    var Promise = require('bluebird');
     var childProcess = require('child_process');
+
+    
 
     function runCLI(modulePath, args, debug, cwd) {
         if (typeof debug === "undefined") { debug = false; }
@@ -1233,7 +1239,7 @@ var xm;
         xm.assertVar(modulePath, 'string', 'modulePath');
         xm.assertVar(args, 'array', 'args');
 
-        var d = Q.defer();
+        var d = Promise.defer();
 
         var stdout = [];
         var stderr = [];
@@ -1311,7 +1317,6 @@ var xm;
     var lo_template = require('lodash-template');
     var path = require('path');
     var Q = require('q');
-    var FS = require('q-io/fs');
 
     var templates = new Map();
 

@@ -4,12 +4,16 @@
 /node_modules
 /build/*.map
 
+/build
 /cache
+/scratch
 /tsd-cache
 /test/tmp
 
 /tscommand*
 /*.tgz
+/*.ts
+/*.txt
 
 tmp/
 dump/

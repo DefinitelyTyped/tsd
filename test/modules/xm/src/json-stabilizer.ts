@@ -1,8 +1,8 @@
 /// <reference path='../../../globals.ts' />
 /// <reference path='../../../globals.ts' />
-/// <reference path='../../../../src/xm/file.ts' />
+/// <reference path='../../../../src/xm/file/file.ts' />
 
-/// <reference path='../../../../src/xm/json-stabilizer.ts' />
+/// <reference path='../../../../src/xm/json/json-stabilizer.ts' />
 
 describe('JSONStabilizer', () => {
 	'use strict';

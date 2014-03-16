@@ -1,66 +1,56 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../tsd/data/DefIndex.ts" />
-/// <reference path="../../tsd/data/DefInfoParser.ts" />
-/// <reference path="SubCore.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import Promise = require('bluebird');
 
-	var Q = require('q');
+import Options = require('../Options');
+import Core = require('Core');
+import SubCore = require('./SubCore');
 
-	export class InfoParser extends SubCore {
+import DefInfo = require('../data/DefInfo');
+import DefVersion = require('../data/DefVersion');
+import DefInfoParser = require('../support/DefInfoParser');
+import defUtil = require('../util/defUtil');
 
-		constructor(core:Core) {
-			super(core, 'info', 'InfoParser');
-		}
-		/*
-		 lazy load a DefVersion content and parse header for DefInfo meta data
-		 promise: DefVersion: with raw .content text and .info DefInfo filled with parsed meta data
-		 */
-		parseDefInfo(file:DefVersion):Q.Promise<DefVersion> {
-			var d:Q.Deferred<DefVersion> = Q.defer();
-			this.track.promise(d.promise, 'parse', file.key);
+class InfoParser extends SubCore {
 
-			this.core.content.loadContent(file).progress(d.notify).then((file:DefVersion) => {
-				var parser = new DefInfoParser();
-				if (file.info) {
-					// TODO why not do an early bail and skip reparse?
-					file.info.resetFields();
-				}
-				else {
-					file.info = new DefInfo();
-				}
+	constructor(core: Core) {
+		super(core, 'info', 'InfoParser');
+	}
 
-				parser.parse(file.info, file.blob.content.toString('utf8'));
+	/*
+	 lazy load a DefVersion content and parse header for DefInfo meta data
+	 */
+	parseDefInfo(file: DefVersion): Promise<DefVersion> {
+		return this.core.content.loadContent(file).then((file: DefVersion) => {
+			var parser = new DefInfoParser();
+			if (file.info) {
+				// TODO why not do an early bail and skip reparse?
+				file.info.resetFields();
+			}
+			else {
+				file.info = new DefInfo();
+			}
 
-				if (!file.info.isValid()) {
-					// this.log.warn('bad parse in: ' + file);
-					// TODO print more debug info
-				}
-				d.resolve(file);
-			}).fail(d.reject);
+			parser.parse(file.info, file.blob.content.toString('utf8'));
 
-			return d.promise;
-		}
+			if (!file.info.isValid()) {
+				// this.log.warn('bad parse in: ' + file);
+				// TODO print more debug info
+			}
+			return file;
+		});
+	}
 
-		/*
-		 bulk version of parseDefInfo()
-		 promise: array: bulk results of single calls
-		 */
-		parseDefInfoBulk(list:DefVersion[]):Q.Promise<DefVersion[]> {
-			var d:Q.Deferred<DefVersion[]> = Q.defer();
-			this.track.promise(d.promise, 'parse_bulk');
-			// needed?
-			list = DefUtil.uniqueDefVersion(list);
+	/*
+	 bulk version of parseDefInfo()
+	 */
+	parseDefInfoBulk(list: DefVersion[]): Promise<DefVersion[]> {
+		list = defUtil.uniqueDefVersion(list);
 
-			Q.all(list.map((file:DefVersion) => {
-				return this.parseDefInfo(file).progress(d.notify);
-
-			})).then((list:DefVersion[]) => {
-				d.resolve(list);
-			}, d.reject);
-
-			return d.promise;
-		}
+		return Promise.map(list, (file: DefVersion) => {
+			return this.parseDefInfo(file);
+		});
 	}
 }
+
+export = InfoParser;

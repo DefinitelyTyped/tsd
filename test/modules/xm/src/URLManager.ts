@@ -1,5 +1,5 @@
 /// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/xm/URLManager.ts" />
+/// <reference path="../../../../src/xm/lib/URLManager.ts" />
 
 describe('xm.URLManager', () => {
 	'use strict';

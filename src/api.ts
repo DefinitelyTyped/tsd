@@ -1,16 +1,12 @@
-/// <reference path="bootstrap.ts" />
-/// <reference path="_ref.d.ts" />
-/// <reference path="tsd/_ref.ts" />
-/// <reference path="tsd/API.ts" />
-/// <reference path="tsd/CLI.ts" />
+require('./bootstrap');
 
-module tsd {
-	'use strict';
+import assertVar = require('./xm/assertVar');
+import API = require('./tsd/API');
+import Context = require('./tsd/context/Context');
 
-	export function getAPI (configPath:string, verbose:boolean = false):tsd.API {
-		xm.assertVar(configPath, 'string', 'configPath');
-		return new tsd.API(new tsd.Context(configPath, verbose));
-	}
+'use strict';
+
+export function getAPI(configPath: string, verbose: boolean = false): API {
+	assertVar(configPath, 'string', 'configPath');
+	return new API(new Context(configPath, verbose));
 }
-
-module.exports = tsd;

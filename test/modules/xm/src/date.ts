@@ -1,5 +1,5 @@
 /// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/xm/date.ts" />
+/// <reference path="../../../../src/xm/dateUtils.ts" />
 
 describe('xm.date', () => {
 	'use strict';

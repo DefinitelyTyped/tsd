@@ -56,13 +56,15 @@ module.exports = function (grunt) {
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
-			sourcemap: ['build/*.js.map'],
-			build: ['build/*.js', 'build/*.js.map']
+			sourcemap: ['build/**/*.js.map'],
+			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map']
 		},
 		copy: {
 			cli: {
-				src: ['src/cli.js'],
-				dest: 'build/cli.js'
+				files: [
+				// includes files within path
+					{expand: true, cwd: 'src', src: ['cli.js', '.gitattributes'], dest: 'build', filter: 'isFile'}
+				]
 			}
 		},
 		'regex-replace': {
@@ -78,7 +80,7 @@ module.exports = function (grunt) {
 				]
 			},
 			build: {
-				src: ['build/*.js'],
+				src: ['build/**/*.js'],
 				actions: [
 					{
 						name: 'map',
@@ -138,6 +140,18 @@ module.exports = function (grunt) {
 				noImplicitAny: false
 			},
 			api: {
+				src: ['src/**/*.ts'],
+				outDir: 'build/'
+			},
+			xm: {
+				src: ['src/xm/**/*.ts'],
+				outDir: 'build/xm/'
+			},
+			git: {
+				src: ['src/git/**/*.ts'],
+				outDir: 'build/git/'
+			},
+			apiXX: {
 				src: ['src/api.ts'],
 				out: 'build/api.js'
 			},
@@ -239,13 +253,17 @@ module.exports = function (grunt) {
 	}, 'lib');
 
 	gtx.alias('pre_publish', [
+		/*'tv4:schemas',*/
 		'tv4:tsd',
 		'tv4:packjson',
+		'rebuild',
 		'regex-replace:build',
 		'regex-replace:cli',
 		'clean:sourcemap',
-		/*'tv4:schemas',*/
-		'mochaTest:integrity'
+		// 'gtx:cli',
+		// 'gtx:api',
+		'mochaTest:integrity',
+		'demo:help'
 	]);
 
 	// assemble!
@@ -255,15 +273,17 @@ module.exports = function (grunt) {
 		'jshint:fixtures',
 		'mocha_unfunk:dev'
 	]);
-	gtx.alias('build', [
+	gtx.alias('rebuild', [
 		'clean:build',
 		'prep',
 		'ts:api',
 		'copy:cli',
 		'regex-replace:cli',
-		'tslint:source',
-		'mochaTest:integrity',
-		'shell:demo_help'
+		'tslint:source'
+	]);
+	gtx.alias('build', [
+		'rebuild' /*,
+		'demo:help'*/
 	]);
 	gtx.alias('test', [
 		'build',
@@ -279,7 +299,13 @@ module.exports = function (grunt) {
 	]);
 
 	//gtx.alias('run', ['build', 'demo:help']);
-	gtx.alias('dev', ['prep', 'ts:dev']);
+	// gtx.alias('dev', ['prep', 'ts:dev']);
+	gtx.alias('dev', [
+		'clean:build',
+		'prep',
+		'ts:xm',
+		'ts:git'
+	]);
 	gtx.alias('run', ['capture_demo']);
 
 	gtx.alias('specjs', ['mochaTest:specs']);

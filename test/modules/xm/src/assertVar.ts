@@ -1,7 +1,6 @@
 /// <reference path="../../../globals.ts" />
 /// <reference path="../../../helper.ts" />
-/// <reference path="../../../../src/xm/iterate.ts" />
-/// <reference path="../../../../src/xm/assertVar.ts" />
+/// <reference path="../../../../src/xm/assert.ts" />
 
 describe('xm.assertVar', () => {
 

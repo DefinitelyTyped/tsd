@@ -44,8 +44,10 @@
     "prepublish": "grunt pre_publish"
   },
   "dependencies": {
+    "lazy.js": "~0.3.2",
+    "bluebird": "~1.1.0",
+    "es6-shim": "~0.10.0",
     "q": "~0.9.7",
-    "q-io": "~1.9.4",
     "open": "~0.0.4",
     "exit": "~0.1.1",
     "mkdirp": "~0.3.5",
@@ -61,15 +63,14 @@
     "ministyle": "~0.1.3",
     "miniwrite": "~0.1.3",
     "minitable": "~0.0.2",
-    "es6-shim": "0.9.1",
     "request": "~2.33.0",
     "event-stream": "~3.1.0",
     "bufferstream": "~0.6.2",
     "update-notifier": "git://github.com/Bartvds/update-notifier/#fix/fork",
     "universal-analytics": "~0.3.2",
     "uuid": "~1.4.1",
-    "weak-map": "~1.0.3",
-    "detect-indent": "~0.1.3"
+    "detect-indent": "~0.1.3",
+    "graceful-fs": "^2.0.2"
   },
   "devDependencies": {
     "source-map-support": "~0.2.5",

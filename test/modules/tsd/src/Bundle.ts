@@ -1,6 +1,6 @@
 /// <reference path='../../../globals.ts' />
 /// <reference path='../../../../src/xm/hash.ts' />
-/// <reference path='../../../../src/xm/file.ts' />
+/// <reference path='../../../../src/xm/file/file.ts' />
 /// <reference path='../../../../src/xm/Logger.ts' />
 
 /// <reference path='../../../../src/tsd/support/Bundle.ts' />
@@ -103,7 +103,7 @@ describe.only('Bundle', () => {
 				}
 				var expected = xm.file.readFileSync(path.join(fixtures, name, 'result.d.ts'));
 
-				if (xm.isFunction(value)) {
+				if (typeOf.isFunction(value)) {
 					 // do it
 					value.call(null, bundle, name);
 				}

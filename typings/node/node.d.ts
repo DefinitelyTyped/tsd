@@ -629,6 +629,8 @@ declare module "url" {
         hostname: string;
         port: string;
         host: string;
+        path: string;
+        hash: string;
         pathname: string;
         search: string;
         query: string;

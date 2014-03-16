@@ -1,32 +1,34 @@
-module git {
-	'use strict';
+/// <reference path="../_ref.d.ts" />
 
-	/*
-	 GitCommitUser: basic git committer
-	  */
-	export class GitUserCommit {
-		name:string;
-		email:string;
-		date:Date;
+import assertVar = require('../../xm/assertVar');
 
-		toString():string {
-			return (this.name ? this.name : '<no name>') + ' ' + (this.email ? '<' + this.email + '>' : '<no email>');
+/*
+ GitCommitUser: basic git committer
+  */
+class GitCommitUser {
+	name: string;
+	email: string;
+	date: Date;
+
+	toString(): string {
+		return (this.name ? this.name : '<no name>') + ' ' + (this.email ? '<' + this.email + '>' : '<no email>');
+	}
+
+	static fromJSON(json: any): GitCommitUser {
+		if (!json) {
+			return null;
 		}
 
-		static fromJSON(json:any):git.GitUserCommit {
-			if (!json) {
-				return null;
-			}
+		assertVar(json.name, 'string', ' json.name');
+		assertVar(json.email, 'string', ' json.email');
 
-			xm.assertVar(json.name, 'string', ' json.name');
-			xm.assertVar(json.email, 'string', ' json.email');
-
-			// TODO verify json data
-			var ret = new git.GitUserCommit();
-			ret.name = json.name;
-			ret.email = json.email;
-			ret.date = new Date(Date.parse(json.date));
-			return ret;
-		}
+		// TODO verify json data
+		var ret = new GitCommitUser();
+		ret.name = json.name;
+		ret.email = json.email;
+		ret.date = new Date(Date.parse(json.date));
+		return ret;
 	}
 }
+
+export = GitCommitUser;

@@ -11,7 +11,6 @@ describe('API', () => {
 
 	var fs = require('fs');
 	var path = require('path');
-	var FS = require('q-io/fs');
 	var Q = require('q');
 	var assert:Chai.Assert = require('chai').assert;
 
@@ -84,11 +83,11 @@ describe('API', () => {
 		return opts;
 	}
 
-	function setupCase(api:tsd.API, name:string, test:any, info:helper.TestInfo):Q.Promise<any> {
+	function setupCase(api:tsd.API, name:string, test:any, info:helper.TestInfo):Promise<any> {
 		if (test.modify) {
 			var before = test.modify.before;
 
-			var runModifyQuery = function ():Q.Promise<any> {
+			var runModifyQuery = function ():Promise<any> {
 				if (before.query) {
 					var query = getQuery(before);
 					var opts = getOptions(before);
@@ -102,10 +101,10 @@ describe('API', () => {
 					});
 				}
 				else {
-					return Q.resolve();
+					return Promise.return();
 				}
 			};
-			var runModifyContent = function ():Q.Promise<any> {
+			var runModifyContent = function ():Promise<any> {
 				if (before.content) {
 					xm.eachProp(before.content, (value:string, dest:string) => {
 						var destFull = path.join(info.typingsDir, dest);
@@ -115,12 +114,12 @@ describe('API', () => {
 						xm.file.writeFileSync(destFull, value);
 					});
 				}
-				return Q.resolve();
+				return Promise.return();
 			};
 
 			return runModifyQuery().then(runModifyContent);
 		}
-		return Q.resolve();
+		return Promise.return();
 	}
 
 	describe('search', () => {

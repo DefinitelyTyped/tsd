@@ -1,6 +1,6 @@
 /// <reference path="../../../globals.ts" />
 /// <reference path="../../../tsdHelper.ts" />
-/// <reference path="../../../../src/tsd/Core.ts" />
+/// <reference path="../../../../src/tsd/logic/Core.ts" />
 /// <reference path="../../../../src/tsd/select/Query.ts" />
 
 describe('Core', () => {
@@ -20,7 +20,7 @@ describe('Core', () => {
 		return core;
 	}
 
-	function testConfig(path:string):Q.Promise<void> {
+	function testConfig(path:string):Promise<void> {
 		context.paths.configFile = path;
 		var source = xm.file.readJSONSync(path);
 
@@ -30,7 +30,7 @@ describe('Core', () => {
 		});
 	}
 
-	function testInvalidConfig(path:string, exp:RegExp):Q.Promise<void> {
+	function testInvalidConfig(path:string, exp:RegExp):Promise<void> {
 		context.paths.configFile = path;
 		core = getCore(context);
 		return assert.isRejected(core.config.readConfig(false), exp);

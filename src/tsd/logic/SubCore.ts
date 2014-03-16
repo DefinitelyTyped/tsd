@@ -1,32 +1,26 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../xm/assertVar.ts" />
-/// <reference path="../../xm/Logger.ts" />
-/// <reference path="../Core.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
+import eventLog = require('../../xm/lib/eventLog');
 
-	export class SubCore {
+import Core = require('./Core');
 
-		core:tsd.Core;
-		track:xm.EventLog;
-		private _verbose:boolean = false;
+class SubCore {
 
-		constructor(core:tsd.Core, track:string, label:string) {
-			xm.assertVar(core, tsd.Core, 'core');
-			this.core = core;
-			this.track = new xm.EventLog(track, label);
+	core: Core;
+	private _verbose: boolean = false;
 
-			xm.object.lockProps(this, ['core', 'track']);
-			xm.object.hidePrefixed(this);
-		}
+	constructor(core: Core, track: string, label: string) {
+		this.core = core;
+	}
 
-		set verbose(verbose:boolean) {
-			this.track.logEnabled = verbose;
-		}
+	set verbose(verbose: boolean) {
+	}
 
-		get verbose():boolean {
-			return this._verbose;
-		}
+	get verbose(): boolean {
+		return this._verbose;
 	}
 }
+
+export = SubCore;

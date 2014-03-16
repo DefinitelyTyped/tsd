@@ -1,103 +1,82 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../Core.ts" />
-/// <reference path="SubCore.ts" />
-/// <reference path="../support/Bundle.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import fs = require('fs');
+import path = require('path');
+import Promise = require('bluebird');
 
-	var Q = require('q');
-	var fs = require('fs');
-	var path = require('path');
-	var FS:typeof QioFS = require('q-io/fs');
+import fileIO = require('../../xm/file/fileIO');
+import getNote = require('../../xm/note/getNote');
 
-	export class BundleManager extends tsd.SubCore {
+import Options = require('../Options');
+import Core = require('Core');
+import SubCore = require('./SubCore');
 
-		static bundle_init = 'bundle_init';
-		static bundle_read = 'bundle_read';
-		static bundle_save = 'bundle_save';
-		static bundle_add = 'bundle_add';
+import Bundle = require('../support/Bundle');
 
-		constructor(core:tsd.Core) {
-			super(core, 'bundle', 'BundleManager');
-		}
+class BundleManager extends SubCore {
 
-		/*
-		 soft load a <reference/> bundle and add references
-		 promise: a tsd.Bundle
-		 */
-		addToBundle(target:string, refs:string[], save:boolean):Q.Promise<tsd.Bundle> {
-			var d:Q.Deferred<tsd.Bundle> = Q.defer();
-			this.track.promise(d.promise, BundleManager.bundle_add, target);
+	static bundle_init = 'bundle_init';
+	static bundle_read = 'bundle_read';
+	static bundle_save = 'bundle_save';
+	static bundle_add = 'bundle_add';
 
-			this.readBundle(target, true).then((bundle:tsd.Bundle) => {
-				refs.forEach((ref) => {
-					bundle.append(ref);
+	constructor(core: Core) {
+		super(core, 'bundle', 'BundleManager');
+	}
+
+	/*
+	 soft load a <reference/> bundle and add references
+	 */
+	addToBundle(target: string, refs: string[], save: boolean): Promise<Bundle> {
+		return this.readBundle(target, true).then((bundle: Bundle) => {
+			refs.forEach((ref) => {
+				bundle.append(ref);
+			});
+			if (save) {
+				return this.saveBundle(bundle).then(() => {
+					return bundle;
 				});
-				if (save) {
-					return this.saveBundle(bundle).progress(d.notify).then(() => {
-						d.resolve(bundle);
-					});
+			}
+			return Promise.cast(bundle);
+		});
+	}
+
+	/*
+	 load and parse a <reference/> bundle
+	 */
+	readBundle(target: string, optional: boolean): Promise<Bundle> {
+		target = path.resolve(target);
+
+		var bundle = new Bundle(target, this.core.context.getTypingsDir());
+
+		return fileIO.exists(target).then((exists: boolean) => {
+			if (!exists) {
+				if (!optional) {
+					throw new Error('cannot locate file: ' + target);
 				}
-				d.resolve(bundle);
-			}).fail(d.reject);
+				return null;
+			}
+			// TODO should be streaming
+			return fileIO.read(target, {flags: 'rb'}).then((buffer: NodeBuffer) => {
+				bundle.parse(buffer.toString('utf8'));
+			});
+		}).return(bundle);
+	}
 
-			return d.promise;
-		}
+	/*
+	 save bundle to file
+	 */
+	saveBundle(bundle: Bundle): Promise<void> {
+		var target = path.resolve(bundle.target);
+		var dir = path.dirname(target);
 
-		/*
-		 load and parse a <reference/> bundle
-		 promise: a tsd.Bundle
-		 */
-		readBundle(target:string, optional:boolean):Q.Promise<tsd.Bundle> {
-			var d:Q.Deferred<tsd.Bundle> = Q.defer();
-			this.track.promise(d.promise, BundleManager.bundle_read, target);
-
-			target = path.resolve(target);
-
-			var bundle = new Bundle(target, this.core.context.getTypingsDir());
-
-			FS.exists(target).then((exists:boolean) => {
-				if (!exists) {
-					if (!optional) {
-						d.reject(new Error('cannot locate file: ' + target));
-					}
-					else {
-						d.resolve(bundle);
-					}
-					return;
-				}
-				// TODO should be streaming
-				return FS.read(target, {flags: 'rb'}).then((buffer:NodeBuffer) => {
-					bundle.parse(buffer.toString('utf8'));
-					d.resolve(bundle);
-				});
-			}).fail(d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 save bundle to file
-		 promise: void
-		 */
-		saveBundle(bundle:tsd.Bundle):Q.Promise<void> {
-			var d:Q.Deferred<void> = Q.defer();
-
-			var target = path.resolve(bundle.target);
-			var dir = path.dirname(target);
-
-			this.track.promise(d.promise, BundleManager.bundle_save, target);
-
-			xm.file.mkdirCheckQ(dir, true).then(() => {
-				// TODO un-voodoo
-				return FS.write(target, bundle.getContent()).then(() => {
-					d.notify(xm.getNote('saved bundle: ' + bundle.target));
-					d.resolve();
-				});
-			}).fail(d.reject);
-
-			return d.promise;
-		}
+		return fileIO.mkdirCheckQ(dir, true).then(() => {
+			// TODO un-voodoo
+			return fileIO.write(target, bundle.getContent()).then(() => {
+				// d.progress(getNote('saved bundle: ' + bundle.target));
+			});
+		});
 	}
 }
+
+export = BundleManager;

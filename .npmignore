@@ -12,6 +12,7 @@
 /tsd-cache
 /util
 /lib
+/scratch
 
 /tsd-config.json
 /tsd.json
@@ -22,6 +23,7 @@
 .npmignore
 .gitignore
 .gitmodules
+.gitattributes
 
 .travis.yml
 .jshintrc
@@ -34,3 +36,4 @@ tmp/
 
 /*.tgz
 /*.txt
+/*.ts

@@ -1,6 +1,6 @@
-/// <reference path="../../../../src/xm/file.ts" />
+/// <reference path="../../../../src/xm/file/file.ts" />
 /// <reference path="../../../../src/xm/data/PackageJSON.ts" />
-/// <reference path="../../../../src/xm/json-pointer.ts" />
+/// <reference path="../../../../src/xm/json/json-pointer.ts" />
 /// <reference path="../../../../src/git/GithubRepo.ts" />
 
 module helper {

@@ -1,5 +1,5 @@
 /// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/tsd/data/DefInfoParser.ts" />
+/// <reference path="../../../../src/tsd/support/DefInfoParser.ts" />
 /// <reference path="../../../../typings/node/node.d.ts" />
 
 module helper {
@@ -9,7 +9,6 @@ module helper {
 	var util = require('util');
 
 	var Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
 
 	export class HeaderAssert {
 		fields:any;
@@ -24,21 +23,21 @@ module helper {
 	// hacky ported from old tsd-deftools fixture loader
 
 	// TODO when bored: rewrite using promises (not important)
-	export function loadHeaderFixtures(src:string):Q.Promise<helper.HeaderAssert[]> {
+	export function loadHeaderFixtures(src:string):Promise<helper.HeaderAssert[]> {
 		src = path.resolve(src);
 
-		var d:Q.Deferred<helper.HeaderAssert[]> = Q.defer();
+		var d = Promise.defer<helper.HeaderAssert[]>();
 		var res:helper.HeaderAssert[] = [];
 
 		getDirs(src).then((dirs:string[]) => {
-			return Q.all(dirs.reduce((memo:any[], project:string) => {
+			return Promise.all(dirs.reduce((memo:any[], project:string) => {
 				memo.push(getDirs(path.join(src, project)).then((names:string[]) => {
 
-					return Q.all(names.reduce((memo:any[], name:string) => {
+					return Promise.all(names.reduce((memo:any[], name:string) => {
 						var pack = path.join(src, project, name);
-						memo.push(Q.all([
+						memo.push(Promise.all([
 							xm.file.readJSONPromise(path.join(pack, 'fields.json')),
-							FS.read(path.join(pack, 'header.ts'))
+							xm.file.read(path.join(pack, 'header.ts'))
 						]).spread((fields, header) => {
 							var data = new helper.HeaderAssert(project, name);
 							data.fields = fields;
@@ -57,13 +56,13 @@ module helper {
 		return d.promise;
 	}
 
-	function getDirs(src:string):Q.Promise<string[]> {
+	function getDirs(src:string):Promise<string[]> {
 		src = path.resolve(src);
 		var ret:string[] = [];
-		var d:Q.Deferred<string[]> = Q.defer();
-		FS.list(src).then((names:string[]) => {
-			return Q.all(names.map((name:string) => {
-				return FS.isDirectory(path.join(src, name)).then((isDir:boolean) => {
+		var d = Promise.defer<string[]>();
+		xm.file.list(src).then((names:string[]) => {
+			return Promise.all(names.map((name:string) => {
+				return xm.file.isDirectory(path.join(src, name)).then((isDir:boolean) => {
 					if (!isDir) {
 						return;
 					}

@@ -12,7 +12,6 @@ describe('git.Github', () => {
 	'use strict';
 
 	var path = require('path');
-	var FS:typeof QioFS = require('q-io/fs');
 	var assert:Chai.Assert = require('chai').assert;
 
 	var repo:git.GithubRepo;
@@ -79,9 +78,9 @@ describe('git.Github', () => {
 
 					// temp hackish
 					return xm.file.mkdirCheckQ(gitTest.extraDir, true).then(() => {
-						return FS.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
+						return xm.file.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
 					}).then(() => {
-						return FS.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});
+						return xm.file.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});
 					}, (err) => {
 						xm.log.error('storage test failure');
 						throw err;

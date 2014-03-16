@@ -1,78 +1,73 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../xm/object.ts" />
-/// <reference path="../../xm/Logger.ts" />
-/// <reference path="../../xm/file.ts" />
-/// <reference path="../../xm/http/HTTPCache.ts" />
-/// <reference path="../GithubRepo.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module git {
-	'use strict';
+import path = require('path');
 
-	var path = require('path');
+import assertVar = require('../../xm/assertVar');
+import HTTPCache = require('../../xm/http/HTTPCache');
+import CacheOpts = require('../../xm/http/CacheOpts');
 
-	/*
-	 GithubRaw: get files from raw.github.com and cache on disk
-	 */
-	export class GithubLoader {
+import objectUtils = require('../../xm/objectUtils');
+import eventLog = require('../../xm/lib/eventLog');
+import JSONPointer = require('../../xm/json/JSONPointer');
 
-		repo:git.GithubRepo;
-		track:xm.EventLog;
+import GithubRepo = require('../GithubRepo');
+import GithubRateInfo = require('../model/GithubRateInfo');
 
-		cache:xm.http.HTTPCache;
-		options:xm.JSONPointer;
+/*
+ GithubLoader: base class
+ */
+class GithubLoader {
 
-		storeDir:string;
+	repo: GithubRepo;
 
-		label:string = 'github-loader';
-		formatVersion:string = '0.0.0';
+	cache: HTTPCache;
+	options: JSONPointer;
 
-		headers = {};
+	storeDir: string;
 
-		constructor(repo:git.GithubRepo, options:xm.JSONPointer, storeDir:string, prefix:string, label:string) {
-			xm.assertVar(repo, git.GithubRepo, 'repo');
-			xm.assertVar(options, xm.JSONPointer, 'options');
-			xm.assertVar(storeDir, 'string', 'storeDir');
+	label: string = 'github-loader';
+	formatVersion: string = '0.0.0';
 
-			this.repo = repo;
-			this.options = options;
-			this.storeDir = storeDir;
-			this.label = label;
-			this.track = new xm.EventLog(prefix, label);
-		}
+	headers = {};
 
-		_initGithubLoader(lock?:string[]):void {
-			var opts = new xm.http.CacheOpts();
-			opts.allowClean = this.options.getBoolean('allowClean', opts.allowClean);
-			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval', opts.cacheCleanInterval / 1000) * 1000;
-			opts.splitDirLevel = this.options.getNumber('splitDirLevel', opts.splitDirLevel);
-			opts.splitDirChunk = this.options.getNumber('splitDirChunk', opts.splitDirChunk);
-			opts.jobTimeout = this.options.getDurationSecs('jobTimeout', opts.jobTimeout / 1000) * 1000;
+	constructor(repo: GithubRepo, options: JSONPointer, storeDir: string, prefix: string, label: string) {
+		assertVar(options, JSONPointer, 'options');
+		assertVar(storeDir, 'string', 'storeDir');
 
-			this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
+		this.repo = repo;
+		this.options = options;
+		this.storeDir = storeDir;
+		this.label = label;
+	}
 
-			xm.object.lockProps(this, ['repo', 'cache', 'options', 'storeDir', 'track', 'label', 'formatVersion']);
-			if (lock) {
-				xm.object.lockProps(this, lock);
-			}
-			// required to have some header
-			this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
-		}
+	_initGithubLoader(): void {
+		var opts = new CacheOpts();
+		opts.allowClean = this.options.getBoolean('allowClean', opts.allowClean);
+		opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval', opts.cacheCleanInterval / 1000) * 1000;
+		opts.splitDirLevel = this.options.getNumber('splitDirLevel', opts.splitDirLevel);
+		opts.splitDirChunk = this.options.getNumber('splitDirChunk', opts.splitDirChunk);
+		opts.jobTimeout = this.options.getDurationSecs('jobTimeout', opts.jobTimeout / 1000) * 1000;
 
-		getCacheKey():string {
-			// override
-			return 'loader';
-		}
+		this.cache = new HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
+		// required to have some header
+		this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+	}
 
-		copyHeadersTo(target:any, source?:any) {
-			source = (source || this.headers);
-			Object.keys(source).forEach((name) => {
-				target[name] = source[name];
-			});
-		}
+	getCacheKey(): string {
+		// override
+		return 'loader';
+	}
 
-		set verbose(verbose:boolean) {
-			this.track.logEnabled = verbose;
-			this.cache.verbose = verbose;
-		}
+	copyHeadersTo(target: any, source?: any) {
+		source = (source || this.headers);
+		Object.keys(source).forEach((name) => {
+			target[name] = source[name];
+		});
+	}
+
+	set verbose(verbose: boolean) {
+		this.cache.verbose = verbose;
 	}
 }
+
+export = GithubLoader;

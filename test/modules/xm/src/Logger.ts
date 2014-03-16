@@ -1,6 +1,6 @@
 /// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/xm/StatCounter.ts" />
-/// <reference path="../../../../src/xm/file.ts" />
+/// <reference path="../../../../src/xm/lib/StatCounter.ts" />
+/// <reference path="../../../../src/xm/file/file.ts" />
 
 describe('xm.Logger', () => {
 	'use strict';

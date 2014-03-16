@@ -1,4 +1,4 @@
-/// <reference path="../src/xm/childProcess.ts" />
+/// <reference path="../src/xm/lib/childProcess.ts" />
 
 (module).exports = function(grunt) {
 
@@ -7,7 +7,6 @@
 	var lo_template = require('lodash-template');
 	var path = require('path');
 	var Q:typeof Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
 
 	var templates = new Map<string, {(data:Object):string}>();
 

@@ -1,23 +1,25 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../tsd/data/Def.ts" />
-/// <reference path="../../tsd/data/DefVersion.ts" />
-/// <reference path="Query.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
 
-	export class Selection {
-		query:tsd.Query;
-		definitions:tsd.Def[];
-		selection:tsd.DefVersion[];
+import Def = require('../data/Def');
+import DefVersion = require('../data/DefVersion');
 
-		error:any;
+import CommitMatcher = require('./CommitMatcher');
+import Query = require('./Query');
 
-		constructor(query:tsd.Query = null) {
-			xm.assertVar(query, tsd.Query, 'query', true);
-			this.query = query;
+class Selection {
+	query: Query;
+	definitions: Def[];
+	selection: DefVersion[];
 
-			xm.object.lockProps(this, ['query']);
-		}
+	error: any;
+
+	constructor(query: Query = null) {
+		assertVar(query, Query, 'query', true);
+		this.query = query;
 	}
 }
+
+export = Selection;

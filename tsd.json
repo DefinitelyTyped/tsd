@@ -3,6 +3,7 @@
 	"path": "./typings",
 	"repo": "borisyankov/DefinitelyTyped",
 	"ref": "master",
+	"bundle": "./typings/tsd.d.ts",
 	"stats": false,
 	"installed": {
 		"universal-analytics/universal-analytics.d.ts": {
@@ -19,6 +20,15 @@
 		},
 		"semver/semver.d.ts": {
 			"commit": "a53d50e91a454ba5b90906568f59f444ac71f9fd"
+		},
+		"bluebird/bluebird.d.ts": {
+			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
+		},
+		"lazy.js/lazy.js.d.ts": {
+			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
+		},
+		"highland/highland.d.ts": {
+			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
 		}
 	}
 }

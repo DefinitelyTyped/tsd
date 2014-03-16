@@ -1,8 +1,8 @@
 /// <reference path='../../../globals.ts' />
 /// <reference path='../../../globals.ts' />
-/// <reference path='../../../../src/xm/file.ts' />
+/// <reference path='../../../../src/xm/file/file.ts' />
 
-/// <reference path='../../../../src/xm/json-pointer.ts' />
+/// <reference path='../../../../src/xm/json/json-pointer.ts' />
 
 describe('JSONPointer', () => {
 	'use strict';

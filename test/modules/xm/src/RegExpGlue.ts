@@ -1,5 +1,5 @@
 /// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/xm/RegExpGlue.ts" />
+/// <reference path="../../../../src/xm/lib/RegExpGlue.ts" />
 
 describe('xm.RexExpGlue', () => {
 	'use strict';

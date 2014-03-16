@@ -1,87 +1,87 @@
-/// <reference path="../../xm/file.ts" />
-/// <reference path="../../xm/iterate.ts" />
-/// <reference path="../../xm/Logger.ts" />
-/// <reference path="../../xm/data/PackageJSON.ts" />
-/// <reference path="../../xm/json-pointer.ts" />
-/// <reference path="Config.ts" />
-/// <reference path="Paths.ts" />
-/// <reference path="Const.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import fs = require('fs');
+import path = require('path');
 
-	var fs = require('fs');
-	var path = require('path');
+import log = require('../../xm/log');
+import assertVar = require('../../xm/assertVar');
+import fileIO = require('../../xm/file/fileIO');
+import JSONPointer = require('../../xm/json/JSONPointer');
+import PackageJSON = require('../../xm/data/PackageJSON');
 
-	/*
-	 Context: bundles the configuration and core functionality
-	 */
-	export class Context {
+import Config = require('./Config');
+import Paths = require('./Paths');
+import Const = require('./Const');
 
-		paths:Paths;
-		config:Config;
-		packageInfo:xm.PackageJSON;
-		verbose:boolean;
-		settings:xm.JSONPointer;
+/*
+ Context: bundles the configuration and core functionality
+ */
+class Context {
 
-		// TODO remove or use more of this log? (xm.log is pretty global already)
-		// log:xm.Logger = xm.getLogger('Context');
-		configSchema:any;
+	paths: Paths;
+	config: Config;
+	packageInfo: PackageJSON;
+	verbose: boolean;
+	settings: JSONPointer;
 
-		// TODO extract IO
-		constructor(configFile:string = null, verbose:boolean = false) {
-			xm.assertVar(configFile, 'string', 'configFile', true);
-			xm.assertVar(verbose, 'boolean', 'verbose');
+	// TODO remove or use more of this log? (log is pretty global already)
+	// log:Logger = getLogger('Context');
+	configSchema: any;
 
-			this.packageInfo = xm.PackageJSON.getLocal();
-			this.settings = new xm.JSONPointer(xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'conf', 'settings.json')));
+	// TODO extract IO
+	constructor(configFile: string = null, verbose: boolean = false) {
+		assertVar(configFile, 'string', 'configFile', true);
+		assertVar(verbose, 'boolean', 'verbose');
 
-			this.stackSettings(path.resolve(tsd.Paths.getUserHome(), tsd.Const.rc));
-			this.stackSettings(path.resolve(process.cwd(), tsd.Const.rc));
+		this.packageInfo = PackageJSON.getLocal();
+		this.settings = new JSONPointer(fileIO.readJSONSync(path.resolve(path.dirname(PackageJSON.find()), 'conf', 'settings.json')));
 
-			this.verbose = verbose;
+		this.stackSettings(path.resolve(Paths.getUserHome(), Const.rc));
+		this.stackSettings(path.resolve(process.cwd(), Const.rc));
 
-			this.paths = new Paths();
-			if (configFile) {
-				this.paths.configFile = path.resolve(configFile);
-			}
-			this.paths.cacheDir = tsd.Paths.getUserCacheDir();
+		this.verbose = verbose;
 
-			this.configSchema = xm.file.readJSONSync(path.resolve(path.dirname(xm.PackageJSON.find()), 'schema', tsd.Const.configSchemaFile));
-			this.config = new Config(this.configSchema);
+		this.paths = new Paths();
+		if (configFile) {
+			this.paths.configFile = path.resolve(configFile);
 		}
+		this.paths.cacheDir = Paths.getUserCacheDir();
 
-		stackSettings(src:string):void {
-			if (fs.existsSync(src)) {
-				if (this.verbose) {
-					xm.log.status('using rc: ' + src);
-				}
-				this.settings.addSource(xm.file.readJSONSync(src));
+		this.configSchema = fileIO.readJSONSync(path.resolve(path.dirname(PackageJSON.find()), 'schema', Const.configSchemaFile));
+		this.config = new Config(this.configSchema);
+	}
+
+	stackSettings(src: string): void {
+		if (fs.existsSync(src)) {
+			if (this.verbose) {
+				log.status('using rc: ' + src);
 			}
-			else {
-				if (this.verbose) {
-					xm.log.status('cannot find rc: ' + src);
-				}
+			this.settings.addSource(fileIO.readJSONSync(src));
+		}
+		else {
+			if (this.verbose) {
+				log.status('cannot find rc: ' + src);
 			}
 		}
+	}
 
-		getTypingsDir():string {
-			return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
-		}
+	getTypingsDir(): string {
+		return this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+	}
 
-		// TODO move this out of this class
-		getInfo(details:boolean = false):Object {
-			var info:any = {
-				version: this.packageInfo.getNameVersion(),
-				repo: 'http://github.com/' + this.config.repo + ' #' + this.config.ref
-			};
-			if (details) {
-				info.paths = this.paths;
-				info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
-				info.config = this.config.toJSON();
-			}
-			return info;
+	// TODO move this out of this class
+	getInfo(details: boolean = false): Object {
+		var info: any = {
+			version: this.packageInfo.getNameVersion(),
+			repo: 'http://github.com/' + this.config.repo + ' #' + this.config.ref
+		};
+		if (details) {
+			info.paths = this.paths;
+			info.typings = this.config.resolveTypingsPath(path.dirname(this.paths.configFile));
+			info.config = this.config.toJSON();
 		}
+		return info;
 	}
 }
 
+export = Context;

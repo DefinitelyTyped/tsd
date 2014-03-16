@@ -1,7 +1,7 @@
 /// <reference path="../../../globals.ts" />
 /// <reference path="../../../../src/tsd/select/Query.ts" />
 /// <reference path="../../../../src/xm/hash.ts" />
-/// <reference path="../../../../src/xm/file.ts" />
+/// <reference path="../../../../src/xm/file/file.ts" />
 
 /// <reference path="../../../../src/tsd/data/Def.ts" />
 /// <reference path="../../../../src/tsd/select/Query.ts" />

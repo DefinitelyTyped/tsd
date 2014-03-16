@@ -1,51 +1,51 @@
-/// <reference path="../_ref.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+import assert = require('../../xm/assert');
 
-	var fullSha = /^[0-9a-f]{40}$/;
-	var hex = /^[0-9a-f]+$/;
+import DefVersion = require('../data/DefVersion');
 
-	/*
-	 CommitMatcher
-	 */
-	export class CommitMatcher {
+var fullSha = /^[0-9a-f]{40}$/;
+var hex = /^[0-9a-f]+$/;
 
-		commitSha:string;
-		minimumShaLen:number = 2;
+/*
+ CommitMatcher
+ */
+class CommitMatcher {
 
-		constructor(commitSha?:string) {
-			if (commitSha) {
-				this.commitSha = String(commitSha).toLowerCase();
-			}
-		}
+	commitSha: string;
+	minimumShaLen: number = 2;
 
-		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
-			if (!this.commitSha) {
-				return list;
-			}
-			return list.filter(this.getFilterFunc(this.commitSha));
-		}
-
-		getFilterFunc(commitSha:string):(file:tsd.DefVersion) => boolean {
-			// safety first
-			if (fullSha.test(commitSha)) {
-				return (file:tsd.DefVersion) => {
-					return (file.commit && file.commit.commitSha === commitSha);
-				};
-			}
-			// alternately use shortened sha?
-			if (!hex.test(commitSha)) {
-				xm.throwAssert('parameter not a hex {a}', commitSha);
-			}
-			var len = commitSha.length;
-			if (len < this.minimumShaLen) {
-				xm.throwAssert('parameter hex too short {a}, {e}', this.minimumShaLen, false);
-			}
-			return (file:tsd.DefVersion) => {
-				return (file.commit && file.commit.commitSha.substr(0, len) === commitSha
-				);
-			};
+	constructor(commitSha?: string) {
+		if (commitSha) {
+			this.commitSha = String(commitSha).toLowerCase();
 		}
 	}
+
+	filter(list: DefVersion[]): DefVersion[] {
+		if (!this.commitSha) {
+			return list;
+		}
+		return list.filter(this.getFilterFunc(this.commitSha));
+	}
+
+	getFilterFunc(commitSha: string): (file: DefVersion) => boolean {
+		// safety first
+		if (fullSha.test(commitSha)) {
+			return (file: DefVersion) => {
+				return (file.commit && file.commit.commitSha === commitSha);
+			};
+		}
+		// alternately use shortened sha?
+		assert(hex.test(commitSha), 'parameter not a hex {a}', commitSha);
+
+		var len = commitSha.length;
+		assert((len < this.minimumShaLen), 'parameter hex too short: expected {e}, got {a}', len, this.minimumShaLen);
+
+		return (file: DefVersion) => {
+			return (file.commit && file.commit.commitSha.substr(0, len) === commitSha
+			);
+		};
+	}
 }
+
+export = CommitMatcher;

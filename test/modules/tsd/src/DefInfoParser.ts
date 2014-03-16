@@ -1,6 +1,6 @@
 /// <reference path="../../../globals.ts" />
 /// <reference path="../../../tsdHelper.ts" />
-/// <reference path="../../../../src/xm/file.ts" />
+/// <reference path="../../../../src/xm/file/file.ts" />
 /// <reference path="../helper/HeaderHelper.ts" />
 
 
