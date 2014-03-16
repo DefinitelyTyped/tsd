@@ -3,16 +3,18 @@
 import chai = require('chai');
 import assert = chai.assert;
 
-export function serialise(author: xm.AuthorInfo, recursive: number = 0): any {
-	assertVar(author, xm.AuthorInfo, 'author');
-	recursive -= 1;
+import assertVar = require('../../../src/xm/assertVar');
+import AuthorInfo = require('../../../src/xm/data/AuthorInfo');
+
+export function serialise(author: AuthorInfo, recursive: number = 0): any {
+	assertVar(author, AuthorInfo, 'author');
 	return author.toJSON();
 }
 
-export function assertion(author: xm.AuthorInfo, values: any, message: string) {
+export function assertion(author: AuthorInfo, values: any, message: string) {
 	assert.ok(author, message + ': author');
 	assert.ok(values, message + ': values');
-	assert.instanceOf(author, xm.AuthorInfo, message + ': author');
+	assert.instanceOf(author, AuthorInfo, message + ': author');
 
 	helper.propStrictEqual(author, values, 'name', message);
 	helper.propStrictEqual(author, values, 'url', message);

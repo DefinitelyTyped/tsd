@@ -6,6 +6,8 @@ import assert = chai.assert;
 import assertVar = require('../../../src/xm/assertVar');
 import DefCommit = require('../../../src/tsd/data/DefCommit');
 
+import helper = require('../helper');
+
 export function serialise(commit: DefCommit, recursive: number = 0): any {
 	assertVar(commit, DefCommit, 'commit');
 	recursive -= 1;

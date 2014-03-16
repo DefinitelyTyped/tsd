@@ -1,11 +1,24 @@
 /// <reference path="../_ref.d.ts" />
 
-var Q = require('q');
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
+import fs = require('fs');
+import util = require('util');
+import path = require('path');
 
-var assert: Chai.Assert = require('chai').assert;
+import chai = require('chai');
+import assert = chai.assert;
+
+import log = require('../../src/xm/log');
+import fileIO = require('../../src/xm/file/fileIO');
+import NodeStats = require('../../src/xm/file/NodeStats');
+import CacheMode = require('../../src/xm/http/CacheMode');
+import Def = require('../../src/tsd/data/Def');
+import Const = require('../../src/tsd/context/Const');
+import Context = require('../../src/tsd/context/Context');
+import Core = require('../../src/tsd/logic/Core');
+
+import unordered = require('./unordered');
+import helper = require('./helper');
+import settings = require('./settings');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13,7 +26,7 @@ var configSchema: Object;
 
 export function getConfigSchema(): any {
 	if (!configSchema) {
-		configSchema = xm.file.readJSONSync(path.join(helper.getProjectRoot(), 'schema', tsd.Const.configSchemaFile));
+		configSchema = fileIO.readJSONSync(path.join(helper.getProjectRoot(), 'schema', Const.configSchemaFile));
 	}
 	return configSchema;
 }
@@ -21,52 +34,46 @@ export function getConfigSchema(): any {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function getFixedCacheDir(): string {
-	return path.join(helper.getProjectRoot(), 'test', 'fixtures', tsd.Const.cacheDir);
+	return path.join(helper.getProjectRoot(), 'test', 'fixtures', Const.cacheDir);
 }
 
 export function getContext() {
-	var context: tsd.Context;
-	context = new tsd.Context();
+	var context: Context;
+	context = new Context();
 	context.paths.cacheDir = getFixedCacheDir();
 	return context;
 }
 
-export function applyCoreUpdate(core: tsd.Core) {
-	core.useCacheMode(xm.http.CacheMode[helper.settings.cache]);
+export function applyCoreUpdate(core: Core) {
+	core.useCacheMode(CacheMode[settings.cache]);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function listDefPaths(dir: string): Promise<string[]> {
-	var d = Promise.defer<string[]>();
-
-	xm.file.listTree(dir,(full: string, stat: xm.NodeStats): boolean => {
+	return fileIO.listTree(dir,(full: string, stat: NodeStats): boolean => {
 		return (stat.isFile() && /\.d\.ts$/.test(full));
 
 	}).then((paths: string[]) => {
-		d.resolve(paths.map((full: string) => {
+		return paths.map((full: string) => {
 			return path.relative(dir, full).replace('\\', '/');
 
 		}).filter((short: string) => {
-			return tsd.Def.isDefPath(short);
-		}));
-	}).catch(d.reject);
-
-	return d.promise;
+			return Def.isDefPath(short);
+		});
+	});
 }
 
 export function assertDefPathsP(actualDir: string, expectedDir: string, assertContent: boolean, message: string): Promise<void> {
-	var d = Promise.defer<void>();
-
-	Promise.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths: string[], expectedPaths: string[]) => {
+	return Promise.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths: string[], expectedPaths: string[]) => {
 		assert.sameMembers(actualPaths, expectedPaths, message);
 
 		if (assertContent) {
-			xm.log.json(actualPaths);
-			xm.log.json(expectedPaths);
+			log.json(actualPaths);
+			log.json(expectedPaths);
 
-			helper.assertUnorderedLike(actualPaths, expectedPaths, (actualPath: string, expectedPath: string) => {
-				return (tsd.Def.getFileFrom(actualPath) === tsd.Def.getFileFrom(expectedPath));
+			unordered.assertionLike(actualPaths, expectedPaths, (actualPath: string, expectedPath: string) => {
+				return (Def.getFileFrom(actualPath) === Def.getFileFrom(expectedPath));
 
 			}, (actualPath: string, expectedPath: string) => {
 				var msg = helper.getPathMessage(actualPath, expectedPath, message);
@@ -75,9 +82,5 @@ export function assertDefPathsP(actualDir: string, expectedDir: string, assertCo
 				// helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
 			}, message);
 		}
-	}).then(() => {
-		d.resolve();
 	});
-
-	return d.promise;
 }

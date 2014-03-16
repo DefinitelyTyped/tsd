@@ -6,6 +6,11 @@ import assert = chai.assert;
 import assertVar = require('../../../src/xm/assertVar');
 import collection = require('../../../src/xm/collection');
 import InstallResult = require('../../../src/tsd/logic/InstallResult');
+import DefVersion = require('../../../src/tsd/data/DefVersion');
+import testDefCommit = require('./DefCommit');
+import testDefVersion = require('./DefVersion');
+import testDefBlob = require('./DefBlob');
+import testMap = require('../Map');
 
 export function serialise(result: InstallResult, recursive: number = 0): any {
 	assertVar(result, InstallResult, 'result');
@@ -16,19 +21,19 @@ export function serialise(result: InstallResult, recursive: number = 0): any {
 	if (result.written) {
 		json.written = {};
 		collection.keysOf(result.written).forEach((key: string) => {
-			json.written[key] = helper.serialiseDefVersion(result.written.get(key), recursive);
+			json.written[key] = testDefVersion.serialise(result.written.get(key), recursive);
 		});
 	}
 	if (result.removed) {
 		json.removed = {};
 		collection.keysOf(result.removed).forEach((key: string) => {
-			json.removed[key] = helper.serialiseDefVersion(result.removed.get(key), recursive);
+			json.removed[key] = testDefVersion.serialise(result.removed.get(key), recursive);
 		});
 	}
 	if (result.skipped) {
 		json.skipped = {};
 		collection.keysOf(result.skipped).forEach((key: string) => {
-			json.skipped[key] = helper.serialiseDefVersion(result.skipped.get(key), recursive);
+			json.skipped[key] = testDefVersion.serialise(result.skipped.get(key), recursive);
 		});
 	}
 	return json;
@@ -40,12 +45,12 @@ export function assertion(result: InstallResult, values: any, message: string) {
 	assert.instanceOf(result, InstallResult, message + ': result');
 
 	if (values.written) {
-		helper.assertMap(result.written, values.written, helper.assertDefVersionFlat, message + ': written');
+		testMap.assertion<DefVersion>(result.written, values.written, testDefVersion.assertionFlat, message + ': written');
 	}
 	if (values.removed) {
-		helper.assertMap(result.removed, values.removed, helper.assertDefVersionFlat, message + ': removed');
+		testMap.assertion<DefVersion>(result.removed, values.removed, testDefVersion.assertionFlat, message + ': removed');
 	}
 	if (values.skipped) {
-		helper.assertMap(result.skipped, values.skipped, helper.assertDefVersionFlat, message + ': skipped');
+		testMap.assertion<DefVersion>(result.skipped, values.skipped, testDefVersion.assertionFlat, message + ': skipped');
 	}
 }

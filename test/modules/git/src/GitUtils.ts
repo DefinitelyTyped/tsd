@@ -14,7 +14,7 @@ describe('git.GitUtils', () => {
 	describe('getDecodedBlob / blobSHABuffer', () => {
 		it('should decode correct data', () => {
 
-			var expectedJson = xm.file.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
+			var expectedJson = fileIO.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			assert.isObject(expectedJson, 'expectedJson');
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');

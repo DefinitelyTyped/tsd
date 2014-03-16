@@ -4,7 +4,13 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../../src/xm/assertVar');
+
+import Def = require('../../../src/tsd/data/Def');
 import DefVersion = require('../../../src/tsd/data/DefVersion');
+import Selection = require('../../../src/tsd/select/Selection');
+
+import testDefVersion = require('./DefVersion');
+import testDef = require('./Def');
 
 export function serialis(selection: Selection, recursive: number = 0): any {
 	assertVar(selection, Selection, 'selection');
@@ -13,10 +19,10 @@ export function serialis(selection: Selection, recursive: number = 0): any {
 
 	var json: any = {};
 	json.selection = selection.selection.map((file: DefVersion) => {
-		return helper.serialiseDefVersion(file, recursive);
+		return testDefVersion.serialise(file, recursive);
 	});
 	json.definitions = selection.definitions.map((file: Def) => {
-		return helper.serialiseDef(file, recursive);
+		return testDef.serialise(file, recursive);
 	});
 	if (selection.error) {
 		json.error = JSON.stringify(selection.error, null, 2);
@@ -30,10 +36,10 @@ export function assertion(selection: Selection, values: any, message: string) {
 	assert.instanceOf(selection, Selection, message + ': selection');
 
 	if (values.selection) {
-		helper.assertDefVersionArray(selection.selection, values.selection, message + ': selection');
+		testDefVersion.assertionArray(selection.selection, values.selection, message + ': selection');
 	}
 	if (values.definitions) {
-		helper.assertDefArray(selection.definitions, values.definitions, message + ': definitions');
+		testDef.assertionArray(selection.definitions, values.definitions, message + ': definitions');
 	}
 	if (values.error) {
 		assert.jsonOf(values.error, selection.error, message + ': error');

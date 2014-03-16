@@ -28,7 +28,7 @@ describe('xm.Logger', () => {
 
 	function assertLoggerBuffer(name:string, buffer:string) {
 		var file = name + '.txt';
-		xm.file.writeFileSync(path.resolve(testPath, 'tmp', 'logger', file), buffer);
+		fileIO.writeFileSync(path.resolve(testPath, 'tmp', 'logger', file), buffer);
 
 		var expected = xm.file.readFileSync(path.resolve(testPath, 'fixtures', 'logger', file));
 		assert.strictEqual(buffer, expected, name + ': stored results');

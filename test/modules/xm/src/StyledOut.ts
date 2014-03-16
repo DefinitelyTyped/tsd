@@ -235,7 +235,7 @@ describe('xm.StyledOut', () => {
 
 		var file = name + '.json';
 
-		xm.file.writeJSONSync(path.resolve(testPath, 'tmp', 'styledout', file), data);
+		fileIO.writeJSONSync(path.resolve(testPath, 'tmp', 'styledout', file), data);
 
 		var expected = xm.file.readJSONSync(path.resolve(testPath, 'fixtures', 'styledout', file));
 		// test all in one

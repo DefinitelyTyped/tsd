@@ -36,8 +36,8 @@ module helper {
 					return Promise.all(names.reduce((memo:any[], name:string) => {
 						var pack = path.join(src, project, name);
 						memo.push(Promise.all([
-							xm.file.readJSONPromise(path.join(pack, 'fields.json')),
-							xm.file.read(path.join(pack, 'header.ts'))
+							fileIO.readJSONPromise(path.join(pack, 'fields.json')),
+							xfileIO.ead(path.join(pack, 'header.ts'))
 						]).spread((fields, header) => {
 							var data = new helper.HeaderAssert(project, name);
 							data.fields = fields;
@@ -60,7 +60,7 @@ module helper {
 		src = path.resolve(src);
 		var ret:string[] = [];
 		var d = Promise.defer<string[]>();
-		xm.file.list(src).then((names:string[]) => {
+		xmfileIO.st(src).then((names:string[]) => {
 			return Promise.all(names.map((name:string) => {
 				return xm.file.isDirectory(path.join(src, name)).then((isDir:boolean) => {
 					if (!isDir) {

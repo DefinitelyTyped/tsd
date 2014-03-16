@@ -5,9 +5,17 @@ import assert = chai.assert;
 
 import assertVar = require('../../../src/xm/assertVar');
 import AuthorInfo = require('../../../src/xm/data/AuthorInfo');
+import Def = require('../../../src/tsd/data/Def');
 import DefVersion = require('../../../src/tsd/data/DefVersion');
+import testDefCommit = require('./DefCommit');
+import testDefInfo = require('./DefInfo');
+import testDefBlob = require('./DefBlob');
+import testDef = require('./Def');
 
-export function serialiseDefVersion(file: DefVersion, recursive: number = 0): any {
+import unordered = require('../unordered');
+import helper = require('../helper');
+
+export function serialise(file: DefVersion, recursive: number = 0): any {
 	assertVar(file, DefVersion, 'file');
 	recursive -= 1;
 
@@ -16,15 +24,15 @@ export function serialiseDefVersion(file: DefVersion, recursive: number = 0): an
 	json.key = file.key;
 	json.solved = file.solved;
 	if (recursive >= 0) {
-		json.commit = helper.serialiseDefCommit(file.commit, recursive);
+		json.commit = testDefCommit.serialise(file.commit, recursive);
 		if (file.blob) {
-			json.blob = helper.serialiseDefBlob(file.blob, recursive);
+			json.blob = testDefBlob.serialise(file.blob, recursive);
 		}
 	}
 	if (file.dependencies && recursive >= 0) {
 		json.dependencies = [];
 		file.dependencies.forEach((def: Def) => {
-			json.dependencies.push(helper.serialiseDef(def, recursive));
+			json.dependencies.push(testDef.serialise(def, recursive));
 		});
 	}
 	return json;
@@ -39,34 +47,34 @@ export function assertion(file: DefVersion, values: any, message: string): void 
 		assert.strictEqual(file.def.path, values.path, message + ': file.path');
 	}
 	if (values.commit) {
-		helper.assertDefCommit(file.commit, values.commit, message + ': file.commit');
+		testDefCommit.assertion(file.commit, values.commit, message + ': file.commit');
 	}
 	if (values.blob) {
-		helper.assertDefBlob(file.blob, values.blob, message + ': file.blob');
+		testDefBlob.assertion(file.blob, values.blob, message + ': file.blob');
 	}
 	if (typeof values.solved !== 'undefined') {
 		assert.isBoolean(values.solved, message + ': values.solved');
 		// helper.propStrictEqual(file, values, 'email', message + ': file');
 	}
 	if (values.info) {
-		helper.assertDefInfo(file.info, values.info, message + ': file.info');
+		testDefInfo.assertion(file.info, values.info, message + ': file.info');
 	}
 	if (values.dependencies) {
-		helper.assertDefArray(file.dependencies, values.dependencies, 'file.dependencies');
+		testDef.assertionArray(file.dependencies, values.dependencies, 'file.dependencies');
 	}
 }
 
-export function assertDefVersionFlat(file: DefVersion, values: any, message: string): void {
-	assertDefVersion(file, values, message);
+export function assertionFlat(file: DefVersion, values: any, message: string): void {
+	assertion(file, values, message);
 }
 
 // TODO should not be 'any' type
-var assertDefVersionArrayUnordered: any = helper.getAssertUnorderedLike((act: DefVersion, exp: any) => {
+var assertDefVersionArrayUnordered: any = unordered.getAssertLike<DefVersion>((act: DefVersion, exp: any) => {
 	return (act.def.path === exp.path && exp.commit && act.commit.commitSha === exp.commit.commitSha);
 }, (act: DefVersion, exp: any, message?: string) => {
-	assertDefVersion(act, exp, message + ': ' + shaShort(exp.commit.commitSha));
+	assertion(act, exp, message + ': ' + shaShort(exp.commit.commitSha));
 }, 'DefVersion');
 
-export function assertDefVersionArray(files: DefVersion[], values: any[], message: string): void {
+export function assertionArray(files: DefVersion[], values: any[], message: string): void {
 	assertDefVersionArrayUnordered(files, values, message + ': files');
 }

@@ -32,7 +32,7 @@ describe('git.GithubRaw', () => {
 	});
 
 	describe('getFile commit', () => {
-		it.eventually('should cache and return data', () => {
+		it('should cache and return data', () => {
 			// repo.raw.verbose = true;
 
 			var filePath = gitTest.config.data.async.filePath;
@@ -74,7 +74,7 @@ describe('git.GithubRaw', () => {
 	});
 
 	describe('getFile ref', () => {
-		it.eventually('should cache and return data', () => {
+		it('should cache and return data', () => {
 			// repo.raw.verbose = true;
 
 			var filePath = gitTest.config.data.async.filePath;

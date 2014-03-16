@@ -1,38 +1,41 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../helper.ts" />
-/// <reference path="../../../../src/xm/iterate.ts" />
-/// <reference path="../../../../src/xm/assert.ts" />
-/// <reference path="../../../../src/xm/encode.ts" />
+/// <reference path="../../../_ref.d.ts" />
 
-module helper {
-	'use strict';
+import fs = require('fs');
+import path = require('path');
 
-	export class HttpTest {
-		storeTmpDir:string;
-		storeFixtureDir:string;
-		wwwHTTP:string;
-		wwwDir:string;
-	}
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../../../src/xm/file/fileIO');
+
+import HTTPCache = require('../../../../src/xm/http/HTTPCache');
+import CacheObject = require('../../../../src/xm/http/CacheObject');
+import CacheInfo = require('../../../../src/xm/http/CacheInfo');
+import CacheOpts = require('../../../../src/xm/http/CacheOpts');
+import CacheRequest = require('../../../../src/xm/http/CacheRequest');
+import CacheObject = require('../../../../src/xm/http/CacheObject');
+import CacheObject = require('../../../../src/xm/http/CacheObject');
+
+import helper = require('../../../src/helper');
+
+class HttpTest {
+	storeTmpDir: string;
+	storeFixtureDir: string;
+	wwwHTTP: string;
+	wwwDir: string;
 }
 
 describe('xm.http', () => {
-	'use strict';
 
-	var track:xm.EventLog;
-	before(() => {
-		track = new xm.EventLog('xm.http');
-	});
-	after(() => {
-		track = null;
-	});
-
-	var assert:Chai.Assert = require('chai').assert;
+	var assert: Chai.Assert = require('chai').assert;
 	var path = require('path');
 	var fs = require('fs');
 
-	function getInfo(name:string):helper.HttpTest {
+	function getInfo(name: string): HttpTest {
 		assert.isString(name, 'name');
-		var info = new helper.HttpTest();
+		var info = new HttpTest();
 		info.storeTmpDir = path.join(helper.getDirNameTmp(), name);
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
 		info.wwwHTTP = 'http://127.0.0.1:9090/';
@@ -40,10 +43,17 @@ describe('xm.http', () => {
 		return info;
 	}
 
-	var cache:xm.http.HTTPCache;
-	var opts:xm.http.CacheOpts;
-	var object:xm.http.CacheObject;
-	var request:xm.http.CacheRequest;
+	var cache: HTTPCache;
+	var opts: CacheOpts;
+	var object: CacheObject;
+	var request: CacheRequest;
+
+	before(() => {
+
+	});
+	after(() => {
+
+	});
 
 	afterEach(() => {
 		cache = null;
@@ -55,16 +65,16 @@ describe('xm.http', () => {
 	describe('HTTPCache core', () => {
 		// TODO add more existence tests
 		it('should exist', () => {
-			assert.isFunction(xm.http.HTTPCache, 'cache');
-			assert.isFunction(xm.http.CacheOpts, 'opts');
-			assert.isFunction(xm.http.CacheObject, 'object');
-			assert.isFunction(xm.http.CacheRequest, 'request');
+			assert.isFunction(HTTPCache, 'cache');
+			assert.isFunction(CacheOpts, 'opts');
+			assert.isFunction(CacheObject, 'object');
+			assert.isFunction(CacheRequest, 'request');
 		});
 	});
 
 	describe('CacheOpts', () => {
 		it('should have default values', () => {
-			var opts = new xm.http.CacheOpts();
+			var opts = new CacheOpts();
 			assert.isTrue(opts.remoteRead, 'remoteRead');
 
 			assert.isTrue(opts.cacheRead, 'cacheRead');
@@ -75,188 +85,186 @@ describe('xm.http', () => {
 			assert.strictEqual(opts.splitDirChunk, 1, 'splitDirChunk');
 		});
 	});
-	describe('cache', () => {
-		describe('simple http get', () => {
-			var test:helper.HttpTest = getInfo('simple');
-			var url = test.wwwHTTP + 'lorem.txt';
-			var src = path.join(test.wwwDir, 'lorem.txt');
-			var date = new Date();
-			var expected;
-			before(() => {
-				fs.utimesSync(src, date, date);
+	describe('cache simple http get', () => {
+		var test: HttpTest = getInfo('simple');
+		var url = test.wwwHTTP + 'lorem.txt';
+		var src = path.join(test.wwwDir, 'lorem.txt');
+		var date = new Date();
+		var expected;
+		before(() => {
+			fs.utimesSync(src, date, date);
 
-				expected = xm.file.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+			expected = fileIO.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+		});
+		beforeEach(() => {
+		});
+
+		it('should get a file', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = false;
+			opts.cacheWrite = true;
+
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
+
+			request = new CacheRequest(url, {});
+			request.lock();
+
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
+
+				assert.ok(obj.response, 'obj.response');
+				assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+
+				assert.instanceOf(obj.body, Buffer, '');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
-			beforeEach(() => {
+		});
+
+		it('should get a file from cache', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = false;
+			opts.remoteRead = false;
+
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
+
+			request = new CacheRequest(url, {});
+			request.lock();
+
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
+
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.notOk(obj.response, 'obj.response');
+
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
+		});
 
-			it.eventually('should get a file', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = false;
-				opts.cacheWrite = true;
+		it('should get a file from http if forced', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = false;
+			opts.remoteRead = true;
 
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
 
-				request = new xm.http.CacheRequest(url, {});
-				request.lock();
+			request = new CacheRequest(url, {});
+			request.forceRefresh = true;
+			request.lock();
 
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
 
-					assert.ok(obj.response, 'obj.response');
-					assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+				assert.ok(obj.response, 'obj.response');
+				assert.strictEqual(obj.response.status, 200, 'obj.response.status');
 
-					assert.instanceOf(obj.body, Buffer, '');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
+		});
 
-			it.eventually('should get a file from cache', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = false;
-				opts.remoteRead = false;
+		it('should get a file from http if stale', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = false;
+			opts.remoteRead = true;
 
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
 
-				request = new xm.http.CacheRequest(url, {});
-				request.lock();
+			request = new CacheRequest(url, {});
+			request.localMaxAge = -24 * 3600 * 1000;
+			request.lock();
 
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
 
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.notOk(obj.response, 'obj.response');
+				assert.ok(obj.response, 'obj.response');
+				assert.strictEqual(obj.response.status, 200, 'obj.response.status');
 
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
+		});
 
-			it.eventually('should get a file from http if forced', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = false;
-				opts.remoteRead = true;
+		it('should get a file from cache if within age', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = false;
+			opts.remoteRead = true;
 
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
 
-				request = new xm.http.CacheRequest(url, {});
-				request.forceRefresh = true;
-				request.lock();
+			request = new CacheRequest(url, {});
+			request.localMaxAge = 24 * 3600 * 1000;
+			request.lock();
 
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
 
-					assert.ok(obj.response, 'obj.response');
-					assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+				assert.notOk(obj.response, 'obj.response');
 
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
+		});
 
-			it.eventually('should get a file from http if stale', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = false;
-				opts.remoteRead = true;
+		it('should get a file from cache if interval high', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = true;
+			opts.remoteRead = true;
 
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
 
-				request = new xm.http.CacheRequest(url, {});
-				request.localMaxAge = -24 * 3600 * 1000;
-				request.lock();
+			request = new CacheRequest(url, {});
+			request.httpInterval = 24 * 3600 * 1000;
+			request.lock();
 
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
 
-					assert.ok(obj.response, 'obj.response');
-					assert.strictEqual(obj.response.status, 200, 'obj.response.status');
+				assert.notOk(obj.response, 'obj.response');
 
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
+		});
 
-			it.eventually('should get a file from cache if within age', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = false;
-				opts.remoteRead = true;
+		it('should get a file from http if interval low', () => {
+			opts = new CacheOpts();
+			opts.cacheRead = true;
+			opts.cacheWrite = true;
+			opts.remoteRead = true;
 
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
+			cache = new HTTPCache(test.storeTmpDir, opts);
+			// cache.verbose = true;
 
-				request = new xm.http.CacheRequest(url, {});
-				request.localMaxAge = 24 * 3600 * 1000;
-				request.lock();
+			request = new CacheRequest(url, {});
+			request.httpInterval = -24 * 3600 * 1000;
+			request.lock();
 
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
+			return cache.getObject(request).then((obj: CacheObject) => {
+				assert.instanceOf(obj, CacheObject, 'obj');
+				assert.ok(obj.info);
 
-					assert.notOk(obj.response, 'obj.response');
+				assert.ok(obj.response, 'obj.response');
+				assert.strictEqual(obj.response.status, 304, 'obj.response.status');
 
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
-			});
-
-			it.eventually('should get a file from cache if interval high', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = true;
-				opts.remoteRead = true;
-
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
-
-				request = new xm.http.CacheRequest(url, {});
-				request.httpInterval = 24 * 3600 * 1000;
-				request.lock();
-
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
-
-					assert.notOk(obj.response, 'obj.response');
-
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
-			});
-
-			it.eventually('should get a file from http if interval low', () => {
-				opts = new xm.http.CacheOpts();
-				opts.cacheRead = true;
-				opts.cacheWrite = true;
-				opts.remoteRead = true;
-
-				cache = new xm.http.HTTPCache(test.storeTmpDir, opts);
-				// cache.verbose = true;
-
-				request = new xm.http.CacheRequest(url, {});
-				request.httpInterval = -24 * 3600 * 1000;
-				request.lock();
-
-				return cache.getObject(request).then((obj:xm.http.CacheObject) => {
-					assert.instanceOf(obj, xm.http.CacheObject, 'obj');
-					assert.ok(obj.info);
-
-					assert.ok(obj.response, 'obj.response');
-					assert.strictEqual(obj.response.status, 304, 'obj.response.status');
-
-					assert.instanceOf(obj.body, Buffer, 'obj.body');
-					assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
-				});
+				assert.instanceOf(obj.body, Buffer, 'obj.body');
+				assert.strictEqual(obj.body.toString('utf8'), expected, 'content');
 			});
 		});
 	});

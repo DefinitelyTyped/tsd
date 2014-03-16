@@ -6,6 +6,9 @@ import assert = chai.assert;
 import assertVar = require('../../../src/xm/assertVar');
 import Config = require('../../../src/tsd/context/Config');
 
+import helper = require('../helper');
+import tsdHelper = require('../tsdHelper');
+
 export function assertion(config: Config, values: any, message: string) {
 	assert.ok(config, message + ': config');
 	assert.ok(values, message + ': values');

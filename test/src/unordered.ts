@@ -1,9 +1,12 @@
-/// <reference path="../../_ref.d.ts" />
+/// <reference path="../_ref.d.ts" />
 
 import chai = require('chai');
 import assert = chai.assert;
 
-import IsLikeCB = require('chai');
+import inspect = require('../../src/xm/inspect');
+import assertLike = require('./assertLike');
+import IsLikeCB = assertLike.IsLikeCB;
+import AssertCB = assertLike.AssertCB;
 
 // TODO test these assertions
 
@@ -35,8 +38,8 @@ export function assertionLike<T>(actual: T[], expected: T[], matcher: IsLikeCB<T
 			}
 		}
 		// use assert.deepEqual for diff report
-		// assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
-		assert.deepEqual([act], expectedQueue, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+		// assert(false, message + ': no matching element for actual: ' + toValueStrim(act));
+		assert.deepEqual([act], expectedQueue, message + ': no matching element for actual: ' + inspect.toValueStrim(act));
 	}
 	// also bad
 	if (expectedQueue.length > 0) {
@@ -82,7 +85,7 @@ export function assertionNaive<T>(actual: T[], expected: T[], assertion: AssertC
 				// maybe next one
 			}
 		}
-		assert(false, message + ': no matching element for actual: ' + xm.toValueStrim(act));
+		assert(false, message + ': no matching element for actual: ' + toValueStrim(act));
 	}
 	// also bad
 	if (expectedQueue.length > 0) {

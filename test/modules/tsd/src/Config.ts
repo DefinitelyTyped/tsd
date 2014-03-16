@@ -61,7 +61,7 @@ describe('Config', () => {
 			];
 			valid.forEach((name) => {
 				it('parses "' + name + '"', () => {
-					var json = xm.file.readJSONSync('./test/fixtures/config/' + name + '.json');
+					var json = fileIO.readJSONSync('./test/fixtures/config/' + name + '.json');
 
 					config.parseJSON(json, name);
 					helper.assertConfig(config, json, name);

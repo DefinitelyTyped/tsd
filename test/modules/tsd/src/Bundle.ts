@@ -98,10 +98,10 @@ describe.only('Bundle', () => {
 				var src = path.join(fixtures, name, 'base.d.ts');
 				var bundle = new tsd.Bundle(path.join(tmp, name, 'result.d.ts'));
 				if (fs.existsSync(src)) {
-					base = xm.file.readFileSync(src);
+					base = fileIO.readFileSync(src);
 					bundle.parse(base);
 				}
-				var expected = xm.file.readFileSync(path.join(fixtures, name, 'result.d.ts'));
+				var expected = xfileIO.eadFileSync(path.join(fixtures, name, 'result.d.ts'));
 
 				if (typeOf.isFunction(value)) {
 					 // do it

@@ -77,8 +77,8 @@ describe('git.Github', () => {
 					// assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
 
 					// temp hackish
-					return xm.file.mkdirCheckQ(gitTest.extraDir, true).then(() => {
-						return xm.file.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
+					return fileIO.mkdirCheckQ(gitTest.extraDir, true).then(() => {
+						return xfileIO.rite(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
 					}).then(() => {
 						return xm.file.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});
 					}, (err) => {

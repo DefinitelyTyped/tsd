@@ -4,7 +4,10 @@ import fs = require('fs');
 import util = require('util');
 import path = require('path');
 import assertVar = require('../../src/xm/assertVar');
+import fileIO = require('../../src/xm/file/fileIO');
 import Const = require('../../src/tsd/context/Const');
+import Paths = require('../../src/tsd/context/Paths');
+import Helper = require('./Helper');
 
 class TestInfo {
 
@@ -17,7 +20,9 @@ class TestInfo {
 	fixturesDir: string;
 	modBuildDir: string;
 
-	constructor(group: string, name: string, test: any, createConfigFile: boolean = true) {
+	helper: Helper;
+
+	constructor(helper: Helper, group: string, name: string, test: any, createConfigFile: boolean = true) {
 		assertVar(group, 'string', 'group');
 		assertVar(name, 'string', 'name');
 		assertVar(test, 'object', 'test');
@@ -43,7 +48,7 @@ class TestInfo {
 	}
 
 	get cacheDirTestFixed(): string {
-		return helper.getFixedCacheDir();
+		return this.helper.getFixedCacheDir();
 	}
 
 	get typingsDir(): string {
@@ -51,7 +56,7 @@ class TestInfo {
 	}
 
 	get cacheDirDev(): string {
-		return path.join(helper.getProjectRoot(), Const.cacheDir);
+		return path.join(this.helper.getProjectRoot(), Const.cacheDir);
 	}
 
 	get cacheDirUser(): string {

@@ -6,6 +6,10 @@ import assert = chai.assert;
 import assertVar = require('../../../src/xm/assertVar');
 import AuthorInfo = require('../../../src/xm/data/AuthorInfo');
 import DefInfo = require('../../../src/tsd/data/DefInfo');
+import testAuthor = require('../xm/AuthorInfo');
+
+import unordered = require('../unordered');
+import helper = require('../helper');
 
 export function serialise(info: DefInfo, recursive: number = 0): any {
 	assertVar(info, DefInfo, 'info');
@@ -21,7 +25,7 @@ export function serialise(info: DefInfo, recursive: number = 0): any {
 	json.authors = [];
 	if (info.authors && recursive >= 0) {
 		info.authors.forEach((author: AuthorInfo) => {
-			json.authors.push(helper.serialiseAuthor(author, recursive));
+			json.authors.push(testAuthor.serialise(author, recursive));
 		});
 	}
 	return json;
@@ -40,9 +44,9 @@ export function assertion(info: DefInfo, values: any, message: string) {
 	helper.propStrictEqual(info, values, 'reposUrl', message);
 
 	if (values.authors) {
-		helper.assertUnorderedNaive(info.authors, values.authors, helper.assertAuthor, message + ': authors');
+		unordered.assertionNaive(info.authors, values.authors, testAuthor.assertion, message + ': authors');
 	}
 	if (values.references) {
-		helper.assertUnorderedNaive(info.authors, values.authors, assert.strictEqual, message + ': authors');
+		unordered.assertionNaive(info.authors, values.authors, assert.strictEqual, message + ': authors');
 	}
 }

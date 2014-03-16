@@ -3,7 +3,9 @@
 import chai = require('chai');
 import assert = chai.assert;
 
-export function assertGitBufferUTFEqual(actual: NodeBuffer, expected: NodeBuffer, message: string) {
+import GitUtil = require('../../../src/git/GitUtil');
+
+export function assertion(actual: NodeBuffer, expected: NodeBuffer, message: string) {
 	assert.instanceOf(actual, Buffer, 'actual: ' + message);
 	assert.instanceOf(expected, Buffer, 'expected: ' + message);
 
@@ -13,11 +15,11 @@ export function assertGitBufferUTFEqual(actual: NodeBuffer, expected: NodeBuffer
 	if (actualStr !== expectedStr) {
 		// show fancy diffs
 		var actualDebug = {
-			sha: git.GitUtil.blobShaHex(actual, 'utf8'),
+			sha: GitUtil.blobShaHex(actual, 'utf8'),
 			str: actualStr
 		};
 		var expectedDebug = {
-			sha: git.GitUtil.blobShaHex(expected, 'utf8'),
+			sha: GitUtil.blobShaHex(expected, 'utf8'),
 			str: expectedStr
 		};
 		assert.fail(actualDebug, expectedDebug, message);

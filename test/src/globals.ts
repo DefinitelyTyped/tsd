@@ -1,6 +1,6 @@
 /// <reference path="../_ref.d.ts" />
 
-import bootstrap = require('../src/bootstrap');
+require('../../src/bootstrap');
 
 /// <reference path="settings.ts" />
 

@@ -10,6 +10,7 @@ import assert = chai.assert;
 import childProcess = require('child_process');
 import bufferEqual = require('buffer-equal');
 
+import log = require('../../src/xm/log');
 import typeOf = require('../../src/xm/typeOf');
 import PackageJSON = require('../../src/xm/data/PackageJSON');
 
@@ -63,7 +64,7 @@ export function longAssert(actual:string, expected:string, msg?:string):void {
 		throw new chai.AssertionError((msg ? msg + ': ' : '') + 'long string', {
 			actual: actual,
 			expected: expected
-		}, helper.longAssert);
+		}, longAssert);
 	}
 }
 
@@ -71,12 +72,12 @@ export function longAssert(actual:string, expected:string, msg?:string):void {
 
 export function dump(object:any, message?:string, depth:number = 6, showHidden:boolean = false):any {
 	message = typeOf.isUndefined(message) ? '' : message + ': ';
-	xm.log(message + util.inspect(object, showHidden, depth, true));
+	log(message + util.inspect(object, showHidden, depth, true));
 }
 
 export function dumpJSON(object:any, message?:string):any {
 	message = typeOf.isUndefined(message) ? '' : message + ': ';
-	xm.log(message + JSON.stringify(object, null, 4));
+	log(message + JSON.stringify(object, null, 4));
 }
 
 export function assertFormatSHA1(value:string, msg?:string):void {
@@ -185,21 +186,3 @@ export function assertError(exec:() => void, expected:any, msg?:string):void {
 	}
 	assert.strictEqual('', expected.toString(), msg + 'expected to throw and match ' + expected);
 }
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-// for safety
-function promiseDoneMistake():void {
-	throw new Error('don\'t use a done() callback when using it.eventually()');
-}
-
-// monkey patch
-it.eventually = function eventually(expectation:string, assertion?:(call:() => void) => void):void {
-	it(expectation, (done) => {
-		Q(assertion(promiseDoneMistake)).done(() => {
-			done();
-		}, (err:Error) => {
-			done(err);
-		});
-	});
-};

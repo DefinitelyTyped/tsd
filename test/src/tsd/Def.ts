@@ -4,12 +4,13 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../../src/xm/assertVar');
-import unordered = require('../xm/unordered');
+import unordered = require('../unordered');
 
 import Def = require('../../../src/tsd/data/Def');
 import DefVersion = require('../../../src/tsd/data/DefVersion');
 
 import testDefVersion = require('./DefVersion');
+import helper = require('../helper');
 
 export function serialise(def: Def, recursive: number = 0): any {
 	assertVar(def, Def, 'def');
@@ -21,7 +22,7 @@ export function serialise(def: Def, recursive: number = 0): any {
 	json.name = def.name;
 	json.semver = def.semver;
 	if (recursive >= 0) {
-		json.head = helper.serialiseDefVersion(def.head, recursive);
+		json.head = testDefVersion.serialise(def.head, recursive);
 	}
 	// version from the DefIndex commit +tree (may be not our edit)
 	if (def.history && recursive >= 0) {

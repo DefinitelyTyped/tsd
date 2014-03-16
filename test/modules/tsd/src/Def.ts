@@ -51,7 +51,7 @@ describe('Def', () => {
 	});
 
 	describe('isDef', () => {
-		var data:any = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
+		var data:any = fileIO.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'is-path.json'));
 		after(() => {
 			data = null;
 		});
@@ -68,7 +68,7 @@ describe('Def', () => {
 	});
 
 	describe('getFrom', () => {
-		var data:any = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
+		var data:any = xfileIO.eadJSONSync(path.resolve(__dirname, '..', 'fixtures', 'parse-path.json'));
 		after(() => {
 			data = null;
 		});

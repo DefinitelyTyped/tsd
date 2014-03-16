@@ -14,8 +14,8 @@ describe('API', () => {
 	var Q = require('q');
 	var assert:Chai.Assert = require('chai').assert;
 
-	var writeJSONSync = xm.file.writeJSONSync;
-	var readJSONSync = xm.file.readJSONSync;
+	var writeJSONSync = fileIO.writeJSONSync;
+	var readJSONSync = fileIO.readJSONSync;
 
 	var api:tsd.API;
 	var context:tsd.Context;
@@ -57,9 +57,9 @@ describe('API', () => {
 
 		api.context.paths.configFile = tmp.configFile;
 
-		xm.file.writeJSONSync(tmp.testDump, test);
-		xm.file.writeJSONSync(tmp.queryDump, query);
-		xm.file.writeJSONSync(tmp.optionsDump, opt);
+		fileIO.writeJSONSync(tmp.testDump, test);
+		fileIO.writeJSONSync(tmp.queryDump, query);
+		fileIO.writeJSONSync(tmp.optionsDump, opt);
 
 		api.verbose = test.debug;
 
@@ -111,7 +111,7 @@ describe('API', () => {
 						if (test.debug) {
 							xm.log.debug('setting content of ' + name + ' in ' + dest);
 						}
-						xm.file.writeFileSync(destFull, value);
+						fileIO.writeFileSync(destFull, value);
 					});
 				}
 				return Promise.return();
@@ -130,7 +130,7 @@ describe('API', () => {
 				return;
 			}
 
-			it.eventually('query "' + name + '"', () => {
+			it('query "' + name + '"', () => {
 				api = getAPI(context);
 
 				var query = getQuery(test);
@@ -141,9 +141,9 @@ describe('API', () => {
 					return api.select(query).then((selection:tsd.Selection) => {
 						assert.instanceOf(selection, tsd.Selection, 'selection');
 
-						xm.file.writeJSONSync(info.resultFile, helper.serialiseSelection(selection, 2));
+						fileIO.writeJSONSync(info.resultFile, helper.serialiseSelection(selection, 2));
 
-						var resultExpect = xm.file.readJSONSync(info.resultExpect);
+						var resultExpect = fileIO.readJSONSync(info.resultExpect);
 						helper.assertSelection(selection, resultExpect, 'result');
 					});
 				});
@@ -159,7 +159,7 @@ describe('API', () => {
 				return;
 			}
 
-			it.eventually('test "' + name + '"', () => {
+			it('test "' + name + '"', () => {
 				api = getAPI(context);
 
 				var query = getQuery(test);
@@ -171,13 +171,13 @@ describe('API', () => {
 						return api.install(selection, opts).then((result:tsd.InstallResult) => {
 							assert.instanceOf(result, tsd.InstallResult, 'result');
 
-							xm.file.writeJSONSync(info.resultFile, helper.serialiseInstallResult(result, 2));
+							fileIO.writeJSONSync(info.resultFile, helper.serialiseInstallResult(result, 2));
 
-							var resultExpect = xm.file.readJSONSync(info.resultExpect);
+							var resultExpect = fileIO.readJSONSync(info.resultExpect);
 							helper.assertInstallResult(result, resultExpect, 'result');
 
-							var configExpect = xm.file.readJSONSync(info.configExpect);
-							var configActual = xm.file.readJSONSync(info.configFile);
+							var configExpect = fileIO.readJSONSync(info.configExpect);
+							var configActual = fileIO.readJSONSync(info.configFile);
 
 							assert.deepEqual(configActual, configExpect, 'configActual');
 							helper.assertConfig(api.context.config, configExpect, 'api.context.config');

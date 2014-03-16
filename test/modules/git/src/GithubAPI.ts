@@ -70,7 +70,7 @@ describe('git.GithubAPI', () => {
 	}
 
 	describe('getBranches', () => {
-		it.eventually('should cache and return data from store', () => {
+		it('should cache and return data from store', () => {
 			// repo.api.verbose = true;
 			repo.api.cache.track.reset();
 			assert.strictEqual(repo.api.cache.track.getItems().length, 0, 'pretest stats');
@@ -96,12 +96,12 @@ describe('git.GithubAPI', () => {
 	});
 
 	describe('getBlob', () => {
-		it.eventually('should cache and return data from store', () => {
+		it('should cache and return data from store', () => {
 			// repo.api.verbose = true;
 			repo.api.cache.track.reset();
 			// assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
-			var expectedJson = xm.file.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
+			var expectedJson = fileIO.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');
 

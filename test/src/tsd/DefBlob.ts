@@ -6,6 +6,8 @@ import assert = chai.assert;
 import assertVar = require('../../../src/xm/assertVar');
 import DefBlob = require('../../../src/tsd/data/DefBlob');
 
+import helper = require('../helper');
+
 export function serialise(blob: DefBlob, recursive: number = 0): any {
 	assertVar(blob, DefBlob, 'blob');
 	recursive -= 1;

@@ -24,7 +24,7 @@ describe('NameMatcher', () => {
 	var select:any = {};
 
 	// get data to generate cases
-	select.data = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
+	select.data = fileIO.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
 	select.source = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
 	assert.ok(select.data, 'select.data');
 	assert.ok(select.source, 'select.source');

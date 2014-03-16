@@ -22,7 +22,7 @@ describe('Core', () => {
 
 	function testConfig(path:string):Promise<void> {
 		context.paths.configFile = path;
-		var source = xm.file.readJSONSync(path);
+		var source = fileIO.readJSONSync(path);
 
 		core = getCore(context);
 		return core.config.readConfig(false).then(() => {
@@ -90,8 +90,8 @@ describe('Core', () => {
 			// core.verbose = true;
 
 			// modify test data
-			var source = xm.file.readJSONSync(saveFile);
-			var changed = xm.file.readJSONSync(saveFile);
+			var source = xfileIO.eadJSONSync(saveFile);
+			var changed = xmfileIO.adJSONSync(saveFile);
 
 			changed.path = 'some/other/path';
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
@@ -117,7 +117,7 @@ describe('Core', () => {
 	});
 
 	describe('updateIndex', () => {
-		it.eventually('should return data', () => {
+		it('should return data', () => {
 			core = getCore(context);
 			// core.verbose = true;
 

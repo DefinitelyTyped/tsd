@@ -11,7 +11,7 @@ describe('CLI Query', () => {
 	function applyTestInfo(group:string, name:string, test:any, createConfigFile:boolean = false):helper.TestInfo {
 		var info = new helper.TestInfo(group, name, test, createConfigFile);
 
-		xm.file.writeJSONSync(info.testDump, test);
+		fileIO.writeJSONSync(info.testDump, test);
 
 		return info;
 	}
@@ -62,7 +62,7 @@ describe('CLI Query', () => {
 		args.push('--config', path.resolve('./test/fixtures/config/default.json'));
 
 		// TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
-		xm.file.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
+		xfileIO.riteJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
 
 		return args;
 	}
@@ -86,7 +86,7 @@ describe('CLI Query', () => {
 			fs.writeFileSync(info.stderrFile, stderr, 'utf8');
 		}
 		if (result.error) {
-			xm.file.writeJSONSync(info.errorFile, result.error);
+			xmfileIO.iteJSONSync(info.errorFile, result.error);
 		}
 
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
@@ -113,7 +113,7 @@ describe('CLI Query', () => {
 				return;
 			}
 
-			it.eventually('test "' + name + '"', () => {
+			it('test "' + name + '"', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
@@ -136,7 +136,7 @@ describe('CLI Query', () => {
 				return;
 			}
 
-			it.eventually('test "' + name + '"', () => {
+			it('test "' + name + '"', () => {
 				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 

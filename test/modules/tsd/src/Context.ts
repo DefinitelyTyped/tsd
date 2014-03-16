@@ -58,7 +58,7 @@ describe('Context', () => {
 			// assert.isObject(ctx.config.installed, 'installed');
 		});
 		it('has valid default', () => {
-			var json = xm.file.readJSONSync('./test/fixtures/config/default.json');
+			var json = fileIO.readJSONSync('./test/fixtures/config/default.json');
 			helper.assertConfig(ctx.config, json, 'default');
 		});
 	});
