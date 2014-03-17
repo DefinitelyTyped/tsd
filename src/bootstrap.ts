@@ -1,13 +1,13 @@
 /// <reference path="_ref.d.ts" />
 
 import Promise = require('bluebird');
-/*
+
 Promise.onPossiblyUnhandledRejection((error) => {
 	console.log('---');
 	console.log(error.message);
 	throw error;
+	process.exit(1);
 });
-*/
 
 // optional
 try {

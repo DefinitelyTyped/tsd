@@ -1,47 +1,54 @@
-/// <reference path='../../../globals.ts' />
-/// <reference path='../../../../src/git/loader/GithubAPI.ts' />
-/// <reference path='../../../../src/git/GitUtil.ts' />
-/// <reference path='../../../../src/git/GitUtil.ts' />
-/// <reference path='../../../../src/tsd/context/Context.ts' />
-/// <reference path='helper.ts' />
+/// <reference path="../../_ref.d.ts" />
 
-describe('git.GithubAPI', () => {
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import log = require('../../xm/log');
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
+import gitHelper = require('../../test/git/gitHelper');
+
+import GitUtil = require('../../git/GitUtil');
+import GithubRepo = require('../../git/GithubRepo');
+import GithubAPI = require('../../git/loader/GithubAPI');
+
+describe('GithubAPI', () => {
 	'use strict';
 
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
-	var repo:git.GithubRepo;
-	var cacheDir:string;
-	var gitTest = helper.getGitTestInfo();
+	var repo: GithubRepo;
+	var cacheDir: string;
+	var gitTest = gitHelper.getGitTestInfo();
 
 	beforeEach(() => {
 		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubAPI');
-		repo = new git.GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
-		helper.enableTrack(repo);
+		repo = new GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
 	});
 	afterEach(() => {
 		repo = null;
 	});
 
 	var num = {
-		'type' : 'number'
+		'type': 'number'
 	};
 	var str = {
-		'type' : 'string'
+		'type': 'string'
 	};
 	var metaFields = {
-		'type' : 'object',
+		'type': 'object',
 		'properties': {
 			'meta': {
-				'type' : 'object',
-				'required' : [
+				'type': 'object',
+				'required': [
 					'rate'
 				],
 				'properties': {
 					'rate': {
-						'required' : [
+						'required': [
 							'lastUpdate',
 							'limit',
 							'remaining',
@@ -72,8 +79,6 @@ describe('git.GithubAPI', () => {
 	describe('getBranches', () => {
 		it('should cache and return data from store', () => {
 			// repo.api.verbose = true;
-			repo.api.cache.track.reset();
-			assert.strictEqual(repo.api.cache.track.getItems().length, 0, 'pretest stats');
 
 			return repo.api.getBranches().then((first) => {
 				assert.ok(first, 'first data');
@@ -98,8 +103,6 @@ describe('git.GithubAPI', () => {
 	describe('getBlob', () => {
 		it('should cache and return data from store', () => {
 			// repo.api.verbose = true;
-			repo.api.cache.track.reset();
-			// assert.isTrue(api.loader.stats.hasAllZero(), 'pretest stats');
 
 			var expectedJson = fileIO.readJSONSync(path.join(gitTest.fixtureDir, 'async-blob.json'));
 			var expectedSha = expectedJson.sha;
@@ -107,9 +110,7 @@ describe('git.GithubAPI', () => {
 
 			var notes = [];
 
-			return repo.api.getBlob(expectedSha).progress((note:any) => {
-				notes.push(note);
-			}).then((first) => {
+			return repo.api.getBlob(expectedSha).then((first) => {
 				assert.ok(first, 'first data');
 				assert.isObject(first, 'first data');
 				assert.strictEqual(first.sha, expectedSha, 'first.sha vs expectedSha');
@@ -118,23 +119,21 @@ describe('git.GithubAPI', () => {
 				fixMeta(first.meta);
 				assert.jsonOf(expectedJson, first, 'first vs expectedJson');
 
-				var firstBuffer = git.GitUtil.decodeBlobJson(first);
+				var firstBuffer = GitUtil.decodeBlobJson(first);
 				assert.instanceOf(firstBuffer, Buffer, 'buffer');
 
-				var firstSha = git.GitUtil.blobShaHex(firstBuffer, 'utf8');
+				var firstSha = GitUtil.blobShaHex(firstBuffer, 'utf8');
 				assert.strictEqual(firstSha, expectedSha, 'firstSha vs expected');
 
 				// get again, should be cached
-				return repo.api.getBlob(expectedSha).progress((note:any) => {
-					notes.push(note);
-				}).then((second) => {
+				return repo.api.getBlob(expectedSha).then((second) => {
 					assert.ok(second, 'second data');
 					assert.isObject(second, 'second data');
 					assert.strictEqual(second.sha, expectedSha, 'second.sha vs expectedSha');
 
-					var secondBuffer = git.GitUtil.decodeBlobJson(first);
+					var secondBuffer = GitUtil.decodeBlobJson(first);
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');
-					var secondSha = git.GitUtil.blobShaHex(secondBuffer, 'utf8');
+					var secondSha = GitUtil.blobShaHex(secondBuffer, 'utf8');
 					assert.strictEqual(secondSha, expectedSha, 'secondSha vs expected');
 
 					helper.assertNotes(notes, [

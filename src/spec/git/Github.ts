@@ -1,30 +1,35 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="helper.ts" />
-/// <reference path="../../../assert/git/_all.ts" />
-/// <reference path="../../../../src/xm/hash.ts" />
-/// <reference path="../../../../src/xm/iterate.ts" />
-/// <reference path="../../../../src/git/GitUtil.ts" />
-/// <reference path="../../../../src/git/GithubRepo.ts" />
-/// <reference path="../../../../src/git/loader/GithubRaw.ts" />
-/// <reference path="../../../../src/git/loader/GithubAPI.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-describe('git.Github', () => {
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import log = require('../../xm/log');
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
+
+import gitHelper = require('../../test/git/gitHelper');
+
+import GitUtil = require('../../git/GitUtil');
+import GithubRepo = require('../../git/GithubRepo');
+import GithubAPI = require('../../git/loader/GithubAPI');
+import GithubRaw = require('../../git/loader/GithubRaw');
+
+describe('Github', () => {
 	'use strict';
 
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
-	var repo:git.GithubRepo;
-
-	var cacheDir:string;
-
-	var gitTest = helper.getGitTestInfo();
+	var repo: GithubRepo;
+	var cacheDir: string;
+	var gitTest = gitHelper.getGitTestInfo();
 
 	beforeEach(() => {
 		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'git-api');
-		repo = new git.GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
-		helper.enableTrack(repo);
+		repo = new GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
+		// helper.enableTrack(repo);
 	});
 
 	afterEach(() => {
@@ -32,12 +37,13 @@ describe('git.Github', () => {
 	});
 
 	it('pretest', () => {
-		assert.instanceOf(repo, git.GithubRepo, 'repo');
-		assert.instanceOf(repo.api, git.GithubAPI, 'api');
-		assert.instanceOf(repo.raw, git.GithubRaw, 'raw');
+		assert.instanceOf(repo, GithubRepo, 'repo');
+		assert.instanceOf(repo.api, GithubAPI, 'api');
+		assert.instanceOf(repo.raw, GithubRaw, 'raw');
 	});
 
-	xm.eachProp(gitTest.config.data, (test, label:string) => {
+	Object.keys(gitTest.config.data).forEach((label) => {
+		var test = gitTest.config.data[label];
 		if (test.skip) {
 			return;
 		}
@@ -52,22 +58,22 @@ describe('git.Github', () => {
 			helper.assertFormatSHA1(commitSha, 'commitSha');
 			helper.assertFormatSHA1(blobSha, 'blobSha');
 
-			return repo.raw.getBinary(commitSha, filePath).then((rawData:NodeBuffer) => {
+			return repo.raw.getBinary(commitSha, filePath).then((rawData: NodeBuffer) => {
 				assert.ok(rawData, 'raw data');
 				assert.instanceOf(rawData, Buffer, 'raw data');
 				assert.operator(rawData.length, '>', 20, 'raw data');
 
-				var rawSha = git.GitUtil.blobShaHex(rawData, 'utf8');
+				var rawSha = GitUtil.blobShaHex(rawData, 'utf8');
 				helper.assertFormatSHA1(rawSha, 'rawSha');
 
 				return repo.api.getBlob(blobSha).then((apiData) => {
 					assert.ok(apiData, 'api data');
 					assert.isObject(apiData, 'api data');
 
-					var apiBuffer = git.GitUtil.decodeBlobJson(apiData);
+					var apiBuffer = GitUtil.decodeBlobJson(apiData);
 					assert.instanceOf(apiBuffer, Buffer, 'api buffer');
 
-					var apiSha = git.GitUtil.blobShaHex(apiBuffer);
+					var apiSha = GitUtil.blobShaHex(apiBuffer);
 					helper.assertFormatSHA1(apiSha, 'sha');
 
 					assert.strictEqual(rawSha, blobSha, 'rawSha vs blobSha');
@@ -78,17 +84,17 @@ describe('git.Github', () => {
 
 					// temp hackish
 					return fileIO.mkdirCheckQ(gitTest.extraDir, true).then(() => {
-						return xfileIO.rite(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags:'wb'});
+						return fileIO.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags: 'wb'});
 					}).then(() => {
-						return xm.file.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags:'rb'});
-					}, (err) => {
-						xm.log.error('storage test failure');
+						return fileIO.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags: 'rb'});
+					},(err) => {
+						log.error('storage test failure');
 						throw err;
-					}).then((cycleData:NodeBuffer) => {
+					}).then((cycleData: NodeBuffer) => {
 						assert.ok(rawData, 'raw data');
 						assert.instanceOf(rawData, Buffer, 'raw data');
 
-						var cycleSha = git.GitUtil.blobShaHex(cycleData);
+						var cycleSha = GitUtil.blobShaHex(cycleData);
 						assert.strictEqual(cycleSha, rawSha, 'cycleSha vs rawData');
 						assert.strictEqual(cycleSha, blobSha, 'cycleSha vs blobSha');
 						assert.strictEqual(cycleSha, apiSha, 'cycleSha vs apiSha');

@@ -9,8 +9,8 @@ import RegExpGlue = require('../../xm/lib/RegExpGlue');
 describe('RexExpGlue', () => {
 	'use strict';
 
-	var exp:RegExpGlue;
-	var e:RegExp;
+	var exp: RegExpGlue;
+	var e: RegExp;
 
 	it('is defined', () => {
 		assert.ok(RegExpGlue);

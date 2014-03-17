@@ -2,14 +2,13 @@
 
 import fs = require('graceful-fs');
 import path = require('path');
-
 import Promise = require('bluebird');
 
 import chai = require('chai');
 import assert = chai.assert;
-import helper = require('../../test/helper');
 
 import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
 
 import HTTPCache = require('../../xm/http/HTTPCache');
 import CacheInfo = require('../../xm/http/CacheInfo');

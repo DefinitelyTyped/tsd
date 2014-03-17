@@ -1,7 +1,7 @@
 /// <reference path="../../_ref.d.ts" />
 
 
-import fs = require('fs');
+import fs = require('graceful-fs');
 import path = require('path');
 
 import chai = require('chai');
@@ -152,7 +152,7 @@ describe('JSONStabilizer', () => {
 			}
 		};
 
-		Object.keys(list).forEach((name:string)=> {
+		Object.keys(list).forEach((name: string)=> {
 			it('"' + name + '"', () => {
 				var test = list[name];
 				var stable = new JSONStabilizer(test.depth);

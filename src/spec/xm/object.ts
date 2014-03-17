@@ -7,10 +7,10 @@ import helper = require('../../test/helper');
 import objectUtils = require('../../xm/objectUtils');
 
 class ObjectUtilTestClass {
-	private _propA:string = 'a';
-	private _propB:string = 'b';
-	propC:string = 'c';
-	propD:string = 'd';
+	private _propA: string = 'a';
+	private _propB: string = 'b';
+	propC: string = 'c';
+	propD: string = 'd';
 }
 
 describe('object', () => {

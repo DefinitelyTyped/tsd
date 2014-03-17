@@ -9,6 +9,8 @@
 /scratch
 /tsd-cache
 /test/tmp
+/test/spec/*/tmp
+/test/spec/*/build
 
 /tscommand*
 /*.tgz

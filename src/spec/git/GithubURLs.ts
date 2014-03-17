@@ -1,16 +1,28 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/git/GithubURLs.ts" />
-/// <reference path="helper.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-describe('git.GithubRepo / git.GithubURLs', () => {
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import log = require('../../xm/log');
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
+import gitHelper = require('../../test/git/gitHelper');
+
+import GitUtil = require('../../git/GitUtil');
+import GithubURLs = require('../../git/GithubURLs');
+import GithubRepo = require('../../git/GithubRepo');
+
+describe('GithubRepo / GithubURLs', () => {
 	'use strict';
 
-	var assert:Chai.Assert = require('chai').assert;
+	var repo: GithubRepo;
+	var urls: GithubURLs;
 
-	var repo:git.GithubRepo;
-	var urls:git.GithubURLs;
-
-	var gitTest = helper.getGitTestInfo();
+	var gitTest = gitHelper.getGitTestInfo();
 
 	after(() => {
 		repo = null;
@@ -20,15 +32,15 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 
 	describe('GithubRepo', () => {
 		it('should be defined', () => {
-			assert.isFunction(git.GithubRepo, 'GithubRepo.constructor');
+			assert.isFunction(GithubRepo, 'GithubRepo.constructor');
 		});
 		it('should throw on bad params', () => {
 			assert.throws(() => {
-				repo = new git.GithubRepo({repoOwner: null, repoProject: null}, null, null);
+				repo = new GithubRepo({repoOwner: null, repoProject: null}, null, null);
 			});
 		});
 		it('should be constructor', () => {
-			repo = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts);
+			repo = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts);
 			urls = repo.urls;
 			assert.ok(urls, 'instance');
 		});
@@ -36,15 +48,15 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 
 	describe('GithubURLs', () => {
 		it('should be defined', () => {
-			assert.isFunction(git.GithubURLs, 'GithubURLs.constructor');
+			assert.isFunction(GithubURLs, 'GithubURLs.constructor');
 		});
 		it('should throw on bad params', () => {
 			assert.throws(() => {
-				urls = new git.GithubURLs(null);
+				urls = new GithubURLs(null);
 			});
 		});
 		it('should return replaced urls', () => {
-			urls = new git.GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
+			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
 			var api = 'https://api.github.com/repos/foo/bar';
 			var raw = 'https://raw.github.com/foo/bar';
 			var base = 'https://github.com/foo/bar';
@@ -55,7 +67,7 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 		});
 		it('should return correctly replaced urls if repoConfig is modified after repo creation', () => {
 			var repoConfig = {repoOwner: 'foo', repoProject: 'bar'};
-			urls = new git.GithubRepo(repoConfig, 'baz', gitTest.opts).urls;
+			urls = new GithubRepo(repoConfig, 'baz', gitTest.opts).urls;
 			repoConfig.repoOwner = 'correctOwner';
 			repoConfig.repoProject = 'correctProject';
 			var api = 'https://api.github.com/repos/correctOwner/correctProject';
@@ -65,7 +77,7 @@ describe('git.GithubRepo / git.GithubURLs', () => {
 			assert.strictEqual(urls.base(), base, 'base');
 		});
 		it('should return no trailing slash', () => {
-			urls = new git.GithubRepo({repoOwner:'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
+			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
 			assert.notMatch(urls.apiBranches(), /\/$/, 'apiBranches');
 			assert.notMatch(urls.apiBranch('abc'), /\/$/, 'apiBranch');
 		});

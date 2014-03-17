@@ -4,9 +4,11 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import inspect = require('../xm/inspect');
+
 import assertLike = require('./assertLike');
 import IsLikeCB = assertLike.IsLikeCB;
 import AssertCB = assertLike.AssertCB;
+import AssertCBA = assertLike.AssertCBA;
 
 // TODO test these assertions
 
@@ -85,7 +87,7 @@ export function assertionNaive<T>(actual: T[], expected: T[], assertion: AssertC
 				// maybe next one
 			}
 		}
-		assert(false, message + ': no matching element for actual: ' + toValueStrim(act));
+		assert(false, message + ': no matching element for actual: ' + inspect.toValueStrim(act));
 	}
 	// also bad
 	if (expectedQueue.length > 0) {

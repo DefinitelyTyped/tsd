@@ -1,6 +1,6 @@
 /// <reference path="_ref.d.ts" />
 
-import fs = require('fs');
+import fs = require('graceful-fs');
 import util = require('util');
 import path = require('path');
 
@@ -65,7 +65,10 @@ export function listDefPaths(dir: string): Promise<string[]> {
 }
 /* tslint:disable:max-line-length */
 export function assertDefPathsP(actualDir: string, expectedDir: string, assertContent: boolean, message: string): Promise<void> {
-	return Promise.all([helper.listDefPaths(actualDir), helper.listDefPaths(expectedDir)]).spread((actualPaths: string[], expectedPaths: string[]) => {
+	return Promise.all([
+		listDefPaths(actualDir),
+		listDefPaths(expectedDir)
+	]).spread((actualPaths: string[], expectedPaths: string[]) => {
 		assert.sameMembers(actualPaths, expectedPaths, message);
 
 		if (assertContent) {
@@ -78,9 +81,9 @@ export function assertDefPathsP(actualDir: string, expectedDir: string, assertCo
 			}, (actualPath: string, expectedPath: string) => {
 				var msg = helper.getPathMessage(actualPath, expectedPath, message);
 
-				helper.assertBufferUTFEqual(fs.readfile(actualPath), fs.readfile(actualPath), msg);
+				helper.assertBufferUTFEqual(fs.readFileSync(actualPath), fs.readFileSync(actualPath), msg);
 				// helper.assertGitBufferUTFEqual(actualPath, expectedPath, msg);
 			}, message);
 		}
-	});
+	}).return();
 }

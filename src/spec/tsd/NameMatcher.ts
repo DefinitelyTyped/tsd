@@ -1,31 +1,36 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../../src/tsd/select/Query.ts" />
-/// <reference path="../../../../src/xm/hash.ts" />
-/// <reference path="../../../../src/xm/file/file.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-/// <reference path="../../../../src/tsd/data/Def.ts" />
-/// <reference path="../../../../src/tsd/select/Query.ts" />
-/// <reference path="../../../../src/tsd/select/NameMatcher.ts" />
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import log = require('../../xm/log');
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
+
+import tsdHelper = require('../../test/tsdHelper');
+import Def = require('../../tsd/data/Def');
+import NameMatcher = require('../../tsd/select/NameMatcher');
 
 describe('NameMatcher', () => {
 	'use strict';
 
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
 	describe('basics', () => {
 		it('is defined', () => {
-			assert.isFunction(tsd.NameMatcher, 'NameMatcher');
+			assert.isFunction(NameMatcher, 'NameMatcher');
 		});
 	});
 
-	var list:tsd.Def[];
-	var files:tsd.Def[];
-	var select:any = {};
+	var list: Def[];
+	var files: Def[];
+	var select: any = {};
 
 	// get data to generate cases
-	select.data = fileIO.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'nameMatcher.json'));
-	select.source = xm.file.readJSONSync(path.resolve(__dirname, '..', 'fixtures', 'paths-many.json'));
+	select.data = fileIO.readJSONSync(path.resolve(helper.getDirNameFixtures(), 'nameMatcher.json'));
+	select.source = fileIO.readJSONSync(path.resolve(helper.getDirNameFixtures(), 'paths-many.json'));
 	assert.ok(select.data, 'select.data');
 	assert.ok(select.source, 'select.source');
 
@@ -33,16 +38,16 @@ describe('NameMatcher', () => {
 		// dummy list
 		list = [];
 
-		var badFixtures:string[] = [];
-		select.source.forEach((path:string) => {
-			var def = tsd.Def.getFrom(path);
+		var badFixtures: string[] = [];
+		select.source.forEach((path: string) => {
+			var def = Def.getFrom(path);
 			if (!def) {
 				badFixtures.push(path);
 			}
 			list.push(def);
 		});
 		if (badFixtures.length > 0) {
-			xm.log.error('bad fixture', badFixtures);
+			log.error('bad fixture', badFixtures);
 			throw new Error('bad fixtures: ' + badFixtures.join('\n'));
 		}
 	});
@@ -52,11 +57,11 @@ describe('NameMatcher', () => {
 		select = null;
 	});
 
-	function assertMatch(str:string, path:string, expectMatch:boolean = true) {
+	function assertMatch(str: string, path: string, expectMatch: boolean = true) {
 		path += '.d.ts';
 
-		var pattern = new tsd.NameMatcher(str);
-		var def = tsd.Def.getFrom(path);
+		var pattern = new NameMatcher(str);
+		var def = Def.getFrom(path);
 		if (!def) {
 			throw new Error('bad fixture: ' + path);
 		}
@@ -109,11 +114,11 @@ describe('NameMatcher', () => {
 	});
 
 	describe('bulk', () => {
-		select.data.forEach((data:any) => {
+		select.data.forEach((data: any) => {
 			it('match "' + String(data.pattern) + '"', () => {
-				var pattern = new tsd.NameMatcher(data.pattern);
+				var pattern = new NameMatcher(data.pattern);
 
-				var paths = pattern.filter(list, []).map((def:tsd.Def) => {
+				var paths = pattern.filter(list, []).map((def: Def) => {
 					return def.path;
 				});
 

@@ -1,6 +1,6 @@
 /// <reference path="../_ref.d.ts" />
 
-import fs = require('fs');
+import fs = require('graceful-fs');
 import path = require('path');
 
 import assertVar = require('../assertVar');

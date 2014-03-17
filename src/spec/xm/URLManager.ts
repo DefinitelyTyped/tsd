@@ -8,9 +8,9 @@ import URLManager = require('../../xm/lib/URLManager');
 
 describe('URLManager', () => {
 
-	var urls:URLManager;
-	var expected:string;
-	var actual:URLTemplate;
+	var urls: URLManager;
+	var expected: string;
+	var actual: URLTemplate;
 
 	it('should be defined', () => {
 		assert.isFunction(URLManager, 'constructor');

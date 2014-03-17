@@ -1,14 +1,19 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../_ref.d.ts" />
+
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
 
 describe('CLI Query', () => {
 	'use strict';
 
-	var fs = require('fs');
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
-	function applyTestInfo(group:string, name:string, test:any, createConfigFile:boolean = false):helper.TestInfo {
+	function applyTestInfo(group: string, name: string, test: any, createConfigFile: boolean = false): helper.TestInfo {
 		var info = new helper.TestInfo(group, name, test, createConfigFile);
 
 		fileIO.writeJSONSync(info.testDump, test);
@@ -16,12 +21,12 @@ describe('CLI Query', () => {
 		return info;
 	}
 
-	function getArgs(test, data, info:helper.TestInfo):string[] {
+	function getArgs(test, data, info: helper.TestInfo): string[] {
 		assert.isObject(test, 'test');
 		assert.isObject(data, 'data');
 		assert.instanceOf(info, helper.TestInfo, 'info');
 
-		var args:string[] = [];
+		var args: string[] = [];
 
 		if (test.command) {
 			assert.isArray(test.command, 'test.command');
@@ -69,11 +74,11 @@ describe('CLI Query', () => {
 
 	var trimHeaderExp = /^\s*?(>> tsd) (\d+\.\d+\.\d+)(\S+)?([ \S]+(?:\r?\n)+)/;
 
-	function trimHeader(str:string):string {
+	function trimHeader(str: string): string {
 		return str.replace(trimHeaderExp, '');
 	}
 
-	function assertCLIResult(result:xm.RunCLIResult, test, info:helper.TestInfo, args):void {
+	function assertCLIResult(result: xm.RunCLIResult, test, info: helper.TestInfo, args): void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
@@ -99,7 +104,7 @@ describe('CLI Query', () => {
 			helper.longAssert(stderr, stderrExpect, 'result.stderr');
 		}
 		if (fs.existsSync(info.errorExpect)) {
-			var errorExpect = xm.file.readJSONSync(info.errorExpect);
+			var errorExpect = fileIO.readJSONSync(info.errorExpect);
 			assert.jsonOf(result.error, errorExpect, 'result.error');
 		}
 	}
@@ -117,7 +122,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
-				return xm.runCLI(info.modBuildCLI, args, debug).then((result:xm.RunCLIResult) => {
+				return xm.runCLI(info.modBuildCLI, args, debug).then((result: xm.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
@@ -140,7 +145,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 
-				return xm.runCLI(info.modBuildCLI, args, debug).then((result:xm.RunCLIResult) => {
+				return xm.runCLI(info.modBuildCLI, args, debug).then((result: xm.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 

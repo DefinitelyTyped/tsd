@@ -1,19 +1,26 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-/// <reference path="../../../../src/tsd/context/Config.ts" />
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
+
+import tsdHelper = require('../../test/tsdHelper');
+import Config = require('../../tsd/context/Config');
+import testConfig = require('../../test/tsd/Config');
 
 describe('Config', () => {
 	'use strict';
 
-	var fs = require('fs');
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
-	var config:tsd.Config;
+	var config: Config;
 
 	beforeEach(() => {
-		config = new tsd.Config(helper.getConfigSchema());
+		config = new Config(tsdHelper.getConfigSchema());
 		config.log.enabled = false;
 	});
 	afterEach(() => {
@@ -23,6 +30,7 @@ describe('Config', () => {
 	it('is instance', () => {
 		assert.isObject(config);
 	});
+
 	describe('schema-validate own toJSON()', () => {
 		it('return null on bad ref', () => {
 			config.ref = '$$$$$';
@@ -64,7 +72,7 @@ describe('Config', () => {
 					var json = fileIO.readJSONSync('./test/fixtures/config/' + name + '.json');
 
 					config.parseJSON(json, name);
-					helper.assertConfig(config, json, name);
+					testConfig.assertion(config, json, name);
 				});
 			});
 		});
@@ -84,7 +92,7 @@ describe('Config', () => {
 				it('rejects "' + tuple[0] + '"', () => {
 					assert.lengthOf(tuple, 2, 'tuple');
 
-					var json = xm.file.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
+					var json = fileIO.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
 					assert.throws(() => {
 						// xm.log(json);
 						config.parseJSON(json, (<string>tuple[0]), false);

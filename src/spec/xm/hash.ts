@@ -115,7 +115,7 @@ describe('hash', () => {
 
 		/* tslint:disable:max-line-length */
 
-		function assertHashNormalines(label:string, values:string[], match:boolean = true) {
+		function assertHashNormalines(label: string, values: string[], match: boolean = true) {
 			var len = values.length;
 			for (var i = 0; i < len; i++) {
 				var valueA = values[i];

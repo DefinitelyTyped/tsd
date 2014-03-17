@@ -1,27 +1,38 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../tsdHelper.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-/// <reference path="../../../../src/tsd/context/Context.ts" />
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../xm/file/fileIO');
+import PackageJSON = require('../../xm/data/PackageJSON');
+import helper = require('../../test/helper');
+
+import tsdHelper = require('../../test/tsdHelper');
+import Paths = require('../../tsd/context/Paths');
+import Context = require('../../tsd/context/Context');
+import Config = require('../../tsd/context/Config');
+
+import testConfig = require('../../test/tsd/Config');
 
 describe('Context', () => {
 	'use strict';
 
-	var fs = require('fs');
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
-
 	describe('Paths', () => {
 		it('is defined as function', () => {
-			assert.isFunction(tsd.Paths);
+			assert.isFunction(Paths);
 		});
 		// more in Context
 	});
 
 	describe('Context', () => {
-		var ctx:tsd.Context;
+		var ctx: Context;
 
 		beforeEach(() => {
-			ctx = new tsd.Context();
+			ctx = new Context();
 		});
 		afterEach(() => {
 			ctx = null;
@@ -33,7 +44,7 @@ describe('Context', () => {
 
 		it('exports packageInfo', () => {
 			assert.isObject(ctx.packageInfo, 'packageInfo');
-			assert.instanceOf(ctx.packageInfo, xm.PackageJSON, 'config');
+			assert.instanceOf(ctx.packageInfo, PackageJSON, 'config');
 			assert.isString(ctx.packageInfo.name, 'name');
 			assert.isString(ctx.packageInfo.version, 'version');
 			assert.isObject(ctx.packageInfo.raw, 'pkg');
@@ -50,7 +61,7 @@ describe('Context', () => {
 		});
 		it('exports config', () => {
 			assert.isObject(ctx.config, 'config');
-			assert.instanceOf(ctx.config, tsd.Config, 'config');
+			assert.instanceOf(ctx.config, Config, 'config');
 			assert.isString(ctx.config.path, 'path');
 			assert.isString(ctx.config.version, 'version');
 			assert.isString(ctx.config.repo, 'repo');
@@ -59,7 +70,7 @@ describe('Context', () => {
 		});
 		it('has valid default', () => {
 			var json = fileIO.readJSONSync('./test/fixtures/config/default.json');
-			helper.assertConfig(ctx.config, json, 'default');
+			testConfig.assertion(ctx.config, json, 'default');
 		});
 	});
 });

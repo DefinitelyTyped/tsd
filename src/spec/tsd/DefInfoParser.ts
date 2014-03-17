@@ -1,26 +1,35 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../tsdHelper.ts" />
-/// <reference path="../../../../src/xm/file/file.ts" />
-/// <reference path="../helper/HeaderHelper.ts" />
+/// <reference path="../../_ref.d.ts" />
 
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../xm/file/fileIO');
+import DefInfo = require('../../tsd/data/DefInfo');
+import DefInfoParser = require('../../tsd/support/DefInfoParser');
+
+import helper = require('../../test/helper');
+import headerHelper = require('../../test/tsd/headerHelper');
+import HeaderAssert = headerHelper.HeaderAssert;
 
 describe('DefInfoParser', () => {
 	'use strict';
 
-	var fs = require('fs');
-	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
+	var fixtureDir = helper.getDirNameFixtures();
 
-	var data:helper.HeaderAssert[];
-	var filter:string[]; // = ['async', 'expect.js'];
+	var data: HeaderAssert[];
+	var filter: string[]; // = ['async', 'expect.js'];
 
-	before((done:(err?) => void) => {
+	before((done: (err?) => void) => {
 		// use old tsd-deftools loader
-		helper.loadHeaderFixtures(path.resolve(__dirname, '..', 'fixtures', 'headers')).done((res:helper.HeaderAssert[]) => {
+		headerHelper.loadrFixtures(path.resolve(fixtureDir, 'headers')).done((res: HeaderAssert[]) => {
 			assert.operator(res.length, '>', 0);
 			data = res;
 			if (filter) {
-				data = data.filter((value:helper.HeaderAssert) => {
+				data = data.filter((value: HeaderAssert) => {
 					return filter.indexOf(value.name) > -1;
 				});
 			}
@@ -42,23 +51,23 @@ describe('DefInfoParser', () => {
 			var actuals = [];
 			var expecteds = [];
 
-			function testProp(item:helper.HeaderAssert, actual:Object, expected:Object, data:Object, parsed:Object, prop:string):void {
+			function testProp(item: HeaderAssert, actual: Object, expected: Object, data: Object, parsed: Object, prop: string): void {
 				actual[prop] = parsed[prop];
 				expected[prop] = data[prop];
 			}
 
-			data.forEach((item:helper.HeaderAssert) => {
+			data.forEach((item: HeaderAssert) => {
 				assert.ok(item, item.key + ' ok');
 
-				var actual:any = {
-					key:item.key
+				var actual: any = {
+					key: item.key
 				};
-				var expected:any = {
-					key:item.key
+				var expected: any = {
+					key: item.key
 				};
 
-				var data = new tsd.DefInfo();
-				var parser = new tsd.DefInfoParser(false);
+				var data = new DefInfo();
+				var parser = new DefInfoParser(false);
 				parser.parse(data, item.header);
 
 				var parsed = item.fields.parsed;
@@ -66,7 +75,7 @@ describe('DefInfoParser', () => {
 				assert.ok(parsed, item.key + ' parsed (test fixture)');
 
 				if (item.fields.fields) {
-					item.fields.fields.forEach((field:string) => {
+					item.fields.fields.forEach((field: string) => {
 						testProp(item, actual, expected, data, parsed, field);
 					});
 				}
@@ -83,8 +92,6 @@ describe('DefInfoParser', () => {
 				actuals.push(actual);
 				expecteds.push(expected);
 			});
-
-
 
 
 			assert.deepEqual(actuals, expecteds);

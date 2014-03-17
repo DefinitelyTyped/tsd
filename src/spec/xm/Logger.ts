@@ -18,7 +18,7 @@ import log = require('../../xm/log');
 
 describe('Logger', () => {
 
-	var testPath = path.resolve('test', 'modules', 'xm');
+	var testPath = path.resolve('test', 'spec', 'xm');
 
 	function assertLoggerShape(log: Logger) {
 		assert.isFunction(log, 'log');

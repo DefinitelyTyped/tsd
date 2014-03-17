@@ -28,7 +28,7 @@ describe('StyledOut', () => {
 		'foo': 'foo'
 	};
 
-	var testPath = path.resolve('test', 'modules', 'xm');
+	var testPath = path.resolve('test', 'spec', 'xm');
 
 	function getOutput(call: (output: StyledOut) => StyledOut): string {
 		var write = miniwrite.buffer();

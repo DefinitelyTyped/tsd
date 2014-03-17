@@ -1,26 +1,33 @@
-/// <reference path="../../../globals.ts" />
-/// <reference path="../../../tsdHelper.ts" />
-/// <reference path="../../../../src/tsd/logic/Core.ts" />
-/// <reference path="../../../../src/tsd/select/Query.ts" />
+/// <reference path="../../_ref.d.ts" />
+
+import fs = require('graceful-fs');
+import path = require('path');
+import Promise = require('bluebird');
+
+import chai = require('chai');
+import assert = chai.assert;
+
+import fileIO = require('../../xm/file/fileIO');
+import helper = require('../../test/helper');
 
 describe('Core', () => {
 	'use strict';
 
-	var fs = require('fs');
+	var fs = require('graceful-fs');
 	var path = require('path');
-	var assert:Chai.Assert = require('chai').assert;
+	var assert: Chai.Assert = require('chai').assert;
 
-	var core:tsd.Core;
-	var context:tsd.Context;
+	var core: tsd.Core;
+	var context: tsd.Context;
 
-	function getCore(context:tsd.Context):tsd.Core {
+	function getCore(context: tsd.Context): tsd.Core {
 		var core = new tsd.Core(context);
 
 		helper.applyCoreUpdate(core);
 		return core;
 	}
 
-	function testConfig(path:string):Promise<void> {
+	function testConfig(path: string): Promise<void> {
 		context.paths.configFile = path;
 		var source = fileIO.readJSONSync(path);
 
@@ -30,7 +37,7 @@ describe('Core', () => {
 		});
 	}
 
-	function testInvalidConfig(path:string, exp:RegExp):Promise<void> {
+	function testInvalidConfig(path: string, exp: RegExp): Promise<void> {
 		context.paths.configFile = path;
 		core = getCore(context);
 		return assert.isRejected(core.config.readConfig(false), exp);
@@ -107,7 +114,7 @@ describe('Core', () => {
 				return core.config.saveConfig();
 			}).then(() => {
 				assert.notIsEmptyFile(context.paths.configFile);
-				return xm.file.readJSONPromise(context.paths.configFile);
+				return fileIO.readJSONPromise(context.paths.configFile);
 			}).then((json) => {
 				assert.like(json, changed, 'saved data json');
 				assert.jsonSchema(json, helper.getConfigSchema(), 'saved valid json');
@@ -121,7 +128,7 @@ describe('Core', () => {
 			core = getCore(context);
 			// core.verbose = true;
 
-			return core.index.getIndex().then((index:tsd.DefIndex) => {
+			return core.index.getIndex().then((index: tsd.DefIndex) => {
 				assert.isTrue(index.hasIndex(), 'index.hasIndex');
 				assert.operator(index.list.length, '>', 200, 'index.list');
 				// xm.log(index.toDump());

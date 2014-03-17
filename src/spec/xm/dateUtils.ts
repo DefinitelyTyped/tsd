@@ -31,7 +31,7 @@ describe('dateUtils', () => {
 				'2000-10-10 10:00',
 				'2010-10-20 10:00'
 			]
-		].forEach((pair:string[]) => {
+		].forEach((pair: string[]) => {
 			it(pair[0] + ' vs ' + pair[1], () => {
 				var before = new Date(pair[0]);
 				var after = new Date(pair[1]);

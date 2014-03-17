@@ -28,7 +28,7 @@ export function assertion(config: Config, values: any, message: string) {
 
 	var json = config.toJSON();
 
-	assert.jsonSchema(json, helper.getConfigSchema(), message + ': schema');
+	assert.jsonSchema(json, tsdHelper.getConfigSchema(), message + ': schema');
 	helper.propStrictEqual(json, values, 'path', message + ': json');
 	helper.propStrictEqual(json, values, 'version', message + ': json');
 	helper.propStrictEqual(json, values, 'repo', message + ': json');

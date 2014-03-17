@@ -9,7 +9,7 @@ import PackageJSON = require('../../xm/data/PackageJSON');
 describe('PackageJSON', () => {
 	'use strict';
 
-	var info:PackageJSON;
+	var info: PackageJSON;
 	it('is defined as function', () => {
 		assert.isFunction(PackageJSON);
 	});
