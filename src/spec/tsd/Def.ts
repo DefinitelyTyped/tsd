@@ -16,7 +16,7 @@ import Def = require('../../tsd/data/Def');
 describe('Def', () => {
 	'use strict';
 	
-	var fixtureDir = helper.getDirNameFixtures();
+	var fixtures = helper.getDirNameFixtures();
 
 	function assertIsDef(path: string, expectMatch: boolean = true) {
 		assert.isString(path, 'path');
@@ -56,7 +56,7 @@ describe('Def', () => {
 	});
 
 	describe('isDef', () => {
-		var data: any = fileIO.readJSONSync(path.resolve(fixtureDir, 'is-path.json'));
+		var data: any = fileIO.readJSONSync(path.resolve(fixtures, 'is-path.json'));
 		after(() => {
 			data = null;
 		});
@@ -73,7 +73,7 @@ describe('Def', () => {
 	});
 
 	describe('getFrom', () => {
-		var data: any = fileIO.readJSONSync(path.resolve(fixtureDir, 'parse-path.json'));
+		var data: any = fileIO.readJSONSync(path.resolve(fixtures, 'parse-path.json'));
 		after(() => {
 			data = null;
 		});
@@ -90,7 +90,7 @@ describe('Def', () => {
 	});
 
 	describe('getFrom trimmed', () => {
-		var data: any = fileIO.readJSONSync(path.resolve(fixtureDir, 'parse-path-trim.json'));
+		var data: any = fileIO.readJSONSync(path.resolve(fixtures, 'parse-path-trim.json'));
 		after(() => {
 			data = null;
 		});

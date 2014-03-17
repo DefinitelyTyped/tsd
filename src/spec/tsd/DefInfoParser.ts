@@ -18,14 +18,14 @@ import HeaderAssert = headerHelper.HeaderAssert;
 describe('DefInfoParser', () => {
 	'use strict';
 
-	var fixtureDir = helper.getDirNameFixtures();
+	var fixtures = helper.getDirNameFixtures();
 
 	var data: HeaderAssert[];
 	var filter: string[]; // = ['async', 'expect.js'];
 
 	before((done: (err?) => void) => {
 		// use old tsd-deftools loader
-		headerHelper.loadrFixtures(path.resolve(fixtureDir, 'headers')).done((res: HeaderAssert[]) => {
+		headerHelper.loadrFixtures(path.resolve(fixtures, 'headers')).done((res: HeaderAssert[]) => {
 			assert.operator(res.length, '>', 0);
 			data = res;
 			if (filter) {

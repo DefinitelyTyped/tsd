@@ -9,6 +9,21 @@ import assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');
+import TestInfo = require('../../test/TestInfo');
+import testInstallResult = require('../../test/tsd/InstallResult');;
+import testSelection = require('../../test/tsd/Selection');;
+
+import tsdHelper = require('../../test/tsdHelper')
+import Context = require('../../tsd/context/Context');
+import Core = require('../../tsd/logic/Core');
+import Query = require('../../tsd/select/Query');
+import InstallResult = require('../../tsd/logic/InstallResult');
+import Selection = require('../../tsd/select/Selection');
+import API = require('../../tsd/API');
+import Options = require('../../tsd/Options');
+import DefUtil = require('../../tsd/util/DefUtil');
+
+import log = require('../../xm/log');
 
 describe('API', () => {
 	'use strict';
@@ -16,8 +31,8 @@ describe('API', () => {
 	var writeJSONSync = fileIO.writeJSONSync;
 	var readJSONSync = fileIO.readJSONSync;
 
-	var api: tsd.API;
-	var context: tsd.Context;
+	var api: API;
+	var context: Context;
 
 	before(() => {
 	});
@@ -36,23 +51,23 @@ describe('API', () => {
 	});
 
 	it('should be defined', () => {
-		assert.isFunction(tsd.API, 'constructor');
+		assert.isFunction(API, 'constructor');
 	});
 
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new tsd.API(null);
+			api = new API(null);
 		});
 	});
 
-	function getAPI(context: tsd.Context): tsd.API {
-		var api = new tsd.API(context);
+	function getAPI(context: Context): API {
+		var api = new API(context);
 		helper.applyCoreUpdate(api.core);
 		return api;
 	}
 
-	function applyTestInfo(group: string, name: string, test: any, query: tsd.Query, opt: tsd.Options): helper.TestInfo {
-		var tmp = new helper.TestInfo(group, name, test, true);
+	function applyTestInfo(group: string, name: string, test: any, query: Query, opt: Options): TestInfo {
+		var tmp = new TestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
 
@@ -65,24 +80,23 @@ describe('API', () => {
 		return tmp;
 	}
 
-	function getQuery(test: any): tsd.Query {
+	function getQuery(test: any): Query {
 		assert.property(test, 'query');
 
-		var query = new tsd.Query(test.query.pattern);
+		var query = new Query(test.query.pattern);
 
 		return query;
 	}
 
-	function getOptions(test: any): tsd.Options {
-		var opts = new tsd.Options();
+	function getOptions(test: any): Options {
+		var opts = new Options();
 		opts.saveToConfig = test.save;
 		opts.overwriteFiles = test.overwrite;
 		opts.resolveDependencies = test.resolve;
-
 		return opts;
 	}
 
-	function setupCase(api: tsd.API, name: string, test: any, info: helper.TestInfo): Promise<any> {
+	function setupCase(api: API, name: string, test: any, info: TestInfo): Promise<any> {
 		if (test.modify) {
 			var before = test.modify.before;
 
@@ -91,10 +105,10 @@ describe('API', () => {
 					var query = getQuery(before);
 					var opts = getOptions(before);
 					if (test.debug) {
-						xm.log.debug('skip modify query of ' + name);
+						log.debug('skip modify query of ' + name);
 					}
-					return api.select(query, opts).then((selection: tsd.Selection) => {
-						return api.install(selection, opts).then((result: tsd.InstallResult) => {
+					return api.select(query, opts).then((selection: Selection) => {
+						return api.install(selection, opts).then((result: InstallResult) => {
 
 						});
 					});
@@ -105,10 +119,11 @@ describe('API', () => {
 			};
 			var runModifyContent = function (): Promise<any> {
 				if (before.content) {
-					xm.eachProp(before.content, (value: string, dest: string) => {
+					Object.keys(before.content).forEach((dest: string) => {
+						var value: string = before.content[dest];
 						var destFull = path.join(info.typingsDir, dest);
 						if (test.debug) {
-							xm.log.debug('setting content of ' + name + ' in ' + dest);
+							log.debug('setting content of ' + name + ' in ' + dest);
 						}
 						fileIO.writeFileSync(destFull, value);
 					});
@@ -124,7 +139,8 @@ describe('API', () => {
 	describe('search', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'search'));
 
-		xm.eachProp(data.tests, (test, name: string) => {
+		Object.keys(data.tests).forEach((name: string) => {
+			var test = data.tests[name];
 			if (test.skip) {
 				return;
 			}
@@ -137,13 +153,13 @@ describe('API', () => {
 				var info = applyTestInfo('search', name, test, query, opts);
 
 				return setupCase(api, test, name, info).then(() => {
-					return api.select(query).then((selection: tsd.Selection) => {
-						assert.instanceOf(selection, tsd.Selection, 'selection');
+					return api.select(query).then((selection: Selection) => {
+						assert.instanceOf(selection, Selection, 'selection');
 
-						fileIO.writeJSONSync(info.resultFile, helper.serialiseSelection(selection, 2));
+						fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 2));
 
 						var resultExpect = fileIO.readJSONSync(info.resultExpect);
-						helper.assertSelection(selection, resultExpect, 'result');
+						testSelection.assertion(selection, resultExpect, 'result');
 					});
 				});
 			});
@@ -153,8 +169,9 @@ describe('API', () => {
 	describe('install', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'install'));
 
-		xm.eachProp(data.tests, (test, name: string) => {
-			if (data.skip) {
+		Object.keys(data.tests).forEach((name: string) => {
+			var test = data.tests[name];
+			if (test.skip) {
 				return;
 			}
 
@@ -166,14 +183,14 @@ describe('API', () => {
 				var info = applyTestInfo('install', name, test, query, opts);
 
 				return setupCase(api, name, test, info).then(() => {
-					return api.select(query, opts).then((selection: tsd.Selection) => {
-						return api.install(selection, opts).then((result: tsd.InstallResult) => {
-							assert.instanceOf(result, tsd.InstallResult, 'result');
+					return api.select(query, opts).then((selection: Selection) => {
+						return api.install(selection, opts).then((result: InstallResult) => {
+							assert.instanceOf(result, InstallResult, 'result');
 
-							fileIO.writeJSONSync(info.resultFile, helper.serialiseInstallResult(result, 2));
+							fileIO.writeJSONSync(info.resultFile, testInstallResult.serialise(result, 2));
 
 							var resultExpect = fileIO.readJSONSync(info.resultExpect);
-							helper.assertInstallResult(result, resultExpect, 'result');
+							testInstallResult.assertion(result, resultExpect, 'result');
 
 							var configExpect = fileIO.readJSONSync(info.configExpect);
 							var configActual = fileIO.readJSONSync(info.configFile);
@@ -181,16 +198,16 @@ describe('API', () => {
 							assert.deepEqual(configActual, configExpect, 'configActual');
 							helper.assertConfig(api.context.config, configExpect, 'api.context.config');
 
-							xm.log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
+							log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
 
-							return helper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing').then(() => {
+							return tsdHelper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing').then(() => {
 
 								// extra check (partially covered by combinations of previous)
 
-								return helper.listDefPaths(info.typingsDir).then((typings: string[]) => {
+								return tsdHelper.listDefPaths(info.typingsDir).then((typings: string[]) => {
 									assert.includeMembers(typings, context.config.getInstalledPaths(), 'saved installed file');
 									if (test.modify && test.modify.written) {
-										var writenPaths = tsd.DefUtil.getPathsOf(xm.valuesOf(result.written));
+										var writenPaths = DefUtil.getPathsOf(valuesOf(result.written));
 										assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
 									}
 								});

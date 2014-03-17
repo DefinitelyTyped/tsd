@@ -14,7 +14,7 @@ import helper = require('../../test/helper');
 import tsdHelper = require('../../test/tsdHelper');
 import Bundle = require('../../tsd/support/Bundle');
 
-describe.only('Bundle', () => {
+describe('Bundle', () => {
 	'use strict';
 
 	var fixtures = path.join(helper.getDirNameFixtures(), 'bundle');

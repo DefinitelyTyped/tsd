@@ -95,7 +95,7 @@ export function readFileSync(dest: string, encoding: string = 'utf8') {
 // lazy wrapper as alternative to writeJSONSync
 export function writeFileSync(dest: string, data: any, encoding: string = 'utf8') {
 	dest = path.resolve(dest);
-	mkdirCheckSync(path.dirname(dest));
+	mkdirCheckSync(path.dirname(dest), true);
 	fs.writeFileSync(dest, data, {encoding: encoding});
 }
 

@@ -8,36 +8,40 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
-import helper = require('../../test/helper');
+import helper = require('../../test/helper')
+import testConfig = require('../../test/tsd/Config')
+
+import tsdHelper = require('../../test/tsdHelper')
+import Context = require('../../tsd/context/Context');
+import Core = require('../../tsd/logic/Core');
+import DefIndex = require('../../tsd/data/DefIndex');
 
 describe('Core', () => {
 	'use strict';
 
-	var fs = require('graceful-fs');
-	var path = require('path');
-	var assert: Chai.Assert = require('chai').assert;
+	var fixtures = helper.getDirNameFixtures();
+	var tmp = helper.getDirNameTmp();
 
-	var core: tsd.Core;
-	var context: tsd.Context;
+	var core: Core;
+	var context: Context;
 
-	function getCore(context: tsd.Context): tsd.Core {
-		var core = new tsd.Core(context);
-
-		helper.applyCoreUpdate(core);
+	function getCore(context: Context): Core {
+		var core = new Core(context);
+		tsdHelper.applyCoreUpdate(core);
 		return core;
 	}
 
-	function testConfig(path: string): Promise<void> {
+	function assertConfig(path: string): Promise<void> {
 		context.paths.configFile = path;
 		var source = fileIO.readJSONSync(path);
 
 		core = getCore(context);
 		return core.config.readConfig(false).then(() => {
-			helper.assertConfig(core.context.config, source, 'source data');
+			testConfig.assertion(core.context.config, source, 'source data');
 		});
 	}
 
-	function testInvalidConfig(path: string, exp: RegExp): Promise<void> {
+	function assertInvalidConfig(path: string, exp: RegExp): Promise<void> {
 		context.paths.configFile = path;
 		core = getCore(context);
 		return assert.isRejected(core.config.readConfig(false), exp);
@@ -46,8 +50,9 @@ describe('Core', () => {
 	before(() => {
 	});
 	beforeEach(() => {
-		context = helper.getContext();
+		context = tsdHelper.getContext();
 		context.config.log.enabled = false;
+		// TODO risky?
 		context.paths.configFile = './test/fixtures/config/default.json';
 	});
 	afterEach(() => {
@@ -56,7 +61,7 @@ describe('Core', () => {
 	});
 
 	it('should be defined', () => {
-		assert.isFunction(tsd.Core, 'constructor');
+		assert.isFunction(Core, 'constructor');
 	});
 	it('should throw on bad params', () => {
 		assert.throws(() => {
@@ -67,21 +72,21 @@ describe('Core', () => {
 	describe('readConfig', () => {
 		// TODO use the actual default
 		it('should load default config data', () => {
-			return testConfig('./test/fixtures/config/default.json');
+			return assertConfig('./test/fixtures/config/default.json');
 		});
 		it('should load minimal config data', () => {
-			return testConfig('./test/fixtures/config/valid-minimal.json');
+			return assertConfig('./test/fixtures/config/valid-minimal.json');
 		});
 
 		it('should fail on missing required data', () => {
-			return testInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file:/);
+			return assertInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file:/);
 		});
 		it('should fail on bad version value', () => {
-			return testInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config:/);
+			return assertInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config:/);
 		});
 
 		it('should pass on missing optional data', () => {
-			context.paths.configFile = './non-existing_____/tsd.json';
+			context.paths.configFile = './non-existing_____/json';
 			core = getCore(context);
 			return assert.isFulfilled(core.config.readConfig(true));
 		});
@@ -89,23 +94,23 @@ describe('Core', () => {
 	describe('saveConfig', () => {
 		it('should save modified data', () => {
 			// copy temp for saving
-			var saveFile = path.resolve(__dirname, 'save-config.json');
-			fs.writeFileSync(saveFile, fs.readFileSync('./test/fixtures/config/valid.json', {encoding: 'utf8'}), {encoding: 'utf8'});
+			var saveFile = path.resolve(tmp, 'save-config.json');
+			fileIO.writeFileSync(saveFile, fileIO.readFileSync('./test/fixtures/config/valid.json'));
 			context.paths.configFile = saveFile;
 
 			core = getCore(context);
 			// core.verbose = true;
 
 			// modify test data
-			var source = xfileIO.eadJSONSync(saveFile);
-			var changed = xmfileIO.adJSONSync(saveFile);
+			var source = fileIO.readJSONSync(saveFile);
+			var changed = fileIO.readJSONSync(saveFile);
 
 			changed.path = 'some/other/path';
 			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
 			delete changed.installed['async/async.d.ts'];
 
 			return core.config.readConfig(false).then(() => {
-				helper.assertConfig(core.context.config, source, 'core.context.config');
+				testConfig.assertion(core.context.config, source, 'core.context.config');
 
 				// modify data
 				core.context.config.path = 'some/other/path';
@@ -114,10 +119,9 @@ describe('Core', () => {
 				return core.config.saveConfig();
 			}).then(() => {
 				assert.notIsEmptyFile(context.paths.configFile);
-				return fileIO.readJSONPromise(context.paths.configFile);
-			}).then((json) => {
+				var json = fileIO.readJSONSync(context.paths.configFile);
 				assert.like(json, changed, 'saved data json');
-				assert.jsonSchema(json, helper.getConfigSchema(), 'saved valid json');
+				assert.jsonSchema(json, tsdHelper.getConfigSchema(), 'saved valid json');
 				return null;
 			});
 		});
@@ -128,7 +132,7 @@ describe('Core', () => {
 			core = getCore(context);
 			// core.verbose = true;
 
-			return core.index.getIndex().then((index: tsd.DefIndex) => {
+			return core.index.getIndex().then((index: DefIndex) => {
 				assert.isTrue(index.hasIndex(), 'index.hasIndex');
 				assert.operator(index.list.length, '>', 200, 'index.list');
 				// xm.log(index.toDump());

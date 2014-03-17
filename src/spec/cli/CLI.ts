@@ -7,24 +7,31 @@ import Promise = require('bluebird');
 import chai = require('chai');
 import assert = chai.assert;
 
+import CacheMode = require('../../xm/http/CacheMode');
 import fileIO = require('../../xm/file/fileIO');
+import cp = require('../../xm/lib/childProcess');
+import RunCLIResult = cp.RunCLIResult;
+import runCLI = cp.runCLI;
+
 import helper = require('../../test/helper');
+import settings = require('../../test/settings');
+import TestInfo = require('../../test/TestInfo');
 
 describe('CLI Query', () => {
 	'use strict';
 
-	function applyTestInfo(group: string, name: string, test: any, createConfigFile: boolean = false): helper.TestInfo {
-		var info = new helper.TestInfo(group, name, test, createConfigFile);
+	function applyTestInfo(group: string, name: string, test: any, createConfigFile: boolean = false): TestInfo {
+		var info = new TestInfo(group, name, test, createConfigFile);
 
 		fileIO.writeJSONSync(info.testDump, test);
 
 		return info;
 	}
 
-	function getArgs(test, data, info: helper.TestInfo): string[] {
+	function getArgs(test, data, info: TestInfo): string[] {
 		assert.isObject(test, 'test');
 		assert.isObject(data, 'data');
-		assert.instanceOf(info, helper.TestInfo, 'info');
+		assert.instanceOf(info, TestInfo, 'info');
 
 		var args: string[] = [];
 
@@ -61,13 +68,13 @@ describe('CLI Query', () => {
 
 		args.push('--progress', 'no');
 		args.push('--services', 'no');
-		args.push('--cacheMode', xm.http.CacheMode[helper.settings.cache]);
+		args.push('--cacheMode', CacheMode[settings.cache]);
 
 		args.push('--cacheDir', info.cacheDirTestFixed);
 		args.push('--config', path.resolve('./test/fixtures/config/default.json'));
 
 		// TODO also write a .bat/.cmd and a shell script; with absolute paths etc (for lazy re-run)
-		xfileIO.riteJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
+		fileIO.writeJSONSync(info.argsDump, {list: args, flat: args.join(' ')});
 
 		return args;
 	}
@@ -78,7 +85,7 @@ describe('CLI Query', () => {
 		return str.replace(trimHeaderExp, '');
 	}
 
-	function assertCLIResult(result: xm.RunCLIResult, test, info: helper.TestInfo, args): void {
+	function assertCLIResult(result: RunCLIResult, test, info: TestInfo, args): void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
@@ -91,7 +98,7 @@ describe('CLI Query', () => {
 			fs.writeFileSync(info.stderrFile, stderr, 'utf8');
 		}
 		if (result.error) {
-			xmfileIO.iteJSONSync(info.errorFile, result.error);
+			fileIO.writeJSONSync(info.errorFile, result.error);
 		}
 
 		var stdoutExpect = fs.readFileSync(info.stdoutExpect, 'utf8');
@@ -112,7 +119,8 @@ describe('CLI Query', () => {
 	describe('help', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'help'));
 
-		xm.eachProp(data.tests, (test, name) => {
+		Object.keys(data.tests).forEach((test, name) => {
+			var test[name] = data.tests;
 			var debug = test.debug;
 			if (test.skip) {
 				return;
@@ -122,7 +130,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
-				return xm.runCLI(info.modBuildCLI, args, debug).then((result: xm.RunCLIResult) => {
+				return runCLI(info.modBuildCLI, args, debug).then((result: RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
@@ -135,7 +143,8 @@ describe('CLI Query', () => {
 	describe('query', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'query'));
 
-		xm.eachProp(data.tests, (test, name) => {
+		Object.keys(data.tests).forEach((test, name) => {
+			var test[name] = data.tests;
 			var debug = test.debug;
 			if (test.skip) {
 				return;
@@ -145,7 +154,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 
-				return xm.runCLI(info.modBuildCLI, args, debug).then((result: xm.RunCLIResult) => {
+				return runCLI(info.modBuildCLI, args, debug).then((result: RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 

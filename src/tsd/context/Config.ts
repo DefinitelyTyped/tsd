@@ -197,7 +197,8 @@ class Config implements GithubRepoConfig {
 		this.stats = (typeOf.isBoolean(json.stats) ? json.stats : Const.statsDefault);
 
 		if (json.installed) {
-			json.installed.forEach((data: any, filePath: string) => {
+			Object.keys(json.installed).forEach((filePath: string) => {
+				var data = json.installed[filePath];
 				var installed = new InstalledDef(filePath);
 				// TODO validate some more
 				installed.commitSha = data.commit;
