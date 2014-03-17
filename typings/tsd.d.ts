@@ -29,7 +29,8 @@
 /// <reference path="universal-analytics/universal-analytics.d.ts" />
 
 /// <reference path="open/open.d.ts" />
-// / <reference path="bufferstream/bufferstream.d.ts" />
+/// <reference path="buffer-equal/buffer-equal.d.ts" />
+//  / <reference path="bufferstream/bufferstream.d.ts" />
 /// <reference path="event-stream/event-stream.d.ts" />
 /// <reference path="source-map-support/source-map-support.d.ts" />
 

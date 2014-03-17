@@ -1,4 +1,4 @@
-/// <reference path="./_ref.d.ts" />
+/// <reference path="_ref.d.ts" />
 
 import Promise = require('bluebird');
 /*
@@ -31,3 +31,7 @@ process.setMaxListeners(20);
 
 // dont use import
 require('es6-shim');
+
+export function noop() {
+
+}

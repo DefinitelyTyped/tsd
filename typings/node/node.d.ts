@@ -840,10 +840,10 @@ declare module "fs" {
     export function open(path: string, flags: string, mode: string, callback?: (err: ErrnoException, fd: number) => any): void;
     export function openSync(path: string, flags: string, mode?: number): number;
     export function openSync(path: string, flags: string, mode?: string): number;
-    export function utimes(path: string, atime: number, mtime: number, callback?: (err?: ErrnoException) => void): void;
-    export function utimesSync(path: string, atime: number, mtime: number): void;
-    export function futimes(fd: number, atime: number, mtime: number, callback?: (err?: ErrnoException) => void): void;
-    export function futimesSync(fd: number, atime: number, mtime: number): void;
+    export function utimes(path: string, atime: Date, mtime: Date, callback?: (err?: ErrnoException) => void): void;
+    export function utimesSync(path: string, atime: Date, mtime: Date): void;
+    export function futimes(fd: number, atime: Date, mtime: Date, callback?: (err?: ErrnoException) => void): void;
+    export function futimesSync(fd: number, atime: Date, mtime: Date): void;
     export function fsync(fd: number, callback?: (err?: ErrnoException) => void): void;
     export function fsyncSync(fd: number): void;
     export function write(fd: number, buffer: NodeBuffer, offset: number, length: number, position: number, callback?: (err: ErrnoException, written: number, buffer: NodeBuffer) => void): void;

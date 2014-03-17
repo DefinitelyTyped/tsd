@@ -122,7 +122,7 @@ module.exports = function (grunt) {
 			},
 			integrity: ['test/integrity.js'],
 			// some extra js tests
-			specs: ['test/specs/*.js']
+			spec: ['test/spec/*.js']
 		},
 		mocha_unfunk: {
 			dev: {
@@ -140,29 +140,17 @@ module.exports = function (grunt) {
 				noImplicitAny: false
 			},
 			api: {
-				src: ['src/**/*.ts'],
+				src: ['src/**/*.ts', '!src/test/**/*.ts', '!src/spec/**/*.ts'],
 				outDir: 'build/'
 			},
-			xm: {
-				src: ['src/xm/**/*.ts'],
-				outDir: 'build/xm/'
-			},
-			git: {
-				src: ['src/git/**/*.ts'],
-				outDir: 'build/git/'
-			},
-			apiXX: {
-				src: ['src/api.ts'],
-				out: 'build/api.js'
-			},
-			blobSha: {
+			/*blobSha: {
 				src: ['src/util/blobSha.ts'],
 				out: 'util/blobSha.js'
-			},
-			capture_task: {
+			},*/
+			/*capture_task: {
 				src: ['tasks/capture_cli.ts'],
 				out: 'tasks/capture_cli.js'
-			},
+			},*/
 			//use this non-checked-in file to test small snippets of dev code
 			dev: {
 				src: ['src/dev.ts'],
@@ -207,22 +195,32 @@ module.exports = function (grunt) {
 
 	// module tester macro
 	gtx.define('moduleTest', function (macro, id) {
-		var testPath = 'test/modules/' + id + '/';
+		var srcPath = 'src/spec/' + id + '/';
 
-		macro.add('clean', [testPath + 'tmp/**/*']);
+		var basePath = 'test/spec/' + id + '/';
+		var tmpPath = basePath + 'tmp/';
+		var outPath = basePath + 'build/';
+
+		macro.add('clean', [tmpPath, outPath]);
 		macro.add('ts', {
-			options: {},
-			src: [testPath + 'src/**/*.ts'],
-			out: testPath + 'tmp/' + id + '.test.js'
+			options: {
+				module: 'commonjs',
+				target: 'es5',
+				declaration: false,
+				sourcemap: true,
+				noImplicitAny: false
+			},
+			src: [srcPath + '**/*.ts'],
+			outDir: outPath
 		});
 		macro.add('tslint', {
-			src: [testPath + 'src/**/*.ts']
+			src: [srcPath + '** /*.ts']
 		});
 		if (macro.getParam('http', 0) > 0) {
 			macro.add('connect', {
 				options: {
 					port: macro.getParam('http'),
-					base: testPath + 'www/'
+					base: basePath + 'www/'
 				}
 			});
 		}
@@ -231,7 +229,7 @@ module.exports = function (grunt) {
 			options: {
 				timeout: macro.getParam('timeout', 3000)
 			},
-			src: [testPath + 'tmp/**/*.test.js']
+			src: [outPath + 'spec/**/*.js']
 		});
 		macro.tag('module');
 
@@ -243,10 +241,10 @@ module.exports = function (grunt) {
 	var longTimer = (isVagrant ? 250000 : 7000);
 
 	// modules
-	gtx.create('xm', 'moduleTest', null, 'lib');
+	/* gtx.create('xm', 'moduleTest', null, 'lib');
 	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
-	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core');
+	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core'); */
 	gtx.create('http', 'moduleTest', {
 		timeout: longTimer,
 		http: 9090
@@ -289,7 +287,7 @@ module.exports = function (grunt) {
 		'build',
 		'tslint:helper',
 		'gtx-type:moduleTest',
-		'mochaTest:specs'
+		'mochaTest:spec'
 	]);
 	gtx.alias('default', [
 		'test'
@@ -308,7 +306,7 @@ module.exports = function (grunt) {
 	]);
 	gtx.alias('run', ['capture_demo']);
 
-	gtx.alias('specjs', ['mochaTest:specs']);
+	gtx.alias('specjs', ['mochaTest:spec']);
 
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');

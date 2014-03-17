@@ -3,13 +3,17 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="../assertion-error/assertion-error" />
-
 declare module Chai {
+	export class AssertionError implements Error {
+		constructor(message: string, _props?: any, ssf?: Function);
+		name: string;
+		message: string;
+		showDiff: boolean;
+		stack: string;
+	}
 	export function use(plugin: any): void;
 
 	export var Assertion: ChaiAssertion;
-	export var AssertionError: AssertionError;
 	export var assert: Assert;
 
 	export interface ChaiAssertion {

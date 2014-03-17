@@ -20,7 +20,7 @@ export interface IContentKoder<T> {
 	encode(value: T):Promise<NodeBuffer>;
 }
 
-export class StringKoder implements IContentKoder<string> {
+export class StringKoder {
 
 	constructor(public encoding = 'utf8') {
 
@@ -48,7 +48,7 @@ export class StringKoder implements IContentKoder<string> {
 }
 
 // this looks weird...
-export class ByteKoder implements IContentKoder<NodeBuffer> {
+export class ByteKoder {
 
 	decode(content: NodeBuffer): Promise<NodeBuffer> {
 		return Promise.attempt(() => {
@@ -74,7 +74,7 @@ export class ByteKoder implements IContentKoder<NodeBuffer> {
 /*
  JSONKoder - json koder with json-schema (validate bot in AND output)
  */
-export class JSONKoder<T> implements IContentKoder<T> {
+export class JSONKoder<T> {
 	schema: any;
 
 	constructor(schema?: Object) {

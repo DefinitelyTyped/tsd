@@ -1,22 +1,21 @@
-/// <reference path="../../../_ref.d.ts" />
+/// <reference path="../../_ref.d.ts" />
 
-import fs = require('fs');
+import fs = require('graceful-fs');
 import path = require('path');
 
 import Promise = require('bluebird');
 
 import chai = require('chai');
 import assert = chai.assert;
+import helper = require('../../test/helper');
 
-import fileIO = require('../../../../src/xm/file/fileIO');
+import fileIO = require('../../xm/file/fileIO');
 
-import HTTPCache = require('../../../../src/xm/http/HTTPCache');
-import CacheObject = require('../../../../src/xm/http/CacheObject');
-import CacheInfo = require('../../../../src/xm/http/CacheInfo');
-import CacheOpts = require('../../../../src/xm/http/CacheOpts');
-import CacheRequest = require('../../../../src/xm/http/CacheRequest');
-
-import helper = require('../../../src/helper');
+import HTTPCache = require('../../xm/http/HTTPCache');
+import CacheInfo = require('../../xm/http/CacheInfo');
+import CacheOpts = require('../../xm/http/CacheOpts');
+import CacheObject = require('../../xm/http/CacheObject');
+import CacheRequest = require('../../xm/http/CacheRequest');
 
 class HttpTest {
 	storeTmpDir: string;
@@ -25,11 +24,7 @@ class HttpTest {
 	wwwDir: string;
 }
 
-describe('xm.http', () => {
-
-	var assert: Chai.Assert = require('chai').assert;
-	var path = require('path');
-	var fs = require('fs');
+describe('HTTPCache', () => {
 
 	function getInfo(name: string): HttpTest {
 		assert.isString(name, 'name');
@@ -38,6 +33,9 @@ describe('xm.http', () => {
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
 		info.wwwHTTP = 'http://127.0.0.1:9090/';
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
+
+		console.log(info);
+
 		return info;
 	}
 
@@ -89,12 +87,13 @@ describe('xm.http', () => {
 		var src = path.join(test.wwwDir, 'lorem.txt');
 		var date = new Date();
 		var expected;
-		before(() => {
-			fs.utimesSync(src, date, date);
 
-			expected = fileIO.readFileSync(path.join(test.wwwDir, 'lorem.txt'), 'utf8');
+		before(() => {
+			expected = fileIO.readFileSync(src, 'utf8');
+			fs.utimesSync(src, date, date);
 		});
 		beforeEach(() => {
+
 		});
 
 		it('should get a file', () => {
