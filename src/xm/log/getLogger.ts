@@ -102,12 +102,12 @@ function getLogger(label?: string): Logger {
 
 	logger.inspect = function (value: any, label?: string, depth: number = 3) {
 		if (logger.enabled) {
-			logger.out.span('-> ').cond(typeof label !== 'undefined', label + ' ').inspect(value, depth);
+			logger.out.span('-> ').cond(typeof label !== 'undefined' && label !== '', label + ' ').inspect(value, depth);
 		}
 	};
 	logger.json = function (value: any, label?: string) {
 		if (logger.enabled) {
-			logger.out.span('-> ').cond(typeof label !== 'undefined', label + ' ').block(JSON.stringify(value, null, 3));
+			logger.out.span('-> ').cond(typeof label !== 'undefined' && label !== '', label + ' ').block(JSON.stringify(value, null, 3));
 		}
 	};
 

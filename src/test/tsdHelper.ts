@@ -51,7 +51,7 @@ export function applyCoreUpdate(core: Core) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function listDefPaths(dir: string): Promise<string[]> {
-	return fileIO.listTree(dir, (full: string, stat: NodeStats): boolean => {
+	return fileIO.listTree(dir,(full: string, stat: NodeStats): boolean => {
 		return (stat.isFile() && /\.d\.ts$/.test(full));
 
 	}).then((paths: string[]) => {

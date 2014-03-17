@@ -4,14 +4,14 @@ import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');
 
-import assertVar = require('../../xm/assertVar');
+import StatCounter = require('../../xm/lib/StatCounter');
 
 describe('StatCounter', () => {
 	'use strict';
-	var counter:StatCounter;
+	var counter: StatCounter;
 
 	beforeEach(() => {
-		counter = new StatCounter(null);
+		counter = new StatCounter();
 	});
 	afterEach(() => {
 		counter = null;

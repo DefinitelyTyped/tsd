@@ -4,15 +4,9 @@ import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');
 
-import assertVar = require('../../xm/assertVar');
-
-import helper = require('../../../helper');
-import typeOf = helper.typeOf;
-import assert = helper.assert;
+import typeOf = require('../../xm/typeOf');
 
 describe('typeOf', () => {
-	'use strict';
-
 
 	var func = function () {
 		// dummy
@@ -34,7 +28,7 @@ describe('typeOf', () => {
 		};
 	})();
 
-	describe('typeOf()', () => {
+	describe('typeOf.get()', () => {
 		for (var mainType in data) {
 			if (data.hasOwnProperty(mainType)) {
 
@@ -43,10 +37,10 @@ describe('typeOf', () => {
 						if (data.hasOwnProperty(checkType)) {
 							var checkData = data[checkType];
 							if (checkType === mainType) {
-								assert.strictEqual(typeOf(checkData[1]), mainType);
+								assert.strictEqual(typeOf.get(checkData[1]), mainType);
 							}
 							else {
-								assert.notStrictEqual(typeOf(checkData[1]), mainType);
+								assert.notStrictEqual(typeOf.get(checkData[1]), mainType);
 							}
 						}
 					}

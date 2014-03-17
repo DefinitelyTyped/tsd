@@ -5,6 +5,7 @@ import assert = chai.assert;
 import helper = require('../../test/helper');
 
 import hasher = require('../../xm/hash');
+import encode = require('../../xm/encode');
 
 describe('hash', () => {
 	describe('sha1()', () => {
@@ -87,7 +88,7 @@ describe('hash', () => {
 		it('should serialise Date, include millisecond level', () => {
 			var valueA = new Date();
 			var ori = hasher.jsonToIdent(valueA);
-			var alt =hasher. jsonToIdent(new Date(valueA.getTime()));
+			var alt = hasher.jsonToIdent(new Date(valueA.getTime()));
 			assert.strictEqual(ori, alt, 'identical values');
 			alt = hasher.jsonToIdent(new Date(valueA.getTime() + 2));
 			assert.notStrictEqual(ori, alt, 'milli second');
@@ -98,8 +99,8 @@ describe('hash', () => {
 		it('should return same hash for similar objects', () => {
 			var valueA = {a: 1, b: 2, c: 3};
 			var valueB = {b: 2, c: 3, a: 1};
-			var hashA = jsonToIdentHash(valueA, 16);
-			var hashB = jsonToIdentHash(valueB, 16);
+			var hashA = hasher.jsonToIdentHash(valueA, 16);
+			var hashB = hasher.jsonToIdentHash(valueB, 16);
 			var expected = 'e47fb2071f83fdce';
 			assert.lengthOf(hashA, 16, 'hashA');
 			assert.lengthOf(hashB, 16, 'hashA');
@@ -118,16 +119,16 @@ describe('hash', () => {
 			var len = values.length;
 			for (var i = 0; i < len; i++) {
 				var valueA = values[i];
-				var hashedA = hashNormalines(valueA);
+				var hashedA = hasher.hashNormalines(valueA);
 				for (var j = (match ? i : i + 1); j < len; j++) {
 					var valueB = values[j];
-					var hashedB = hashNormalines(valueB);
+					var hashedB = hasher.hashNormalines(valueB);
 
 					if (match) {
-						assert.strictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + wrapIfComplex(valueA) + ' vs ' + wrapIfComplex(valueB));
+						assert.strictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + encode.wrapIfComplex(valueA) + ' vs ' + encode.wrapIfComplex(valueB));
 					}
 					else {
-						assert.notStrictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + wrapIfComplex(valueA) + ' vs ' + wrapIfComplex(valueB));
+						assert.notStrictEqual(hashedA, hashedB, 'values: ' + label + ': (' + [i, j, len] + '): ' + encode.wrapIfComplex(valueA) + ' vs ' + encode.wrapIfComplex(valueB));
 					}
 				}
 			}

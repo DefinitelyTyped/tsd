@@ -241,8 +241,8 @@ module.exports = function (grunt) {
 	var longTimer = (isVagrant ? 250000 : 7000);
 
 	// modules
-	/* gtx.create('xm', 'moduleTest', null, 'lib');
-	gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
+	gtx.create('xm', 'moduleTest', null, 'lib');
+	/*gtx.create('git', 'moduleTest', {timeout: longTimer}, 'lib');
 	gtx.create('tsd', 'moduleTest', {timeout: longTimer}, 'lib,core');
 	gtx.create('core,api,cli', 'moduleTest', {timeout: longTimer}, 'core'); */
 	gtx.create('http', 'moduleTest', {

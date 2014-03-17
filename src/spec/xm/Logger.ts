@@ -5,19 +5,22 @@ import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');
 
-import assertVar = require('../../xm/assertVar');
-import fileIO = require('../../xm/file/fileIO');
-import Logger = require('../../xm/log/Logger');
-import getLogger = require('../../xm/log/getLogger');
-
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
+
+import assertVar = require('../../xm/assertVar');
+import fileIO = require('../../xm/file/fileIO');
+
+import StyledOut = require('../../xm/lib/StyledOut');
+import getLogger = require('../../xm/log/getLogger');
+import Logger = require('../../xm/log/Logger');
+import log = require('../../xm/log');
 
 describe('Logger', () => {
 
 	var testPath = path.resolve('test', 'modules', 'xm');
 
-	function assertLoggerShape(log:Logger) {
+	function assertLoggerShape(log: Logger) {
 		assert.isFunction(log, 'log');
 		assert.isFunction(log.log, 'log.log');
 		assert.isFunction(log.ok, 'log.ok');
@@ -30,7 +33,7 @@ describe('Logger', () => {
 		assert.instanceOf(log.out, StyledOut, 'log.out');
 	}
 
-	function assertLoggerBuffer(name:string, buffer:string) {
+	function assertLoggerBuffer(name: string, buffer: string) {
 		var file = name + '.txt';
 		fileIO.writeFileSync(path.resolve(testPath, 'tmp', 'logger', file), buffer);
 
@@ -38,15 +41,15 @@ describe('Logger', () => {
 		assert.strictEqual(buffer, expected, name + ': stored results');
 	}
 
-	function writeStandard(log:Logger) {
+	function writeStandard(log: Logger) {
 		log('aa');
 		log.log('bb');
 		log.ok('cc');
 		log.warn('dd');
 		log.error('ee');
 		log.debug('ff');
-		log.inspect({a: {b: 2}}, 0);
-		log.inspect({a: {b: 2}}, 1);
+		log.inspect({a: {b: 2}}, '', 0);
+		log.inspect({a: {b: 2}}, '', 1);
 		log.json({a: {b: 2}});
 	}
 
@@ -104,8 +107,8 @@ describe('Logger', () => {
 			log.warn('dd', 1, 2);
 			log.error('ee', 1, 2);
 			log.debug('ff', 1, 2);
-			log.inspect({a: {b: 2}}, 0, 'foo');
-			log.inspect({a: {b: 2}}, 1, 'foo');
+			log.inspect({a: {b: 2}}, 'foo', 0);
+			log.inspect({a: {b: 2}}, 'foo', 1);
 
 			assertLoggerBuffer('multi', buffer.concat('\n'));
 		});
