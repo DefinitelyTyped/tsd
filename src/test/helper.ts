@@ -14,6 +14,9 @@ import log = require('../xm/log');
 import typeOf = require('../xm/typeOf');
 import PackageJSON = require('../xm/data/PackageJSON');
 
+// boohoo
+import Const = require('../tsd/context/Const');
+
 import chai = require('chai');
 import assert = chai.assert;
 
@@ -25,6 +28,8 @@ chai.Assertion.includeStack = true;
 
 var shaRegExp = /^[0-9a-f]{40}$/;
 var md5RegExp = /^[0-9a-f]{32}$/;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function getProjectRoot(): string {
 	return path.dirname(PackageJSON.find());
@@ -40,6 +45,10 @@ export function getDirNameTmp(): string {
 
 export function getDirNameBuild(): string {
 	return path.resolve(__dirname, '..', '..', 'build');
+}
+
+export function getFixedCacheDir(): string {
+	return path.join(getProjectRoot(), 'test', 'fixtures', Const.cacheDir);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

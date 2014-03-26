@@ -33,14 +33,11 @@ export function getConfigSchema(): any {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-export function getFixedCacheDir(): string {
-	return path.join(helper.getProjectRoot(), 'test', 'fixtures', Const.cacheDir);
-}
 
 export function getContext() {
 	var context: Context;
 	context = new Context();
-	context.paths.cacheDir = getFixedCacheDir();
+	context.paths.cacheDir = helper.getFixedCacheDir();
 	return context;
 }
 

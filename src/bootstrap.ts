@@ -33,5 +33,5 @@ process.setMaxListeners(20);
 require('es6-shim');
 
 export function noop() {
-
+	// trick tsc into keeping the import
 }

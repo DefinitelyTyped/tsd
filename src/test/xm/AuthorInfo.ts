@@ -5,6 +5,7 @@ import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
 import AuthorInfo = require('../../xm/data/AuthorInfo');
+import helper = require('../../test/helper');
 
 export function serialise(author: AuthorInfo, recursive: number = 0): any {
 	assertVar(author, AuthorInfo, 'author');

@@ -12,7 +12,7 @@ import Selection = require('../../tsd/select/Selection');
 import testDefVersion = require('./DefVersion');
 import testDef = require('./Def');
 
-export function serialis(selection: Selection, recursive: number = 0): any {
+export function serialise(selection: Selection, recursive: number = 0): any {
 	assertVar(selection, Selection, 'selection');
 
 	recursive -= 1;

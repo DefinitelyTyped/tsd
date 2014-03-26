@@ -8,12 +8,15 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
+import collection = require('../../xm/collection');
 import helper = require('../../test/helper');
 import TestInfo = require('../../test/TestInfo');
-import testInstallResult = require('../../test/tsd/InstallResult');;
-import testSelection = require('../../test/tsd/Selection');;
+import testInstallResult = require('../../test/tsd/InstallResult');
+import testSelection = require('../../test/tsd/Selection');
+import testConfig = require('../../test/tsd/Config');
 
 import tsdHelper = require('../../test/tsdHelper')
+
 import Context = require('../../tsd/context/Context');
 import Core = require('../../tsd/logic/Core');
 import Query = require('../../tsd/select/Query');
@@ -21,15 +24,12 @@ import InstallResult = require('../../tsd/logic/InstallResult');
 import Selection = require('../../tsd/select/Selection');
 import API = require('../../tsd/API');
 import Options = require('../../tsd/Options');
-import DefUtil = require('../../tsd/util/DefUtil');
+import defUtil = require('../../tsd/util/defUtil');
 
 import log = require('../../xm/log');
 
 describe('API', () => {
 	'use strict';
-
-	var writeJSONSync = fileIO.writeJSONSync;
-	var readJSONSync = fileIO.readJSONSync;
 
 	var api: API;
 	var context: Context;
@@ -41,7 +41,7 @@ describe('API', () => {
 	});
 
 	beforeEach(() => {
-		context = helper.getContext();
+		context = tsdHelper.getContext();
 		context.config.log.enabled = false;
 	});
 
@@ -62,7 +62,7 @@ describe('API', () => {
 
 	function getAPI(context: Context): API {
 		var api = new API(context);
-		helper.applyCoreUpdate(api.core);
+		tsdHelper.applyCoreUpdate(api.core);
 		return api;
 	}
 
@@ -76,7 +76,7 @@ describe('API', () => {
 		fileIO.writeJSONSync(tmp.optionsDump, opt);
 
 		api.verbose = test.debug;
-
+		console.log(tmp);
 		return tmp;
 	}
 
@@ -114,7 +114,7 @@ describe('API', () => {
 					});
 				}
 				else {
-					return Promise.return();
+					return Promise.resolve();
 				}
 			};
 			var runModifyContent = function (): Promise<any> {
@@ -128,12 +128,12 @@ describe('API', () => {
 						fileIO.writeFileSync(destFull, value);
 					});
 				}
-				return Promise.return();
+				return Promise.resolve();
 			};
 
 			return runModifyQuery().then(runModifyContent);
 		}
-		return Promise.return();
+		return Promise.resolve();
 	}
 
 	describe('search', () => {
@@ -196,7 +196,7 @@ describe('API', () => {
 							var configActual = fileIO.readJSONSync(info.configFile);
 
 							assert.deepEqual(configActual, configExpect, 'configActual');
-							helper.assertConfig(api.context.config, configExpect, 'api.context.config');
+							testConfig.assertion(api.context.config, configExpect, 'api.context.config');
 
 							log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
 
@@ -207,7 +207,7 @@ describe('API', () => {
 								return tsdHelper.listDefPaths(info.typingsDir).then((typings: string[]) => {
 									assert.includeMembers(typings, context.config.getInstalledPaths(), 'saved installed file');
 									if (test.modify && test.modify.written) {
-										var writenPaths = DefUtil.getPathsOf(valuesOf(result.written));
+										var writenPaths = defUtil.getPathsOf(collection.valuesOf(result.written));
 										assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
 									}
 								});

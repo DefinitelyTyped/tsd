@@ -6,7 +6,7 @@ import assert = chai.assert;
 import assertVar = require('../../xm/assertVar');
 import AuthorInfo = require('../../xm/data/AuthorInfo');
 import DefInfo = require('../../tsd/data/DefInfo');
-import testAuthor = require('../../xm/AuthorInfo');
+import testAuthor = require('../../test/xm/AuthorInfo');
 
 import unordered = require('../unordered');
 import helper = require('../helper');

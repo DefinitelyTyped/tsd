@@ -40,4 +40,4 @@
 /// <reference path="chai/chai-fuzzy-assert.d.ts" />
 /// <reference path="chai/chai-fs-assert.d.ts" />
 /// <reference path="chai/chai-as-promised-assert.d.ts" />
-/// <reference path="highland/highland.d.ts" />
+/// <reference path="highland/highland.d.ts" />s

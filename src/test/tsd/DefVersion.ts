@@ -5,6 +5,7 @@ import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
 import AuthorInfo = require('../../xm/data/AuthorInfo');
+import tsdUtil = require('../../tsd/util/tsdUtil');
 import Def = require('../../tsd/data/Def');
 import DefVersion = require('../../tsd/data/DefVersion');
 import testDefCommit = require('./DefCommit');
@@ -72,7 +73,7 @@ export function assertionFlat(file: DefVersion, values: any, message: string): v
 var assertDefVersionArrayUnordered: any = unordered.getAssertLike<DefVersion>((act: DefVersion, exp: any) => {
 	return (act.def.path === exp.path && exp.commit && act.commit.commitSha === exp.commit.commitSha);
 }, (act: DefVersion, exp: any, message?: string) => {
-	assertion(act, exp, message + ': ' + shaShort(exp.commit.commitSha));
+	assertion(act, exp, message + ': ' + tsdUtil.shaShort(exp.commit.commitSha));
 }, 'DefVersion');
 
 export function assertionArray(files: DefVersion[], values: any[], message: string): void {

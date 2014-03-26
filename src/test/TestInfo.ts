@@ -7,7 +7,7 @@ import assertVar = require('../xm/assertVar');
 import fileIO = require('../xm/file/fileIO');
 import Const = require('../tsd/context/Const');
 import Paths = require('../tsd/context/Paths');
-import Helper = require('./Helper');
+import helper = require('./helper');
 
 class TestInfo {
 
@@ -20,9 +20,7 @@ class TestInfo {
 	fixturesDir: string;
 	modBuildDir: string;
 
-	helper: Helper;
-
-	constructor(helper: Helper, group: string, name: string, test: any, createConfigFile: boolean = true) {
+	constructor(group: string, name: string, test: any, createConfigFile: boolean = true) {
 		assertVar(group, 'string', 'group');
 		assertVar(name, 'string', 'name');
 		assertVar(test, 'object', 'test');
@@ -32,7 +30,7 @@ class TestInfo {
 
 		this.tmpDir = path.join(__dirname, 'result', this.group, this.name);
 		this.dumpDir = path.resolve(this.tmpDir, 'dump');
-		this.fixturesDir = path.resolve(__dirname, '..', 'fixtures', 'expected', this.group, this.name);
+		this.fixturesDir = path.resolve(__dirname, '..', '..', 'fixtures', 'expected', this.group, this.name);
 		this.modBuildDir = path.resolve(__dirname, '..', '..', '..', '..', 'build');
 
 		if (test.fixtures) {
@@ -43,12 +41,12 @@ class TestInfo {
 		fileIO.mkdirCheckSync(this.modBuildDir, true);
 
 		if (createConfigFile) {
-			fs.writeFileSync(this.configFile, fs.readFileSync('./test/fixtures/config/default.json', {encoding: 'utf8'}), {encoding: 'utf8'});
+			fileIO.writeFileSync(this.configFile, fileIO.readFileSync('./test/fixtures/config/default.json'));
 		}
 	}
 
 	get cacheDirTestFixed(): string {
-		return this.helper.getFixedCacheDir();
+		return helper.getFixedCacheDir();
 	}
 
 	get typingsDir(): string {
@@ -56,7 +54,7 @@ class TestInfo {
 	}
 
 	get cacheDirDev(): string {
-		return path.join(this.helper.getProjectRoot(), Const.cacheDir);
+		return path.join(helper.getProjectRoot(), Const.cacheDir);
 	}
 
 	get cacheDirUser(): string {

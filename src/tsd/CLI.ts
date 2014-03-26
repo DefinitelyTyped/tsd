@@ -9,10 +9,12 @@ import yaml = require('js-yaml');
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
 
+import fileIO = require('../xm/file/fileIO');
 import assertVar = require('../xm/assertVar');
 import PackageJSON = require('../xm/data/PackageJSON');
 import StyledOut = require('../xm/lib/StyledOut');
 
+import ActionMap = require('../xm/promise/ActionMap');
 import GithubRateInfo = require('../git/model/GithubRateInfo');
 
 import API = require('./API');
@@ -30,9 +32,6 @@ import VersionMatcher = require('./select/VersionMatcher');
 import CommitMatcher = require('./select/CommitMatcher');
 import DateMatcher = require('./select/DateMatcher');
 import InstallResult = require('./logic/InstallResult');
-
-import fileIO = require('../xm/file/fileIO');
-import ActionMap = require('../xm/promise/ActionMap');
 
 import Expose = require('../xm/expose/Expose');
 import ExposeGroup = require('../xm/expose/ExposeGroup');
