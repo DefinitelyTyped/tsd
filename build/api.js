@@ -10573,4 +10573,3 @@ var tsd;
 })(tsd || (tsd = {}));
 
 module.exports = tsd;
-//# sourceMappingURL=api.js.map

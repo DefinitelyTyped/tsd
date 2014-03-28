@@ -6,18 +6,14 @@
 
 TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
-#### 0.5.x notes
+#### Usage notes
 
-*	It is recommended you check-in the definitions you install into your VCS:
-	*	The `tsd.json` file saves [repo + commit + path] but you might want to make local changes.
-	*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
-*	Not backwards compatible with the config files from earlier versions.
-*	Version `0.5.x` still in development; API and options are work-in-progress.
-*	See below for legacy version.
+*	It is recommended you check-in the definitions you install into your VCS.
+*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
 
 #### Github rate-limit
 
-The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. Optionally a limited-scope Github OAuth token can be used to boost the rate-limit to 5000.
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. Optionally a scope-limited Github OAuth token can be used to boost the limit to 5000.
 
 #### Usage stats & update-notifier
 
@@ -385,7 +381,7 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 ### v0.5.x ( > 2013-08)
 
-For previews and history check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
+See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
 
 * `0.5.x` - `current` - Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
@@ -471,7 +467,7 @@ Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don
 
 ## Contribute
 
-Contributions are very welcome, please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first, and of course bug fixes and simple enhancements are always much appreciated. 
+Contributions are very welcome; please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first. Fixes and simple enhancements are always much appreciated. 
 
 **Note:** Contributions on the definition files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
