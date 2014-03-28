@@ -350,7 +350,7 @@ declare module tsd {
 declare module git {
     module GitUtil {
         function decodeBlobJson(blobJSON: any): NodeBuffer;
-        function blobShaHex(data: NodeBuffer, encoding?: string): string;
+        function blobShaHex(data: NodeBuffer): string;
     }
 }
 declare module tsd {
@@ -1142,7 +1142,7 @@ declare module tsd {
         public setHistory(def: Def, commitJsonArray: any[]): void;
         public procureCommit(commitSha: string): DefCommit;
         public procureBlob(blobSha: string): DefBlob;
-        public procureBlobFor(content: NodeBuffer, encoding?: string): DefBlob;
+        public procureBlobFor(content: NodeBuffer): DefBlob;
         public procureDef(path: string): Def;
         public procureVersion(def: Def, commit: DefCommit): DefVersion;
         public procureVersionFromSha(path: string, commitSha: string): DefVersion;

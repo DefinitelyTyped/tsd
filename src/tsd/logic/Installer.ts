@@ -73,7 +73,7 @@ module tsd {
 			var written = new Map<string, DefVersion>();
 
 			Q.all(list.map((installed:tsd.InstalledDef) => {
-				return this.core.index.procureFile(installed.path, installed.commitSha).progress(d.notify).then((file:tsd.DefVersion)=> {
+				return this.core.index.procureFile(installed.path, installed.commitSha).progress(d.notify).then((file:tsd.DefVersion) => {
 					return this.installFile(file, true, overwrite).progress(d.notify).then((targetPath:string) => {
 						if (targetPath) {
 							written.set(file.def.path, file);

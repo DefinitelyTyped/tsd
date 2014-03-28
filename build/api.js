@@ -2330,9 +2330,9 @@ var git;
         }
         GitUtil.decodeBlobJson = decodeBlobJson;
 
-        function blobShaHex(data, encoding) {
+        function blobShaHex(data) {
             xm.assertVar(data, Buffer, 'data');
-            return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
+            return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data).digest('hex');
         }
         GitUtil.blobShaHex = blobShaHex;
     })(git.GitUtil || (git.GitUtil = {}));
@@ -2371,7 +2371,7 @@ var tsd;
                 throw new Error('content already set: ' + this.sha);
             }
 
-            var sha = git.GitUtil.blobShaHex(content, encoding || this.encoding);
+            var sha = git.GitUtil.blobShaHex(content);
             if (sha !== this.sha) {
                 xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
             }
@@ -6265,11 +6265,10 @@ var tsd;
             return blob;
         };
 
-        DefIndex.prototype.procureBlobFor = function (content, encoding) {
-            if (typeof encoding === "undefined") { encoding = null; }
+        DefIndex.prototype.procureBlobFor = function (content) {
             xm.assertVar(content, Buffer, 'content');
 
-            var sha = git.GitUtil.blobShaHex(content, encoding);
+            var sha = git.GitUtil.blobShaHex(content);
             var blob = this.procureBlob(sha);
             if (!blob.hasContent()) {
                 blob.setContent(content);

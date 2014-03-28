@@ -151,7 +151,7 @@ describe('JSONStabilizer', () => {
 			}
 		};
 
-		Object.keys(list).forEach((name:string)=> {
+		Object.keys(list).forEach((name:string) => {
 			it('"' + name + '"', () => {
 				var test = list[name];
 				var stable = new xm.JSONStabilizer(test.depth);

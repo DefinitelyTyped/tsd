@@ -121,7 +121,7 @@ describe('git.GithubAPI', () => {
 				var firstBuffer = git.GitUtil.decodeBlobJson(first);
 				assert.instanceOf(firstBuffer, Buffer, 'buffer');
 
-				var firstSha = git.GitUtil.blobShaHex(firstBuffer, 'utf8');
+				var firstSha = git.GitUtil.blobShaHex(firstBuffer);
 				assert.strictEqual(firstSha, expectedSha, 'firstSha vs expected');
 
 				// get again, should be cached
@@ -134,7 +134,7 @@ describe('git.GithubAPI', () => {
 
 					var secondBuffer = git.GitUtil.decodeBlobJson(first);
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');
-					var secondSha = git.GitUtil.blobShaHex(secondBuffer, 'utf8');
+					var secondSha = git.GitUtil.blobShaHex(secondBuffer);
 					assert.strictEqual(secondSha, expectedSha, 'secondSha vs expected');
 
 					helper.assertNotes(notes, [

@@ -36,7 +36,7 @@ module tsd {
 				throw new Error('content already set: ' + this.sha);
 			}
 
-			var sha = git.GitUtil.blobShaHex(content, encoding || this.encoding);
+			var sha = git.GitUtil.blobShaHex(content);
 			if (sha !== this.sha) {
 				xm.throwAssert('blob sha mismatch: ' + sha + ' != ' + this.sha, sha, this.sha);
 			}

@@ -5,6 +5,7 @@
 /deploy
 /docs
 /media
+/scratch
 /src
 /tasks
 /test
@@ -34,3 +35,4 @@ tmp/
 
 /*.tgz
 /*.txt
+/*.ts

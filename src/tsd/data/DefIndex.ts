@@ -163,10 +163,10 @@ module tsd {
 		/*
 		 get a DefBlob for a sha (enforces single instances)
 		 */
-		procureBlobFor(content:NodeBuffer, encoding:string = null):tsd.DefBlob {
+		procureBlobFor(content:NodeBuffer):tsd.DefBlob {
 			xm.assertVar(content, Buffer, 'content');
 
-			var sha = git.GitUtil.blobShaHex(content, encoding);
+			var sha = git.GitUtil.blobShaHex(content);
 			var blob:tsd.DefBlob = this.procureBlob(sha);
 			if (!blob.hasContent()) {
 				blob.setContent(content);

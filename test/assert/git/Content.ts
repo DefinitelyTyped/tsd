@@ -17,11 +17,11 @@ module helper {
 		if (actualStr !== expectedStr) {
 			// show fancy diffs
 			var actualDebug = {
-				sha: git.GitUtil.blobShaHex(actual, 'utf8'),
+				sha: git.GitUtil.blobShaHex(actual),
 				str: actualStr
 			};
 			var expectedDebug = {
-				sha: git.GitUtil.blobShaHex(expected, 'utf8'),
+				sha: git.GitUtil.blobShaHex(expected),
 				str: expectedStr
 			};
 			assert.fail(actualDebug, expectedDebug, message);
