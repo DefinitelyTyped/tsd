@@ -241,7 +241,7 @@ Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit 
 
 ````bash
 $ tsd query youtube --history
-$ tsd query youtube --date d6ff
+$ tsd query youtube --commit d6ff
 
 $ tsd query youtube -y
 $ tsd query youtube -c d6ff
