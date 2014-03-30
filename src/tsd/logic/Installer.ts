@@ -60,7 +60,7 @@ class Installer extends SubCore {
 		var written = new Map<string, DefVersion>();
 
 		return Promise.map(list, (installed: InstalledDef) => {
-			return this.core.index.procureFile(installed.path, installed.commitSha).then((file: DefVersion)=> {
+			return this.core.index.procureFile(installed.path, installed.commitSha).then((file: DefVersion) => {
 				return this.installFile(file, true, overwrite).then((targetPath: string) => {
 					if (targetPath) {
 						written.set(file.def.path, file);

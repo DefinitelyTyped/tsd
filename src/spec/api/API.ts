@@ -15,7 +15,7 @@ import testInstallResult = require('../../test/tsd/InstallResult');
 import testSelection = require('../../test/tsd/Selection');
 import testConfig = require('../../test/tsd/Config');
 
-import tsdHelper = require('../../test/tsdHelper')
+import tsdHelper = require('../../test/tsdHelper');
 
 import Context = require('../../tsd/context/Context');
 import Core = require('../../tsd/logic/Core');

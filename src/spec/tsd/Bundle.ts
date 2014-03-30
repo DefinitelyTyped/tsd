@@ -96,7 +96,7 @@ describe('Bundle', () => {
 			}
 		};
 
-		Object.keys(list).forEach((name: string)=> {
+		Object.keys(list).forEach((name: string) => {
 			it('"' + name + '"', () => {
 				var value = list[name];
 				var base = '';

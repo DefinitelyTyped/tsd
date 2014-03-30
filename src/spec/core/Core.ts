@@ -8,10 +8,10 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
-import helper = require('../../test/helper')
-import testConfig = require('../../test/tsd/Config')
+import helper = require('../../test/helper');
+import testConfig = require('../../test/tsd/Config');
 
-import tsdHelper = require('../../test/tsdHelper')
+import tsdHelper = require('../../test/tsdHelper');
 import Context = require('../../tsd/context/Context');
 import Core = require('../../tsd/logic/Core');
 import DefIndex = require('../../tsd/data/DefIndex');

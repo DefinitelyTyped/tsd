@@ -119,8 +119,8 @@ describe('CLI Query', () => {
 	describe('help', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'help'));
 
-		Object.keys(data.tests).forEach((test, name) => {
-			var test[name] = data.tests;
+		Object.keys(data.tests).forEach((name) => {
+			var test = data.tests[name];
 			var debug = test.debug;
 			if (test.skip) {
 				return;
@@ -143,8 +143,8 @@ describe('CLI Query', () => {
 	describe('query', () => {
 		var data = require(path.join(helper.getDirNameFixtures(), 'query'));
 
-		Object.keys(data.tests).forEach((test, name) => {
-			var test[name] = data.tests;
+		Object.keys(data.tests).forEach((name) => {
+			var test = data.tests[name];
 			var debug = test.debug;
 			if (test.skip) {
 				return;

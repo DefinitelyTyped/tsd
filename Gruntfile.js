@@ -37,7 +37,13 @@ module.exports = function (grunt) {
 			},
 			source: ['src/**/*.ts'],
 			helper: ['test/*.ts'],
-			tests: ['test/*.ts', 'test/*/.ts', 'test/**/src/**/*.ts']
+			testing: [
+				'src/test**/*.ts',
+				'src/spec**/*.ts',
+				'test/*.ts',
+				'test/*/.ts',
+				'test/**/src/**/*.ts'
+			]
 		},
 		todos: {
 			options: {
@@ -285,7 +291,7 @@ module.exports = function (grunt) {
 	]);
 	gtx.alias('test', [
 		'build',
-		'tslint:helper',
+		'tslint:testing',
 		'gtx-type:moduleTest',
 		'mochaTest:spec'
 	]);

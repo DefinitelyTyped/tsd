@@ -87,7 +87,7 @@ describe('Github', () => {
 						return fileIO.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags: 'wb'});
 					}).then(() => {
 						return fileIO.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags: 'rb'});
-					},(err) => {
+					}, (err) => {
 						log.error('storage test failure');
 						throw err;
 					}).then((cycleData: NodeBuffer) => {

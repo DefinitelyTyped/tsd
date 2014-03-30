@@ -6,7 +6,6 @@ Promise.onPossiblyUnhandledRejection((error) => {
 	console.log('---');
 	console.log(error.message);
 	throw error;
-	process.exit(1);
 });
 
 // optional
