@@ -4,22 +4,16 @@
 	<meta charset="utf-8">
 	<title>TSD</title>
 	<meta name="description" content="TypeScript Definition manager for DefinitelyTyped">
-	<meta name="author" content="Diullei Gomes">
 	<meta name="author" content="Bart van der Schoor">
+	<meta name="author" content="Diullei Gomes">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="css/build.css" rel="stylesheet">
-	<!--[if lt IE 9]>
-	<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-	<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>    <![endif]-->
 </head>
 <body>
-<!--[if lt IE 7]><p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade
+<!--[if lt IE 9]><p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade
 	your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a>
-	to better experience this site.</p><![endif]--><a href="https://github.com/Definitelytyped/tsd"><img
-		style="position: absolute; top: 0; right: 0; border: 0;"
-		src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-
+	to better experience this site.</p><![endif]--><a href="https://github.com/Definitelytyped/tsd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
 <div class="wrapper">
 	<div class="container">
 		<header class="header row">
@@ -62,17 +56,13 @@
 						<p>TSD is a package manager to search and install <a href="http://www.typescriptlang.org/">TypeScript</a> definition files directly from the community driven <a href="https://github.com/borisyankov/DefinitelyTyped">DefinitelyTyped</a> repository.</p>
 					</div>
 					<div class="well">
-						<b>Got web skills?</b> TSD is looking for a developer to improve this site. Leave a message <a href="https://github.com/DefinitelyTyped/tsd-site/issues">here</a> if you like Grunt, github and big json.
+						<b>Got design skills?</b> TSD is looking for a creative to improve this site. Leave a message <a href="https://github.com/DefinitelyTyped/tsd-site/issues">here</a> if you like Grunt, Github and Vue.
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<section class="main" ng-controller="TSDListCtrl">
-			<script type="text/javascript">
-				var sortingOrder = 'name';
-			</script>
-
+		<section id="def-table" class="main">
 			<div class="row">
 				<div class="col-md-3">
 					<h3>screenshots</h3>
@@ -89,11 +79,11 @@
 					</ul>
 				</div>
 				<div class="col-md-9">
-					<h3>browse (stale)</h3>
+					<h3>browse <small>{{updated}}</small></h3>
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<form class="form-inline" role="form" action="">
-								<input type="search" ng-model="query" ng-change="search()" class="form-control input-sm" placeholder="Search in {{items.length}} files...">
+							<form class="form-inline" role="form">
+								<input type="search" v-model="searchTerm" v-on="keyup: update" class="form-control" placeholder="Search in {{total}} files...">
 							</form>
 						</div>
 					</div>
@@ -101,18 +91,41 @@
 			</div>
 
 			<div id="host">
+				<!-- <div class="well">
+					defs: {{all.length}}<br/>
+					pageNum: {{pageNum}}<br/>
+					pagePer: {{pagePer}}<br/>
+					pageLim: {{pageLim}}<br/>
+
+					repo: {{repo}}<br/>
+					ref: {{ref}}<br/>
+					updated: {{updated}}<br/>
+					sortKey: {{sortKey}}<br/>
+					sortReverse: {{sortReverse}}<br/>
+					searchTerm: {{searchTerm}}<br/>
+					urls: {{urls}}<br/>
+					pageNum: {{pageNum}}<br/>
+					pagePer: {{pagePer}}<br/>
+					total: {{total}}<br/>
+					count: {{count}}<br/>
+					pageNumbers #: {{pageNumbers}}<br/>
+					visible #: {{visible.length}}<br/>
+					selection #: {{selection.length}}<br/>
+					all #: {{all.length}}<br/>
+				</div> -->
+
 				<table id="defs" class="table table-striped table-bordered table-hover">
 					<thead>
 						<tr>
-							<th><a ng-click="sort_by('project')">project</a></th>
-							<th><a ng-click="sort_by('name')">name</a></th>
+							<th><a v-on="click: sortOn('project')">Project</a></th>
+							<th><a v-on="click: sortOn('name')">Name</a></th>
 							<th>Version</th>
 							<th>View</th>
 							<th>Homepage</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="def in pagedItems[currentPage] | orderBy:sortingOrder:reverse">
+						<tr v-repeat="def: visible">
 							<td>{{ def.project }}</td>
 							<td>{{ def.name }}</td>
 							<td style="width:5em;">{{ def.semver || def.info.version }}</td>
@@ -124,41 +137,38 @@
 
 				<div id="paginator">
 					<ul class="pagination">
-
-						<li ng-class="{disabled: currentPage == 0}">
-							<a href ng-click="prevPage()">«</a>
+						<li v-class="disabled: pageNum == 0 || !active">
+							<span v-on="click: showFirstPage">1</span>
 						</li>
-						<li ng-repeat="n in range(pagedItems.length, currentPage)"
-							ng-class="{active: n == currentPage}"
-							ng-click="setPage()">
-							<a href ng-bind="n + 1">1</a>
+						<li v-class="disabled: pageNum == 0 || !active">
+							<span v-on="click: showPrevPage">« «</span>
 						</li>
-						<li ng-class="{disabled: currentPage == pagedItems.length - 1}">
-							<a href ng-click="nextPage()">»</a>
+						<li v-repeat="pageI: pageNumbers" v-class="active: pageI == pageNum, disabled: !active">
+							<span v-on="click: $parent.showPage(pageI)">{{pageI + 1}}</span>
+						</li>
+						<li v-class="disabled: pageNum == pageLim || !active">
+							<span v-on="click: showNextPage">» »</span>
+						</li>
+						<li v-class="disabled: pageNum == pageLim || !active">
+							<span v-on="click: showLastPage">{{pageLim + 1}}</span>
 						</li>
 					</ul>
-					<div class="well">
-						This paginator is freaky.
-					</div>
 				</div>
 			</div>
 		</section>
 
 		<footer>
 			<p class="text-center">
-				Brought to you by <a href="https://github.com/diullei"><img
-					src="http://gravatar.com/avatar/5e93890c5b54d18dd454f14789c2b225?s=40" width="40" height="40"
-					alt="Diullei Gomes"> Diullei Gomes</a> & <a href="https://github.com/bartvds"><img
-					src="http://gravatar.com/avatar/967fd44ed43e85a227dc855d1209eb48?s=40" width="40" height="40"
-					alt="Bart van der Schoor">Bart van der Schoor</a> - Thanks to the <a
-					href="https://github.com/borisyankov/DefinitelyTyped">DefinitelyTyped</a> project.
+				Brought to you by <a href="https://github.com/bartvds">Bart van der Schoor</a> &amp; <a href="https://github.com/diullei">Diullei Gomes</a> - Content from <a
+					href="https://github.com/borisyankov/DefinitelyTyped">DefinitelyTyped</a>.
 			</p>
 		</footer>
 	</div>
 </div>
-<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="//code.jquery.com/jquery-2.1.0.min.js"></script>
 <script src="js/bootstrap.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
-<script src="js/controllers.js"></script>
+<script src="js/oboe.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/index.js"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "count": 376,
+  "count": 387,
   "content": [
     {
       "project": "accounting",
@@ -409,6 +409,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "assert",
+      "name": "assert",
+      "path": "assert/assert.d.ts",
+      "info": {
+        "references": [],
+        "name": "assert and power-assert",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/Jxck/assert",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
@@ -1002,6 +1016,25 @@
       }
     },
     {
+      "project": "ckeditor",
+      "name": "ckeditor",
+      "path": "ckeditor/ckeditor.d.ts",
+      "info": {
+        "references": [],
+        "name": "CKEditor",
+        "version": "",
+        "description": "",
+        "projectUrl": "http://ckeditor.com",
+        "authors": [
+          {
+            "name": "Ondrej Sevcik",
+            "url": "https://github.com/ondrejsevcik"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "codemirror",
       "name": "codemirror",
       "path": "codemirror/codemirror.d.ts",
@@ -1251,6 +1284,24 @@
           {
             "name": "David Khristepher Santos",
             "url": "http://github.com/rupertavery"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "dcjs",
+      "name": "dc",
+      "path": "dcjs/dc.d.ts",
+      "info": {
+        "references": [],
+        "name": "DCJS",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/dc-js",
+        "authors": [
+          {
+            "name": "hans windhoff"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -3470,6 +3521,27 @@
       }
     },
     {
+      "project": "jquery.placeholder",
+      "name": "jquery.placeholder",
+      "path": "jquery.placeholder/jquery.placeholder.d.ts",
+      "info": {
+        "references": [
+          "../jquery/jquery.d.ts"
+        ],
+        "name": "jquery.placeholder.js 2.0.7",
+        "version": "2.0.7",
+        "description": "",
+        "projectUrl": "https://github.com/mathiasbynens/jquery-placeholder",
+        "authors": [
+          {
+            "name": "Peter Gill",
+            "url": "https://github.com/majorsilence"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "jquery.scrollTo",
       "name": "jquery.scrollTo",
       "path": "jquery.scrollTo/jquery.scrollTo.d.ts",
@@ -3742,6 +3814,20 @@
       }
     },
     {
+      "project": "jquery.ui.datetimepicker",
+      "name": "jquery.ui.datetimepicker",
+      "path": "jquery.ui.datetimepicker/jquery.ui.datetimepicker.d.ts",
+      "info": {
+        "references": [],
+        "name": "jQuery UI DateTimePicker 0.3 Addon",
+        "version": "0.3",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
+      }
+    },
+    {
       "project": "jquery.ui.layout",
       "name": "jquery.ui.layout",
       "path": "jquery.ui.layout/jquery.ui.layout.d.ts",
@@ -3776,6 +3862,9 @@
         "description": "",
         "projectUrl": "http://bassistance.de/jquery-plugins/jquery-plugin-validation",
         "authors": [
+          {
+            "name": "https"
+          },
           {
             "name": "https"
           }
@@ -4174,6 +4263,29 @@
           {
             "name": "Vincent Bortone",
             "url": "https://github.com/vbortone"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "kineticjs",
+      "name": "kineticjs",
+      "path": "kineticjs/kineticjs.d.ts",
+      "info": {
+        "references": [],
+        "name": "KineticJS",
+        "version": "",
+        "description": "",
+        "projectUrl": "http://kineticjs.com",
+        "authors": [
+          {
+            "name": "Basarat Ali Syed",
+            "url": "http://www.github.com/basarat"
+          },
+          {
+            "name": "Ralph de Ruijter",
+            "url": "http://www.superdopey.nl/techblog"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -5235,6 +5347,25 @@
       }
     },
     {
+      "project": "nomnom",
+      "name": "nomnom",
+      "path": "nomnom/nomnom.d.ts",
+      "info": {
+        "references": [],
+        "name": "nomnom",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/harthur/nomnom",
+        "authors": [
+          {
+            "name": "Paul Vick",
+            "url": "https://github.com/panopticoncentral"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "nprogress",
       "name": "NProgress",
       "path": "nprogress/NProgress.d.ts",
@@ -5525,6 +5656,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "promises-a-plus",
+      "name": "promises-a-plus",
+      "path": "promises-a-plus/promises-a-plus.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
@@ -5940,10 +6085,11 @@
       "path": "rx.js/rx.async.d.ts",
       "info": {
         "references": [
-          "rx.d.ts"
+          "rx.d.ts",
+          "rx.async-lite.ts"
         ],
-        "name": "RxJS-Async package 2.2.11",
-        "version": "2.2.11",
+        "name": "RxJS-Async v2.2.17",
+        "version": "2.2.17",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -5961,14 +6107,37 @@
     },
     {
       "project": "rx.js",
+      "name": "rx.backpressure",
+      "path": "rx.js/rx.backpressure.d.ts",
+      "info": {
+        "references": [
+          "rx.d.ts",
+          "rx.backpressure-lite.ts"
+        ],
+        "name": "RxJS-BackPressure v2.2.15",
+        "version": "2.2.15",
+        "description": "",
+        "projectUrl": "http://rx.codeplex.com",
+        "authors": [
+          {
+            "name": "Igor Oleinikov",
+            "url": "https://github.com/Igorbek"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "rx.js",
       "name": "rx.binding",
       "path": "rx.js/rx.binding.d.ts",
       "info": {
         "references": [
-          "rx.d.ts"
+          "rx.d.ts",
+          "rx.binding-lite.ts"
         ],
-        "name": "RxJS-Binding package",
-        "version": "",
+        "name": "RxJS-Binding v2.2.17",
+        "version": "2.2.17",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6014,9 +6183,11 @@
       "name": "rx",
       "path": "rx.js/rx.d.ts",
       "info": {
-        "references": [],
-        "name": "RxJS",
-        "version": "",
+        "references": [
+          "rx-lite.ts"
+        ],
+        "name": "RxJS v2.2.17",
+        "version": "2.2.17",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6098,6 +6269,35 @@
     },
     {
       "project": "rx.js",
+      "name": "rx.lite",
+      "path": "rx.js/rx.lite.d.ts",
+      "info": {
+        "references": [
+          "rx-lite.ts",
+          "rx.async-lite.ts",
+          "rx.binding-lite.ts",
+          "rx.time-lite.ts",
+          "rx.backpressure-lite.ts"
+        ],
+        "name": "RxJS-Lite v2.2.17",
+        "version": "2.2.17",
+        "description": "",
+        "projectUrl": "http://rx.codeplex.com",
+        "authors": [
+          {
+            "name": "gsino",
+            "url": "http://www.codeplex.com/site/users/view/gsino"
+          },
+          {
+            "name": "Igor Oleinikov",
+            "url": "https://github.com/Igorbek"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "rx.js",
       "name": "rx.testing",
       "path": "rx.js/rx.testing.d.ts",
       "info": {
@@ -6124,10 +6324,11 @@
       "path": "rx.js/rx.time.d.ts",
       "info": {
         "references": [
-          "rx.d.ts"
+          "rx.d.ts",
+          "rx.time-lite.ts"
         ],
-        "name": "RxJS \"Aggregates\"",
-        "version": "",
+        "name": "RxJS-Time v2.2.17",
+        "version": "2.2.17",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6524,20 +6725,22 @@
       "name": "smoothie",
       "path": "smoothie/smoothie.d.ts",
       "info": {
-        "references": [
-          "../node/node.d.ts"
-        ],
-        "name": "smoothie",
-        "version": "",
+        "references": [],
+        "name": "Smoothie Charts 1.21",
+        "version": "1.21",
         "description": "",
         "projectUrl": "https://github.com/joewalnes/smoothie",
         "authors": [
+          {
+            "name": "Drew Noakes",
+            "url": "https://drewnoakes.com"
+          },
           {
             "name": "Mike H. Hawley",
             "url": "https://github.com/mikehhawley"
           }
         ],
-        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped/smoothie"
       }
     },
     {
@@ -7191,6 +7394,27 @@
       }
     },
     {
+      "project": "urlrouter",
+      "name": "urlrouter",
+      "path": "urlrouter/urlrouter.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts"
+        ],
+        "name": "urlrouter",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/fengmk2/urlrouter",
+        "authors": [
+          {
+            "name": "soywiz",
+            "url": "https://github.com/soywiz"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "uuid",
       "name": "UUID",
       "path": "uuid/UUID.d.ts",
@@ -7621,6 +7845,10 @@
           {
             "name": "Blake Niemyjski",
             "url": "https://github.com/niemyjski"
+          },
+          {
+            "name": "György Balássy",
+            "url": "https://github.com/balassy"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
