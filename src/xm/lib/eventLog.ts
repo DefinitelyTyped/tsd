@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import StatCounter = require('./StatCounter');
 import typeOf = require('../typeOf');
 import Logger = require('../log/Logger');

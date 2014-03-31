@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 var expTrim = /^\/(.*)\/([a-z]+)*$/gm;
 var flagFilter = /[gim]/;
 // var flagFilter = /[gixsm]/;

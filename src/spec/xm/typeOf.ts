@@ -1,9 +1,11 @@
 /// <reference path="../../_ref.d.ts" />
 
+'use strict';
+
 import chai = require('chai');
 import assert = chai.assert;
-import helper = require('../../test/helper');
 
+import helper = require('../../test/helper');
 import typeOf = require('../../xm/typeOf');
 
 describe('typeOf', () => {

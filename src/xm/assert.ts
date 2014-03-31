@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import AssertionError = require('assertion-error');
 
 import typeOf = require('./typeOf');

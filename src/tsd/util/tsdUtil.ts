@@ -1,3 +1,5 @@
+'use strict';
+
 import Const = require('../context/Const');
 
 export function shaShort(sha: string): string {

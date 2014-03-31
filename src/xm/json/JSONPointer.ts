@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import pointer = require('json-pointer');
 import typeOf = require('../typeOf');
 

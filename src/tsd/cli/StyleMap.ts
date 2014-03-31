@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
 

@@ -1,9 +1,10 @@
 /// <reference path="../../_ref.d.ts" />
 
-var path = require('path');
+'use strict';
 
-var miniwrite = <typeof MiniWrite> require('miniwrite');
-var ministyle = <typeof MiniStyle> require('ministyle');
+import path = require('path');
+import miniwrite = require('miniwrite');
+import ministyle = require('ministyle');
 import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');

@@ -1,3 +1,5 @@
+'use strict';
+
 import StyledOut = require('../lib/StyledOut');
 
 var consoleOut = new StyledOut();

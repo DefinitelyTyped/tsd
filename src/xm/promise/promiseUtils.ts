@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 // TODO add interesting helpers based on weak-map
 
 import Promise = require('bluebird');

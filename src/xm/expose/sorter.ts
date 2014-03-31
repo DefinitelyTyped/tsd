@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import ExposeCommand = require('./ExposeCommand');
 import ExposeOption = require('./ExposeOption');
 import ExposeGroup = require('./ExposeGroup');

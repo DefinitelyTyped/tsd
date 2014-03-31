@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 export var natives: {[key: string]: string} = {
 	'[object Arguments]': 'arguments',
 	'[object Array]': 'array',

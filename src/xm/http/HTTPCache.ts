@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): NodeTimer;
 declare function clearTimeout(timeoutId: NodeTimer): void;
 

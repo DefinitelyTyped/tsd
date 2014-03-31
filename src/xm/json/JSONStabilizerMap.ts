@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import WeakMap = require('weak-map');
 import detectIndent = require('detect-indent');
 

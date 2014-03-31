@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import path = require('path');
 import Promise = require('bluebird');
 import updateNotifier = require('update-notifier');

@@ -1,5 +1,7 @@
 /// <reference path="../../_ref.d.ts" />
 
+'use strict';
+
 import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');
@@ -7,8 +9,6 @@ import helper = require('../../test/helper');
 import koder = require('../../xm/lib/koder');
 import StringKoder = koder.StringKoder;
 import JSONKoder = koder.JSONKoder;
-
-'use strict';
 
 describe('koders', () => {
 	describe('StringKoder', () => {

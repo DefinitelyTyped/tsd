@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import detectIndent = require('detect-indent');
 
 import CodeStyle = require('../lib/CodeStyle');

@@ -35,14 +35,11 @@ module.exports = function (grunt) {
 				configuration: gtx.readJSON('tslint.json'),
 				formatter: 'tslint-path-formatter'
 			},
-			source: ['src/**/*.ts'],
+			source: ['src/**/*.ts', '!src/test', '!src/spec'],
 			helper: ['test/*.ts'],
 			testing: [
-				'src/test**/*.ts',
-				'src/spec**/*.ts',
-				'test/*.ts',
-				'test/*/.ts',
-				'test/**/src/**/*.ts'
+				'src/test/**/*.ts',
+				'src/spec/**/*.ts'
 			]
 		},
 		todos: {
@@ -147,6 +144,10 @@ module.exports = function (grunt) {
 			},
 			api: {
 				src: ['src/**/*.ts', '!src/test/**/*.ts', '!src/spec/**/*.ts'],
+				outDir: 'build/'
+			},
+			test: {
+				src: ['src/test.ts'],
 				outDir: 'build/'
 			},
 			/*blobSha: {

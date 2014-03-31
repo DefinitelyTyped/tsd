@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import typeOf = require('../../xm/typeOf');
 import assert = require('../../xm/assert');
 import assertVar = require('../../xm/assertVar');

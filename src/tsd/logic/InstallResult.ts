@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import assertVar = require('../../xm/assertVar');
 import Options = require('../Options');
 

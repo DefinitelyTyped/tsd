@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import stringUtils = require('./stringUtils');
 import typeOf = require('./typeOf');
 

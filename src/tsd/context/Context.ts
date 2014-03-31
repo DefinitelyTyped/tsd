@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import fs = require('graceful-fs');
 import path = require('path');
 

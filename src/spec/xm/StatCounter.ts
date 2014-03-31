@@ -1,5 +1,7 @@
 /// <reference path="../../_ref.d.ts" />
 
+'use strict';
+
 import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');

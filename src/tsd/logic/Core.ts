@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 // TODO get rid of hacky updateConfig()
 
 import path = require('path');
@@ -25,6 +27,7 @@ import InfoParser = require('./InfoParser');
 import Installer = require('./Installer');
 import Resolver = require('./Resolver');
 import BundleManager = require('./BundleManager');
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

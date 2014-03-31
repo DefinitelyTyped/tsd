@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import typeOf = require('../../xm/typeOf');
 import dateUtils = require('../../xm/dateUtils');
 import collection = require('../../xm/collection');

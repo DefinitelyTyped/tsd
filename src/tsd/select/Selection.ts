@@ -1,12 +1,13 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 
 import Def = require('../data/Def');
 import DefVersion = require('../data/DefVersion');
 
-import CommitMatcher = require('./CommitMatcher');
 import Query = require('./Query');
 
 class Selection {

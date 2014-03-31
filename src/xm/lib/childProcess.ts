@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import Promise = require('bluebird');
 import childProcess = require('child_process');
 import assertVar = require('../assertVar');

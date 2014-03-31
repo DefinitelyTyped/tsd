@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import Promise = require('bluebird');
 
 import log = require('../../xm/log');

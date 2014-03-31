@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import CacheRequest = require('./CacheRequest');
 import CacheInfo = require('./CacheInfo');
 import ResponseInfo = require('./ResponseInfo');

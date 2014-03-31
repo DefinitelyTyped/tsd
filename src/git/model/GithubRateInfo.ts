@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import typeOf = require('../../xm/typeOf');
 
 function pad(input: number): string {

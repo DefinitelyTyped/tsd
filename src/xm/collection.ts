@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 // TODO consider expanding to work on every collection type
 // TODO ditch for Lazy.js or Highland
 

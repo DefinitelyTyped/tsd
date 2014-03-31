@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import log = require('../../xm/log');
 import AuthorInfo = require('../../xm/data/AuthorInfo');
 import RegExpGlue = require('../../xm/lib/RegExpGlue');

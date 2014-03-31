@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import ExposeSorter = require('./ExposeSorter');
 import sorter = require('./sorter');
 

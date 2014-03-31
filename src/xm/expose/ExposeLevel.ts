@@ -1,3 +1,5 @@
+'use strict';
+
 // TODO swap ExposeLevel class for enum
 class ExposeLevel {
 	static min = -1;

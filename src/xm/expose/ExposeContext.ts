@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 /*
 Expose: cli command manager and help generator
 */

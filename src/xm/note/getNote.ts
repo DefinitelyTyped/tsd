@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import type = require('../typeOf');
 import Notification = require('./Notification');
 

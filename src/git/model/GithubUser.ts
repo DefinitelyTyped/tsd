@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 // single user on Github (with profilem gravatar etc)
 class GithubUser {
 

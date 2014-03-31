@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import typeOf = require('./typeOf');
 import encode = require('./encode');
 

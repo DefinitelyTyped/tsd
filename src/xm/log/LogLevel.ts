@@ -1,3 +1,5 @@
+'use strict';
+
 class LogLevel {
 	static ok = 'ok';
 	static log = 'log';

@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import dateUtils = require('../../xm/dateUtils');
 
 import Def = require('../data/Def');

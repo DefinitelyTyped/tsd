@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 var endSlashTrim = /\/?$/;
 var trim = /(^\s+)|(\s?\/?\s?$)/;
 

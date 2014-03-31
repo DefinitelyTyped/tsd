@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import crypto = require('crypto');
 import inspect = require('./inspect');
 import typeOf = require('./typeOf');

@@ -1,3 +1,5 @@
+'use strict';
+
 import Def = require('./Def');
 import DefBlob = require('./DefBlob');
 import DefCommit = require('./DefCommit');

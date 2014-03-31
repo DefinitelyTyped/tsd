@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import ua = require('universal-analytics');
 import uuid = require('uuid');
 import urlMod = require('url');

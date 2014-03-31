@@ -7,6 +7,8 @@ import objectUtils = require('../../xm/objectUtils');
 import gitUtil = require('../../git/gitUtil');
 import tsdUtil = require('../util/tsdUtil');
 
+'use strict';
+
 class DefBlob {
 	sha: string = null;
 	content: NodeBuffer = null;

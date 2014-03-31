@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 /*
  StatCounter: manages named numeric counters, handy for minimalistic stats
  */

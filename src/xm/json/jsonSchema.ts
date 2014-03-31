@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import tv4 = require('tv4');
 import AssertionError = require('assertion-error');
 

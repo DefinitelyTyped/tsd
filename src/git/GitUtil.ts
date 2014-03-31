@@ -1,7 +1,8 @@
 /// <reference path="./_ref.d.ts" />
 
-import assertVar = require('../xm/assertVar');
+'use strict';
 
+import assertVar = require('../xm/assertVar');
 import crypto = require('crypto');
 
 export function decodeBlobJson(blobJSON: any): NodeBuffer {

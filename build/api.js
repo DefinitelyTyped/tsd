@@ -1,10 +1,9 @@
+'use strict';
 require('./bootstrap');
 
 var assertVar = require('./xm/assertVar');
 var API = require('./tsd/API');
 var Context = require('./tsd/context/Context');
-
-'use strict';
 
 function getAPI(configPath, verbose) {
     if (typeof verbose === "undefined") { verbose = false; }

@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import jsesc = require('jsesc');
 import Promise = require('bluebird');
 import exitProcess = require('exit');

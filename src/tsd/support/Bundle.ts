@@ -1,3 +1,5 @@
+'use strict';
+
 import path = require('path');
 
 import assertVar = require('../../xm/assertVar');

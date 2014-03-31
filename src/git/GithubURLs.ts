@@ -1,5 +1,7 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import assertVar = require('../xm/assertVar');
 import objectUtils = require('../xm/objectUtils');
 import URLManager = require('../xm/lib/URLManager');

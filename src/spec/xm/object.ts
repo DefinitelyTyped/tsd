@@ -1,5 +1,7 @@
 /// <reference path="../../_ref.d.ts" />
 
+'use strict';
+
 import chai = require('chai');
 import assert = chai.assert;
 import helper = require('../../test/helper');
@@ -15,7 +17,7 @@ class ObjectUtilTestClass {
 
 describe('object', () => {
 	// TODO add tests for more methods
-	describe('hidePrefixed()', () => {
+	describe('hideProps()', () => {
 		it('should return formatted string', () => {
 			var keys;
 			var inst = new ObjectUtilTestClass();
@@ -23,7 +25,7 @@ describe('object', () => {
 			keys = Object.keys(inst);
 			assert.sameMembers(keys, ['_propA', '_propB', 'propC', 'propD'], 'before hide');
 
-			objectUtils.hidePrefixed(inst);
+			objectUtils.hideProps(inst, null, false, true);
 
 			keys = Object.keys(inst);
 			assert.sameMembers(keys, ['propC', 'propD'], 'after hide');

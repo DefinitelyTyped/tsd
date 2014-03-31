@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import uriTemplates = require('uri-templates');
 import typeOf = require('../typeOf');
 

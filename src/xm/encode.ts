@@ -4,6 +4,8 @@
 
 // evill
 
+'use strict';
+
 import util = require('util');
 import jsesc = require('jsesc');
 

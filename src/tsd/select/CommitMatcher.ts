@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import assert = require('../../xm/assert');
 
 import DefVersion = require('../data/DefVersion');

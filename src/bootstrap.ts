@@ -1,5 +1,7 @@
 /// <reference path="_ref.d.ts" />
 
+'use strict';
+
 import Promise = require('bluebird');
 
 Promise.onPossiblyUnhandledRejection((error) => {
@@ -23,7 +25,6 @@ catch (e) {
 var bufferstream = require('bufferstream');
 bufferstream.fn.warn = false;
 
-// future is now
 
 // TODO verify process.setMaxListeners() still needs to be this high
 process.setMaxListeners(20);

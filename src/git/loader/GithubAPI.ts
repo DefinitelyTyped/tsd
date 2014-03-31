@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import request = require('request');
 import Promise = require('bluebird');
 
@@ -13,6 +15,7 @@ import CacheObject = require('../../xm/http/CacheObject');
 import GithubRepo = require('../GithubRepo');
 import GithubLoader = require('./GithubLoader');
 import GithubRateInfo = require('../model/GithubRateInfo');
+
 /*
  GithubAPI: access github rest-api with local cache (evading the non-auth rate-limit)
  */

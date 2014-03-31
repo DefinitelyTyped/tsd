@@ -1,7 +1,10 @@
 /// <reference path="./_ref.d.ts" />
 
+'use strict';
+
 import typeOf = require('../xm/typeOf');
 import assertVar = require('../xm/assertVar');
+
 /*
  Options: bundles options
  */

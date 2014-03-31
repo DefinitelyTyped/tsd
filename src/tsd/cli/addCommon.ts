@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import Expose = require('../../xm/expose/Expose');
 import ExposeContext = require('../../xm/expose/ExposeContext');
 import ExposeOption = require('../../xm/expose/ExposeOption');

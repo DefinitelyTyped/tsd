@@ -1,5 +1,7 @@
 /// <reference path="../_ref.d.ts" />
 
+'use strict';
+
 import util = require('util');
 
 import miniwrite = require('miniwrite');
