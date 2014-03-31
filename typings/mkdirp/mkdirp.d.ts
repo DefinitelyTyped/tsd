@@ -1,8 +1,15 @@
+// Type definitions for mkdirp 0.3.0
+// Project: http://github.com/substack/node-mkdirp
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module 'mkdirp' {
-	function Mkdirp(dir: string, flags?: any): void;
-	module Mkdirp {
-		// (dir: string):void;
-		export function sync(dir: string, flags?: any): void;
+
+	function mkdirp(dir: string, cb: (err: any, made: string) => void): void;
+	function mkdirp(dir: string, flags: any, cb: (err: any, made: string) => void): void;
+
+	module mkdirp {
+		function sync(dir: string, flags?: any): string;
 	}
-	export = Mkdirp;
+	export = mkdirp;
 }

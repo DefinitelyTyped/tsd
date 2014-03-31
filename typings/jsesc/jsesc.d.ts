@@ -1,6 +1,25 @@
-declare function JSEsc(str: string, opts?: any): string;
-declare module JSEsc {
-}
+// Type definitions for jsesc 0.4.3
+// Project: https://github.com/mathiasbynens/jsesc
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module 'jsesc' {
-export = JSEsc;
+
+	function jsesc(str: string, opts?: any): string;
+
+	module jsesc {
+		var version: string;
+
+		interface Opts {
+			quotes?: string;
+			wrap?: boolean;
+			es6?: boolean;
+			escapeEverything?: boolean;
+			compact?: boolean;
+			indent?: string;
+			json?: boolean;
+		}
+	}
+
+	export = jsesc;
 }

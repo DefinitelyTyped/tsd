@@ -13,7 +13,7 @@
 			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
 		},
 		"node/node.d.ts": {
-			"commit": "eff67e5162e2b847f93eea4e247faf8243b800e3"
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
 		},
 		"q/Q.d.ts": {
 			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
@@ -22,13 +22,52 @@
 			"commit": "a53d50e91a454ba5b90906568f59f444ac71f9fd"
 		},
 		"bluebird/bluebird.d.ts": {
-			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
 		},
 		"lazy.js/lazy.js.d.ts": {
 			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
 		},
 		"highland/highland.d.ts": {
 			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
+		},
+		"buffer-equal/buffer-equal.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"detect-indent/detect-indent.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"exit/exit.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"graceful-fs/graceful-fs.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"jsesc/jsesc.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"json-pointer/json-pointer.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"minimist/minimist.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"open/open.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"source-map-support/source-map-support.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"mkdirp/mkdirp.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"uri-templates/uri-templates.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"tv4/tv4.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"configstore/configstore.d.ts": {
+			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
 		}
 	}
 }

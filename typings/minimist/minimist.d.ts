@@ -1,3 +1,8 @@
+// Type definitions for minimist 0.0.8
+// Project: https://github.com/substack/minimist
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module 'minimist' {
 	function minimist(args?: string[], opts?: minimist.Opts):Object;
 

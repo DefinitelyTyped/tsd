@@ -1,4 +1,9 @@
-declare module 'config-store' {
+// Type definitions for configstore 0.3.0
+// Project: https://github.com/yeoman/configstore
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
+declare module 'configstore' {
 	/*
 	 Set an item
 	 */
