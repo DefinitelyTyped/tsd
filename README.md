@@ -251,34 +251,6 @@ Notes:
 
 1. For now this only works with commits that actually changed the definition file you selected (eg, listed in `--history`) This will be expanded to allow selecting from any commit at a later date.
 
-## Usage as module
- 
-TSD can be used as a JavaScript npm dependency: 
-
-````js
-var tsd = require('tsd');
-var api = new tsd.API(new tsd.Context('path/to/tsd-config.json'));
-api.search(new tsd.Selector('jquery/*')).then(function(res) {
-	// yes
-	util.inspect(res);
-
-}, function(err) {
-	// no
-});
-````
-
-For a practical example see [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
-
-TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
-
-Note: Keep in mind this project started as a `<reference>` style TypeScript `v0.8.x` single-file compile target, which makes it harder to limit the exported API compared to `import` multi-file style. This is also why the definitions include more then just the `tsd` namespace. 
-
-API export is somewhat experimental; take care to lock versions and test on upgrade. If you plan to use TSD as module in a tool or project then feel free to [leave a message](https://github.com/DefinitelyTyped/tsd/issues) and coordinate stuff.
-
-### API docs 
-
-Not yet. 
-
 ## Special files
 
 ### tsd.json
@@ -336,6 +308,34 @@ Note: keep in mind the `.tsdrc` file is *not* secured. Don't use a token with ad
 
 The bare 'no scope' token is *relatively* harmless as it gives 'read-only access to public information', same as any non-autenticated access. But it does *identify* any requests done with it as being *yours*, so it is still *your* responsibility to keep the token private.
 
+## Usage as module
+ 
+TSD can be used as a JavaScript npm dependency: 
+
+````js
+var tsd = require('tsd');
+var api = new tsd.API(new tsd.Context('path/to/tsd-config.json'));
+api.search(new tsd.Selector('jquery/*')).then(function(res) {
+	// yes
+	util.inspect(res);
+
+}, function(err) {
+	// no
+});
+````
+
+For a practical example see [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+
+TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
+
+Note: Keep in mind this project started as a `<reference>` style TypeScript `v0.8.x` single-file compile target, which makes it harder to limit the exported API compared to `import` multi-file style. This is also why the definitions include more then just the `tsd` namespace. 
+
+API export is somewhat experimental; take care to lock versions and test on upgrade. If you plan to use TSD as module in a tool or project then feel free to [leave a message](https://github.com/DefinitelyTyped/tsd/issues) and coordinate stuff.
+
+### API docs 
+
+Not yet. 
+
 ## FAQ & Info
 
 ### Is there a grunt task available?
@@ -379,12 +379,6 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 ## History
 
-### v0.5.x ( > 2013-08)
-
-See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
-
-* `0.5.x` - `current` - Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
-
 ### v0.3.x
 
 * Original version by @[Diullei](https://github.com/Diullei).
@@ -394,6 +388,16 @@ To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/bl
 ````bash
 $ npm install tsd@0.3.0 -g
 ````
+
+### v0.5.x ( > 2013-08) 
+
+* Current release versions. See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
+
+* Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+
+### v0.6.x ( > 2014-02) 
+
+* Development for next-generation. Migrated to external TS modules, using more npm code, externalsing own functionalities. Code clean-up, best practices etc. Should apply lessons-learned and come in line with modern TypeScript code style. Development in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch; probably broken and regularly rebased for near future.
 
 ## Notable modules
 
@@ -411,35 +415,33 @@ Some essential modules used to build TSD:
 
 TSD is build with [TypeScript](http://www.typescriptlang.org/) `v0.9.7` and managed using [Grunt](http://www.gruntjs.com).
 
-To rebuild clone or fork the repos:
+To rebuild clone the repos:
 
-Install dependencies
+Install dependencies:
 
 ````bash
 $ npm install
 ````
 
-Build, lint and test
+Build, lint and test:
 
 ````bash
 $ grunt test
 ````
 
-Only rebuild (and run cli)
+Only rebuild:
 
 ````bash
 $ grunt build
 ````
 
-Either install global or use in dev folder:
-
-Run in dev folder
+Run in dev folder:
 
 ````bash
 $ node ./build/cli.js query d3 --dev
 ````
 
-Install to global cli
+Install dev folder to global cli:
 
 ````bash
 $ npm install . -g
@@ -447,13 +449,13 @@ $ npm install . -g
 
 TSD uses [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) to test separate test suites sets during development:
 
-List aliases
+List aliases:
 
 ````bash
 $ grunt -h
 ````
 
-Example: run only api tests
+Example: run only api tests:
 
 ````bash
 $ grunt gtx:api
@@ -464,6 +466,8 @@ $ grunt gtx:tsd
 It is recommend you use an intelligent parsing IDE (WebStorm or VisualStudio) and a big screen (or two) on a properly powerful workstation.
 
 Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don't really care, because [smart-tabs](http://www.emacswiki.org/SmartTabs) are awesome like that). The gruntfile uses slightly harsh [JSHint](https://github.com/jshint/jshint) and [TSLint](https://github.com/palantir/tslint) settings to enforce code style, but there is an [`.editorconfig`](http://editorconfig.org/) to elevate some of the pain.
+
+Master branch is the release version, new development happens currently in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch: probably broken and regularly rebased for near future.
 
 ## Contribute
 
