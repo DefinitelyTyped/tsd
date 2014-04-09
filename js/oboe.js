@@ -6167,7 +6167,9 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("D:\\_Editing\\github\\tsd\\tsd-site\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":24,"D:\\_Editing\\github\\tsd\\tsd-site\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":10,"inherits":9}],"Q44B2R":[function(require,module,exports){
+},{"./support/isBuffer":24,"D:\\_Editing\\github\\tsd\\tsd-site\\node_modules\\grunt-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":10,"inherits":9}],"oboe":[function(require,module,exports){
+module.exports=require('Q44B2R');
+},{}],"Q44B2R":[function(require,module,exports){
 // this file is the concatenation of several js files. See http://github.com/jimhigson/oboe.js
 // for the unconcatenated source
 
@@ -8613,6 +8615,4 @@ function oboe(arg1, arg2) {
    return oboe;
 })();
 
-},{"http":5,"url":23}],"oboe":[function(require,module,exports){
-module.exports=require('Q44B2R');
-},{}]},{},[]);
+},{"http":5,"url":23}]},{},[]);

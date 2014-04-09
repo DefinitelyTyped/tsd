@@ -4,8 +4,8 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "updatedAt": 1396735255941,
-  "count": 416,
+  "updatedAt": 1397003770407,
+  "count": 417,
   "content": [
     {
       "project": "accounting",
@@ -407,6 +407,26 @@
           {
             "name": "Arash Shakery",
             "url": "https://github.com/arash16"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "asciify",
+      "name": "asciify",
+      "path": "asciify/asciify.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts"
+        ],
+        "name": "asciify 1.3.5",
+        "version": "1.3.5",
+        "description": "",
+        "projectUrl": "https://www.npmjs.org/package/asciify",
+        "authors": [
+          {
+            "name": "Alan Norbauer http"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -1051,6 +1071,10 @@
           {
             "name": "Matthew Kimber",
             "url": "https://github.com/matthewkimber"
+          },
+          {
+            "name": "otiai10",
+            "url": "https://github.com/otiai10"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -2554,8 +2578,8 @@
         "references": [
           "../jquery/jquery.d.ts"
         ],
-        "name": "Hammer.js 1.0.5",
-        "version": "1.0.5",
+        "name": "Hammer.js 1.0.10",
+        "version": "1.0.10",
         "description": "",
         "projectUrl": "http://eightmedia.github.com/hammer.js",
         "authors": [
