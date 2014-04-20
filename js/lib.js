@@ -10,5 +10,6 @@ exports.absoluteURI = function absoluteURI(rel) {
 	delete u.search;
 	delete u.query;
 	delete u.hash;
+	delete u.href;
 	return urlMod.format(u);
 };

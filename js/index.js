@@ -1728,7 +1728,7 @@ function getDefURL(path) {
 }
 
 function loadData(data, url, done) {
-	console.log('loadData %s', url);
+	// console.log('loadData %s', url);
 
 	oboe(url)
 	.node('!repo', function (value) {
@@ -1770,8 +1770,6 @@ loadData(table.$data, lib.absoluteURI('data/repository.json'), function(err, dat
 	if (err) {
 		throw err;
 	}
-	console.log('done!');
-	console.log(data.all.length);
 });
 
 },{"./lib":9,"oboe":"Q44B2R","vue":"Dp4DMx"}],9:[function(require,module,exports){
@@ -1787,6 +1785,7 @@ exports.absoluteURI = function absoluteURI(rel) {
 	delete u.search;
 	delete u.query;
 	delete u.hash;
+	delete u.href;
 	return urlMod.format(u);
 };
 
