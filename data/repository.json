@@ -4,8 +4,8 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "updatedAt": 1397003770407,
-  "count": 417,
+  "updatedAt": 1397958122059,
+  "count": 431,
   "content": [
     {
       "project": "accounting",
@@ -479,6 +479,29 @@
           {
             "name": "Boris Yankov",
             "url": "https://github.com/borisyankov"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "atom",
+      "name": "atom",
+      "path": "atom/atom.d.ts",
+      "info": {
+        "references": [
+          "../q/Q.d.ts",
+          "../space-pen/space-pen.d.ts",
+          "../emissary/emissary.d.ts"
+        ],
+        "name": "Atom",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://atom.io",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -1100,6 +1123,25 @@
       }
     },
     {
+      "project": "clone",
+      "name": "clone",
+      "path": "clone/clone.d.ts",
+      "info": {
+        "references": [],
+        "name": "clone 0.1.11",
+        "version": "0.1.11",
+        "description": "",
+        "projectUrl": "https://github.com/pvorb/node-clone",
+        "authors": [
+          {
+            "name": "Kieran Simpson",
+            "url": "https://github.com/kierans/DefinitelyTyped"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "codemirror",
       "name": "codemirror",
       "path": "codemirror/codemirror.d.ts",
@@ -1214,6 +1256,28 @@
       }
     },
     {
+      "project": "cordova",
+      "name": "cordova",
+      "path": "cordova/cordova.d.ts",
+      "info": {
+        "references": [],
+        "name": "Apache Cordova.",
+        "version": "",
+        "description": "",
+        "projectUrl": "http://cordova.apache.org",
+        "authors": [
+          {
+            "name": "Microsoft Open Technologies"
+          },
+          {
+            "name": "Inc.",
+            "url": "http://msopentech.com"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "couchbase",
       "name": "couchbase",
       "path": "couchbase/couchbase.d.ts",
@@ -1229,6 +1293,29 @@
           {
             "name": "Basarat Ali Syed",
             "url": "https://github.com/basarat"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "createjs-lib",
+      "name": "createjs-lib",
+      "path": "createjs-lib/createjs-lib.d.ts",
+      "info": {
+        "references": [],
+        "name": "EaselJS 0.7.1, TweenJS 0.5.1, SoundJS 0.5.2, PreloadJS 0.4.1",
+        "version": "0.7.1",
+        "description": "",
+        "projectUrl": "http://www.createjs.com/#!/EaselJS",
+        "authors": [
+          {
+            "name": "Pedro Ferreira",
+            "url": "https://bitbucket.org/drk4"
+          },
+          {
+            "name": "Chris Smith",
+            "url": "https://github.com/evilangelist"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -1443,6 +1530,25 @@
           {
             "name": "Maksim Kozhukh",
             "url": "http://github.com/mkozhukh"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "diff",
+      "name": "diff",
+      "path": "diff/diff.d.ts",
+      "info": {
+        "references": [],
+        "name": "diff",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/kpdecker/jsdiff",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -1677,6 +1783,27 @@
           {
             "name": "Jed Hunsaker",
             "url": "https://github.com/jedhunsaker"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "emissary",
+      "name": "emissary",
+      "path": "emissary/emissary.d.ts",
+      "info": {
+        "references": [
+          "../mixto/mixto.d.ts"
+        ],
+        "name": "emissary",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/atom/emissary",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -2340,6 +2467,28 @@
       }
     },
     {
+      "project": "glob",
+      "name": "glob",
+      "path": "glob/glob.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts",
+          "../minimatch/minimatch.d.ts"
+        ],
+        "name": "Glob",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/isaacs/node-glob",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "globalize",
       "name": "globalize",
       "path": "globalize/globalize.d.ts",
@@ -2645,6 +2794,25 @@
           {
             "name": "Sergey Gerasimov",
             "url": "https://github.com/gerich-home"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "hellojs",
+      "name": "hellojs",
+      "path": "hellojs/hellojs.d.ts",
+      "info": {
+        "references": [],
+        "name": "hello.js 0.2.1",
+        "version": "0.2.1",
+        "description": "",
+        "projectUrl": "http://adodson.com/hello.js",
+        "authors": [
+          {
+            "name": "Pavel Zika",
+            "url": "https://github.com/PavelPZ"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -4171,6 +4339,10 @@
           {
             "name": "Boris Yankov",
             "url": "https://github.com/borisyankov"
+          },
+          {
+            "name": "John Reilly",
+            "url": "https://github.com/johnnyreilly"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -5235,6 +5407,25 @@
       }
     },
     {
+      "project": "minimatch",
+      "name": "minimatch",
+      "path": "minimatch/minimatch.d.ts",
+      "info": {
+        "references": [],
+        "name": "Minimatch",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/isaacs/minimatch",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "minimist",
       "name": "minimist",
       "path": "minimist/minimist.d.ts",
@@ -5248,6 +5439,25 @@
           {
             "name": "Bart van der Schoor",
             "url": "https://github.com/Bartvds"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "mixto",
+      "name": "mixto",
+      "path": "mixto/mixto.d.ts",
+      "info": {
+        "references": [],
+        "name": "mixto",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/atom/mixto",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -5665,6 +5875,25 @@
       }
     },
     {
+      "project": "notify.js",
+      "name": "notify.js",
+      "path": "notify.js/notify.js.d.ts",
+      "info": {
+        "references": [],
+        "name": "notify.js 1.2.0",
+        "version": "1.2.0",
+        "description": "",
+        "projectUrl": "https://github.com/alexgibson/notify.js",
+        "authors": [
+          {
+            "name": "soundTricker",
+            "url": "https://github.com/soundTricker"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "nprogress",
       "name": "NProgress",
       "path": "nprogress/NProgress.d.ts",
@@ -5779,6 +6008,27 @@
       }
     },
     {
+      "project": "passport-facebook",
+      "name": "passport-facebook",
+      "path": "passport-facebook/passport-facebook.d.ts",
+      "info": {
+        "references": [
+          "../passport/passport.d.ts"
+        ],
+        "name": "passport-facebook 1.0.3",
+        "version": "1.0.3",
+        "description": "",
+        "projectUrl": "https://github.com/jaredhanson/passport-facebook",
+        "authors": [
+          {
+            "name": "James Roland Cabresos",
+            "url": "https://github.com/staticfunction"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "passport",
       "name": "passport",
       "path": "passport/passport.d.ts",
@@ -5794,6 +6044,28 @@
           {
             "name": "Horiuchi_H",
             "url": "https://github.com/horiuchi"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "pathwatcher",
+      "name": "pathwatcher",
+      "path": "pathwatcher/pathwatcher.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts",
+          "../q/Q.d.ts"
+        ],
+        "name": "pathwatcher",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/atom/node-pathwatcher",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -6453,8 +6725,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Aggregates package",
-        "version": "",
+        "name": "RxJS-Aggregates v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6493,8 +6765,8 @@
           "rx.d.ts",
           "rx.async-lite.d.ts"
         ],
-        "name": "RxJS-Async v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-Async v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6533,8 +6805,8 @@
           "rx.d.ts",
           "rx.backpressure-lite.d.ts"
         ],
-        "name": "RxJS-BackPressure v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-BackPressure v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6569,8 +6841,8 @@
           "rx.d.ts",
           "rx.binding-lite.d.ts"
         ],
-        "name": "RxJS-Binding v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-Binding v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6594,8 +6866,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Coincidence package",
-        "version": "",
+        "name": "RxJS-Coincidence v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6619,8 +6891,8 @@
         "references": [
           "rx-lite.d.ts"
         ],
-        "name": "RxJS v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6644,8 +6916,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS/Experimental",
-        "version": "",
+        "name": "RxJS-Experimental v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "https://github.com/Reactive-Extensions/RxJS",
         "authors": [
@@ -6665,8 +6937,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Join package",
-        "version": "",
+        "name": "RxJS-Join v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6712,8 +6984,8 @@
           "rx.time-lite.d.ts",
           "rx.backpressure-lite.d.ts"
         ],
-        "name": "RxJS-Lite v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-Lite v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6738,8 +7010,8 @@
           "rx.d.ts",
           "rx.virtualtime.d.ts"
         ],
-        "name": "RxJS-Testing",
-        "version": "",
+        "name": "RxJS-Testing v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "https://github.com/Reactive-Extensions/RxJS",
         "authors": [
@@ -6774,8 +7046,8 @@
           "rx.d.ts",
           "rx.time-lite.d.ts"
         ],
-        "name": "RxJS-Time v2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-Time v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -6799,8 +7071,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-VirtualTime package 2.2.18",
-        "version": "2.2.18",
+        "name": "RxJS-VirtualTime v2.2.20",
+        "version": "2.2.20",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7304,6 +7576,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "space-pen",
+      "name": "space-pen",
+      "path": "space-pen/space-pen.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
