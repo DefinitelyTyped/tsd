@@ -1612,9 +1612,13 @@ function parseHost(host) {
 }());
 
 },{"punycode":3,"querystring":6}],8:[function(require,module,exports){
-var oboe = require('oboe');
 var Vue = require('vue');
 var lib = require('./lib');
+
+//grab global (hacky skip browserifing node version)
+if (!window.oboe) {
+	throw new Error('expected oboe global object');
+}
 
 function escapeRegExp(str) {
 	return String(str).replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
@@ -1772,7 +1776,7 @@ loadData(table.$data, lib.absoluteURI('data/repository.json'), function(err, dat
 	}
 });
 
-},{"./lib":9,"oboe":"Q44B2R","vue":"Dp4DMx"}],9:[function(require,module,exports){
+},{"./lib":9,"vue":"Dp4DMx"}],9:[function(require,module,exports){
 var urlMod = require('url');
 var path = require('path');
 
@@ -1786,6 +1790,7 @@ exports.absoluteURI = function absoluteURI(rel) {
 	delete u.query;
 	delete u.hash;
 	delete u.href;
+	console.log(urlMod.format(u));
 	return urlMod.format(u);
 };
 
