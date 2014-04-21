@@ -4,8 +4,8 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "updatedAt": 1397962059812,
-  "count": 431,
+  "updatedAt": 1398044798119,
+  "count": 432,
   "content": [
     {
       "project": "accounting",
@@ -3238,6 +3238,25 @@
           {
             "name": "Theodore Brown",
             "url": "https://github.com/theodorejb"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "joi",
+      "name": "joi",
+      "path": "joi/joi.d.ts",
+      "info": {
+        "references": [],
+        "name": "joi v3.1.0",
+        "version": "3.1.0",
+        "description": "",
+        "projectUrl": "https://github.com/spumko/joi",
+        "authors": [
+          {
+            "name": "Bart van der Schoor",
+            "url": "https://github.com/Bartvds"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -7583,13 +7602,20 @@
       "name": "space-pen",
       "path": "space-pen/space-pen.d.ts",
       "info": {
-        "references": [],
-        "name": "",
+        "references": [
+          "../jquery/jquery.d.ts"
+        ],
+        "name": "SpacePen",
         "version": "",
         "description": "",
-        "projectUrl": "",
-        "authors": [],
-        "reposUrl": ""
+        "projectUrl": "https://github.com/atom/space-pen",
+        "authors": [
+          {
+            "name": "vvakame",
+            "url": "https://github.com/vvakame"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
       }
     },
     {

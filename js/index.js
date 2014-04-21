@@ -1789,8 +1789,6 @@ exports.absoluteURI = function absoluteURI(rel) {
 	delete u.search;
 	delete u.query;
 	delete u.hash;
-	delete u.href;
-	console.log(urlMod.format(u));
 	return urlMod.format(u);
 };
 
