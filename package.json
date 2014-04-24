@@ -99,7 +99,6 @@
     "buffer-equal": "0.0.0",
     "ansidiff": "~1.0.0",
     "lodash-template": "~1.0.0",
-    "grunt-webshot": "~0.2.0",
     "grunt-regex-replace": "~0.2.5",
     "package.json-schema": "~0.2.0"
   }

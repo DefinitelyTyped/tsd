@@ -145,10 +145,6 @@ module.exports = function (grunt) {
 				src: ['src/util/blobSha.ts'],
 				out: 'util/blobSha.js'
 			},
-			capture_task: {
-				src: ['tasks/capture_cli.ts'],
-				out: 'tasks/capture_cli.js'
-			},
 			//use this non-checked-in file to test small snippets of dev code
 			dev: {
 				src: ['src/dev.ts'],
@@ -178,15 +174,6 @@ module.exports = function (grunt) {
 				].join(' '),
 				options: {
 				}
-			}
-		},
-		capture_cli: {
-			options: {
-				modulePath: './build/cli.js',
-				debug: false,
-				cwd: null,
-				template: path.resolve('assets', 'templates', 'cli-standard.html'),
-				outDir: './media/capture'
 			}
 		}
 	});
@@ -294,96 +281,6 @@ module.exports = function (grunt) {
 	gtx.alias('edit_07', 'gtx:http');
 	gtx.alias('edit_08', 'specjs');
 
-	// capture macro
-	gtx.define('capture', function (macro, id) {
-		var output = './media/capture/' + id + '.html';
-		var shotFull = './media/capture/' + id + '.png';
-		var shotSmall = './media/capture/' + id + '-small.png';
-
-		macro.add('clean', [
-			output,
-			shotFull,
-			shotSmall
-		]);
-
-		macro.add('capture_cli', {
-			options: {
-				title: id,
-				outDir: '',
-				name: output,
-				args: [
-					'--style', 'css'
-				].concat(macro.getParam('args', []))
-			}
-		});
-		macro.add('webshot', {
-			options: {
-				site: output,
-				savePath: shotFull,
-				siteType: 'file',
-				windowSize: {
-					width: 1024,
-					height: 400
-				},
-				shotSize: {
-					width: macro.getParam('width', 800),
-					height: macro.getParam('height', 'all')
-				}
-			}
-		});
-		if (macro.getParam('small', false)) {
-			macro.add('webshot', {
-				options: {
-					site: output,
-					savePath: shotSmall,
-					siteType: 'file',
-					windowSize: {
-						width: 640,
-						height: 768
-					},
-					shotSize: {
-						width: 640,
-						height: macro.getParam('smallHeight', 'all')
-					}
-				}
-			});
-		}
-	}, {
-		concurrent: cpuCores
-	});
-	gtx.create('help', 'capture', {
-		args: [
-			'help'
-		],
-		small: true,
-		smallHeight: 400
-	});
-	/*gtx.create('index', 'capture', {
-	 args: [
-	 'query', '*'
-	 ]
-	 });*/
-	gtx.create('async', 'capture', {
-		args: [
-			'query',
-			'async',
-			'--action', 'install',
-			'--overwrite',
-			'--history',
-			'--info'
-		]
-	});
-	gtx.create('angular', 'capture', {
-		args: [
-			'query',
-			'angular*',
-			'--resolve'
-		]
-	});
-	gtx.alias('capture_demo', [
-		'ts:capture_task',
-		'gtx-type:capture'
-	]);
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();
