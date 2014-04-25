@@ -135,6 +135,16 @@ Install and save to `test.d.ts` as `<reference/>` bundle:
 $ tsd query mocha chai -r -o -s -a install -b test
 ````
 
+#### Update all definitions
+
+Update everything in `tsd.json`: 
+
+````bash
+$ tsd update --save --overwrite
+$ tsd update -s -o
+$ tsd update -so
+````
+
 ## Query
 
 TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
