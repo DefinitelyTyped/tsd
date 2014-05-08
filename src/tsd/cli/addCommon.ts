@@ -12,7 +12,7 @@ import CacheMode = require('../../http/CacheMode');
 
 import Printer = require('./Printer');
 import StyleMap = require('./StyleMap');
-import CliConst = require('./Const');
+import CliConst = require('./const');
 import Opt = CliConst.Opt;
 import Action = CliConst.Action;
 

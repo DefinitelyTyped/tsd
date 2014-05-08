@@ -15,7 +15,7 @@ import helper = require('../../test/helper');
 
 import gitHelper = require('../../test/git/gitHelper');
 
-import GitUtil = require('../../git/GitUtil');
+import GitUtil = require('../../git/gitUtil');
 import GithubRepo = require('../../git/GithubRepo');
 import GithubAPI = require('../../git/loader/GithubAPI');
 import GithubRaw = require('../../git/loader/GithubRaw');

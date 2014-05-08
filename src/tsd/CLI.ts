@@ -44,7 +44,7 @@ import ExposeCommand = require('../expose/Command');
 import ExposeContext = require('../expose/Context');
 import sorter = require('../expose/sorter');
 
-import CliConst = require('./cli/Const');
+import CliConst = require('./cli/const');
 import Opt = CliConst.Opt;
 import Group = CliConst.Group;
 import Action = CliConst.Action;

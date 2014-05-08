@@ -26,7 +26,7 @@ describe('DefInfoParser', () => {
 
 	before((done: (err?) => void) => {
 		// use old tsd-deftools loader
-		headerHelper.loadrFixtures(path.resolve(fixtures, 'headers')).done((res: HeaderAssert[]) => {
+		headerHelper.loadFixtures(path.resolve(fixtures, 'headers')).done((res: HeaderAssert[]) => {
 			assert.operator(res.length, '>', 0);
 			data = res;
 			if (filter) {

@@ -6,7 +6,7 @@ import log = require('../../xm/log');
 import AuthorInfo = require('../../xm/data/AuthorInfo');
 import RegExpGlue = require('../../xm/lib/RegExpGlue');
 
-import lineParser = require('../../xm/lib/lineParser');
+import lineParser = require('../../xm/lib/LineParser');
 import LineParserCore = lineParser.LineParserCore;
 import LineParser = lineParser.LineParser;
 import LineParserMatch = lineParser.LineParserMatch;
