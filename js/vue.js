@@ -2871,9 +2871,7 @@ function stripQuotes (str) {
         return str.slice(1, -1)
     }
 }
-},{"./utils":25}],"vue":[function(require,module,exports){
-module.exports=require('Dp4DMx');
-},{}],"Dp4DMx":[function(require,module,exports){
+},{"./utils":25}],"Dp4DMx":[function(require,module,exports){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
@@ -3057,7 +3055,9 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
-},{"./config":4,"./directives":9,"./filters":19,"./observer":22,"./transition":24,"./utils":25,"./viewmodel":26}],22:[function(require,module,exports){
+},{"./config":4,"./directives":9,"./filters":19,"./observer":22,"./transition":24,"./utils":25,"./viewmodel":26}],"vue":[function(require,module,exports){
+module.exports=require('Dp4DMx');
+},{}],22:[function(require,module,exports){
 /* jshint proto:true */
 
 var Emitter  = require('./emitter'),
