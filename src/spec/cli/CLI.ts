@@ -9,10 +9,9 @@ import Promise = require('bluebird');
 import chai = require('chai');
 import assert = chai.assert;
 
-import CacheMode = require('../../xm/http/CacheMode');
+import CacheMode = require('../../http/CacheMode');
 import fileIO = require('../../xm/file/fileIO');
 import cp = require('../../xm/lib/childProcess');
-import RunCLIResult = cp.RunCLIResult;
 import runCLI = cp.runCLI;
 
 import helper = require('../../test/helper');
@@ -20,7 +19,6 @@ import settings = require('../../test/settings');
 import TestInfo = require('../../test/TestInfo');
 
 describe('CLI Query', () => {
-	'use strict';
 
 	function applyTestInfo(group: string, name: string, test: any, createConfigFile: boolean = false): TestInfo {
 		var info = new TestInfo(group, name, test, createConfigFile);
@@ -87,7 +85,7 @@ describe('CLI Query', () => {
 		return str.replace(trimHeaderExp, '');
 	}
 
-	function assertCLIResult(result: RunCLIResult, test, info: TestInfo, args): void {
+	function assertCLIResult(result: cp.RunCLIResult, test, info: TestInfo, args): void {
 		assert.isObject(result, 'result');
 		assert.strictEqual(result.code, 0, 'result.code');
 		assert.operator(result.stdout.length, '>=', 0, 'result.stdout.length');
@@ -132,7 +130,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('help', name, test);
 				var args = getArgs(test, data, info);
 
-				return runCLI(info.modBuildCLI, args, debug).then((result: RunCLIResult) => {
+				return runCLI(info.modBuildCLI, args, debug).then((result: cp.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 
@@ -156,7 +154,7 @@ describe('CLI Query', () => {
 				var info = applyTestInfo('query', name, data);
 				var args = getArgs(test, data, info);
 
-				return runCLI(info.modBuildCLI, args, debug).then((result: RunCLIResult) => {
+				return runCLI(info.modBuildCLI, args, debug).then((result: cp.RunCLIResult) => {
 					assert.isObject(result, 'result');
 					assert.notOk(result.error, 'result.error');
 

@@ -2,33 +2,12 @@
 
 'use strict';
 
-export var natives: {[key: string]: string} = {
-	'[object Arguments]': 'arguments',
-	'[object Array]': 'array',
-	'[object Date]': 'date',
-	'[object Function]': 'function',
-	'[object Number]': 'number',
-	'[object RegExp]': 'regexp',
-	'[object String]': 'string'
-};
+import typeDetect = require('type-detect');
 
 var toString = Object.prototype.toString;
 
 export function get(value: any): string {
-	var str = Object.prototype.toString.call(value);
-	if (natives[str]) {
-		return natives[str];
-	}
-	if (value === null) {
-		return 'null';
-	}
-	if (value === undefined) {
-		return 'undefined';
-	}
-	if (value === Object(value)) {
-		return 'object';
-	}
-	return typeof value;
+	return typeDetect(value);
 }
 
 export var jsonTypes: string[] = [
@@ -53,16 +32,7 @@ export var valueTypes: string[] = [
 	'null'
 ];
 
-var objectNameExp = /(^\[object )|(\]$)/gi;
-
-
-var toStr = Object.prototype.toString;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-export function toProtoString(value: any): string {
-	return toStr.call(value).replace(objectNameExp, '');
-}
-
 
 export function hasOwnProp(value: any, prop: string): boolean {
 	return hasOwnProperty.call(value, prop);
@@ -76,47 +46,47 @@ export function isType(value: any, type: string): boolean {
 }
 
 export function isArguments(value: any): boolean {
-	return get(value) === 'arguments';
+	return typeDetect(value) === 'arguments';
 }
 
 export function isArray(value: any): boolean {
-	return get(value) === 'array';
+	return typeDetect(value) === 'array';
 }
 
 export function isDate(value: any): boolean {
-	return get(value) === 'date';
+	return typeDetect(value) === 'date';
 }
 
 export function isFunction(value: any): boolean {
-	return get(value) === 'function';
+	return typeDetect(value) === 'function';
 }
 
 export function isNumber(value: any): boolean {
-	return get(value) === 'number';
+	return typeDetect(value) === 'number';
 }
 
 export function isRegExp(value: any): boolean {
-	return get(value) === 'regexp';
+	return typeDetect(value) === 'regexp';
 }
 
 export function isString(value: any): boolean {
-	return get(value) === 'string';
+	return typeDetect(value) === 'string';
 }
 
 export function isNull(value: any): boolean {
-	return get(value) === 'null';
+	return typeDetect(value) === 'null';
 }
 
 export function isUndefined(value: any): boolean {
-	return get(value) === 'undefined';
+	return typeDetect(value) === 'undefined';
 }
 
 export function isObject(value: any): boolean {
-	return get(value) === 'object';
+	return typeDetect(value) === 'object';
 }
 
 export function isBoolean(value: any): boolean {
-	return get(value) === 'boolean';
+	return typeDetect(value) === 'boolean';
 }
 // error?
 
@@ -124,7 +94,7 @@ export function isBoolean(value: any): boolean {
 
 // TODO add more array-likes?? DOM???
 export function isArrayLike(value: any): boolean {
-	return (get(value) === 'array' || get(value) === 'arguments');
+	return (typeDetect(value) === 'array' || typeDetect(value) === 'arguments');
 }
 
 export function isOk(value: any): boolean {
@@ -154,7 +124,7 @@ export function isFlagOn(value: any): boolean {
 }
 
 export function isValid(value: any): boolean {
-	var type = get(value);
+	var type = typeDetect(value);
 	return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(value)));
 }
 
@@ -163,15 +133,15 @@ export function isNaN(value: any): boolean {
 }
 
 export function isJSONValue(value: any): boolean {
-	return jsonTypes.indexOf(get(value)) > -1;
+	return jsonTypes.indexOf(typeDetect(value)) > -1;
 }
 
 export function isPrimitive(value: any): boolean {
-	return primitiveTypes.indexOf(get(value)) > -1;
+	return primitiveTypes.indexOf(typeDetect(value)) > -1;
 }
 
 export function isValueType(value: any): boolean {
-	return valueTypes.indexOf(get(value)) > -1;
+	return valueTypes.indexOf(typeDetect(value)) > -1;
 }
 
 // - - - -

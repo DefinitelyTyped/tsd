@@ -5,11 +5,11 @@
 import fs = require('graceful-fs');
 import path = require('path');
 import util = require('util');
+import VError = require('verror');
 
 import Promise = require('bluebird');
 import mkdirp = require('mkdirp');
 
-import NodeStats = require('./NodeStats');
 import assertVar = require('../assertVar');
 
 var mkdirpP = Promise.promisify(mkdirp);
@@ -82,11 +82,8 @@ export function writeJSONSync(dest: string, data: any) {
 	fs.writeFileSync(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 }
 
-export function writeJSON(dest: string, data: any): Promise<void> {
-	dest = path.resolve(dest);
-	return mkdirCheckQ(path.dirname(dest), true).then((dest: string) => {
-		return write(dest, JSON.stringify(data, null, 2), {encoding: 'utf8'});
-	});
+export function writeJSON(filename: string, data: any): Promise<void> {
+	return write(filename, JSON.stringify(data, null, 2), {encoding: 'utf8'});
 }
 
 // lazy wrapper as alternative to readJSONSync
@@ -109,7 +106,7 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
 	dir = path.resolve(dir);
 	if (fs.existsSync(dir)) {
 		if (!fs.statSync(dir).isDirectory()) {
-			throw (new Error('path exists but is not a directory: ' + dir));
+			throw new Error('path exists but is not a directory ' + dir);
 		}
 		if (writable) {
 			fs.chmodSync(dir, '744');
@@ -131,7 +128,7 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
 		}
 		catch (e) {
 			// rethrow
-			throw new Error('no write access to: ' + dir + ' -> ' + e);
+			throw new VError(e, 'no write access to %s -> %s', dir, + e);
 		}
 	}
 	return dir;
@@ -142,14 +139,14 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
  */
 // TODO unit test this
 // TODO why not by default make writable? why ever use this without writable?
-export function mkdirCheckQ(dir: string, writable: boolean = false, testWritable: boolean = false): Promise<string> {
+export function mkdirCheck(dir: string, writable: boolean = false, testWritable: boolean = false): Promise<string> {
 	dir = path.resolve(dir);
 
 	return exists(dir).then((exists: boolean) => {
 		if (exists) {
 			return isDirectory(dir).then((isDir: boolean) => {
 				if (!isDir) {
-					throw (new Error('path exists but is not a directory: ' + dir));
+					throw (new Error('path exists but is not a directory ' + dir));
 				}
 				if (writable) {
 					return chmod(dir, '744');
@@ -170,7 +167,7 @@ export function mkdirCheckQ(dir: string, writable: boolean = false, testWritable
 			return write(testFile, 'test').then(() => {
 				return remove(testFile);
 			}).catch((err) => {
-				throw new Error('no write access to: ' + dir + ' -> ' + err);
+				throw new Error('no write access to ' + dir + ' -> ' + err);
 			});
 		}
 	}).return(dir);
@@ -198,7 +195,7 @@ export function removeFile(target: string): Promise<void> {
 		}
 		return isFile(target).then((isFile: boolean) => {
 			if (!isFile) {
-				throw new Error('not a file: ' + target);
+				throw new Error('not a file ' + target);
 			}
 			return remove(target);
 		});
@@ -209,7 +206,7 @@ var utimes = Promise.promisify(fs.utimes);
 
 // TODO what about directories?
 export function touchFile(src: string, atime?: Date, mtime?: Date): Promise<void> {
-	return stat(src).then((stat: NodeStats) => {
+	return stat(src).then((stat: fs.Stats) => {
 		atime = (atime || new Date());
 		mtime = (mtime || stat.mtime);
 		return utimes(src, atime, mtime);
@@ -219,7 +216,7 @@ export function touchFile(src: string, atime?: Date, mtime?: Date): Promise<void
 export function findup(dir: string, name: string): Promise<string> {
 	return Promise.attempt<string>(() => {
 		if (dir === '/') {
-			throw new Error('could not find package.json up from: ' + dir);
+			throw new Error('could not find package.json up from ' + dir);
 		}
 		else if (!dir || dir === '.') {
 			throw new Error('cannot find package.json from unspecified directory');
@@ -233,7 +230,7 @@ export function findup(dir: string, name: string): Promise<string> {
 			// one-up
 			var dirName = path.dirname(dir);
 			if (dirName === dir) {
-				throw new Error('cannot find file: ' + name);
+				throw new Error('cannot find file ' + name);
 			}
 			return findup(path.dirname(dir), name).then((file: string) => {
 				return file;
@@ -250,9 +247,9 @@ export function exists(filename: string): any {
 	});
 }
 
-export function stat(filename: string): Promise<NodeStats> {
-	return new Promise<NodeStats>((resolve, reject) => {
-		fs.stat(filename, (err, stat: NodeStats) => {
+export function stat(filename: string): Promise<fs.Stats> {
+	return new Promise<fs.Stats>((resolve, reject) => {
+		fs.stat(filename, (err, stat: fs.Stats) => {
 			if (err) {
 				reject(err);
 			}
@@ -290,14 +287,18 @@ export function read(filename: string, opts?: Object): Promise<any> {
 }
 
 export function write(filename: string, content: any, opts?: Object): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
-		fs.writeFile(filename, content, opts, (err) => {
-			if (err) {
-				reject(err);
-			}
-			else {
-				resolve(undefined);
-			}
+	filename = path.resolve(filename);
+
+	return mkdirCheck(path.dirname(filename), true).then(() => {
+		return new Promise<void>((resolve, reject) => {
+			fs.writeFile(filename, content, opts, (err) => {
+				if (err) {
+					reject(err);
+				}
+				else {
+					resolve(undefined);
+				}
+			});
 		});
 	});
 }
@@ -337,9 +338,9 @@ export function readdir(basePath: string): Promise<string[]> {
 	return new Promise<string[]>((resolve, reject) => {
 		fs.readdir(basePath, (error, list) => {
 			if (error) {
-				error.message = 'Can\'t list ' + JSON.stringify(path) + ': ' + error.message;
-				return reject(error);
-			} else {
+				return reject(new VError(error, 'Can\'t list %s', JSON.stringify(path)));
+			}
+			else {
 				resolve(list);
 			}
 		});
@@ -347,7 +348,7 @@ export function readdir(basePath: string): Promise<string[]> {
 }
 
 // lifted from Q-io
-export function listTree(basePath: string, guard: (basePath: string, stat: NodeStats) => boolean): Promise<string[]> {
+export function listTree(basePath: string, guard: (basePath: string, stat: fs.Stats) => boolean): Promise<string[]> {
 	basePath = String(basePath || '');
 	if (!basePath) {
 		basePath = '.';

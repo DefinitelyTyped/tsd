@@ -1,5 +1,6 @@
 /// <reference path="../_ref.d.ts" />
 
+import VError = require('verror');
 import typeOf = require('../../xm/typeOf');
 import assertVar = require('../../xm/assertVar');
 import assert = require('../../xm/assert');
@@ -11,7 +12,7 @@ import tsdUtil = require('../util/tsdUtil');
 
 class DefBlob {
 	sha: string = null;
-	content: NodeBuffer = null;
+	content: Buffer = null;
 	encoding: string = 'utf8';
 
 	constructor(sha: string, content: any = null, encoding: string = null) {
@@ -33,10 +34,10 @@ class DefBlob {
 		return typeOf.isValid(this.content);
 	}
 
-	setContent(content: NodeBuffer, encoding?: string): void {
+	setContent(content: Buffer, encoding?: string): void {
 		assertVar(content, Buffer, 'content');
 		if (typeOf.isValid(this.content)) {
-			throw new Error('content already set: ' + this.sha);
+			throw new VError('content already set %s', this.sha);
 		}
 
 		var sha = gitUtil.blobShaHex(content, encoding || this.encoding);

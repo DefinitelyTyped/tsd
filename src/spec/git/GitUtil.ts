@@ -17,7 +17,6 @@ import gitHelper = require('../../test/git/gitHelper');
 import GitUtil = require('../../git/GitUtil');
 
 describe('GitUtils', () => {
-	'use strict';
 
 	var gitTest = gitHelper.getGitTestInfo();
 

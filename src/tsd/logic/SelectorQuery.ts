@@ -16,9 +16,10 @@ import Selection = require('../select/Selection');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
+import VError = require('verror');
 
-class SelectorQuery extends SubCore {
+class SelectorQuery extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'select', 'Select');
@@ -47,15 +48,15 @@ class SelectorQuery extends SubCore {
 			res.selection = defUtil.getHeads(res.definitions);
 
 			if (options.minMatches > 0 && res.definitions.length < options.minMatches) {
-				throw new Error('expected more matches: ' + res.definitions.length + ' < ' + options.minMatches);
+				throw new VError('expected more matches %s < %s', res.definitions.length, options.minMatches);
 			}
 			if (options.maxMatches > 0 && res.definitions.length > options.maxMatches) {
-				throw new Error('expected less matches: ' + res.definitions.length + ' > ' + options.maxMatches);
+				throw new VError('expected less matches %s > %s', res.definitions.length, options.maxMatches);
 			}
 		}).then(() => {
 			if (query.requiresHistory) {
 				if (options.limitApi > 0 && res.definitions.length > options.limitApi) {
-					throw new Error('match count ' + res.definitions.length + ' over api limit ' + options.limitApi);
+					throw new VError('match count %s over api limit %s', res.definitions.length , options.limitApi);
 				}
 				return this.core.content.loadHistoryBulk(res.definitions).then(() => {
 					if (query.commitMatcher) {

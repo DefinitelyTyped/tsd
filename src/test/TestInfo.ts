@@ -30,10 +30,10 @@ class TestInfo {
 		this.name = name;
 		this.group = group;
 
-		this.tmpDir = path.join(__dirname, 'result', this.group, this.name);
+		this.tmpDir = path.join(__dirname, '..', '..', 'tmp', 'result', this.group, this.name);
 		this.dumpDir = path.resolve(this.tmpDir, 'dump');
 		this.fixturesDir = path.resolve(__dirname, '..', '..', 'fixtures', 'expected', this.group, this.name);
-		this.modBuildDir = path.resolve(__dirname, '..', '..', '..', '..', 'build');
+		this.modBuildDir = path.resolve('./build');
 
 		if (test.fixtures) {
 			this.fixturesDir = path.resolve(this.fixturesDir, '..', test.fixtures);
@@ -53,6 +53,10 @@ class TestInfo {
 
 	get typingsDir(): string {
 		return path.join(this.tmpDir, 'typings');
+	}
+
+	get bundleFile(): string {
+		return path.join(this.tmpDir, 'typings', Const.bundleFile);
 	}
 
 	get cacheDirDev(): string {
@@ -105,6 +109,10 @@ class TestInfo {
 
 	get typingsExpect(): string {
 		return path.join(this.fixturesDir, 'typings');
+	}
+
+	get bundleExpect(): string {
+		return path.join(this.fixturesDir, 'typings', Const.bundleFile);
 	}
 
 	get testDump(): string {

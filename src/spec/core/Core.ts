@@ -19,7 +19,6 @@ import Core = require('../../tsd/logic/Core');
 import DefIndex = require('../../tsd/data/DefIndex');
 
 describe('Core', () => {
-	'use strict';
 
 	var fixtures = helper.getDirNameFixtures();
 	var tmp = helper.getDirNameTmp();
@@ -81,10 +80,10 @@ describe('Core', () => {
 		});
 
 		it('should fail on missing required data', () => {
-			return assertInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file:/);
+			return assertInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file/);
 		});
 		it('should fail on bad version value', () => {
-			return assertInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config:/);
+			return assertInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config/);
 		});
 
 		it('should pass on missing optional data', () => {
@@ -93,6 +92,7 @@ describe('Core', () => {
 			return assert.isFulfilled(core.config.readConfig(true));
 		});
 	});
+
 	describe('saveConfig', () => {
 		it('should save modified data', () => {
 			// copy temp for saving

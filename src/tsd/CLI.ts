@@ -8,6 +8,7 @@ import path = require('path');
 import Promise = require('bluebird');
 import yaml = require('js-yaml');
 
+import VError = require('verror');
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
 
@@ -35,13 +36,13 @@ import CommitMatcher = require('./select/CommitMatcher');
 import DateMatcher = require('./select/DateMatcher');
 import InstallResult = require('./logic/InstallResult');
 
-import Expose = require('../xm/expose/Expose');
-import ExposeGroup = require('../xm/expose/ExposeGroup');
-import ExposeOption = require('../xm/expose/ExposeOption');
-import ExposeResult = require('../xm/expose/ExposeResult');
-import ExposeCommand = require('../xm/expose/ExposeCommand');
-import ExposeContext = require('../xm/expose/ExposeContext');
-import sorter = require('../xm/expose/sorter');
+import Expose = require('../expose/Expose');
+import ExposeGroup = require('../expose/Group');
+import ExposeOption = require('../expose/Option');
+import ExposeResult = require('../expose/Result');
+import ExposeCommand = require('../expose/Command');
+import ExposeContext = require('../expose/Context');
+import sorter = require('../expose/sorter');
 
 import CliConst = require('./cli/Const');
 import Opt = CliConst.Opt;
@@ -184,7 +185,7 @@ export function getExpose(): Expose {
 		// callback for easy error reporting
 		return getAPIJob(ctx).then((job: Job) => {
 			if (ctx.numArgs < 1) {
-				throw new Error('pass at least one query pattern');
+				throw new VError('pass at least one query pattern');
 			}
 			job.query = new Query();
 			for (var i = 0, ii = ctx.numArgs; i < ii; i++) {
@@ -250,11 +251,11 @@ export function getExpose(): Expose {
 		group.sorter = (one: ExposeCommand, two: ExposeCommand): number => {
 			var sort: number;
 			// TODO sane-ify sorting groups
-			sort = sorter.exposeSortHasElem(one.groups, two.groups, Group.query);
+			sort = sorter.sortHasElem(one.groups, two.groups, Group.query);
 			if (sort !== 0) {
 				return sort;
 			}
-			return sorter.exposeSortIndex(one, two);
+			return sorter.sortCommandIndex(one, two);
 		};
 	});
 
@@ -265,15 +266,15 @@ export function getExpose(): Expose {
 		group.sorter = (one: ExposeCommand, two: ExposeCommand): number => {
 			var sort: number;
 			// TODO sane-ify sorting groups
-			sort = sorter.exposeSortHasElem(one.groups, two.groups, Group.primary);
+			sort = sorter.sortHasElem(one.groups, two.groups, Group.primary);
 			if (sort !== 0) {
 				return sort;
 			}
-			sort = sorter.exposeSortHasElem(one.groups, two.groups, Group.support);
+			sort = sorter.sortHasElem(one.groups, two.groups, Group.support);
 			if (sort !== 0) {
 				return sort;
 			}
-			return sorter.exposeSortIndex(one, two);
+			return sorter.sortCommandIndex(one, two);
 		};
 	});
 

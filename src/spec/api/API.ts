@@ -31,10 +31,6 @@ import defUtil = require('../../tsd/util/defUtil');
 import log = require('../../xm/log');
 
 describe('API', () => {
-	'use strict';
-
-	var api: API;
-	var context: Context;
 
 	before(() => {
 	});
@@ -43,13 +39,10 @@ describe('API', () => {
 	});
 
 	beforeEach(() => {
-		context = tsdHelper.getContext();
-		context.config.log.enabled = false;
 	});
 
 	afterEach(() => {
-		context = null;
-		api = null;
+
 	});
 
 	it('should be defined', () => {
@@ -58,17 +51,18 @@ describe('API', () => {
 
 	it('should throw on bad params', () => {
 		assert.throws(() => {
-			api = new API(null);
+			var api = new API(null);
 		});
 	});
 
-	function getAPI(context: Context): API {
+	function getAPI(): API {
+		var context = tsdHelper.getContext();
 		var api = new API(context);
 		tsdHelper.applyCoreUpdate(api.core);
 		return api;
 	}
 
-	function applyTestInfo(group: string, name: string, test: any, query: Query, opt: Options): TestInfo {
+	function applyTestInfo(group: string, name: string, test: any, api: API, query: Query, opt: Options): TestInfo {
 		var tmp = new TestInfo(group, name, test, true);
 
 		api.context.paths.configFile = tmp.configFile;
@@ -78,7 +72,6 @@ describe('API', () => {
 		fileIO.writeJSONSync(tmp.optionsDump, opt);
 
 		api.verbose = test.debug;
-		console.log(tmp);
 		return tmp;
 	}
 
@@ -92,50 +85,44 @@ describe('API', () => {
 
 	function getOptions(test: any): Options {
 		var opts = new Options();
-		opts.saveToConfig = test.save;
-		opts.overwriteFiles = test.overwrite;
-		opts.resolveDependencies = test.resolve;
+		opts.saveToConfig = !!test.save;
+		opts.overwriteFiles = !!test.overwrite;
+		opts.resolveDependencies = !!test.resolve;
 		return opts;
 	}
 
 	function setupCase(api: API, name: string, test: any, info: TestInfo): Promise<any> {
-		if (test.modify) {
-			var before = test.modify.before;
-
-			var runModifyQuery = function (): Promise<any> {
-				if (before.query) {
-					var query = getQuery(before);
-					var opts = getOptions(before);
-					if (test.debug) {
-						log.debug('skip modify query of ' + name);
-					}
-					return api.select(query, opts).then((selection: Selection) => {
-						return api.install(selection, opts).then((result: InstallResult) => {
-
-						});
-					});
-				}
-				else {
-					return Promise.resolve();
-				}
-			};
-			var runModifyContent = function (): Promise<any> {
-				if (before.content) {
-					Object.keys(before.content).forEach((dest: string) => {
-						var value: string = before.content[dest];
-						var destFull = path.join(info.typingsDir, dest);
-						if (test.debug) {
-							log.debug('setting content of ' + name + ' in ' + dest);
-						}
-						fileIO.writeFileSync(destFull, value);
-					});
-				}
-				return Promise.resolve();
-			};
-
-			return runModifyQuery().then(runModifyContent);
+		if (!test.modify) {
+			return Promise.resolve();
 		}
-		return Promise.resolve();
+		var before = test.modify.before;
+
+		return Promise.try(() => {
+			if (before.query) {
+				var query = getQuery(before);
+				var opts = getOptions(before);
+				if (test.debug) {
+					log.debug('skip modify query of ' + name);
+				}
+				return api.select(query, opts).then((selection: Selection) => {
+					return api.install(selection, opts).then((result: InstallResult) => {
+
+					});
+				});
+			}
+			return Promise.resolve();
+		}).then(() => {
+			if (before.content) {
+				Object.keys(before.content).forEach((dest: string) => {
+					var value: string = before.content[dest];
+					var destFull = path.join(info.typingsDir, dest);
+					if (test.debug) {
+						log.debug('setting content of ' + name + ' in ' + destFull);
+					}
+					fileIO.writeFileSync(destFull, value);
+				});
+			}
+		});
 	}
 
 	describe('search', () => {
@@ -148,21 +135,21 @@ describe('API', () => {
 			}
 
 			it('query "' + name + '"', () => {
-				api = getAPI(context);
+				var api = getAPI();
 
 				var query = getQuery(test);
 				var opts = getOptions(test);
-				var info = applyTestInfo('search', name, test, query, opts);
+				var info = applyTestInfo('search', name, test, api, query, opts);
 
 				return setupCase(api, test, name, info).then(() => {
-					return api.select(query).then((selection: Selection) => {
-						assert.instanceOf(selection, Selection, 'selection');
+					return api.select(query);
+				}).then((selection: Selection) => {
+					assert.instanceOf(selection, Selection, 'selection');
 
-						fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 2));
+					fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 2));
 
-						var resultExpect = fileIO.readJSONSync(info.resultExpect);
-						testSelection.assertion(selection, resultExpect, 'result');
-					});
+					var resultExpect = fileIO.readJSONSync(info.resultExpect);
+					testSelection.assertion(selection, resultExpect, 'result');
 				});
 			});
 		});
@@ -178,42 +165,47 @@ describe('API', () => {
 			}
 
 			it('test "' + name + '"', () => {
-				api = getAPI(context);
+				var api = getAPI();
 
 				var query = getQuery(test);
 				var opts = getOptions(test);
-				var info = applyTestInfo('install', name, test, query, opts);
+				var info = applyTestInfo('install', name, test, api, query, opts);
 
 				return setupCase(api, name, test, info).then(() => {
-					return api.select(query, opts).then((selection: Selection) => {
-						return api.install(selection, opts).then((result: InstallResult) => {
-							assert.instanceOf(result, InstallResult, 'result');
+					return api.select(query, opts);
+				}).then((selection: Selection) => {
+					return api.install(selection, opts);
+				}).then((result: InstallResult) => {
+					assert.instanceOf(result, InstallResult, 'result');
 
-							fileIO.writeJSONSync(info.resultFile, testInstallResult.serialise(result, 2));
+					return Promise.all([
+						fileIO.readJSON(info.resultExpect),
+						fileIO.readJSON(info.configExpect),
+						fileIO.read(info.bundleExpect, {encoding: 'utf8'}).catch(e => ''),
 
-							var resultExpect = fileIO.readJSONSync(info.resultExpect);
-							testInstallResult.assertion(result, resultExpect, 'result');
+						fileIO.readJSON(info.configFile),
+						fileIO.read(info.bundleFile, {encoding: 'utf8'}).catch(e => ''),
 
-							var configExpect = fileIO.readJSONSync(info.configExpect);
-							var configActual = fileIO.readJSONSync(info.configFile);
+						fileIO.writeJSON(info.resultFile, testInstallResult.serialise(result, 2))
 
-							assert.deepEqual(configActual, configExpect, 'configActual');
-							testConfig.assertion(api.context.config, configExpect, 'api.context.config');
+					]).spread((resultExpect, configExpect, bundleExpect, configActual, bundleActual) => {
 
-							log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
+						testInstallResult.assertion(result, resultExpect, 'result');
+						assert.deepEqual(configActual, configExpect, 'configActual');
+						testConfig.assertion(api.context.config, configExpect, 'api.context.config');
+						helper.longAssert(bundleActual, bundleExpect, 'bundle');
 
-							return tsdHelper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing').then(() => {
+						log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
 
-								// extra check (partially covered by combinations of previous)
-
-								return tsdHelper.listDefPaths(info.typingsDir).then((typings: string[]) => {
-									assert.includeMembers(typings, context.config.getInstalledPaths(), 'saved installed file');
-									if (test.modify && test.modify.written) {
-										var writenPaths = defUtil.getPathsOf(collection.valuesOf(result.written));
-										assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
-									}
-								});
-							});
+						return tsdHelper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing');
+					}).then(() => {
+						// extra check (partially covered by combinations of previous)
+						return tsdHelper.listDefPaths(info.typingsDir).then((typings: string[]) => {
+							assert.includeMembers(typings, api.context.config.getInstalledPaths(), 'saved installed file');
+							if (test.modify && test.modify.written) {
+								var writenPaths = defUtil.getPathsOf(collection.valuesOf(result.written));
+								assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
+							}
 						});
 					});
 				});

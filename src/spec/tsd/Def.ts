@@ -16,7 +16,6 @@ import tsdHelper = require('../../test/tsdHelper');
 import Def = require('../../tsd/data/Def');
 
 describe('Def', () => {
-	'use strict';
 	
 	var fixtures = helper.getDirNameFixtures();
 

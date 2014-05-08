@@ -44,11 +44,12 @@ module.exports = function (grunt) {
 		},
 		todos: {
 			options: {
-				reporter: require('./lib/grunt/todos-reporter').make(grunt),
+				reporter: 'path',
 				verbose: false,
 				priorities: {
-					low: null,
-					med: /(TODO|FIXME)/
+					low: /(NOTE|TODO)/,
+					med: /(FIXME)/,
+					high: /(BROKEN)/
 				}
 			},
 			all: {
@@ -127,9 +128,20 @@ module.exports = function (grunt) {
 			// some extra js tests
 			spec: ['test/spec/*.js']
 		},
+		typson: {
+			options: {
+
+			},
+			http: {
+				src: [
+					'./src/http/types.ts'
+				]
+			}
+		},
 		mocha_unfunk: {
 			dev: {
 				options: {
+					reportPending: true,
 					stackFilter: true
 				}
 			}
@@ -137,13 +149,14 @@ module.exports = function (grunt) {
 		ts: {
 			options: {
 				module: 'commonjs',
+				fast: 'never',
 				target: 'es5',
 				declaration: true,
 				sourcemap: true,
 				noImplicitAny: false
 			},
 			api: {
-				src: ['src/**/*.ts', '!src/test/**/*.ts', '!src/spec/**/*.ts'],
+				src: ['src/**/*.ts', '!src/test/**/*.ts', '!src/spec/**/*.ts', '!src/**/_ref.d.ts'],
 				outDir: 'build/'
 			},
 			test: {
@@ -162,6 +175,13 @@ module.exports = function (grunt) {
 			dev: {
 				src: ['src/dev.ts'],
 				out: 'tmp/dev.js'
+			},
+			scratch: {
+				options: {
+					baseDir: './src'
+				},
+				src: ['src/dt/dt.ts'],
+				outDir: 'tmp/'
 			}
 		},
 		shell: {
@@ -187,6 +207,22 @@ module.exports = function (grunt) {
 				].join(' '),
 				options: {
 				}
+			},
+			scratch: {
+				command: [
+					'node', './tmp/dt/dt',
+					'--stack'
+				].join(' '),
+				options: {
+				}
+			}
+		},
+		export_declaration: {
+			api: {
+				options: {
+					main: 'build/api.d.ts'
+				},
+				src: ['build/**/*.d.ts']
 			}
 		},
 		capture_cli: {
@@ -284,7 +320,8 @@ module.exports = function (grunt) {
 		'ts:api',
 		'copy:cli',
 		'regex-replace:cli',
-		'tslint:source'
+		'tslint:source',
+		// 'export_declaration:api'
 	]);
 	gtx.alias('build', [
 		'rebuild' /*,
@@ -308,12 +345,15 @@ module.exports = function (grunt) {
 	gtx.alias('dev', [
 		'clean:build',
 		'prep',
-		'ts:xm',
-		'ts:git'
+		'typson:http',
+		//'ts:scratch',
+		//'shell:scratch'
 	]);
-	gtx.alias('run', ['capture_demo']);
 
 	gtx.alias('specjs', ['mochaTest:spec']);
+	gtx.alias('scratch', ['clean:tmp', 'ts:scratch']);
+
+	gtx.alias('debugger', ['gtx:api']);
 
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');
@@ -323,98 +363,7 @@ module.exports = function (grunt) {
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
 	gtx.alias('edit_07', 'gtx:http');
-	gtx.alias('edit_08', 'specjs');
-
-	// capture macro
-	gtx.define('capture', function (macro, id) {
-		var output = './media/capture/' + id + '.html';
-		var shotFull = './media/capture/' + id + '.png';
-		var shotSmall = './media/capture/' + id + '-small.png';
-
-		macro.add('clean', [
-			output,
-			shotFull,
-			shotSmall
-		]);
-
-		macro.add('capture_cli', {
-			options: {
-				title: id,
-				outDir: '',
-				name: output,
-				args: [
-					'--style', 'css'
-				].concat(macro.getParam('args', []))
-			}
-		});
-		macro.add('webshot', {
-			options: {
-				site: output,
-				savePath: shotFull,
-				siteType: 'file',
-				windowSize: {
-					width: 1024,
-					height: 400
-				},
-				shotSize: {
-					width: macro.getParam('width', 800),
-					height: macro.getParam('height', 'all')
-				}
-			}
-		});
-		if (macro.getParam('small', false)) {
-			macro.add('webshot', {
-				options: {
-					site: output,
-					savePath: shotSmall,
-					siteType: 'file',
-					windowSize: {
-						width: 640,
-						height: 768
-					},
-					shotSize: {
-						width: 640,
-						height: macro.getParam('smallHeight', 'all')
-					}
-				}
-			});
-		}
-	}, {
-		concurrent: cpuCores
-	});
-	gtx.create('help', 'capture', {
-		args: [
-			'help'
-		],
-		small: true,
-		smallHeight: 400
-	});
-	/*gtx.create('index', 'capture', {
-	 args: [
-	 'query', '*'
-	 ]
-	 });*/
-	gtx.create('async', 'capture', {
-		args: [
-			'query',
-			'async',
-			'--action', 'install',
-			'--overwrite',
-			'--history',
-			'--info'
-		]
-	});
-	gtx.create('angular', 'capture', {
-		args: [
-			'query',
-			'angular*',
-			'--resolve'
-		]
-	});
-	gtx.alias('capture_demo', [
-		'ts:capture_task',
-		'gtx-type:capture'
-	]);
+	gtx.alias('edit_08', 'scratch');
 
 	// build and send to grunt.initConfig();
 	gtx.finalise();

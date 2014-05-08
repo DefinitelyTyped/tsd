@@ -30,7 +30,7 @@
 
 /// <reference path="open/open.d.ts" />
 /// <reference path="buffer-equal/buffer-equal.d.ts" />
-//  / <reference path="bufferstream/bufferstream.d.ts" />
+/// <reference path="bufferstream/bufferstream.d.ts" />
 /// <reference path="event-stream/event-stream.d.ts" />
 /// <reference path="source-map-support/source-map-support.d.ts" />
 
@@ -42,3 +42,20 @@
 /// <reference path="chai/chai-as-promised-assert.d.ts" />
 /// <reference path="highland/highland.d.ts" />
 /// <reference path="configstore/configstore.d.ts" />
+/// <reference path="joi/joi.d.ts" />
+/// <reference path="joi/joi-assert.d.ts" />
+/// <reference path="oboe/oboe.d.ts" />
+/// <reference path="clone/clone.d.ts" />
+/// <reference path="glob-stream/glob-stream.d.ts" />
+/// <reference path="readdir-stream/readdir-stream.d.ts" />
+/// <reference path="glob/glob.d.ts" />
+/// <reference path="minimatch/minimatch.d.ts" />
+/// <reference path="verror/verror.d.ts" />
+/// <reference path="extsprintf/extsprintf.d.ts" />
+/// <reference path="JSONStream/JSONStream.d.ts" />
+/// <reference path="lockfile/lockfile.d.ts" />
+/// <reference path="lru-cache/lru-cache.d.ts" />
+/// <reference path="bl/bl.d.ts" />
+/// <reference path="form-data/form-data.d.ts" />
+/// <reference path="deep-freeze/deep-freeze.d.ts" />
+/// <reference path="type-detect/type-detect.d.ts" />

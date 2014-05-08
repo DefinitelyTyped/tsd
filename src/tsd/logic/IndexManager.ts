@@ -3,12 +3,13 @@
 'use strict';
 
 import pointer = require('json-pointer');
+import VError = require('verror');
 import Promise = require('bluebird');
 import Resolver = Promise.Resolver;
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
 import Def = require('../data/Def');
 import DefVersion = require('../data/DefVersion');
@@ -17,7 +18,7 @@ import DefIndex = require('../data/DefIndex');
 
 var branch_tree: string = '/commit/commit/tree/sha';
 
-class IndexManager extends SubCore {
+class IndexManager extends CoreModule {
 
 	static init: string = 'init';
 	static tree_get: string = 'tree_get';
@@ -44,11 +45,11 @@ class IndexManager extends SubCore {
 
 		return this._defer[refKey] = this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData: any) => {
 			if (!branchData) {
-				throw new Error('loaded empty branch data');
+				throw new VError('loaded empty branch data');
 			}
 			var sha = pointer.get(branchData, branch_tree);
 			if (!sha) {
-				throw new Error('missing sha');
+				throw new VError('missing sha');
 			}
 			return this.core.repo.api.getTree(sha, true).then((data: any) => {
 				var index = new DefIndex();
@@ -65,7 +66,7 @@ class IndexManager extends SubCore {
 		return this.getIndex().then((index: DefIndex) => {
 			var def: Def = index.procureDef(path);
 			if (!def) {
-				throw new Error('cannot get def for path: ' + path);
+				throw new VError('cannot get def for path %s', path);
 			}
 			return def;
 		});
@@ -78,7 +79,7 @@ class IndexManager extends SubCore {
 		return this.getIndex().then((index: DefIndex) => {
 			var file: DefVersion = index.procureVersionFromSha(path, commitSha);
 			if (!file) {
-				throw new Error('cannot get file for path: ' + path);
+				throw new VError('cannot get file for path %s', path);
 			}
 			return file;
 		});
@@ -91,7 +92,7 @@ class IndexManager extends SubCore {
 		return this.getIndex().then((index: DefIndex) => {
 			var commit: DefCommit = index.procureCommit(commitSha);
 			if (!commit) {
-				throw new Error('cannot commit def for commitSha: ' + commitSha);
+				throw new VError('cannot commit def for commitSha %s', commitSha);
 			}
 			return commit;
 		});

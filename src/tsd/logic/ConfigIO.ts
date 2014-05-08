@@ -6,18 +6,15 @@ import fs = require('graceful-fs');
 import path = require('path');
 import pointer = require('json-pointer');
 import Promise = require('bluebird');
+import VError = require('verror');
 
 import fileIO = require('../../xm/file/fileIO');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
-class ConfigIO extends SubCore {
-
-	static config_init = 'config_init';
-	static config_read = 'config_read';
-	static config_save = 'config_save';
+class ConfigIO extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'config', 'ConfigIO');
@@ -32,7 +29,7 @@ class ConfigIO extends SubCore {
 		return fileIO.exists(target).then((exists: boolean) => {
 			if (exists) {
 				if (!overwrite) {
-					throw new Error('cannot overwrite file: ' + target);
+					throw new VError('cannot overwrite file %s', target);
 				}
 				return fileIO.remove(target);
 			}
@@ -52,7 +49,7 @@ class ConfigIO extends SubCore {
 		return fileIO.exists(target).then((exists: boolean) => {
 			if (!exists) {
 				if (!optional) {
-					throw new Error('cannot locate file: ' + target);
+					throw new VError('cannot locate file %s', target);
 				}
 				return;
 			}
@@ -68,27 +65,8 @@ class ConfigIO extends SubCore {
 	 */
 	saveConfig(target?: string): Promise<string> {
 		target = target || this.core.context.paths.configFile;
-		var dir = path.dirname(target);
-
-		return fileIO.mkdirCheckQ(dir, true).then(() => {
-			var output = this.core.context.config.toJSONString();
-
-			// TODO un-voodoo
-			return fileIO.write(target, output);
-		/*}).then(() => {
-			// VOODOO call Fs.stat dummy to stop node.js from reporting the file is empty (when it is not).
-			// this might me a Node + Windows issue, or just my crappy workstation
-			return fileIO.stat(target);
-		}).then(() => {
-			return Promise.delay(50);
-		}).then(() => {
-			// now do the real check
-			return fileIO.stat(target);
-		}).then((stat) => {
-			if (stat.size === 0) {
-				throw new Error('saveConfig written zero bytes to: ' + target + ' (looks lie');
-			}*/
-		}).return(target);
+		var output = this.core.context.config.toJSONString();
+		return fileIO.write(target, output).return(target);
 	}
 }
 

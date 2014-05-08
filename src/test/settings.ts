@@ -2,11 +2,9 @@
 
 'use strict';
 
-import chai = require('chai');
-import assert = chai.assert;
+import deepFreeze = require('deep-freeze');
 
-import CacheMode = require('../xm/http/CacheMode');
-import objectUtils = require('../xm/objectUtils');
+import CacheMode = require('../http/CacheMode');
 import log = require('../xm/log');
 
 var settings = {
@@ -14,7 +12,7 @@ var settings = {
 	cache: CacheMode.forceLocal
 };
 // seriously cool
-objectUtils.deepFreeze(settings);
+deepFreeze(settings);
 
 log.debug('helper.settings.cache', CacheMode[settings.cache]);
 

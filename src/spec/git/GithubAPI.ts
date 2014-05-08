@@ -9,6 +9,9 @@ import Promise = require('bluebird');
 import chai = require('chai');
 import assert = chai.assert;
 
+import Joi = require('joi');
+import joiAssert = require('joi-assert');
+
 import log = require('../../xm/log');
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');
@@ -19,7 +22,6 @@ import GithubRepo = require('../../git/GithubRepo');
 import GithubAPI = require('../../git/loader/GithubAPI');
 
 describe('GithubAPI', () => {
-	'use strict';
 
 	var repo: GithubRepo;
 	var cacheDir: string;
@@ -28,49 +30,31 @@ describe('GithubAPI', () => {
 	beforeEach(() => {
 		// use clean tmp folder in this test module
 		cacheDir = path.join(gitTest.cacheDir, 'GithubAPI');
-		repo = new GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
+		repo = new GithubRepo(gitTest.config.repo, cacheDir, gitTest.opts);
 	});
 	afterEach(() => {
 		repo = null;
 	});
 
-	var num = {
-		'type': 'number'
-	};
-	var str = {
-		'type': 'string'
-	};
-	var metaFields = {
-		'type': 'object',
-		'properties': {
-			'meta': {
-				'type': 'object',
-				'required': [
-					'rate'
-				],
-				'properties': {
-					'rate': {
-						'required': [
-							'lastUpdate',
-							'limit',
-							'remaining',
-							'reset',
-							'resetAt'
-						],
-						'properties': {
-							'lastUpdate': num,
-							'limit': num,
-							'remaining': num,
-							'reset': num,
-							'resetAt': str
-						}
-					}
-				}
-			}
-		}
-	};
+	var metaAssert = joiAssert.bake(Joi.object({
+		meta: Joi.object({
+			rate: Joi.object({
+				lastUpdate: Joi.number().min(0),
+				limit: Joi.number().min(0),
+				remaining: Joi.number().min(0),
+				reset: Joi.number().min(0),
+				resetAt: Joi.string()
+			})
+		})
+	}).options({
+		convert: false,
+		allowUnknown: true
+	}).description('metaAssert'));
 
 	function fixMeta(meta) {
+		if (!meta.rate) {
+			meta.rate = {};
+		}
 		meta.rate.lastUpdate = 0;
 		meta.rate.limit = 0;
 		meta.rate.remaining = 0;
@@ -78,22 +62,23 @@ describe('GithubAPI', () => {
 		meta.rate.resetAt = '0:11:22';
 	}
 
+	it('should have default options', () => {
+		assert.isFunction(GithubAPI, 'constructor');
+		assert.isTrue(repo.api.cache.opts.cache.cacheRead, 'options.cacheRead');
+		assert.isTrue(repo.api.cache.opts.cache.cacheWrite, 'options.cacheWrite');
+		assert.isTrue(repo.api.cache.opts.cache.remoteRead, 'options.remoteRead');
+	});
+
 	describe('getBranches', () => {
 		it('should cache and return data from store', () => {
 			// repo.api.verbose = true;
 
 			return repo.api.getBranches().then((first) => {
-				assert.ok(first, 'first data');
 				assert.isArray(first, 'first data');
-				// assert.jsonSchema(first, metaFields, 'first meta');
-				// fixMeta(first.meta);
 
 				// get again, should be cached
 				return repo.api.getBranches().then((second) => {
-					assert.ok(second, 'second data');
 					assert.isArray(second, 'second data');
-					// assert.jsonSchema(second, metaFields, 'second meta');
-					// fixMeta(second.meta);
 
 					// same data?
 					assert.deepEqual(first, second, 'first vs second');
@@ -110,14 +95,11 @@ describe('GithubAPI', () => {
 			var expectedSha = expectedJson.sha;
 			helper.assertFormatSHA1(expectedSha, 'expectedSha');
 
-			var notes = [];
-
 			return repo.api.getBlob(expectedSha).then((first) => {
-				assert.ok(first, 'first data');
 				assert.isObject(first, 'first data');
 				assert.strictEqual(first.sha, expectedSha, 'first.sha vs expectedSha');
 
-				assert.jsonSchema(first, metaFields, 'first meta');
+				metaAssert(first);
 				fixMeta(first.meta);
 				assert.jsonOf(expectedJson, first, 'first vs expectedJson');
 
@@ -129,7 +111,6 @@ describe('GithubAPI', () => {
 
 				// get again, should be cached
 				return repo.api.getBlob(expectedSha).then((second) => {
-					assert.ok(second, 'second data');
 					assert.isObject(second, 'second data');
 					assert.strictEqual(second.sha, expectedSha, 'second.sha vs expectedSha');
 
@@ -137,17 +118,6 @@ describe('GithubAPI', () => {
 					assert.instanceOf(secondBuffer, Buffer, 'buffer');
 					var secondSha = GitUtil.blobShaHex(secondBuffer, 'utf8');
 					assert.strictEqual(secondSha, expectedSha, 'secondSha vs expected');
-
-					helper.assertNotes(notes, [
-						{
-							message: /^remote: /,
-							code: 'http 200'
-						},
-						{
-							message: /^local: /,
-							code: null
-						}
-					], 'second');
 				});
 			});
 		});

@@ -2,7 +2,8 @@
 
 'use strict';
 
-import typeOf = require('./typeOf');
+
+import typeDetect = require('type-detect');
 import encode = require('./encode');
 
 interface Function {
@@ -21,7 +22,7 @@ export function getFuncLabel(func: any): string {
 }
 
 export function toValueStrim(obj: any, depth: number = 4, cutoff: number = 80): string {
-	var type = typeOf.get(obj);
+	var type = typeDetect(obj);
 
 	depth--;
 

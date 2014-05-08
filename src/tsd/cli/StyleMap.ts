@@ -8,7 +8,7 @@ import ministyle = require('ministyle');
 import assertVar = require('../../xm/assertVar');
 import collection = require('../../xm/collection');
 import StyledOut = require('../../xm/lib/StyledOut');
-import ExposeContext = require('../../xm/expose/ExposeContext');
+import ExposeContext = require('../../expose/Context');
 
 class StyleMap {
 

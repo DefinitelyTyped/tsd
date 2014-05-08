@@ -4,6 +4,7 @@
 
 import pointer = require('json-pointer');
 import Lazy = require('lazy.js');
+import VError = require('verror');
 
 import log = require('../../xm/log');
 import assertVar = require('../../xm/assertVar');
@@ -79,7 +80,7 @@ class DefIndex {
 
 		// verify tree is from branch (compare sha's)
 		if (sha !== treeSha) {
-			throw new Error('branch and tree sha mismatch');
+			throw new VError('branch and tree sha mismatch');
 		}
 
 		this._branchName = branch.name;
@@ -128,7 +129,7 @@ class DefIndex {
 			var commit = this.procureCommit(json.sha);
 			if (!commit) {
 				log.inspect('weird: no commit for sha ' + json.sha);
-				throw new Error('huh?');
+				throw new VError('huh?');
 			}
 			if (!commit.hasMeta) {
 				commit.parseJSON(json);
@@ -174,7 +175,7 @@ class DefIndex {
 	/*
 	 get a DefBlob for a sha (enforces single instances)
 	 */
-	procureBlobFor(content: NodeBuffer, encoding: string = null): DefBlob {
+	procureBlobFor(content: Buffer, encoding: string = null): DefBlob {
 		assertVar(content, Buffer, 'content');
 
 		var sha = gitUtil.blobShaHex(content, encoding);
@@ -199,7 +200,7 @@ class DefIndex {
 		else {
 			def = Def.getFrom(path);
 			if (!def) {
-				throw new Error('cannot parse path to def: ' + path);
+				throw new VError('cannot parse path to def %s', path);
 			}
 			this._definitions.set(path, def);
 		}
@@ -221,7 +222,7 @@ class DefIndex {
 			file = this._versions.get(key);
 			// NOTE: should not happen but keep robust
 			if (file.def !== def) {
-				throw new Error('weird: internal data mismatch: version does not belong to file: ' + file.def + ' -> ' + commit);
+				throw new VError('weird: internal data mismatch: version does not belong to file %s -> %s', file.def, commit);
 			}
 		}
 		else {
@@ -246,19 +247,19 @@ class DefIndex {
 			def = this.procureDef(path);
 		}
 		if (!def) {
-			throw new Error('cannot procure definition for path: ' + path);
+			throw new VError('cannot procure definition for %s', path);
 		}
 
 		var commit = this.procureCommit(commitSha);
 		if (!commit) {
-			throw new Error('cannot procure commit for path: ' + path + ' -> commit: ' + commitSha);
+			throw new VError('cannot procure commit for %s -> %s', path, commitSha);
 		}
 		if (!commit.hasMetaData()) {
 			// TODO always load meta data? meh? waste of requests?
 		}
 		var file = this.procureVersion(def, commit);
 		if (!file) {
-			throw new Error('cannot procure definition version for path: ' + path + ' -> commit: ' + commit.commitSha);
+			throw new VError('cannot procure definition version for  %s -> %s', path, commit.commitSha);
 		}
 		// need to look it up
 

@@ -35,8 +35,8 @@
 		"no-string-literal": false,
 		"no-trailing-whitespace": true,
 		"no-unreachable": true,
-		"x_________________no-unused-variable": true,
-		"x_________________no-use-before-declare": true,
+		"x__no-unused-variable": true,
+		"x__no-use-before-declare": true,
 		"x__one-line": [true,
 			"check-catch",
 			"check-else"

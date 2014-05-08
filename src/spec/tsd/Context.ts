@@ -21,7 +21,6 @@ import Config = require('../../tsd/context/Config');
 import testConfig = require('../../test/tsd/Config');
 
 describe('Context', () => {
-	'use strict';
 
 	describe('Paths', () => {
 		it('is defined as function', () => {

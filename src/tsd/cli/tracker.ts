@@ -5,6 +5,7 @@
 import ua = require('universal-analytics');
 import uuid = require('uuid');
 import urlMod = require('url');
+import VError = require('verror');
 
 import log = require('../../xm/log');
 import assertVar = require('../../xm/assertVar');
@@ -57,7 +58,7 @@ class Tracker {
 			return;
 		}
 		if (!this._accountID || !/^UA-\d+-\d+$/.test(this._accountID)) {
-			throw new Error('invalid accountID: ' + this._accountID);
+			throw new VError('invalid accountID $s', this._accountID);
 		}
 		// force anonymous
 		this._client = ua(this._accountID, uuid.v4());

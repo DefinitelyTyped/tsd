@@ -3,17 +3,15 @@
 'use strict';
 
 import uriTemplates = require('uri-templates');
+import URITemplate = uriTemplates.URITemplate;
 import typeOf = require('../typeOf');
 
-interface URLTemplateParser {
-	(template: string):URLTemplate;
-}
 /*
  URLManager: hold url-templates
  */
 class URLManager {
 
-	private _templates: {[id:string]:URLTemplate} = Object.create(null);
+	private _templates: {[id:string]:URITemplate} = Object.create(null);
 	private _vars = Object.create(null);
 
 	constructor(common?: any) {
@@ -48,7 +46,7 @@ class URLManager {
 		});
 	}
 
-	public getTemplate(id: string): URLTemplate {
+	public getTemplate(id: string): URITemplate {
 		if (id in this._templates) {
 			return this._templates[id];
 		}

@@ -22,7 +22,7 @@ catch (e) {
 }
 
 // kill warning
-var bufferstream = require('bufferstream');
+import bufferstream = require('bufferstream');
 bufferstream.fn.warn = false;
 
 

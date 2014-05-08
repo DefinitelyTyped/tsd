@@ -12,7 +12,6 @@ import helper = require('../../test/helper');
 import JSONStabilizer = require('../../xm/json/JSONStabilizer');
 
 describe('JSONStabilizer', () => {
-	'use strict';
 
 	var fixtures = path.join(helper.getDirNameFixtures(), 'stabiliser');
 	var tmp = path.join(helper.getDirNameTmp(), 'stabiliser');

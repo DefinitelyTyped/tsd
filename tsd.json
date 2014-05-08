@@ -13,7 +13,7 @@
 			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
 		},
 		"node/node.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
 		},
 		"q/Q.d.ts": {
 			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
@@ -28,7 +28,7 @@
 			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
 		},
 		"highland/highland.d.ts": {
-			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
+			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
 		},
 		"buffer-equal/buffer-equal.d.ts": {
 			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
@@ -68,6 +68,27 @@
 		},
 		"configstore/configstore.d.ts": {
 			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
+		},
+		"joi/joi.d.ts": {
+			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
+		},
+		"gruntjs/gruntjs.d.ts": {
+			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
+		},
+		"async/async.d.ts": {
+			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
+		},
+		"glob/glob.d.ts": {
+			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
+		},
+		"minimatch/minimatch.d.ts": {
+			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
+		},
+		"request/request.d.ts": {
+			"commit": "a9d2023e8eb1afe534b55758f2f1d16fb69ce61f"
+		},
+		"form-data/form-data.d.ts": {
+			"commit": "a9d2023e8eb1afe534b55758f2f1d16fb69ce61f"
 		}
 	}
 }

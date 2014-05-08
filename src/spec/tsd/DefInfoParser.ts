@@ -18,7 +18,6 @@ import headerHelper = require('../../test/tsd/headerHelper');
 import HeaderAssert = headerHelper.HeaderAssert;
 
 describe('DefInfoParser', () => {
-	'use strict';
 
 	var fixtures = helper.getDirNameFixtures();
 

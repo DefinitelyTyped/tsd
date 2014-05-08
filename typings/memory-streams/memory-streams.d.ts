@@ -4,14 +4,14 @@
 declare module 'memory-streams' {
 	module MemoryStreams {
 
-		interface Writable extends WritableStream {
+		interface Writable extends NodeJS.WritableStream {
 			toString():string;
-			toBuffer():NodeBuffer;
+			toBuffer():Buffer;
 		}
 
-		interface Readable extends ReadableStream {
+		interface Readable extends NodeJS.ReadableStream {
 			append (chunk:string, encoding?:string):void;
-			append (chunk:NodeBuffer):void;
+			append (chunk:Buffer):void;
 			toString():string;
 		}
 	}

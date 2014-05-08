@@ -12,8 +12,8 @@ import log = require('../log');
 export interface RunCLIResult {
 	code:number;
 	error:Error;
-	stdout:NodeBuffer;
-	stderr:NodeBuffer;
+	stdout:Buffer;
+	stderr:Buffer;
 	args:string[];
 }
 
@@ -24,8 +24,8 @@ export function runCLI(modulePath: string, args: string[], debug: boolean = fals
 		assertVar(modulePath, 'string', 'modulePath');
 		assertVar(args, 'array', 'args');
 
-		var stdout: NodeBuffer[] = [];
-		var stderr: NodeBuffer[] = [];
+		var stdout: Buffer[] = [];
+		var stderr: Buffer[] = [];
 
 		var options: any = {
 			silent: true
@@ -62,13 +62,13 @@ export function runCLI(modulePath: string, args: string[], debug: boolean = fals
 			return;
 		}
 
-		child.stdout.on('data', (chunk: NodeBuffer) => {
+		child.stdout.on('data', (chunk: Buffer) => {
 			stdout.push(chunk);
 			if (debug) {
 				process.stdout.write(chunk);
 			}
 		});
-		child.stderr.on('data', (chunk: NodeBuffer) => {
+		child.stderr.on('data', (chunk: Buffer) => {
 			stderr.push(chunk);
 			if (debug) {
 				process.stdout.write(chunk);

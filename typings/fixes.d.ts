@@ -1,7 +1,7 @@
 interface ReadOnlyBuffer {
 	toString(encoding?:string, start?:number, end?:number): string;
 	length: number;
-	slice(start?:number, end?:number): NodeBuffer;
+	slice(start?:number, end?:number): Buffer;
 	readUInt8(offset:number, noAsset?:boolean): number;
 	readUInt16LE(offset:number, noAssert?:boolean): number;
 	readUInt16BE(offset:number, noAssert?:boolean): number;

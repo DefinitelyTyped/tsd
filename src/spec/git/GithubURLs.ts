@@ -19,7 +19,6 @@ import GithubURLs = require('../../git/GithubURLs');
 import GithubRepo = require('../../git/GithubRepo');
 
 describe('GithubRepo / GithubURLs', () => {
-	'use strict';
 
 	var repo: GithubRepo;
 	var urls: GithubURLs;

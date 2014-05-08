@@ -6,6 +6,7 @@ import fs = require('graceful-fs');
 import path = require('path');
 import util = require('util');
 import tv4 = require('tv4');
+import VError = require('verror');
 import Laxy = require('lazy.js');
 
 import log = require('../../xm/log');
@@ -37,7 +38,7 @@ var reporter = require('tv4-reporter');
 //  - maybe worth to keep class (json is an important part of whole UIX after all)
 //  - quite a lot of code neded for nice output (JSONStabilizer etc)
 // TODO extract loading io to own class
-// TODO move parse/to/validate code to Koder (or it's replacement)
+// TODO move parse/to/validate code to new file
 class Config implements GithubRepoConfig {
 
 	path: string;
@@ -78,8 +79,8 @@ class Config implements GithubRepoConfig {
 		this._installed.clear();
 	}
 
-	resolveTypingsPath(relativeToDir: string): string {
-		var cfgFull = path.resolve(relativeToDir);
+	resolveTypingsPath(baseDir: string): string {
+		var cfgFull = path.resolve(baseDir);
 		var typings = this.path.replace(/[\\\/]/g, path.sep);
 
 		if (/^([\\\/]|\w:)/.test(this.path)) {
@@ -221,7 +222,7 @@ class Config implements GithubRepoConfig {
 				report.reportResult(report.createTest(schema, json, label, res, true), '   ');
 				log.out.ln();
 			}
-			throw (new Error('malformed config: doesn\'t comply with schema'));
+			throw (new VError('malformed config: doesn\'t comply with schema'));
 		}
 		return json;
 	}

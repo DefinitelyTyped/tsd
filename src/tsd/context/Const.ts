@@ -5,7 +5,7 @@
 var Const = {
 	rc: '.tsdrc',
 	ident: 'tsd',
-	configFile: 'json',
+	configFile: 'tsd.json',
 	typingsDir: 'typings',
 	cacheDir: 'tsd-cache',
 	bundleFile: 'tsd.d.ts',

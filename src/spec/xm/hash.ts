@@ -32,6 +32,8 @@ describe('hash', () => {
 
 		var valueA = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
 
+		var valueHash = '5a896b7653c5d20c59762844c35fe55a193a8cca';
+
 		var valueB = {c: [1, 2, 3], d: {b: 'bravo', a: 11, c: [11, 22, 33]}, a: 1, b: 'B'};
 
 		var valueX1 = {a: 222, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo', c: [11, 22, 33]}};
@@ -44,55 +46,66 @@ describe('hash', () => {
 
 		var valueX5 = {a: 1, b: 'B', c: [1, 2, 3], d: {a: 11, b: 'bravo'}};
 
+		it('should return correct hash for same object', () => {
+			var ori = hasher.jsonToIdentHash(valueA);
+			assert.isString(ori, 'ori');
+			assert.strictEqual(ori, valueHash);
+		});
+
 		it('should return identical hash for same object', () => {
-			var ori = hasher.jsonToIdent(valueA);
-			var alt = hasher.jsonToIdent(valueA);
+			var ori = hasher.jsonToIdentHash(valueA);
+			var alt = hasher.jsonToIdentHash(valueA);
 			assert.isString(ori, 'ori');
 			assert.isString(alt, 'alt');
 			assert.strictEqual(ori, alt);
 		});
+
 		it('should return identical hash for reordered data', () => {
-			var ori = hasher.jsonToIdent(valueA);
-			var alt = hasher.jsonToIdent(valueB);
+			var ori = hasher.jsonToIdentHash(valueA);
+			var alt = hasher.jsonToIdentHash(valueB);
 			assert.strictEqual(ori, alt);
 		});
+
 		it('should return different hash for different data', () => {
-			var ori = hasher.jsonToIdent(valueA);
+			var ori = hasher.jsonToIdentHash(valueA);
 			var alt;
 
-			alt = hasher.jsonToIdent(valueX1);
+			alt = hasher.jsonToIdentHash(valueX1);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX1');
 
-			alt = hasher.jsonToIdent(valueX2);
+			alt = hasher.jsonToIdentHash(valueX2);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX2');
 
-			alt = hasher.jsonToIdent(valueX3);
+			alt = hasher.jsonToIdentHash(valueX3);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX3');
 
-			alt = hasher.jsonToIdent(valueX4);
+			alt = hasher.jsonToIdentHash(valueX4);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX4');
 
-			alt = hasher.jsonToIdent(valueX5);
+			alt = hasher.jsonToIdentHash(valueX5);
 			assert.notStrictEqual(ori, alt, 'valueA -> valueX5');
 		});
+
 		it('should throw on Function', () => {
 			assert.throws(() => {
-				hasher.jsonToIdent({a: 1, b: function (x) {
+				hasher.jsonToIdentHash({a: 1, b: function (x) {
 					return x * x;
 				}});
 			});
 		});
+
 		it('should throw on RegExp', () => {
 			assert.throws(() => {
-				hasher.jsonToIdent({a: 1, b: /^[0-9]+$/});
+				hasher.jsonToIdentHash({a: 1, b: /^[0-9]+$/});
 			});
 		});
+
 		it('should serialise Date, include millisecond level', () => {
 			var valueA = new Date();
-			var ori = hasher.jsonToIdent(valueA);
-			var alt = hasher.jsonToIdent(new Date(valueA.getTime()));
+			var ori = hasher.jsonToIdentHash(valueA);
+			var alt = hasher.jsonToIdentHash(new Date(valueA.getTime()));
 			assert.strictEqual(ori, alt, 'identical values');
-			alt = hasher.jsonToIdent(new Date(valueA.getTime() + 2));
+			alt = hasher.jsonToIdentHash(new Date(valueA.getTime() + 2));
 			assert.notStrictEqual(ori, alt, 'milli second');
 		});
 	});

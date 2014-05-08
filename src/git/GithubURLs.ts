@@ -20,6 +20,7 @@ class GithubURLs extends URLManager {
 
 	constructor(repo: GithubRepo) {
 		super();
+		assertVar(repo, 'object', 'repo');
 
 		this._repo = repo;
 		// externalise later

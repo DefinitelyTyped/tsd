@@ -3,16 +3,16 @@
 'use strict';
 
 import request = require('request');
+import ReqOptions = request.Options;
 import Promise = require('bluebird');
 
 import typeOf = require('../../xm/typeOf');
 import JSONPointer = require('../../xm/json/JSONPointer');
-import koder = require('../../xm/lib/koder');
 
-import CacheRequest = require('../../xm/http/CacheRequest');
-import CacheObject = require('../../xm/http/CacheObject');
+import CacheRequest = require('../../http/CacheRequest');
+import CacheObject = require('../../http/CacheObject');
 
-import GithubRepo = require('../GithubRepo');
+import GithubURLs = require('../GithubURLs');
 import GithubLoader = require('./GithubLoader');
 import GithubRateInfo = require('../model/GithubRateInfo');
 
@@ -24,14 +24,11 @@ import GithubRateInfo = require('../model/GithubRateInfo');
 // TODO add OAuth support (here or in HTTPCache)
 class GithubAPI extends GithubLoader {
 
-	static get_cachable = 'get_cachable';
-	static get_rate = 'get_rate';
-
 	// github's version
 	private apiVersion: string = '3.0.0';
 
-	constructor(repo: GithubRepo, options: JSONPointer, storeDir: string) {
-		super(repo, options, storeDir, 'github-api', 'GithubAPI');
+	constructor(urls: GithubURLs, options: JSONPointer, storeDir: string) {
+		super(urls, options, storeDir, 'github-api', 'GithubAPI');
 
 		this.formatVersion = '1.0';
 
@@ -39,23 +36,23 @@ class GithubAPI extends GithubLoader {
 	}
 
 	getBranches(): Promise<any> {
-		return this.getCachableURL(this.repo.urls.apiBranches());
+		return this.getCachableURL(this.urls.apiBranches());
 	}
 
 	getBranch(branch: string): Promise<any> {
-		return this.getCachableURL(this.repo.urls.apiBranch(branch));
+		return this.getCachableURL(this.urls.apiBranch(branch));
 	}
 
 	getTree(sha: string, recursive: boolean): Promise<any> {
-		return this.getCachableURL(this.repo.urls.apiTree(sha, (recursive ? 1 : undefined)));
+		return this.getCachableURL(this.urls.apiTree(sha, (recursive ? 1 : undefined)));
 	}
 
 	getCommit(sha: string): Promise<any> {
-		return this.getCachableURL(this.repo.urls.apiCommit(sha));
+		return this.getCachableURL(this.urls.apiCommit(sha));
 	}
 
 	getBlob(sha: string): Promise<any> {
-		return this.getCachableURL(this.repo.urls.apiBlob(sha));
+		return this.getCachableURL(this.urls.apiBlob(sha));
 	}
 
 	/*
@@ -70,18 +67,15 @@ class GithubAPI extends GithubLoader {
 
 	getPathCommits(path: string): Promise<any> {
 		// TODO implement result pagination
-		return this.getCachableURL(this.repo.urls.apiPathCommits(path));
+		return this.getCachableURL(this.urls.apiPathCommits(path));
 	}
 
 	getCachableURL(url: string): Promise<any> {
 		var request = new CacheRequest(url);
-		return this.getCachable(request, true);
+		return this.getCachable(request);
 	}
 
-	getCachable(request: CacheRequest, addMeta: boolean): Promise<any> {
-		// TODO add some specific validation
-		var k: koder.IContentKoder<any> = koder.JSONKoder.main;
-
+	getCachable(request: CacheRequest): Promise<any> {
 		if (!typeOf.isNumber(request.localMaxAge)) {
 			request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
 		}
@@ -91,37 +85,31 @@ class GithubAPI extends GithubLoader {
 		this.copyHeadersTo(request.headers);
 
 		request.headers['accept'] = 'application/vnd.github.beta+json';
-
 		request.lock();
 
 		return this.cache.getObject(request).then((object: CacheObject) => {
-			return k.decode(object.body).then((res: any) => {
-				if (object.response) {
-					var rate = new GithubRateInfo(object.response.headers);
-					/*d.progress({
-						message: rate.toString(),
-						data: rate
-					});*/
-				}
-				if (addMeta && typeOf.isObject(res)) {
+			var res = JSON.parse(object.body.toString('utf8'));
+			if (object.response) {
+				var rate = new GithubRateInfo(object.response.headers);
+				if (typeOf.isObject(res)) {
 					res.meta = {rate: rate};
 				}
-				return res;
-			});
+			}
+			return res;
 		});
 	}
 
 	getRateInfo(): Promise<GithubRateInfo> {
 		return new Promise((resolve: (info: GithubRateInfo) => void, reject) => {
-			var url = this.repo.urls.rateLimit();
-			var req: any = {
+			var url = this.urls.rateLimit();
+			var req: ReqOptions = {
 				url: url,
 				headers: {}
 			};
 			this.copyHeadersTo(req.headers);
 
-			if (this.cache.proxy) {
-				req.proxy = this.cache.proxy;
+			if (this.cache.opts.proxy) {
+				req.proxy = this.cache.opts.proxy;
 			}
 			/*d.progress({
 				message: 'get url: ' + url

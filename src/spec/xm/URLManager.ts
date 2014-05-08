@@ -2,17 +2,15 @@
 
 'use strict';
 
+import helper = require('../../test/helper');
 import chai = require('chai');
 import assert = chai.assert;
-import helper = require('../../test/helper');
 
 import URLManager = require('../../xm/lib/URLManager');
 
 describe('URLManager', () => {
 
 	var urls: URLManager;
-	var expected: string;
-	var actual: URLTemplate;
 
 	it('should be defined', () => {
 		assert.isFunction(URLManager, 'constructor');
@@ -39,7 +37,7 @@ describe('URLManager', () => {
 
 	describe('getTemplate()', () => {
 		it('should be defined', () => {
-			actual = urls.getTemplate('main');
+			var actual = urls.getTemplate('main');
 			assert.isObject(actual);
 
 			assert.isFunction(actual.fillFromObject, 'fillFromObject');
@@ -47,15 +45,15 @@ describe('URLManager', () => {
 			assert.isFunction(actual.fill, 'fill');
 		});
 		it('should return template', () => {
-			actual = urls.getTemplate('main');
-			expected = 'https://example.com/foo/bar/some';
+			var actual = urls.getTemplate('main');
+			var expected = 'https://example.com/foo/bar/some';
 			assert.strictEqual(actual.fillFromObject({name: 'foo', value: 'bar', sub: 'some'}), expected);
 		});
 	});
 
 	describe('getURL()', () => {
 		it('should return replaced url', () => {
-			expected = 'https://example.com/foo/bar/some';
+			var expected = 'https://example.com/foo/bar/some';
 			assert.strictEqual(urls.getURL('main', {value: 'bar'}), expected);
 		});
 	});

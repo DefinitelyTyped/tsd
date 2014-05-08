@@ -146,7 +146,7 @@ class JSONStabilizer {
 		}
 		var str = JSON.stringify(json, null, this.style.indent);
 		if (this.style.eol !== '\n') {
-			str = str.replace(/\n/g, this.style.eol);
+			str = str.replace(/\r?\n/g, this.style.eol);
 		}
 		if (this.style.trailingEOL) {
 			str += this.style.eol;

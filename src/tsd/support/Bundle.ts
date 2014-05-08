@@ -130,19 +130,6 @@ class Bundle {
 		}
 	}
 
-	toArray(all: boolean = false): string[] {
-		var ret: string[] = [];
-		var base = path.dirname(this.target);
-		var line = this.head;
-		while (line) {
-			if (all || line.ref) {
-				ret.push(line.getRef(base));
-			}
-			line = line.next;
-		}
-		return ret;
-	}
-
 	private first(all: boolean = false): BundleLine {
 		var line = this.head;
 		while (line) {
@@ -160,6 +147,19 @@ class Bundle {
 		while (line) {
 			if (all || line.ref) {
 				ret = line;
+			}
+			line = line.next;
+		}
+		return ret;
+	}
+
+	toArray(all: boolean = false): string[] {
+		var ret: string[] = [];
+		var base = path.dirname(this.target);
+		var line = this.head;
+		while (line) {
+			if (all || line.ref) {
+				ret.push(line.getRef(base));
 			}
 			line = line.next;
 		}

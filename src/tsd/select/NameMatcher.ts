@@ -2,6 +2,7 @@
 
 'use strict';
 
+import VError = require('verror');
 import assertVar = require('../../xm/assertVar');
 import RegExpGlue = require('../../xm/lib/RegExpGlue');
 
@@ -48,7 +49,7 @@ class NameMatcher {
 	// crude compilator
 	private compile(): void {
 		if (!this.pattern) {
-			throw (new Error('NameMatcher undefined pattern'));
+			throw (new VError('NameMatcher undefined pattern'));
 		}
 		this.projectExp = null;
 		this.nameExp = null;
@@ -71,7 +72,7 @@ class NameMatcher {
 		var match = patternSingle.exec(this.pattern);
 
 		if (match.length < 4) {
-			throw (new Error('NameMatcher bad match: "' + match + '"'));
+			throw new VError('NameMatcher bad match %s', match);
 		}
 		var glue: RegExpGlue;
 
@@ -100,7 +101,7 @@ class NameMatcher {
 		var match = patternSplit.exec(this.pattern);
 
 		if (match.length < 7) {
-			throw (new Error('NameMatcher bad match: "' + match + '"'));
+			throw new VError('NameMatcher bad match %s', match);
 		}
 		var glue: RegExpGlue;
 
@@ -161,7 +162,7 @@ class NameMatcher {
 			};
 		}
 		else {
-			throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(<any>this.pattern) + ''));
+			throw new VError('NameMatcher cannot compile pattern %s', JSON.stringify(<any>this.pattern));
 		}
 	}
 }

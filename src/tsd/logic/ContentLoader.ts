@@ -17,9 +17,9 @@ import defUtil = require('../util/defUtil');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
-class ContentLoader extends SubCore {
+class ContentLoader extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'content', 'ContentLoader');
@@ -52,7 +52,7 @@ class ContentLoader extends SubCore {
 			if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
 				ref = this.core.context.config.ref;
 			}
-			return this.core.repo.raw.getBinary(ref, file.def.path).then((content: NodeBuffer) => {
+			return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
 				if (file.blob && !file.blob.hasContent()) {
 					try {
 						file.blob.setContent(content);

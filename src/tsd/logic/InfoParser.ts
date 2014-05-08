@@ -6,14 +6,14 @@ import Promise = require('bluebird');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
 import DefInfo = require('../data/DefInfo');
 import DefVersion = require('../data/DefVersion');
 import DefInfoParser = require('../support/DefInfoParser');
 import defUtil = require('../util/defUtil');
 
-class InfoParser extends SubCore {
+class InfoParser extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'info', 'InfoParser');

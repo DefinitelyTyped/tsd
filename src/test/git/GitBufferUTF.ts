@@ -7,7 +7,7 @@ import assert = chai.assert;
 
 import GitUtil = require('../../git/GitUtil');
 
-export function assertion(actual: NodeBuffer, expected: NodeBuffer, message: string) {
+export function assertion(actual: Buffer, expected: Buffer, message: string) {
 	assert.instanceOf(actual, Buffer, 'actual: ' + message);
 	assert.instanceOf(expected, Buffer, 'expected: ' + message);
 

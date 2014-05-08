@@ -46,10 +46,9 @@ class Query {
 	}
 
 	toString(): string {
-		return this.patterns.reduce((memo: string[], matcher: NameMatcher) => {
-			memo.push(matcher.pattern);
-			return memo;
-		}, []).join(', ');
+		return this.patterns.map((matcher: NameMatcher) => {
+			return matcher.pattern;
+		}).join(', ');
 	}
 }
 

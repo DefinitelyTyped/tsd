@@ -6,13 +6,14 @@ import fs = require('graceful-fs');
 import util = require('util');
 import path = require('path');
 
+import Promise = require('bluebird');
+
 import chai = require('chai');
 import assert = chai.assert;
 
 import log = require('../xm/log');
 import fileIO = require('../xm/file/fileIO');
-import NodeStats = require('../xm/file/NodeStats');
-import CacheMode = require('../xm/http/CacheMode');
+import CacheMode = require('../http/CacheMode');
 import Def = require('../tsd/data/Def');
 import Const = require('../tsd/context/Const');
 import Context = require('../tsd/context/Context');
@@ -50,7 +51,7 @@ export function applyCoreUpdate(core: Core) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function listDefPaths(dir: string): Promise<string[]> {
-	return fileIO.listTree(dir, (full: string, stat: NodeStats): boolean => {
+	return fileIO.listTree(dir, (full: string, stat: fs.Stats): boolean => {
 		return (stat.isFile() && /\.d\.ts$/.test(full));
 
 	}).then((paths: string[]) => {

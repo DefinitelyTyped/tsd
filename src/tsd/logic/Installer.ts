@@ -10,17 +10,22 @@ import getNote = require('../../xm/note/getNote');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
+import Def = require('../data/Def');
 import DefVersion = require('../data/DefVersion');
 import defUtil = require('../util/defUtil');
 
 import InstalledDef = require('../context/InstalledDef');
 
-class Installer extends SubCore {
+class Installer extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'install', 'Installer');
+	}
+
+	getInstallPath(def: Def): string {
+		return path.join(this.core.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
 	}
 
 	/*
@@ -77,7 +82,7 @@ class Installer extends SubCore {
 	 lazy load and save a single DefVersion to typings folder
 	 */
 	useFile(file: DefVersion, overwrite: boolean): Promise<string> {
-		var targetPath = this.core.getInstallPath(file.def);
+		var targetPath = this.getInstallPath(file.def);
 
 		return fileIO.canWriteFile(targetPath, overwrite).then((canWrite: boolean) => {
 			if (!canWrite) {
@@ -95,11 +100,9 @@ class Installer extends SubCore {
 					return fileIO.remove(targetPath);
 				}
 			}).then(() => {
-				return fileIO.mkdirCheckQ(path.dirname(targetPath), true);
-			}).then(() => {
 				return fileIO.write(targetPath, file.blob.content);
-			});
-		}).return(targetPath);
+			}).return(targetPath);
+		});
 	}
 
 	/*

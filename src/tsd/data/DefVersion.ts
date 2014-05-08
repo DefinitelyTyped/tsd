@@ -2,8 +2,8 @@
 
 'use strict';
 
+import VError = require('verror');
 import assertVar = require('../../xm/assertVar');
-import objectUtils = require('../../xm/objectUtils');
 
 import Def = require('./Def');
 import DefBlob = require('./DefBlob');
@@ -43,7 +43,7 @@ class DefVersion {
 	setContent(blob: DefBlob): void {
 		assertVar(blob, DefBlob, 'blob');
 		if (this._blob) {
-			throw new Error('already got a blob: ' + this._blob.sha + ' != ' + blob.sha);
+			throw new VError('already got a blob %s != %s', this._blob.sha, blob.sha);
 		}
 		this._blob = blob;
 	}

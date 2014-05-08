@@ -35,19 +35,8 @@ class GithubRepo {
 
 		this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
-		this.api = new GithubAPI(this, opts.getChild('git/api'), this.storeDir);
-		this.raw = new GithubRaw(this, opts.getChild('git/raw'), this.storeDir);
-
-		var proxy = (
-		opts.getString('proxy')
-		|| process.env.HTTPS_PROXY
-		|| process.env.https_proxy
-		|| process.env.HTTP_PROXY
-		|| process.env.http_proxy
-		);
-
-		this.api.cache.proxy = proxy;
-		this.raw.cache.proxy = proxy;
+		this.api = new GithubAPI(this.urls, opts.getChild('git/api'), this.storeDir);
+		this.raw = new GithubRaw(this.urls, opts.getChild('git/raw'), this.storeDir);
 	}
 
 	getCacheKey(): string {

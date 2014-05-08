@@ -1,6 +1,6 @@
 /// <reference path="./_ref.d.ts" />
 
-// TODO figure out what is actually used at all and cleanup this nightmare (seriously wtf)
+// FIXME figure out what is actually used at all and cleanup this nightmare (seriously wtf)
 
 // evill
 

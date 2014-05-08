@@ -75,7 +75,7 @@ class Context {
 	getInfo(details: boolean = false): Object {
 		var info: any = {
 			version: this.packageInfo.getNameVersion(),
-			repo: 'http://github.com/' + this.config.repo + ' #' + this.config.ref
+			repo: 'https://github.com/' + this.config.repo + ' #' + this.config.ref
 		};
 		if (details) {
 			info.paths = this.paths;

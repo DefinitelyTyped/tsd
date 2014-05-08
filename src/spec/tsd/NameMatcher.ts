@@ -18,7 +18,6 @@ import Def = require('../../tsd/data/Def');
 import NameMatcher = require('../../tsd/select/NameMatcher');
 
 describe('NameMatcher', () => {
-	'use strict';
 
 	describe('basics', () => {
 		it('is defined', () => {

@@ -32,9 +32,9 @@ declare module Chai {
 		notIsEmptyDirectory(path:string, msg?:string):void;
 
 		fileContent(path:string, data:string, msg?:string):void;
-		fileContent(path:string, data:NodeBuffer, msg?:string):void;
+		fileContent(path:string, data:Buffer, msg?:string):void;
 		notFileContent(path:string, data:string, msg?:string):void;
-		notFileContent(path:string, data:NodeBuffer, msg?:string):void;
+		notFileContent(path:string, data:Buffer, msg?:string):void;
 
 		jsonFile(path:string, msg?:string):void;
 		notJsonFile(path:string, msg?:string):void;

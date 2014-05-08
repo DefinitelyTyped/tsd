@@ -9,7 +9,7 @@ import helper = require('../../test/helper');
 import StatCounter = require('../../xm/lib/StatCounter');
 
 describe('StatCounter', () => {
-	'use strict';
+
 	var counter: StatCounter;
 
 	beforeEach(() => {

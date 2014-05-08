@@ -9,6 +9,7 @@ import getLogger = require('../log/getLogger');
 import inspect = require('../inspect');
 import encode = require('../encode');
 import objectUtils = require('../objectUtils');
+import Promise = require('bluebird');
 
 function padL(input: string, len: number, char: string): string {
 	char = String(char).charAt(0);

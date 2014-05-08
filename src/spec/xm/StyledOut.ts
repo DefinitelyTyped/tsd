@@ -14,7 +14,6 @@ import fileIO = require('../../xm/file/fileIO');
 import collection = require('../../xm/collection');
 
 describe('StyledOut', () => {
-	'use strict';
 
 	var output: StyledOut;
 

@@ -20,25 +20,25 @@ var tests = {
 			pattern: 'async/async'
 		}
 	}),
-	'bootstrap' : lib.clone(installOpts, {
+	'bootstrap': lib.clone(installOpts, {
 		debug: false,
 		query: {
 			pattern: 'bootstrap/bootstrap'
 		}
 	}),
-	'bootstrap-no-resolve' : lib.clone(installOpts, {
+	'bootstrap-no-resolve': lib.clone(installOpts, {
 		debug: false,
 		resolve: false,
 		query: {
 			pattern: 'bootstrap/bootstrap'
 		}
 	}),
-	'bootstrap-no-overwrite' : lib.clone(installOpts, {
+	'bootstrap-no-overwrite': lib.clone(installOpts, {
 		debug: false,
 		overwrite: false,
 		modify: {
 			before: {
-				content : {
+				content: {
 					'jquery/jquery.d.ts': 'foo'
 				}
 			}

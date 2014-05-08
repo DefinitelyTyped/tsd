@@ -12,11 +12,12 @@ import assert = chai.assert;
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');
 
-import HTTPCache = require('../../xm/http/HTTPCache');
-import CacheInfo = require('../../xm/http/CacheInfo');
-import CacheOpts = require('../../xm/http/CacheOpts');
-import CacheObject = require('../../xm/http/CacheObject');
-import CacheRequest = require('../../xm/http/CacheRequest');
+import HTTPCache = require('../../http/HTTPCache');
+import HTTPOpts = require('../../http/HTTPOpts');
+import CacheInfo = require('../../http/CacheInfo');
+import CacheOpts = require('../../http/CacheOpts');
+import CacheObject = require('../../http/CacheObject');
+import CacheRequest = require('../../http/CacheRequest');
 
 class HttpTest {
 	storeTmpDir: string;
@@ -34,30 +35,18 @@ describe('HTTPCache', () => {
 		info.storeFixtureDir = path.join(helper.getDirNameFixtures(), name);
 		info.wwwHTTP = 'http://127.0.0.1:9090/';
 		info.wwwDir = path.resolve(helper.getDirNameTmp(), '..', 'www');
-
-		console.log(info);
-
 		return info;
 	}
 
-	var cache: HTTPCache;
-	var opts: CacheOpts;
-	var object: CacheObject;
-	var request: CacheRequest;
+	function getOpts(test: HttpTest): HTTPOpts {
+		var cacheOpts = new CacheOpts();
+		cacheOpts.storeDir = test.storeTmpDir;
 
-	before(() => {
-
-	});
-	after(() => {
-
-	});
-
-	afterEach(() => {
-		cache = null;
-		opts = null;
-		object = null;
-		request = null;
-	});
+		// TODO set proxy
+		return {
+			cache: cacheOpts
+		};
+	}
 
 	describe('HTTPCache core', () => {
 		// TODO add more existence tests
@@ -93,19 +82,16 @@ describe('HTTPCache', () => {
 			expected = fileIO.readFileSync(src, 'utf8');
 			fs.utimesSync(src, date, date);
 		});
-		beforeEach(() => {
-
-		});
 
 		it('should get a file', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = false;
-			opts.cacheWrite = true;
+			var opts = getOpts(test);
+			opts.cache.cacheRead = false;
+			opts.cache.cacheWrite = true;
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.lock();
 
 			return cache.getObject(request).then((obj: CacheObject) => {
@@ -121,15 +107,15 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from cache', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = false;
-			opts.remoteRead = false;
+			var opts = getOpts(test);
+			opts.cache.cacheRead = true;
+			opts.cache.cacheWrite = false;
+			opts.cache.remoteRead = false;
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.lock();
 
 			return cache.getObject(request).then((obj: CacheObject) => {
@@ -144,15 +130,13 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from http if forced', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = false;
-			opts.remoteRead = true;
+			var opts = getOpts(test);
+			opts.cache.cacheWrite = false;
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.forceRefresh = true;
 			request.lock();
 
@@ -169,15 +153,13 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from http if stale', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = false;
-			opts.remoteRead = true;
+			var opts = getOpts(test);
+			opts.cache.cacheWrite = false;
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.localMaxAge = -24 * 3600 * 1000;
 			request.lock();
 
@@ -194,15 +176,13 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from cache if within age', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = false;
-			opts.remoteRead = true;
+			var opts = getOpts(test);
+			opts.cache.cacheWrite = false;
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.localMaxAge = 24 * 3600 * 1000;
 			request.lock();
 
@@ -218,15 +198,12 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from cache if interval high', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = true;
-			opts.remoteRead = true;
+			var opts = getOpts(test);
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.httpInterval = 24 * 3600 * 1000;
 			request.lock();
 
@@ -242,15 +219,12 @@ describe('HTTPCache', () => {
 		});
 
 		it('should get a file from http if interval low', () => {
-			opts = new CacheOpts();
-			opts.cacheRead = true;
-			opts.cacheWrite = true;
-			opts.remoteRead = true;
+			var opts = getOpts(test);
 
-			cache = new HTTPCache(test.storeTmpDir, opts);
+			var cache = new HTTPCache(opts);
 			// cache.verbose = true;
 
-			request = new CacheRequest(url, {});
+			var request = new CacheRequest(url, {});
 			request.httpInterval = -24 * 3600 * 1000;
 			request.lock();
 

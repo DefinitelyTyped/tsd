@@ -25,7 +25,6 @@ class GithubRateInfo {
 	}
 
 	readFromRes(map: any) {
-
 		if (typeOf.isObject(map)) {
 			if (map['x-ratelimit-limit']) {
 				this.limit = parseInt(map['x-ratelimit-limit'], 10);

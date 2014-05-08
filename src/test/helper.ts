@@ -118,13 +118,13 @@ export function propStrictEqual(actual: Object, expected: Object, prop: string, 
 	assert.strictEqual(actual[prop], expected[prop], message + '.' + prop + ' equal');
 }
 
-export function assertBufferEqual(act: NodeBuffer, exp: NodeBuffer, msg?: string): void {
+export function assertBufferEqual(act: Buffer, exp: Buffer, msg?: string): void {
 	assert.instanceOf(act, Buffer, msg + ': ' + act);
 	assert.instanceOf(exp, Buffer, msg + ': ' + exp);
 	assert(bufferEqual(act, exp), msg + ': bufferEqual');
 }
 
-export function assertBufferUTFEqual(act: NodeBuffer, exp: NodeBuffer, msg?: string): void {
+export function assertBufferUTFEqual(act: Buffer, exp: Buffer, msg?: string): void {
 	assert.instanceOf(act, Buffer, msg + ': ' + act);
 	assert.instanceOf(exp, Buffer, msg + ': ' + exp);
 	assert.strictEqual(act.toString('utf8'), exp.toString('utf8'), msg + ': bufferEqual');

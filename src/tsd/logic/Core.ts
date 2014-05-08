@@ -9,16 +9,15 @@ import Promise = require('bluebird');
 
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
-import CacheMode = require('../../xm/http/CacheMode');
+import CacheMode = require('../../http/CacheMode');
 import eventLog = require('../../xm/lib/eventLog');
 
 import GithubRepo = require('../../git/GithubRepo');
 
 import Context = require('../context/Context');
 
-import Def = require('../data/Def');
+import CoreModule = require('./CoreModule');
 
-import ITrackable = require('./ITrackable');
 import IndexManager = require('./IndexManager');
 import SelectorQuery = require('./SelectorQuery');
 import ConfigIO = require('./ConfigIO');
@@ -89,17 +88,13 @@ class Core {
 		this.useCacheMode(this._cacheMode);
 	}
 
-	getInstallPath(def: Def): string {
-		return path.join(this.context.getTypingsDir(), def.path.replace(/[//\/]/g, path.sep));
-	}
-
 	useCacheMode(modeName: string): void {
 		this._cacheMode = modeName;
 
 		if (modeName in CacheMode) {
 			var mode = CacheMode[modeName];
-			this.repo.api.cache.opts.applyCacheMode(mode);
-			this.repo.raw.cache.opts.applyCacheMode(mode);
+			this.repo.api.cache.opts.cache.applyCacheMode(mode);
+			this.repo.raw.cache.opts.cache.applyCacheMode(mode);
 		}
 	}
 
@@ -114,7 +109,7 @@ class MultiManager {
 
 	private _verbose: boolean = false;
 
-	trackables = new Set<ITrackable>();
+	modules = new Set<CoreModule>();
 
 	constructor(public core: Core) {
 		assertVar(core, Core, 'core');
@@ -122,31 +117,31 @@ class MultiManager {
 
 	add(list: any[]) {
 		list.forEach((comp) => {
-			this.trackables.add(comp);
+			this.modules.add(comp);
 		});
 	}
 
 	remove(list: any[]) {
 		while (list.length > 0) {
-			this.trackables.delete(list.pop());
+			this.modules.delete(list.pop());
 		}
 	}
 
 	replace(fields: Object): void {
 		Object.keys(fields).forEach((property: string) => {
-			this.trackables.delete(this.core[property]);
+			this.modules.delete(this.core[property]);
 			var trackable = fields[property];
 			if (!this.core[property]) {
 				this.core[property] = trackable;
 			}
 			trackable.verbose = this._verbose;
-			this.trackables.add(fields[property]);
+			this.modules.add(fields[property]);
 		});
 	}
 
 	set verbose(verbose: boolean) {
 		this._verbose = verbose;
-		this.trackables.forEach((comp: ITrackable) => {
+		this.modules.forEach((comp: CoreModule) => {
 			comp.verbose = this._verbose;
 		});
 	}

@@ -5,22 +5,18 @@
 import fs = require('graceful-fs');
 import path = require('path');
 import Promise = require('bluebird');
+import VError = require('verror');
 
 import fileIO = require('../../xm/file/fileIO');
 import getNote = require('../../xm/note/getNote');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
 import Bundle = require('../support/Bundle');
 
-class BundleManager extends SubCore {
-
-	static bundle_init = 'bundle_init';
-	static bundle_read = 'bundle_read';
-	static bundle_save = 'bundle_save';
-	static bundle_add = 'bundle_add';
+class BundleManager extends CoreModule {
 
 	constructor(core: Core) {
 		super(core, 'bundle', 'BundleManager');
@@ -54,12 +50,12 @@ class BundleManager extends SubCore {
 		return fileIO.exists(target).then((exists: boolean) => {
 			if (!exists) {
 				if (!optional) {
-					throw new Error('cannot locate file: ' + target);
+					throw new VError('cannot locate file %s', target);
 				}
 				return null;
 			}
 			// TODO should be streaming
-			return fileIO.read(target, {flags: 'rb'}).then((buffer: NodeBuffer) => {
+			return fileIO.read(target, {flags: 'rb'}).then((buffer: Buffer) => {
 				bundle.parse(buffer.toString('utf8'));
 			});
 		}).return(bundle);
@@ -70,14 +66,7 @@ class BundleManager extends SubCore {
 	 */
 	saveBundle(bundle: Bundle): Promise<void> {
 		var target = path.resolve(bundle.target);
-		var dir = path.dirname(target);
-
-		return fileIO.mkdirCheckQ(dir, true).then(() => {
-			// TODO un-voodoo
-			return fileIO.write(target, bundle.getContent()).then(() => {
-				// d.progress(getNote('saved bundle: ' + bundle.target));
-			});
-		});
+		return fileIO.write(target, bundle.getContent());
 	}
 }
 

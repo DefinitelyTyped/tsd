@@ -2,6 +2,7 @@
 
 'use strict';
 
+import VError = require('verror');
 import dateUtils = require('../../xm/dateUtils');
 
 import Def = require('../data/Def');
@@ -115,7 +116,7 @@ export function extractReferenceTags(source: string): string[] {
 	var match: RegExpExecArray;
 
 	if (!referenceTagExp.global) {
-		throw new Error('referenceTagExp RegExp must have global flag');
+		throw new VError('referenceTagExp RegExp must have global flag');
 	}
 	referenceTagExp.lastIndex = 0;
 

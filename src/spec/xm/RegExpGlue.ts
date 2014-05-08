@@ -9,7 +9,6 @@ import helper = require('../../test/helper');
 import RegExpGlue = require('../../xm/lib/RegExpGlue');
 
 describe('RexExpGlue', () => {
-	'use strict';
 
 	var exp: RegExpGlue;
 	var e: RegExp;

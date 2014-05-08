@@ -25,21 +25,21 @@ function assertVar(value: any, type: any, label: string, opt: boolean = false): 
 	if (!typeOf.isValid(value)) {
 		if (!opt) {
 			throw new AssertionError(
-			'expected ' + encode.wrapQuotes(label, true)
-			+ ' to be defined as a ' + inspect.toValueStrim(type)
-			+ ' but got ' + (valueKind === 'number' ? 'NaN' : valueKind),
-			undefined, assertVar
+					'expected ' + encode.wrapQuotes(label, true)
+					+ ' to be defined as a ' + inspect.toValueStrim(type)
+					+ ' but got ' + (valueKind === 'number' ? 'NaN' : valueKind),
+				undefined, assertVar
 			);
 		}
 	}
 	else if (typeKind === 'function') {
 		if (!(value instanceof type)) {
 			throw new AssertionError(
-			'expected ' + encode.wrapQuotes(label, true)
-			+ ' to be instanceof ' + inspect.getFuncLabel(type)
-			+ ' but is a ' + inspect.getFuncLabel(value.constructor)
-			+ ': ' + inspect.toValueStrim(value),
-			undefined, assertVar
+					'expected ' + encode.wrapQuotes(label, true)
+					+ ' to be instanceof ' + inspect.getFuncLabel(type)
+					+ ' but is a ' + inspect.getFuncLabel(value.constructor)
+					+ ': ' + inspect.toValueStrim(value),
+				undefined, assertVar
 			);
 		}
 	}
@@ -48,29 +48,29 @@ function assertVar(value: any, type: any, label: string, opt: boolean = false): 
 			var check = typeOfAssert[type];
 			if (!check(value)) {
 				throw new AssertionError(
-				'expected ' + encode.wrapQuotes(label, true)
-				+ ' to be a ' + encode.wrapQuotes(type, true)
-				+ ' but got a ' + encode.wrapQuotes(valueKind, true)
-				+ ': ' + inspect.toValueStrim(value),
-				undefined, assertVar
+						'expected ' + encode.wrapQuotes(label, true)
+						+ ' to be a ' + encode.wrapQuotes(type, true)
+						+ ' but got a ' + encode.wrapQuotes(valueKind, true)
+						+ ': ' + inspect.toValueStrim(value),
+					undefined, assertVar
 				);
 			}
 		}
 		else {
 			throw new AssertionError(
-			'unknown type-assertion parameter ' + encode.wrapQuotes(type, true)
-			+ ' for ' + inspect.toValueStrim(value),
-			undefined, assertVar
+					'unknown type-assertion parameter ' + encode.wrapQuotes(type, true)
+					+ ' for ' + inspect.toValueStrim(value),
+				undefined, assertVar
 			);
 		}
 	}
 	else {
 		throw new AssertionError(
-		'bad type-assertion parameter '
-		+ inspect.toValueStrim(type)
-		+ ' for '
-		+ encode.wrapQuotes(label, true),
-		undefined, assertVar
+				'bad type-assertion parameter '
+				+ inspect.toValueStrim(type)
+				+ ' for '
+				+ encode.wrapQuotes(label, true),
+			undefined, assertVar
 		);
 	}
 }

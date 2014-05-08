@@ -17,7 +17,7 @@ import defUtil = require('../util/defUtil');
 
 import Options = require('../Options');
 import Core = require('Core');
-import SubCore = require('./SubCore');
+import CoreModule = require('./CoreModule');
 
 var localExp = /^\.\//;
 var leadingExp = /^\.\.\//;
@@ -27,7 +27,7 @@ var leadingExp = /^\.\.\//;
  */
 // TODO add unit test, verify race condition solver works properly
 // TODO 'resolve' not good choice (conflicts with promises)
-class Resolver extends SubCore {
+class Resolver extends CoreModule {
 
 	static active: string = 'active';
 	static solved: string = 'solved';
@@ -86,7 +86,7 @@ class Resolver extends SubCore {
 		}).return(file);
 	}
 
-	applyResolution(index: DefIndex, file: DefVersion, content: string): Promise<DefVersion>[] {
+	private applyResolution(index: DefIndex, file: DefVersion, content: string): Promise<DefVersion>[] {
 		var refs: string[] = this.extractPaths(file, content);
 
 		return refs.reduce((memo: any[], refPath: string) => {
@@ -101,8 +101,7 @@ class Resolver extends SubCore {
 					// log('recurse ' + dep.toString());
 
 					// lets go deeper
-					var p: Promise<DefVersion> = this.resolveDeps(dep.head);
-					memo.push(p);
+					memo.push(this.resolveDeps(dep.head));
 				}
 			}
 			else {
@@ -113,7 +112,7 @@ class Resolver extends SubCore {
 		}, []);
 	}
 
-	extractPaths(file: DefVersion, content: string): string[] {
+	private extractPaths(file: DefVersion, content: string): string[] {
 		// filter reasonable formed paths
 		return defUtil.extractReferenceTags(content).reduce((memo: string[], refPath: string): any[] => {
 			// TODO harder def-test? why?

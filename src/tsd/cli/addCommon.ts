@@ -2,13 +2,13 @@
 
 'use strict';
 
-import Expose = require('../../xm/expose/Expose');
-import ExposeContext = require('../../xm/expose/ExposeContext');
-import ExposeOption = require('../../xm/expose/ExposeOption');
-import ExposeLevel = require('../../xm/expose/ExposeLevel');
+import Expose = require('../../expose/Expose');
+import ExposeContext = require('../../expose/Context');
+import ExposeOption = require('../../expose/Option');
+import ExposeLevel = require('../../expose/Level');
 
 import collection = require('../../xm/collection');
-import CacheMode = require('../../xm/http/CacheMode');
+import CacheMode = require('../../http/CacheMode');
 
 import Printer = require('./Printer');
 import StyleMap = require('./StyleMap');

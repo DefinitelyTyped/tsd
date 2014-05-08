@@ -12,6 +12,7 @@
 /test/spec/*/tmp
 /test/spec/*/build
 
+/.tscache
 /tscommand*
 /*.tgz
 /*.ts

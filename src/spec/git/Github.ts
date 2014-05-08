@@ -21,7 +21,6 @@ import GithubAPI = require('../../git/loader/GithubAPI');
 import GithubRaw = require('../../git/loader/GithubRaw');
 
 describe('Github', () => {
-	'use strict';
 
 	var repo: GithubRepo;
 	var cacheDir: string;
@@ -29,8 +28,8 @@ describe('Github', () => {
 
 	beforeEach(() => {
 		// use clean tmp folder in this test module
-		cacheDir = path.join(gitTest.cacheDir, 'git-api');
-		repo = new GithubRepo(gitTest.config.repo, gitTest.cacheDir, gitTest.opts);
+		cacheDir = path.join(gitTest.cacheDir, 'GithubRepo');
+		repo = new GithubRepo(gitTest.config.repo, cacheDir, gitTest.opts);
 		// helper.enableTrack(repo);
 	});
 
@@ -60,7 +59,7 @@ describe('Github', () => {
 			helper.assertFormatSHA1(commitSha, 'commitSha');
 			helper.assertFormatSHA1(blobSha, 'blobSha');
 
-			return repo.raw.getBinary(commitSha, filePath).then((rawData: NodeBuffer) => {
+			return repo.raw.getBinary(commitSha, filePath).then((rawData: Buffer) => {
 				assert.ok(rawData, 'raw data');
 				assert.instanceOf(rawData, Buffer, 'raw data');
 				assert.operator(rawData.length, '>', 20, 'raw data');
@@ -83,24 +82,6 @@ describe('Github', () => {
 
 					// this explodes.. weird!
 					// assert.strictEqual(apiBuffer, rawBuffer, 'api vs raw buffer');
-
-					// temp hackish
-					return fileIO.mkdirCheckQ(gitTest.extraDir, true).then(() => {
-						return fileIO.write(path.join(gitTest.extraDir, 'tmp_test.bin'), rawData, {flags: 'wb'});
-					}).then(() => {
-						return fileIO.read(path.join(gitTest.extraDir, 'tmp_test.bin'), {flags: 'rb'});
-					}, (err) => {
-						log.error('storage test failure');
-						throw err;
-					}).then((cycleData: NodeBuffer) => {
-						assert.ok(rawData, 'raw data');
-						assert.instanceOf(rawData, Buffer, 'raw data');
-
-						var cycleSha = GitUtil.blobShaHex(cycleData);
-						assert.strictEqual(cycleSha, rawSha, 'cycleSha vs rawData');
-						assert.strictEqual(cycleSha, blobSha, 'cycleSha vs blobSha');
-						assert.strictEqual(cycleSha, apiSha, 'cycleSha vs apiSha');
-					});
 				});
 			});
 		});

@@ -1,5 +1,6 @@
 {
 	"proxy" : null,
+	"oath" : null,
 	"git": {
 		"raw": {
 			"allowClean": true,

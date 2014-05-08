@@ -3,25 +3,9 @@
 'use strict';
 
 import typeOf = require('./typeOf');
+import clone = require('clone');
 
 // TODO remove some method clutter
-
-function deepFreezeRecursive(object: any, active: any[]): void {
-	var value: any, prop: string;
-	active = (active || []);
-	active.push(object);
-	Object.freeze(object);
-	for (prop in object) {
-		if (typeOf.hasOwnProp(object, prop)) {
-			value = object[prop];
-			if (typeOf.isObject(value) || typeOf.isArray(value)) {
-				if (active.indexOf(object) < 0) {
-					deepFreezeRecursive(value, active);
-				}
-			}
-		}
-	}
-}
 
 // just here for consistency
 export function defineProp(object: Object, property: string, settings: any): void {
@@ -105,10 +89,4 @@ export function lockPrimitives(object: Object): void {
 			Object.defineProperty(object, property, {writable: false});
 		}
 	});
-}
-
-export function deepFreeze(object: Object): void {
-	if (typeOf.isObject(object) || typeOf.isArray(object)) {
-		deepFreezeRecursive(object, []);
-	}
 }

@@ -1,9 +1,13 @@
 /// <reference path="../node/node.d.ts" />
 
 declare module 'bufferstream' {
+	import stream = require('stream');
 
-	class BufferStream implements ReadWriteStream {
-		constructor (options?: BufferStream.Opts);
+	export = BufferStream;
+
+	class BufferStream extends stream.Duplex {
+		constructor(options?: BufferStream.Opts);
+
 		/*
 		 different buffer behaviors can be triggered by size:
 
@@ -27,8 +31,8 @@ declare module 'bufferstream' {
 		disable(): void;
 		disable(token: string, ...tokens: string[]): void;
 		disable(tokens: string[]): void; // Array
-		disable(token: NodeBuffer, ...tokens: NodeBuffer[]): void;
-		disable(tokens: NodeBuffer[]): void; // Array
+		disable(token: Buffer, ...tokens: Buffer[]): void;
+		disable(tokens: Buffer[]): void; // Array
 		/*
 		 each time BufferStream finds a splitter token in the input data it will emit a split event. this also works for binary data.
 
@@ -36,16 +40,16 @@ declare module 'bufferstream' {
 		*/
 		split(token: string, ...tokens: string[]): void;
 		split(tokens: string[]): void; // Array
-		split(token: NodeBuffer, ...tokens: NodeBuffer[]): void;
-		split(tokens: NodeBuffer[]): void; // Array
+		split(token: Buffer, ...tokens: Buffer[]): void;
+		split(tokens: Buffer[]): void; // Array
 		/*
 		 returns Buffer.
 		*/
-		getBuffer(): NodeBuffer;
+		getBuffer(): Buffer;
 		/*
 		 returns Buffer.
 		*/
-		buffer: NodeBuffer;
+		buffer: Buffer;
 		/*
 		 shortcut for buffer.toString()
 		*/
@@ -55,8 +59,8 @@ declare module 'bufferstream' {
 		*/
 		length: number;
 	}
-
 	module BufferStream {
+
 		export interface Opts {
 			/*
 			 default encoding for writing strings
@@ -69,7 +73,7 @@ declare module 'bufferstream' {
 			/*
 			 defines buffer level or sets buffer to given size (see ↓setSize for more)
 			*/
-			size?: number;
+			size?: any;
 			/*
 			 immediately call disable
 			*/
@@ -78,20 +82,18 @@ declare module 'bufferstream' {
 			 short form for:
 				split(token, function (chunk) {emit('data', chunk)})
 			*/
-			// String or NodeBuffer
+			// String or Buffer
 			split?: any;
 		}
 		export var fn: {warn: boolean};
 	}
-
-	export = BufferStream;
 }
 
 declare module 'bufferstream/postbuffer' {
 	import http = require('http');
 	import BufferStream = require('bufferstream');
 
-	interface PostBuffer extends ReadWriteStream {
+	interface PostBuffer extends NodeJS.ReadWriteStream {
 		/*
 		 for if you want to get all the post data from a http server request and do some db reqeust before.
 
@@ -105,7 +107,7 @@ declare module 'bufferstream/postbuffer' {
 		/*
 		 pumps data into another stream to allow incoming streams given options will be passed to Stream.pipe
 		*/
-		pipe(stream: WritableStream, options?: BufferStream.Opts);
+		pipe(stream: NodeJS.WritableStream, options?: BufferStream.Opts);
 	}
 
 	export = PostBuffer;

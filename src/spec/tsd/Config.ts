@@ -17,7 +17,6 @@ import Config = require('../../tsd/context/Config');
 import testConfig = require('../../test/tsd/Config');
 
 describe('Config', () => {
-	'use strict';
 
 	var config: Config;
 

@@ -19,7 +19,6 @@ import GithubRepo = require('../../git/GithubRepo');
 import GithubRaw = require('../../git/loader/GithubRaw');
 
 describe('GithubRaw', () => {
-	'use strict';
 
 	var repo: GithubRepo;
 	var cacheDir: string;
@@ -37,13 +36,13 @@ describe('GithubRaw', () => {
 
 	it('should have default options', () => {
 		assert.isFunction(GithubRaw, 'constructor');
-		assert.isTrue(repo.raw.cache.opts.cacheRead, 'options.cacheRead');
-		assert.isTrue(repo.raw.cache.opts.cacheWrite, 'options.cacheWrite');
-		assert.isTrue(repo.raw.cache.opts.remoteRead, 'options.remoteRead');
+		assert.isTrue(repo.raw.cache.opts.cache.cacheRead, 'options.cacheRead');
+		assert.isTrue(repo.raw.cache.opts.cache.cacheWrite, 'options.cacheWrite');
+		assert.isTrue(repo.raw.cache.opts.cache.remoteRead, 'options.remoteRead');
 	});
 
 	describe('getFile commit', () => {
-		it('should cache and return data', () => {
+		it('should be repeatable', () => {
 			// repo.raw.verbose = true;
 
 			var filePath = gitTest.config.data.async.filePath;
@@ -52,34 +51,21 @@ describe('GithubRaw', () => {
 			var commitSha = gitTest.config.data.async.commitSha;
 			helper.assertFormatSHA1(commitSha, 'commitSha');
 
-			var notes = [];
-
-			return repo.raw.getBinary(commitSha, filePath).then((firstData: NodeBuffer) => {
+			return repo.raw.getBinary(commitSha, filePath).then((firstData: Buffer) => {
 				assert.instanceOf(firstData, Buffer, 'first callback data');
 				assert.operator(firstData.length, '>', 0, 'first callback data');
 
 				// get again, should be cached
-				return repo.raw.getBinary(commitSha, filePath).then((secondData: NodeBuffer) => {
+				return repo.raw.getBinary(commitSha, filePath).then((secondData: Buffer) => {
 					assert.instanceOf(secondData, Buffer, 'second callback data');
 					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
-
-					helper.assertNotes(notes, [
-						{
-							message: /^remote: /,
-							code: 'http 200'
-						},
-						{
-							message: /^local: /,
-							code: null
-						}
-					], 'second');
 				});
 			});
 		});
 	});
 
 	describe('getFile ref', () => {
-		it('should cache and return data', () => {
+		it('should be repeatable', () => {
 			// repo.raw.verbose = true;
 
 			var filePath = gitTest.config.data.async.filePath;
@@ -88,27 +74,14 @@ describe('GithubRaw', () => {
 			var ref = gitTest.config.repo.ref;
 			assert.isString(ref, 'ref');
 
-			var notes = [];
-
-			return repo.raw.getBinary(ref, filePath).then((firstData: NodeBuffer) => {
+			return repo.raw.getBinary(ref, filePath).then((firstData: Buffer) => {
 				assert.instanceOf(firstData, Buffer, 'first callback data');
 				assert.operator(firstData.length, '>', 0, 'first callback data');
 
 				// get again, should be cached
-				return repo.raw.getBinary(ref, filePath).then((secondData: NodeBuffer) => {
+				return repo.raw.getBinary(ref, filePath).then((secondData: Buffer) => {
 					assert.instanceOf(secondData, Buffer, 'second callback data');
 					assert.strictEqual(firstData.toString('utf8'), secondData.toString('utf8'), 'first vs second data');
-
-					/*helper.assertNotes(notes, [
-						{
-							message: /^remote: /,
-							code: 'http 200'
-						},
-						{
-							message: /^local: /,
-							code: null
-						}
-					], 'second');*/
 				});
 			});
 		});

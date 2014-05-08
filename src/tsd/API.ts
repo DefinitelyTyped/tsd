@@ -51,8 +51,7 @@ class API {
 	 */
 	// TODO add some more options
 	initConfig(overwrite: boolean): Promise<string> {
-		var p = this.core.config.initConfig(overwrite);
-		return p;
+		return this.core.config.initConfig(overwrite);
 	}
 
 	/*
@@ -60,16 +59,14 @@ class API {
 	 */
 	// TODO add some more options
 	readConfig(optional: boolean): Promise<void> {
-		var p = this.core.config.readConfig(optional);
-		return p;
+		return this.core.config.readConfig(optional);
 	}
 
 	/*
 	 save the config to Context.path.configFile
 	 */
 	saveConfig(): Promise<string> {
-		var p = this.core.config.saveConfig();
-		return p;
+		return this.core.config.saveConfig();
 	}
 
 	/*
@@ -97,19 +94,19 @@ class API {
 		var files: DefVersion[] = defUtil.mergeDependencies(selection.selection);
 
 		return this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
-		.then((written: Map<string, DefVersion>) => {
-			if (!written) {
-				throw new Error('expected install paths');
-			}
-			res.written = written;
-		}).then(() => {
-			if (options.saveToConfig) {
-				return this.core.config.saveConfig();
-			}
-			return null;
-		}).then(() => {
-			return this.saveBundles(collection.valuesOf(res.written), options);
-		}).return(res);
+			.then((written: Map<string, DefVersion>) => {
+				if (!written) {
+					throw new Error('expected install paths');
+				}
+				res.written = written;
+			}).then(() => {
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig();
+				}
+				return null;
+			}).then(() => {
+				return this.saveBundles(collection.valuesOf(res.written), options);
+			}).return(res);
 	}
 
 	/*
@@ -120,29 +117,34 @@ class API {
 		assertVar(options, Options, 'options', true);
 		options = options || Options.main;
 
+		if (files.length === 0) {
+			return Promise.resolve();
+		}
+
+		var refs: string[] = [];
+		files.forEach((file: DefVersion) => {
+			refs.push(file.def.path);
+		});
+
+		var basePath = path.dirname(this.context.paths.configFile);
+
 		var bundles: string[] = [];
 		if (options.addToBundles) {
 			options.addToBundles.forEach((bundle: string) => {
-				bundle = path.join(this.context.config.path, bundle);
+				bundle = path.resolve(basePath, bundle);
 				if (!/\.ts$/.test(bundle)) {
 					bundle += '.d.ts';
 				}
 				bundles.push(bundle);
 			});
 		}
-		var refs: string[] = [];
-		files.forEach((file: DefVersion) => {
-			refs.push(file.def.path);
-		});
+		// TODO re-use config var?
+		if (options.saveToConfig && this.context.config.bundle) {
+			bundles.push(path.resolve(basePath, this.context.config.bundle));
+		}
 
 		return Promise.map(bundles, (target: string) => {
 			return this.core.bundle.addToBundle(target, refs, true);
-		}).then(() => {
-			// TODO re-use config var?
-			if (options.saveToConfig && this.context.config.bundle) {
-				// no progress?
-				return this.core.bundle.addToBundle(this.context.config.bundle, refs, true);
-			}
 		}).return();
 	}
 
@@ -153,16 +155,16 @@ class API {
 		var res = new InstallResult(options);
 
 		return this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
-		.then((map: Map<string, DefVersion>) => {
-			res.written = map;
-		}).then(() => {
-			if (options.saveToConfig) {
-				return this.core.config.saveConfig();
-			}
-			return null;
-		}).then(() => {
-			return this.saveBundles(collection.valuesOf(res.written), options);
-		}).return(res);
+			.then((map: Map<string, DefVersion>) => {
+				res.written = map;
+			}).then(() => {
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig();
+				}
+				return null;
+			}).then(() => {
+				return this.saveBundles(collection.valuesOf(res.written), options);
+			}).return(res);
 	}
 
 	/*
@@ -235,7 +237,7 @@ class API {
 			}
 			return Promise.cast(file);
 		}).then((list) => {
-			return list.reduce((memo:string[],  file: DefVersion) => {
+			return list.reduce((memo: string[], file: DefVersion) => {
 				var url;
 				if (file.info && file.info.projectUrl) {
 					url = file.info.projectUrl;
