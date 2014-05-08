@@ -64,7 +64,7 @@ describe('Github', () => {
 				assert.instanceOf(rawData, Buffer, 'raw data');
 				assert.operator(rawData.length, '>', 20, 'raw data');
 
-				var rawSha = GitUtil.blobShaHex(rawData, 'utf8');
+				var rawSha = GitUtil.blobShaHex(rawData);
 				helper.assertFormatSHA1(rawSha, 'rawSha');
 
 				return repo.api.getBlob(blobSha).then((apiData) => {

@@ -5,7 +5,8 @@
   "keywords": [
     "typescript",
     "definition",
-    "package"
+    "package",
+    "manager"
   ],
   "homepage": "https://github.com/DefinitelyTyped/tsd",
   "repository": {
@@ -33,7 +34,7 @@
   },
   "preferGlobal": true,
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 0.10.0 < 0.11.0"
   },
   "main": "./build/api.js",
   "bin": {
@@ -47,7 +48,6 @@
     "lazy.js": "~0.3.2",
     "bluebird": "~1.1.0",
     "es6-shim": "~0.10.0",
-    "q": "~0.9.7",
     "open": "~0.0.4",
     "exit": "~0.1.1",
     "mkdirp": "~0.3.5",
@@ -71,19 +71,13 @@
     "uuid": "~1.4.1",
     "detect-indent": "~0.1.3",
     "graceful-fs": "~2.0.2",
-    "weak-map": "~1.0.3",
-    "highland": "^1.22.0",
-    "joi": "^4.0.0",
-    "clone": "^0.1.11",
-    "glob-stream": "^3.1.9",
-    "verror": "^1.4.0",
-    "extsprintf": "^1.0.3",
-    "JSONStream": "^0.7.2",
-    "minimatch": "^0.2.14",
-    "readdir-stream": "^0.1.0",
+    "joi": "~4.0.0",
+    "verror": "~1.4.0",
+    "extsprintf": "~1.0.3",
+    "minimatch": "~0.2.14",
     "joi-assert": "0.0.3",
     "deep-freeze": "0.0.1",
-    "type-detect": "^0.1.2"
+    "type-detect": "~0.1.2"
   },
   "devDependencies": {
     "source-map-support": "~0.2.5",
@@ -93,14 +87,13 @@
     "grunt-contrib-copy": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
     "jshint-path-reporter": "~0.1",
-    "typescript": "~1.0.0",
-    "grunt-ts": "^1.11.2",
+    "grunt-ts": "~1.11.2",
     "grunt-tslint": "~0.4.1",
     "tslint-path-formatter": "~0.1.0",
     "grunt-tv4": "~0.4.0",
     "grunt-shell": "~0.6.1",
     "grunt-contrib-connect": "~0.5.0",
-    "grunt-todos": "^0.3.0",
+    "grunt-todos": "~0.3.0",
     "grunt-mocha-test": "~0.10.0",
     "mocha-unfunk-reporter": "~0.4.0",
     "chai": "git://github.com/Bartvds/chai/#fixes/1.8.x",
@@ -110,7 +103,6 @@
     "chai-as-promised": "~4.1.0",
     "buffer-equal": "0.0.0",
     "lodash-template": "~1.0.0",
-    "definition-header": "git://github.com/DefinitelyTyped/definition-header#21a661047fbe742842a829e6722e4117a9d4f6d1",
     "grunt-regex-replace": "~0.2.5",
     "package.json-schema": "~0.2.0"
   }

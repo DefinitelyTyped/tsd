@@ -31,7 +31,7 @@ describe('GitUtils', () => {
 			var buffer = GitUtil.decodeBlobJson(expectedJson);
 			assert.instanceOf(buffer, Buffer, 'buffer');
 
-			var sha = GitUtil.blobShaHex(buffer, 'utf8');
+			var sha = GitUtil.blobShaHex(buffer);
 			helper.assertFormatSHA1(sha, 'sha');
 
 			assert.strictEqual(sha, expectedSha, 'sha actual vs expected');

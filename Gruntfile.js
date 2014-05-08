@@ -216,23 +216,6 @@ module.exports = function (grunt) {
 				options: {
 				}
 			}
-		},
-		export_declaration: {
-			api: {
-				options: {
-					main: 'build/api.d.ts'
-				},
-				src: ['build/**/*.d.ts']
-			}
-		},
-		capture_cli: {
-			options: {
-				modulePath: './build/cli.js',
-				debug: false,
-				cwd: null,
-				template: path.resolve('assets', 'templates', 'cli-standard.html'),
-				outDir: './media/capture'
-			}
 		}
 	});
 

@@ -1,6 +1,6 @@
 {
 	"proxy" : null,
-	"oath" : null,
+	"token" : null,
 	"git": {
 		"raw": {
 			"allowClean": true,
@@ -48,10 +48,10 @@
 		"enabled": true,
 		"registryUrl": "http://registry.npmjs.org/%s",
 		"updateCheckTimeout": {
-			"seconds": 20
+			"seconds": 10
 		},
 		"updateCheckInterval": {
-			"days": 4
+			"days": 7
 		}
 	}
 }

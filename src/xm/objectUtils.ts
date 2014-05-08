@@ -3,7 +3,6 @@
 'use strict';
 
 import typeOf = require('./typeOf');
-import clone = require('clone');
 
 // TODO remove some method clutter
 

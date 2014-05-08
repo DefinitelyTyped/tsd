@@ -79,7 +79,7 @@ describe('CLI Query', () => {
 		return args;
 	}
 
-	var trimHeaderExp = /^\s*?(>> tsd) (\d+\.\d+\.\d+)(\S+)?([ \S]+(?:\r?\n)+)/;
+	var trimHeaderExp = /^\s*?(>> tsd) (\d+\.\d+\.\d+)(\S+)?([ \S]*(?:\r?\n)+)/;
 
 	function trimHeader(str: string): string {
 		return str.replace(trimHeaderExp, '');

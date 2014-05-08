@@ -17,11 +17,11 @@ export function assertion(actual: Buffer, expected: Buffer, message: string) {
 	if (actualStr !== expectedStr) {
 		// show fancy diffs
 		var actualDebug = {
-			sha: GitUtil.blobShaHex(actual, 'utf8'),
+			sha: GitUtil.blobShaHex(actual),
 			str: actualStr
 		};
 		var expectedDebug = {
-			sha: GitUtil.blobShaHex(expected, 'utf8'),
+			sha: GitUtil.blobShaHex(expected),
 			str: expectedStr
 		};
 		assert.fail(actualDebug, expectedDebug, message);

@@ -19,7 +19,7 @@ export function decodeBlobJson(blobJSON: any): Buffer {
 	}
 }
 
-export function blobShaHex(data: Buffer, encoding?: string): string {
+export function blobShaHex(data: Buffer): string {
 	assertVar(data, Buffer, 'data');
-	return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data, encoding).digest('hex');
+	return crypto.createHash('sha1').update('blob ' + data.length + '\0').update(data).digest('hex');
 }

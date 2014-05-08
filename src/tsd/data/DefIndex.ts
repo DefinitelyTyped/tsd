@@ -175,10 +175,10 @@ class DefIndex {
 	/*
 	 get a DefBlob for a sha (enforces single instances)
 	 */
-	procureBlobFor(content: Buffer, encoding: string = null): DefBlob {
+	procureBlobFor(content: Buffer): DefBlob {
 		assertVar(content, Buffer, 'content');
 
-		var sha = gitUtil.blobShaHex(content, encoding);
+		var sha = gitUtil.blobShaHex(content);
 		var blob: DefBlob = this.procureBlob(sha);
 		if (!blob.hasContent()) {
 			blob.setContent(content);

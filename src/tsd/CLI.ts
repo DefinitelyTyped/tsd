@@ -98,7 +98,7 @@ export function getExpose(): Expose {
 	function showHeader(): Promise<void> {
 		var pkg = PackageJSON.getLocal();
 
-		output.ln().report(true).tweakPunc(pkg.getNameVersion()).space().muted('(').accent('beta').muted(')').ln();
+		output.ln().report(true).tweakPunc(pkg.getNameVersion()).ln(); // .space().muted('(').accent('beta').muted(')').ln();
 		// .clear().span(pkg.getHomepage(true)).ln()
 		// .ruler().ln();
 		return Promise.resolve();

@@ -11,6 +11,7 @@ import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 import CacheMode = require('../../http/CacheMode');
 import eventLog = require('../../xm/lib/eventLog');
+import typeOf = require('../../xm/typeOf');
 
 import GithubRepo = require('../../git/GithubRepo');
 
@@ -84,6 +85,14 @@ class Core {
 		// lets be gents
 		this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 		this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
+
+		var token = this.context.settings.getValue('/token');
+		if (typeOf.isString(token)) {
+			this.repo.api.headers['authorization'] = 'token ' + token;
+		}
+		else {
+			delete this.repo.api.headers['authorization'];
+		}
 
 		this.useCacheMode(this._cacheMode);
 	}
