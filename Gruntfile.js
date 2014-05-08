@@ -60,6 +60,7 @@ module.exports = function (grunt) {
 		clean: {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
+			test: ['test/*/spec/build/**/*'],
 			sourcemap: ['build/**/*.js.map'],
 			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map']
 		},
@@ -293,6 +294,7 @@ module.exports = function (grunt) {
 	// assemble!
 	gtx.alias('prep', [
 		'clean:tmp',
+		'clean:test',
 		'jshint:support',
 		'jshint:fixtures',
 		'mocha_unfunk:dev'
