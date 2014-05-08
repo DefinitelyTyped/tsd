@@ -145,7 +145,7 @@ $ tsd update -s -o
 $ tsd update -so
 ````
 
-#### Reinstall definitions from `tsd.json`
+#### Reinstall definitions
 
 Reset the definitions to the commits listed in `tsd.json`:
 
@@ -154,7 +154,6 @@ $ tsd reinstall --save --overwrite
 $ tsd reinstall -s -o
 $ tsd reinstall -so
 ````
-
 
 ## Query
 
@@ -347,9 +346,7 @@ api.search(new tsd.Selector('jquery/*')).then(function(res) {
 
 For a practical example see [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
 
-TSD uses Promise/A+ by [kriskowal/q](https://github.com/kriskowal/q) and [kriskowal/q-io](https://github.com/kriskowal/q-io) packages. :point_left::+1: 
-
-Note: Keep in mind this project started as a `<reference>` style TypeScript `v0.8.x` single-file compile target, which makes it harder to limit the exported API compared to `import` multi-file style. This is also why the definitions include more then just the `tsd` namespace. 
+TSD uses Promise/A+ by [bluebird](https://github.com/petkaantonov/bluebird). :point_left::+1:
 
 API export is somewhat experimental; take care to lock versions and test on upgrade. If you plan to use TSD as module in a tool or project then feel free to [leave a message](https://github.com/DefinitelyTyped/tsd/issues) and coordinate stuff.
 
