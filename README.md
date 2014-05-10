@@ -6,6 +6,10 @@
 
 TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
+:warning: This is the development branch [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) for `v0.6.x`.
+
+:point_right: Current release version `v0.5.x` lives at [master](https://github.com/DefinitelyTyped/tsd/tree/master).
+
 #### Usage notes
 
 *	It is recommended you check-in the definitions you install into your VCS.
@@ -13,7 +17,7 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 #### Github rate-limit
 
-The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. Optionally a scope-limited Github OAuth token can be used to boost the limit to 5000.
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. If you need some more then a scope-limited Github OAuth token can be used to boost the limit to 5000.
 
 #### Usage stats & update-notifier
 
