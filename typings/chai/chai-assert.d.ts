@@ -15,10 +15,14 @@ declare module Chai {
 
 	export var Assertion: ChaiAssertion;
 	export var assert: Assert;
+	export var config: ChaiConfig;
+
+	export interface ChaiConfig {
+		includeStack: boolean;
+	}
 
 	export interface ChaiAssertion {
-		includeStack:boolean;
-		// TODO more
+		// what?
 	}
 
 	export interface Assert {

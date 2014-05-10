@@ -26,7 +26,7 @@ chai.use(require('chai-fuzzy'));
 chai.use(require('chai-json-schema'));
 chai.use(require('chai-fs'));
 chai.use(require('chai-as-promised'));
-chai.Assertion.includeStack = true;
+chai.config.includeStack = true;
 
 var shaRegExp = /^[0-9a-f]{40}$/;
 var md5RegExp = /^[0-9a-f]{32}$/;
