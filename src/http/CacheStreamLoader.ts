@@ -5,6 +5,7 @@
 import fs = require('graceful-fs');
 
 import path = require('path');
+import crypto = require('crypto');
 import Promise = require('bluebird');
 import joiAssert = require('joi-assert');
 
@@ -13,7 +14,7 @@ import request = require('request');
 import Request = request.Request;
 
 import es = require('event-stream');
-import BufferStream = require('bufferstream');
+import BufferList = require('bl');
 
 import typeOf = require('../xm/typeOf');
 import assert = require('../xm/assert');
@@ -203,14 +204,21 @@ class CacheStreamLoader {
 
 			// d.progress(getNote('loading: ' + this.request.url));
 
-			// memory stream for now
-			var writer = new BufferStream({size: 'flexible'});
+			// var writer = new BufferStream({size: 'flexible'});
 			// pause it so we don't miss chunks before we choose a decoder
 			var pause = es.pause();
 			pause.pause();
 
+			var checkSha = crypto.createHash('sha1');
+
 			// start loading
 			var r = request.get(req);
+			r.on('data', (chunk) => {
+				checkSha.update(chunk);
+			});
+			r.pipe(pause).on('error', (err) => {
+				reject(err);
+			});
 			r.on('response', (res) => {
 				// keep some info
 				this.object.response = new ResponseInfo();
@@ -233,12 +241,39 @@ class CacheStreamLoader {
 						return;
 					}
 					// cache hit!
-
 					this.updateInfo(res, this.object.info.contentChecksum);
-
 					this.cacheWrite(true).then(resolve, reject);
+
 					return;
 				}
+
+				// setup completion handler
+				var writer = new BufferList((err, body) => {
+					// var body = writer.slice();
+					if (!body) {
+						// shouldn't we test
+						throw new Error('flow error: http 304 but no local info on: ' + this.request.url);
+					}
+					if (body.length === 0) {
+						throw new Error('loaded zero bytes ' + this.request.url);
+					}
+
+					var checksum = checkSha.digest('hex');
+
+					if (this.object.info) {
+						if (this.object.info.contentChecksum) {
+							assert(checksum === this.object.info.contentChecksum,
+								'{a} !== {b}', checksum, this.object.info.contentChecksum);
+						}
+						this.updateInfo(res, checksum);
+					}
+					else {
+						this.copyInfo(res, checksum);
+					}
+					this.object.body = body;
+
+					this.cacheWrite(false).done(resolve, reject);
+				});
 
 				// pick and pipe paused stream to decoder
 				switch (res.headers['content-encoding']) {
@@ -253,37 +288,8 @@ class CacheStreamLoader {
 						break;
 				}
 
-				// setup completion handler
-				writer.on('end', () => {
-					var body = writer.getBuffer();
-					if (!body) {
-						// shouldn't we test
-						throw new Error('flow error: http 304 but no local info on: ' + this.request.url);
-					}
-					if (body.length === 0) {
-						throw new Error('loaded zero bytes ' + this.request.url);
-					}
-					var checksum = hash.sha1(body);
-
-					if (this.object.info) {
-						if (this.object.info.contentChecksum) {
-							// assert(checksum === this.object.info.contentChecksum,
-							//  '{a} !== {b}', checksum, this.object.info.contentChecksum);
-						}
-						this.updateInfo(res, checksum);
-					}
-					else {
-						this.copyInfo(res, checksum);
-					}
-					this.object.body = body;
-
-					this.cacheWrite(false).done(resolve, reject);
-				});
 				// restart stream with proper setup
 				pause.resume();
-			});
-			r.pipe(pause).on('error', (err) => {
-				reject(err);
 			});
 		});
 	}

@@ -21,11 +21,6 @@ catch (e) {
 	// whatever
 }
 
-// kill warning
-import bufferstream = require('bufferstream');
-bufferstream.fn.warn = false;
-
-
 // TODO verify process.setMaxListeners() still needs to be this high
 process.setMaxListeners(20);
 
