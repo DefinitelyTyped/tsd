@@ -2,8 +2,6 @@
 
 'use strict';
 
-require('../bootstrap');
-
 import path = require('path');
 import Promise = require('bluebird');
 import yaml = require('js-yaml');
