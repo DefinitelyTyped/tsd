@@ -213,9 +213,6 @@ class CacheStreamLoader {
 
 			// start loading
 			var r = request.get(req);
-			r.on('data', (chunk) => {
-				checkSha.update(chunk);
-			});
 			r.pipe(pause).on('error', (err) => {
 				reject(err);
 			});
@@ -276,17 +273,24 @@ class CacheStreamLoader {
 				});
 
 				// pick and pipe paused stream to decoder
+				var decoded;
 				switch (res.headers['content-encoding']) {
 					case 'gzip':
-						pause.pipe(zlib.createGunzip()).pipe(writer);
+						decoded = pause.pipe(zlib.createGunzip());
 						break;
 					case 'deflate':
-						pause.pipe(zlib.createInflate()).pipe(writer);
+						decoded = pause.pipe(zlib.createInflate());
 						break;
 					default:
-						pause.pipe(writer);
+						decoded = pause;
 						break;
 				}
+
+				// tap for hash
+				decoded.on('data', (chunk) => {
+					checkSha.update(chunk);
+				});
+				decoded.pipe(writer);
 
 				// restart stream with proper setup
 				pause.resume();
