@@ -265,7 +265,7 @@ module.exports = function (grunt) {
 		concurrent: 1 //cpuCores
 	});
 
-	var longTimer = (isVagrant ? 250000 : 7000);
+	var longTimer = (isVagrant ? 250000 : 10000);
 
 	// modules
 	gtx.create('xm', 'moduleTest', null, 'lib');
