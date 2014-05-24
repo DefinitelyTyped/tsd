@@ -61,7 +61,7 @@ module.exports = function (grunt) {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
 			test: ['test/*/spec/build/**/*'],
-			sourcemap: ['build/**/*.js.map'],
+			cruft: ['build/**/*.js.map', 'build/**/*.d.ts', 'build/**/.baseDir*'],
 			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map']
 		},
 		copy: {
@@ -284,7 +284,7 @@ module.exports = function (grunt) {
 		'rebuild',
 		'regex-replace:build',
 		'regex-replace:cli',
-		'clean:sourcemap',
+		'clean:cruft',
 		// 'gtx:cli',
 		// 'gtx:api',
 		'mochaTest:integrity',
@@ -325,8 +325,6 @@ module.exports = function (grunt) {
 		'shell:demo_help'
 	]);
 
-	//gtx.alias('run', ['build', 'demo:help']);
-	// gtx.alias('dev', ['prep', 'ts:dev']);
 	gtx.alias('dev', [
 		'clean:build',
 		'prep',

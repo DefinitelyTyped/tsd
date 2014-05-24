@@ -101,7 +101,6 @@
     "grunt-tv4": "~0.4.0",
     "gruntfile-gtx": "^0.3.0",
     "jshint-path-reporter": "~0.1",
-    "lodash-template": "~1.0.0",
     "mocha-unfunk-reporter": "~0.4.0",
     "package.json-schema": "~0.2.0",
     "source-map-support": "~0.2.5",

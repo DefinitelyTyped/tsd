@@ -21,15 +21,18 @@
 /Vagrantfile
 /Gruntfile.js
 
+/.travis.yml
+/appveyor.yml
+/.jshintrc
+/.vagrant
+/.editorconfig
+/.tscache
+/.grunt
+
 .npmignore
 .gitignore
 .gitmodules
 .gitattributes
-
-.travis.yml
-.jshintrc
-.vagrant
-.editorconfig
 
 /tscommand*
 
