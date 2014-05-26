@@ -258,10 +258,6 @@ class CacheStreamLoader {
 					var checksum = checkSha.digest('hex');
 
 					if (this.object.info) {
-						if (this.object.info.contentChecksum) {
-							assert(checksum === this.object.info.contentChecksum,
-								'{a} !== {b}', checksum, this.object.info.contentChecksum);
-						}
 						this.updateInfo(res, checksum);
 					}
 					else {
