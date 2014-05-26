@@ -61,7 +61,6 @@ module.exports = function (grunt) {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
 			test: ['test/*/spec/build/**/*'],
-			cruft: ['build/**/*.js.map', 'build/**/*.d.ts', 'build/**/.baseDir*'],
 			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map']
 		},
 		copy: {
@@ -145,6 +144,12 @@ module.exports = function (grunt) {
 					reportPending: true,
 					stackFilter: true
 				}
+			}
+		},
+		ts_clean: {
+			build: {
+				src: ['build/**/*'],
+				dot: true
 			}
 		},
 		ts: {
@@ -284,7 +289,7 @@ module.exports = function (grunt) {
 		'rebuild',
 		'regex-replace:build',
 		'regex-replace:cli',
-		'clean:cruft',
+		'ts_clean:build',
 		// 'gtx:cli',
 		// 'gtx:api',
 		'mochaTest:integrity',
@@ -309,8 +314,7 @@ module.exports = function (grunt) {
 		// 'export_declaration:api'
 	]);
 	gtx.alias('build', [
-		'rebuild' /*,
-		'demo:help'*/
+		'rebuild'
 	]);
 	gtx.alias('test', [
 		'build',
