@@ -20,7 +20,6 @@
 /tslint.json
 /Vagrantfile
 /Gruntfile.js
-
 /.travis.yml
 /appveyor.yml
 /.jshintrc

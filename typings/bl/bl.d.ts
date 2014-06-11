@@ -1,4 +1,9 @@
-// <reference path="../node/node.d.ts" />
+// Type definitions for BufferList v0.8.0
+// Project: https://github.com/rvagg/bl
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
+/// <reference path="../node/node.d.ts" />
 
 declare module 'bl' {
 	import stream = require('stream');

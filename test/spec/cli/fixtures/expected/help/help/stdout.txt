@@ -37,6 +37,7 @@
    update                     update definitions from config
     --overwrite          -o    > overwrite existing files (flag)
     --save               -s    > save changes to config file (flag)
+   link                       link definitions from package managers
    help                       display usage help
    version                    display tsd version info
    settings                   display config settings

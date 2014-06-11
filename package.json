@@ -78,12 +78,12 @@
     "joi-assert": "0.0.3",
     "deep-freeze": "0.0.1",
     "type-detect": "~0.1.2",
-    "bl": "^0.8.0"
+    "bl": "~0.8.0"
   },
   "devDependencies": {
     "buffer-equal": "0.0.0",
     "chai": "~1.9.1",
-    "chai-as-promised": "~4.1.0",
+    "chai-as-promised": "~4.1.1",
     "chai-fs": "~0.0.3",
     "chai-fuzzy": "~1.4.0",
     "chai-json-schema": "~1.0.10",
@@ -92,19 +92,20 @@
     "grunt-contrib-connect": "~0.5.0",
     "grunt-contrib-copy": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
-    "grunt-mocha-test": "~0.10.0",
+    "grunt-mocha-test": "~0.11.0",
     "grunt-regex-replace": "~0.2.5",
     "grunt-shell": "~0.6.1",
     "grunt-todos": "~0.3.0",
     "grunt-ts": "~1.11.2",
-    "grunt-ts-clean": "^0.1.1",
+    "grunt-ts-clean": "~0.1.1",
     "grunt-tslint": "~0.4.1",
     "grunt-tv4": "~0.4.0",
-    "gruntfile-gtx": "^0.3.0",
+    "gruntfile-gtx": "~0.3.0",
     "jshint-path-reporter": "~0.1",
     "mocha-unfunk-reporter": "~0.4.0",
     "package.json-schema": "~0.2.0",
     "source-map-support": "~0.2.5",
-    "tslint-path-formatter": "~0.1.0"
+    "tslint-path-formatter": "~0.1.0",
+    "typescript": "~1.0.1"
   }
 }

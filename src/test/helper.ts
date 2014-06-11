@@ -37,6 +37,10 @@ export function getProjectRoot(): string {
 	return path.dirname(PackageJSON.find());
 }
 
+export function getSharedFixtures(): string {
+	return path.resolve(getProjectRoot(), 'test', 'fixtures');
+}
+
 export function getDirNameFixtures(): string {
 	return path.resolve(__dirname, '..', '..', 'fixtures');
 }

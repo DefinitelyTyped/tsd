@@ -31,6 +31,9 @@ import GitRateInfo = require('../git/model/GithubRateInfo');
 import Options = require('./Options');
 import Core = require('./logic/Core');
 
+import PackageLinker = require('./support/PackageLinker');
+import PackageDefinition = require('./support/PackageDefinition');
+
 /*
  API: the high-level API used by dependants
  */
@@ -180,6 +183,22 @@ class API {
 
 		return this.select(query, options).then((selection: Selection) => {
 			return this.install(selection, options);
+		});
+	}
+
+	link(baseDir: string): Promise<PackageDefinition[]> {
+		assertVar(baseDir, 'string', 'baseDir');
+
+		var linker = new PackageLinker();
+
+		return linker.scanDefinitions(baseDir).then((packages) => {
+			var refs = packages.reduce((memo: string[], packaged) => {
+				return packaged.definitions.reduce((memo, ref) => {
+					memo.push(ref);
+					return memo;
+				}, memo);
+			}, []);
+			return this.core.bundle.addToBundle(this.context.config.bundle, refs, true).return(packages);
 		});
 	}
 

@@ -34,6 +34,8 @@ import CommitMatcher = require('./select/CommitMatcher');
 import DateMatcher = require('./select/DateMatcher');
 import InstallResult = require('./logic/InstallResult');
 
+import PackageDefinition = require('./support/PackageDefinition');
+
 import Expose = require('../expose/Expose');
 import ExposeGroup = require('../expose/Group');
 import ExposeOption = require('../expose/Option');
@@ -508,6 +510,26 @@ export function getExpose(): Expose {
 					print.installResult(result);
 
 					tracker.install('update', result);
+				});
+			}).catch(reportError);
+		};
+	});
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	expose.defineCommand((cmd: ExposeCommand) => {
+		cmd.name = 'link';
+		cmd.label = 'link definitions from package managers';
+		cmd.groups = [Group.support, Group.primary];
+		cmd.execute = (ctx: ExposeContext) => {
+			return getAPIJob(ctx).then((job: Job) => {
+				output.line();
+				output.info(true).span('running').space().accent(cmd.name).ln();
+
+				return job.api.link(process.cwd()).then((packages: PackageDefinition[]) => {
+					packages.forEach((linked) => {
+						output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
+					});
 				});
 			}).catch(reportError);
 		};

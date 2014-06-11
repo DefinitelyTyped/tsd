@@ -159,6 +159,7 @@ module.exports = function (grunt) {
 				target: 'es5',
 				declaration: true,
 				sourcemap: true,
+				removeComments: true,
 				noImplicitAny: false
 			},
 			api: {
