@@ -159,6 +159,46 @@ $ tsd reinstall -s -o
 $ tsd reinstall -so
 ````
 
+
+#### Link to package-manager bundled definitions
+
+:warning: This is experimental
+
+TSD supports easy linking of definitions that have been bundles in packages installed with `node` or `bower`.
+
+This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `defintions` sub-element that contains a relative path(s) to `.d.ts` files:
+
+````json
+{
+	"name": "cool-module",
+	"version": "1.2.3",
+	"typescript": {
+		"definition": "dist/cool-module.d.ts"
+	}
+}
+````
+
+Or if the module exports multiple independent files (eg: for some reason not internally `<reference>`'d):
+
+````json
+{
+	"name": "cool-module",
+	"version": "1.2.3",
+	"typescript": {
+		"definitions": [
+			"dist/cool-module-partA.d.ts",
+			"dist/cool-module-partB.d.ts"
+		]
+	}
+}
+````
+
+Use the `link` command and your `tsd.d.ts` will be updated with paths to the files in the `node_modules` or `bower_modules` folders.
+
+````bash
+$ tsd link
+````
+
 ## Query
 
 TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
