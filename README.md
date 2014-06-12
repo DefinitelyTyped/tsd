@@ -1,6 +1,6 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.png?branch=master)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.png)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.png)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.png)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies) [![Build status](https://ci.appveyor.com/api/projects/status/usywa9w6kd7ssskv)](https://ci.appveyor.com/project/BartvanderSchoor/tsd)
+[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.svg?branch=master)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.svg)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.svg)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.svg)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies) [![Build status](https://ci.appveyor.com/api/projects/status/usywa9w6kd7ssskv)](https://ci.appveyor.com/project/BartvanderSchoor/tsd)
 
 > TypeScript Definition manager for DefinitelyTyped
 
