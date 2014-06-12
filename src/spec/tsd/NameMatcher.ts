@@ -112,6 +112,15 @@ describe('NameMatcher', () => {
 		it('q', () => {
 			assertMatch('q', 'q/Q', true);
 		});
+		it('foo', () => {
+			assertMatch('foo', 'foo/bar', false);
+		});
+		it('foo/', () => {
+			assertMatch('foo/', 'foo/bar', true);
+		});
+		it('/bar', () => {
+			assertMatch('/bar', 'foo/bar', true);
+		});
 	});
 
 	describe('bulk', () => {
@@ -124,15 +133,9 @@ describe('NameMatcher', () => {
 				});
 
 				assert.isArray(paths, 'paths');
-				assert.lengthOf(paths, data.result.length, 'paths');
 				assert.like(paths, data.result, 'paths');
+				assert.lengthOf(paths, data.result.length, 'paths');
 			});
-		});
-	});
-
-	describe('multi', () => {
-		it('q', () => {
-			assertMatch('q', 'q/Q', true);
 		});
 	});
 });

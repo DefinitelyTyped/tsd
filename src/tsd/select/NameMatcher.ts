@@ -12,7 +12,7 @@ import Def = require('../data/Def');
 var wordParts = /[\w_\.-]/;
 var wordGreedy = /[\w_\.-]+/;
 var wordLazy = /[\w_\.-]*?/;
-var wordGlob: RegExp = /(\**)([\w_\.-]*?)(\**)/;
+var wordGlob = /(\**)([\w_\.-]*?)(\**)/;
 
 // simple pattern: *project*/*name*
 var patternSplit: RegExp = RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
@@ -158,7 +158,7 @@ class NameMatcher {
 		}
 		else if (this.projectExp) {
 			return (file: Def) => {
-				return this.projectExp.test(file.name);
+				return this.projectExp.test(file.project);
 			};
 		}
 		else {

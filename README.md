@@ -244,6 +244,12 @@ $ tsd query project/module
 $ tsd query other/module
 ````
 
+Or simply get everything in a project:
+
+````bash
+$ tsd query project/
+````
+
 ### Globbing filter
 
 The selector also supports globbing, for example:
