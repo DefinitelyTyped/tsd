@@ -6,7 +6,7 @@
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): NodeJS.Timer;
 declare function clearTimeout(timeoutId: NodeJS.Timer): void;
 
-import fs = require('graceful-fs');
+import fs = require('fs');
 import path = require('path');
 import Promise = require('bluebird');
 import Joi = require('joi');
@@ -26,6 +26,11 @@ import CacheRequest = require('./CacheRequest');
 import CacheStreamLoader = require('./CacheStreamLoader');
 
 import types = require('./types');
+
+interface PathStat {
+	path: string;
+	atime: number;
+}
 
 class HTTPCache {
 
@@ -157,35 +162,55 @@ class HTTPCache {
 		assertVar(maxAge, 'number', 'maxAge');
 
 		return this.init().then(() => {
-			var limit = Date.now() - maxAge;
+			var ageLimit = Date.now() - maxAge;
+			var dirs = Object.create(null);
+			var files: PathStat[] = [];
 
-			return fileIO.listTree(this.opts.cache.storeDir, (src: string, stat: fs.Stats) => {
-				if (stat.isFile()) {
-					var ext = path.extname(src);
-					if (ext !== '.json') {
-						return false;
+			var baseDir = path.resolve(this.opts.cache.storeDir);
+
+			return fileIO.listTree(baseDir).map((target: string) => {
+				var first = path.relative(baseDir, target).match(/^\w+/);
+				if (first && typeOf.isString(first[0]) && /^[0-9a-f]{1,40}$/.test(first[0])) {
+					if (!(first[0] in dirs)) {
+						dirs[first[0]] = path.join(baseDir, first[0]);
 					}
-					var name = path.basename(src, ext);
-					if (!typeOf.isSha(name)) {
-						return false;
-					}
-					if (stat.atime.getTime() > limit) {
-						return false;
-					}
-					// kill it
-					return true;
 				}
-				return false;
-			});
-		}).then((tree: string[]) => {
-			return Promise.map(tree, (src: string) => {
-				return Promise.all([
-					fileIO.removeFile(src),
-					fileIO.removeFile(src.replace(/\.json$/, '.raw'))
-				]).then(() => {
-					// d.progress('dropped from cache: ' + src);
-				}, (err) => {
-					// eat error
+				return fileIO.stat(target).then((stat: fs.Stats) => {
+					if (stat.isFile()) {
+						files.push({
+							atime: stat.atime.getTime(),
+							path: target
+						});
+					}
+					return target;
+				});
+			}).then(() => {
+				// strict filter
+				var remove = files.filter((obj: PathStat) => {
+					var ext = path.extname(obj.path);
+					var first = path.relative(baseDir, obj.path).match(/^\w+/);
+					if (ext !== '.json' && ext !== '.raw') {
+						delete dirs[first];
+						return false;
+					}
+					var name = path.basename(obj.path, ext);
+					if (!typeOf.isSha(name)) {
+						delete dirs[first];
+						return false;
+					}
+					if (maxAge > 0 && obj.atime > ageLimit) {
+						delete dirs[first];
+						return false;
+					}
+					return true;
+				}).map(obj => obj.path);
+
+				return Promise.map(remove, (target: string) => {
+					return fileIO.removeFile(target);
+				}).then(() => {
+					return Promise.map(Object.keys(dirs), (key: string) => {
+						return fileIO.rimraf(dirs[key]);
+					});
 				});
 			});
 		}).return();

@@ -2,13 +2,14 @@
 
 'use strict';
 
-import fs = require('graceful-fs');
+import fs = require('fs');
 import path = require('path');
 import util = require('util');
 import VError = require('verror');
 
 import Promise = require('bluebird');
 import mkdirp = require('mkdirp');
+import rimrafMod = require('rimraf');
 
 import assertVar = require('../assertVar');
 
@@ -202,6 +203,19 @@ export function removeFile(target: string): Promise<void> {
 	});
 }
 
+export function rimraf(target: string): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		rimrafMod(target, (err) => {
+			if (err) {
+				reject(err);
+			}
+			else {
+				resolve(undefined);
+			}
+		});
+	});
+}
+
 var utimes = Promise.promisify(fs.utimes);
 
 // TODO what about directories?
@@ -348,7 +362,7 @@ export function readdir(basePath: string): Promise<string[]> {
 }
 
 // lifted from Q-io
-export function listTree(basePath: string, guard: (basePath: string, stat: fs.Stats) => boolean): Promise<string[]> {
+export function listTree(basePath: string, guard?: (basePath: string, stat: fs.Stats) => boolean): Promise<string[]> {
 	basePath = String(basePath || '');
 	if (!basePath) {
 		basePath = '.';

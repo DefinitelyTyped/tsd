@@ -2,7 +2,7 @@
 
 'use strict';
 
-import fs = require('graceful-fs');
+import fs = require('fs');
 import util = require('util');
 import path = require('path');
 import assertVar = require('../xm/assertVar');

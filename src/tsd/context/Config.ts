@@ -2,7 +2,7 @@
 
 'use strict';
 
-import fs = require('graceful-fs');
+import fs = require('fs');
 import path = require('path');
 import util = require('util');
 import tv4 = require('tv4');

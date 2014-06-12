@@ -59,3 +59,4 @@
 /// <reference path="form-data/form-data.d.ts" />
 /// <reference path="deep-freeze/deep-freeze.d.ts" />
 /// <reference path="type-detect/type-detect.d.ts" />
+/// <reference path="rimraf/rimraf.d.ts" />
