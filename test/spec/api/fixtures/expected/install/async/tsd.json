@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "async/async.d.ts": {
-      "commit": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
+      "commit": "e9be9177f6ef097329e080c70010f81dab08bf4d"
     }
   }
 }

@@ -2,14 +2,12 @@
   "written": {
     "async/async.d.ts": {
       "path": "async/async.d.ts",
-      "key": "async/async.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "async/async.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": true,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
-      "blob": {
-        "sha": "12aa4123f3e68a5ef9a45108c55abd9e1b645851"
-      },
+      "blobSha": "25736941fe8de2b32cd354004c3737892b74acf4",
       "dependencies": []
     }
   },

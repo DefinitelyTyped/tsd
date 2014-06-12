@@ -2,13 +2,10 @@
   "selection": [
     {
       "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     }
@@ -20,7 +17,7 @@
       "name": "bootstrap",
       "head": {
         "path": "bootstrap/bootstrap.d.ts",
-        "key": "bootstrap/bootstrap.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []

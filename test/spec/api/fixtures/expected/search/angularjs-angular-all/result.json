@@ -2,97 +2,73 @@
   "selection": [
     {
       "path": "angularjs/angular-animate.d.ts",
-      "key": "angularjs/angular-animate.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-animate.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "696e6f8349114be26ce7c14e1a48e5cc38d41606"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-cookies.d.ts",
-      "key": "angularjs/angular-cookies.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-cookies.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "60eebbacb02fad10c66df953fbd7c546adb4464f"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-mocks.d.ts",
-      "key": "angularjs/angular-mocks.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-mocks.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "a607422dd44e906d7e883197c3e00ae28ba3f36d"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-resource.d.ts",
-      "key": "angularjs/angular-resource.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-resource.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "c26bc9fe829417c9c228fea3d2a3ef124d13bd0a"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-route.d.ts",
-      "key": "angularjs/angular-route.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-route.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "b8d1db50b58d7665e97aa622920a8259e800383d"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-sanitize.d.ts",
-      "key": "angularjs/angular-sanitize.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-sanitize.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "a28bdb0d77cb62805903ca78cc7d02b2810e6e9f"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular-scenario.d.ts",
-      "key": "angularjs/angular-scenario.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular-scenario.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "ec3efd9f933022c122f46315419f80c08383c4a8"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     },
     {
       "path": "angularjs/angular.d.ts",
-      "key": "angularjs/angular.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "angularjs/angular.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
-      },
-      "blob": {
-        "sha": "b369a271f8b8c00d74ec15c51965ea0cf18b0306"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
       "dependencies": []
     }
@@ -104,7 +80,7 @@
       "name": "angular-animate",
       "head": {
         "path": "angularjs/angular-animate.d.ts",
-        "key": "angularjs/angular-animate.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-animate.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -115,7 +91,7 @@
       "name": "angular-cookies",
       "head": {
         "path": "angularjs/angular-cookies.d.ts",
-        "key": "angularjs/angular-cookies.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-cookies.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -126,7 +102,7 @@
       "name": "angular-mocks",
       "head": {
         "path": "angularjs/angular-mocks.d.ts",
-        "key": "angularjs/angular-mocks.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-mocks.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -137,7 +113,7 @@
       "name": "angular-resource",
       "head": {
         "path": "angularjs/angular-resource.d.ts",
-        "key": "angularjs/angular-resource.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-resource.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -148,7 +124,7 @@
       "name": "angular-route",
       "head": {
         "path": "angularjs/angular-route.d.ts",
-        "key": "angularjs/angular-route.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-route.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -159,7 +135,7 @@
       "name": "angular-sanitize",
       "head": {
         "path": "angularjs/angular-sanitize.d.ts",
-        "key": "angularjs/angular-sanitize.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-sanitize.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -170,7 +146,7 @@
       "name": "angular-scenario",
       "head": {
         "path": "angularjs/angular-scenario.d.ts",
-        "key": "angularjs/angular-scenario.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular-scenario.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []
@@ -181,7 +157,7 @@
       "name": "angular",
       "head": {
         "path": "angularjs/angular.d.ts",
-        "key": "angularjs/angular.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+        "key": "angularjs/angular.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
         "solved": false
       },
       "history": []

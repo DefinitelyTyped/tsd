@@ -2,14 +2,12 @@
   "written": {
     "bootstrap/bootstrap.d.ts": {
       "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": true,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
-      "blob": {
-        "sha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd"
-      },
+      "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd",
       "dependencies": [
         {
           "path": "jquery/jquery.d.ts",
@@ -20,14 +18,12 @@
     },
     "jquery/jquery.d.ts": {
       "path": "jquery/jquery.d.ts",
-      "key": "jquery/jquery.d.ts-42004a39f156ff6ea6491c1c30608ff5b0f16fdb",
+      "key": "jquery/jquery.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": true,
       "commit": {
-        "commitSha": "42004a39f156ff6ea6491c1c30608ff5b0f16fdb"
+        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
-      "blob": {
-        "sha": "958128e2c19ad0435cd231716b399a024e02a18e"
-      },
+      "blobSha": "6fff3fab622f37113f0d11da82c1cfc5045219ae",
       "dependencies": []
     }
   },
