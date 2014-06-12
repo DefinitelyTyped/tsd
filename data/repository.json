@@ -4,8 +4,8 @@
   "urls": {
     "def": "https://github.com/borisyankov/DefinitelyTyped/blob/master/{path}"
   },
-  "updatedAt": 1401119381175,
-  "count": 502,
+  "updatedAt": 1402553862897,
+  "count": 507,
   "content": [
     {
       "project": "Finch",
@@ -107,17 +107,12 @@
       "path": "amplifyjs/amplifyjs.d.ts",
       "info": {
         "references": [],
-        "name": "AmplifyJs 1.1.0",
-        "version": "1.1.0",
+        "name": "",
+        "version": "",
         "description": "",
-        "projectUrl": "http://amplifyjs.com",
-        "authors": [
-          {
-            "name": "Jonas Eriksson",
-            "url": "https://github.com/joeriks"
-          }
-        ],
-        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
@@ -436,6 +431,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "ansicolors",
+      "name": "ansicolors",
+      "path": "ansicolors/ansicolors.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
@@ -806,6 +815,27 @@
       }
     },
     {
+      "project": "bl",
+      "name": "bl",
+      "path": "bl/bl.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts"
+        ],
+        "name": "BufferList v0.8.0",
+        "version": "0.8.0",
+        "description": "",
+        "projectUrl": "https://github.com/rvagg/bl",
+        "authors": [
+          {
+            "name": "Bart van der Schoor",
+            "url": "https://github.com/Bartvds"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "bluebird",
       "name": "bluebird",
       "path": "bluebird/bluebird.d.ts",
@@ -922,6 +952,25 @@
           {
             "name": "derikwhittaker",
             "url": "https://github.com/derikwhittaker"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "bootstrap.v3.datetimepicker",
+      "name": "bootstrap.v3.datetimepicker",
+      "path": "bootstrap.v3.datetimepicker/bootstrap.v3.datetimepicker.d.ts",
+      "info": {
+        "references": [],
+        "name": "Bootstrap datetimepicker v3",
+        "version": "3",
+        "description": "",
+        "projectUrl": "http://eonasdan.github.io/bootstrap-datetimepicker",
+        "authors": [
+          {
+            "name": "Jesica N. Fera",
+            "url": "https://github.com/bayitajesi"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -1905,14 +1954,14 @@
       "path": "durandal/durandal.d.ts",
       "info": {
         "references": [],
-        "name": "Durandal 2.0.1",
-        "version": "2.0.1",
+        "name": "Durandal 2.1.0",
+        "version": "2.1.0",
         "description": "",
         "projectUrl": "http://durandaljs.com",
         "authors": [
           {
-            "name": "Evan Larsen",
-            "url": "https://github.com/evanlarsen"
+            "name": "Blue Spire",
+            "url": "https://github.com/BlueSpire"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -2439,8 +2488,8 @@
         "references": [
           "../jquery/jquery.d.ts"
         ],
-        "name": "Flight 1.1.1",
-        "version": "1.1.1",
+        "name": "Flight 1.1.4",
+        "version": "1.1.4",
         "description": "",
         "projectUrl": "http://flightjs.github.com/flight",
         "authors": [
@@ -2559,7 +2608,7 @@
       "path": "fs-extra/fs-extra.d.ts",
       "info": {
         "references": [],
-        "name": "aws-sdk",
+        "name": "fs-extra",
         "version": "",
         "description": "",
         "projectUrl": "https://github.com/jprichardson/node-fs-extra",
@@ -3643,26 +3692,6 @@
           {
             "name": "Bart van der Schoor",
             "url": "https://github.com/Bartvds"
-          }
-        ],
-        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
-      }
-    },
-    {
-      "project": "jasmine",
-      "name": "jasmine",
-      "path": "jasmine/jasmine-1.3.d.ts",
-      "semver": "1.3.0",
-      "info": {
-        "references": [],
-        "name": "Jasmine 1.3",
-        "version": "1.3",
-        "description": "",
-        "projectUrl": "http://pivotal.github.com/jasmine",
-        "authors": [
-          {
-            "name": "Boris Yankov",
-            "url": "https://github.com/borisyankov"
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
@@ -4801,7 +4830,7 @@
         "name": "jquery.validation 1.11.1",
         "version": "1.11.1",
         "description": "",
-        "projectUrl": "http://bassistance.de/jquery-plugins/jquery-plugin-validation",
+        "projectUrl": "http://jqueryvalidation.org",
         "authors": [
           {
             "name": "https"
@@ -7092,6 +7121,27 @@
       }
     },
     {
+      "project": "pg",
+      "name": "pg",
+      "path": "pg/pg.d.ts",
+      "info": {
+        "references": [
+          "../node/node.d.ts"
+        ],
+        "name": "pg",
+        "version": "",
+        "description": "",
+        "projectUrl": "https://github.com/brianc/node-postgres",
+        "authors": [
+          {
+            "name": "Phips Peter",
+            "url": "http://pspeter3.com"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "phantomjs",
       "name": "phantomjs",
       "path": "phantomjs/phantomjs.d.ts",
@@ -7749,6 +7799,25 @@
       }
     },
     {
+      "project": "rtree",
+      "name": "rtree",
+      "path": "rtree/rtree.d.ts",
+      "info": {
+        "references": [],
+        "name": "rtree 1.4.0",
+        "version": "1.4.0",
+        "description": "",
+        "projectUrl": "https://github.com/leaflet-extras/RTree",
+        "authors": [
+          {
+            "name": "Omede Firouz",
+            "url": "https://github.com/oefirouz"
+          }
+        ],
+        "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
       "project": "rx.js",
       "name": "rx-lite",
       "path": "rx.js/rx-lite.d.ts",
@@ -7770,8 +7839,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Aggregates v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Aggregates v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7810,8 +7879,8 @@
           "rx.d.ts",
           "rx.async-lite.d.ts"
         ],
-        "name": "RxJS-Async v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Async v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7850,8 +7919,8 @@
           "rx.d.ts",
           "rx.backpressure-lite.d.ts"
         ],
-        "name": "RxJS-BackPressure v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-BackPressure v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7886,8 +7955,8 @@
           "rx.d.ts",
           "rx.binding-lite.d.ts"
         ],
-        "name": "RxJS-Binding v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Binding v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7926,8 +7995,8 @@
           "rx.d.ts",
           "rx.coincidence-lite.d.ts"
         ],
-        "name": "RxJS-Coincidence v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Coincidence v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7951,8 +8020,8 @@
         "references": [
           "rx-lite.d.ts"
         ],
-        "name": "RxJS v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -7976,8 +8045,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Experimental v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Experimental v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "https://github.com/Reactive-Extensions/RxJS",
         "authors": [
@@ -7997,8 +8066,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-Join v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Join v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -8045,8 +8114,8 @@
           "rx.backpressure-lite.d.ts",
           "rx.coincidence-lite.d.ts"
         ],
-        "name": "RxJS-Lite v2.2.20",
-        "version": "2.2.20",
+        "name": "RxJS-Lite v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -8071,8 +8140,8 @@
           "rx.d.ts",
           "rx.virtualtime.d.ts"
         ],
-        "name": "RxJS-Testing v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Testing v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "https://github.com/Reactive-Extensions/RxJS",
         "authors": [
@@ -8107,8 +8176,8 @@
           "rx.d.ts",
           "rx.time-lite.d.ts"
         ],
-        "name": "RxJS-Time v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-Time v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -8132,8 +8201,8 @@
         "references": [
           "rx.d.ts"
         ],
-        "name": "RxJS-VirtualTime v2.2.24",
-        "version": "2.2.24",
+        "name": "RxJS-VirtualTime v2.2.25",
+        "version": "2.2.25",
         "description": "",
         "projectUrl": "http://rx.codeplex.com",
         "authors": [
@@ -9958,6 +10027,20 @@
           }
         ],
         "reposUrl": "https://github.com/borisyankov/DefinitelyTyped"
+      }
+    },
+    {
+      "project": "x2js",
+      "name": "xml2json",
+      "path": "x2js/xml2json.d.ts",
+      "info": {
+        "references": [],
+        "name": "",
+        "version": "",
+        "description": "",
+        "projectUrl": "",
+        "authors": [],
+        "reposUrl": ""
       }
     },
     {
