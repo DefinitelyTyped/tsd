@@ -1,8 +1,9 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"id": "tsd-v4-dev-5",
+	"id": "tsd-v4-dev-6",
 	"description": "TSD - TypeScript Definition Manager: config & data file",
 	"type": "object",
+	"additionalProperties": true,
 	"required": ["version", "repo", "ref", "path"],
 	"properties": {
 		"version": {
