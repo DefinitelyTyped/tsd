@@ -82,17 +82,6 @@ module.exports = function (grunt) {
 						flags: 'g'
 					}
 				]
-			},
-			build: {
-				src: ['build/**/*.js'],
-				actions: [
-					{
-						name: 'map',
-						search: '\r?\n?\\\/\\\/# sourceMappingURL=.*',
-						replace: '',
-						flags: 'g'
-					}
-				]
 			}
 		},
 		tv4: {
@@ -288,10 +277,9 @@ module.exports = function (grunt) {
 		'tv4:tsd',
 		'tv4:packjson',
 		'rebuild',
-		'regex-replace:build',
 		'regex-replace:cli',
 		'ts_clean:build',
-		// 'gtx:cli',
+		'gtx:cli',
 		// 'gtx:api',
 		'mochaTest:integrity',
 		'demo:help'
