@@ -257,7 +257,7 @@ module.exports = function (grunt) {
 
 		//TODO implement new gruntfile-gtx once() feature (run-once dependencies, like tslint:source or tslint:helper)
 	}, {
-		concurrent: 1 //cpuCores
+		concurrent: cpuCores
 	});
 
 	var longTimer = (isVagrant ? 250000 : 10000);
@@ -279,7 +279,6 @@ module.exports = function (grunt) {
 		'rebuild',
 		'regex-replace:cli',
 		'ts_clean:build',
-		'gtx:cli',
 		// 'gtx:api',
 		'mochaTest:integrity',
 		'demo:help'
