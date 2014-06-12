@@ -19,7 +19,6 @@
 /// <reference path="es6-shim/es6-shim.d.ts" />
 /// <reference path="miniwrite/miniwrite.d.ts" />
 /// <reference path="ministyle/ministyle.d.ts" />
-/// <reference path="graceful-fs/graceful-fs.d.ts" />
 /// <reference path="json-pointer/json-pointer.d.ts" />
 /// <reference path="detect-indent/detect-indent.d.ts" />
 /// <reference path="uri-templates/uri-templates.d.ts" />
