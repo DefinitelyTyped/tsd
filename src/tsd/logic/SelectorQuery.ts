@@ -83,11 +83,6 @@ class SelectorQuery extends CoreModule {
 			}
 			return null;
 		}).then(() => {
-			if (query.requiresSource) {
-				return this.core.content.loadContentBulk(res.selection);
-			}
-			return null;
-		}).then(() => {
 			if (query.parseInfo || query.infoMatcher) {
 				// TODO use dateMatcher?
 				return this.core.parser.parseDefInfoBulk(res.selection);

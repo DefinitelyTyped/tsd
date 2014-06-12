@@ -95,6 +95,9 @@
 		},
 		"rimraf/rimraf.d.ts": {
 			"commit": "4c09ca98bb22e3fa6964d8d27b9a359e54f9d83c"
+		},
+		"lru-cache/lru-cache.d.ts": {
+			"commit": "ff4d52f8edf4f65fcb15ff129ea8861e93417c87"
 		}
 	}
 }

@@ -37,10 +37,6 @@ class Query {
 		this.patterns.push(new NameMatcher(pattern));
 	}
 
-	get requiresSource(): boolean {
-		return !!(this.infoMatcher || this.parseInfo);
-	}
-
 	get requiresHistory(): boolean {
 		return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
 	}

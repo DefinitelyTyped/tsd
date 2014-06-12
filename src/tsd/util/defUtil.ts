@@ -6,7 +6,6 @@ import VError = require('verror');
 import dateUtils = require('../../xm/dateUtils');
 
 import Def = require('../data/Def');
-import DefBlob = require('../data/DefBlob');
 import DefCommit = require('../data/DefCommit');
 import DefIndex = require('../data/DefIndex');
 import DefInfo = require('../data/DefInfo');
@@ -192,17 +191,6 @@ export function matchCommit(list: DefVersion[], commitSha: string): DefVersion[]
 	for (var i = 0, ii = list.length; i < ii; i++) {
 		var file = list[i];
 		if (file.commit && file.commit.commitSha === commitSha) {
-			ret.push(file);
-		}
-	}
-	return ret;
-}
-
-export function haveContent(list: DefVersion[]): DefVersion[] {
-	var ret: DefVersion[] = [];
-	for (var i = 0, ii = list.length; i < ii; i++) {
-		var file = list[i];
-		if (file.hasContent()) {
 			ret.push(file);
 		}
 	}

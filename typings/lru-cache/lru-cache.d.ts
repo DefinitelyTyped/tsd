@@ -1,3 +1,8 @@
+// Type definitions for lru-cache v2.5.0
+// Project: https://github.com/isaacs/node-lru-cache
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module 'lru-cache' {
 	function LRU<T>(opts: LRU.Options<T>): LRU.Cache<T>;
 	function LRU<T>(max: number): LRU.Cache<T>;
@@ -14,7 +19,7 @@ declare module 'lru-cache' {
 		interface Cache<T> {
 			set(key: string, value: T): void;
 			get(key: string): T;
-			peek(key: string): any;
+			peek(key: string): T;
 			has(key: string): boolean
 			del(key: string): void;
 			reset(): void;

@@ -77,9 +77,9 @@ class Printer {
 				this.output.accent(sep).accent('<no commit>');
 			}
 		}
-		/*if (file.blob) {
-		 this.output.span(sep).span(file.blob.shaShort);
-		 }*/
+		/*if (file.blobSha) {
+			this.output.span(sep).span(file.blobShaShort);
+		}*/
 		return this.output;
 	}
 
@@ -213,7 +213,7 @@ class Printer {
 		return this.output;
 	}
 
-	rateInfo(info: GithubRateInfo, note:boolean = false, force:boolean = false): StyledOut {
+	rateInfo(info: GithubRateInfo, note: boolean = false, force: boolean = false): StyledOut {
 		var warnLim = 10;
 		var goodLim = 30;
 		var stealthLim = 45;

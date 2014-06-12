@@ -12,7 +12,6 @@ import objectUtils = require('../../xm/objectUtils');
 import collection = require('../../xm/collection');
 
 import Def = require('./Def');
-import DefBlob = require('./DefBlob');
 import DefCommit = require('./DefCommit');
 import DefUtil = require('./../util/defUtil');
 import DefVersion = require('./DefVersion');
@@ -38,7 +37,6 @@ class DefIndex {
 
 	private _definitions = new Map<string, Def>();
 	private _commits = new Map<string, DefCommit>();
-	private _blobs = new Map<string, DefBlob>();
 	private _versions = new Map<string, DefVersion>();
 
 	constructor() {
@@ -62,7 +60,6 @@ class DefIndex {
 			return;
 		}
 
-		this._blobs.clear();
 		this._commits.clear();
 		this._versions.clear();
 		this._definitions.clear();
@@ -101,9 +98,6 @@ class DefIndex {
 				file = this.procureVersion(def, this._indexCommit);
 				if (!file) {
 					return;
-				}
-				if (!file.blob) {
-					file.setContent(this.procureBlob(elem.sha));
 				}
 				def.head = file;
 			}
@@ -153,37 +147,6 @@ class DefIndex {
 			this._commits.set(commitSha, commit);
 		}
 		return commit;
-	}
-
-	/*
-	 get a DefBlob for a sha (enforces single instances)
-	 */
-	procureBlob(blobSha: string): DefBlob {
-		assertVar(blobSha, 'sha1', 'blobSha');
-
-		var blob: DefBlob;
-		if (this._blobs.has(blobSha)) {
-			blob = this._blobs.get(blobSha);
-		}
-		else {
-			blob = new DefBlob(blobSha);
-			this._blobs.set(blobSha, blob);
-		}
-		return blob;
-	}
-
-	/*
-	 get a DefBlob for a sha (enforces single instances)
-	 */
-	procureBlobFor(content: Buffer): DefBlob {
-		assertVar(content, Buffer, 'content');
-
-		var sha = gitUtil.blobShaHex(content);
-		var blob: DefBlob = this.procureBlob(sha);
-		if (!blob.hasContent()) {
-			blob.setContent(content);
-		}
-		return blob;
 	}
 
 	/*
@@ -272,14 +235,6 @@ class DefIndex {
 
 	hasDef(path: string): boolean {
 		return this._definitions.has(path);
-	}
-
-	getBlob(sha: string): DefBlob {
-		return this._blobs.get(sha);
-	}
-
-	hasBlob(sha: string): boolean {
-		return this._blobs.has(sha);
 	}
 
 	getCommit(sha: string): DefCommit {

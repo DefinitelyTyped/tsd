@@ -5,8 +5,9 @@
 import VError = require('verror');
 import assertVar = require('../../xm/assertVar');
 
+import tsdUtil = require('../util/tsdUtil');
+
 import Def = require('./Def');
-import DefBlob = require('./DefBlob');
 import DefCommit = require('./DefCommit');
 import DefInfo = require('./DefInfo');
 
@@ -22,7 +23,7 @@ class DefVersion {
 	private _commit: DefCommit = null;
 
 	// NOTE blobs are impractical to work with: api rate-limits and no access over raw.github
-	private _blob: DefBlob = null;
+	private _blobSha: string = null;
 
 	// parse from tags
 	// TODO shouldn't this be DefVersion? from same commit? (still could easily get the head)
@@ -40,16 +41,12 @@ class DefVersion {
 		this._commit = commit;
 	}
 
-	setContent(blob: DefBlob): void {
-		assertVar(blob, DefBlob, 'blob');
-		if (this._blob) {
-			throw new VError('already got a blob %s != %s', this._blob.sha, blob.sha);
+	setBlob(sha: string): void {
+		assertVar(sha, 'sha1', 'blob');
+		if (this._blobSha && this._blobSha !== sha) {
+			throw new VError('already got a blob %s != %s', this._blobSha, sha);
 		}
-		this._blob = blob;
-	}
-
-	hasContent(): boolean {
-		return (this._blob && this._blob.hasContent());
+		this._blobSha = sha;
 	}
 
 	get key(): string {
@@ -67,20 +64,20 @@ class DefVersion {
 		return this._commit;
 	}
 
-	get blob(): DefBlob {
-		return this._blob;
+	get blobSha(): string {
+		return this._blobSha;
 	}
 
 	// human friendly
 	get blobShaShort(): string {
-		return this._blob ? this._blob.shaShort : '<no blob>';
+		return this._blobSha ? tsdUtil.shaShort(this._blobSha) : '<no sha>';
 	}
 
 	toString(): string {
 		var str = '';
 		str += (this._def ? this._def.path : '<no def>');
 		str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
-		str += ' : ' + (this._blob ? this._blob.shaShort : '<no blob>');
+		str += ' : ' + (this._blobSha ? this.blobShaShort : '<no blob>');
 		return str;
 	}
 }

@@ -11,7 +11,6 @@ import InstallResult = require('../../tsd/logic/InstallResult');
 import DefVersion = require('../../tsd/data/DefVersion');
 import testDefCommit = require('./DefCommit');
 import testDefVersion = require('./DefVersion');
-import testDefBlob = require('./DefBlob');
 import testMap = require('../Map');
 
 export function serialise(result: InstallResult, recursive: number = 0): any {

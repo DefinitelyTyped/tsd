@@ -11,6 +11,7 @@ import promiseUtils = require('../../xm/promise/promiseUtils');
 import PromiseStash = promiseUtils.PromiseStash;
 
 import Def = require('../data/Def');
+import DefBlob = require('../data/DefBlob');
 import DefVersion = require('../data/DefVersion');
 import DefIndex = require('../data/DefIndex');
 import defUtil = require('../util/defUtil');
@@ -28,17 +29,6 @@ var leadingExp = /^\.\.\//;
 // TODO add unit test, verify race condition solver works properly
 // TODO 'resolve' not good choice (conflicts with promises)
 class Resolver extends CoreModule {
-
-	static active: string = 'active';
-	static solved: string = 'solved';
-	static remove: string = 'remove';
-	static bulk: string = 'bulk';
-	static resolve: string = 'resolve';
-	static parse: string = 'parse';
-	static subload: string = 'subload';
-	static dep_recurse: string = 'dep_recurse';
-	static dep_added: string = 'dep_added';
-	static dep_missing: string = 'dep_missing';
 
 	private _stash: PromiseStash<DefVersion>;
 
@@ -73,14 +63,14 @@ class Resolver extends CoreModule {
 		return Promise.all([
 			this.core.index.getIndex(),
 			this.core.content.loadContent(file)
-		]).spread((index: DefIndex, file: DefVersion) => {
+		]).spread((index: DefIndex, blob: DefBlob) => {
 			// force empty for robustness
 			file.dependencies.splice(0, file.dependencies.length);
 
-			var queued: Promise<DefVersion>[] = this.applyResolution(index, file, file.blob.content.toString(file.blob.encoding));
 			// keep
 			file.solved = true;
-			return Promise.all(queued);
+
+			return Promise.all(this.applyResolution(index, file, blob.content.toString('utf8')));
 		}).finally(() => {
 			this._stash.remove(file.key);
 		}).return(file);

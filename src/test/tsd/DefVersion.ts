@@ -12,7 +12,6 @@ import Def = require('../../tsd/data/Def');
 import DefVersion = require('../../tsd/data/DefVersion');
 import testDefCommit = require('./DefCommit');
 import testDefInfo = require('./DefInfo');
-import testDefBlob = require('./DefBlob');
 import testDef = require('./Def');
 
 import unordered = require('../unordered');
@@ -28,8 +27,8 @@ export function serialise(file: DefVersion, recursive: number = 0): any {
 	json.solved = file.solved;
 	if (recursive >= 0) {
 		json.commit = testDefCommit.serialise(file.commit, recursive);
-		if (file.blob) {
-			json.blob = testDefBlob.serialise(file.blob, recursive);
+		if (file.blobSha) {
+			json.blobSha = file.blobSha;
 		}
 	}
 	if (file.dependencies && recursive >= 0) {
@@ -52,8 +51,8 @@ export function assertion(file: DefVersion, values: any, message: string): void 
 	if (values.commit) {
 		testDefCommit.assertion(file.commit, values.commit, message + ': file.commit');
 	}
-	if (values.blob) {
-		testDefBlob.assertion(file.blob, values.blob, message + ': file.blob');
+	if (values.blobSha) {
+		assert.strictEqual(file.blobSha, values.blobSha, message + ': file.blobSha');
 	}
 	if (typeof values.solved !== 'undefined') {
 		assert.isBoolean(values.solved, message + ': values.solved');

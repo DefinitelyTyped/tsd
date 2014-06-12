@@ -92,15 +92,8 @@ class Installer extends CoreModule {
 				return null;
 			}
 			// write
-			return this.core.content.loadContent(file).then(() => {
-				// check again? (race?)
-				return fileIO.exists(targetPath);
-			}).then((exists) => {
-				if (exists) {
-					return fileIO.remove(targetPath);
-				}
-			}).then(() => {
-				return fileIO.write(targetPath, file.blob.content);
+			return this.core.content.loadContent(file).then((blob) => {
+				return fileIO.write(targetPath, blob.content);
 			}).return(targetPath);
 		});
 	}

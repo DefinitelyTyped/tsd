@@ -61,6 +61,7 @@
     "jsesc": "~0.4.3",
     "json-pointer": "~0.1.0",
     "lazy.js": "~0.3.2",
+    "lru-cache": "^2.5.0",
     "minimatch": "~0.2.14",
     "minimist": "0.0.7",
     "ministyle": "~0.1.3",

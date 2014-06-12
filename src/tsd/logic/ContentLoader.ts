@@ -6,23 +6,43 @@ import fs = require('fs');
 import path = require('path');
 import pointer = require('json-pointer');
 import Promise = require('bluebird');
+import LRU = require('lru-cache');
+import VError = require('verror');
 
 import log = require('../../xm/log');
+import assert = require('../../xm/assert');
 
 import Def = require('../data/Def');
+import DefBlob = require('../data/DefBlob');
 import DefVersion = require('../data/DefVersion');
 import DefCommit = require('../data/DefCommit');
 import DefIndex = require('../data/DefIndex');
 import defUtil = require('../util/defUtil');
+import gitUtil = require('../../git/gitUtil');
 
 import Options = require('../Options');
 import Core = require('Core');
 import CoreModule = require('./CoreModule');
 
+interface CacheItem {
+	buffer: Buffer;
+}
+
 class ContentLoader extends CoreModule {
+
+	private cache: LRU.Cache<Buffer>;
 
 	constructor(core: Core) {
 		super(core, 'content', 'ContentLoader');
+
+		this.cache = LRU<Buffer>({
+			stale: true,
+			max: 10 * 1024 * 1024,
+			maxAge: 1000 * 60,
+			length: (buffer) => {
+				return buffer.length;
+			}
+		});
 	}
 
 	/*
@@ -41,42 +61,37 @@ class ContentLoader extends CoreModule {
 	/*
 	 lazy load a single DefVersion file content
 	 */
-	// TODO this should not keep the content in memory
-	loadContent(file: DefVersion, tryHead: boolean = false): Promise<DefVersion> {
-		if (file.hasContent()) {
-			return Promise.cast(file);
+	loadContent(file: DefVersion, tryHead: boolean = false): Promise<DefBlob> {
+		if (file.blobSha && this.cache.has(file.blobSha)) {
+			return Promise.resolve(new DefBlob(file, this.cache.get(file.blobSha)));
 		}
-		return this.core.index.getIndex().then((index: DefIndex) => {
+		return this.core.index.getIndex().then(() => {
 			var ref = file.commit.commitSha;
 			// re-cycle head
 			if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
 				ref = this.core.context.config.ref;
 			}
 			return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
-				if (file.blob && !file.blob.hasContent()) {
-					try {
-						file.blob.setContent(content);
-					}
-					catch (err) {
-						log.warn(err);
-						log.debug('path', file.def.path);
-						log.debug('commitSha', file.commit.commitSha);
-						log.error('failed to set content');
-						// throw new Error('failed to set content');
-						throw err;
+				var sha: string = gitUtil.blobShaHex(content);
+				if (file.blobSha) {
+					if (sha !== file.blobSha) {
+						throw new VError('bad blob sha1 for %s, expected %s, got %s', file.def.path, file.blobSha, sha);
 					}
 				}
 				else {
-					file.setContent(index.procureBlobFor(content));
+					file.setBlob(sha);
 				}
+				this.cache.set(sha, content);
+
+				return new DefBlob(file, content);
 			});
-		}).return(file);
+		});
 	}
 
 	/*
 	 bulk version of loadContent
 	 */
-	loadContentBulk(list: DefVersion[]): Promise<DefVersion[]> {
+	loadContentBulk(list: DefVersion[]): Promise<DefBlob[]> {
 		return Promise.map(list, (file: DefVersion) => {
 			return this.loadContent(file);
 		});
