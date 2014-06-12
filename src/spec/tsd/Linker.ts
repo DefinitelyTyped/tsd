@@ -14,7 +14,7 @@ import helper = require('../../test/helper');
 import PackageLinker = require('../../tsd/support/PackageLinker');
 import PackageDefinition = require('../../tsd/support/PackageDefinition');
 
-describe.only('PackageLinker', () => {
+describe('PackageLinker', () => {
 
 	var linkerFixtures = path.join(helper.getSharedFixtures(), 'linker');
 
