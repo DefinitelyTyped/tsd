@@ -77,6 +77,10 @@ class CacheStreamLoader {
 		this.object = obj;
 	}
 
+	get url(): string {
+		return this.request ? this.request.url : null;
+	}
+
 	destruct(): void {
 		this._promise = null;
 	}

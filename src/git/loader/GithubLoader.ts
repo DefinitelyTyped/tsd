@@ -51,9 +51,11 @@ class GithubLoader {
 		cache.jobTimeout = this.options.getDurationSecs('jobTimeout', cache.jobTimeout / 1000) * 1000;
 		cache.storeDir = path.join(this.storeDir, this.getCacheKey());
 
-		var opts = <HTTPOpts>{};
-		opts.cache = cache;
-		opts.oath = this.options.getString('oath', null);
+		var opts: HTTPOpts = {
+			cache: cache,
+			concurrent: this.options.getNumber('concurrent', 20),
+			oath: this.options.getString('oath', null)
+		};
 		opts.proxy = (this.options.getString('proxy')
 			|| process.env.HTTPS_PROXY
 			|| process.env.https_proxy

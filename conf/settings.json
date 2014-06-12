@@ -3,6 +3,7 @@
 	"token" : null,
 	"git": {
 		"raw": {
+			"concurrent": 10,
 			"allowClean": true,
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
@@ -19,10 +20,11 @@
 				"minutes": 1
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		},
 		"api": {
+			"concurrent": 5,
 			"allowClean": true,
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
@@ -36,7 +38,7 @@
 				"minutes": 5
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		}
 	},

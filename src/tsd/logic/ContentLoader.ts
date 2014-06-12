@@ -61,7 +61,7 @@ class ContentLoader extends CoreModule {
 	/*
 	 lazy load a single DefVersion file content
 	 */
-	loadContent(file: DefVersion, tryHead: boolean = false): Promise<DefBlob> {
+	loadContent(file: DefVersion, tryHead: boolean = true): Promise<DefBlob> {
 		if (file.blobSha && this.cache.has(file.blobSha)) {
 			return Promise.resolve(new DefBlob(file, this.cache.get(file.blobSha)));
 		}

@@ -7,9 +7,6 @@ import Promise = require('bluebird');
 import log = require('../../xm/log');
 import fileIO = require('../../xm/file/fileIO');
 
-import promiseUtils = require('../../xm/promise/promiseUtils');
-import PromiseStash = promiseUtils.PromiseStash;
-
 import Def = require('../data/Def');
 import DefBlob = require('../data/DefBlob');
 import DefVersion = require('../data/DefVersion');
@@ -30,12 +27,10 @@ var leadingExp = /^\.\.\//;
 // TODO 'resolve' not good choice (conflicts with promises)
 class Resolver extends CoreModule {
 
-	private _stash: PromiseStash<DefVersion>;
+	private _active = new Map<string, Promise<DefVersion>>();
 
 	constructor(core: Core) {
 		super(core, 'resolve', 'Resolver');
-
-		this._stash = new PromiseStash<DefVersion>();
 	}
 
 	/*
@@ -54,26 +49,31 @@ class Resolver extends CoreModule {
 	 */
 	resolveDeps(file: DefVersion): Promise<DefVersion> {
 		if (file.solved) {
-			return Promise.cast(file);
+			return Promise.resolve(file);
 		}
-		if (this._stash.has(file.key)) {
-			return this._stash.promise(file.key);
+		if (this._active.has(file.key)) {
+			return this._active.get(file.key);
 		}
 		// it is not solved and not in the active list so lets load it
-		return Promise.all([
+		var promise = Promise.all([
 			this.core.index.getIndex(),
 			this.core.content.loadContent(file)
 		]).spread((index: DefIndex, blob: DefBlob) => {
 			// force empty for robustness
 			file.dependencies.splice(0, file.dependencies.length);
 
+			var queued: Promise<DefVersion>[] = this.applyResolution(index, file, blob.content.toString());
 			// keep
 			file.solved = true;
-
-			return Promise.all(this.applyResolution(index, file, blob.content.toString('utf8')));
+			return Promise.all(queued);
 		}).finally(() => {
-			this._stash.remove(file.key);
+			// remove since it is ready
+			this._active.delete(file.key);
 		}).return(file);
+
+		this._active.set(file.key, promise);
+
+		return promise;
 	}
 
 	private applyResolution(index: DefIndex, file: DefVersion, content: string): Promise<DefVersion>[] {
@@ -87,7 +87,7 @@ class Resolver extends CoreModule {
 
 				// TODO decide if always to go with head or not
 				// maybe it need some resolving itself?
-				if (!dep.head.solved && !this._stash.has(dep.head.key)) {
+				if (!dep.head.solved && !this._active.has(dep.head.key)) {
 					// log('recurse ' + dep.toString());
 
 					// lets go deeper

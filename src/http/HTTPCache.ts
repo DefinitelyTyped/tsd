@@ -32,14 +32,40 @@ interface PathStat {
 	atime: number;
 }
 
+class QueueItem {
+	job: CacheStreamLoader;
+	defer: Promise.Resolver<CacheObject>;
+
+	constructor(job: CacheStreamLoader) {
+		this.job = job;
+		this.defer = Promise.defer<CacheObject>();
+	}
+
+	run(): Promise<CacheObject> {
+		this.job.getObject().then((object) => {
+			this.defer.resolve(object);
+		}, (err) => {
+			this.defer.reject(err);
+		});
+		return this.defer.promise;
+	}
+
+	get promise(): Promise<CacheObject> {
+		return this.defer.promise;
+	}
+}
+
 class HTTPCache {
 
 	opts: HTTPOpts;
 
-	private jobs = new Map<string, CacheStreamLoader>();
+	private _init: Promise<void>;
+
+	private jobs = new Map<string, Promise<CacheObject>>();
 	private jobTimers = new Map<string, NodeJS.Timer>();
 
-	private _init: Promise<void>;
+	private queue: QueueItem[] = [];
+	private active: QueueItem[] = [];
 
 	private manageFile: string;
 	private cacheSweepLast: Date;
@@ -53,6 +79,7 @@ class HTTPCache {
 	}
 
 	setStoreDir(dir: string): void {
+		assertVar(dir, 'string', 'dir');
 		this.manageFile = path.join(dir, '_info.json');
 	}
 
@@ -61,22 +88,45 @@ class HTTPCache {
 		assert(request.locked, 'request must be lock()-ed {a}', request.url);
 
 		return this.init().then(() => {
-			var job: CacheStreamLoader;
-
 			if (this.jobs.has(request.key)) {
-				job = this.jobs.get(request.key);
+				return this.jobs.get(request.key);
 			}
 			else {
-				job = new CacheStreamLoader(this.opts, request);
-				this.jobs.set(request.key, job);
+				var job = new CacheStreamLoader(this.opts, request);
+				var item = new QueueItem(job);
+
+				this.jobs.set(request.key, item.promise);
+				this.queue.push(item);
+
+				this.checkQueue();
+
+				return item.promise;
 			}
-			return job.getObject();
 		}).then((res: CacheObject) => {
 			// start housekeeping
 			this.scheduleRelease(request.key);
 			this.checkCleanCache();
 			// don't wait
 			return res;
+		});
+	}
+
+	private checkQueue(): void {
+		var max = (this.opts.concurrent || 20);
+		while (this.active.length < max && this.queue.length > 0) {
+			this.step(this.queue.shift());
+		}
+	}
+
+	private step(item: QueueItem): void {
+		this.active.push(item);
+
+		item.run().then(() => {
+			var i = this.active.indexOf(item);
+			if (i > -1) {
+				this.active.splice(i);
+			}
+			this.checkQueue();
 		});
 	}
 
@@ -89,12 +139,10 @@ class HTTPCache {
 		}
 
 		if (this.opts.cache.jobTimeout <= 0) {
-			this.jobs.get(key).destruct();
 			this.jobs.delete(key);
 		}
 		else {
 			var timer: NodeJS.Timer = setTimeout(() => {
-				this.jobs.get(key).destruct();
 				this.jobs.delete(key);
 			}, this.opts.cache.jobTimeout);
 
