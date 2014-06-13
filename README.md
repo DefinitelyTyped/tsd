@@ -51,11 +51,13 @@ Sometimes it looks like this:
 
 ### Practical examples
 
-Create a new `tsd.json`:
+Create a new `tsd.json`
 
 ````bash
 $ tsd init
 ````
+
+This is not required but useful if you want to customise settings.
 
 #### Search
 
@@ -64,8 +66,6 @@ Minimal query for `d3`:
 ````bash
 $ tsd query d3
 ````
-
-Tip: if you are using Linux or Mac OS X, use `$ tsd query "*"`.
 
 Get some info about `jquery`:
 
@@ -77,8 +77,14 @@ $ tsd query jquery -ir
 
 Search for `jquery` plugins:
 
+
 ````bash
 $ tsd query */jquery.*
+````
+Tip: if you are using Linux or Mac OS X, use quotes to glob:
+
+````bash
+$ tsd query "*/jquery.*"
 ````
 
 View `mocha` history:
@@ -94,7 +100,7 @@ List *everything*:
 $ tsd query *
 ````
 
-#### Open browser
+#### Open a browser
 
 Browse `pixi` definition on github:
 
@@ -164,9 +170,14 @@ $ tsd reinstall -so
 
 :warning: This is experimental
 
-TSD supports easy linking of definitions that have been bundles in packages installed with `node` or `bower`.
+TSD supports easy linking of definitions that support bundled in packages installed with `node` or `bower`.
 
-This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `defintions` sub-element that contains a relative path(s) to `.d.ts` files:
+
+````bash
+$ tsd link
+````
+
+This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `defintions` sub-element that contain relative path(s) to `.d.ts` files:
 
 ````json
 {
@@ -178,7 +189,7 @@ This feature will scan `package.json` and `bower.json` files for a `typescript` 
 }
 ````
 
-Or if the module exports multiple independent files (eg: for some reason not internally `<reference>`'d):
+If the module exports multiple independent files,eg: for some reason not internally `<reference>`'d:
 
 ````json
 {
@@ -186,8 +197,8 @@ Or if the module exports multiple independent files (eg: for some reason not int
 	"version": "1.2.3",
 	"typescript": {
 		"definitions": [
-			"dist/cool-module-partA.d.ts",
-			"dist/cool-module-partB.d.ts"
+			"dist/cool-partA.d.ts",
+			"dist/cool-partB.d.ts"
 		]
 	}
 }
@@ -195,9 +206,6 @@ Or if the module exports multiple independent files (eg: for some reason not int
 
 Use the `link` command and your `tsd.d.ts` will be updated with paths to the files in the `node_modules` or `bower_modules` folders.
 
-````bash
-$ tsd link
-````
 
 ## Query
 
@@ -325,17 +333,57 @@ Notes:
 
 ### tsd.json
 
-The `tsd.json` file is automatically created in the root of each project: it configures TSD and it tracks the definitions that are installed (using `--save`). See the [JSON Schema](https://github.com/DefinitelyTyped/tsd/tree/master/schema) for more info.
+The `tsd.json` file is automatically created in the root of each project: it configures TSD and it tracks the definitions that are installed (using `--save`).
+
+To generate a default `tsd.json` run:
+
+````bash
+$ tsd init
+````
+
+An example configuration the 'node.js' definition installed would look like this:
+
+````json
+{
+	"version": "v4",
+	"repo": "borisyankov/DefinitelyTyped",
+	"ref": "master",
+	"path": "typings",
+	"bundle": "typings/tsd.d.ts",
+	"installed": {
+		"node/node.d.ts": {
+			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
+		}        
+    }
+}
+````
+
+Supported fields:
+
+
+| field | required | default | description  |
+|---|---|---|---|
+| `version` | yes | `v4` | Tracks config version for future changes (don't change this).
+| `repo` | yes | `borisyankov/DefinitelyTyped` |  Github user and repo name of the typings repository. Change this if you want to use TSD from a DefinitelyTyped fork.
+| `ref` | yes | `master` | Branch name or other git reference of the repository. Change this to use legacy branches.
+| `path` | yes | `typings` | Path to the typings directory, the definitions will be installed in the appropriate sub-folders. Change this to have typings in your main code directory, but this is not recommended as the mixed styles used in the definitions it will confuse your inspections and lint-tools.
+| `bundle` | no | `typings/tsd.d.ts` | Path to a `.d.ts` bundle file (see below). Change this if you want the bundle to be closer to the actual source files. TSD will create the appropriate relative paths.
+| `stats` | no | (not set) | Set to `false` to disable the stats tracking. Keep in mind the stats are anonymous, help us improve TSD & DT and motivate us to spend our time on development. See below for the 'Privacy statement'.
+
+--
 
 ### tsd.d.ts
 
-The `tsd.d.ts` file links every definition that is installed (with `--save`) for convenient reference:
+The `tsd.d.ts` file refers every definition that is installed with `--save` for convenient and explicit single reference from code.
 
 ````
 /// <reference path="../typings/tsd.d.ts" />
 ```` 
 
-By default it is created in the typings folder but it is configurable in `tsd.json`. TSD will check the existing references and respects re-ordering.
+By default it is created in the typings folder but the name and location are configurable in `tsd.json`. When adding new references TSD will check the existing references and respects re-ordering (ordering is important for inter-dependent definitions).
+
+
+--
 
 ### .tsdrc
 
@@ -376,7 +424,7 @@ Change or revoke the token at any time on https://github.com/settings/applicatio
 
 Note: keep in mind the `.tsdrc` file is *not* secured. Don't use a token with additional scope unless you know what you are doing. 
 
-The bare 'no scope' token is *relatively* harmless as it gives 'read-only access to public information', same as any non-autenticated access. But it does *identify* any requests done with it as being *yours*, so it is still *your* responsibility to keep the token private.
+The bare 'no scope' token is *relatively* harmless as it gives 'read-only access to public information', same as any non-authenticated access. But it does *identify* any requests done with it as being *yours*, so it is still *your* responsibility to keep the token private.
 
 ## Usage as module
  
@@ -536,29 +584,39 @@ Code looks best with tabs rendered at 4 spaces (3 is nice too, or 6 or 8.. I don
 
 Master branch is the release version, new development happens currently in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch: probably broken and regularly rebased for near future.
 
+
 ## Contribute
 
-Contributions are very welcome; please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first. Fixes and simple enhancements are always much appreciated. 
+Contributions are very welcome; please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first. Fixes and simple enhancements are always much appreciated. Please make sure you work in the right branch.
 
 **Note:** Contributions on the definition files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
 
-## Privacy statement
 
-The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed. The information collected amounts to about same level of detail as services like npm or github would collect (maybe even less as we don't track a user id). 
+## Privacy
+
+The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed. The information collected amounts to about same level of detail as services like npm or github would collect (maybe even less as we don't track a user id).
 
 The API does not track anything. 
 
-To store this TSD uses [Google Analytics](http://www.google.com/analytics/) in the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
-
-The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
-
-Using an OAuth token with additional scope is *not advised nor supported* (even though it could make TSD work with private repositories). But it might also leak repo or content names to analytics or leave a bare http cache in your temp dir. If this bothers you please review the license and/or leave a message.
+To store this TSD uses [Google Analytics](http://www.google.com/analytics/) in the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website. 
 
 Changes to the policy should be announced in release notes, and ideally ask confirmation on the first CLI use.
 
+Keep in mind we're just devs like you and are working on this in our spare time; we run this project out of love and duty and most of all for fun as learning experience. The stats give us helpful insights into the usage of TSD, and of course the growing numbers and graphs motivate us to spend our time on further development.
+
+
+## Security
+
+The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
+
+Please close read the relevant sections of the readme, especially on OAuth 'scope'. 
+
+Using an OAuth token with additional scope is *neither advised nor supported*, even though it could make TSD work with private repositories. But it might also leak repo or content names to analytics or leave a bare http cache in your temp dir. If this bothers you please review the license and/or leave a message.
+
+
 ## License
 
-Copyright (c) 2013 by [Bart van der Schoor](https://github.com/Bartvds).
+Copyright (c) 2014 by [Bart van der Schoor](https://github.com/Bartvds).
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt). 
 
