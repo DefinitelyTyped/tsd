@@ -61,19 +61,6 @@ function addCommon(expose: Expose, print: Printer, style: StyleMap): void {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	expose.defineOption((opt: ExposeOption) => {
-		opt.name = Opt.progress;
-		opt.short = 'p';
-		opt.description = 'display progress notifications';
-		opt.type = 'flag';
-		opt.global = true;
-		opt.default = true;
-		// opt.note = ['experimental'];
-		/*opt.apply = (value:any, ctx:ExposeContext) => {
-		 ctx.out.ln().indent().warning('--progress events are not 100%').ln();
-		 };*/
-	});
-
-	expose.defineOption((opt: ExposeOption) => {
 		opt.name = Opt.verbose;
 		opt.description = 'verbose output';
 		opt.type = 'flag';
@@ -81,19 +68,8 @@ function addCommon(expose: Expose, print: Printer, style: StyleMap): void {
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
-		opt.name = Opt.detail;
-		opt.description = 'modify reporting detail level';
-		opt.type = 'string';
-		opt.global = true;
-		opt.placeholder = 'level';
-		opt.default = ExposeLevel.med;
-		opt.enum = ['low', 'mid', 'high'];
-		opt.note = ['partially implemented'];
-	});
-
-	expose.defineOption((opt: ExposeOption) => {
 		opt.name = Opt.services;
-		opt.description = 'allow usage-tracker, TSD updates etc';
+		opt.description = 'toggle usage-tracker, TSD updates etc';
 		opt.type = 'flag';
 		opt.default = true;
 		opt.global = true;

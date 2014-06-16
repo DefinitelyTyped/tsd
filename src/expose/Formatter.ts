@@ -38,7 +38,7 @@ class Formatter {
 	}
 
 	// TODO figure-out proper way to specify/rank detail level
-	printCommands(level: string): void {
+	printCommands(): void {
 		var builder = minitable.getBuilder(this.output.getWrite(), this.output.getStyle());
 		assertVar(builder, 'object', 'builder');
 

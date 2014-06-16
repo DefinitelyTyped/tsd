@@ -156,7 +156,6 @@ export function getExpose(): Expose {
 
 				job.options = new Options();
 
-				job.options.timeout = ctx.getOpt(Opt.timeout);
 				job.options.limitApi = ctx.getOpt(Opt.limit);
 				job.options.minMatches = ctx.getOpt(Opt.min);
 				job.options.maxMatches = ctx.getOpt(Opt.max);
@@ -213,15 +212,6 @@ export function getExpose(): Expose {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var expose = new Expose(output);
-
-	function getProgress(ctx: ExposeContext): (note: any) => void {
-		if (ctx.getOpt(Opt.progress)) {
-			return print.reportProgress;
-		}
-		return function (note: any) {
-			// ignore
-		};
-	}
 
 	function reportError(err: any, head: boolean = true): void {
 		tracker.error(err);
@@ -296,7 +286,7 @@ export function getExpose(): Expose {
 		cmd.execute = (ctx: ExposeContext) => {
 			return getContext(ctx).then((context: Context) => {
 				ctx.out.ln();
-				ctx.expose.reporter.printCommands(ctx.getOpt(Opt.detail));
+				ctx.expose.reporter.printCommands();
 
 				return runUpdateNotifier(ctx, context);
 			}).catch(reportError);

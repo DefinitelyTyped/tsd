@@ -19,16 +19,12 @@ export module Opt {
 	export var min = 'min';
 	export var max = 'max';
 	export var limit = 'limit';
-	export var timeout = 'timeout';
 	export var commit = 'commit';
 	export var semver = 'semver';
 	export var date = 'date';
-	export var progress = 'progress';
-
 	export var action = 'action';
 	export var info = 'info';
 	export var history = 'history';
-	export var detail = 'detail';
 	export var services = 'services';
 }
 objectUtils.lockPrimitives(Opt);
