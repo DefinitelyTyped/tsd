@@ -5,6 +5,7 @@
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
+import globMod = require('glob');
 import VError = require('verror');
 
 import Promise = require('bluebird');
@@ -338,6 +339,19 @@ export function chmod(filename: string, mode: string): Promise<void> {
 			}
 			else {
 				resolve(undefined);
+			}
+		});
+	});
+}
+
+export function glob(pattern: string, opts?: globMod.IOptions): Promise<string[]> {
+	return new Promise<string[]>((resolve, reject) => {
+		globMod(pattern, (opts || {}), (err, paths: string[]) => {
+			if (err) {
+				reject(err);
+			}
+			else {
+				resolve(paths);
 			}
 		});
 	});

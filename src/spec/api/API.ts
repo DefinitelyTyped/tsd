@@ -32,19 +32,6 @@ import log = require('../../xm/log');
 
 describe('API', () => {
 
-	before(() => {
-	});
-
-	after(() => {
-	});
-
-	beforeEach(() => {
-	});
-
-	afterEach(() => {
-
-	});
-
 	it('should be defined', () => {
 		assert.isFunction(API, 'constructor');
 	});

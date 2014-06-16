@@ -7,7 +7,7 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import typeOf = require('../../xm/typeOf');
 import fileIO = require('../../xm/file/fileIO');
@@ -30,7 +30,11 @@ describe('Bundle', () => {
 			var p = path.resolve(tmp, 'result.d.ts');
 			var bundle = new Bundle(p);
 			bundle.append('aa/bb.d.ts');
-			var actual = bundle.getContent();
+
+			assert.isTrue(bundle.has('aa/bb.d.ts'));
+			assert.isTrue(bundle.has(path.resolve(tmp, 'aa/bb.d.ts')));
+
+			var actual = bundle.stringify();
 			var expected = '/// <reference path="aa/bb.d.ts" />\n';
 			assert.strictEqual(actual, expected);
 		});
@@ -39,7 +43,10 @@ describe('Bundle', () => {
 			var p = path.resolve(tmp, 'result.d.ts');
 			var bundle = new Bundle(p);
 			bundle.append('../aa/bb.d.ts');
-			var actual = bundle.getContent();
+
+			assert.isTrue(bundle.has(path.resolve(tmp, '..', 'aa/bb.d.ts')));
+
+			var actual = bundle.stringify();
 			var expected = '/// <reference path="../aa/bb.d.ts" />\n';
 			assert.strictEqual(actual, expected);
 		});
@@ -48,7 +55,11 @@ describe('Bundle', () => {
 			var p = path.resolve(tmp, 'result.d.ts');
 			var bundle = new Bundle(p);
 			bundle.append(path.resolve(tmp, 'aa/bb.d.ts'));
-			var actual = bundle.getContent();
+
+			assert.isTrue(bundle.has('aa/bb.d.ts'));
+			assert.isTrue(bundle.has(path.resolve(tmp, 'aa/bb.d.ts')));
+
+			var actual = bundle.stringify();
 			var expected = '/// <reference path="aa/bb.d.ts" />\n';
 			assert.strictEqual(actual, expected);
 		});
@@ -58,8 +69,25 @@ describe('Bundle', () => {
 			var d = path.resolve(tmp, '..', 'alt');
 			var bundle = new Bundle(p, d);
 			bundle.append('aa/bb.d.ts');
-			var actual = bundle.getContent();
+
+			assert.isTrue(bundle.has('aa/bb.d.ts'));
+			assert.isTrue(bundle.has(path.resolve(tmp, '../alt/aa/bb.d.ts')));
+
+			var actual = bundle.stringify();
 			var expected = '/// <reference path="../alt/aa/bb.d.ts" />\n';
+			assert.strictEqual(actual, expected);
+		});
+
+		it('different baseDir absolute', () => {
+			var p = path.resolve(tmp, 'result.d.ts');
+			var d = path.resolve(tmp, '..', 'alt');
+			var bundle = new Bundle(p, d);
+			bundle.append(path.resolve(tmp, 'aa/bb.d.ts'));
+
+			assert.isTrue(bundle.has(path.resolve(tmp, 'aa/bb.d.ts')));
+
+			var actual = bundle.stringify();
+			var expected = '/// <reference path="aa/bb.d.ts" />\n';
 			assert.strictEqual(actual, expected);
 		});
 	});
@@ -113,7 +141,7 @@ describe('Bundle', () => {
 					// do it
 					value.call(null, bundle, name);
 				}
-				var actual = bundle.getContent();
+				var actual = bundle.stringify();
 
 				fileIO.writeFileSync(bundle.target, actual);
 

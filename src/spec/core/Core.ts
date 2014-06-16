@@ -6,6 +6,8 @@ import fs = require('fs');
 import path = require('path');
 import Promise = require('bluebird');
 
+import ncp = require('ncp');
+
 import chai = require('chai');
 import assert = chai.assert;
 
@@ -24,8 +26,8 @@ import configSchema = require('../../tsd/schema/config');
 
 describe('Core', () => {
 
-	var fixtures = helper.getDirNameFixtures();
-	var tmp = helper.getDirNameTmp();
+	var fixtureDir = helper.getDirNameFixtures();
+	var tmpDit = helper.getDirNameTmp();
 
 	var core: Core;
 	var context: Context;
@@ -73,7 +75,7 @@ describe('Core', () => {
 		});
 	});
 
-	describe('readConfig', () => {
+	describe('config.readConfig', () => {
 		// TODO use the actual default
 		it('should load default config data', () => {
 			return assertConfig('./test/fixtures/config/default.json');
@@ -96,10 +98,10 @@ describe('Core', () => {
 		});
 	});
 
-	describe('saveConfig', () => {
+	describe('config.saveConfig', () => {
 		it('should save modified data', () => {
 			// copy temp for saving
-			var saveFile = path.resolve(tmp, 'save-config.json');
+			var saveFile = path.resolve(tmpDit, 'save-config.json');
 			fileIO.writeFileSync(saveFile, fileIO.readFileSync('./test/fixtures/config/valid.json'));
 			context.paths.configFile = saveFile;
 
@@ -132,7 +134,7 @@ describe('Core', () => {
 		});
 	});
 
-	describe('updateIndex', () => {
+	describe('index.getIndex', () => {
 		it('should return data', () => {
 			core = getCore(context);
 			// core.verbose = true;
@@ -145,5 +147,24 @@ describe('Core', () => {
 				return null;
 			});
 		});
+	});
+
+	describe('bundle', () => {
+		/*it('should cleanup data', () => {
+			core = getCore(context);
+			var name = 'bundle-clean';
+			var baseDir = path.resolve(fixtureDir, name);
+			core.context.config.bundle = path.resolve(baseDir, 'bundle-clean');
+			core.context.config.path = path.resolve(baseDir, 'bundle-clean');
+			// core.verbose = true;
+
+			return core.index.getIndex().then((index: DefIndex) => {
+				assert.isTrue(index.hasIndex(), 'index.hasIndex');
+				assert.operator(index.list.length, '>', 200, 'index.list');
+				// xm.log(index.toDump());
+				// TODO validate index data
+				return null;
+			});
+		});*/
 	});
 });

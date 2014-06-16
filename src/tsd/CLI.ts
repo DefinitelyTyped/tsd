@@ -34,6 +34,7 @@ import DateMatcher = require('./select/DateMatcher');
 import InstallResult = require('./logic/InstallResult');
 
 import PackageDefinition = require('./support/PackageDefinition');
+import BundleChange = require('./support/BundleChange');
 
 import Expose = require('../expose/Expose');
 import ExposeGroup = require('../expose/Group');
@@ -503,6 +504,37 @@ export function getExpose(): Expose {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	expose.defineCommand((cmd: ExposeCommand) => {
+		cmd.name = 'rebundle';
+		cmd.label = 'update & clean reference bundle';
+		cmd.groups = [Group.primary];
+		cmd.execute = (ctx: ExposeContext) => {
+			return getAPIJob(ctx).then((job: Job) => {
+				if (job.api.context.config.bundle) {
+					return job.api.core.bundle.updateBundle(job.api.context.config.bundle, true).then((changes) => {
+						if (changes.someRemoved()) {
+							output.ln().report(true).line('removed:').ln();
+							changes.getRemoved(true, true).sort().forEach((file) => {
+								output.indent(1).bullet(true).line(file);
+							});
+						}
+						if (changes.someAdded()) {
+							output.ln().report(true).line('added:').ln();
+							changes.getAdded(true, true).sort().forEach((file) => {
+								output.indent(1).bullet(true).line(file);
+							});
+						}
+						if (!changes.someAdded() && !changes.someRemoved()) {
+							output.ln().report(true).line('nothing to rebundle').ln();
+						}
+					});
+				}
+			}).catch(reportError);
+		};
+	});
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'link';
 		cmd.label = 'link definitions from package managers';
 		cmd.groups = [Group.support, Group.primary];
@@ -511,7 +543,7 @@ export function getExpose(): Expose {
 				output.line();
 				output.info(true).span('running').space().accent(cmd.name).ln();
 
-				return job.api.link(process.cwd()).then((packages: PackageDefinition[]) => {
+				return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
 					packages.forEach((linked) => {
 						output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
 					});
