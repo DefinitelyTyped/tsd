@@ -61,7 +61,8 @@ module.exports = function (grunt) {
 			tmp: ['tmp/**/*', 'test/tmp/**/*'],
 			dump: ['test/modules/**/dump'],
 			test: ['test/*/spec/build/**/*'],
-			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map']
+			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map'],
+			cruft: ['tscommand-*.tmp.txt']
 		},
 		copy: {
 			cli: {
@@ -290,12 +291,14 @@ module.exports = function (grunt) {
 		'clean:test',
 		'jshint:support',
 		'jshint:fixtures',
-		'mocha_unfunk:dev'
+		'mocha_unfunk:dev',
+		'clean:cruft'
 	]);
 	gtx.alias('rebuild', [
 		'clean:build',
 		'prep',
 		'ts:api',
+		'clean:cruft',
 		'copy:cli',
 		'regex-replace:cli',
 		'tslint:source',
@@ -308,7 +311,8 @@ module.exports = function (grunt) {
 		'build',
 		'tslint:testing',
 		'gtx-type:moduleTest',
-		'mochaTest:spec'
+		'mochaTest:spec',
+		'clean:cruft'
 	]);
 	gtx.alias('default', [
 		'test'
