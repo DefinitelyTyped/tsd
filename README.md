@@ -170,7 +170,9 @@ $ tsd reinstall -so
 
 :warning: This is experimental
 
-TSD supports easy linking of definitions that support bundled in packages installed with `node` or `bower`.
+TSD supports easy linking of definitions from packages installed with `node` or `bower`.
+
+Use the `link` command and your `tsd.d.ts` will be updated with paths to the files in the `node_modules` or `bower_modules` folders.
 
 
 ````bash
@@ -178,6 +180,7 @@ $ tsd link
 ````
 
 This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `defintions` sub-element that contain relative path(s) to `.d.ts` files:
+
 
 ````json
 {
@@ -203,9 +206,6 @@ If the module exports multiple independent files,eg: for some reason not interna
 	}
 }
 ````
-
-Use the `link` command and your `tsd.d.ts` will be updated with paths to the files in the `node_modules` or `bower_modules` folders.
-
 
 ## Query
 
