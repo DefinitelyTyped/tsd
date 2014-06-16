@@ -250,16 +250,27 @@ export function getExpose(): Expose {
 	});
 
 	expose.defineGroup((group: ExposeGroup) => {
+		group.name = Group.manage;
+		group.label = 'manage';
+		group.options = [];
+		group.sorter = (one: ExposeCommand, two: ExposeCommand): number => {
+			var sort: number;
+			// TODO sane-ify sorting groups
+			sort = sorter.sortHasElem(one.groups, two.groups, Group.manage);
+			if (sort !== 0) {
+				return sort;
+			}
+			return sorter.sortCommandIndex(one, two);
+		};
+	});
+
+	expose.defineGroup((group: ExposeGroup) => {
 		group.name = Group.support;
 		group.label = 'support';
 		group.options = [];
 		group.sorter = (one: ExposeCommand, two: ExposeCommand): number => {
 			var sort: number;
 			// TODO sane-ify sorting groups
-			sort = sorter.sortHasElem(one.groups, two.groups, Group.primary);
-			if (sort !== 0) {
-				return sort;
-			}
 			sort = sorter.sortHasElem(one.groups, two.groups, Group.support);
 			if (sort !== 0) {
 				return sort;
@@ -312,7 +323,7 @@ export function getExpose(): Expose {
 		cmd.name = 'init';
 		cmd.label = 'create empty config file';
 		cmd.options = [Opt.config, Opt.overwrite];
-		cmd.groups = [Group.support, Group.primary];
+		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				return job.api.initConfig(ctx.getOpt(Opt.overwrite)).then((target: string) => {
@@ -402,7 +413,7 @@ export function getExpose(): Expose {
 			['tsd query angular* --resolve', 'list angularjs bundle']
 		];
 		cmd.variadic = ['...pattern'];
-		cmd.groups = [Group.primary, Group.query];
+		cmd.groups = [Group.query];
 		cmd.options = [
 			Opt.info, Opt.history,
 			Opt.semver, Opt.date, Opt.commit,
@@ -465,7 +476,7 @@ export function getExpose(): Expose {
 		cmd.name = 'reinstall';
 		cmd.label = 're-install definitions from config';
 		cmd.options = [Opt.overwrite, Opt.save];
-		cmd.groups = [Group.support, Group.primary];
+		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				output.line();
@@ -486,7 +497,7 @@ export function getExpose(): Expose {
 		cmd.name = 'update';
 		cmd.label = 'update definitions from config';
 		cmd.options = [Opt.overwrite, Opt.save];
-		cmd.groups = [Group.support, Group.primary];
+		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				output.line();
@@ -506,7 +517,7 @@ export function getExpose(): Expose {
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'rebundle';
 		cmd.label = 'update & clean reference bundle';
-		cmd.groups = [Group.primary];
+		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				if (job.api.context.config.bundle) {
@@ -537,7 +548,7 @@ export function getExpose(): Expose {
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'link';
 		cmd.label = 'link definitions from package managers';
-		cmd.groups = [Group.support, Group.primary];
+		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				output.line();

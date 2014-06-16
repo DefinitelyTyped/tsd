@@ -102,7 +102,7 @@ function addCommon(expose: Expose, print: Printer, style: StyleMap): void {
 	expose.defineOption((opt: ExposeOption) => {
 		opt.name = Opt.commit;
 		opt.short = 'c';
-		opt.description = 'filter on commit hash';
+		opt.description = 'filter on (short) commit hash';
 		opt.type = 'string';
 		opt.placeholder = 'sha1';
 	});

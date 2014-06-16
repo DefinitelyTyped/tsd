@@ -30,7 +30,7 @@ export module Opt {
 objectUtils.lockPrimitives(Opt);
 
 export module Group {
-	export var primary = 'primary';
+	export var manage = 'manage';
 	export var query = 'query';
 	export var support = 'support';
 	export var help = 'help';
