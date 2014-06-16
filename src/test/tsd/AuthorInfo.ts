@@ -6,7 +6,7 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
-import AuthorInfo = require('../../xm/data/AuthorInfo');
+import AuthorInfo = require('../../tsd/support/AuthorInfo');
 import helper = require('../../test/helper');
 
 export function serialise(author: AuthorInfo, recursive: number = 0): any {
@@ -21,5 +21,7 @@ export function assertion(author: AuthorInfo, values: any, message: string) {
 
 	helper.propStrictEqual(author, values, 'name', message);
 	helper.propStrictEqual(author, values, 'url', message);
-	helper.propStrictEqual(author, values, 'email', message);
+	if (values.email) {
+		helper.propStrictEqual(author, values, 'email', message);
+	}
 }

@@ -57,3 +57,4 @@
 /// <reference path="deep-freeze/deep-freeze.d.ts" />
 /// <reference path="type-detect/type-detect.d.ts" />
 /// <reference path="rimraf/rimraf.d.ts" />
+/// <reference path="../node_modules/definition-header/dist/index.d.ts" />

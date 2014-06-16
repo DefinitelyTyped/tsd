@@ -6,9 +6,9 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
-import AuthorInfo = require('../../xm/data/AuthorInfo');
+import AuthorInfo = require('../../tsd/support/AuthorInfo');
 import DefInfo = require('../../tsd/data/DefInfo');
-import testAuthor = require('../../test/xm/AuthorInfo');
+import testAuthor = require('./AuthorInfo');
 
 import unordered = require('../unordered');
 import helper = require('../helper');
@@ -20,9 +20,7 @@ export function serialise(info: DefInfo, recursive: number = 0): any {
 
 	var json: any = {};
 	json.name = info.name;
-	json.description = info.description;
-	json.projectUrl = info.projectUrl;
-	json.reposUrl = info.reposUrl;
+	json.projects = info.projects;
 	json.references = info.references.slice(0);
 	json.authors = [];
 	if (info.authors && recursive >= 0) {
@@ -39,12 +37,11 @@ export function assertion(info: DefInfo, values: any, message: string) {
 	assert.instanceOf(info, DefInfo, message + ': info');
 
 	helper.propStrictEqual(info, values, 'name', message);
-	if (values.description) {
-		assert.strictEqual(info.description, values.description, message + ': info.description');
-	}
 	helper.propStrictEqual(info, values, 'projectUrl', message);
-	helper.propStrictEqual(info, values, 'reposUrl', message);
 
+	if (values.projects) {
+		unordered.assertionNaive(info.projects, values.projects, assert.strictEqual, message + ': projects');
+	}
 	if (values.authors) {
 		unordered.assertionNaive(info.authors, values.authors, testAuthor.assertion, message + ': authors');
 	}

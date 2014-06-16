@@ -128,6 +128,7 @@ class API {
 		files.forEach((file: DefVersion) => {
 			refs.push(file.def.path);
 		});
+		refs.sort();
 
 		var basePath = path.dirname(this.context.paths.configFile);
 
@@ -258,11 +259,11 @@ class API {
 		}).then((list) => {
 			return list.reduce((memo: string[], file: DefVersion) => {
 				var url;
-				if (file.info && file.info.projectUrl) {
-					url = file.info.projectUrl;
+				if (file.info && file.info.projects) {
+					url = file.info.projects;
 				}
-				else if (file.def.head.info && file.def.head.info.projectUrl) {
-					url = file.def.head.info.projectUrl;
+				else if (file.def.head.info && file.def.head.info.projects) {
+					url = file.def.head.info.projects;
 				}
 				if (url) {
 					memo.push(url);

@@ -2,7 +2,9 @@
 
 'use strict';
 
-import AuthorInfo = require('../../xm/data/AuthorInfo');
+import header = require('definition-header');
+
+import AuthorInfo = require('../support/AuthorInfo');
 
 /*
  DefInfo: parsed info from single definition source
@@ -10,12 +12,9 @@ import AuthorInfo = require('../../xm/data/AuthorInfo');
 class DefInfo {
 	name: string;
 	version: string;
-	description: string;
-	projectUrl: string;
+	projects: string[];
 
 	authors: AuthorInfo[];
-	// reposName:string;
-	reposUrl: string;
 
 	references: string[] = [];
 
@@ -26,12 +25,9 @@ class DefInfo {
 	resetFields() {
 		this.name = '';
 		this.version = '';
-		this.description = '';
-		this.projectUrl = '';
+		this.projects = [];
 
 		this.authors = [];
-		// this.reposName = '';
-		this.reposUrl = '';
 	}
 
 	resetAll() {

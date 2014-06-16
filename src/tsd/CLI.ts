@@ -535,60 +535,6 @@ export function getExpose(): Expose {
 		};
 	});
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	expose.defineCommand((cmd: ExposeCommand) => {
-		cmd.name = 'validate';
-		cmd.label = 'validate data source';
-		cmd.hidden = true;
-		cmd.groups = [Group.support];
-		cmd.execute = (ctx: ExposeContext) => {
-			return getContext(ctx).then((context: Context) => {
-				var job = new Job();
-				job.context = context;
-
-				job.ctx = ctx;
-				job.api = new API(job.context);
-
-				job.query = new Query('*');
-				job.query.parseInfo = true;
-
-				job.options = new Options();
-				job.options.resolveDependencies = true;
-
-				if (ctx.hasOpt(Opt.cacheMode)) {
-					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
-				}
-
-				return job.api.readConfig(true).then(() => {
-					return job.api.select(job.query, job.options).then((selection: Selection) => {
-						if (selection.selection.length === 0) {
-							output.ln().report().warning('zero results').ln();
-							return;
-						}
-
-						var invalid = [];
-						selection.selection.forEach((def: DefVersion) => {
-							if (!def.commit || !def.info) {
-								invalid.push(def);
-								return;
-							}
-							if (!def.info.name || !def.info.projectUrl || def.info.authors.length === 0) {
-								invalid.push(def);
-								return;
-							}
-						});
-						if (invalid.length > 0) {
-							output.line();
-							output.info(true).span('found').space().error(invalid.length).space().span('invalid defs').ln();
-							output.inspect(invalid, 3);
-						}
-					});
-				});
-			}).catch(reportError);
-		};
-	});
-
 	return expose;
 }
 

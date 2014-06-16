@@ -6,7 +6,7 @@ import typeOf = require('../../xm/typeOf');
 import dateUtils = require('../../xm/dateUtils');
 import collection = require('../../xm/collection');
 import StyledOut = require('../../xm/lib/StyledOut');
-import AuthorInfo = require('../../xm/data/AuthorInfo');
+import AuthorInfo = require('../support/AuthorInfo');
 
 import GithubRateInfo = require('../../git/model/GithubRateInfo');
 
@@ -123,9 +123,9 @@ class Printer {
 			this.output.line();
 			if (file.info.isValid()) {
 				this.output.indent(1).tweakPunc(file.info.toString());
-				if (file.info.projectUrl) {
-					this.output.space().tweakURI(file.info.projectUrl, true, true);
-				}
+				file.info.projects.forEach((url) => {
+					this.output.space().tweakURI(url, true, true);
+				});
 				this.output.ln();
 
 				if (file.info.authors) {

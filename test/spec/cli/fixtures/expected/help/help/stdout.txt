@@ -48,16 +48,12 @@
    
     --help               -h    > display usage help (flag)
     --version            -V    > display version information (flag)
-    --progress           -p    > display progress notifications (flag, default: true)
     --cacheDir <path>          > path to cache directory (string)
     --cacheMode <mode>         > change cache behaviour (string, default: allowUpdate)
                                   [ forceLocal, forceRemote, forceUpdate, allowRemote, allowUpdate ]
     --config <path>            > path to config file (string)
-    --detail <level>           > modify reporting detail level (string)
-                                  [ low, mid, high ]
-                                  : partially implemented
     --dev                      > development mode (flag)
-    --services                 > allow usage-tracker, TSD updates etc (flag, default: true)
+    --services                 > toggle usage-tracker, TSD updates etc (flag, default: true)
     --style <name>             > specify CLI style (string, default: no)
                                   [ no, plain, ansi, html, css, dev ]
     --verbose                  > verbose output (flag)

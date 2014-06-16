@@ -1,14 +1,15 @@
-/// <reference path="../_ref.d.ts" />
+/// <reference path="../../xm/_ref.d.ts" />
 
 'use strict';
 
-var endSlashTrim = /\/?$/;
-var trim = /(^\s+)|(\s?\/?\s?$)/;
+import header = require('definition-header');
+
+var trim = /\/$/;
 
 /*
  AuthorInfo: basic info
  */
-class AuthorInfo {
+class AuthorInfo implements header.model.Person {
 
 	constructor(public name: string = '', public url: string = null, public email: string = null) {
 		if (this.url) {

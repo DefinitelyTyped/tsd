@@ -6,7 +6,7 @@ import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
-import AuthorInfo = require('../../xm/data/AuthorInfo');
+import AuthorInfo = require('../../tsd/support/AuthorInfo');
 import tsdUtil = require('../../tsd/util/tsdUtil');
 import Def = require('../../tsd/data/Def');
 import DefVersion = require('../../tsd/data/DefVersion');

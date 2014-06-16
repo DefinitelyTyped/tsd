@@ -3,6 +3,7 @@
 'use strict';
 
 import Promise = require('bluebird');
+import header = require('definition-header');
 
 import Options = require('../Options');
 import Core = require('Core');
@@ -11,8 +12,9 @@ import CoreModule = require('./CoreModule');
 import DefInfo = require('../data/DefInfo');
 import DefVersion = require('../data/DefVersion');
 import DefBlob = require('../data/DefBlob');
-import DefInfoParser = require('../support/DefInfoParser');
 import defUtil = require('../util/defUtil');
+
+import AuthorInfo = require('../support/AuthorInfo');
 
 class InfoParser extends CoreModule {
 
@@ -25,7 +27,11 @@ class InfoParser extends CoreModule {
 	 */
 	parseDefInfo(file: DefVersion): Promise<DefVersion> {
 		return this.core.content.loadContent(file).then((blob: DefBlob) => {
-			var parser = new DefInfoParser();
+			var source = blob.content.toString('utf8');
+
+			if (header.isPartial(source)) {
+				return file;
+			}
 			if (file.info) {
 				// TODO why not do an early bail and skip reparse?
 				file.info.resetFields();
@@ -34,11 +40,15 @@ class InfoParser extends CoreModule {
 				file.info = new DefInfo();
 			}
 
-			parser.parse(file.info, blob.content.toString('utf8'));
-
-			if (!file.info.isValid()) {
-				// this.log.warn('bad parse in: ' + file);
-				// TODO print more debug info
+			var res: header.Result = header.parse(source);
+			if (res.success) {
+				var head: header.model.Header = res.value;
+				file.info.name = head.label.name;
+				file.info.version = (head.label.version || '');
+				file.info.projects = head.project.map(p => p.url);
+				file.info.authors = head.authors.map((a) => {
+					return new AuthorInfo(a.name, a.url);
+				});
 			}
 			return file;
 		});
