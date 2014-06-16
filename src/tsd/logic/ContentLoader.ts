@@ -9,7 +9,6 @@ import Promise = require('bluebird');
 import LRU = require('lru-cache');
 import VError = require('verror');
 
-import log = require('../../xm/log');
 import assert = require('../../xm/assert');
 
 import Def = require('../data/Def');
@@ -108,7 +107,7 @@ class ContentLoader extends CoreModule {
 			this.core.index.getIndex(),
 			this.core.repo.api.getPathCommits(def.path)
 		]).spread((index: DefIndex, content: any[]) => {
-			// this.log.inspect(content, null, 2);
+			// this.console.dir(content, null, 2);
 			// TODO add pagination support (see github api docs)
 			index.setHistory(def, content);
 		}).return(def);

@@ -5,7 +5,6 @@
 import Promise = require('bluebird');
 import childProcess = require('child_process');
 import assertVar = require('../assertVar');
-import log = require('../log');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -43,12 +42,12 @@ export function runCLI(modulePath: string, args: string[], debug: boolean = fals
 				args: args
 			};
 			if (debug && res.code > 0) {
-				log.debug(['node', modulePath , res.args.join(' ')].join(' '));
-				log.debug('error: ' + res.error);
-				log.debug('code: ' + res.code);
-				log(res.stdout.toString('utf8'));
+				console.log(['node', modulePath , res.args.join(' ')].join(' '));
+				console.log('error: ' + res.error);
+				console.log('code: ' + res.code);
+				console.log(res.stdout.toString('utf8'));
 				if (res.stderr.length) {
-					log.error(res.stderr.toString('utf8'));
+					console.error(res.stderr.toString('utf8'));
 				}
 			}
 			return res;
@@ -77,8 +76,8 @@ export function runCLI(modulePath: string, args: string[], debug: boolean = fals
 
 		child.on('error', (err: any) => {
 			if (err) {
-				log.error('child process exited with code ' + err.code);
-				log.error(err);
+				console.error('child process exited with code ' + err.code);
+				console.error(err);
 			}
 			// never fail (we might test for cli failure after all)
 			resolve(getResult(1, err));

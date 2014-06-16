@@ -111,9 +111,6 @@ class GithubAPI extends GithubLoader {
 			if (this.cache.opts.proxy) {
 				req.proxy = this.cache.opts.proxy;
 			}
-			/*d.progress({
-				message: 'get url: ' + url
-			});*/
 			request.get(req, (err, res, body) => {
 				if (err) {
 					reject(err);

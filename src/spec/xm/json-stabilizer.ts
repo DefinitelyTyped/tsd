@@ -6,7 +6,7 @@ import fs = require('fs');
 import path = require('path');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 import helper = require('../../test/helper');
 
 import JSONStabilizer = require('../../xm/json/JSONStabilizer');

@@ -41,10 +41,10 @@ export function parseJson(text: string): any {
 	catch (err) {
 		if (err.name === 'SyntaxError') {
 			// TODO find/write module to pretty print parse errors
-			/*log.error(err);
-			log('---');
-			log(text.substr(0, 1024));
-			log('---');*/
+			/*console.error(err);
+			console.log('---');
+			console.log(text.substr(0, 1024));
+			console.log('---');*/
 		}
 		// rethrow
 		throw (err);

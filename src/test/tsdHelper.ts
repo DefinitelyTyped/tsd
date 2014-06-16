@@ -9,9 +9,8 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
-import log = require('../xm/log');
 import fileIO = require('../xm/file/fileIO');
 import CacheMode = require('../http/CacheMode');
 import Def = require('../tsd/data/Def');
@@ -61,8 +60,8 @@ export function assertDefPathsP(actualDir: string, expectedDir: string, assertCo
 		assert.sameMembers(actualPaths, expectedPaths, message);
 
 		if (assertContent) {
-			log.json(actualPaths);
-			log.json(expectedPaths);
+			console.dir(actualPaths);
+			console.dir(expectedPaths);
 
 			unordered.assertionLike(actualPaths, expectedPaths, (actualPath: string, expectedPath: string) => {
 				return (Def.getFileFrom(actualPath) === Def.getFileFrom(expectedPath));

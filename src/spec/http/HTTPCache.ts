@@ -7,7 +7,7 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');

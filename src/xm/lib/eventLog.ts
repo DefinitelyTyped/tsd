@@ -4,8 +4,6 @@
 
 import StatCounter = require('./StatCounter');
 import typeOf = require('../typeOf');
-import Logger = require('../log/Logger');
-import getLogger = require('../log/getLogger');
 import inspect = require('../inspect');
 import encode = require('../encode');
 import objectUtils = require('../objectUtils');
@@ -65,21 +63,20 @@ export class EventLog {
 	private _label: string;
 	private _prefix: string;
 	private _startAt: number;
-	logger: Logger;
 
-	logEnabled: boolean = false;
+	private _logEnabled: boolean = false;
 	private _trackEnabled: boolean = false;
 	private _trackLimit: number = 100;
 	private _trackPrune: number = 30;
 
 	private _mutePromises: string[] = [EventLevel.notify, EventLevel.promise, EventLevel.resolve, EventLevel.reject];
 
-	constructor(prefix: string = '', label: string = '', log?: Logger) {
+	constructor(prefix: string = '', label: string = '', log: boolean = false) {
 		this._label = label;
 		this._prefix = (prefix ? prefix + ':' : '');
 
 		// TODO this is not dynamic (style/out not updatable)
-		this.logger = log || (label ? getLogger(this._label) : (log || getLogger()));
+		this._logEnabled = log;
 
 		this._startAt = Date.now();
 	}
@@ -182,8 +179,8 @@ export class EventLog {
 			this._items.push(item);
 			this.trim();
 		}
-		if (this.logEnabled) {
-			this.logger.status(this.getItemString(item, true));
+		if (this._logEnabled) {
+			console.log(this.getItemString(item, true));
 		}
 		return item;
 	}

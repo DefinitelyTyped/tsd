@@ -6,7 +6,6 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import fileIO = require('../../xm/file/fileIO');
-import getNote = require('../../xm/note/getNote');
 
 import Options = require('../Options');
 import Core = require('Core');

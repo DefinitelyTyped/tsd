@@ -7,7 +7,6 @@ import uuid = require('uuid');
 import urlMod = require('url');
 import VError = require('verror');
 
-import log = require('../../xm/log');
 import assertVar = require('../../xm/assertVar');
 
 import Query = require('../select/Query');
@@ -142,7 +141,7 @@ class Tracker {
 	private doEvent(event): void {
 		this._workers.push(event);
 		if (this._debug) {
-			log.debug('event', event);
+			console.log('event', event);
 		}
 		this._client.event(event, (err) => {
 			var i = this._workers.indexOf(event);
@@ -166,7 +165,7 @@ class Tracker {
 			if (!err) {
 				var duration = Date.now() - start;
 				if (this._debug) {
-					log.debug('timer', duration + 'ms');
+					console.log('timer', duration + 'ms');
 				}
 				this._client.timing(this.getPage(), variable, duration, label).send();
 			}
@@ -185,7 +184,7 @@ class Tracker {
 		if (enabled !== this._enabled) {
 			this._enabled = enabled;
 			if (this._debug) {
-				log.status('Tracker ' + (this._enabled ? 'enabled' : 'disabled'));
+				console.log('Tracker ' + (this._enabled ? 'enabled' : 'disabled'));
 			}
 		}
 	}

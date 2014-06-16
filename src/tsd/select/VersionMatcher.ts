@@ -5,7 +5,6 @@
 import semver = require('semver');
 
 import assert = require('../../xm/assert');
-import log = require('../../xm/log');
 
 import Def = require('../data/Def');
 
@@ -89,7 +88,7 @@ class VersionMatcher {
 				latest = def;
 			}
 			else if (semver.gt(def.semver, latest.semver)) {
-				log('VersionMatcher.filter', 'gt', def.semver, latest.semver);
+				console.log('VersionMatcher.filter', 'gt', def.semver, latest.semver);
 				latest = def;
 			}
 		}

@@ -9,15 +9,12 @@ import VError = require('verror');
 import Lazy = require('lazy.js');
 import Joi = require('joi');
 
-import log = require('../../xm/log');
 import typeOf = require('../../xm/typeOf');
 import assert = require('../../xm/assert');
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 import collection = require('../../xm/collection');
 
-import Logger = require('../../xm/log/Logger');
-import getLogger = require('../../xm/log/getLogger');
 import JSONStabilizer = require('../../xm/json/JSONStabilizer');
 
 import GithubRepoConfig = require('../../git/GithubRepoConfig');
@@ -51,8 +48,6 @@ class Config implements GithubRepoConfig {
 	private _installed = new Map<string, InstalledDef>();
 
 	private _stable: JSONStabilizer = new JSONStabilizer();
-
-	log = getLogger('Config');
 
 	constructor() {
 		// import defaults

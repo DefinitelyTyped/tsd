@@ -4,7 +4,6 @@
 
 import Promise = require('bluebird');
 
-import log = require('../../xm/log');
 import fileIO = require('../../xm/file/fileIO');
 
 import Def = require('../data/Def');
@@ -88,14 +87,14 @@ class Resolver extends CoreModule {
 				// TODO decide if always to go with head or not
 				// maybe it need some resolving itself?
 				if (!dep.head.solved && !this._active.has(dep.head.key)) {
-					// log('recurse ' + dep.toString());
+					// console.log('recurse ' + dep.toString());
 
 					// lets go deeper
 					memo.push(this.resolveDeps(dep.head));
 				}
 			}
 			else {
-				log.warn('path reference not in index: ' + refPath);
+				console.log('path reference not in index: ' + refPath);
 				// TODO weird: could be removed file; add it? beh?
 			}
 			return memo;

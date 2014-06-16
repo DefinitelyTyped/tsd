@@ -6,7 +6,6 @@ import pointer = require('json-pointer');
 import Lazy = require('lazy.js');
 import VError = require('verror');
 
-import log = require('../../xm/log');
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 import collection = require('../../xm/collection');
@@ -118,11 +117,11 @@ class DefIndex {
 		// TODO harden data validation
 		Lazy(commitJsonArray).each((json) => {
 			if (!json || !json.sha) {
-				log.inspect(json, 'weird: json no sha', 1);
+				console.dir(json, 'weird: json no sha', 1);
 			}
 			var commit = this.procureCommit(json.sha);
 			if (!commit) {
-				log.inspect('weird: no commit for sha ' + json.sha);
+				console.dir('weird: no commit for sha ' + json.sha);
 				throw new VError('huh?');
 			}
 			if (!commit.hasMeta) {
@@ -204,7 +203,7 @@ class DefIndex {
 
 		var def = this.getDef(path);
 		if (!def) {
-			log.warn('path not in index, attempt-adding: ' + path);
+			console.log('path not in index, attempt-adding: ' + path);
 
 			// attempt creation
 			def = this.procureDef(path);

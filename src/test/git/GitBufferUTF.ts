@@ -3,7 +3,7 @@
 'use strict';
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import GitUtil = require('../../git/gitUtil');
 

@@ -6,7 +6,7 @@ import path = require('path');
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 import helper = require('../../test/helper');
 
 import StyledOut = require('../../xm/lib/StyledOut');

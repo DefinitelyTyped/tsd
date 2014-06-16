@@ -120,7 +120,7 @@ class Def {
 				file.name = file.name.substr(0, semMatch.index);
 			}
 			else {
-				// log.warn('invalid semver', sem);
+				// console.log('invalid semver', sem);
 			}
 		}
 

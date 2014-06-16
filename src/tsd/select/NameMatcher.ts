@@ -63,8 +63,8 @@ class NameMatcher {
 			this.compileSingle();
 		}
 
-		// log(this.projectExp);
-		// log(this.nameExp);
+		// console.log(this.projectExp);
+		// console.log(this.nameExp);
 	}
 
 	private compileSingle(): void {

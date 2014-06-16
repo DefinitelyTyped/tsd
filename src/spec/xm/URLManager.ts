@@ -4,7 +4,7 @@
 
 import helper = require('../../test/helper');
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import URLManager = require('../../xm/lib/URLManager');
 

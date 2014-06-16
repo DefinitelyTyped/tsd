@@ -140,7 +140,7 @@ describe('Core', () => {
 			return core.index.getIndex().then((index: DefIndex) => {
 				assert.isTrue(index.hasIndex(), 'index.hasIndex');
 				assert.operator(index.list.length, '>', 200, 'index.list');
-				// xm.log(index.toDump());
+				// console.log(index.toDump());
 				// TODO validate index data
 				return null;
 			});

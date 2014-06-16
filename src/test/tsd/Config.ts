@@ -5,7 +5,7 @@
 import joiAssert = require('joi-assert');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
 import Config = require('../../tsd/context/Config');

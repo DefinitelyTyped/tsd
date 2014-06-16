@@ -11,7 +11,7 @@ import ministyle = require('ministyle');
 
 import fileIO = require('../xm/file/fileIO');
 import assertVar = require('../xm/assertVar');
-import PackageJSON = require('../xm/data/PackageJSON');
+import PackageJSON = require('../xm/lib/PackageJSON');
 import StyledOut = require('../xm/lib/StyledOut');
 
 import ActionMap = require('../xm/promise/ActionMap');

@@ -13,9 +13,8 @@ import Promise = require('bluebird');
 
 import ncpMod = require('ncp');
 
-import log = require('../xm/log');
 import typeOf = require('../xm/typeOf');
-import PackageJSON = require('../xm/data/PackageJSON');
+import PackageJSON = require('../xm/lib/PackageJSON');
 
 // boohoo
 import Const = require('../tsd/context/Const');
@@ -114,12 +113,12 @@ export function longAssert(actual: string, expected: string, msg?: string): void
 
 export function dump(object: any, message?: string, depth: number = 6, showHidden: boolean = false): any {
 	message = typeOf.isUndefined(message) ? '' : message + ': ';
-	log(message + util.inspect(object, showHidden, depth, true));
+	console.log(message + util.inspect(object, showHidden, depth, true));
 }
 
 export function dumpJSON(object: any, message?: string): any {
 	message = typeOf.isUndefined(message) ? '' : message + ': ';
-	log(message + JSON.stringify(object, null, 4));
+	console.log(message + JSON.stringify(object, null, 4));
 }
 
 export function assertFormatSHA1(value: string, msg?: string): void {

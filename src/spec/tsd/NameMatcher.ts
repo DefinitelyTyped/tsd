@@ -7,9 +7,8 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
-import log = require('../../xm/log');
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');
 
@@ -48,7 +47,7 @@ describe('NameMatcher', () => {
 			list.push(def);
 		});
 		if (badFixtures.length > 0) {
-			log.error('bad fixture', badFixtures);
+			console.error('bad fixture', badFixtures);
 			throw new Error('bad fixtures: ' + badFixtures.join('\n'));
 		}
 	});

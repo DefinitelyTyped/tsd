@@ -8,7 +8,6 @@ import Promise = require('bluebird');
 import VError = require('verror');
 
 import fileIO = require('../../xm/file/fileIO');
-import getNote = require('../../xm/note/getNote');
 
 import Options = require('../Options');
 import Core = require('Core');

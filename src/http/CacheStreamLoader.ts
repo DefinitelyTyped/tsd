@@ -21,7 +21,6 @@ import assert = require('../xm/assert');
 import assertVar = require('../xm/assertVar');
 import dateUtils = require('../xm/dateUtils');
 import hash = require('../xm/hash');
-import LogLevel = require('../xm/log/LogLevel');
 
 import fileIO = require('../xm/file/fileIO');
 
@@ -206,8 +205,6 @@ class CacheStreamLoader {
 			// always zip
 			req.headers['accept-encoding'] = 'gzip, deflate';
 
-			// d.progress(getNote('loading: ' + this.request.url));
-
 			// var writer = new BufferStream({size: 'flexible'});
 			// pause it so we don't miss chunks before we choose a decoder
 			var pause = es.pause();
@@ -332,12 +329,10 @@ class CacheStreamLoader {
 	private checkExists(file: string, label: string): Promise<boolean> {
 		return fileIO.exists(file).then((exist: boolean) => {
 			if (!exist) {
-				// d.progress(getNote('missing ' + label + ' file: ' + file, LogLevel.error));
 				return Promise.cast(false);
 			}
 			return fileIO.stat(file).then((stat: fs.Stats) => {
 				if (stat.size === 0) {
-					// d.progress(getNote('written zero ' + label + ' bytes to: ' + file, LogLevel.error));
 					return false;
 				}
 				return true;

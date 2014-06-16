@@ -7,7 +7,7 @@ import path = require('path');
 import Promise = require('bluebird');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import fileIO = require('../../xm/file/fileIO');
 import collection = require('../../xm/collection');
@@ -27,8 +27,6 @@ import Selection = require('../../tsd/select/Selection');
 import API = require('../../tsd/API');
 import Options = require('../../tsd/Options');
 import defUtil = require('../../tsd/util/defUtil');
-
-import log = require('../../xm/log');
 
 describe('API', () => {
 
@@ -89,7 +87,7 @@ describe('API', () => {
 				var query = getQuery(before);
 				var opts = getOptions(before);
 				if (test.debug) {
-					log.debug('skip modify query of ' + name);
+					console.log('skip modify query of ' + name);
 				}
 				return api.select(query, opts).then((selection: Selection) => {
 					return api.install(selection, opts).then((result: InstallResult) => {
@@ -104,7 +102,7 @@ describe('API', () => {
 					var value: string = before.content[dest];
 					var destFull = path.join(info.typingsDir, dest);
 					if (test.debug) {
-						log.debug('setting content of ' + name + ' in ' + destFull);
+						console.log('setting content of ' + name + ' in ' + destFull);
 					}
 					fileIO.writeFileSync(destFull, value);
 				});
@@ -182,7 +180,7 @@ describe('API', () => {
 						testConfig.assertion(api.context.config, configExpect, 'api.context.config');
 						helper.longAssert(bundleActual, bundleExpect, 'bundle');
 
-						log.out.line().warning('-> ').span('helper.assertDefPathsP').space().warning('should have assertContent enabled!').line();
+						console.log('-> helper.assertDefPathsP should have assertContent enabled!');
 
 						return tsdHelper.assertDefPathsP(info.typingsDir, info.typingsExpect, false, 'typing');
 					}).then(() => {

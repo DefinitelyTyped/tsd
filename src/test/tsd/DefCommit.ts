@@ -3,7 +3,7 @@
 'use strict';
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
 import DefCommit = require('../../tsd/data/DefCommit');

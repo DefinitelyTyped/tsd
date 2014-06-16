@@ -3,10 +3,10 @@
 'use strict';
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 import helper = require('../../test/helper');
 
-import PackageJSON = require('../../xm/data/PackageJSON');
+import PackageJSON = require('../../xm/lib/PackageJSON');
 
 describe('PackageJSON', () => {
 

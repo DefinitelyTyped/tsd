@@ -5,11 +5,10 @@
 import fs = require('fs');
 import path = require('path');
 
-import log = require('../../xm/log');
 import assertVar = require('../../xm/assertVar');
 import fileIO = require('../../xm/file/fileIO');
 import JSONPointer = require('../../xm/json/JSONPointer');
-import PackageJSON = require('../../xm/data/PackageJSON');
+import PackageJSON = require('../../xm/lib/PackageJSON');
 
 import Config = require('./Config');
 import Paths = require('./Paths');
@@ -52,13 +51,13 @@ class Context {
 	stackSettings(src: string): void {
 		if (fs.existsSync(src)) {
 			if (this.verbose) {
-				log.status('using rc: ' + src);
+				console.log('using rc: ' + src);
 			}
 			this.settings.addSource(fileIO.readJSONSync(src));
 		}
 		else {
 			if (this.verbose) {
-				log.status('cannot find rc: ' + src);
+				console.log('cannot find rc: ' + src);
 			}
 		}
 	}
