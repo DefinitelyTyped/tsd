@@ -21,7 +21,7 @@ class BundleChange {
 		if (!target) {
 			return;
 		}
-		if (this._added.indexOf(target)) {
+		if (this._added.indexOf(target) < 0) {
 			this._added.push(target);
 		}
 		var i = this._removed.indexOf(target);
@@ -34,7 +34,7 @@ class BundleChange {
 		if (!target) {
 			return;
 		}
-		if (this._removed.indexOf(target)) {
+		if (this._removed.indexOf(target) < 0) {
 			this._removed.push(target);
 		}
 		var i = this._added.indexOf(target);

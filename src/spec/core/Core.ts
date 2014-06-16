@@ -5,11 +5,8 @@
 import fs = require('fs');
 import path = require('path');
 import Promise = require('bluebird');
-
-import ncp = require('ncp');
-
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 import joiAssert = require('joi-assert');
 
@@ -24,10 +21,13 @@ import DefIndex = require('../../tsd/data/DefIndex');
 
 import configSchema = require('../../tsd/schema/config');
 
+import Bundle = require('../../tsd/support/Bundle');
+import BundleChange = require('../../tsd/support/BundleChange');
+
 describe('Core', () => {
 
 	var fixtureDir = helper.getDirNameFixtures();
-	var tmpDit = helper.getDirNameTmp();
+	var tmpDir = helper.getDirNameTmp();
 
 	var core: Core;
 	var context: Context;
@@ -101,12 +101,11 @@ describe('Core', () => {
 	describe('config.saveConfig', () => {
 		it('should save modified data', () => {
 			// copy temp for saving
-			var saveFile = path.resolve(tmpDit, 'save-config.json');
+			var saveFile = path.resolve(tmpDir, 'save-config.json');
 			fileIO.writeFileSync(saveFile, fileIO.readFileSync('./test/fixtures/config/valid.json'));
 			context.paths.configFile = saveFile;
 
 			core = getCore(context);
-			// core.verbose = true;
 
 			// modify test data
 			var source = fileIO.readJSONSync(saveFile);
@@ -137,7 +136,6 @@ describe('Core', () => {
 	describe('index.getIndex', () => {
 		it('should return data', () => {
 			core = getCore(context);
-			// core.verbose = true;
 
 			return core.index.getIndex().then((index: DefIndex) => {
 				assert.isTrue(index.hasIndex(), 'index.hasIndex');
@@ -150,21 +148,83 @@ describe('Core', () => {
 	});
 
 	describe('bundle', () => {
-		/*it('should cleanup data', () => {
+		it('should read data', () => {
 			core = getCore(context);
+
+			var name = 'bundle-read';
+			var baseDir = path.resolve(fixtureDir, name);
+
+			core.context.config.bundle = path.resolve(baseDir, 'tsd.d.ts');
+			core.context.config.path = path.resolve(baseDir);
+
+			return core.bundle.readBundle(core.context.config.bundle, false).then((bundle: Bundle) => {
+				assert.deepEqual(bundle.toArray(true, true).sort(), [
+					'bar/bar.d.ts',
+					'bar/baz.d.ts',
+					'foo/foo.d.ts'
+				]);
+			});
+		});
+
+		it('should cleanup data', () => {
+			core = getCore(context);
+
 			var name = 'bundle-clean';
 			var baseDir = path.resolve(fixtureDir, name);
-			core.context.config.bundle = path.resolve(baseDir, 'bundle-clean');
-			core.context.config.path = path.resolve(baseDir, 'bundle-clean');
-			// core.verbose = true;
+			var testDir = path.resolve(tmpDir, name);
 
-			return core.index.getIndex().then((index: DefIndex) => {
-				assert.isTrue(index.hasIndex(), 'index.hasIndex');
-				assert.operator(index.list.length, '>', 200, 'index.list');
-				// xm.log(index.toDump());
-				// TODO validate index data
-				return null;
+			core.context.config.bundle = path.resolve(testDir, 'tsd.d.ts');
+			core.context.config.path = path.resolve(testDir);
+
+			return helper.ncp(baseDir, testDir).then(() => {
+				return core.bundle.cleanupBundle(core.context.config.bundle, true);
+			}).then((changes: BundleChange) => {
+				assert.deepEqual(changes.getAdded(true, true), [], 'getAdded');
+				assert.deepEqual(changes.getRemoved(true, true).sort(), [
+					'bar/bar.d.ts',
+					'bar/baz.d.ts',
+				], 'getRemoved');
+
+				assert.isTrue(changes.someChanged(), 'someChanged');
+				assert.isFalse(changes.someAdded(), 'someAdded');
+				assert.isTrue(changes.someRemoved(), 'someRemoved');
+
+				var expected = fileIO.readFileSync(path.resolve(testDir, 'expected.d.ts'), 'utf8').replace(/\r\n/g, '\n');
+				var actual = fileIO.readFileSync(core.context.config.bundle, 'utf8').replace(/\r\n/g, '\n');
+				assert.strictEqual(actual, expected);
 			});
-		});*/
+		});
+
+		it('should update data', () => {
+			core = getCore(context);
+
+			var name = 'bundle-update';
+			var baseDir = path.resolve(fixtureDir, name);
+			var testDir = path.resolve(tmpDir, name);
+
+			core.context.config.bundle = path.resolve(testDir, 'tsd.d.ts');
+			core.context.config.path = path.resolve(testDir);
+
+			return helper.ncp(baseDir, testDir).then(() => {
+				return core.bundle.updateBundle(core.context.config.bundle, true);
+			}).then((changes: BundleChange) => {
+				assert.deepEqual(changes.getAdded(true, true).sort(), [
+					'bar/bar.d.ts',
+					'bar/baz.d.ts',
+					'foo/fizz.d.ts'
+				], 'getAdded');
+				assert.deepEqual(changes.getRemoved(true, true), [
+					'hoge/hoge.d.ts'
+				], 'getRemoved');
+
+				assert.isTrue(changes.someChanged(), 'someChanged');
+				assert.isTrue(changes.someAdded(), 'someAdded');
+				assert.isTrue(changes.someRemoved(), 'someRemoved');
+
+				var expected = fileIO.readFileSync(path.resolve(testDir, 'expected.d.ts'), 'utf8').replace(/\r\n/g, '\n');
+				var actual = fileIO.readFileSync(core.context.config.bundle, 'utf8').replace(/\r\n/g, '\n');
+				assert.strictEqual(actual, expected);
+			});
+		});
 	});
 });

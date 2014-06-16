@@ -7,15 +7,13 @@
 
 declare module 'ncp' {
 	function ncp (source: string, destination: string, callback: (err: Error) => void);
-	function ncp (source: string, destination: string, options: ncp.Options, callback: (err: Error) => void);
+	function ncp (source: string, destination: string, options: Options, callback: (err: Error) => void);
 
-	module ncp {
-		interface Options {
-			filter? : RegExp;
-			transform? : (read: NodeJS.ReadableStream, write: NodeJS.WritableStream) => void;
-			clobber? : boolean;
-			stopOnErr? : boolean;
-			errs? : NodeJS.WritableStream;
-		}
+	interface Options {
+		filter? : RegExp;
+		transform? : (read: NodeJS.ReadableStream, write: NodeJS.WritableStream) => void;
+		clobber? : boolean;
+		stopOnErr? : boolean;
+		errs? : NodeJS.WritableStream;
 	}
 }

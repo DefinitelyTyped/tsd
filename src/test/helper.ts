@@ -10,7 +10,8 @@ import path = require('path');
 import util = require('util');
 
 import Promise = require('bluebird');
-import bufferEqual = require('buffer-equal');
+
+import ncpMod = require('ncp');
 
 import log = require('../xm/log');
 import typeOf = require('../xm/typeOf');
@@ -20,7 +21,7 @@ import PackageJSON = require('../xm/data/PackageJSON');
 import Const = require('../tsd/context/Const');
 
 import chai = require('chai');
-import assert = chai.assert;
+var assert = chai.assert;
 
 chai.use(require('chai-fuzzy'));
 chai.use(require('chai-fs'));
@@ -29,6 +30,22 @@ chai.config.includeStack = true;
 
 var shaRegExp = /^[0-9a-f]{40}$/;
 var md5RegExp = /^[0-9a-f]{32}$/;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+export function ncp(source: string, destination: string, opts?: ncpMod.Options): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		ncpMod.ncp(source, destination, (opts || {}), (err) => {
+			if (err) {
+				reject(err);
+			}
+			else {
+				resolve(null);
+			}
+		});
+	});
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -119,12 +136,6 @@ export function propStrictEqual(actual: Object, expected: Object, prop: string, 
 	assert.property(actual, prop, message + '.' + prop + ' actual');
 	assert.property(expected, prop, message + '.' + prop + ' expected');
 	assert.strictEqual(actual[prop], expected[prop], message + '.' + prop + ' equal');
-}
-
-export function assertBufferEqual(act: Buffer, exp: Buffer, msg?: string): void {
-	assert.instanceOf(act, Buffer, msg + ': ' + act);
-	assert.instanceOf(exp, Buffer, msg + ': ' + exp);
-	assert(bufferEqual(act, exp), msg + ': bufferEqual');
 }
 
 export function assertBufferUTFEqual(act: Buffer, exp: Buffer, msg?: string): void {

@@ -275,8 +275,7 @@ module.exports = function (grunt) {
 		'clean:test',
 		'jshint:support',
 		'jshint:fixtures',
-		'mocha_unfunk:dev',
-		'clean:cruft'
+		'mocha_unfunk:dev'
 	]);
 	gtx.alias('rebuild', [
 		'clean:build',

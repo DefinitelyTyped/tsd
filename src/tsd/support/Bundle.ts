@@ -45,7 +45,6 @@ class Bundle {
 		var lineMatch: RegExpExecArray;
 		var refMatch: RegExpExecArray;
 		var line: BundleLine;
-		var prev: BundleLine = null;
 
 		var eolWin = 0;
 		var eolNix = 0;
@@ -55,6 +54,7 @@ class Bundle {
 			splitExp.lastIndex = lineMatch.index + lineMatch[0].length;
 
 			line = new BundleLine(lineMatch[1]);
+
 			this.lines.push(line);
 
 			if (/\r\n/.test(lineMatch[2])) {
@@ -66,6 +66,7 @@ class Bundle {
 
 			referenceTagExp.lastIndex = 0;
 			refMatch = referenceTagExp.exec(lineMatch[1]);
+
 			if (refMatch && refMatch.length > 1) {
 				// clean-up path
 				line.ref = path.resolve(this.baseDir, refMatch[1]);
@@ -96,13 +97,13 @@ class Bundle {
 				var i = this.lines.indexOf(this.last);
 				if (i > -1) {
 					this.lines.splice(i + 1, 0, line);
+					this.last = line;
+					return ref;
 				}
 			}
-			else {
-				this.lines.push(line);
-			}
-			this.last = line;
 
+			this.lines.push(line);
+			this.last = line;
 			return ref;
 		}
 		return null;
@@ -113,11 +114,23 @@ class Bundle {
 
 		if (this.has(ref)) {
 			var line = this.map[ref];
+
 			var i = this.lines.indexOf(line);
 			if (i > -1) {
 				this.lines.splice(i, 1);
 			}
+
 			delete this.map[ref];
+
+			if (line === this.last) {
+				for (i -= 1; i >= 0; i--) {
+					if (this.lines[i].ref) {
+						this.last = this.lines[i];
+						return ref;
+					}
+				}
+			}
+			this.last = null;
 			return ref;
 		}
 		return null;
@@ -134,10 +147,9 @@ class Bundle {
 	stringify(): string {
 		// make relative paths from target to files
 		var base = path.dirname(this.target);
-		return this.lines.reduce((memo: string[], line) => {
-			memo.push(line.getValue(base), this.eol);
-			return memo;
-		}, []).join('');
+		return this.lines.map((line) => {
+			return line.getValue(base) + this.eol;
+		}).join('');
 	}
 }
 

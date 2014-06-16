@@ -58,3 +58,6 @@
 /// <reference path="type-detect/type-detect.d.ts" />
 /// <reference path="rimraf/rimraf.d.ts" />
 /// <reference path="../node_modules/definition-header/dist/index.d.ts" />
+/// <reference path="easy-table/easy-table.d.ts" />
+/// <reference path="ncp/ncp.d.ts" />
+/// <reference path="postal/postal.d.ts" />
