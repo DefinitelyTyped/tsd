@@ -93,20 +93,6 @@ module.exports = function (grunt) {
 					}
 				},
 				src: ['package.json']
-			},
-			tsd: {
-				options: {
-					multi: true,
-					root: 'schema/tsd-v4.json'
-				},
-				src: ['tsd.json']
-			},
-			schemas: {
-				options: {
-					multi: true,
-					root: 'http://json-schema.org/draft-04/schema#'
-				},
-				src: ['schema/*.json']
 			}
 		},
 		mochaTest: {
@@ -274,8 +260,6 @@ module.exports = function (grunt) {
 	}, 'lib');
 
 	gtx.alias('pre_publish', [
-		/*'tv4:schemas',*/
-		'tv4:tsd',
 		'tv4:packjson',
 		'rebuild',
 		'regex-replace:cli',
