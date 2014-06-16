@@ -6,7 +6,6 @@
 
 /// <reference path="es6/collections.d.ts" />
 
-/// <reference path="tv4/tv4.d.ts" />
 /// <reference path="exit/exit.d.ts" />
 /// <reference path="uuid/uuid.d.ts" />
 /// <reference path="jsesc/jsesc.d.ts" />
@@ -35,7 +34,6 @@
 
 /// <reference path="mocha/mocha.d.ts" />
 /// <reference path="chai/chai-assert.d.ts" />
-/// <reference path="chai/chai-json-schema-assert.d.ts" />
 /// <reference path="chai/chai-fuzzy-assert.d.ts" />
 /// <reference path="chai/chai-fs-assert.d.ts" />
 /// <reference path="chai/chai-as-promised-assert.d.ts" />

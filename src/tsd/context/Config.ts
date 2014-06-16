@@ -5,9 +5,9 @@
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
-import tv4 = require('tv4');
 import VError = require('verror');
-import Laxy = require('lazy.js');
+import Lazy = require('lazy.js');
+import Joi = require('joi');
 
 import log = require('../../xm/log');
 import typeOf = require('../../xm/typeOf');
@@ -28,7 +28,8 @@ import InstalledDef = require('../context/InstalledDef');
 import DefVersion = require('../data/DefVersion');
 import DefCommit = require('../data/DefCommit');
 
-var reporter = require('tv4-reporter');
+import tsdSchema = require('../schema/config');
+
 /*
  Config: local config file
  */
@@ -36,9 +37,8 @@ var reporter = require('tv4-reporter');
 //  - as simple object straight from JSON?
 //  - or parse and typed into and object?
 //  - maybe worth to keep class (json is an important part of whole UIX after all)
-//  - quite a lot of code neded for nice output (JSONStabilizer etc)
-// TODO extract loading io to own class
-// TODO move parse/to/validate code to new file
+//  - quite a lot of code needed for nice output (JSONStabilizer etc)
+
 class Config implements GithubRepoConfig {
 
 	path: string;
@@ -49,18 +49,12 @@ class Config implements GithubRepoConfig {
 	bundle: string;
 
 	private _installed = new Map<string, InstalledDef>();
-	private _schema: any;
 
 	private _stable: JSONStabilizer = new JSONStabilizer();
 
 	log = getLogger('Config');
 
-	constructor(schema: any) {
-		assertVar(schema, 'object', 'schema');
-		assert((schema.version !== Const.configVersion), 'bad schema config version', schema.version, Const.configVersion, true);
-
-		this._schema = schema;
-
+	constructor() {
 		// import defaults
 		this.reset();
 	}
@@ -103,10 +97,6 @@ class Config implements GithubRepoConfig {
 		return this.repo + '#' + this.ref;
 	}
 
-	get schema(): any {
-		return this._schema;
-	}
-
 	addFile(file: DefVersion) {
 		assertVar(file, DefVersion, 'file');
 
@@ -142,7 +132,7 @@ class Config implements GithubRepoConfig {
 	}
 
 	getInstalledPaths(): string[] {
-		return Laxy(this._installed).map((value: InstalledDef) => {
+		return Lazy(this._installed).map((value: InstalledDef) => {
 			return value.path;
 		}).toArray();
 	}
@@ -169,7 +159,7 @@ class Config implements GithubRepoConfig {
 			};
 		});
 		// self-test (no corruption)
-		this.validateJSON(json, this._schema);
+		this.validateJSON(json);
 
 		return json;
 	}
@@ -178,15 +168,15 @@ class Config implements GithubRepoConfig {
 		return this._stable.toJSONString(this.toJSON(), false);
 	}
 
-	parseJSONString(input: string, label?: string, log: boolean = true): any {
+	parseJSONString(input: string, label: string = null): any {
 		assertVar(input, 'string', 'input');
-		this.parseJSON(this._stable.parseString(input));
+		this.parseJSON(this._stable.parseString(input), label);
 	}
 
-	parseJSON(json: any, label?: string, log: boolean = true): any {
+	parseJSON(json: any, label: string = null): any {
 		assertVar(json, 'object', 'json');
 
-		this.validateJSON(json, this._schema, label, log);
+		this.validateJSON(json, label);
 
 		// TODO harden validation besides schema
 
@@ -210,20 +200,8 @@ class Config implements GithubRepoConfig {
 		}
 	}
 
-	validateJSON(json: any, schema: any, label?: string, logMsg: boolean = true): any {
-		assertVar(schema, 'object', 'schema');
-
-		label = (label || '<config json>');
-		var res = tv4.validateMultiple(json, schema);
-		if (!res.valid || res.missing.length > 0) {
-			if (logMsg) {
-				log.out.ln();
-				var report = reporter.getReporter(log.out.getWrite(), log.out.getStyle());
-				report.reportResult(report.createTest(schema, json, label, res, true), '   ');
-				log.out.ln();
-			}
-			throw (new VError('malformed config: doesn\'t comply with schema'));
-		}
+	validateJSON(json, label: string = null): any {
+		Joi.assert(json, tsdSchema);
 		return json;
 	}
 }

@@ -9,6 +9,8 @@ import Promise = require('bluebird');
 import chai = require('chai');
 import assert = chai.assert;
 
+import joiAssert = require('joi-assert');
+
 import fileIO = require('../../xm/file/fileIO');
 import helper = require('../../test/helper');
 import testConfig = require('../../test/tsd/Config');
@@ -17,6 +19,8 @@ import tsdHelper = require('../../test/tsdHelper');
 import Context = require('../../tsd/context/Context');
 import Core = require('../../tsd/logic/Core');
 import DefIndex = require('../../tsd/data/DefIndex');
+
+import configSchema = require('../../tsd/schema/config');
 
 describe('Core', () => {
 
@@ -52,7 +56,6 @@ describe('Core', () => {
 	});
 	beforeEach(() => {
 		context = tsdHelper.getContext();
-		context.config.log.enabled = false;
 		// TODO risky?
 		context.paths.configFile = './test/fixtures/config/default.json';
 	});
@@ -83,7 +86,7 @@ describe('Core', () => {
 			return assertInvalidConfig('./non-existing_____/tsd-json', /^cannot locate file/);
 		});
 		it('should fail on bad version value', () => {
-			return assertInvalidConfig('./test/fixtures/config/invalid-version.json', /^malformed config/);
+			return assertInvalidConfig('./test/fixtures/config/version-invalid.json', /version fails to match the required pattern/);
 		});
 
 		it('should pass on missing optional data', () => {
@@ -123,7 +126,7 @@ describe('Core', () => {
 				assert.notIsEmptyFile(context.paths.configFile);
 				var json = fileIO.readJSONSync(context.paths.configFile);
 				assert.like(json, changed, 'saved data json');
-				assert.jsonSchema(json, tsdHelper.getConfigSchema(), 'saved valid json');
+				joiAssert(json, configSchema, 'saved valid json');
 				return null;
 			});
 		});

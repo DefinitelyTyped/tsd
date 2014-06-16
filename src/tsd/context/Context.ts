@@ -20,15 +20,12 @@ import Const = require('./Const');
  */
 class Context {
 
+	verbose: boolean;
+
 	paths: Paths;
 	config: Config;
 	packageInfo: PackageJSON;
-	verbose: boolean;
 	settings: JSONPointer;
-
-	// TODO remove or use more of this log? (log is pretty global already)
-	// log:Logger = getLogger('Context');
-	configSchema: any;
 
 	// TODO extract IO
 	constructor(configFile: string = null, verbose: boolean = false) {
@@ -49,8 +46,7 @@ class Context {
 		}
 		this.paths.cacheDir = Paths.getUserCacheDir();
 
-		this.configSchema = fileIO.readJSONSync(path.resolve(path.dirname(PackageJSON.find()), 'schema', Const.configSchemaFile));
-		this.config = new Config(this.configSchema);
+		this.config = new Config();
 	}
 
 	stackSettings(src: string): void {

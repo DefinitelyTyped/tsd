@@ -1,0 +1,7 @@
+{
+	"version": "v4",
+	"path": "typings",
+	"ref": "master",
+	"bundle": "typings/tsd.d.ts",
+	"installed": {}
+}

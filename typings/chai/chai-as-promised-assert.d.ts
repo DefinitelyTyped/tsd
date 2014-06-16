@@ -1,4 +1,4 @@
-// Type definitions for chai-fs v0.0.0 assert style
+// Type definitions for chai-as-promised v0.0.0 assert style
 // Project: http://chaijs.com/
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped

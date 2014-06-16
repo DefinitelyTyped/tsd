@@ -4,7 +4,6 @@
 
 import path = require('path');
 import Promise = require('bluebird');
-import yaml = require('js-yaml');
 
 import VError = require('verror');
 import miniwrite = require('miniwrite');
@@ -347,11 +346,7 @@ export function getExpose(): Expose {
 					indent: 3,
 					flowLevel: -1
 				};
-				return output.plain(yaml.safeDump(job.api.context.getInfo(true), {
-					skipInvalid: false,
-					schema: yaml.DEFAULT_FULL_SCHEMA,
-					indent: 3
-				}));
+				return output.plain(JSON.stringify(job.api.context.getInfo(true), null, 3));
 
 			}).catch(reportError);
 		};

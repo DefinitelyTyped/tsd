@@ -13,7 +13,6 @@ var Const = {
 	settings: 'settings.json',
 
 	configVersion: 'v4',
-	configSchemaFile: 'tsd-v4.json',
 	definitelyRepo: 'borisyankov/DefinitelyTyped',
 	mainBranch: 'master',
 	statsDefault: true,

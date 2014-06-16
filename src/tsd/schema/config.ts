@@ -2,28 +2,29 @@
 
 'use strict';
 
-import path = require('path');
 import Joi = require('joi');
-import Const = require('./Const');
-
-// TODO on-hold for https://github.com/spumko/joi/issues/261
+import Const = require('../context/Const');
 
 var schema = Joi.object({
 	version: Joi
-		.string().regex(/^v[\\d]+$/)
+		.string().regex(/^v\d+$/)
 		.default(Const.configVersion)
+		.required()
 		.description('config-format version'),
 	path: Joi
-		.string()
+		.string().regex(/^[\w\.-]+(?:\/[\w\.-]+)*$/)
 		.default(Const.typingsDir)
+		.required()
 		.description('path to definition directory'),
 	repo: Joi
 		.string().regex(/^[\w\.-]+\/[\w\.-]+$/)
 		.default(Const.definitelyRepo)
+		.required()
 		.description('github repository "owner/name"'),
 	ref: Joi
 		.string().regex(/^[\w\.-]+(?:\/[\w\.-]+)*$/)
 		.default(Const.mainBranch)
+		.required()
 		.description('git ref (branch/commit'),
 	cache: Joi
 		.string()
@@ -33,19 +34,21 @@ var schema = Joi.object({
 		.string().regex(/\w+\.ts$/)
 		.default(Const.typingsDir + '/' + Const.bundleFile)
 		.optional()
-		.description('path to <reference /> bundle').optional(),
+		.description('path to <reference /> bundle'),
 	stats: Joi
 		.boolean()
 		.default(Const.statsDefault)
 		.optional()
-		.description('enable stats tracking'),
+		.description('toggle stats tracking'),
 	installed: Joi
-		.object({
-
-		})
-		.options({
-			allowUnknown: true
-		})
+		.object()
+		.pattern(/^[\w\.-]+(?:\/[\w\.-]+)+\.d\.ts$/, Joi.object({
+			commit: Joi.string()
+				.required()
+				.regex(/^[0-9a-f]{6,40}$/)
+				.description('git commit sha1 hash')
+		}))
+		.unknown(false)
 		.optional()
 		.description('installed definitions')
 }).options({

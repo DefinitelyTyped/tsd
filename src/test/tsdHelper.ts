@@ -23,19 +23,8 @@ import unordered = require('./unordered');
 import helper = require('./helper');
 import settings = require('./settings');
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-var configSchema: Object;
-
-export function getConfigSchema(): any {
-	if (!configSchema) {
-		configSchema = fileIO.readJSONSync(path.join(helper.getProjectRoot(), 'schema', Const.configSchemaFile));
-	}
-	return configSchema;
-}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 export function getContext() {
 	var context: Context;

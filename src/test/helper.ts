@@ -23,7 +23,6 @@ import chai = require('chai');
 import assert = chai.assert;
 
 chai.use(require('chai-fuzzy'));
-chai.use(require('chai-json-schema'));
 chai.use(require('chai-fs'));
 chai.use(require('chai-as-promised'));
 chai.config.includeStack = true;

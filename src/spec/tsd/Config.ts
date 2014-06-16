@@ -21,8 +21,7 @@ describe('Config', () => {
 	var config: Config;
 
 	beforeEach(() => {
-		config = new Config(tsdHelper.getConfigSchema());
-		config.log.enabled = false;
+		config = new Config();
 	});
 	afterEach(() => {
 		config = null;
@@ -80,26 +79,35 @@ describe('Config', () => {
 
 		describe('invalid', () => {
 			var invalid = [
-				['missing-path', /^malformed config:/],
-				['path-bad-chars', /^malformed config:/],
-				['path-no-project', /^malformed config:/],
-				['path-no-type', /^malformed config:/],
-				['commit-lacking-length', /^malformed config:/],
-				['commit-missing', /^malformed config:/],
-				['commit-over-length', /^malformed config:/],
-				['path-no-type', /^malformed config:/]
+				['bundle-not-ts', /bundle fails to match the required pattern/],
+				['commit-bad-chars', /commit fails to match the required pattern/],
+				['commit-lacking-length', /commit fails to match the required pattern/],
+				['commit-missing', /commit fails to match the required pattern/],
+				['commit-over-length', /commit fails to match the required pattern/],
+				['installed-path-bad-chars', /project%\/modu   le\.d\.ts/],
+				['installed-path-no-project', /module\.d\.ts is not allowed/],
+				['installed-path-no-type', /project&#x2f;module is not allowed/],
+				['path-lacking-length', /path is not allowed to be empty/],
+				['path-missing',  /path is required/],
+				['ref-missing',  /ref is required/],
+				['ref-invalid',  /ref fails to match the required pattern/],
+				['repo-missing',  /repo is required/],
+				['repo-invalid',  /repo fails to match the required pattern/],
+				['version-invalid',  /version fails to match the required pattern/],
+				['version-missing',  /version is required/]
 			];
-			invalid.forEach((tuple) => {
+			invalid.forEach((tuple: any[]) => {
 				it('rejects "' + tuple[0] + '"', () => {
 					assert.lengthOf(tuple, 2, 'tuple');
+					// borky cast
+					var name = <string> tuple[0];
+					var regex = <RegExp> tuple[1];
 
-					var json = fileIO.readJSONSync('./test/fixtures/config/' + tuple[0] + '.json');
+					var json = fileIO.readJSONSync('./test/fixtures/config/' + name + '.json');
+
 					assert.throws(() => {
-						// xm.log(json);
-						config.parseJSON(json, (<string>tuple[0]), false);
-
-						// borky cast
-					}, (<string>tuple[1]));
+						config.parseJSON(json, name);
+					}, regex);
 				});
 			});
 		});

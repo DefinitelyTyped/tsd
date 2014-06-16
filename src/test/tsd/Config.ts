@@ -2,11 +2,14 @@
 
 'use strict';
 
+import joiAssert = require('joi-assert');
+
 import chai = require('chai');
 import assert = chai.assert;
 
 import assertVar = require('../../xm/assertVar');
 import Config = require('../../tsd/context/Config');
+import configSchema = require('../../tsd/schema/config');
 
 import helper = require('../helper');
 import tsdHelper = require('../tsdHelper');
@@ -30,7 +33,7 @@ export function assertion(config: Config, values: any, message: string) {
 
 	var json = config.toJSON();
 
-	assert.jsonSchema(json, tsdHelper.getConfigSchema(), message + ': schema');
+	joiAssert(json, configSchema, message + ': schema');
 	helper.propStrictEqual(json, values, 'path', message + ': json');
 	helper.propStrictEqual(json, values, 'version', message + ': json');
 	helper.propStrictEqual(json, values, 'repo', message + ': json');
