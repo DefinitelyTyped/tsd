@@ -282,14 +282,14 @@ module.exports = function (grunt) {
 		'clean:build',
 		'prep',
 		'ts:api',
-		'clean:cruft',
 		'copy:cli',
 		'regex-replace:cli',
 		'tslint:source',
 		// 'export_declaration:api'
 	]);
 	gtx.alias('build', [
-		'rebuild'
+		'rebuild',
+		'clean:cruft',
 	]);
 	gtx.alias('test', [
 		'build',
@@ -321,7 +321,7 @@ module.exports = function (grunt) {
 	// additional editor toolbar mappings
 	gtx.alias('edit_01', 'gtx:tsd');
 	gtx.alias('edit_02', 'gtx:api');
-	gtx.alias('edit_03', 'build', 'gtx:cli');
+	gtx.alias('edit_03', 'rebuild', 'gtx:cli');
 	gtx.alias('edit_04', 'gtx:core');
 	gtx.alias('edit_05', 'gtx:git');
 	gtx.alias('edit_06', 'gtx:xm');
