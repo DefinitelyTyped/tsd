@@ -3,7 +3,9 @@
 'use strict';
 
 import boot = require('../bootstrap');
-boot.noop();
+
+// haxx for compiler
+[boot];
 
 import fs = require('fs');
 import path = require('path');

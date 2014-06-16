@@ -7,6 +7,8 @@ import VError = require('verror');
 import Promise = require('bluebird');
 import Resolver = Promise.Resolver;
 
+import collection = require('../../xm/collection');
+
 import Options = require('../Options');
 import Core = require('Core');
 import CoreModule = require('./CoreModule');
@@ -28,7 +30,7 @@ class IndexManager extends CoreModule {
 	static procure_file: string = 'procure_file';
 	static procure_commit: string = 'procure_commit';
 
-	private _defer = new Map<string, Promise<DefIndex>>();
+	private _defer = new collection.Hash<Promise<DefIndex>>();
 
 	constructor(core: Core) {
 		super(core, 'index', 'IndexManager');

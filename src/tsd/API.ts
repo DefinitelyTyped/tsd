@@ -97,7 +97,7 @@ class API {
 		var files: DefVersion[] = defUtil.mergeDependencies(selection.selection);
 
 		return this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
-			.then((written: Map<string, DefVersion>) => {
+			.then((written: collection.Hash<DefVersion>) => {
 				if (!written) {
 					throw new Error('expected install paths');
 				}
@@ -108,7 +108,7 @@ class API {
 				}
 				return null;
 			}).then(() => {
-				return this.saveBundles(collection.valuesOf(res.written), options);
+				return this.saveBundles(res.written.values(), options);
 			}).return(res);
 	}
 
@@ -159,7 +159,7 @@ class API {
 		var res = new InstallResult(options);
 
 		return this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
-			.then((map: Map<string, DefVersion>) => {
+			.then((map: collection.Hash<DefVersion>) => {
 				res.written = map;
 			}).then(() => {
 				if (options.saveToConfig) {
@@ -167,7 +167,7 @@ class API {
 				}
 				return null;
 			}).then(() => {
-				return this.saveBundles(collection.valuesOf(res.written), options);
+				return this.saveBundles(res.written.values(), options);
 			}).return(res);
 	}
 

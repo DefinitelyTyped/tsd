@@ -188,7 +188,7 @@ describe('API', () => {
 						return tsdHelper.listDefPaths(info.typingsDir).then((typings: string[]) => {
 							assert.includeMembers(typings, api.context.config.getInstalledPaths(), 'saved installed file');
 							if (test.modify && test.modify.written) {
-								var writenPaths = defUtil.getPathsOf(collection.valuesOf(result.written));
+								var writenPaths = defUtil.getPathsOf(result.written.values());
 								assert.sameMembers(writenPaths.sort(), test.modify.written.sort(), 'written: files');
 							}
 						});

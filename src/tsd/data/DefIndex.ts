@@ -34,9 +34,9 @@ class DefIndex {
 	private _hasIndex: boolean = false;
 	private _indexCommit: DefCommit = null;
 
-	private _definitions = new Map<string, Def>();
-	private _commits = new Map<string, DefCommit>();
-	private _versions = new Map<string, DefVersion>();
+	private _definitions = new collection.Hash<Def>();
+	private _commits = new collection.Hash<DefCommit>();
+	private _versions = new collection.Hash<DefVersion>();
 
 	constructor() {
 		// hide from inspect()
@@ -245,9 +245,9 @@ class DefIndex {
 	}
 
 	getPaths(): string[] {
-		return Lazy(this._definitions).map((file: Def) => {
+		return this._definitions.values().map((file: Def) => {
 			return file.path;
-		}).toArray();
+		});
 	}
 
 	toDump(): string {
@@ -270,7 +270,7 @@ class DefIndex {
 	}
 
 	get list(): Def[] {
-		return collection.valuesOf(this._definitions);
+		return this._definitions.values();
 	}
 
 	get indexCommit(): DefCommit {

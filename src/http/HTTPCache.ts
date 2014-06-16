@@ -16,6 +16,7 @@ import fileIO = require('../xm/file/fileIO');
 import assert = require('../xm/assert');
 import assertVar = require('../xm/assertVar');
 import typeOf = require('../xm/typeOf');
+import collection = require('../xm/collection');
 
 import HTTPOpts = require('./HTTPOpts');
 
@@ -61,8 +62,8 @@ class HTTPCache {
 
 	private _init: Promise<void>;
 
-	private jobs = new Map<string, Promise<CacheObject>>();
-	private jobTimers = new Map<string, NodeJS.Timer>();
+	private jobs = new collection.Hash<Promise<CacheObject>>();
+	private jobTimers = new collection.Hash<NodeJS.Timer>();
 
 	private queue: QueueItem[] = [];
 	private active: QueueItem[] = [];

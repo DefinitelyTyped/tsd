@@ -7,6 +7,7 @@
 import path = require('path');
 import Promise = require('bluebird');
 
+import collection = require('../../xm/collection');
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 import CacheMode = require('../../http/CacheMode');
@@ -117,40 +118,39 @@ class Core {
 class MultiManager {
 
 	private _verbose: boolean = false;
-
-	modules = new Set<CoreModule>();
+	private _modules = new collection.Set<CoreModule>();
 
 	constructor(public core: Core) {
 		assertVar(core, Core, 'core');
 	}
 
-	add(list: any[]) {
+	add(list: CoreModule[]) {
 		list.forEach((comp) => {
-			this.modules.add(comp);
+			this._modules.add(comp);
 		});
 	}
 
-	remove(list: any[]) {
+	remove(list: CoreModule[]) {
 		while (list.length > 0) {
-			this.modules.delete(list.pop());
+			this._modules.delete(list.pop());
 		}
 	}
 
 	replace(fields: Object): void {
 		Object.keys(fields).forEach((property: string) => {
-			this.modules.delete(this.core[property]);
+			this._modules.delete(this.core[property]);
 			var trackable = fields[property];
 			if (!this.core[property]) {
 				this.core[property] = trackable;
 			}
 			trackable.verbose = this._verbose;
-			this.modules.add(fields[property]);
+			this._modules.add(fields[property]);
 		});
 	}
 
 	set verbose(verbose: boolean) {
 		this._verbose = verbose;
-		this.modules.forEach((comp: CoreModule) => {
+		this._modules.forEach((comp: CoreModule) => {
 			comp.verbose = this._verbose;
 		});
 	}

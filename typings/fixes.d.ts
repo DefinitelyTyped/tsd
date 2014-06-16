@@ -27,27 +27,3 @@ interface NodeModule {
 	parent: any;
 	children: any[];
 }
-
-interface ArrayIterator<T> {
-	next():ArrayIteratorTuple<T>;
-}
-
-interface ArrayIteratorTuple<T> {
-	done:boolean;
-	value:T;
-}
-/*
-interface ArrayIteratorKeyValue<K, V> {
-	0:K;
-	1:V;
-}
-
-interface Set<T> {
-	values():  ArrayIterator<T>;
-}
-
-interface Map<K, V> {
-	keys(): ArrayIterator<K>;
-	values(): ArrayIterator<V>;
-	items(): ArrayIterator<ArrayIteratorKeyValue<K, V>>;
-}*/

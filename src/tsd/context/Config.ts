@@ -6,7 +6,6 @@ import fs = require('fs');
 import path = require('path');
 import util = require('util');
 import VError = require('verror');
-import Lazy = require('lazy.js');
 import Joi = require('joi');
 
 import typeOf = require('../../xm/typeOf');
@@ -45,7 +44,7 @@ class Config implements GithubRepoConfig {
 	stats: boolean;
 	bundle: string;
 
-	private _installed = new Map<string, InstalledDef>();
+	private _installed = new collection.Hash<InstalledDef>();
 
 	private _stable: JSONStabilizer = new JSONStabilizer();
 
@@ -114,7 +113,7 @@ class Config implements GithubRepoConfig {
 
 	getFile(filePath: string): InstalledDef {
 		assertVar(filePath, 'string', 'filePath');
-		return this._installed.has(filePath) ? this._installed.get(filePath) : null;
+		return this._installed.get(filePath);
 	}
 
 	removeFile(filePath: string) {
@@ -123,13 +122,13 @@ class Config implements GithubRepoConfig {
 	}
 
 	getInstalled(): InstalledDef[] {
-		return collection.valuesOf(this._installed);
+		return this._installed.values();
 	}
 
 	getInstalledPaths(): string[] {
-		return Lazy(this._installed).map((value: InstalledDef) => {
+		return this._installed.values().map((value: InstalledDef) => {
 			return value.path;
-		}).toArray();
+		});
 	}
 
 	toJSON(): any {
@@ -147,7 +146,7 @@ class Config implements GithubRepoConfig {
 		}
 		json.installed = {};
 
-		this._installed.forEach((file: InstalledDef, key: string) => {
+		this._installed.forEach((file: InstalledDef) => {
 			json.installed[file.path] = {
 				commit: file.commitSha
 				// what more?

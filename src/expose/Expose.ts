@@ -37,9 +37,9 @@ import minimist = require('minimist');
 // TODO implement Actions/Commands queue
 class Expose {
 
-	commands = new Map<string, Command>();
-	options = new Map<string, Option>();
-	groups = new Map<string, Group>();
+	commands = new collection.Hash<Command>();
+	options = new collection.Hash<Option>();
+	groups = new collection.Hash<Group>();
 	mainGroup = new Group();
 
 	private _isInit = false;
@@ -205,7 +205,7 @@ class Expose {
 			alt = 'help';
 		}
 
-		var options: Option[] = collection.valuesOf(this.options);
+		var options: Option[] = this.options.values();
 		var opt: Option;
 		var i: number, ii: number;
 

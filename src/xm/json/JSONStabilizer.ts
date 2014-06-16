@@ -5,6 +5,7 @@
 import detectIndent = require('detect-indent');
 
 import CodeStyle = require('../lib/CodeStyle');
+import collection = require('../collection');
 import assertVar = require('../assertVar');
 import typeOf = require('../typeOf');
 
@@ -26,7 +27,7 @@ class JSONStabilizer {
 	keys: string[] = [];
 
 	parent: JSONStabilizer = null;
-	children = new Map<string, JSONStabilizer>();
+	children = new collection.Hash<JSONStabilizer>();
 
 	constructor(depth: number = 2, style: CodeStyle = null) {
 		this.depth = depth;
@@ -97,7 +98,7 @@ class JSONStabilizer {
 		assertVar(object, 'object', 'object');
 
 		this.keys = Object.keys(object);
-		this.children = new Map<string, JSONStabilizer>();
+		this.children = new collection.Hash<JSONStabilizer>();
 
 		if (this.depth > 0) {
 			this.keys.forEach((key) => {

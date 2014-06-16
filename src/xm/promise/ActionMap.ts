@@ -3,36 +3,20 @@
 'use strict';
 
 import Promise = require('bluebird');
+import collection = require('../collection');
 
-class ActionMap<T> {
+class ActionMap<T> extends collection.Hash<T> {
 
-	private _map = new Map<string, T>();
 
-	constructor(data?: any) {
-		if (data) {
-			Object.keys(data).forEach((key: string, value: any) => {
-				this._map.set(key, value);
-			});
-		}
-	}
-
-	set(key: string, value: T) {
-		return this._map.set(key, value);
-	}
-
-	has(key: string): Boolean {
-		return this._map.has(key);
-	}
-
-	get(key: string): T {
-		return this._map.get(key);
+	constructor(data?: collection.Dict<T>) {
+		super(data);
 	}
 
 	run<U>(id: string, call: (value: T) => U, optional: boolean = false): Promise<U> {
 		return Promise.attempt<U>(() => {
-			if (this._map.has(id)) {
+			if (this.has(id)) {
 				// cast as any
-				return call(this._map.get(id));
+				return call(this.get(id));
 			}
 			if (!optional) {
 				throw new Error('missing action: ' + id);

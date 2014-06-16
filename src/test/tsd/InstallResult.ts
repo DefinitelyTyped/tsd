@@ -21,20 +21,20 @@ export function serialise(result: InstallResult, recursive: number = 0): any {
 	var json: any = {};
 	if (result.written) {
 		json.written = {};
-		collection.keysOf(result.written).forEach((key: string) => {
-			json.written[key] = testDefVersion.serialise(result.written.get(key), recursive);
+		result.written.forEach((value, key) => {
+			json.written[key] = testDefVersion.serialise(value, recursive);
 		});
 	}
 	if (result.removed) {
 		json.removed = {};
-		collection.keysOf(result.removed).forEach((key: string) => {
-			json.removed[key] = testDefVersion.serialise(result.removed.get(key), recursive);
+		result.removed.forEach((value, key) => {
+			json.removed[key] = testDefVersion.serialise(value, recursive);
 		});
 	}
 	if (result.skipped) {
 		json.skipped = {};
-		collection.keysOf(result.skipped).forEach((key: string) => {
-			json.skipped[key] = testDefVersion.serialise(result.skipped.get(key), recursive);
+		result.skipped.forEach((value, key) => {
+			json.skipped[key] = testDefVersion.serialise(value, recursive);
 		});
 	}
 	return json;

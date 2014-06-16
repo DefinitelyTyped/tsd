@@ -51,7 +51,7 @@ function addCommon(expose: Expose, print: Printer, style: StyleMap): void {
 		opt.type = 'string';
 		opt.placeholder = 'name';
 		opt.global = true;
-		opt.enum = style.getKeys();
+		opt.enum = style.getStyles();
 		opt.default = (process.stdout['isTTY'] ? 'ansi' : 'no');
 		opt.apply = (value: any, ctx: ExposeContext) => {
 			style.useStyle(value, ctx);

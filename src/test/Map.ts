@@ -11,12 +11,12 @@ import IsLikeCB = assertLike.IsLikeCB;
 import AssertCB = assertLike.AssertCB;
 
 // TODO suppor non-string keys
-export function assertion<V>(map: Map<string, V>, values: any, assertCB: AssertCB<V>, message: string): void {
+export function assertion<V>(map: collection.Hash<V>, values: any, assertCB: AssertCB<V>, message: string): void {
 	assert.isObject(map, message + ': map');
 	assert.isObject(values, message + ': values');
 	assert.isFunction(assertion, message + ': assertion');
 
-	var mapKeys: string[] = collection.keysOf(map).sort();
+	var mapKeys: string[] = map.keys().sort();
 	var valueKeys: string[] = Object.keys(values).sort();
 
 	assert.sameMembers(mapKeys, valueKeys, message + ': same paths');

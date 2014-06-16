@@ -21,12 +21,4 @@ catch (e) {
 	// whatever
 }
 
-// TODO verify process.setMaxListeners() still needs to be this high
 process.setMaxListeners(20);
-
-// dont use import
-require('es6-shim');
-
-export function noop() {
-	// trick tsc into keeping the import
-}

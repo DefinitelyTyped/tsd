@@ -4,6 +4,7 @@
 
 import Promise = require('bluebird');
 
+import collection = require('../../xm/collection');
 import fileIO = require('../../xm/file/fileIO');
 
 import Def = require('../data/Def');
@@ -26,7 +27,7 @@ var leadingExp = /^\.\.\//;
 // TODO 'resolve' not good choice (conflicts with promises)
 class Resolver extends CoreModule {
 
-	private _active = new Map<string, Promise<DefVersion>>();
+	private _active = new collection.Hash<Promise<DefVersion>>();
 
 	constructor(core: Core) {
 		super(core, 'resolve', 'Resolver');

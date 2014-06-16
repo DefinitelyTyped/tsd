@@ -186,7 +186,7 @@ class Printer {
 	}
 
 	installResult(result: InstallResult): StyledOut {
-		var keys = collection.keysOf(result.written);
+		var keys = result.written.keys();
 		if (keys.length === 0) {
 			this.output.ln().report(true).span('written ').accent('zero').span(' files').ln();
 		}

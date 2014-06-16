@@ -19,9 +19,6 @@ class Options {
 	saveToConfig: boolean = false;
 	addToBundles: string[] = [];
 
-	// TODO implement timeout (limitless powerr!)
-	timeout: number = 10000;
-
 	static fromJSON(json: Object): Options {
 		var opts = new Options();
 		if (json) {

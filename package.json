@@ -52,7 +52,6 @@
     "deep-freeze": "0.0.1",
     "definition-header": "0.0.2",
     "detect-indent": "~0.1.3",
-    "es6-shim": "~0.13.0",
     "event-stream": "~3.1.0",
     "exit": "~0.1.1",
     "glob": "^4.0.2",

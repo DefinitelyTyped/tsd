@@ -79,14 +79,14 @@ class Formatter {
 		var globalOptNames: string[] = [];
 		var detailPad: string = this.output.nibs.decl;
 
-		var allCommands = collection.keysOf(this.expose.commands);
-		var allGroups = collection.valuesOf(this.expose.groups);
+		var allCommands = this.expose.commands.keys();
+		var allGroups = this.expose.groups.values();
 
 		var sortOptionName = (one: string, two: string) => {
 			return sorter.sortOption(this.expose.options.get(one), this.expose.options.get(two));
 		};
 
-		var optKeys = collection.keysOf(this.expose.options).sort(sortOptionName);
+		var optKeys = this.expose.options.keys().sort(sortOptionName);
 
 		var firstHeader = true;
 		var addHeader = (title: string) => {
@@ -224,9 +224,9 @@ class Formatter {
 		});
 
 		if (allGroups.length > 0) {
-			collection.valuesOf(this.expose.groups).sort(sorter.sortGroup).forEach((group: Group) => {
+			this.expose.groups.values().sort(sorter.sortGroup).forEach((group: Group) => {
 
-				var contents = collection.valuesOf(this.expose.commands).filter((cmd: Command) => {
+				var contents = this.expose.commands.values().filter((cmd: Command) => {
 					return cmd.groups.indexOf(group.name) > -1;
 				});
 				if (contents.length > 0) {

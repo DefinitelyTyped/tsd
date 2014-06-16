@@ -5,6 +5,8 @@
 import path = require('path');
 import Promise = require('bluebird');
 
+
+import collection = require('../../xm/collection');
 import fileIO = require('../../xm/file/fileIO');
 
 import Options = require('../Options');
@@ -47,8 +49,8 @@ class Installer extends CoreModule {
 	/*
 	 bulk version of installFile()
 	 */
-	installFileBulk(list: DefVersion[], addToConfig: boolean = true, overwrite: boolean = true): Promise<Map<string, DefVersion>> {
-		var written = new Map<string, DefVersion>();
+	installFileBulk(list: DefVersion[], addToConfig: boolean = true, overwrite: boolean = true): Promise<collection.Hash<DefVersion>> {
+		var written = new collection.Hash<DefVersion>();
 
 		return Promise.map(list, (file: DefVersion) => {
 			return this.installFile(file, addToConfig, overwrite).then((targetPath: string) => {
@@ -62,8 +64,8 @@ class Installer extends CoreModule {
 	/*
 	 reinstall multiple DefVersion's from InstalledDef data
 	 */
-	reinstallBulk(list: InstalledDef[], overwrite: boolean = false): Promise<Map<string, DefVersion>> {
-		var written = new Map<string, DefVersion>();
+	reinstallBulk(list: InstalledDef[], overwrite: boolean = false): Promise<collection.Hash<DefVersion>> {
+		var written = new collection.Hash<DefVersion>();
 
 		return Promise.map(list, (installed: InstalledDef) => {
 			return this.core.index.procureFile(installed.path, installed.commitSha).then((file: DefVersion) => {
@@ -100,12 +102,12 @@ class Installer extends CoreModule {
 	/*
 	 bulk version of useFile()
 	 */
-	useFileBulk(list: DefVersion[], overwrite: boolean = true): Promise<Map<string, DefVersion>> {
+	useFileBulk(list: DefVersion[], overwrite: boolean = true): Promise<collection.Hash<DefVersion>> {
 		// needed?
 		list = defUtil.uniqueDefVersion(list);
 
 		// this could be a bit more then just 'written'
-		var written = new Map<string, DefVersion>();
+		var written = new collection.Hash<DefVersion>();
 
 		return Promise.map(list, (file: DefVersion) => {
 			return this.useFile(file, overwrite).then((targetPath: string) => {

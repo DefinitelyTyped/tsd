@@ -1,10 +1,7 @@
 /// <reference path="bluebird/bluebird.d.ts" />
-
 /// <reference path="node/node.d.ts" />
 
 /// <reference path="fixes.d.ts" />
-
-/// <reference path="es6/collections.d.ts" />
 
 /// <reference path="exit/exit.d.ts" />
 /// <reference path="uuid/uuid.d.ts" />
@@ -15,7 +12,6 @@
 /// <reference path="request/request.d.ts" />
 /// <reference path="lazy.js/lazy.js.d.ts" />
 /// <reference path="minimist/minimist.d.ts" />
-/// <reference path="es6-shim/es6-shim.d.ts" />
 /// <reference path="miniwrite/miniwrite.d.ts" />
 /// <reference path="ministyle/ministyle.d.ts" />
 /// <reference path="json-pointer/json-pointer.d.ts" />

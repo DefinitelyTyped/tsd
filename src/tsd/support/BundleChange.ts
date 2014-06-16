@@ -4,14 +4,15 @@
 
 import path = require('path');
 
+import collection = require('../../xm/collection');
 import Bundle = require('./Bundle');
 
 class BundleChange {
 
 	bundle: Bundle;
 
-	private _added: string[] = [];
-	private _removed: string[] = [];
+	private _added = new collection.Set<string>();
+	private _removed = new collection.Set<string>();
 
 	constructor(bundle: Bundle) {
 		this.bundle = bundle;
@@ -21,47 +22,37 @@ class BundleChange {
 		if (!target) {
 			return;
 		}
-		if (this._added.indexOf(target) < 0) {
-			this._added.push(target);
-		}
-		var i = this._removed.indexOf(target);
-		if (i > -1) {
-			this._removed.splice(i, 1);
-		}
+		this._added.add(target);
+		this._removed.delete(target);
 	}
 
 	remove(target: string): void {
 		if (!target) {
 			return;
 		}
-		if (this._removed.indexOf(target) < 0) {
-			this._removed.push(target);
-		}
-		var i = this._added.indexOf(target);
-		if (i > -1) {
-			this._added.splice(i, 1);
-		}
+		this._added.delete(target);
+		this._removed.add(target);
 	}
 
 	someRemoved(): boolean {
-		return this._removed.length > 0;
+		return this._removed.size > 0;
 	}
 
 	someAdded(): boolean {
-		return this._added.length > 0;
+		return this._added.size > 0;
 	}
 
 	someChanged(): boolean {
-		return this._added.length > 0 || this._removed.length > 0;
+		return this._added.size > 0 || this._removed.size > 0;
 	}
 
 	getRemoved(relative: boolean, canonical: boolean = false): string [] {
-		var arr: string[];
+		var arr: string[] = this._removed.values();
 		if (!relative) {
-			arr = this._removed.map(p => path.resolve(this.bundle.baseDir, p));
+			arr = arr.map(p => path.resolve(this.bundle.baseDir, p));
 		}
 		else {
-			arr = this._removed.map(p => path.relative(this.bundle.baseDir, p));
+			arr = arr.map(p => path.relative(this.bundle.baseDir, p));
 		}
 		if (canonical) {
 			return arr.map(p => p.replace(/\\/g, '/'));
@@ -70,12 +61,12 @@ class BundleChange {
 	}
 
 	getAdded(relative: boolean, canonical: boolean = false): string [] {
-		var arr: string[];
+		var arr: string[] = this._added.values();
 		if (!relative) {
-			arr = this._added.map(p => path.resolve(this.bundle.baseDir, p));
+			arr = arr.map(p => path.resolve(this.bundle.baseDir, p));
 		}
 		else {
-			arr = this._added.map(p => path.relative(this.bundle.baseDir, p));
+			arr = arr.map(p => path.relative(this.bundle.baseDir, p));
 		}
 		if (canonical) {
 			return arr.map(p => p.replace(/\\/g, '/'));
