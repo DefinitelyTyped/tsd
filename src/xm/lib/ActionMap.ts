@@ -7,7 +7,6 @@ import collection = require('../collection');
 
 class ActionMap<T> extends collection.Hash<T> {
 
-
 	constructor(data?: collection.Dict<T>) {
 		super(data);
 	}

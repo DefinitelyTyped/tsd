@@ -6,7 +6,7 @@ import path = require('path');
 
 import assertVar = require('../xm/assertVar');
 import objectUtils = require('../xm/objectUtils');
-import JSONPointer = require('../xm/json/JSONPointer');
+import JSONPointer = require('../xm/lib/JSONPointer');
 
 import GithubRepoConfig = require('./GithubRepoConfig');
 import GithubURLs = require('./GithubURLs');

@@ -6,7 +6,7 @@ import chai = require('chai');
 var assert = chai.assert;
 import helper = require('../../test/helper');
 
-import JSONPointer = require('../../xm/json/JSONPointer');
+import JSONPointer = require('../../xm/lib/JSONPointer');
 
 describe('JSONPointer', () => {
 	it('is constructor', () => {

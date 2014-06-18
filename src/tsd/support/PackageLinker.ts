@@ -6,7 +6,7 @@ import path = require('path');
 import Promise = require('bluebird');
 import VError = require('verror');
 
-import FS = require('../../xm/file/fileIO');
+import FS = require('../../xm/fileIO');
 import typeOf = require('../../xm/typeOf');
 
 import PackageDefinition = require('../support/PackageDefinition');

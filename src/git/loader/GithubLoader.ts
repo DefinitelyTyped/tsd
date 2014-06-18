@@ -9,7 +9,7 @@ import HTTPCache = require('../../http/HTTPCache');
 import HTTPOpts = require('../../http/HTTPOpts');
 import CacheOpts = require('../../http/CacheOpts');
 
-import JSONPointer = require('../../xm/json/JSONPointer');
+import JSONPointer = require('../../xm/lib/JSONPointer');
 
 import GithubURLs = require('../GithubURLs');
 import GithubRateInfo = require('../model/GithubRateInfo');

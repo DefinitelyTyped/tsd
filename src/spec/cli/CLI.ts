@@ -10,7 +10,7 @@ import chai = require('chai');
 var assert = chai.assert;
 
 import CacheMode = require('../../http/CacheMode');
-import fileIO = require('../../xm/file/fileIO');
+import fileIO = require('../../xm/fileIO');
 import cp = require('../../xm/lib/childProcess');
 import runCLI = cp.runCLI;
 

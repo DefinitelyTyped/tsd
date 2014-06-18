@@ -5,7 +5,7 @@
 import Promise = require('bluebird');
 
 import collection = require('../../xm/collection');
-import fileIO = require('../../xm/file/fileIO');
+import fileIO = require('../../xm/fileIO');
 
 import Def = require('../data/Def');
 import DefBlob = require('../data/DefBlob');

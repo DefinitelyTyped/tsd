@@ -12,7 +12,7 @@ import GithubUser = require('../../git/model/GithubUser');
 import GitCommitUser = require('../../git/model/GitCommitUser');
 import GitCommitMessage = require('../../git/model/GitCommitMessage');
 
-import tsdUtil = require('../util/tsdUtil');
+import defUtil = require('../util/defUtil');
 
 /*
  DefCommit: meta-data for a single github commit
@@ -77,7 +77,7 @@ class DefCommit {
 
 	// human friendly
 	get commitShort(): string {
-		return this.commitSha ? tsdUtil.shaShort(this.commitSha) : '<no sha>';
+		return this.commitSha ? defUtil.shaShort(this.commitSha) : '<no sha>';
 	}
 }
 

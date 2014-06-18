@@ -22,7 +22,7 @@ import assertVar = require('../xm/assertVar');
 import dateUtils = require('../xm/dateUtils');
 import hash = require('../xm/hash');
 
-import fileIO = require('../xm/file/fileIO');
+import fileIO = require('../xm/fileIO');
 
 import HTTPCache = require('./HTTPCache');
 import HTTPOpts = require('./HTTPOpts');

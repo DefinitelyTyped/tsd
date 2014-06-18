@@ -8,7 +8,7 @@ import Promise = require('bluebird');
 import chai = require('chai');
 var assert = chai.assert;
 
-import fileIO = require('../../xm/file/fileIO');
+import fileIO = require('../../xm/fileIO');
 import helper = require('../../test/helper');
 
 import PackageLinker = require('../../tsd/support/PackageLinker');

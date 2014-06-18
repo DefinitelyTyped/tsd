@@ -5,7 +5,7 @@
 import VError = require('verror');
 import assertVar = require('../../xm/assertVar');
 
-import tsdUtil = require('../util/tsdUtil');
+import defUtil = require('../util/defUtil');
 
 import Def = require('./Def');
 import DefCommit = require('./DefCommit');
@@ -70,7 +70,7 @@ class DefVersion {
 
 	// human friendly
 	get blobShaShort(): string {
-		return this._blobSha ? tsdUtil.shaShort(this._blobSha) : '<no sha>';
+		return this._blobSha ? defUtil.shaShort(this._blobSha) : '<no sha>';
 	}
 
 	toString(): string {

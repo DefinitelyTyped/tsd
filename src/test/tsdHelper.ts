@@ -11,7 +11,7 @@ import Promise = require('bluebird');
 import chai = require('chai');
 var assert = chai.assert;
 
-import fileIO = require('../xm/file/fileIO');
+import fileIO = require('../xm/fileIO');
 import CacheMode = require('../http/CacheMode');
 import Def = require('../tsd/data/Def');
 import Const = require('../tsd/context/Const');

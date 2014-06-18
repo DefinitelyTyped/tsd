@@ -6,7 +6,7 @@ import Promise = require('bluebird');
 
 import assertVar = require('../../xm/assertVar');
 import typeOf = require('../../xm/typeOf');
-import JSONPointer = require('../../xm/json/JSONPointer');
+import JSONPointer = require('../../xm/lib/JSONPointer');
 
 import CacheRequest = require('../../http/CacheRequest');
 import CacheObject = require('../../http/CacheObject');

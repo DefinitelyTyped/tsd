@@ -5,6 +5,8 @@
 import VError = require('verror');
 import dateUtils = require('../../xm/dateUtils');
 
+import Const = require('../context/Const');
+
 import Def = require('../data/Def');
 import DefCommit = require('../data/DefCommit');
 import DefIndex = require('../data/DefIndex');
@@ -13,6 +15,13 @@ import DefVersion = require('../data/DefVersion');
 
 // TODO replace reference node RegExp with a xml parser (tony the pony)
 var referenceTagExp = /<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+
+export function shaShort(sha: string): string {
+	if (!sha) {
+		return '<no sha>';
+	}
+	return sha.substr(0, Const.shaShorten);
+}
 
 export function getDefs(list: DefVersion[]): Def[] {
 	return list.map((def: DefVersion) => {

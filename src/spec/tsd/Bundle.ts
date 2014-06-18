@@ -10,7 +10,7 @@ import chai = require('chai');
 var assert = chai.assert;
 
 import typeOf = require('../../xm/typeOf');
-import fileIO = require('../../xm/file/fileIO');
+import fileIO = require('../../xm/fileIO');
 import helper = require('../../test/helper');
 
 import tsdHelper = require('../../test/tsdHelper');

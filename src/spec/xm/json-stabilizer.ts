@@ -9,7 +9,7 @@ import chai = require('chai');
 var assert = chai.assert;
 import helper = require('../../test/helper');
 
-import JSONStabilizer = require('../../xm/json/JSONStabilizer');
+import JSONStabilizer = require('../../xm/lib/JSONStabilizer');
 
 describe('JSONStabilizer', () => {
 

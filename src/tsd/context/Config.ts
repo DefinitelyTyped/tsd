@@ -14,7 +14,7 @@ import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 import collection = require('../../xm/collection');
 
-import JSONStabilizer = require('../../xm/json/JSONStabilizer');
+import JSONStabilizer = require('../../xm/lib/JSONStabilizer');
 
 import GithubRepoConfig = require('../../git/GithubRepoConfig');
 

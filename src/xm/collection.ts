@@ -60,7 +60,12 @@ export class Hash<T> {
 	private dict: Dict<T>;
 
 	constructor(d?: Dict<T>) {
-		this.dict = d || dict<T>();
+		this.dict = dict<T>();
+		if (d) {
+			Object.keys(d).forEach((key) => {
+				this.dict[key] = d[key];
+			});
+		}
 	}
 
 	has(key: string): boolean {

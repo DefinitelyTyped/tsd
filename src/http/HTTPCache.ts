@@ -12,7 +12,7 @@ import Promise = require('bluebird');
 import Joi = require('joi');
 import joiAssert = require('joi-assert');
 
-import fileIO = require('../xm/file/fileIO');
+import fileIO = require('../xm/fileIO');
 import assert = require('../xm/assert');
 import assertVar = require('../xm/assertVar');
 import typeOf = require('../xm/typeOf');

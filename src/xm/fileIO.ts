@@ -1,4 +1,4 @@
-/// <reference path="../_ref.d.ts" />
+/// <reference path="_ref.d.ts" />
 
 'use strict';
 
@@ -12,7 +12,7 @@ import Promise = require('bluebird');
 import mkdirp = require('mkdirp');
 import rimrafMod = require('rimraf');
 
-import assertVar = require('../assertVar');
+import assertVar = require('./assertVar');
 
 var mkdirpP = Promise.promisify(mkdirp);
 

@@ -6,7 +6,7 @@ import fs = require('fs');
 import path = require('path');
 
 import assertVar = require('../assertVar');
-import fileIO = require('../file/fileIO');
+import fileIO = require('../fileIO');
 import objectUtils = require('../objectUtils');
 
 // partial from pkginfo

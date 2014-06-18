@@ -6,8 +6,8 @@ import fs = require('fs');
 import path = require('path');
 
 import assertVar = require('../../xm/assertVar');
-import fileIO = require('../../xm/file/fileIO');
-import JSONPointer = require('../../xm/json/JSONPointer');
+import fileIO = require('../../xm/fileIO');
+import JSONPointer = require('../../xm/lib/JSONPointer');
 import PackageJSON = require('../../xm/lib/PackageJSON');
 
 import Config = require('./Config');

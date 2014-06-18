@@ -9,12 +9,12 @@ import VError = require('verror');
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
 
-import fileIO = require('../xm/file/fileIO');
+import fileIO = require('../xm/fileIO');
 import assertVar = require('../xm/assertVar');
 import PackageJSON = require('../xm/lib/PackageJSON');
 import StyledOut = require('../xm/lib/StyledOut');
 
-import ActionMap = require('../xm/promise/ActionMap');
+import ActionMap = require('../xm/lib/ActionMap');
 import GithubRateInfo = require('../git/model/GithubRateInfo');
 
 import API = require('./API');

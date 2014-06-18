@@ -64,26 +64,24 @@ class ContentLoader extends CoreModule {
 		if (file.blobSha && this.cache.has(file.blobSha)) {
 			return Promise.resolve(new DefBlob(file, this.cache.get(file.blobSha)));
 		}
-		return this.core.index.getIndex().then(() => {
-			var ref = file.commit.commitSha;
-			// re-cycle head
-			if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
-				ref = this.core.context.config.ref;
+		var ref = file.commit.commitSha;
+		// re-cycle head
+		if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
+			ref = this.core.context.config.ref;
+		}
+		return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
+			var sha: string = gitUtil.blobShaHex(content);
+			if (file.blobSha) {
+				if (sha !== file.blobSha) {
+					throw new VError('bad blob sha1 for %s, expected %s, got %s', file.def.path, file.blobSha, sha);
+				}
 			}
-			return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
-				var sha: string = gitUtil.blobShaHex(content);
-				if (file.blobSha) {
-					if (sha !== file.blobSha) {
-						throw new VError('bad blob sha1 for %s, expected %s, got %s', file.def.path, file.blobSha, sha);
-					}
-				}
-				else {
-					file.setBlob(sha);
-				}
-				this.cache.set(sha, content);
+			else {
+				file.setBlob(sha);
+			}
+			this.cache.set(sha, content);
 
-				return new DefBlob(file, content);
-			});
+			return new DefBlob(file, content);
 		});
 	}
 

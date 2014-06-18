@@ -22,15 +22,7 @@ var branch_tree: string = '/commit/commit/tree/sha';
 
 class IndexManager extends CoreModule {
 
-	static init: string = 'init';
-	static tree_get: string = 'tree_get';
-	static branch_get: string = 'branch_get';
-
-	static procure_def: string = 'procure_def';
-	static procure_file: string = 'procure_file';
-	static procure_commit: string = 'procure_commit';
-
-	private _defer = new collection.Hash<Promise<DefIndex>>();
+	private _promise: Promise<DefIndex>;
 
 	constructor(core: Core) {
 		super(core, 'index', 'IndexManager');
@@ -40,12 +32,11 @@ class IndexManager extends CoreModule {
 	 lazy get or load the current DefIndex
 	 */
 	getIndex(): Promise<DefIndex> {
-		var refKey = this.core.context.config.repoRef;
-		if (this._defer.has(refKey)) {
-			return this._defer.get(refKey);
+		if (this._promise) {
+			return this._promise;
 		}
 
-		return this._defer[refKey] = this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData: any) => {
+		return this._promise = this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData: any) => {
 			if (!branchData) {
 				throw new VError('loaded empty branch data');
 			}

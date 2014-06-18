@@ -24,20 +24,6 @@ var escapeAdd = '\\$&$&';
 export var singleQuoteExp = /([^'\\]*(?:\\.[^'\\]*)*)'/g;
 export var doubleQuoteExp = /([^"\\]*(?:\\.[^"\\]*)*)"/g;
 
-export interface ReplaceCallback {
-	(substring: string, ...args: any[]):string;
-}
-
-export function getReplacerFunc(matches: string[], values: string[]): ReplaceCallback {
-	return function (match: string, ...args: any[]) {
-		var i = matches.indexOf(match);
-		if (i > -1 && i < values.length) {
-			return values[i];
-		}
-		return match;
-	};
-}
-
 // very handy for Array.map
 export interface IReplacer {
 	(input: string):string;
@@ -154,55 +140,4 @@ export function trimWrap(value: string, cutoff: number = 60, double?: boolean): 
 		return wrapQuotes(value.substr(0, cutoff), double) + '...';
 	}
 	return wrapQuotes(value, double);
-}
-
-/* tslint:disable:max-line-length */
-
-// proper JSON-like escape
-var escapableExp = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
-
-/* tslint:edable:max-line-length */
-
-var meta = {
-	'\b': '\\b',
-	'\t': '\\t',
-	'\n': '\\n',
-	'\f': '\\f',
-	'\r': '\\r',
-	'"': '\\"',
-	'\\': '\\\\'
-};
-var jsonNW = {
-	json: true,
-	wrap: false,
-	quotes: 'double'
-};
-
-// JSON escape: https://github.com/douglascrockford/JSON-js/blob/master/json2.js#L211
-// If the string contains no control characters, no quote characters, and no
-// backslash characters, then we can safely slap some quotes around it.
-// Otherwise we must also replace the offending characters with safe escape
-// sequences.
-export function escapeSimple(str: string): string {
-	escapableExp.lastIndex = 0;
-	if (escapableExp.test(str)) {
-		return str.replace(escapableExp, function (a) {
-			var c = meta[a];
-			if (typeof c === 'string') {
-				return c;
-			}
-			// return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-			return jsesc(a, jsonNW);
-		});
-	}
-	return str;
-}
-
-export function escapeHTML(html: string): string {
-	return String(html)
-	.replace(/&/g, '&amp;')
-	.replace(/"/g, '&quot;')
-	.replace(/'/g, '&#39;')
-	.replace(/</g, '&lt;')
-	.replace(/>/g, '&gt;');
 }

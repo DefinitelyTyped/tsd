@@ -10,7 +10,7 @@ var assert = chai.assert;
 import helper = require('../../test/helper');
 
 import StyledOut = require('../../xm/lib/StyledOut');
-import fileIO = require('../../xm/file/fileIO');
+import fileIO = require('../../xm/fileIO');
 import collection = require('../../xm/collection');
 
 describe('StyledOut', () => {
