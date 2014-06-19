@@ -10,7 +10,6 @@ import collection = require('../xm/collection');
 import IsLikeCB = assertLike.IsLikeCB;
 import AssertCB = assertLike.AssertCB;
 
-// TODO suppor non-string keys
 export function assertion<V>(map: collection.Hash<V>, values: any, assertCB: AssertCB<V>, message: string): void {
 	assert.isObject(map, message + ': map');
 	assert.isObject(values, message + ': values');

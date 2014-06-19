@@ -51,7 +51,7 @@ import Action = CliConst.Action;
 
 import Printer = require('./cli/Printer');
 import StyleMap = require('./cli/StyleMap');
-import Tracker = require('./cli/Tracker');
+import Tracker = require('./cli/tracker');
 import addCommon = require('./cli/addCommon');
 
 import update = require('./cli/update');
