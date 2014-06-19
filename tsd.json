@@ -15,9 +15,6 @@
 		"node/node.d.ts": {
 			"commit": "88f38f5b582007f8a4e71cb9023f8a2daa98fbb7"
 		},
-		"q/Q.d.ts": {
-			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
-		},
 		"semver/semver.d.ts": {
 			"commit": "a53d50e91a454ba5b90906568f59f444ac71f9fd"
 		},
@@ -27,19 +24,10 @@
 		"lazy.js/lazy.js.d.ts": {
 			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
 		},
-		"highland/highland.d.ts": {
-			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
-		},
-		"buffer-equal/buffer-equal.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
 		"detect-indent/detect-indent.d.ts": {
 			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
 		},
 		"exit/exit.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"graceful-fs/graceful-fs.d.ts": {
 			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
 		},
 		"jsesc/jsesc.d.ts": {
@@ -69,12 +57,6 @@
 		"joi/joi.d.ts": {
 			"commit": "c63244f8bae7725f100a0b8a9a255305a990f6c6"
 		},
-		"gruntjs/gruntjs.d.ts": {
-			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
-		},
-		"async/async.d.ts": {
-			"commit": "a1c5b46743759ca9f84c94081d5400358adc02ad"
-		},
 		"glob/glob.d.ts": {
 			"commit": "7573f56bec703a373ab307eeeb23aa0e0b4ee10f"
 		},
@@ -96,8 +78,17 @@
 		"lru-cache/lru-cache.d.ts": {
 			"commit": "ff4d52f8edf4f65fcb15ff129ea8861e93417c87"
 		},
-		"parsimmon/parsimmon.d.ts": {
-			"commit": "c63244f8bae7725f100a0b8a9a255305a990f6c6"
+		"lockfile/lockfile.d.ts": {
+			"commit": "6745ac3279f3650a8ce5e8877cca831272fe0a06"
+		},
+		"deep-freeze/deep-freeze.d.ts": {
+			"commit": "83663818b8176edfe1343e6d7eff688fb1375949"
+		},
+		"ncp/ncp.d.ts": {
+			"commit": "83663818b8176edfe1343e6d7eff688fb1375949"
+		},
+		"type-detect/type-detect.d.ts": {
+			"commit": "47ebd394626861a9d492a7eac1f6aca96df6dfc1"
 		}
 	}
 }

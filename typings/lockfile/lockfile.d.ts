@@ -1,3 +1,8 @@
+// Type definitions for lockfile v0.4.2
+// Project: https://github.com/isaacs/lockfile
+// Definitions by: Bart van der Schoor <https://github.com/Bartvds>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module 'lockfile' {
 	export interface Options {
 		wait?: number;
