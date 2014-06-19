@@ -207,6 +207,18 @@ If the module exports multiple independent files,eg: for some reason not interna
 }
 ````
 
+
+#### Rebundle
+
+:warning: This is experimental, exact functionality may change.
+
+Cleanup the bundle file (usually `tsd.d.ts`): remove paths to non-existent files, and append unlisted definitions. Handy when doing manual work on your definition folder.
+
+````bash
+$ tsd rebundle
+````
+
+
 ## Query
 
 TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
