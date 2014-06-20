@@ -73,7 +73,7 @@
     "semver": "~2.3.0",
     "type-detect": "~0.1.2",
     "universal-analytics": "~0.3.2",
-    "update-notifier": "git+https://github.com/Bartvds/update-notifier/#fix/fork",
+    "update-notifier": "git+https://github.com/Bartvds/update-notifier/#fix/spawn",
     "uri-templates": "~0.1.5",
     "uuid": "~1.4.1",
     "verror": "~1.4.0"

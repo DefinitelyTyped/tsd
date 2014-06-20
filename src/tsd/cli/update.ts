@@ -52,13 +52,8 @@ export function runNotifier(context: Context, waitForIt: boolean = false): Promi
 	});
 }
 
-export function showNotifier(output: StyledOut, context?: Context, promise: boolean = false): Promise<void> {
+export function showNotifier(output: StyledOut): Promise<void> {
 	return Promise.attempt(() => {
-		if (context) {
-			return runNotifier(context, promise);
-		}
-		return notifier;
-	}).then((notifier) => {
 		if (notifier && notifier.update) {
 			output.ln();
 			output.report(true).span('update available: ');
