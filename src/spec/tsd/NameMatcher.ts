@@ -38,18 +38,10 @@ describe('NameMatcher', () => {
 		// dummy list
 		list = [];
 
-		var badFixtures: string[] = [];
 		select.source.forEach((path: string) => {
-			var def = Def.getFrom(path);
-			if (!def) {
-				badFixtures.push(path);
-			}
+			var def = new Def(path);
 			list.push(def);
 		});
-		if (badFixtures.length > 0) {
-			console.error('bad fixture', badFixtures);
-			throw new Error('bad fixtures: ' + badFixtures.join('\n'));
-		}
 	});
 	after(() => {
 		list = null;
@@ -61,11 +53,8 @@ describe('NameMatcher', () => {
 		path += '.d.ts';
 
 		var pattern = new NameMatcher(str);
-		var def = Def.getFrom(path);
-		if (!def) {
-			throw new Error('bad fixture: ' + path);
-		}
-		var paths = pattern.filter([def], []);
+		var def = new Def(path);
+		var paths = pattern.filter([def]);
 		if (expectMatch) {
 			assert((paths.length === 1), 'expected match for "' + [str, path].join('" vs "') + '"');
 		}
@@ -105,6 +94,47 @@ describe('NameMatcher', () => {
 			assertMatch('aA/BB', 'aa/bb', true);
 			assertMatch('aA/BB', 'aa/bb', true);
 		});
+		it('deeper', () => {
+			assertMatch('bb:cc', 'aa/bb/cc', true);
+			assertMatch('aa/bb:cc', 'aa/bb/cc', true);
+			assertMatch('aa/', 'aa/bb/cc', true);
+			assertMatch('/bb:cc', 'aa/bb/cc', true);
+		});
+	});
+
+	describe('slashes', () => {
+		it('aa/', () => {
+			assertMatch('aa/', 'aa/bb', true);
+		});
+		it('/bb', () => {
+			assertMatch('/bb', 'aa/bb', true);
+		});
+	});
+
+	describe('glob', () => {
+		it('only', () => {
+			assertMatch('*', 'aa/bb', true);
+			assertMatch('/*', 'aa/bb', true);
+			assertMatch('*/', 'aa/bb', true);
+			assertMatch('*/*', 'aa/bb', true);
+		});
+		it('name', () => {
+			assertMatch('a*', 'aa/bb', false);
+			assertMatch('b*', 'aa/bb', true);
+			assertMatch('*b', 'aa/bb', true);
+		});
+		it('project', () => {
+			assertMatch('aa/b*', 'aa/bb', true);
+			assertMatch('aa/a*', 'aa/bb', false);
+		});
+		it('multi', () => {
+			assertMatch('*/b*', 'aa/bb', true);
+			assertMatch('*/a*', 'aa/bb', false);
+		});
+		it('slashed', () => {
+			assertMatch('a*/', 'aa/bb', true);
+			assertMatch('/b*', 'aa/bb', true);
+		});
 	});
 
 	describe('specific', () => {
@@ -114,12 +144,6 @@ describe('NameMatcher', () => {
 		it('foo', () => {
 			assertMatch('foo', 'foo/bar', false);
 		});
-		it('foo/', () => {
-			assertMatch('foo/', 'foo/bar', true);
-		});
-		it('/bar', () => {
-			assertMatch('/bar', 'foo/bar', true);
-		});
 	});
 
 	describe('bulk', () => {
@@ -127,7 +151,7 @@ describe('NameMatcher', () => {
 			it('match "' + String(data.pattern) + '"', () => {
 				var pattern = new NameMatcher(data.pattern);
 
-				var paths = pattern.filter(list, []).map((def: Def) => {
+				var paths = pattern.filter(list).map((def: Def) => {
 					return def.path;
 				});
 

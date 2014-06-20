@@ -178,7 +178,7 @@ class API {
 
 		var query = new Query();
 		this.context.config.getInstalled().forEach((inst: InstalledDef) => {
-			query.addNamePattern(Def.getFrom(inst.path).pathTerm);
+			query.addNamePattern(new Def(inst.path).pathTerm);
 		});
 		query.versionMatcher = new VersionMatcher(version);
 

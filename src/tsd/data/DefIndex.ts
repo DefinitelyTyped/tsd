@@ -94,11 +94,13 @@ class DefIndex {
 				if (!def) {
 					return;
 				}
+
 				file = this.procureVersion(def, this._indexCommit);
 				if (!file) {
 					return;
 				}
 				def.head = file;
+				file.setBlob(elem.sha);
 			}
 		});
 		this._hasIndex = true;
@@ -160,7 +162,7 @@ class DefIndex {
 			def = this._definitions.get(path);
 		}
 		else {
-			def = Def.getFrom(path);
+			def = new Def(path);
 			if (!def) {
 				throw new VError('cannot parse path to def %s', path);
 			}
@@ -221,7 +223,7 @@ class DefIndex {
 		}
 		var file = this.procureVersion(def, commit);
 		if (!file) {
-			throw new VError('cannot procure definition version for  %s -> %s', path, commit.commitSha);
+			throw new VError('cannot procure definition version for %s -> %s', path, commit.commitSha);
 		}
 		// need to look it up
 

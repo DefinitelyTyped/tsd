@@ -64,7 +64,7 @@ export function assertDefPathsP(actualDir: string, expectedDir: string, assertCo
 			console.dir(expectedPaths);
 
 			unordered.assertionLike(actualPaths, expectedPaths, (actualPath: string, expectedPath: string) => {
-				return (Def.getFileFrom(actualPath) === Def.getFileFrom(expectedPath));
+				return (actualPath === expectedPath);
 
 			}, (actualPath: string, expectedPath: string) => {
 				var msg = helper.getPathMessage(actualPath, expectedPath, message);

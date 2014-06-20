@@ -42,7 +42,7 @@ var schema = Joi.object({
 		.description('toggle stats tracking'),
 	installed: Joi
 		.object()
-		.pattern(/^[\w\.-]+(?:\/[\w\.-]+)+\.d\.ts$/, Joi.object({
+		.pattern(/^([a-z](?:[\._-]?[a-z0-9]+)*)(\/[a-z](?:[\._-]?[a-z0-9]+)*)+\.d\.ts$/, Joi.object({
 			commit: Joi.string()
 				.required()
 				.regex(/^[0-9a-f]{6,40}$/)

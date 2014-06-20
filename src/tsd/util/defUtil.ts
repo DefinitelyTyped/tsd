@@ -219,8 +219,13 @@ export function fileCompare(aa: DefVersion, bb: DefVersion): number {
 	else if (aa.def.path > bb.def.path) {
 		return 1;
 	}
-	// hmm.. now what?
-	return -1;
+	if (aa.blobSha < bb.blobSha) {
+		return -1;
+	}
+	else if (aa.blobSha > bb.blobSha) {
+		return 1;
+	}
+	return 0;
 }
 
 export function defCompare(aa: Def, bb: Def): number {
@@ -236,8 +241,7 @@ export function defCompare(aa: Def, bb: Def): number {
 	else if (aa.path > bb.path) {
 		return 1;
 	}
-	// hmm.. now what?
-	return -1;
+	return 0;
 }
 
 export function fileCommitCompare(aa: DefVersion, bb: DefVersion): number {

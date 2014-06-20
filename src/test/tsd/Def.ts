@@ -23,6 +23,11 @@ export function serialise(def: Def, recursive: number = 0): any {
 	json.project = def.project;
 	json.name = def.name;
 	json.semver = def.semver;
+
+	json.label = def.label;
+	json.isMain = def.isMain;
+	json.isLegacy = def.isLegacy;
+
 	if (recursive >= 0) {
 		json.head = testDefVersion.serialise(def.head, recursive);
 	}
@@ -44,6 +49,10 @@ export function assertion(def: Def, values: any, message: string) {
 	helper.propStrictEqual(def, values, 'path', message);
 	helper.propStrictEqual(def, values, 'name', message);
 	helper.propStrictEqual(def, values, 'project', message);
+
+	helper.propStrictEqual(def, values, 'label', message);
+	helper.propStrictEqual(def, values, 'isMain', message);
+	helper.propStrictEqual(def, values, 'isLegacy', message);
 
 	if (values.semver) {
 		helper.propStrictEqual(def, values, 'semver', message);

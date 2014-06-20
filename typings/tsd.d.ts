@@ -49,3 +49,4 @@
 /// <reference path="../node_modules/definition-header/dist/index.d.ts" />
 /// <reference path="ncp/ncp.d.ts" />
 /// <reference path="postal/postal.d.ts" />
+/// <reference path="chai/chai-shallow-deep-equal.d.ts" />

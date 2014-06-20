@@ -8,13 +8,21 @@
 		"a-a/a-a.d.ts": true,
 		"AA/a.d.ts": true,
 		"a/AA.d.ts": true
-
+	},
+	"short": {
+		"a.d.ts": false,
+		"bb.d.ts": false
+	},
+	"tests": {
+		"a/a-tests.ts": false,
+		"aa/bb-tests.ts": false,
+		"a/bb-tests.ts": false
 	},
 	"debatable": {
-		"_a/a.d.ts": true,
-		"a_/a.d.ts": true,
-		"a/_a.d.ts": true,
-		"a/a_.d.ts": true
+		"_a/a.d.ts": false,
+		"a_/a.d.ts": false,
+		"a/_a.d.ts": false,
+		"a/a_.d.ts": false
 	},
 	"space": {
 		" a/a.d.ts": false,
@@ -35,12 +43,28 @@
 		"aa/bb-v1.0.d.ts": true,
 		"aa/bb.1.0-alpha.d.ts": true,
 		"aa/bb-v1.0-alpha.d.ts": true,
+		"aa/bb.1.0-alpha-1.d.ts": true,
+		"aa/bb-v1.0-alpha-1.2.33.d.ts": true,
+		"aa/bb.1.0-alpha-1.d.ts": true,
+		"aa/bb-v1.0-alpha-1.2.33.d.ts": true,
 
 		"aa/bb.1.0.0.d.ts": true,
 		"aa/bb-v1.0.0.d.ts": true,
 		"aa/bb.1.0.0-alpha.d.ts": true,
 
 		"aa/bb.1.0.0-al p ha.d.ts": false
+	},
+	"deeper": {
+		"a/b/c.d.ts": true,
+		"aa/bb/cc.d.ts": true,
+		"aa/bb/cc/dd.d.ts": true,
+		"aa/bb/cc/dd/ee.d.ts": true
+	},
+	"deeper-semver": {
+		"aa/bb/cc.1.0.d.ts": true,
+		"aa/bb/cc-v1.0.d.ts": true,
+		"aa/bb/cc.1.0-alpha.d.ts": true,
+		"aa/bb/cc-v1.0-alpha.d.ts": true
 	},
 	"bugs": {
 		"amplifyjs/amplifyjs-tests.ts": false,

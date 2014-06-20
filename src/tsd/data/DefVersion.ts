@@ -31,7 +31,7 @@ class DefVersion {
 	solved: boolean = false;
 
 	// parsed from header
-	info: DefInfo;
+	info: DefInfo = null;
 
 	constructor(def: Def, commit: DefCommit) {
 		assertVar(def, Def, 'def');
@@ -44,7 +44,7 @@ class DefVersion {
 	setBlob(sha: string): void {
 		assertVar(sha, 'sha1', 'blob');
 		if (this._blobSha && this._blobSha !== sha) {
-			throw new VError('already got a blob %s != %s', this._blobSha, sha);
+			throw new VError('already got a blob but %s != %s', this._blobSha, sha);
 		}
 		this._blobSha = sha;
 	}

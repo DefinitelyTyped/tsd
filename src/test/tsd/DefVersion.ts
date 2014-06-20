@@ -26,11 +26,10 @@ export function serialise(file: DefVersion, recursive: number = 0): any {
 	json.path = file.def.path;
 	json.key = file.key;
 	json.solved = file.solved;
+	json.blobSha = file.blobSha;
+
 	if (recursive >= 0) {
 		json.commit = testDefCommit.serialise(file.commit, recursive);
-		if (file.blobSha) {
-			json.blobSha = file.blobSha;
-		}
 	}
 	if (file.dependencies && recursive >= 0) {
 		json.dependencies = [];

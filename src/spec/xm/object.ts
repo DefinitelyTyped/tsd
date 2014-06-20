@@ -16,21 +16,6 @@ class ObjectUtilTestClass {
 }
 
 describe('object', () => {
-	// TODO add tests for more methods
-	describe('hideProps()', () => {
-		it('should return formatted string', () => {
-			var keys;
-			var inst = new ObjectUtilTestClass();
-
-			keys = Object.keys(inst);
-			assert.sameMembers(keys, ['_propA', '_propB', 'propC', 'propD'], 'before hide');
-
-			objectUtils.hideProps(inst, null, false, true);
-
-			keys = Object.keys(inst);
-			assert.sameMembers(keys, ['propC', 'propD'], 'after hide');
-		});
-	});
 	describe('lockProps()', () => {
 		it('should throw when accessing frozen property', () => {
 			var fixed = {aa: 1, bb: 2};

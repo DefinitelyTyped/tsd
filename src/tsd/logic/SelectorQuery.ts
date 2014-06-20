@@ -13,6 +13,7 @@ import defUtil = require('../util/defUtil');
 import Query = require('../select/Query');
 import NameMatcher = require('../select/NameMatcher');
 import Selection = require('../select/Selection');
+import VersionMatcher = require('../select/VersionMatcher');
 
 import Options = require('../Options');
 import Core = require('Core');
@@ -32,8 +33,9 @@ class SelectorQuery extends CoreModule {
 		var res = new Selection(query);
 
 		return this.core.index.getIndex().then((index: DefIndex) => {
+			// TODO optimise this logic (with a map instead of linear search)
 			res.definitions = query.patterns.reduce((memo: Def[], names: NameMatcher) => {
-				names.filter(index.list, memo).forEach((def: Def) => {
+				names.filter(index.list).forEach((def: Def) => {
 					if (!defUtil.containsDef(memo, def)) {
 						memo.push(def);
 					}
@@ -43,6 +45,10 @@ class SelectorQuery extends CoreModule {
 
 			if (query.versionMatcher) {
 				res.definitions = query.versionMatcher.filter(res.definitions);
+			}
+			else {
+				// get latest
+				res.definitions = new VersionMatcher().filter(res.definitions);
 			}
 			// default to all heads
 			res.selection = defUtil.getHeads(res.definitions);
@@ -84,7 +90,6 @@ class SelectorQuery extends CoreModule {
 			return null;
 		}).then(() => {
 			if (query.parseInfo || query.infoMatcher) {
-				// TODO use dateMatcher?
 				return this.core.parser.parseDefInfoBulk(res.selection);
 			}
 			return null;
@@ -95,7 +100,6 @@ class SelectorQuery extends CoreModule {
 			}
 		}).then(() => {
 			if (options.resolveDependencies) {
-				// TODO use dateMatcher?
 				return this.core.resolver.resolveBulk(res.selection);
 			}
 			return null;

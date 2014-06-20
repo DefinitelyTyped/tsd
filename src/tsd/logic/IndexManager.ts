@@ -22,7 +22,7 @@ var branch_tree: string = '/commit/commit/tree/sha';
 
 class IndexManager extends CoreModule {
 
-	private _promise: Promise<DefIndex>;
+	private _promise: Promise<DefIndex> = null;
 
 	constructor(core: Core) {
 		super(core, 'index', 'IndexManager');
@@ -35,7 +35,7 @@ class IndexManager extends CoreModule {
 		if (this._promise) {
 			return this._promise;
 		}
-
+		// keep a promise
 		return this._promise = this.core.repo.api.getBranch(this.core.context.config.ref).then((branchData: any) => {
 			if (!branchData) {
 				throw new VError('loaded empty branch data');

@@ -4,15 +4,19 @@
       "path": "bootstrap/bootstrap.d.ts",
       "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": true,
+      "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd",
       "commit": {
         "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
-      "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd",
       "dependencies": [
         {
           "path": "jquery/jquery.d.ts",
           "project": "jquery",
-          "name": "jquery"
+          "name": "jquery",
+          "semver": null,
+          "label": "jquery/jquery",
+          "isMain": true,
+          "isLegacy": false
         }
       ]
     },
@@ -20,10 +24,10 @@
       "path": "jquery/jquery.d.ts",
       "key": "jquery/jquery.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": true,
+      "blobSha": "6fff3fab622f37113f0d11da82c1cfc5045219ae",
       "commit": {
         "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
-      "blobSha": "6fff3fab622f37113f0d11da82c1cfc5045219ae",
       "dependencies": []
     }
   },

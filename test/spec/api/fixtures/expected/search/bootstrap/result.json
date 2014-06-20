@@ -4,6 +4,7 @@
       "path": "bootstrap/bootstrap.d.ts",
       "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
+      "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd",
       "commit": {
         "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
@@ -15,10 +16,15 @@
       "path": "bootstrap/bootstrap.d.ts",
       "project": "bootstrap",
       "name": "bootstrap",
+      "semver": null,
+      "label": "bootstrap/bootstrap",
+      "isMain": true,
+      "isLegacy": false,
       "head": {
         "path": "bootstrap/bootstrap.d.ts",
         "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
-        "solved": false
+        "solved": false,
+        "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd"
       },
       "history": []
     }

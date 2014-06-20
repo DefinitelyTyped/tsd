@@ -27,6 +27,8 @@ var assert = chai.assert;
 chai.use(require('chai-fuzzy'));
 chai.use(require('chai-fs'));
 chai.use(require('chai-as-promised'));
+chai.use(require('chai-shallow-deep-equal'));
+
 chai.config.includeStack = true;
 
 var shaRegExp = /^[0-9a-f]{40}$/;

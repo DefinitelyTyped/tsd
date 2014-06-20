@@ -21,9 +21,13 @@ import tsdHelper = require('../../test/tsdHelper');
 
 import Context = require('../../tsd/context/Context');
 import Core = require('../../tsd/logic/Core');
-import Query = require('../../tsd/select/Query');
 import InstallResult = require('../../tsd/logic/InstallResult');
+
+import Query = require('../../tsd/select/Query');
 import Selection = require('../../tsd/select/Selection');
+import VersionMatcher = require('../../tsd/select/VersionMatcher');
+import CommitMatcher = require('../../tsd/select/CommitMatcher');
+
 import API = require('../../tsd/API');
 import Options = require('../../tsd/Options');
 import defUtil = require('../../tsd/util/defUtil');
@@ -64,7 +68,12 @@ describe('API', () => {
 		assert.property(test, 'query');
 
 		var query = new Query(test.query.pattern);
-
+		if (test.query.version) {
+			query.versionMatcher = new VersionMatcher(test.query.version);
+		}
+		if (test.query.commit) {
+			query.commitMatcher = new CommitMatcher(test.query.commit);
+		}
 		return query;
 	}
 
@@ -133,7 +142,8 @@ describe('API', () => {
 
 					fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 2));
 
-					var resultExpect = fileIO.readJSONSync(info.resultExpect);
+					// up-cast
+					var resultExpect = <Selection> fileIO.readJSONSync(info.resultExpect);
 					testSelection.assertion(selection, resultExpect, 'result');
 				});
 			});

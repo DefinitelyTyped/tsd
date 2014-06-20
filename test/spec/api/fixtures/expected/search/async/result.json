@@ -4,6 +4,7 @@
       "path": "async/async.d.ts",
       "key": "async/async.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
       "solved": false,
+      "blobSha": "25736941fe8de2b32cd354004c3737892b74acf4",
       "commit": {
         "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
       },
@@ -15,10 +16,15 @@
       "path": "async/async.d.ts",
       "project": "async",
       "name": "async",
+      "semver": null,
+      "label": "async/async",
+      "isMain": true,
+      "isLegacy": false,
       "head": {
         "path": "async/async.d.ts",
         "key": "async/async.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
-        "solved": false
+        "solved": false,
+        "blobSha": "25736941fe8de2b32cd354004c3737892b74acf4"
       },
       "history": []
     }

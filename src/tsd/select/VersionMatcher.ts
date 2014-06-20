@@ -22,7 +22,7 @@ class VersionMatcher {
 
 	range: string;
 
-	constructor(range: string) {
+	constructor(range?: string) {
 		if (range === VersionMatcher.latest || range === VersionMatcher.all) {
 			this.range = range;
 		}

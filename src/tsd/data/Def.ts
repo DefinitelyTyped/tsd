@@ -3,45 +3,107 @@
 'use strict';
 
 import semver = require('semver');
+import VError = require('verror');
 
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
 
 import DefVersion = require('./DefVersion');
 
+var defExp = /^[a-z](?:[\._-]?[a-z0-9])*(?:\/[a-z](?:[\._-]?[a-z0-9])*)+\.d\.ts$/i;
+
+var versionEnd = /(?:-v?)(\d+(?:\.\d+)*)(-[a-z](?:[_-]?[a-z0-9])*(?:\.\d+)*)?$/i;
+var twoNums = /^\d+\.\d+$/;
+
+var lockProps = [
+	'path',
+	'project',
+	'name',
+	'semver',
+	'label',
+	'isLegacy',
+	'isMain',
+];
+
 /*
  Def: single definition in repo (identified by its path)
  */
 class Def {
 
-	static nameExp = /^([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
-	static nameExpEnd = /([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
-
-	static versionEnd = /(?:-v?)(\d+(?:\.\d+)*)((?:-[a-z]+)?)$/i;
-	static twoNums = /^\d+\.\d+$/;
-
 	// unique identifier: 'project/name-v0.1.3-alpha.d.ts'
-	path: string;
+	path: string = null;
 
 	// split
-	project: string;
-	name: string;
-	// used?
-	semver: string;
+	project: string = null;
+	name: string = null;
+	semver: string = null;
+
+	// normalised display name
+	label: string = null;
+
+	isLegacy: boolean = false;
+	isMain: boolean = true;
 
 	// version from the DefIndex commit +tree (may be not our edit)
-	head: DefVersion;
+	head: DefVersion = null;
 
 	// versions from commits that changed this file
 	history: DefVersion[] = [];
 
 	constructor(path: string) {
 		assertVar(path, 'string', 'path');
+
+		if (!defExp.test(path)) {
+			throw new VError('cannot part path %s to Def', path);
+		}
+
 		this.path = path;
+
+		var parts = this.path.replace(/\.d\.ts$/, '').split(/\//g);
+
+		this.project = parts[0];
+		this.name = parts.slice(1).join(':');
+
+		// aa/bb.dts vs aa/bb/cc.d.ts
+		this.isMain = (parts.length === 2);
+		this.isLegacy = false;
+
+		if (parts.length > 2 && parts[1] === 'legacy') {
+			this.isLegacy = true;
+			this.name = parts.slice(2).join(':');
+			this.isMain = (parts.length === 3);
+		}
+
+		versionEnd.lastIndex = 0;
+		var semMatch = versionEnd.exec(this.name);
+		if (semMatch) {
+			var sem = semMatch[1];
+
+			// try to fix semver version
+			if (twoNums.test(sem)) {
+				sem += '.0';
+			}
+			if (semMatch.length > 2 && typeof semMatch[2] !== 'undefined') {
+				sem += semMatch[2];
+			}
+
+			var valid = semver.valid(sem, true);
+			if (valid) {
+				this.semver = valid;
+				this.name = this.name.substr(0, semMatch.index);
+			}
+			else {
+				// console.log('invalid semver ' + def.name);
+			}
+		}
+
+		this.label = this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
+
+		objectUtils.lockProps(this, lockProps);
 	}
 
 	toString(): string {
-		return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
+		return this.path;
 	}
 
 	// TODO add test
@@ -49,82 +111,15 @@ class Def {
 		return this.path.replace(/\.d\.ts$/, '');
 	}
 
-	// TODO add test
-	static getPathExp(trim: boolean): RegExp {
-		var useExp: RegExp = (trim ? Def.nameExpEnd : Def.nameExp);
-		useExp.lastIndex = 0;
-		return useExp;
+	static isDefPath(path: string): boolean {
+		return defExp.test(path);
 	}
 
-	// TODO add test
-	static getFileFrom(path: string): string {
-		var useExp: RegExp = Def.getPathExp(true);
-		var match = useExp.exec(path);
-		if (!match) {
+	static getFrom(path: string): Def {
+		if (!defExp.test(path)) {
 			return null;
 		}
-		return match[1] + '/' + match[2] + '.d.ts';
-	}
-
-	static isDefPath(path: string, trim: boolean = false): boolean {
-		if (Def.getPathExp(trim).test(path)) {
-			Def.versionEnd.lastIndex = 0;
-			var semMatch = Def.versionEnd.exec(path);
-			if (!semMatch) {
-				return true;
-			}
-			var sem = semMatch[1];
-			if (Def.twoNums.test(sem)) {
-				sem += '.0';
-			}
-			if (semMatch.length > 2) {
-				sem += semMatch[2];
-			}
-			return !semver.valid(sem, true);
-		}
-		return false;
-	}
-
-	static getFrom(path: string, trim: boolean = false): Def {
-		var useExp: RegExp = Def.getPathExp(trim);
-
-		var match: RegExpExecArray = useExp.exec(path);
-		if (!match) {
-			return null;
-		}
-		if (match.length < 1) {
-			return null;
-		}
-		if (match[1].length < 1 || match[2].length < 1) {
-			return null;
-		}
-		var file = new Def(path);
-		file.project = match[1];
-		file.name = match[2];
-
-		Def.versionEnd.lastIndex = 0;
-		var semMatch = Def.versionEnd.exec(file.name);
-		if (semMatch) {
-			var sem = semMatch[1];
-			// append missing patch version
-			if (Def.twoNums.test(sem)) {
-				sem += '.0';
-			}
-			if (semMatch.length > 2) {
-				sem += semMatch[2];
-			}
-
-			var valid = semver.valid(sem, true);
-			if (valid) {
-				file.semver = valid;
-				file.name = file.name.substr(0, semMatch.index);
-			}
-			else {
-				// console.log('invalid semver', sem);
-			}
-		}
-
-		return file;
+		return new Def(path);
 	}
 }
 
