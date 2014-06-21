@@ -2,7 +2,6 @@
 
 'use strict';
 
-import tty = require('tty');
 import path = require('path');
 
 import Promise = require('bluebird');
@@ -10,7 +9,6 @@ import VError = require('verror');
 
 import miniwrite = require('miniwrite');
 import ministyle = require('ministyle');
-import minitable = require('minitable');
 
 import fileIO = require('../xm/fileIO');
 import assertVar = require('../xm/assertVar');
@@ -54,7 +52,8 @@ import Opt = CliConst.Opt;
 import Group = CliConst.Group;
 import Action = CliConst.Action;
 
-import Printer = require('./cli/Printer');
+import Printer = require('./cli/CLIPrinter');
+import TablePrinter = require('./cli/TablePrinter');
 import StyleMap = require('./cli/StyleMap');
 import Tracker = require('./cli/tracker');
 import addCommon = require('./cli/addCommon');
@@ -79,22 +78,6 @@ export interface JobSelectionAction {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-function getViewWidth(width: number = 80, max: number = 0): number {
-	var isatty = (tty.isatty(1) && tty.isatty(2));
-	if (isatty) {
-		if (typeof process.stdout['getWindowSize'] === 'function') {
-			width = process.stdout['getWindowSize'](1)[0];
-		}
-		else {
-			width = tty['getWindowSize']()[1];
-		}
-	}
-	if (max > 0) {
-		width = Math.min(max, width);
-	}
-	return width;
-}
-
 // the fun starts here
 
 export function getExpose(): Expose {
@@ -103,7 +86,9 @@ export function getExpose(): Expose {
 	if (!process.stdout['isTTY']) {
 		output.useStyle(ministyle.plain());
 	}
+
 	var print = new Printer(output);
+	var table = new TablePrinter(output);
 	var styles = new StyleMap(output);
 	var tracker = new Tracker();
 
@@ -424,14 +409,6 @@ export function getExpose(): Expose {
 		});
 	});
 
-	function tweakURI(uri: string, out: any): void {
-		// out.muted('<');
-		uri = uri.replace(/^\w+?:\/\//, '').replace(/\/$/g, '');
-		out.plain(uri);
-		// out.muted('>');
-	}
-	var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
-
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'query';
 		cmd.label = 'search definitions using one or more globbing patterns';
@@ -461,140 +438,7 @@ export function getExpose(): Expose {
 					}
 					output.line();
 
-					// TODO report on written/skipped
-
-					var builder = minitable.getBuilder(output.getWrite(), output.getStyle());
-
-					var filePrint = builder.createType('results', [
-						{ name: 'project'},
-						{ name: 'slash'},
-						{ name: 'name'},
-						{ name: 'sep1'},
-						{ name: 'commit'},
-						{ name: 'sep2'},
-						{ name: 'date'}
-					], {
-						inner: ' ',
-						rowSpace: 0
-					});
-
-					var infoPrint = builder.createType('label', [
-						{ name: 'label'},
-						{ name: 'url'}
-					], {
-						inner: ' ',
-						rowSpace: 0
-					});
-
-					var commitPrint = builder.createType('label', [
-						{ name: 'block'}
-					], {
-						outer: '   ',
-						rowSpace: 0
-					});
-
-					filePrint.init();
-					infoPrint.init();
-					commitPrint.init();
-
-					selection.selection.sort(defUtil.fileCompare).forEach((file: DefVersion) => {
-						filePrint.next();
-						filePrint.row.project.out.accent(' - ').plain(file.def.project);
-						filePrint.row.slash.out.accent('/');
-						filePrint.row.name.out.plain(file.def.nameTerm);
-
-						if (file.def.head !== file && file.commit) {
-							filePrint.row.sep1.out.accent(':');
-							filePrint.row.commit.out.plain(file.commit.commitShort);
-							filePrint.row.sep2.out.accent(':');
-							filePrint.row.date.out.plain(dateUtils.toNiceUTC(file.commit.changeDate));
-						}
-
-						if (file.dependencies && file.dependencies.length > 0) {
-							filePrint.next();
-							filePrint.row.project.out.ln();
-
-							var deps = defUtil.mergeDependenciesOf(file.dependencies).filter((refer: DefVersion) => {
-								return refer.def.path !== file.def.path;
-							});
-							deps.forEach((file) => {
-								filePrint.next();
-								filePrint.row.project.out.indent().accent('>> ').plain(file.def.project);
-								filePrint.row.slash.out.accent('/');
-								filePrint.row.name.out.plain(file.def.nameTerm);
-							});
-						}
-						filePrint.close();
-
-						if (file.info) {
-							infoPrint.next();
-							infoPrint.row.label.out.ln();
-
-							infoPrint.next();
-							infoPrint.row.label.out.plain('   ').plain(file.info.name);
-
-							if (file.info.version) {
-								infoPrint.row.label.out.plain(' ').plain(file.info.version);
-							}
-
-							file.info.projects.forEach((url) => {
-								infoPrint.row.url.out.accent(': ');
-								tweakURI(url, infoPrint.row.url.out);
-								infoPrint.next();
-							});
-
-							if (file.info.authors && file.info.authors.length > 0) {
-								infoPrint.next();
-								infoPrint.row.label.out.ln();
-								file.info.authors.forEach((author) => {
-									infoPrint.next();
-									infoPrint.row.label.out.plain('   ').accent(' @ ').plain(author.name);
-									if (author.url) {
-										infoPrint.row.url.out.accent(': ');
-										tweakURI(author.url, infoPrint.row.url.out);
-									}
-								});
-							}
-							infoPrint.close();
-						}
-
-						if (file.def.history.length > 0) {
-							commitPrint.next();
-							commitPrint.row.block.out.ln();
-
-							file.def.history.slice(0).reverse().forEach((file: DefVersion, i: number) => {
-								commitPrint.next();
-								var out = commitPrint.row.block.out;
-
-								out.plain(file.commit.commitShort);
-								if (file.commit.changeDate) {
-									out.accent(' | ').plain(dateUtils.toNiceUTC(file.commit.changeDate));
-								}
-
-								out.accent(' | ').plain(file.commit.gitAuthor.name);
-								if (file.commit.hubAuthor) {
-									out.accent(' @ ').plain(file.commit.hubAuthor.login);
-								}
-								out.ln().ln();
-								out.accent(' | ').line(file.commit.message.subject);
-
-								if (file.commit.message.body) {
-									out.accent(' | ').ln();
-									stringUtils.wordWrap(file.commit.message.body, getViewWidth(80, 100)).every((line: string, index: number) => {
-										out.accent(' | ').line(line);
-										if (index < 10) {
-											return true;
-										}
-										out.accent(' | ').line('<...>');
-										return false;
-									});
-								}
-								out.ln();
-							});
-						}
-					});
-
-					builder.flush();
+					table.fileTable(selection.selection);
 
 					// run actions
 					return Promise.attempt(() => {
@@ -605,7 +449,7 @@ export function getExpose(): Expose {
 							return;
 						}
 						if (!queryActions.has(action)) {
-							output.ln().report().warning('unknown action:').space().span(action).ln();
+							output.ln().report().signal('unknown action:').space().span(action).ln();
 							return;
 						}
 						output.ln().report(true).span('running').space().accent(action).span('..').ln();

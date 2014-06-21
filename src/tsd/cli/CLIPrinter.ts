@@ -17,7 +17,7 @@ import InstallResult = require('../logic/InstallResult');
 
 var lineSplitExp = /[ \t]*[\r\n][ \t]*/g;
 
-class Printer {
+class CLIPrinter {
 
 	output: StyledOut;
 	indent: number = 0;
@@ -324,4 +324,4 @@ class Printer {
 	}
 }
 
-export = Printer;
+export = CLIPrinter;

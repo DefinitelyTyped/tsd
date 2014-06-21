@@ -129,6 +129,11 @@ class StyledOut {
 		return this;
 	}
 
+	signal(str: any): StyledOut {
+		this._line.write(this._style.signal(str));
+		return this;
+	}
+
 	muted(str: any): StyledOut {
 		this._line.write(this._style.muted(str));
 		return this;

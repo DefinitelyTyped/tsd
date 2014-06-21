@@ -10,13 +10,13 @@ import ExposeLevel = require('../../expose/Level');
 import collection = require('../../xm/collection');
 import CacheMode = require('../../http/CacheMode');
 
-import Printer = require('./Printer');
+import CLIPrinter = require('./CLIPrinter');
 import StyleMap = require('./StyleMap');
 import CliConst = require('./const');
 import Opt = CliConst.Opt;
 import Action = CliConst.Action;
 
-function addCommon(expose: Expose, print: Printer, style: StyleMap): void {
+function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
