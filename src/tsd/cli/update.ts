@@ -55,13 +55,14 @@ export function runNotifier(context: Context, waitForIt: boolean = false): Promi
 export function showNotifier(output: StyledOut): Promise<void> {
 	return Promise.attempt(() => {
 		if (notifier && notifier.update) {
-			output.ln();
-			output.report(true).span('update available: ');
-			output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
-			output.ln().ln();
-			output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
-			output.ln();
-
+			if (notifier.type === 'major' || notifier.type === 'minor') {
+				output.ln();
+				output.report(true).span('update available: ');
+				output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
+				output.ln().ln();
+				output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
+				output.ln();
+			}
 			notifier = null;
 		}
 	});
