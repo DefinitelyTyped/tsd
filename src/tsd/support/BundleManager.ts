@@ -49,7 +49,7 @@ class BundleManager {
 				if (!optional) {
 					throw new VError('cannot locate file %s', target);
 				}
-				return null;
+				return Promise.resolve(bundle);
 			}
 			// TODO should be streaming
 			return fileIO.read(target, {flags: 'rb'}).then((buffer: Buffer) => {
