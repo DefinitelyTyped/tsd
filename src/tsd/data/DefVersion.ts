@@ -4,6 +4,7 @@
 
 import VError = require('verror');
 import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
 
 import defUtil = require('../util/defUtil');
 
@@ -16,11 +17,10 @@ import DefInfo = require('./DefInfo');
 
  NOTE: for practical reasons linked to a commit (tree) instead of a blob
  */
-// TODO rename DefVersion to DefRevision / DefRev
+// TODO rename DefVersion to DefRevision / DefRev / DefFile
 class DefVersion {
-	// TODO swap for non-writable properties?
-	private _def: Def = null;
-	private _commit: DefCommit = null;
+	def: Def = null;
+	commit: DefCommit = null;
 
 	// NOTE blobs are impractical to work with: api rate-limits and no access over raw.github
 	private _blobSha: string = null;
@@ -37,8 +37,10 @@ class DefVersion {
 		assertVar(def, Def, 'def');
 		assertVar(commit, DefCommit, 'commit');
 
-		this._def = def;
-		this._commit = commit;
+		this.def = def;
+		this.commit = commit;
+
+		objectUtils.lockProps(this, ['def', 'commit']);
 	}
 
 	setBlob(sha: string): void {
@@ -50,18 +52,10 @@ class DefVersion {
 	}
 
 	get key(): string {
-		if (!this._def || !this._commit) {
+		if (!this.def || !this.commit) {
 			return null;
 		}
-		return this._def.path + '-' + this._commit.commitSha;
-	}
-
-	get def(): Def {
-		return this._def;
-	}
-
-	get commit(): DefCommit {
-		return this._commit;
+		return this.def.path + '-' + this.commit.commitSha;
 	}
 
 	get blobSha(): string {
@@ -75,8 +69,8 @@ class DefVersion {
 
 	toString(): string {
 		var str = '';
-		str += (this._def ? this._def.path : '<no def>');
-		str += ' : ' + (this._commit ? this._commit.commitShort : '<no commit>');
+		str += (this.def ? this.def.path : '<no def>');
+		str += ' : ' + (this.commit ? this.commit.commitShort : '<no commit>');
 		str += ' : ' + (this._blobSha ? this.blobShaShort : '<no blob>');
 		return str;
 	}
