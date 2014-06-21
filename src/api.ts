@@ -1,6 +1,8 @@
 'use strict';
 
-require('./bootstrap');
+import bootstrap = require('./bootstrap');
+
+[bootstrap];
 
 import API = require('./tsd/API');
 import Context = require('./tsd/context/Context');

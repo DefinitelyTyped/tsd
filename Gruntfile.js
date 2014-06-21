@@ -150,21 +150,9 @@ module.exports = function (grunt) {
 				noImplicitAny: false
 			},
 			api: {
-				src: ['src/**/*.ts', '!src/test/**/*.ts', '!src/spec/**/*.ts', '!src/**/_ref.d.ts'],
+				src: ['src/api.ts', 'src/tsd/CLI.ts'],
 				outDir: 'build/'
 			},
-			test: {
-				src: ['src/test.ts'],
-				outDir: 'build/'
-			},
-			/*blobSha: {
-				src: ['src/util/blobSha.ts'],
-				out: 'util/blobSha.js'
-			},*/
-			/*capture_task: {
-				src: ['tasks/capture_cli.ts'],
-				out: 'tasks/capture_cli.js'
-			},*/
 			//use this non-checked-in file to test small snippets of dev code
 			dev: {
 				src: ['src/dev.ts'],
