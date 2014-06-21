@@ -50,3 +50,4 @@
 /// <reference path="ncp/ncp.d.ts" />
 /// <reference path="postal/postal.d.ts" />
 /// <reference path="chai/chai-shallow-deep-equal.d.ts" />
+/// <reference path="minitable/minitable.d.ts" />

@@ -106,9 +106,12 @@ class Def {
 		return this.path;
 	}
 
-	// TODO add test
 	get pathTerm(): string {
 		return this.path.replace(/\.d\.ts$/, '');
+	}
+
+	get nameTerm(): string {
+		return this.name + (this.semver ? '-v' + this.semver : '');
 	}
 
 	static isDefPath(path: string): boolean {

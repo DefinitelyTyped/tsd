@@ -28,8 +28,8 @@ import typeOf = require('../typeOf');
 // TODO consider dynamicify indent size?
 class StyledOut {
 
-	private _style: MiniStyle.Style;
-	private _line: MiniWrite.Chars;
+	private _style: ministyle.Style;
+	private _line: miniwrite.Chars;
 	private _tabSize: number = 3;
 
 	nibs = {
@@ -45,7 +45,7 @@ class StyledOut {
 		none: '   '
 	};
 
-	constructor(write?: MiniWrite.Line, style?: MiniStyle.Style) {
+	constructor(write?: miniwrite.Line, style?: ministyle.Style) {
 		if (style) {
 			ministyle.assertMiniStyle(style);
 		}
@@ -370,23 +370,23 @@ class StyledOut {
 		this._line.flush();
 	}
 
-	useStyle(mini: MiniStyle.Style): StyledOut {
+	useStyle(mini: ministyle.Style): StyledOut {
 		ministyle.assertMiniStyle(mini);
 		this._style = mini;
 		return this;
 	}
 
-	useWrite(mini: MiniWrite.Line): StyledOut {
+	useWrite(mini: miniwrite.Line): StyledOut {
 		miniwrite.assertMiniWrite(mini);
 		this._line.useTarget(mini);
 		return this;
 	}
 
-	getWrite(): MiniWrite.Chars {
+	getWrite(): miniwrite.Chars {
 		return this._line;
 	}
 
-	getStyle(): MiniStyle.Style {
+	getStyle(): ministyle.Style {
 		return this._style;
 	}
 }

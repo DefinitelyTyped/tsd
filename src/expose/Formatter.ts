@@ -9,7 +9,7 @@ Expose: cli command manager and help generator
 import jsesc = require('jsesc');
 import ministyle = require('ministyle');
 import miniwrite = require('miniwrite');
-var minitable = require('minitable');
+import minitable = require('minitable');
 
 import assertVar = require('../xm/assertVar');
 import typeOf = require('../xm/typeOf');
