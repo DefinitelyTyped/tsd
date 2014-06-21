@@ -3,6 +3,7 @@
 'use strict';
 
 import path = require('path');
+
 import Promise = require('bluebird');
 import VError = require('verror');
 
@@ -54,35 +55,31 @@ class PackageLinker {
 	}
 
 	private scanFolder(memo: PackageDefinition[], type: PackageType, baseDir: string): Promise<void> {
-		var scanDir = path.join(baseDir, type.folderName);
-		return FS.readdir(scanDir).filter((target: string) => {
-			return FS.stat(path.join(scanDir, target)).then(stat => stat.isDirectory());
-		}).map((packageName: string) => {
-			var infoFile = path.join(scanDir, packageName, type.infoJson);
+		var scanDir = path.resolve(baseDir, type.folderName);
+		var pattern = '*/' + type.infoJson;
 
-			return FS.stat(infoFile).then((stat) => {
-				return stat.isFile();
-			}).catch(err => false).then((hasInfo) => {
-				if (!hasInfo) {
-					return;
-				}
-				return FS.readJSON(infoFile).then((info) => {
-					var use = new PackageDefinition(packageName, [], type.name);
-					// verify existence
-					return Promise.all(PackageLinker.extractDefLinks(info).map((ref) => {
-						ref = path.resolve(path.dirname(infoFile), ref);
-						return FS.exists(ref).then((exists) => {
-							if (exists) {
-								use.definitions.push(ref);
-							}
-						});
-					})).then(() => {
-						if (use.definitions.length > 0) {
-							memo.push(use);
+		return FS.glob(pattern, {
+			cwd: scanDir
+		}).map((infoPath: string) => {
+			var packageName = path.basename(path.dirname(infoPath));
+			infoPath = path.join(scanDir, infoPath);
+
+			return FS.readJSON(infoPath).then((info) => {
+				var use = new PackageDefinition(packageName, [], type.name);
+				// verify existence
+				return Promise.all(PackageLinker.extractDefLinks(info).map((ref) => {
+					ref = path.resolve(path.dirname(infoPath), ref);
+					return FS.exists(ref).then((exists) => {
+						if (exists) {
+							use.definitions.push(ref);
 						}
 					});
-				}).return();
-			});
+				})).then(() => {
+					if (use.definitions.length > 0) {
+						memo.push(use);
+					}
+				});
+			}).return();
 		}).catch((err) => {
 			// eat error
 		});

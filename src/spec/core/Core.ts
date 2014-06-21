@@ -21,9 +21,6 @@ import DefIndex = require('../../tsd/data/DefIndex');
 
 import configSchema = require('../../tsd/schema/config');
 
-import Bundle = require('../../tsd/support/Bundle');
-import BundleChange = require('../../tsd/support/BundleChange');
-
 describe('Core', () => {
 
 	var fixtureDir = helper.getDirNameFixtures();
@@ -54,8 +51,6 @@ describe('Core', () => {
 		return assert.isRejected(core.config.readConfig(false), exp);
 	}
 
-	before(() => {
-	});
 	beforeEach(() => {
 		context = tsdHelper.getContext();
 		// TODO risky?
@@ -143,87 +138,6 @@ describe('Core', () => {
 				// console.log(index.toDump());
 				// TODO validate index data
 				return null;
-			});
-		});
-	});
-
-	describe('bundle', () => {
-		it('should read data', () => {
-			core = getCore(context);
-
-			var name = 'bundle-read';
-			var baseDir = path.resolve(fixtureDir, name);
-
-			core.context.config.bundle = path.resolve(baseDir, 'tsd.d.ts');
-			core.context.config.path = path.resolve(baseDir);
-
-			return core.bundle.readBundle(core.context.config.bundle, false).then((bundle: Bundle) => {
-				assert.deepEqual(bundle.toArray(true, true).sort(), [
-					'bar/bar.d.ts',
-					'bar/baz.d.ts',
-					'foo/foo.d.ts'
-				]);
-			});
-		});
-
-		it('should cleanup data', () => {
-			core = getCore(context);
-
-			var name = 'bundle-clean';
-			var baseDir = path.resolve(fixtureDir, name);
-			var testDir = path.resolve(tmpDir, name);
-
-			core.context.config.bundle = path.resolve(testDir, 'tsd.d.ts');
-			core.context.config.path = path.resolve(testDir);
-
-			return helper.ncp(baseDir, testDir).then(() => {
-				return core.bundle.cleanupBundle(core.context.config.bundle, true);
-			}).then((changes: BundleChange) => {
-				assert.deepEqual(changes.getAdded(true, true), [], 'getAdded');
-				assert.deepEqual(changes.getRemoved(true, true).sort(), [
-					'bar/bar.d.ts',
-					'bar/baz.d.ts',
-				], 'getRemoved');
-
-				assert.isTrue(changes.someChanged(), 'someChanged');
-				assert.isFalse(changes.someAdded(), 'someAdded');
-				assert.isTrue(changes.someRemoved(), 'someRemoved');
-
-				var expected = fileIO.readFileSync(path.resolve(testDir, 'expected.d.ts'), 'utf8').replace(/\r\n/g, '\n');
-				var actual = fileIO.readFileSync(core.context.config.bundle, 'utf8').replace(/\r\n/g, '\n');
-				assert.strictEqual(actual, expected);
-			});
-		});
-
-		it('should update data', () => {
-			core = getCore(context);
-
-			var name = 'bundle-update';
-			var baseDir = path.resolve(fixtureDir, name);
-			var testDir = path.resolve(tmpDir, name);
-
-			core.context.config.bundle = path.resolve(testDir, 'tsd.d.ts');
-			core.context.config.path = path.resolve(testDir);
-
-			return helper.ncp(baseDir, testDir).then(() => {
-				return core.bundle.updateBundle(core.context.config.bundle, true);
-			}).then((changes: BundleChange) => {
-				assert.deepEqual(changes.getAdded(true, true).sort(), [
-					'bar/bar.d.ts',
-					'bar/baz.d.ts',
-					'foo/fizz.d.ts'
-				], 'getAdded');
-				assert.deepEqual(changes.getRemoved(true, true), [
-					'hoge/hoge.d.ts'
-				], 'getRemoved');
-
-				assert.isTrue(changes.someChanged(), 'someChanged');
-				assert.isTrue(changes.someAdded(), 'someAdded');
-				assert.isTrue(changes.someRemoved(), 'someRemoved');
-
-				var expected = fileIO.readFileSync(path.resolve(testDir, 'expected.d.ts'), 'utf8').replace(/\r\n/g, '\n');
-				var actual = fileIO.readFileSync(core.context.config.bundle, 'utf8').replace(/\r\n/g, '\n');
-				assert.strictEqual(actual, expected);
 			});
 		});
 	});

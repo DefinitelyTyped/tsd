@@ -33,6 +33,8 @@ import Core = require('./logic/Core');
 
 import PackageLinker = require('./support/PackageLinker');
 import PackageDefinition = require('./support/PackageDefinition');
+import BundleManager = require('./support/BundleManager');
+import BundleChange = require('./support/BundleChange');
 
 /*
  API: the high-level API used by dependants
@@ -129,6 +131,7 @@ class API {
 		refs.sort();
 
 		var basePath = path.dirname(this.context.paths.configFile);
+		var manager = new BundleManager(this.core.context.getTypingsDir());
 
 		var bundles: string[] = [];
 		if (options.addToBundles) {
@@ -146,7 +149,7 @@ class API {
 		}
 
 		return Promise.map(bundles, (target: string) => {
-			return this.core.bundle.addToBundle(target, refs, true);
+			return manager.addToBundle(target, refs, true);
 		}).return();
 	}
 
@@ -189,6 +192,7 @@ class API {
 		assertVar(baseDir, 'string', 'baseDir');
 
 		var linker = new PackageLinker();
+		var manager = new BundleManager(this.core.context.getTypingsDir());
 
 		return linker.scanDefinitions(baseDir).then((packages) => {
 			var refs = packages.reduce((memo: string[], packaged) => {
@@ -197,8 +201,23 @@ class API {
 					return memo;
 				}, memo);
 			}, []);
-			return this.core.bundle.addToBundle(this.context.config.bundle, refs, true).return(packages);
+			return manager.addToBundle(this.context.config.bundle, refs, true).return(packages);
 		});
+	}
+
+	addToBundle(target: string, refs: string[], save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.addToBundle(target, refs, save);
+	}
+
+	cleanupBundle(target: string, save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.cleanupBundle(target, save);
+	}
+
+	updateBundle(target: string, save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.updateBundle(target, save);
 	}
 
 	/*

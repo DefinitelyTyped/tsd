@@ -20,8 +20,6 @@ import GithubRepo = require('../../git/GithubRepo');
 
 import Context = require('../context/Context');
 
-import CoreModule = require('./CoreModule');
-
 import IndexManager = require('./IndexManager');
 import SelectorQuery = require('./SelectorQuery');
 import ConfigIO = require('./ConfigIO');
@@ -29,7 +27,6 @@ import ContentLoader = require('./ContentLoader');
 import InfoParser = require('./InfoParser');
 import Installer = require('./Installer');
 import Resolver = require('./Resolver');
-import BundleManager = require('./BundleManager');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -48,7 +45,6 @@ class Core {
 	parser: InfoParser;
 	installer: Installer;
 	resolver: Resolver;
-	bundle: BundleManager;
 
 	private _apiCacheMode: string = CacheMode[CacheMode.allowUpdate];
 	private _rawCacheMode: string = CacheMode[CacheMode.allowUpdate];
@@ -64,7 +60,6 @@ class Core {
 		this.parser = new InfoParser(this);
 		this.installer = new Installer(this);
 		this.resolver = new Resolver(this);
-		this.bundle = new BundleManager(this);
 
 		this.updateConfig();
 	}

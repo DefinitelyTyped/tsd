@@ -149,7 +149,10 @@ class TablePrinter {
 						out.accent(' @ ').plain(file.commit.hubAuthor.login);
 					}
 					out.ln().ln();
-					out.accent(' | ').line(file.commit.message.subject);
+
+					stringUtils.wordWrap(file.commit.message.subject, textWidth).forEach((line: string, index: number) => {
+						out.accent(' | ').line(line);
+					});
 
 					if (file.commit.message.body) {
 						out.accent(' | ').ln();

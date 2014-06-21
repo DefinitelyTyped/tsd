@@ -9,17 +9,15 @@ import VError = require('verror');
 
 import fileIO = require('../../xm/fileIO');
 
-import Options = require('../Options');
-import Core = require('./Core');
-import CoreModule = require('./CoreModule');
-
 import Bundle = require('../support/Bundle');
 import BundleChange = require('../support/BundleChange');
 
-class BundleManager extends CoreModule {
+class BundleManager {
 
-	constructor(core: Core) {
-		super(core, 'BundleManager');
+	typingsDir: string;
+
+	constructor(typingsDir: string) {
+		this.typingsDir = typingsDir;
 	}
 
 	/*
@@ -44,7 +42,7 @@ class BundleManager extends CoreModule {
 	readBundle(target: string, optional: boolean): Promise<Bundle> {
 		target = path.resolve(target);
 
-		var bundle = new Bundle(target, this.core.context.getTypingsDir());
+		var bundle = new Bundle(target, this.typingsDir);
 
 		return fileIO.exists(target).then((exists: boolean) => {
 			if (!exists) {
@@ -56,8 +54,8 @@ class BundleManager extends CoreModule {
 			// TODO should be streaming
 			return fileIO.read(target, {flags: 'rb'}).then((buffer: Buffer) => {
 				bundle.parse(buffer.toString('utf8'));
-			});
-		}).return(bundle);
+			}).return(bundle);
+		});
 	}
 
 	/*
@@ -98,12 +96,6 @@ class BundleManager extends CoreModule {
 					var full = path.resolve(change.bundle.baseDir, def);
 					change.add(change.bundle.append(full));
 				});
-
-				/*console.log('\nadded\n');
-				console.log(change.getAdded(false));
-				console.log('\nremoved\n');
-				console.log(change.getRemoved(false));*/
-
 				if (save && change.someChanged()) {
 					return this.saveBundle(change.bundle);
 				}

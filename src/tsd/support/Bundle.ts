@@ -12,6 +12,13 @@ var splitExp = /(?:(.*)(\r?\n))|(?:(.+)($))/g;
 // TODO replace reference node RegExp with a xml parser (tony the pony)
 var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
+// different fs-call return upper / lower-case drive-letters
+function fixWinDrive(ref: string): string {
+	return ref.replace(/^[a-z]:/, (str) => {
+		return str.toUpperCase();
+	});
+}
+
 /*
  Bundle - file to bundle <reference/> 's
 
@@ -35,8 +42,8 @@ class Bundle {
 	constructor(target: string, baseDir?: string) {
 		assertVar(target, 'string', 'target');
 
-		this.target = target.replace(/^\.\//, '');
-		this.baseDir = baseDir || path.dirname(this.target);
+		this.target = fixWinDrive(target.replace(/^\.\//, ''));
+		this.baseDir = fixWinDrive(baseDir || path.dirname(this.target));
 	}
 
 	parse(content: string): void {
@@ -69,7 +76,7 @@ class Bundle {
 
 			if (refMatch && refMatch.length > 1) {
 				// clean-up path
-				line.ref = path.resolve(this.baseDir, refMatch[1]);
+				line.ref = fixWinDrive(path.resolve(this.baseDir, refMatch[1]));
 
 				this.map[line.ref] = line;
 				this.last = line;
@@ -81,14 +88,14 @@ class Bundle {
 	}
 
 	has(ref: string): boolean {
-		ref = path.resolve(this.baseDir, ref);
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
 		return (ref in this.map);
 	}
 
 	append(ref: string): string {
-		ref = path.resolve(this.baseDir, ref);
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
 
-		if (!this.has(ref)) {
+		if (!(ref in this.map)) {
 			var line = new BundleLine('', ref);
 
 			this.map[ref] = line;
@@ -110,9 +117,9 @@ class Bundle {
 	}
 
 	remove(ref: string): string {
-		ref = path.resolve(this.baseDir, ref);
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
 
-		if (this.has(ref)) {
+		if (ref in this.map) {
 			var line = this.map[ref];
 
 			var i = this.lines.indexOf(line);

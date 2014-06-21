@@ -433,7 +433,7 @@ export function getExpose(): Expose {
 				return job.api.select(job.query, job.options).then((selection: Selection) => {
 
 					if (selection.selection.length === 0) {
-						output.ln().report().warning('zero results').ln();
+						output.ln().report().signal('zero results').ln();
 						return;
 					}
 					output.line();
@@ -518,7 +518,7 @@ export function getExpose(): Expose {
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				if (job.api.context.config.bundle) {
-					return job.api.core.bundle.updateBundle(job.api.context.config.bundle, true).then((changes) => {
+					return job.api.updateBundle(job.api.context.config.bundle, true).then((changes) => {
 						if (changes.someRemoved()) {
 							output.ln().report(true).line('removed:').ln();
 							changes.getRemoved(true, true).sort().forEach((file) => {
@@ -552,9 +552,12 @@ export function getExpose(): Expose {
 				output.info(true).span('running').space().accent(cmd.name).ln();
 
 				return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
-					packages.forEach((linked) => {
-						output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
-					});
+					if (packages.length > 0) {
+						output.ln();
+						packages.forEach((linked) => {
+							output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
+						});
+					}
 				});
 			}).catch(reportError);
 		};
