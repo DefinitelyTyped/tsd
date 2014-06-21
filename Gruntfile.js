@@ -269,7 +269,11 @@ module.exports = function (grunt) {
 		'demo:help'
 	]);
 
-	// assemble!
+	gtx.alias('lint', [
+		'jshint',
+		'tslint'
+	]);
+
 	gtx.alias('prep', [
 		'clean:tmp',
 		'clean:test',
