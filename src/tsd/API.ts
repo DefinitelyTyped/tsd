@@ -253,7 +253,7 @@ class API {
 			if (!file.info) {
 				return this.core.parser.parseDefInfo(file);
 			}
-			return Promise.cast(file);
+			return Promise.resolve(file);
 		}).then((list) => {
 			return list.reduce((memo: string[], file: DefVersion) => {
 				var url;

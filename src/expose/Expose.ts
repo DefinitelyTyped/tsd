@@ -173,11 +173,11 @@ class Expose {
 	executeArgv(argvRaw: any, alt?: string, exitAfter: boolean = true): void {
 		this.executeRaw(argvRaw, alt).then((res: Result) => {
 			if (this.end) {
-				return Promise.cast(this.end.call(null, res)).then((over: Result) => {
+				return Promise.resolve(this.end.call(null, res)).then((over: Result) => {
 					return over || res;
 				});
 			}
-			return Promise.cast(res);
+			return Promise.resolve(res);
 		}).then((res: Result) => {
 			if (res.error) {
 				throw(res.error);
@@ -248,7 +248,7 @@ class Expose {
 		this.init();
 
 		if (!this.commands.has(name)) {
-			return Promise.cast({
+			return Promise.resolve({
 				ctx: ctx,
 				code: 1,
 				error: new Error('unknown command ' + name)
@@ -258,13 +258,13 @@ class Expose {
 
 		return Promise.attempt(() => {
 			if (this.before) {
-				return Promise.cast(this.before(ctx));
+				return Promise.resolve(this.before(ctx));
 			}
 		}).then(() => {
-			return Promise.cast(cmd.execute(ctx));
+			return Promise.resolve(cmd.execute(ctx));
 		}).then(() => {
 			if (this.after) {
-				return Promise.cast(this.after(ctx));
+				return Promise.resolve(this.after(ctx));
 			}
 			return null;
 		}).then(() => {

@@ -329,7 +329,7 @@ class CacheStreamLoader {
 	private checkExists(file: string, label: string): Promise<boolean> {
 		return fileIO.exists(file).then((exist: boolean) => {
 			if (!exist) {
-				return Promise.cast(false);
+				return Promise.resolve(false);
 			}
 			return fileIO.stat(file).then((stat: fs.Stats) => {
 				if (stat.size === 0) {

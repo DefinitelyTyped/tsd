@@ -178,7 +178,7 @@ export function mkdirCheck(dir: string, writable: boolean = false, testWritable:
 export function canWriteFile(targetPath: string, overwrite: boolean) {
 	return exists(targetPath).then((exists: boolean) => {
 		if (!exists) {
-			return Promise.cast(true);
+			return Promise.resolve(true);
 		}
 		return isFile(targetPath).then((isFile: boolean) => {
 			if (isFile) {
@@ -240,7 +240,7 @@ export function findup(dir: string, name: string): Promise<string> {
 
 		return exists(file).then((exists: boolean) => {
 			if (exists) {
-				return Promise.cast(file);
+				return Promise.resolve(file);
 			}
 			// one-up
 			var dirName = path.dirname(dir);
@@ -400,7 +400,7 @@ export function listTree(basePath: string, guard?: (basePath: string, stat: fs.S
 			});
 		}
 		else {
-			return Promise.cast(paths);
+			return Promise.resolve(paths);
 		}
 	}).catch((reason) => {
 		return [];

@@ -49,7 +49,7 @@ class ContentLoader extends CoreModule {
 	 */
 	loadCommitMetaData(commit: DefCommit): Promise<DefCommit> {
 		if (commit.hasMetaData()) {
-			return Promise.cast(commit);
+			return Promise.resolve(commit);
 		}
 		return this.core.repo.api.getCommit(commit.commitSha).then((json: any) => {
 			commit.parseJSON(json);
