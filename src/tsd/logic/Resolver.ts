@@ -2,6 +2,8 @@
 
 'use strict';
 
+import path = require('path');
+
 import Promise = require('bluebird');
 
 import collection = require('../../xm/collection');
@@ -105,16 +107,10 @@ class Resolver extends CoreModule {
 	private extractPaths(file: DefVersion, content: string): string[] {
 		// filter reasonable formed paths
 		return defUtil.extractReferenceTags(content).reduce((memo: string[], refPath: string): any[] => {
-			// TODO harder def-test? why?
-			refPath = refPath.replace(localExp, '').replace(leadingExp, '');
-			if (refPath.indexOf('/') < 0) {
-				// same folder
-				refPath = file.def.project + '/' + refPath;
-			}
+			refPath = path.normalize(path.dirname(file.def.path) + '/' + refPath).replace(/\\/g, '/');
+
 			if (Def.isDefPath(refPath) && memo.indexOf(refPath) < 0) {
 				memo.push(refPath);
-			}
-			else {
 			}
 			return memo;
 		}, []);
