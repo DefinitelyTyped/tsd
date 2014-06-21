@@ -4,6 +4,7 @@
 
 import pointer = require('json-pointer');
 import Promise = require('bluebird');
+import VError = require('verror');
 
 import Def = require('../data/Def');
 import DefIndex = require('../data/DefIndex');
@@ -16,14 +17,13 @@ import Selection = require('../select/Selection');
 import VersionMatcher = require('../select/VersionMatcher');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
-import VError = require('verror');
 
 class SelectorQuery extends CoreModule {
 
 	constructor(core: Core) {
-		super(core, 'select', 'Select');
+		super(core, 'Select');
 	}
 
 	/*

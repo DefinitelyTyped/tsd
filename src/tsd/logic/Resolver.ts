@@ -14,7 +14,7 @@ import DefIndex = require('../data/DefIndex');
 import defUtil = require('../util/defUtil');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 var localExp = /^\.\//;
@@ -30,7 +30,7 @@ class Resolver extends CoreModule {
 	private _active = new collection.Hash<Promise<DefVersion>>();
 
 	constructor(core: Core) {
-		super(core, 'resolve', 'Resolver');
+		super(core, 'Resolver');
 	}
 
 	/*

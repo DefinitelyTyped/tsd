@@ -6,13 +6,15 @@ import deepFreeze = require('deep-freeze');
 
 import CacheMode = require('../http/CacheMode');
 
-var settings = {
+module settings {
 	// control the cache used as fixture for the tests
-	cache: CacheMode.forceLocal
-};
+	export var apiCache = CacheMode.forceLocal;
+	export var rawCache = CacheMode.forceLocal;
+}
 // seriously cool
 deepFreeze(settings);
 
-console.log('helper.settings.cache', CacheMode[settings.cache]);
+console.log('helper.settings.apiCache %s', CacheMode[settings.apiCache]);
+console.log('helper.settings.rawCache %s', CacheMode[settings.rawCache]);
 
 export = settings;

@@ -68,7 +68,7 @@ describe('CLI Query', () => {
 
 		args.push('--progress', 'no');
 		args.push('--services', 'no');
-		args.push('--cacheMode', CacheMode[settings.cache]);
+		args.push('--cacheMode', CacheMode[settings.apiCache]);
 
 		args.push('--cacheDir', info.cacheDirTestFixed);
 		args.push('--config', path.resolve('./test/fixtures/config/default.json'));

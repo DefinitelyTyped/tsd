@@ -10,7 +10,7 @@ import Resolver = Promise.Resolver;
 import collection = require('../../xm/collection');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 import Def = require('../data/Def');
@@ -25,7 +25,7 @@ class IndexManager extends CoreModule {
 	private _promise: Promise<DefIndex> = null;
 
 	constructor(core: Core) {
-		super(core, 'index', 'IndexManager');
+		super(core, 'IndexManager');
 	}
 
 	/*

@@ -20,7 +20,7 @@ import defUtil = require('../util/defUtil');
 import gitUtil = require('../../git/gitUtil');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 interface CacheItem {
@@ -32,7 +32,7 @@ class ContentLoader extends CoreModule {
 	private cache: LRU.Cache<Buffer>;
 
 	constructor(core: Core) {
-		super(core, 'content', 'ContentLoader');
+		super(core, 'ContentLoader');
 
 		this.cache = LRU<Buffer>({
 			stale: true,
@@ -99,7 +99,7 @@ class ContentLoader extends CoreModule {
 	 */
 	loadHistory(def: Def): Promise<Def> {
 		if (def.history.length > 0) {
-			return Promise.cast(def);
+			return Promise.resolve(def);
 		}
 		return Promise.all([
 			this.core.index.getIndex(),

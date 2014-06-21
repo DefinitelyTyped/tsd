@@ -11,17 +11,11 @@ import Core = require('./Core');
 class CoreModule {
 
 	core: Core;
-	private _verbose: boolean = false;
+	label: string;
 
-	constructor(core: Core, track: string, label: string) {
+	constructor(core: Core, label: string) {
 		this.core = core;
-	}
-
-	set verbose(verbose: boolean) {
-	}
-
-	get verbose(): boolean {
-		return this._verbose;
+		this.label = label;
 	}
 }
 

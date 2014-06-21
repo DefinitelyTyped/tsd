@@ -6,7 +6,7 @@ import Promise = require('bluebird');
 import header = require('definition-header');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 import DefInfo = require('../data/DefInfo');
@@ -19,7 +19,7 @@ import AuthorInfo = require('../support/AuthorInfo');
 class InfoParser extends CoreModule {
 
 	constructor(core: Core) {
-		super(core, 'info', 'InfoParser');
+		super(core, 'InfoParser');
 	}
 
 	/*

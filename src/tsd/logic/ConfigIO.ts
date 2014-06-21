@@ -11,13 +11,13 @@ import VError = require('verror');
 import fileIO = require('../../xm/fileIO');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 class ConfigIO extends CoreModule {
 
 	constructor(core: Core) {
-		super(core, 'config', 'ConfigIO');
+		super(core, 'ConfigIO');
 	}
 
 	/*

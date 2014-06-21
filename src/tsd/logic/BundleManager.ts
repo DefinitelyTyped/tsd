@@ -10,7 +10,7 @@ import VError = require('verror');
 import fileIO = require('../../xm/fileIO');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 import Bundle = require('../support/Bundle');
@@ -19,7 +19,7 @@ import BundleChange = require('../support/BundleChange');
 class BundleManager extends CoreModule {
 
 	constructor(core: Core) {
-		super(core, 'bundle', 'BundleManager');
+		super(core, 'BundleManager');
 	}
 
 	/*

@@ -6,13 +6,15 @@
 
 import path = require('path');
 import Promise = require('bluebird');
+import VError = require('verror');
 
 import collection = require('../../xm/collection');
 import assertVar = require('../../xm/assertVar');
 import objectUtils = require('../../xm/objectUtils');
-import CacheMode = require('../../http/CacheMode');
 import eventLog = require('../../xm/lib/eventLog');
 import typeOf = require('../../xm/typeOf');
+
+import CacheMode = require('../../http/CacheMode');
 
 import GithubRepo = require('../../git/GithubRepo');
 
@@ -28,11 +30,6 @@ import InfoParser = require('./InfoParser');
 import Installer = require('./Installer');
 import Resolver = require('./Resolver');
 import BundleManager = require('./BundleManager');
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-var leadingExp = /^\.\.\//;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -53,35 +50,28 @@ class Core {
 	resolver: Resolver;
 	bundle: BundleManager;
 
-	private _components: MultiManager;
-	private _cacheMode: string;
+	private _apiCacheMode: string = CacheMode[CacheMode.allowUpdate];
+	private _rawCacheMode: string = CacheMode[CacheMode.allowUpdate];
 
 	constructor(context: Context) {
 		assertVar(context, Context, 'context');
 		this.context = context;
 
-		this._components = new MultiManager(this);
-		this._components.add([
-			this.index = new IndexManager(this),
-			this.config = new ConfigIO(this),
-			this.selector = new SelectorQuery(this),
-			this.content = new ContentLoader(this),
-			this.parser = new InfoParser(this),
-			this.installer = new Installer(this),
-			this.resolver = new Resolver(this),
-			this.bundle = new BundleManager(this)
-		]);
+		this.index = new IndexManager(this);
+		this.config = new ConfigIO(this);
+		this.selector = new SelectorQuery(this);
+		this.content = new ContentLoader(this);
+		this.parser = new InfoParser(this);
+		this.installer = new Installer(this);
+		this.resolver = new Resolver(this);
+		this.bundle = new BundleManager(this);
 
 		this.updateConfig();
-
-		this.verbose = this.context.verbose;
 	}
 
 	updateConfig(): void {
 		// drop statefull helper
-		this._components.replace({
-			repo: new GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings)
-		});
+		this.repo = new GithubRepo(this.context.config, this.context.paths.cacheDir, this.context.settings);
 
 		// lets be gents
 		this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
@@ -95,64 +85,23 @@ class Core {
 			delete this.repo.api.headers['authorization'];
 		}
 
-		this.useCacheMode(this._cacheMode);
+		this.useCacheMode(this._apiCacheMode, this._rawCacheMode);
 	}
 
-	useCacheMode(modeName: string): void {
-		this._cacheMode = modeName;
-
-		if (modeName in CacheMode) {
-			var mode = CacheMode[modeName];
-			this.repo.api.cache.opts.cache.applyCacheMode(mode);
-			this.repo.raw.cache.opts.cache.applyCacheMode(mode);
+	useCacheMode(modeName: string, rawMode?: string): void {
+		if (!(modeName in CacheMode)) {
+			throw new Error('invalid CacheMode' + modeName);
 		}
-	}
-
-	set verbose(verbose: boolean) {
-		this._components.verbose = verbose;
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-class MultiManager {
-
-	private _verbose: boolean = false;
-	private _modules = new collection.Set<CoreModule>();
-
-	constructor(public core: Core) {
-		assertVar(core, Core, 'core');
-	}
-
-	add(list: CoreModule[]) {
-		list.forEach((comp) => {
-			this._modules.add(comp);
-		});
-	}
-
-	remove(list: CoreModule[]) {
-		while (list.length > 0) {
-			this._modules.delete(list.pop());
+		if (rawMode && !(rawMode in CacheMode)) {
+			throw new Error('invalid CacheMode ' + rawMode);
 		}
-	}
 
-	replace(fields: Object): void {
-		Object.keys(fields).forEach((property: string) => {
-			this._modules.delete(this.core[property]);
-			var trackable = fields[property];
-			if (!this.core[property]) {
-				this.core[property] = trackable;
-			}
-			trackable.verbose = this._verbose;
-			this._modules.add(fields[property]);
-		});
-	}
+		this._apiCacheMode = modeName;
+		this._rawCacheMode = (rawMode || modeName);
 
-	set verbose(verbose: boolean) {
-		this._verbose = verbose;
-		this._modules.forEach((comp: CoreModule) => {
-			comp.verbose = this._verbose;
-		});
+		// pow pow pow
+		this.repo.api.cache.opts.cache.applyCacheMode(CacheMode[this._apiCacheMode]);
+		this.repo.raw.cache.opts.cache.applyCacheMode(CacheMode[this._rawCacheMode]);
 	}
 }
 

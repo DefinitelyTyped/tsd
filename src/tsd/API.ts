@@ -45,8 +45,6 @@ class API {
 		assertVar(context, Context, 'context');
 
 		this.core = new Core(this.context);
-
-		this.verbose = this.context.verbose;
 	}
 
 	/*
@@ -287,10 +285,6 @@ class API {
 			queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
 		}
 		return Promise.all(queue).return();
-	}
-
-	set verbose(verbose: boolean) {
-		this.core.verbose = verbose;
 	}
 }
 

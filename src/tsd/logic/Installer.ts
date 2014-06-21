@@ -10,7 +10,7 @@ import collection = require('../../xm/collection');
 import fileIO = require('../../xm/fileIO');
 
 import Options = require('../Options');
-import Core = require('Core');
+import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
 import Def = require('../data/Def');
@@ -22,7 +22,7 @@ import InstalledDef = require('../context/InstalledDef');
 class Installer extends CoreModule {
 
 	constructor(core: Core) {
-		super(core, 'install', 'Installer');
+		super(core, 'Installer');
 	}
 
 	getInstallPath(def: Def): string {

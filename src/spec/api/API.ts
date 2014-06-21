@@ -60,7 +60,6 @@ describe('API', () => {
 		fileIO.writeJSONSync(tmp.queryDump, query);
 		fileIO.writeJSONSync(tmp.optionsDump, opt);
 
-		api.verbose = test.debug;
 		return tmp;
 	}
 

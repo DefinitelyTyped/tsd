@@ -22,7 +22,6 @@ import unordered = require('./unordered');
 import helper = require('./helper');
 import settings = require('./settings');
 
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function getContext() {
@@ -33,7 +32,7 @@ export function getContext() {
 }
 
 export function applyCoreUpdate(core: Core) {
-	core.useCacheMode(CacheMode[settings.cache]);
+	core.useCacheMode(CacheMode[settings.apiCache], CacheMode[settings.rawCache]);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
