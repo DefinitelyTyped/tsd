@@ -36,7 +36,6 @@ var md5RegExp = /^[0-9a-f]{32}$/;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
 export function ncp(source: string, destination: string, opts?: ncpMod.Options): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		ncpMod.ncp(source, destination, (opts || {}), (err) => {

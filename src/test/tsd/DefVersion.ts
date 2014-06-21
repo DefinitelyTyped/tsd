@@ -28,15 +28,14 @@ export function serialise(file: DefVersion, recursive: number = 0): any {
 	json.solved = file.solved;
 	json.blobSha = file.blobSha;
 
-	if (recursive >= 0) {
-		json.commit = testDefCommit.serialise(file.commit, recursive);
+	json.commit = testDefCommit.serialise(file.commit);
+	if (file.info) {
+		json.info = testDefInfo.serialise(file.info, recursive);
 	}
-	if (file.dependencies && recursive >= 0) {
-		json.dependencies = [];
-		file.dependencies.forEach((def: Def) => {
-			json.dependencies.push(testDef.serialise(def, recursive));
-		});
-	}
+	json.dependencies = [];
+	file.dependencies.forEach((def: Def) => {
+		json.dependencies.push(testDef.serialise(def, recursive));
+	});
 	return json;
 }
 
@@ -50,6 +49,9 @@ export function assertion(file: DefVersion, values: any, message: string): void 
 	}
 	if (values.commit) {
 		testDefCommit.assertion(file.commit, values.commit, message + ': file.commit');
+	}
+	if (values.info) {
+		testDefInfo.assertion(file.info, values.info, message + ': file.info');
 	}
 	if (values.blobSha) {
 		assert.strictEqual(file.blobSha, values.blobSha, message + ': file.blobSha');

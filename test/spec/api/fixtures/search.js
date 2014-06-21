@@ -7,18 +7,30 @@ var tests = {
 			pattern: 'async'
 		}
 	},
-	/*'async-commit-full': {
+	'async-commit-full': {
 		query: {
 			pattern: 'async',
-			commit: '12978f397b2a1cd717aa29dd42c67b61e1706e06'
+			commit: '6cfdabc5b280210fab2c3ccf834c8289e05c619e'
 		}
 	},
 	'async-commit-short': {
 		query: {
 			pattern: 'async',
-			commit: '12978f'
+			commit: '6cfdab'
 		}
-	},*/
+	},
+	'async-history': {
+		query: {
+			pattern: 'async',
+			history: true
+		}
+	},
+	'async-info': {
+		query: {
+			pattern: 'async',
+			info: true
+		}
+	},
 	'bootstrap': {
 		query: {
 			pattern: 'bootstrap'

@@ -41,7 +41,7 @@ class CommitMatcher {
 		assert(hex.test(commitSha), 'parameter not a hex {a}', commitSha);
 
 		var len = commitSha.length;
-		assert((len < this.minimumShaLen), 'parameter hex too short: expected {e}, got {a}', len, this.minimumShaLen);
+		assert((len >= this.minimumShaLen), 'parameter hex too short: expected {e}, got {a}', this.minimumShaLen, len);
 
 		return (file: DefVersion) => {
 			return (file.commit && file.commit.commitSha.substr(0, len) === commitSha

@@ -51,6 +51,18 @@ describe('API', () => {
 		return api;
 	}
 
+	function doit(test: any, label: string, assertion: () => void) {
+		if (test.skip) {
+			it.skip(label, assertion);
+		}
+		else if (test.only) {
+			it.only(label, assertion);
+		}
+		else {
+			it(label, assertion);
+		}
+	}
+
 	function applyTestInfo(group: string, name: string, test: any, api: API, query: Query, opt: Options): TestInfo {
 		var tmp = new TestInfo(group, name, test, true);
 
@@ -72,6 +84,12 @@ describe('API', () => {
 		}
 		if (test.query.commit) {
 			query.commitMatcher = new CommitMatcher(test.query.commit);
+		}
+		if (test.query.info) {
+			query.parseInfo = true;
+		}
+		if (test.query.history) {
+			query.loadHistory = true;
 		}
 		return query;
 	}
@@ -123,11 +141,8 @@ describe('API', () => {
 
 		Object.keys(data.tests).forEach((name: string) => {
 			var test = data.tests[name];
-			if (test.skip) {
-				return;
-			}
 
-			it('query "' + name + '"', () => {
+			doit(test, 'query "' + name + '"', () => {
 				var api = getAPI();
 
 				var query = getQuery(test);
@@ -135,11 +150,11 @@ describe('API', () => {
 				var info = applyTestInfo('search', name, test, api, query, opts);
 
 				return setupCase(api, test, name, info).then(() => {
-					return api.select(query);
+					return api.select(query, opts);
 				}).then((selection: Selection) => {
 					assert.instanceOf(selection, Selection, 'selection');
 
-					fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 2));
+					fileIO.writeJSONSync(info.resultFile, testSelection.serialise(selection, 4));
 
 					// up-cast
 					var resultExpect = <Selection> fileIO.readJSONSync(info.resultExpect);
@@ -154,11 +169,8 @@ describe('API', () => {
 
 		Object.keys(data.tests).forEach((name: string) => {
 			var test = data.tests[name];
-			if (test.skip) {
-				return;
-			}
 
-			it('test "' + name + '"', () => {
+			doit(test, 'test "' + name + '"', () => {
 				var api = getAPI();
 
 				var query = getQuery(test);

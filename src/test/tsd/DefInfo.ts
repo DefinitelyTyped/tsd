@@ -20,12 +20,14 @@ export function serialise(info: DefInfo, recursive: number = 0): any {
 
 	var json: any = {};
 	json.name = info.name;
+	json.version = info.version;
+
 	json.projects = info.projects;
 	json.references = info.references.slice(0);
 	json.authors = [];
-	if (info.authors && recursive >= 0) {
+	if (info.authors) {
 		info.authors.forEach((author: AuthorInfo) => {
-			json.authors.push(testAuthor.serialise(author, recursive));
+			json.authors.push(testAuthor.serialise(author));
 		});
 	}
 	return json;
@@ -37,15 +39,15 @@ export function assertion(info: DefInfo, values: any, message: string) {
 	assert.instanceOf(info, DefInfo, message + ': info');
 
 	helper.propStrictEqual(info, values, 'name', message);
-	helper.propStrictEqual(info, values, 'projectUrl', message);
+	helper.propStrictEqual(info, values, 'version', message);
 
-	if (values.projects) {
-		unordered.assertionNaive(info.projects, values.projects, assert.strictEqual, message + ': projects');
-	}
-	if (values.authors) {
-		unordered.assertionNaive(info.authors, values.authors, testAuthor.assertion, message + ': authors');
-	}
-	if (values.references) {
-		unordered.assertionNaive(info.authors, values.authors, assert.strictEqual, message + ': authors');
-	}
+	assert.deepEqual(info.projects, values.projects, message + ': projects');
+	unordered.assertionNaive(info.authors, values.authors, testAuthor.assertion, message + ': authors');
+	assert.deepEqual(info.references, values.references, message + ': references');
 }
+/*
+var assertAuthor = unordered.getAssertLike<AuthorInfo>((actual, expected) => {
+	return actual.name == expected.name;
+}, (actual, expected) => {
+	testAuthor.assertion(actual, expected, 'author');
+}, 'author');*/

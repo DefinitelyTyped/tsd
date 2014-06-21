@@ -32,7 +32,7 @@ export function serialise(def: Def, recursive: number = 0): any {
 		json.head = testDefVersion.serialise(def.head, recursive);
 	}
 	// version from the DefIndex commit +tree (may be not our edit)
-	if (def.history && recursive >= 0) {
+	if (def.history) {
 		json.history = [];
 		def.history.forEach((file: DefVersion) => {
 			json.history.push(testDefVersion.serialise(file, recursive));
@@ -73,9 +73,9 @@ export function assertion(def: Def, values: any, message: string) {
 }
 
 // TODO should not be 'any' type
-var assertDefArrayUnordered: any = unordered.getAssertLike<Def>(function (act: Def, exp: Def): boolean {
+var assertDefArrayUnordered: any = unordered.getAssertLike<Def>((act: Def, exp: Def) => {
 	return (act.path === exp.path);
-}, function (act: Def, exp: Def, message: string) {
+}, (act: Def, exp: Def, message: string) => {
 	assertion(act, exp, message);
 }, 'Def');
 

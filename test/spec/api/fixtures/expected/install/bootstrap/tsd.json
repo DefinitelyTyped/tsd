@@ -6,10 +6,10 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "bootstrap/bootstrap.d.ts": {
-      "commit": "e9be9177f6ef097329e080c70010f81dab08bf4d"
+      "commit": "0545e0567d242abcd295a63babb86c88e7d9911d"
     },
     "jquery/jquery.d.ts": {
-      "commit": "e9be9177f6ef097329e080c70010f81dab08bf4d"
+      "commit": "0545e0567d242abcd295a63babb86c88e7d9911d"
     }
   }
 }

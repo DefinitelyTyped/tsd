@@ -38,13 +38,13 @@ class DefCommit {
 		assertVar(commitSha, 'sha1', 'commitSha');
 
 		this.commitSha = commitSha;
+		objectUtils.lockProps(this, ['commitSha']);
 	}
 
 	parseJSON(commit: any): void {
 		assertVar(commit, 'object', 'commit');
 		assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
 
-		// TODO add a bit of checking? error? beh?
 		this.hubAuthor = GithubUser.fromJSON(commit.author);
 		this.hubCommitter = GithubUser.fromJSON(commit.committer);
 
@@ -53,8 +53,6 @@ class DefCommit {
 
 		this.message.parse(commit.commit.message);
 		this.hasMeta = true;
-
-		objectUtils.lockProps(this, ['commitSha', 'hasMeta']);
 	}
 
 	hasMetaData(): boolean {

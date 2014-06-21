@@ -2,11 +2,31 @@
   "written": {
     "bootstrap/bootstrap.d.ts": {
       "path": "bootstrap/bootstrap.d.ts",
-      "key": "bootstrap/bootstrap.d.ts-e9be9177f6ef097329e080c70010f81dab08bf4d",
+      "key": "bootstrap/bootstrap.d.ts-0545e0567d242abcd295a63babb86c88e7d9911d",
       "solved": true,
       "blobSha": "b9fe9cd59728baa3934a454c7bd979a46270b0bd",
       "commit": {
-        "commitSha": "e9be9177f6ef097329e080c70010f81dab08bf4d"
+        "commitSha": "0545e0567d242abcd295a63babb86c88e7d9911d",
+        "hubAuthor": {
+          "id": 874898,
+          "login": "basarat",
+          "avatar_url": "https://avatars.githubusercontent.com/u/874898?"
+        },
+        "hubCommitter": {
+          "id": 874898,
+          "login": "basarat",
+          "avatar_url": "https://avatars.githubusercontent.com/u/874898?"
+        },
+        "gitAuthor": {
+          "name": "Basarat Ali Syed",
+          "email": "basaratali@gmail.com",
+          "date": "2014-06-21T03:48:54.000Z"
+        },
+        "gitCommitter": {
+          "name": "Basarat Ali Syed",
+          "email": "basaratali@gmail.com",
+          "date": "2014-06-21T03:48:54.000Z"
+        }
       },
       "dependencies": [
         {
@@ -16,7 +36,8 @@
           "semver": null,
           "label": "jquery/jquery",
           "isMain": true,
-          "isLegacy": false
+          "isLegacy": false,
+          "history": []
         }
       ]
     }

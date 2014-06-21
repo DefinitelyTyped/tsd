@@ -58,10 +58,21 @@ module.exports = function (grunt) {
 			}
 		},
 		clean: {
-			tmp: ['tmp/**/*', 'test/tmp/**/*'],
+			tmp: [
+				'tmp/**/*',
+				'test/tmp/**/*'
+			],
 			dump: ['test/modules/**/dump'],
-			test: ['test/*/spec/build/**/*'],
-			build: ['build/**', 'build/**/*.js', 'build/**/*.d.ts', 'build/**/*.js.map'],
+			test: [
+				'test/spec/*/build/**/*',
+				'test/spec/*/fixtures/expected/*/*/dump'
+			],
+			build: [
+				'build/**',
+				'build/**/*.js',
+				'build/**/*.d.ts',
+				'build/**/*.js.map'
+			],
 			cruft: ['tscommand-*.tmp.txt']
 		},
 		copy: {

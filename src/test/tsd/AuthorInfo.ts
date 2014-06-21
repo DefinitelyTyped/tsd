@@ -9,9 +9,13 @@ import assertVar = require('../../xm/assertVar');
 import AuthorInfo = require('../../tsd/support/AuthorInfo');
 import helper = require('../../test/helper');
 
-export function serialise(author: AuthorInfo, recursive: number = 0): any {
+export function serialise(author: AuthorInfo): any {
 	assertVar(author, AuthorInfo, 'author');
-	return author.toJSON();
+	return {
+		name: author.name,
+		url: author.url,
+		email: author.email
+	};
 }
 
 export function assertion(author: AuthorInfo, values: any, message: string) {

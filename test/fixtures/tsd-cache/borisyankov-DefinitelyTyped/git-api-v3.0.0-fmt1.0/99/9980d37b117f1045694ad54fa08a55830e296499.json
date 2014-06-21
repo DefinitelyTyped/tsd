@@ -2,9 +2,9 @@
   "url": "https://api.github.com/repos/borisyankov/DefinitelyTyped/branches/master",
   "key": "9980d37b117f1045694ad54fa08a55830e296499",
   "contentType": "application/json; charset=utf-8",
-  "cacheCreated": "2014-06-12T14:50:44.915Z",
-  "cacheUpdated": "2014-06-12T14:50:44.915Z",
-  "httpETag": "\"9356259cff0222e903b29ec9d84c2945\"",
-  "httpModified": "2014-06-12T14:50:44.915Z",
-  "contentChecksum": "0e705dfae1d7edc69bb9aa6eb7d300b928b510d5"
+  "cacheCreated": "2014-06-21T03:12:48.208Z",
+  "cacheUpdated": "2014-06-21T04:08:50.639Z",
+  "httpETag": "\"00a84587c2b8fda51c10b7a80cb0f6a5\"",
+  "httpModified": "2014-06-21T04:08:50.639Z",
+  "contentChecksum": "54549545c41c30584977ef32c8fa1b841442464c"
 }
