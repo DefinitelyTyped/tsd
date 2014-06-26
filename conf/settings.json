@@ -8,10 +8,10 @@
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
 			"cacheCleanInterval": {
-				"days": 4
+				"days": 1
 			},
 			"localMaxAge": {
-				"days": 14
+				"days": 7
 			},
 			"httpInterval": {
 				"days": 1
@@ -29,10 +29,10 @@
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
 			"cacheCleanInterval": {
-				"days": 4
+				"days": 1
 			},
 			"localMaxAge": {
-				"days": 14
+				"days": 7
 			},
 			"httpInterval": {
 				"minutes": 5

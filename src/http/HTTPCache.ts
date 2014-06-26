@@ -217,13 +217,19 @@ class HTTPCache {
 
 			var baseDir = path.resolve(this.opts.cache.storeDir);
 
+			// list tree, collect dir names & file info
 			return fileIO.listTree(baseDir).map((target: string) => {
-				var first = path.relative(baseDir, target).match(/^\w+/);
-				if (first && typeOf.isString(first[0]) && /^[0-9a-f]{1,40}$/.test(first[0])) {
+				// grab first part of relative path
+				var first = path.relative(baseDir, target).match(/^[0-9a-f]+/);
+
+				// collect main directory names
+				if (first && typeOf.isString(first[0])) {
+					// keeper
 					if (!(first[0] in dirs)) {
 						dirs[first[0]] = path.join(baseDir, first[0]);
 					}
 				}
+				// collect files
 				return fileIO.stat(target).then((stat: fs.Stats) => {
 					if (stat.isFile()) {
 						files.push({
@@ -234,10 +240,10 @@ class HTTPCache {
 					return target;
 				});
 			}).then(() => {
-				// strict filter
-				var remove = files.filter((obj: PathStat) => {
+				// strict filter files and find empty dirs
+				var removeFiles = files.filter((obj: PathStat) => {
 					var ext = path.extname(obj.path);
-					var first = path.relative(baseDir, obj.path).match(/^\w+/);
+					var first = path.relative(baseDir, obj.path).match(/^[0-9a-f]+/);
 					if (ext !== '.json' && ext !== '.raw') {
 						delete dirs[first];
 						return false;
@@ -251,14 +257,26 @@ class HTTPCache {
 						delete dirs[first];
 						return false;
 					}
+					// ok, let's delete this one
 					return true;
 				}).map(obj => obj.path);
 
-				return Promise.map(remove, (target: string) => {
+				// use full paths
+				var removeDirs = Object.keys(dirs).map(key => dirs[key]);
+
+				// let's not delete files from dirs we'll be rimraffing anyway
+				// sometimes OS throws errors when internal stats aren't updated after unlink (why? who knows)
+				removeFiles = removeFiles.filter((file) => {
+					return removeDirs.every((dir) => {
+						return file.indexOf(dir) !== 0;
+					});
+				});
+
+				return Promise.map(removeFiles, (target: string) => {
 					return fileIO.removeFile(target);
 				}).then(() => {
-					return Promise.map(Object.keys(dirs), (key: string) => {
-						return fileIO.rimraf(dirs[key]);
+					return Promise.map(removeDirs, (dir: string) => {
+						return fileIO.rimraf(dir);
 					});
 				});
 			});
