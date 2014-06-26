@@ -41,9 +41,8 @@ class PackageLinker {
 	private managers: PackageType[] = [];
 
 	constructor() {
-
 		this.managers.push(new PackageType('node', 'node_modules', 'package.json'));
-		this.managers.push(new PackageType('bower', 'bower_modules', 'bower.json'));
+		this.managers.push(new PackageType('bower', 'bower_components', 'bower.json'));
 	}
 
 	scanDefinitions(baseDir: string): Promise<PackageDefinition[]> {

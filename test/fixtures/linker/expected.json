@@ -3,7 +3,7 @@
         "name": "bar",
         "manager": "bower",
         "definitions": [
-            "bower_modules/bar/bar.d.ts"
+            "bower_components/bar/bar.d.ts"
         ]
     },
     {
