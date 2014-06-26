@@ -115,16 +115,6 @@ module.exports = function (grunt) {
 			// some extra js tests
 			spec: ['test/spec/*.js']
 		},
-		typson: {
-			options: {
-
-			},
-			http: {
-				src: [
-					'./src/http/types.ts'
-				]
-			}
-		},
 		mocha_unfunk: {
 			dev: {
 				options: {
@@ -286,8 +276,7 @@ module.exports = function (grunt) {
 		'ts:api',
 		'copy:cli',
 		'regex-replace:cli',
-		'tslint:source',
-		// 'export_declaration:api'
+		'tslint:source'
 	]);
 	gtx.alias('build', [
 		'rebuild',
