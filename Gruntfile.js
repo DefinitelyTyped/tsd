@@ -6,6 +6,8 @@ module.exports = function (grunt) {
 	var path = require('path');
 	var util = require('util');
 
+	require('time-grunt')(grunt);
+
 	var isTravis = (process.env.TRAVIS === 'true');
 	var isVagrant = (process.env.PWD === '/vagrant');
 	if (isVagrant) {
@@ -36,7 +38,6 @@ module.exports = function (grunt) {
 				formatter: 'tslint-path-formatter'
 			},
 			source: ['src/**/*.ts', '!src/test', '!src/spec'],
-			helper: ['test/*.ts'],
 			testing: [
 				'src/test/**/*.ts',
 				'src/spec/**/*.ts'
@@ -211,9 +212,9 @@ module.exports = function (grunt) {
 			src: [srcPath + '**/*.ts'],
 			outDir: outPath
 		});
-		macro.add('tslint', {
+		/*macro.add('tslint', {
 			src: [srcPath + '** /*.ts']
-		});
+		});*/
 		if (macro.getParam('http', 0) > 0) {
 			macro.add('connect', {
 				options: {

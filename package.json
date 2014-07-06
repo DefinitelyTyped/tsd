@@ -95,7 +95,7 @@
     "grunt-todos": "~0.3.0",
     "grunt-ts": "~1.11.2",
     "grunt-ts-clean": "^0.2.0",
-    "grunt-tslint": "~0.4.1",
+    "grunt-tslint": "git+https://github.com/Bartvds/grunt-tslint#feature/multi",
     "grunt-tv4": "~0.4.0",
     "gruntfile-gtx": "~0.3.0",
     "jshint-path-reporter": "~0.1",
@@ -103,6 +103,7 @@
     "ncp": "^0.5.1",
     "package.json-schema": "~0.2.0",
     "source-map-support": "~0.2.6",
+    "time-grunt": "^0.3.2",
     "tslint-path-formatter": "~0.1.1",
     "typescript": "~1.0.1"
   }

@@ -16,7 +16,7 @@ import tsdHelper = require('../../test/tsdHelper');
 import Def = require('../../tsd/data/Def');
 
 describe('Def', () => {
-	
+
 	var fixtures = helper.getDirNameFixtures();
 
 	function assertIsDef(path: string, expectMatch: boolean = true) {
