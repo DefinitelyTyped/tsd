@@ -179,7 +179,7 @@ Use the `link` command and your `tsd.d.ts` will be updated with paths to the fil
 $ tsd link
 ````
 
-This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `defintions` sub-element that contain relative path(s) to `.d.ts` files:
+This feature will scan `package.json` and `bower.json` files for a `typescript` element. This element then contains `definition` or `definitions` sub-element that contain relative path(s) to `.d.ts` files:
 
 
 ````json
