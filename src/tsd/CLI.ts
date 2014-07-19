@@ -407,13 +407,55 @@ export function getExpose(): Expose {
 	});
 
 	expose.defineCommand((cmd: ExposeCommand) => {
+		cmd.name = 'install';
+		cmd.label = 'install definitions using one or more globbing patterns';
+		cmd.examples = [
+			['tsd install mocha', 'install mocha'],
+			['tsd install angularjs/', 'install full angularjs bundle']
+		];
+		cmd.variadic = ['...pattern'];
+		cmd.groups = [Group.query];
+		cmd.options = [
+			Opt.semver, Opt.date, Opt.commit,
+			Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
+		];
+		cmd.execute = (ctx: ExposeContext) => {
+			return getSelectorJob(ctx).then((job: Job) => {
+				tracker.query(job.query);
+
+				return job.api.select(job.query, job.options).then((selection: Selection) => {
+
+					if (selection.selection.length === 0) {
+						output.ln().report().signal('zero results').ln();
+						return;
+					}
+					output.line();
+
+					table.fileTable(selection.selection);
+
+					output.ln().report(true).span('running').space().accent('install').span('..').ln();
+
+					return job.api.install(selection, job.options).then((result: InstallResult) => {
+						print.installResult(result);
+
+						tracker.install('install', result);
+					}).catch((err) => {
+						output.report().span('install').space().error('error!').ln();
+						reportError(err, false);
+					});
+				});
+			}).catch(reportError);
+		};
+	});
+
+	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'query';
 		cmd.label = 'search definitions using one or more globbing patterns';
 		cmd.examples = [
 			['tsd query d3 --info --history', 'view d3 info & history'],
 			['tsd query mocha --action install', 'install mocha'],
 			['tsd query jquery.*/*', 'search jquery plugins'],
-			['tsd query angular* --resolve', 'list angularjs bundle']
+			['tsd query angularjs/ --resolve', 'list full angularjs bundle']
 		];
 		cmd.variadic = ['...pattern'];
 		cmd.groups = [Group.query];
