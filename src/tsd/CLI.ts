@@ -317,9 +317,6 @@ export function getExpose(): Expose {
 		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getContext(ctx).then((context: Context) => {
-				ctx.out.ln();
-				ctx.out.line(PackageJSON.getLocal().getNameVersion());
-
 				return runUpdateNotifier(ctx, context);
 			}).catch(reportError);
 		};

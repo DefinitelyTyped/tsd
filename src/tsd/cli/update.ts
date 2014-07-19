@@ -55,7 +55,7 @@ export function runNotifier(context: Context, waitForIt: boolean = false): Promi
 export function showNotifier(output: StyledOut): Promise<void> {
 	return Promise.attempt(() => {
 		if (notifier && notifier.update) {
-			if (notifier.type === 'major' || notifier.type === 'minor') {
+			if (notifier.update.type === 'major' || notifier.update.type === 'minor') {
 				output.ln();
 				output.report(true).span('update available: ');
 				output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
