@@ -25,6 +25,11 @@ var lockProps = [
 	'isMain',
 ];
 
+var legacyFolders = [
+	'legacy',
+	'releases'
+];
+
 /*
  Def: single definition in repo (identified by its path)
  */
@@ -68,7 +73,7 @@ class Def {
 		this.isMain = (parts.length === 2);
 		this.isLegacy = false;
 
-		if (parts.length > 2 && parts[1] === 'legacy') {
+		if (parts.length > 2 && legacyFolders.indexOf(parts[1]) > -1) {
 			this.isLegacy = true;
 			this.name = parts.slice(2).join(':');
 			this.isMain = (parts.length === 3);
