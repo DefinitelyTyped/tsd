@@ -14,7 +14,6 @@ module.exports = function (grunt) {
 		grunt.log.writeln('-> ' + 'vagrant detected'.cyan);
 	}
 	var cpuCores = require('os').cpus().length;
-	//grunt.log.writeln(util.inspect(process.env));
 
 	var gtx = require('gruntfile-gtx').wrap(grunt);
 	gtx.loadAuto();
