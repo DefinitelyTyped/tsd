@@ -141,7 +141,7 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
  */
 // TODO unit test this
 // TODO why not by default make writable? why ever use this without writable?
-export function mkdirCheck(dir: string, writable: boolean = false, testWritable: boolean = false): Promise<string> {
+export function mkdirCheck(dir: string, testWritable: boolean = false): Promise<string> {
 	dir = path.resolve(dir);
 
 	return exists(dir).then((exists: boolean) => {
@@ -150,17 +150,11 @@ export function mkdirCheck(dir: string, writable: boolean = false, testWritable:
 				if (!isDir) {
 					throw (new Error('path exists but is not a directory ' + dir));
 				}
-				if (writable) {
-					return chmod(dir, '744');
-				}
-				return null;
+				return chmod(dir, '744');
 			});
 		}
 		else {
-			if (writable) {
-				return mkdirpP(dir, '744');
-			}
-			return mkdirpP(dir);
+			return mkdirpP(dir, '744');
 		}
 	}).then(() => {
 		if (testWritable) {
@@ -304,7 +298,7 @@ export function read(filename: string, opts?: Object): Promise<any> {
 export function write(filename: string, content: any, opts?: Object): Promise<void> {
 	filename = path.resolve(filename);
 
-	return mkdirCheck(path.dirname(filename), true).then(() => {
+	return mkdirCheck(path.dirname(filename)).then(() => {
 		return new Promise<void>((resolve, reject) => {
 			fs.writeFile(filename, content, opts, (err) => {
 				if (err) {

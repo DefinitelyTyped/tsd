@@ -133,6 +133,6 @@ export class Hash<T> {
 // use with TypeScript enums
 export function enumNames(enumer: Object): string[] {
 	return Object.keys(enumer).filter((value: string) => {
-		return !/\d+/.test(value);
+		return !/^\d+$/.test(value);
 	});
 }

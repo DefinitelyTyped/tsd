@@ -17,10 +17,6 @@ export function sha1(data: any): string {
 	return crypto.createHash('sha1').update(data).digest('hex');
 }
 
-export function sha1Short(data: any, length: number = 8): string {
-	return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
-}
-
 // don't trim additional whitespace
 // var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
 var hashNormExp = /[\r\n]+/g;

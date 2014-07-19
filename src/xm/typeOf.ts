@@ -105,7 +105,7 @@ export function isFlagOn(value: any): boolean {
 	if (!isValid(value)) {
 		return false;
 	}
-	value = ('' + value).toLowerCase();
+	value = String(value).trim().toLowerCase();
 	if (value === '' || value === '0') {
 		return false;
 	}

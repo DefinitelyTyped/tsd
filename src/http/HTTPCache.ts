@@ -159,7 +159,7 @@ class HTTPCache {
 			return this._init;
 		}
 		// first create directory
-		return this._init = fileIO.mkdirCheck(this.opts.cache.storeDir, true).return();
+		return this._init = fileIO.mkdirCheck(this.opts.cache.storeDir).return();
 	}
 
 	checkCleanCache(): Promise<void> {
