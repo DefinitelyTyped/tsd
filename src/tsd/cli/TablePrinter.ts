@@ -68,7 +68,7 @@ class TablePrinter {
 		infoPrint.init();
 		commitPrint.init();
 
-		files.sort(defUtil.fileCompare).forEach((file: DefVersion) => {
+		files.sort(defUtil.fileCompare).forEach((file: DefVersion, i:number) => {
 			filePrint.next();
 			filePrint.row.project.out.accent(' - ').plain(file.def.project);
 			filePrint.row.slash.out.accent('/');
@@ -130,14 +130,15 @@ class TablePrinter {
 			}
 
 			if (file.def.history.length > 0) {
-				commitPrint.next();
-				commitPrint.row.block.out.ln();
 
 				var textWidth = cliUtils.getViewWidth(76, 96);
 
+				commitPrint.next();
+				var out = commitPrint.row.block.out;
+				out.ln();
+
 				file.def.history.slice(0).reverse().forEach((file: DefVersion, i: number) => {
 					commitPrint.next();
-					var out = commitPrint.row.block.out;
 
 					out.plain(file.commit.commitShort);
 					if (file.commit.changeDate) {
@@ -165,8 +166,19 @@ class TablePrinter {
 							return false;
 						});
 					}
-					out.ln();
+
+					if (i < file.def.history.length - 1) {
+						out.ln();
+					}
+					commitPrint.close();
 				});
+			}
+			if (file.info || file.def.history.length > 0) {
+				if (i < files.length - 1) {
+					filePrint.next();
+					filePrint.row.project.out.ln();
+					filePrint.close();
+				}
 			}
 		});
 
