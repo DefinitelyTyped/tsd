@@ -28,16 +28,18 @@ class InfoParser extends CoreModule {
 	parseDefInfo(file: DefVersion): Promise<DefVersion> {
 		return this.core.content.loadContent(file).then((blob: DefBlob) => {
 			var source = blob.content.toString('utf8');
-
-			if (header.isPartial(source)) {
-				return file;
-			}
 			if (file.info) {
 				// TODO why not do an early bail and skip reparse?
 				file.info.resetFields();
 			}
 			else {
 				file.info = new DefInfo();
+			}
+
+			file.info.externals = defUtil.extractExternals(source);
+
+			if (header.isPartial(source)) {
+				return file;
 			}
 
 			var res: header.Result = header.parse(source);

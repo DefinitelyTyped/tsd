@@ -126,6 +126,15 @@ class TablePrinter {
 						}
 					});
 				}
+
+				if (file.info.externals && file.info.externals.length > 0) {
+					infoPrint.next();
+					infoPrint.row.label.out.ln();
+					file.info.externals.forEach((external) => {
+						infoPrint.next();
+						infoPrint.row.label.out.plain('   ').accent(' - ').plain(external + ' (module)');
+					});
+				}
 				infoPrint.close();
 			}
 

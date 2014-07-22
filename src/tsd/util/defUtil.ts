@@ -137,6 +137,26 @@ export function extractReferenceTags(source: string): string[] {
 	return ret;
 }
 
+var externalModules = /(?:^|\r?\n)declare module *(['"])(\w+)\1\s*{/g;
+
+export function extractExternals(source: string): string [] {
+	var ret: string[] = [];
+	var match: RegExpExecArray;
+
+	if (!externalModules.global) {
+		throw new VError('referenceTagExp RegExp must have global flag');
+	}
+	externalModules.lastIndex = 0;
+
+	while ((match = externalModules.exec(source))) {
+		if (match.length >= 2 && match[2].length > 0) {
+			ret.push(match[2]);
+		}
+	}
+
+	return ret;
+}
+
 export function contains(list: DefVersion[], file: DefVersion): boolean {
 	var p = file.def.path;
 	for (var i = 0, ii = list.length; i < ii; i++) {
