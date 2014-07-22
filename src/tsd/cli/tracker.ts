@@ -111,6 +111,14 @@ class Tracker {
 		});
 	}
 
+	link(packg: string): void {
+		this.sendEvent({
+			ec: 'link',
+			ea: packg,
+			dp: this.getPage()
+		});
+	}
+
 	error(err: any): void {
 		if (err) {
 			if (err.message) {

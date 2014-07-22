@@ -225,6 +225,18 @@ export function getExpose(): Expose {
 		print.reportError(err, head);
 	}
 
+	function link(job: Job): Promise<PackageDefinition[]> {
+		return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
+			if (packages.length > 0) {
+				packages.forEach((linked) => {
+					tracker.link(linked.name + ' (' + linked.manager + ')');
+					output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
+				});
+			}
+			return packages;
+		});
+	}
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	expose.before = (ctx: ExposeContext) => {
@@ -522,6 +534,8 @@ export function getExpose(): Expose {
 					print.installResult(result);
 
 					tracker.install('reinstall', result);
+				}).then(() => {
+					return link(job);
 				});
 			}).catch(reportError);
 		};
@@ -556,7 +570,16 @@ export function getExpose(): Expose {
 		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
-				if (job.api.context.config.bundle) {
+				return Promise.attempt(() => {
+					if (!job.api.context.config.bundle) {
+						output.line();
+						output.report(true).line('no bundle configured').ln();
+						return null;
+					}
+
+					output.line();
+					output.info(true).span('running').space().accent(cmd.name).ln();
+
 					return job.api.updateBundle(job.api.context.config.bundle, true).then((changes) => {
 						if (changes.someRemoved()) {
 							output.ln().report(true).line('removed:').ln();
@@ -571,10 +594,12 @@ export function getExpose(): Expose {
 							});
 						}
 						if (!changes.someAdded() && !changes.someRemoved()) {
-							output.ln().report(true).line('nothing to rebundle').ln();
+							output.ln().report(true).span('nothing to rebundle').ln();
 						}
 					});
-				}
+				}).then(() => {
+					return link(job);
+				});
 			}).catch(reportError);
 		};
 	});
@@ -588,15 +613,9 @@ export function getExpose(): Expose {
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				output.line();
-				output.info(true).span('running').space().accent(cmd.name).ln();
-
-				return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
-					if (packages.length > 0) {
-						output.ln();
-						packages.forEach((linked) => {
-							output.indent(1).report(true).line(linked.name + ' (' + linked.manager + ')');
-						});
-					}
+				output.info(true).span('running').space().accent(cmd.name).ln().ln();
+				return link(job).then(() => {
+					output.report(true).line('no (new) packages to link');
 				});
 			}).catch(reportError);
 		};

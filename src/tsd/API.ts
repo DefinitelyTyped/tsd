@@ -195,13 +195,14 @@ class API {
 		var manager = new BundleManager(this.core.context.getTypingsDir());
 
 		return linker.scanDefinitions(baseDir).then((packages) => {
-			var refs = packages.reduce((memo: string[], packaged) => {
-				return packaged.definitions.reduce((memo, ref) => {
-					memo.push(ref);
+			return Promise.reduce(packages, (memo: PackageDefinition[], packaged) => {
+				return manager.addToBundle(this.context.config.bundle, packaged.definitions, true).then((change) => {
+					if (change.someAdded()) {
+						memo.push(packaged);
+					}
 					return memo;
-				}, memo);
+				});
 			}, []);
-			return manager.addToBundle(this.context.config.bundle, refs, true).return(packages);
 		});
 	}
 
