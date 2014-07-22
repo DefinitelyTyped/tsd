@@ -3,6 +3,7 @@
 'use strict';
 
 import VError = require('verror');
+import semver = require('semver');
 import dateUtils = require('../../xm/dateUtils');
 
 import Const = require('../context/Const');
@@ -262,6 +263,22 @@ export function defCompare(aa: Def, bb: Def): number {
 		return 1;
 	}
 	return 0;
+}
+
+export function defSemverCompare(aa: Def, bb: Def): number {
+	if (!bb) {
+		return 1;
+	}
+	if (!aa) {
+		return -1;
+	}
+	if (aa.semver && !bb.semver) {
+		return -1;
+	}
+	else if (!aa.semver && bb.semver) {
+		return 1;
+	}
+	return semver.compare(aa.semver, bb.semver);
 }
 
 export function fileCommitCompare(aa: DefVersion, bb: DefVersion): number {

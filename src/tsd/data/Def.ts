@@ -55,6 +55,8 @@ class Def {
 	// versions from commits that changed this file
 	history: DefVersion[] = [];
 
+	releases: Def[] = [];
+
 	constructor(path: string) {
 		assertVar(path, 'string', 'path');
 
@@ -95,6 +97,7 @@ class Def {
 			var valid = semver.valid(sem, true);
 			if (valid) {
 				this.semver = valid;
+				this.isLegacy = true;
 				this.name = this.name.substr(0, semMatch.index);
 			}
 			else {

@@ -101,6 +101,17 @@ class TablePrinter {
 				infoPrint.next();
 				infoPrint.row.label.out.ln();
 
+				if (file.def.releases && file.def.releases.length > 0) {
+					infoPrint.next();
+					infoPrint.row.label.out.plain('   ').accent(' v ').plain('latest');
+					file.def.releases.sort(defUtil.defSemverCompare).forEach((def) => {
+						infoPrint.next();
+						infoPrint.row.label.out.plain('   ').accent(' v ').plain(def.semver);
+					});
+					infoPrint.next();
+					infoPrint.row.label.out.ln();
+				}
+
 				infoPrint.next();
 				infoPrint.row.label.out.plain('   ').plain(file.info.name);
 

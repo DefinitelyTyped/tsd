@@ -87,6 +87,8 @@ class DefIndex {
 		var def: Def;
 		var file: DefVersion;
 
+		var releases: Def[] = [];
+
 		Lazy(<Object>tree.tree).each((elem: GithubJSONTreeElem) => {
 			var char = elem.path.charAt(0);
 			if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDefPath(elem.path)) {
@@ -101,8 +103,24 @@ class DefIndex {
 				}
 				def.head = file;
 				file.setBlob(elem.sha);
+
+				if (def.isLegacy) {
+					releases.push(def);
+				}
 			}
 		});
+
+		// collect release versions
+		var defs = this._definitions.values();
+		releases.forEach((legacy) => {
+			defs.some((def) => {
+				if (def.project === legacy.project && def.name === legacy.name && def.isLegacy === false) {
+					def.releases.push(legacy);
+					return true;
+				}
+			});
+		});
+
 		this._hasIndex = true;
 	}
 
