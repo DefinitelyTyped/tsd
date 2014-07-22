@@ -26,7 +26,7 @@
 /// <reference path="source-map-support/source-map-support.d.ts" />
 
 /// <reference path="mocha/mocha.d.ts" />
-/// <reference path="chai/chai-assert.d.ts" />
+/// <reference path="chai/chai.d.ts" />
 /// <reference path="chai/chai-fuzzy-assert.d.ts" />
 /// <reference path="chai/chai-fs-assert.d.ts" />
 /// <reference path="chai/chai-as-promised-assert.d.ts" />

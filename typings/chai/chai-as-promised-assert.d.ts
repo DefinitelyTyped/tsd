@@ -3,9 +3,9 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-///<reference path="../chai/chai-assert.d.ts" />
+///<reference path="../chai/chai.d.ts" />
 
-declare module Chai {
+declare module chai {
 	export interface Assert {
 		isFulfilled(promise:any, msg?:string):any;
 

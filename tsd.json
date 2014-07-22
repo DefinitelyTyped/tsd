@@ -89,6 +89,9 @@
 		},
 		"type-detect/type-detect.d.ts": {
 			"commit": "47ebd394626861a9d492a7eac1f6aca96df6dfc1"
+		},
+		"chai/chai.d.ts": {
+			"commit": "5a8f9e312f3db37b8efc4dcdd1de204f60e67eb1"
 		}
 	}
 }
