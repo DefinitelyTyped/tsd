@@ -37,6 +37,11 @@ class Query {
 		this.patterns.push(new NameMatcher(pattern));
 	}
 
+	setVersionRange(range: string): void {
+		assertVar(range, 'string', 'range');
+		this.versionMatcher = new VersionMatcher(range);
+	}
+
 	get requiresHistory(): boolean {
 		return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
 	}

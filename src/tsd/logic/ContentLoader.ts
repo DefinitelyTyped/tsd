@@ -23,10 +23,6 @@ import Options = require('../Options');
 import Core = require('./Core');
 import CoreModule = require('./CoreModule');
 
-interface CacheItem {
-	buffer: Buffer;
-}
-
 class ContentLoader extends CoreModule {
 
 	private cache: LRU.Cache<Buffer>;

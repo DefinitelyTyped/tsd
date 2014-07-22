@@ -23,7 +23,6 @@ export function serialise(info: DefInfo, recursive: number = 0): any {
 	json.version = info.version;
 
 	json.projects = info.projects;
-	json.references = info.references.slice(0);
 	json.authors = [];
 	if (info.authors) {
 		info.authors.forEach((author: AuthorInfo) => {
@@ -43,7 +42,6 @@ export function assertion(info: DefInfo, values: any, message: string) {
 
 	assert.deepEqual(info.projects, values.projects, message + ': projects');
 	unordered.assertionNaive(info.authors, values.authors, testAuthor.assertion, message + ': authors');
-	assert.deepEqual(info.references, values.references, message + ': references');
 }
 /*
 var assertAuthor = unordered.getAssertLike<AuthorInfo>((actual, expected) => {

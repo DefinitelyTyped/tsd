@@ -88,7 +88,6 @@ class VersionMatcher {
 				latest = def;
 			}
 			else if (semver.gt(def.semver, latest.semver)) {
-				console.log('VersionMatcher.filter', 'gt', def.semver, latest.semver);
 				latest = def;
 			}
 		}

@@ -16,7 +16,6 @@ class DefInfo {
 
 	authors: AuthorInfo[];
 
-	references: string[] = [];
 	externals: string[] = [];
 
 	constructor() {
@@ -33,8 +32,6 @@ class DefInfo {
 
 	resetAll() {
 		this.resetFields();
-
-		this.references = [];
 	}
 
 	toString(): string {
