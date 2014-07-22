@@ -48,56 +48,56 @@
 			"name": "b",
 			"semver": "1.2.0",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-1.2.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.0",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-v1.2-alpha.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.0-alpha",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-1.2-alpha.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.0-alpha",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-v1.2.3-alpha.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.3-alpha",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-1.2.3-alpha.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.3-alpha",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-1.2-alpha-0.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.0-alpha-0",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		},
 		"a/b-v1.2.3-alpha-0.1.2.d.ts": {
 			"project": "a",
 			"name": "b",
 			"semver": "1.2.3-alpha-0.1.2",
 			"isMain": true,
-			"isLegacy": false
+			"isLegacy": true
 		}
 	}
 }
