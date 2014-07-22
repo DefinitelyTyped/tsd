@@ -1,8 +1,8 @@
+/// <reference path="_ref.d.ts" />
+
 'use strict';
 
 import bootstrap = require('./bootstrap');
-
-[bootstrap];
 
 import API = require('./tsd/API');
 import assertVar = require('./xm/assertVar');
@@ -17,6 +17,7 @@ export import InfoMatcher = require('./tsd/select/InfoMatcher');
 export import VersionMatcher = require('./tsd/select/VersionMatcher');
 
 export import defUtil = require('./tsd/util/defUtil');
+export import getContent = require('./getContent');
 
 export function getAPI(configPath: string, verbose: boolean = false): API {
 	assertVar(configPath, 'string', 'configPath');
@@ -25,6 +26,8 @@ export function getAPI(configPath: string, verbose: boolean = false): API {
 
 // haxx compiler emit bug
 [
+	bootstrap,
+	getContent,
 	Options,
 	Query,
 	Context,
