@@ -223,6 +223,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.description = 'save to reference bundle';
 		opt.type = 'string[]';
 		opt.placeholder = 'name';
+		opt.hidden = true;
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
