@@ -43,6 +43,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.description = 'development mode';
 		opt.type = 'flag';
 		opt.global = true;
+		opt.hidden = true;
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
@@ -65,6 +66,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.description = 'verbose output';
 		opt.type = 'flag';
 		opt.global = true;
+		opt.hidden = true;
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
@@ -73,6 +75,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.type = 'flag';
 		opt.default = true;
 		opt.global = true;
+		opt.hidden = true;
 	});
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -146,6 +149,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.type = 'string';
 		opt.placeholder = 'path';
 		opt.global = true;
+		opt.hidden = true;
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
@@ -156,6 +160,7 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.default = CacheMode[CacheMode.allowUpdate];
 		opt.enum = collection.enumNames(CacheMode);
 		opt.global = true;
+		opt.hidden = true;
 	});
 
 	expose.defineOption((opt: ExposeOption) => {

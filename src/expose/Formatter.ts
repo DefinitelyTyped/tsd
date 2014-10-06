@@ -77,7 +77,6 @@ class Formatter {
 
 		var commandOptNames: string[] = [];
 		var globalOptNames: string[] = [];
-		var detailPad: string = this.output.nibs.decl;
 
 		var allCommands = this.expose.commands.keys();
 		var allGroups = this.expose.groups.values();
@@ -108,14 +107,16 @@ class Formatter {
 
 		var addOption = (name: string) => {
 			commands.next();
+
 			var option: Option = this.expose.options.get(name);
 			var command = commands.row.command.out;
 			var label = commands.row.label.out;
+
 			if (!option) {
 				command.indent(1).sp().accent('--').plain(name).ln();
 				label.indent(1).warning('<undefined>').ln();
 			}
-			else {
+			else if(!option.hidden) {
 				command.indent(1).sp().accent('--').plain(name);
 				if (option.placeholder) {
 					command.sp().muted('<').plain(option.placeholder).muted('>');
@@ -145,9 +146,9 @@ class Formatter {
 						}) + '\'';
 					}).join(', ')).accent(' ]').ln();
 				}
-			}
 
-			addNote(option.note);
+				addNote(option.note);
+			}
 		};
 
 		var addCommand = (cmd: Command, group: Group) => {
@@ -209,7 +210,7 @@ class Formatter {
 
 		optKeys.forEach((name: string) => {
 			var option: Option = this.expose.options.get(name);
-			if (option.command) {
+			if (option.command && !option.hidden) {
 				// addOption(option);
 				commandOptNames.push(option.name);
 			}
@@ -217,7 +218,7 @@ class Formatter {
 
 		optKeys.forEach((name: string) => {
 			var option: Option = this.expose.options.get(name);
-			if (option.global && !option.command) {
+			if (option.global && !option.command && !option.hidden) {
 				// addOption(option);
 				globalOptNames.push(option.name);
 			}

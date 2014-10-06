@@ -314,7 +314,9 @@ export function getExpose(): Expose {
 		cmd.label = 'display usage help';
 		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
-			return getContext(ctx).then((context: Context) => {
+			return showHeader().then(() => {
+				return getContext(ctx);
+			}).then((context: Context) => {
 				ctx.out.ln();
 				ctx.expose.reporter.printCommands();
 
@@ -328,7 +330,9 @@ export function getExpose(): Expose {
 		cmd.label = 'display tsd version info';
 		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
-			return getContext(ctx).then((context: Context) => {
+			return showHeader().then(() => {
+				return getContext(ctx);
+			}).then((context: Context) => {
 				return runUpdateNotifier(ctx, context);
 			}).catch(reportError);
 		};
@@ -358,13 +362,7 @@ export function getExpose(): Expose {
 		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
-				output.ln();
-				var opts = {
-					indent: 3,
-					flowLevel: -1
-				};
-				return output.plain(JSON.stringify(job.api.context.getInfo(true), null, 3));
-
+				output.ln().plain(JSON.stringify(job.api.context.getInfo(true), null, 3));
 			}).catch(reportError);
 		};
 	});
@@ -378,7 +376,7 @@ export function getExpose(): Expose {
 			return getAPIJob(ctx).then((job: Job) => {
 				// TODO expose raw/api/all option
 				return job.api.purge(true, true).then(() => {
-
+					output.ln().info().success('purged cache').ln();
 				});
 			}).catch(reportError);
 		};

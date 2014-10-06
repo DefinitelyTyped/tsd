@@ -13,6 +13,7 @@ class Option {
 	default: any;
 	command: string;
 	global: boolean = false;
+	hidden: boolean = false;
 	// TODO implement optional
 	optional: boolean = true;
 	enum: any[] = [];
