@@ -61,6 +61,7 @@ class HTTPCache {
 	opts: HTTPOpts;
 
 	private _init: Promise<void>;
+	private _cleaning: Promise<void>;
 
 	private jobs = new collection.Hash<Promise<CacheObject>>();
 	private jobTimers = new collection.Hash<NodeJS.Timer>();
@@ -163,14 +164,19 @@ class HTTPCache {
 	}
 
 	checkCleanCache(): Promise<void> {
+		if (this._cleaning) {
+			return this._cleaning;
+		}
 		if (!this._init || !this.opts.cache.allowClean || !typeOf.isNumber(this.opts.cache.cleanInterval)) {
 			return Promise.resolve();
 		}
 		if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cache.cleanInterval) {
-			return Promise.resolve();
+			return this._cleaning || Promise.resolve();
 		}
 
-		return fileIO.exists(this.manageFile).then((exists: boolean) => {
+		var now = new Date();
+
+		return this._cleaning = fileIO.exists(this.manageFile).then((exists: boolean) => {
 			if (!exists) {
 				return null;
 			}
@@ -186,24 +192,27 @@ class HTTPCache {
 		}).then((manageInfo) => {
 			if (manageInfo) {
 				var date = new Date(manageInfo.lastSweep);
-				if (date.getTime() > Date.now() - this.opts.cache.cleanInterval) {
+				if (date.getTime() > now.getTime() - this.opts.cache.cleanInterval) {
 					// fine, keep it
 					return;
 				}
 			}
 			// clean cache
 			return this.cleanupCacheAge(this.opts.cache.cleanInterval).then(() => {
-				this.cacheSweepLast = new Date();
 				if (!manageInfo) {
 					manageInfo = {
-						lastSweep: this.cacheSweepLast.toISOString()
+						lastSweep: now.toISOString()
 					};
 				}
 				else {
-					manageInfo.lastSweep = this.cacheSweepLast.toISOString();
+					manageInfo.lastSweep = now.toISOString();
 				}
 				return fileIO.write(this.manageFile, new Buffer(JSON.stringify(manageInfo, null, 2), 'utf8'));
 			});
+		}).finally(() => {
+			// ready for another run
+			this.cacheSweepLast = new Date();
+			this._cleaning = null;
 		});
 	}
 
@@ -238,18 +247,21 @@ class HTTPCache {
 						});
 					}
 					return target;
+				}).catch((e) => {
+					console.log('\n-stat error-\n');
+					console.log(e);
 				});
 			}).then(() => {
 				// strict filter files and find empty dirs
 				var removeFiles = files.filter((obj: PathStat) => {
 					var ext = path.extname(obj.path);
 					var first = path.relative(baseDir, obj.path).match(/^[0-9a-f]+/);
-					if (ext !== '.json' && ext !== '.raw') {
+					var name = path.basename(obj.path, ext);
+					if (!typeOf.isSha(name)) {
 						delete dirs[first];
 						return false;
 					}
-					var name = path.basename(obj.path, ext);
-					if (!typeOf.isSha(name)) {
+					if (ext !== '.json' && ext !== '.raw') {
 						delete dirs[first];
 						return false;
 					}
@@ -273,10 +285,16 @@ class HTTPCache {
 				});
 
 				return Promise.map(removeFiles, (target: string) => {
-					return fileIO.removeFile(target);
+					return fileIO.removeFile(target)/*.catch((e) => {
+						console.log('\n-removeFile error-\n');
+						console.log(e);
+					})*/;
 				}).then(() => {
 					return Promise.map(removeDirs, (dir: string) => {
-						return fileIO.rimraf(dir);
+						return fileIO.rimraf(dir)/*.catch((e) => {
+							console.log('\n-removeDir error-\n');
+							console.log(e);
+						})*/;
 					});
 				});
 			});
