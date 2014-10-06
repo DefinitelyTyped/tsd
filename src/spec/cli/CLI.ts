@@ -82,7 +82,7 @@ describe('CLI Query', () => {
 	var trimHeaderExp = /^\s*?(>> tsd) (\d+\.\d+\.\d+)(\S+)?([ \S]*(?:\r?\n)+)/;
 
 	function trimHeader(str: string): string {
-		return str.replace(trimHeaderExp, '');
+		return str.replace(trimHeaderExp, '').replace(/^(\r?\n)+/, '');
 	}
 
 	function assertCLIResult(result: cp.RunCLIResult, test, info: TestInfo, args): void {
