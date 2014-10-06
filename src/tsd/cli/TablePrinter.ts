@@ -82,69 +82,75 @@ class TablePrinter {
 			}
 
 			if (file.dependencies && file.dependencies.length > 0) {
-				filePrint.next();
-				filePrint.row.project.out.ln();
+				/*filePrint.next();
+				filePrint.row.project.out.ln();*/
 
 				var deps = defUtil.mergeDependenciesOf(file.dependencies).filter((refer: DefVersion) => {
 					return refer.def.path !== file.def.path;
 				});
 				deps.forEach((file) => {
 					filePrint.next();
-					filePrint.row.project.out.indent().accent('>> ').plain(file.def.project);
-					filePrint.row.slash.out.accent('/');
+					filePrint.row.project.out.indent().accent('-> ').plain(file.def.project);
+					filePrint.row.slash.out.accent('>');
 					filePrint.row.name.out.plain(file.def.nameTerm);
 				});
 			}
 			filePrint.close();
 
 			if (file.info) {
-				infoPrint.next();
-				infoPrint.row.label.out.ln();
+				/*infoPrint.next();
+				infoPrint.row.label.out.ln();*/
 
-				if (file.def.releases && file.def.releases.length > 0) {
+				if (file.info.partial) {
 					infoPrint.next();
-					infoPrint.row.label.out.plain('   ').accent(' v ').plain('latest');
-					file.def.releases.sort(defUtil.defSemverCompare).forEach((def) => {
-						infoPrint.next();
-						infoPrint.row.label.out.plain('   ').accent(' v ').plain(def.semver);
-					});
-					infoPrint.next();
-					infoPrint.row.label.out.ln();
+					infoPrint.row.label.out.indent().accent(' ! ').plain('partial').ln();
 				}
-
-				infoPrint.next();
-				infoPrint.row.label.out.plain('   ').plain(file.info.name);
-
-				if (file.info.version) {
-					infoPrint.row.label.out.plain(' ').plain(file.info.version);
-				}
-
-				file.info.projects.forEach((url) => {
-					infoPrint.row.url.out.accent(': ');
-					this.outTweakURI(url, infoPrint.row.url.out);
-					infoPrint.next();
-				});
-
-				if (file.info.authors && file.info.authors.length > 0) {
-					infoPrint.next();
-					infoPrint.row.label.out.ln();
-					file.info.authors.forEach((author) => {
+				else {
+					if (file.def.releases && file.def.releases.length > 0) {
 						infoPrint.next();
-						infoPrint.row.label.out.plain('   ').accent(' @ ').plain(author.name);
-						if (author.url) {
-							infoPrint.row.url.out.accent(': ');
-							this.outTweakURI(author.url, infoPrint.row.url.out);
-						}
-					});
-				}
+						infoPrint.row.label.out.indent().accent(' v ').plain('latest');
+						file.def.releases.sort(defUtil.defSemverCompare).forEach((def) => {
+							infoPrint.next();
+							infoPrint.row.label.out.indent().accent(' v ').plain(def.semver).ln();
+						});
+						/*infoPrint.next();
+						infoPrint.row.label.out.ln();*/
+					}
 
-				if (file.info.externals && file.info.externals.length > 0) {
 					infoPrint.next();
-					infoPrint.row.label.out.ln();
-					file.info.externals.forEach((external) => {
+					infoPrint.row.label.out.indent().accent('>> ').plain(file.info.name);
+
+					if (file.info.version) {
+						infoPrint.row.label.out.plain(' ').plain(file.info.version);
+					}
+
+					file.info.projects.forEach((url) => {
+						infoPrint.row.url.out.accent(': ');
+						this.outTweakURI(url, infoPrint.row.url.out);
 						infoPrint.next();
-						infoPrint.row.label.out.plain('   ').accent(' - ').plain(external + ' (module)');
 					});
+
+					if (file.info.authors && file.info.authors.length > 0) {
+						/*infoPrint.next();
+						infoPrint.row.label.out.ln();*/
+						file.info.authors.forEach((author) => {
+							infoPrint.next();
+							infoPrint.row.label.out.indent().accent(' @ ').plain(author.name);
+							if (author.url) {
+								infoPrint.row.url.out.accent(': ');
+								this.outTweakURI(author.url, infoPrint.row.url.out);
+							}
+						});
+					}
+
+					if (file.info.externals && file.info.externals.length > 0) {
+						/*infoPrint.next();
+						infoPrint.row.label.out.ln();*/
+						file.info.externals.forEach((external) => {
+							infoPrint.next();
+							infoPrint.row.label.out.indent().accent(' < ').plain(external + ' (external module)');
+						});
+					}
 				}
 				infoPrint.close();
 			}
@@ -153,7 +159,7 @@ class TablePrinter {
 
 				var textWidth = cliUtils.getViewWidth(76, 96);
 
-				commitPrint.next();
+				// commitPrint.next();
 				var out = commitPrint.row.block.out;
 				out.ln();
 
@@ -169,7 +175,8 @@ class TablePrinter {
 					if (file.commit.hubAuthor) {
 						out.accent(' @ ').plain(file.commit.hubAuthor.login);
 					}
-					out.ln().ln();
+					out.ln();
+					// out.ln().ln();
 
 					stringUtils.wordWrap(file.commit.message.subject, textWidth).forEach((line: string, index: number) => {
 						out.accent(' | ').line(line);

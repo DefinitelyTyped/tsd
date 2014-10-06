@@ -17,6 +17,7 @@ class DefInfo {
 	authors: AuthorInfo[];
 
 	externals: string[] = [];
+	partial: boolean;
 
 	constructor() {
 		this.resetAll();

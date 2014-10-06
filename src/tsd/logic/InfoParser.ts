@@ -39,6 +39,7 @@ class InfoParser extends CoreModule {
 			file.info.externals = defUtil.extractExternals(source);
 
 			if (header.isPartial(source)) {
+				file.info.partial = true;
 				return file;
 			}
 

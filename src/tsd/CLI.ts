@@ -240,7 +240,7 @@ export function getExpose(): Expose {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	expose.before = (ctx: ExposeContext) => {
-		return showHeader();
+		return null; // showHeader();
 	};
 
 	expose.end = (ctx: ExposeResult) => {
