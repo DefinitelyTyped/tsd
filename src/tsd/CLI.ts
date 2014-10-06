@@ -576,27 +576,25 @@ export function getExpose(): Expose {
 					}
 
 					output.line();
-					output.info(true).span('running').space().accent(cmd.name).ln();
+					// output.info(true).span('running').space().accent(cmd.name).ln();
 
 					return job.api.updateBundle(job.api.context.config.bundle, true).then((changes) => {
 						if (changes.someRemoved()) {
-							output.ln().report(true).line('removed:').ln();
+							output.report(true).line('removed:');
 							changes.getRemoved(true, true).sort().forEach((file) => {
 								output.indent(1).bullet(true).tweakPath(file).ln();
 							});
 						}
 						if (changes.someAdded()) {
-							output.ln().report(true).line('added:').ln();
+							output.report(true).line('added:');
 							changes.getAdded(true, true).sort().forEach((file) => {
 								output.indent(1).bullet(true).tweakPath(file).ln();
 							});
 						}
 						if (!changes.someAdded() && !changes.someRemoved()) {
-							output.ln().report(true).span('nothing to rebundle').ln();
+							output.report(true).span('nothing rebundled').ln();
 						}
 					});
-				}).then(() => {
-					return link(job);
 				});
 			}).catch(reportError);
 		};
@@ -611,9 +609,11 @@ export function getExpose(): Expose {
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
 				output.line();
-				output.info(true).span('running').space().accent(cmd.name).ln().ln();
-				return link(job).then(() => {
-					output.report(true).line('no (new) packages to link');
+				// output.info(true).span('running').space().accent(cmd.name).ln().ln();
+				return link(job).then((packages) => {
+					if (packages.length === 0) {
+						output.report(true).line('no (new) packages to link');
+					}
 				});
 			}).catch(reportError);
 		};

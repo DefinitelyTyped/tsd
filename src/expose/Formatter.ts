@@ -95,7 +95,7 @@ class Formatter {
 			builder.closeAll();
 			firstHeader = false;
 			headers.next();
-			headers.row.title.out.accent('>> ').plain(title).line();
+			headers.row.title.out.accent('>> ').plain(title).accent(':').line();
 			addDivider();
 		};
 
@@ -116,7 +116,7 @@ class Formatter {
 				command.indent(1).sp().accent('--').plain(name).ln();
 				label.indent(1).warning('<undefined>').ln();
 			}
-			else if(!option.hidden) {
+			else if (!option.hidden) {
 				command.indent(1).sp().accent('--').plain(name);
 				if (option.placeholder) {
 					command.sp().muted('<').plain(option.placeholder).muted('>');
