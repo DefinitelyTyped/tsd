@@ -165,16 +165,6 @@ Install `mocha`, `chai` and `sinon` definitions all at once, with resolve refere
 $ tsd install mocha chai sinon -ros
 ````
 
-#### Update all definitions
-
-Update everything in `tsd.json` to latest version from repos:
-
-````bash
-$ tsd update --save --overwrite
-$ tsd update -s -o
-$ tsd update -so
-````
-
 #### Reinstall definitions
 
 Reset the definitions to the commits listed in `tsd.json`:
@@ -186,9 +176,20 @@ $ tsd reinstall -so
 ````
 
 
-#### Link to package-manager bundled definitions
+#### Update all definitions
 
-TSD supports easy linking of definitions from packages installed with `node` or `bower`.
+Update everything in `tsd.json` to head version in the repository:
+
+````bash
+$ tsd update --save --overwrite
+$ tsd update -s -o
+$ tsd update -so
+````
+
+
+#### Link to bundled definitions
+
+TSD supports discovery and linking of definitions from packages installed with `node` or `bower`.
 
 Use the `link` command and your `tsd.d.ts` will be updated with paths to the files in the `node_modules` or `bower_modules` folders.
 
@@ -235,21 +236,21 @@ $ tsd rebundle
 ````
 
 
-#### Clear http cache
-
-Forcefully remove all global http cache files
-
-````bash
-$ tsd purge
-````
-
-
 #### Rate-limit 
 
 Print current Github rate-limit info
 
 ````bash
 $ tsd rate
+````
+
+
+#### Clear http cache
+
+Forcefully remove global http cache files
+
+````bash
+$ tsd purge
 ````
 
 
