@@ -8,7 +8,7 @@ var assert = chai.assert;
 import stringUtils = require('../../xm/stringUtils');
 
 describe('stringUtils', () => {
-	describe.only('wordWrap', () => {
+	describe('wordWrap', () => {
 		it('wrap 4', () => {
 			var test = 'aaaa bbbb cccc dddd eeee';
 
