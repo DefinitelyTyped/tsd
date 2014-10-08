@@ -155,7 +155,7 @@ export function assertObjectValues(actual: Object, expected: Object, msg?: strin
 			test[prop] = actual[prop];
 		}
 		else {
-			test[prop] = 0;
+			test[prop] = undefined;
 		}
 	});
 	assert.deepEqual(test, expected, msg);
