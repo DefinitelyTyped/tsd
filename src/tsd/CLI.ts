@@ -345,11 +345,11 @@ export function getExpose(): Expose {
 		cmd.groups = [Group.support];
 		cmd.execute = (ctx: ExposeContext) => {
 			return getAPIJob(ctx).then((job: Job) => {
-				return job.api.initConfig(ctx.getOpt(Opt.overwrite)).then((target: string) => {
-					output.ln().info().success('written').sp().span(target).ln();
-				}, (err) => {
-					output.ln().info().error('error').sp().span(err.message).ln();
-					throw(err);
+				return job.api.initConfig(ctx.getOpt(Opt.overwrite)).then((targets: string[]) => {
+					output.ln();
+					targets.forEach((dest) => {
+						output.info().accent('written').sp().span(dest).ln();
+					});
 				});
 			}).catch(reportError);
 		};

@@ -111,6 +111,18 @@ class BundleManager {
 		var target = path.resolve(bundle.target);
 		return fileIO.write(target, bundle.stringify());
 	}
+
+	/*
+	 save empty bundle file
+	 */
+	saveEmptyBundle(target: string): Promise<void> {
+		var target = path.resolve(target);
+		return fileIO.exists(target).then((exists) => {
+			if (!exists) {
+				return fileIO.write(target, '\n');
+			}
+		});
+	}
 }
 
 export = BundleManager;

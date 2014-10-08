@@ -53,8 +53,19 @@ class API {
 	 create default config file
 	 */
 	// TODO add some more options
-	initConfig(overwrite: boolean): Promise<string> {
-		return this.core.config.initConfig(overwrite);
+	initConfig(overwrite: boolean): Promise<string[]> {
+		return this.core.config.initConfig(overwrite).then((configPath) => {
+			configPath = path.relative(process.cwd(), configPath)
+			if (!this.context.config.bundle) {
+				return Promise.resolve([configPath]);
+			}
+			var manager = new BundleManager(this.core.context.getTypingsDir());
+			return manager.saveEmptyBundle(this.context.config.bundle).then(() => {
+				return [configPath, path.relative(process.cwd(), this.context.config.bundle)];
+			}, () => {
+				return [configPath];
+			});
+		});
 	}
 
 	/*
