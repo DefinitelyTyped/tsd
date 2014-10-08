@@ -6,22 +6,10 @@
 
 TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
+
 :warning: This is the development branch [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) for `v0.6.x`.
 
 :point_right: Current release version `v0.5.x` lives at [master](https://github.com/DefinitelyTyped/tsd/tree/master).
-
-#### Usage notes
-
-*	It is recommended you check-in the definitions you install into your VCS.
-*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
-
-#### Github rate-limit
-
-The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. If you need some more then a scope-limited Github OAuth token can be used to boost the limit to 5000.
-
-#### Usage stats & update-notifier
-
-The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates.
 
 ## Install
 
@@ -33,12 +21,30 @@ $ npm install tsd -g
 
 For previews and history check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).
 
-## Usage as CLI command
+## Commands
 
-Global `tsd` binary:
+### Quick start
 
 ````bash
+$ tsd install jquery --save
+
+$ tsd query angular -ir
+$ tsd query angularjs/
+
+$ tsd query jquery.*
+# glob on mac/linux
+$ tsd query "jquery.*"
+````
+
+### Commands
+
+Global `tsd` binary with help.
+
+````bash
+$ tsd
 $ tsd -h
+$ tsd --help
+$ tsd --version
 ````
 
 [![$ tsd -h](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help-small.png)](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/help.png)
@@ -49,15 +55,15 @@ Sometimes it looks like this:
 * [`$ tsd query async --info --history --action install`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/async.png)
 * [`$ tsd query angular* --resolve`](https://raw.github.com/DefinitelyTyped/tsd/master/media/capture/angular.png)
 
-### Practical examples
 
-Create a new `tsd.json`
+### Init
+
+Create a new `tsd.json` and `tsd.d.ts`. This is not required but useful to init valid project references before starting to add (external) code, or if you want to edit the config.
 
 ````bash
 $ tsd init
 ````
 
-This is not required but useful if you want to customise settings.
 
 #### Search
 
@@ -77,11 +83,11 @@ $ tsd query jquery -ir
 
 Search for `jquery` plugins:
 
-
 ````bash
 $ tsd query */jquery.*
 ````
-Tip: if you are using Linux or Mac OS X, use quotes to glob:
+
+Hint: if you are using Linux or Mac OS X, use quotes to glob:
 
 ````bash
 $ tsd query "*/jquery.*"
@@ -99,6 +105,8 @@ List *everything*:
 ````bash
 $ tsd query *
 ````
+
+Note: more info on queries can be found futher-on in this readme.
 
 #### Open a browser
 
@@ -118,31 +126,43 @@ $ tsd query gruntjs -a visit
 
 #### Install to project
 
-Install `mocha`, `chai` and `sinon` definitions all at once:
+Install `mocha`:
 
 ````bash
-$ tsd query mocha chai sinon --action install
-$ tsd query mocha chai sinon -a install
+$ tsd install mocha
 ````
 
-Install `bootstrap` definitions:
+Install `mocha` and save to `tsd.json`:
 
 ````bash
-$ tsd query bootstrap --action install
-$ tsd query bootstrap -a install
+$ tsd install mocha --save
+$ tsd install mocha -s
 ````
 
-Solve the reference to `jquery`, overwrite existing files and save to the tsd.config:
+Same as query action:
+````bash
+$ tsd query mocha --save --action install
+$ tsd query mocha -sa install
+````
 
+
+Resolve the reference to `jquery`, overwrite existing files and save to `tsd.json`:
+
+````bash
+$ tsd install angular --resolve --overwrite --save
+$ tsd install angular -r -o -s
+$ tsd install angular -ros
+````
+
+Same as query action:
 ````bash
 $ tsd query angular --resolve --overwrite --save --action install
-$ tsd query angular -r -o -s -a install
-$ tsd query angular -rosa install
 ````
-Install and save to `test.d.ts` as `<reference/>` bundle:
+
+Install `mocha`, `chai` and `sinon` definitions all at once, with resolve references, overwrite existing files and save to `tsd.json`:
 
 ````bash
-$ tsd query mocha chai -r -o -s -a install -b test
+$ tsd install mocha chai sinon -ros
 ````
 
 #### Update all definitions
@@ -167,8 +187,6 @@ $ tsd reinstall -so
 
 
 #### Link to package-manager bundled definitions
-
-:warning: This is experimental
 
 TSD supports easy linking of definitions from packages installed with `node` or `bower`.
 
@@ -208,18 +226,38 @@ If the module exports multiple independent files,eg: for some reason not interna
 ````
 
 
-#### Rebundle
+#### Rebundle definition file
 
-:warning: This is experimental, exact functionality may change.
-
-Cleanup the bundle file (usually `tsd.d.ts`): remove paths to non-existent files, and append unlisted definitions. Handy when doing manual work on your definition folder.
+Cleanup the bundle file (usually `tsd.d.ts`): remove paths to non-existent files, and append unlisted definitions. Handy when editing definitions.
 
 ````bash
 $ tsd rebundle
 ````
 
 
-## Query
+#### Clear http cache
+
+Forcefully remove all global http cache files
+
+````bash
+$ tsd purge
+````
+
+
+#### Rate-limit 
+
+Print current Github rate-limit info
+
+````bash
+$ tsd rate
+````
+
+
+## Detailed queries
+
+There are various ways to select files from the repository index.
+
+### Module name
 
 TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
 
@@ -288,7 +326,11 @@ $ tsd query */module-*
 $ tsd query */*plugin
 ````
 
-Globbing implements only leading and trailing (for now).
+Hint: if you are using Linux or Mac OS X, use quotes to glob:
+
+````bash
+$ tsd query "*/jquery.*"
+````
 
 ### Semver filter
 
@@ -464,13 +506,27 @@ API export is somewhat experimental; take care to lock versions and test on upgr
 
 Not yet. 
 
+## Notes
+
+*	It is recommended you check-in the definitions you install into your VCS.
+*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
+
+#### Github rate-limit
+
+The Github API has a 60-requests-per-hour [rate-limit](http://developer.github.com/v3/#rate-limiting) for non-authenticated use. You'll likely never hit this as TSD uses local caching and the definition files are downloaded from Github RAW urls. If you need some more then a scope-limited Github OAuth token can be used to boost the limit to 5000.
+
+#### Usage stats & update-notifier
+
+The CLI tool [tracks](https://github.com/DefinitelyTyped/tsd/blob/master/src/tsd/cli/tracker.ts) some *anonymous* usage statistics about what definitions are installed though TSD in Google Analytics (using [universal-analytics](https://npmjs.org/package/universal-analytics)). There is also a [update-notifier](https://npmjs.org/package/update-notifier) service to check for TSD updates.
+
+
 ## FAQ & Info
 
-### Is there a grunt task available?
+### Is there a build task available?
 
-Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd).
+Of course! The official plugin is [grunt-tsd](https://github.com/DefinitelyTyped/grunt-tsd), and the community created [gulp-tsd](https://github.com/moznion/gulp-tsd).
 
-### I hit the rate-limit: now what?
+### I hit the Github rate-limit, now what?
 
 If TSD is used in a way that needs many unique API calls in a short period (like using `--history` on big selections), or shares an internet-connection with multiple users (like in an office) then the rate limit blocks the API. It blocks for 60 minutes after the *first* request of the total 60.
 
@@ -482,12 +538,6 @@ As of `v0.5.7` there are two ways to configure the location of the proxy server:
 
 1. Use a environment variable. TSD support the conventional fields: pick one of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY` or `http_proxy`.
 1. Use a global `.tsdrc` file and set a `proxy` value (see the tsdrc-section elsewhere in the readme).
-
-### Why does the install / search command not work like in TSD 0.3.0?
-
-The old TSD `v0.3.0` had it's own repository data file that mapped module names to url's of definition files. This had a few downsides for (maintenance being one). Since `v0.5.0` we link directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) where the directory and file names are a reasonable indicator but not 100% identical to the names as you'd find them in npm, bower or other package managers.
-
-The DefinitelyTyped [group](https://github.com/DefinitelyTyped/tsd/issues) is working on a meta-data source that will solve this.
 
 ### Can TSD auto-install definitions for a specific package version?
 
@@ -507,6 +557,24 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 ## History
 
+### v0.6.x ( > 2014-10) 
+
+* Long delayed release of major overhaul: migrated code to external module style and reworked many features, subsystems and dependencies. Development in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch.
+
+* Interesting changes 
+	* added `install` command to CLI
+	* improved module-name pattern matching
+	* refreshed CLI interface, formatting, help
+	* reworked http download/cache
+	* switched many modules, added `definition-header`
+	* replaced ugly node-gyp sub-dependency
+
+### v0.5.x ( > 2013-08) 
+
+* Current release versions. See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
+
+* Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+
 ### v0.3.x
 
 * Original version by @[Diullei](https://github.com/Diullei).
@@ -517,30 +585,9 @@ To install `v0.3.x` (old readme [here](https://github.com/DefinitelyTyped/tsd/bl
 $ npm install tsd@0.3.0 -g
 ````
 
-### v0.5.x ( > 2013-08) 
-
-* Current release versions. See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
-
-* Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
-
-### v0.6.x ( > 2014-02) 
-
-* Development for next-generation. Migrated to external TS modules, using more npm code, externalsing own functionalities. Code clean-up, best practices etc. Should apply lessons-learned and come in line with modern TypeScript code style. Development in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch; probably broken and regularly rebased for near future.
-
-## Notable modules
-
-Some essential modules used to build TSD:
-
-* [es6-shim](https://github.com/paulmillr/es6-shim) & [weak-map](https://github.com/drses/weak-map) - Map, Sets and some usefull things.
-* [grunt-ts](https://github.com/basarat/grunt-ts) - TypeScript compiler for grunt.
-* [tslint](https://github.com/palantir/tslint) + [grunt-tslint](https://github.com/palantir/grunt-tslint) - TypeScript linter (contribute some rules!)
-* [gruntfile-gtx](https://github.com/Bartvds/gruntfile-gtx) - Gruntfile powerbooster (by author).
-* [tv4](https://github.com/geraintluff/tv4) - JSON-Schema validation like a boss.
-* [bluebird](https://github.com/petkaantonov/bluebird) high-power Promises.
-
 ## Build
 
-TSD is build with [TypeScript](http://www.typescriptlang.org/) `v0.9.7` and managed using [Grunt](http://www.gruntjs.com).
+TSD is compiled with [TypeScript](http://www.typescriptlang.org/) `v1.1.0-1` and managed using [Grunt](http://www.gruntjs.com).
 
 To rebuild clone the repos:
 
@@ -619,16 +666,16 @@ Keep in mind we're just devs like you and are working on this in our spare time;
 
 ## Security
 
-The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
-
 Please close read the relevant sections of the readme, especially on OAuth 'scope'. 
+
+The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
 
 Using an OAuth token with additional scope is *neither advised nor supported*, even though it could make TSD work with private repositories. But it might also leak repo or content names to analytics or leave a bare http cache in your temp dir. If this bothers you please review the license and/or leave a message.
 
 
 ## License
 
-Copyright (c) 2014 by [Bart van der Schoor](https://github.com/Bartvds).
+Copyright (c) 2014 by [Bart van der Schoor](https://github.com/Bartvds) @ [DefinitelyTyped](https://github.com/DefinitelyTyped)
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt). 
 
