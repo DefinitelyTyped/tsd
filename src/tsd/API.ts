@@ -55,7 +55,8 @@ class API {
 	// TODO add some more options
 	initConfig(overwrite: boolean): Promise<string[]> {
 		return this.core.config.initConfig(overwrite).then((configPath) => {
-			configPath = path.relative(process.cwd(), configPath)
+			configPath = path.relative(process.cwd(), configPath);
+
 			if (!this.context.config.bundle) {
 				return Promise.resolve([configPath]);
 			}

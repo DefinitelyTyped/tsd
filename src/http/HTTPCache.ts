@@ -160,7 +160,7 @@ class HTTPCache {
 			return this._init;
 		}
 		// first create directory
-		return this._init = fileIO.mkdirCheck(this.opts.cache.storeDir).return();
+		return this._init = fileIO.mkdirCheck(this.opts.cache.storeDir, true).return();
 	}
 
 	checkCleanCache(): Promise<void> {
@@ -225,13 +225,12 @@ class HTTPCache {
 			var files: PathStat[] = [];
 
 			var baseDir = path.resolve(this.opts.cache.storeDir);
-			var hexExp = /^[0-9a-f]+$/;
+			var hexStartExp = /^[0-9a-f]+/;
 
 			// list tree, collect dir names & file info
 			return fileIO.listTree(baseDir).map((target: string) => {
 				// grab first part of relative path
-				var first = path.relative(baseDir, target).match(hexExp);
-				console.log('first', target, first);
+				var first = path.relative(baseDir, target).match(hexStartExp);
 
 				// collect main directory names
 				if (first && first.length > 0) {
@@ -257,8 +256,8 @@ class HTTPCache {
 				// strict filter files and find empty dirs
 				var removeFiles = files.filter((obj: PathStat) => {
 					var ext = path.extname(obj.path);
-					var first = path.relative(baseDir, obj.path).match(hexExp);
-					console.log('second', obj.path, first);
+					var first = path.relative(baseDir, obj.path).match(hexStartExp);
+
 					if (!first || first.length === 0) {
 						return false;
 					}
@@ -289,6 +288,9 @@ class HTTPCache {
 						return file.indexOf(dir) !== 0;
 					});
 				});
+
+				// console.log('removeDirs', removeDirs);
+				// console.log('removeFiles', removeFiles);
 
 				return Promise.map(removeFiles, (target: string) => {
 					return fileIO.removeFile(target)/*.catch((e) => {

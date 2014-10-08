@@ -104,7 +104,7 @@ export function writeFileSync(dest: string, data: any, encoding: string = 'utf8'
  mkdirCheck: like mkdirp but with writable rights and verification, synchronous
  */
 // TODO unit test this
-export function mkdirCheckSync(dir: string, writable: boolean = false, testWritable: boolean = false): string {
+export function mkdirCheckSync(dir: string, writable: boolean = false): string {
 	dir = path.resolve(dir);
 	if (fs.existsSync(dir)) {
 		if (!fs.statSync(dir).isDirectory()) {
@@ -122,17 +122,6 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
 			mkdirp.sync(dir);
 		}
 	}
-	if (testWritable) {
-		var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-		try {
-			fs.writeFileSync(testFile, 'test');
-			fs.unlinkSync(testFile);
-		}
-		catch (e) {
-			// rethrow
-			throw new VError(e, 'no write access to %s -> %s', dir, + e);
-		}
-	}
 	return dir;
 }
 
@@ -141,7 +130,7 @@ export function mkdirCheckSync(dir: string, writable: boolean = false, testWrita
  */
 // TODO unit test this
 // TODO why not by default make writable? why ever use this without writable?
-export function mkdirCheck(dir: string, testWritable: boolean = false): Promise<string> {
+export function mkdirCheck(dir: string, writable: boolean = false): Promise<string> {
 	dir = path.resolve(dir);
 
 	return exists(dir).then((exists: boolean) => {
@@ -150,21 +139,16 @@ export function mkdirCheck(dir: string, testWritable: boolean = false): Promise<
 				if (!isDir) {
 					throw (new Error('path exists but is not a directory ' + dir));
 				}
-				return chmod(dir, '744');
+				if (writable) {
+					return chmod(dir, '744');
+				}
 			});
 		}
-		else {
+		else if (writable) {
 			return mkdirpP(dir, '744');
 		}
-	}).then(() => {
-		if (testWritable) {
-			var testFile = path.join(dir, 'mkdirCheck_' + Math.round(Math.random() * Math.pow(10, 10)).toString(16) + '.tmp');
-
-			return write(testFile, 'test').then(() => {
-				return remove(testFile);
-			}).catch((err) => {
-				throw new Error('no write access to ' + dir + ' -> ' + err);
-			});
+		else {
+			return mkdirpP(dir);
 		}
 	}).return(dir);
 }
@@ -298,7 +282,7 @@ export function read(filename: string, opts?: Object): Promise<any> {
 export function write(filename: string, content: any, opts?: Object): Promise<void> {
 	filename = path.resolve(filename);
 
-	return mkdirCheck(path.dirname(filename)).then(() => {
+	return mkdirCheck(path.dirname(filename), true).then(() => {
 		return new Promise<void>((resolve, reject) => {
 			fs.writeFile(filename, content, opts, (err) => {
 				if (err) {
