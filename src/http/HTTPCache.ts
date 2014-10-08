@@ -225,14 +225,16 @@ class HTTPCache {
 			var files: PathStat[] = [];
 
 			var baseDir = path.resolve(this.opts.cache.storeDir);
+			var hexExp = /^[0-9a-f]+$/;
 
 			// list tree, collect dir names & file info
 			return fileIO.listTree(baseDir).map((target: string) => {
 				// grab first part of relative path
-				var first = path.relative(baseDir, target).match(/^[0-9a-f]+/);
+				var first = path.relative(baseDir, target).match(hexExp);
+				console.log('first', target, first);
 
 				// collect main directory names
-				if (first && typeOf.isString(first[0])) {
+				if (first && first.length > 0) {
 					// keeper
 					if (!(first[0] in dirs)) {
 						dirs[first[0]] = path.join(baseDir, first[0]);
@@ -255,18 +257,22 @@ class HTTPCache {
 				// strict filter files and find empty dirs
 				var removeFiles = files.filter((obj: PathStat) => {
 					var ext = path.extname(obj.path);
-					var first = path.relative(baseDir, obj.path).match(/^[0-9a-f]+/);
+					var first = path.relative(baseDir, obj.path).match(hexExp);
+					console.log('second', obj.path, first);
+					if (!first || first.length === 0) {
+						return false;
+					}
 					var name = path.basename(obj.path, ext);
 					if (!typeOf.isSha(name)) {
-						delete dirs[first];
+						delete dirs[first[0]];
 						return false;
 					}
 					if (ext !== '.json' && ext !== '.raw') {
-						delete dirs[first];
+						delete dirs[first[0]];
 						return false;
 					}
 					if (maxAge > 0 && obj.atime > ageLimit) {
-						delete dirs[first];
+						delete dirs[first[0]];
 						return false;
 					}
 					// ok, let's delete this one
