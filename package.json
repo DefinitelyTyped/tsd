@@ -51,13 +51,11 @@
     "bluebird": "~1.2.4",
     "deep-freeze": "0.0.1",
     "definition-header": "~0.1.0",
-    "detect-indent": "^1.0.1",
+    "detect-indent": "^0.2.0",
     "event-stream": "~3.1.5",
     "exit": "~0.1.2",
     "glob": "^4.0.6",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-tslint": "^0.4.2",
-    "gruntfile-gtx": "^0.3.0",
+    "grunt-ts": "^1.12.1",
     "joi": "^4.7.0",
     "joi-assert": "0.0.3",
     "jsesc": "^0.5.0",
@@ -91,7 +89,7 @@
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-connect": "~0.8.0",
     "grunt-contrib-copy": "^0.6.0",
-    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-jshint": "^0.10.0",
     "grunt-mocha-test": "^0.12.1",
     "grunt-regex-replace": "~0.2.5",
     "grunt-shell": "^1.1.1",
@@ -100,7 +98,7 @@
     "grunt-ts-clean": "~0.2.0",
     "grunt-tslint": "git+https://github.com/Bartvds/grunt-tslint#feature/multi",
     "grunt-tv4": "~0.4.0",
-    "gruntfile-gtx": "~0.3.0",
+    "gruntfile-gtx": "^0.3.0",
     "jshint-path-reporter": "~0.1",
     "mocha": "^1.21.4",
     "mocha-unfunk-reporter": "^0.4.0",
@@ -109,6 +107,6 @@
     "source-map-support": "~0.2.6",
     "time-grunt": "^1.0.0",
     "tslint-path-formatter": "~0.1.1",
-    "typescript": "~1.0.1"
+    "typescript": "^1.1.0-1"
   }
 }
