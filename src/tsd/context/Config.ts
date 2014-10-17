@@ -43,6 +43,8 @@ class Config implements GithubRepoConfig {
 	ref: string;
 	stats: boolean;
 	bundle: string;
+	// Save all properties
+	baseJson: any;
 
 	private _installed = new collection.Hash<InstalledDef>();
 
@@ -132,12 +134,13 @@ class Config implements GithubRepoConfig {
 	}
 
 	toJSON(): any {
-		var json: any = {
-			version: this.version,
-			repo: this.repo,
-			ref: this.ref,
-			path: this.path
-		};
+
+		var json = this.baseJson;
+		json.version = this.version;
+		json.repo = this.repo;
+		json.ref = this.ref;
+		json.path = this.path;
+
 		if (this.bundle) {
 			json.bundle = this.bundle;
 		}
@@ -175,7 +178,7 @@ class Config implements GithubRepoConfig {
 		// TODO harden validation besides schema
 
 		this._installed.clear();
-
+		this.baseJson = json;
 		this.path = json.path;
 		this.version = json.version;
 		this.repo = json.repo;
