@@ -44,7 +44,7 @@ class Config implements GithubRepoConfig {
 	stats: boolean;
 	bundle: string;
 	// Save all properties
-	baseJson: any;
+	otherFields: any;
 
 	private _installed = new collection.Hash<InstalledDef>();
 
@@ -62,6 +62,7 @@ class Config implements GithubRepoConfig {
 		this.repo = Const.definitelyRepo;
 		this.ref = Const.mainBranch;
 		this.stats = Const.statsDefault;
+		this.otherFields = {};
 
 		// use linux seperator
 		this.bundle = Const.typingsDir + '/' + Const.bundleFile;
@@ -134,8 +135,7 @@ class Config implements GithubRepoConfig {
 	}
 
 	toJSON(): any {
-
-		var json = this.baseJson;
+		var json = this.otherFields;
 		json.version = this.version;
 		json.repo = this.repo;
 		json.ref = this.ref;
@@ -178,7 +178,7 @@ class Config implements GithubRepoConfig {
 		// TODO harden validation besides schema
 
 		this._installed.clear();
-		this.baseJson = json;
+
 		this.path = json.path;
 		this.version = json.version;
 		this.repo = json.repo;
@@ -195,6 +195,13 @@ class Config implements GithubRepoConfig {
 				this._installed.set(filePath, installed);
 			});
 		}
+
+		var reservedFields = ['path', 'version', 'repo', 'ref', 'bundle', 'stats', 'installed'];
+		var otherFieldKeys = Object.keys(json).filter(function(key) { return reservedFields.indexOf(key) === -1; } );
+		this.otherFields = otherFieldKeys.reduce(function(fields, key) {
+			fields[key] = json[key];
+			return fields;
+		}, {});
 	}
 
 	validateJSON(json, label: string = null): any {
