@@ -43,6 +43,8 @@ class Config implements GithubRepoConfig {
 	ref: string;
 	stats: boolean;
 	bundle: string;
+	// Save all properties
+	otherFields: any;
 
 	private _installed = new collection.Hash<InstalledDef>();
 
@@ -60,6 +62,7 @@ class Config implements GithubRepoConfig {
 		this.repo = Const.definitelyRepo;
 		this.ref = Const.mainBranch;
 		this.stats = Const.statsDefault;
+		this.otherFields = {};
 
 		// use linux seperator
 		this.bundle = Const.typingsDir + '/' + Const.bundleFile;
@@ -132,12 +135,12 @@ class Config implements GithubRepoConfig {
 	}
 
 	toJSON(): any {
-		var json: any = {
-			version: this.version,
-			repo: this.repo,
-			ref: this.ref,
-			path: this.path
-		};
+		var json = this.otherFields;
+		json.version = this.version;
+		json.repo = this.repo;
+		json.ref = this.ref;
+		json.path = this.path;
+
 		if (this.bundle) {
 			json.bundle = this.bundle;
 		}
@@ -192,6 +195,13 @@ class Config implements GithubRepoConfig {
 				this._installed.set(filePath, installed);
 			});
 		}
+
+		var reservedFields = ['path', 'version', 'repo', 'ref', 'bundle', 'stats', 'installed'];
+		var otherFieldKeys = Object.keys(json).filter(function(key) { return reservedFields.indexOf(key) === -1; } );
+		this.otherFields = otherFieldKeys.reduce(function(fields, key) {
+			fields[key] = json[key];
+			return fields;
+		}, {});
 	}
 
 	validateJSON(json, label: string = null): any {
