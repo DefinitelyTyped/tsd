@@ -64,7 +64,7 @@ class BundleManager {
 	cleanupBundle(target: string, save: boolean): Promise<BundleChange> {
 		target = path.resolve(target);
 
-		return this.readBundle(target, false).then((bundle: Bundle) => {
+		return this.readBundle(target, true).then((bundle: Bundle) => {
 			var change = new BundleChange(bundle);
 
 			return Promise.map(bundle.toArray(), (full: string) => {
@@ -116,7 +116,7 @@ class BundleManager {
 	 save empty bundle file
 	 */
 	saveEmptyBundle(target: string): Promise<void> {
-		var target = path.resolve(target);
+		target = path.resolve(target);
 		return fileIO.exists(target).then((exists) => {
 			if (!exists) {
 				return fileIO.write(target, '\n');

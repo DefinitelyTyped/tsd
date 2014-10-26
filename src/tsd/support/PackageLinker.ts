@@ -37,7 +37,6 @@ function getStringArray(elem: any): string[] {
 
 class PackageLinker {
 
-	private baseDir: string;
 	private managers: PackageType[] = [];
 
 	constructor() {
