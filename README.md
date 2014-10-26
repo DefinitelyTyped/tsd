@@ -11,6 +11,12 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 :point_right: Current release version `v0.5.x` lives at [master](https://github.com/DefinitelyTyped/tsd/tree/master).
 
+The `v0.6.x` prerelease is available on npm tagged as `next`:
+
+````
+npm install tsd@next -g
+````
+
 ## Install
 
 Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/):
