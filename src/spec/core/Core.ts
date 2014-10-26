@@ -97,18 +97,19 @@ describe('Core', () => {
 		it('should save modified data', () => {
 			// copy temp for saving
 			var saveFile = path.resolve(tmpDir, 'save-config.json');
-			fileIO.writeFileSync(saveFile, fileIO.readFileSync('./test/fixtures/config/valid.json'));
+			fileIO.writeFileSync(saveFile, fileIO.readFileSync('./test/fixtures/config/valid-additional.json'));
 			context.paths.configFile = saveFile;
 
 			core = getCore(context);
 
-			// modify test data
+			// read test data
 			var source = fileIO.readJSONSync(saveFile);
-			var changed = fileIO.readJSONSync(saveFile);
 
-			changed.path = 'some/other/path';
-			changed.installed['bleh/blah.d.ts'] = changed.installed['async/async.d.ts'];
-			delete changed.installed['async/async.d.ts'];
+			// setup expected value
+			var expected = fileIO.readJSONSync(saveFile);
+			expected.path = 'some/other/path';
+			expected.installed['bleh/blah.d.ts'] = expected.installed['async/async.d.ts'];
+			delete expected.installed['async/async.d.ts'];
 
 			return core.config.readConfig(false).then(() => {
 				testConfig.assertion(core.context.config, source, 'core.context.config');
@@ -121,8 +122,9 @@ describe('Core', () => {
 			}).then(() => {
 				assert.notIsEmptyFile(context.paths.configFile);
 				var json = fileIO.readJSONSync(context.paths.configFile);
-				assert.like(json, changed, 'saved data json');
+				assert.like(json, expected, 'saved correct data to json');
 				joiAssert(json, configSchema, 'saved valid json');
+
 				return null;
 			});
 		});

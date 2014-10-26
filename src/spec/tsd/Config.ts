@@ -65,7 +65,8 @@ describe('Config', () => {
 				'valid',
 				'valid-alt',
 				'valid-minimal',
-				'valid-short-commit'
+				'valid-short-commit',
+				'valid-additional'
 			];
 			valid.forEach((name) => {
 				it('parses "' + name + '"', () => {
