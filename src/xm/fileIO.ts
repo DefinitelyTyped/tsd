@@ -256,12 +256,16 @@ export function stat(filename: string): Promise<fs.Stats> {
 export function isFile(filename: string): Promise<boolean> {
 	return stat(filename).then((stat) => {
 		return stat.isFile();
+	}).catch((e) => {
+		return false;
 	});
 }
 
 export function isDirectory(filename: string): Promise<boolean> {
 	return stat(filename).then((stat) => {
 		return stat.isDirectory();
+	}).catch((e) => {
+		return false;
 	});
 }
 

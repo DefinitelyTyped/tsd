@@ -171,7 +171,7 @@ class HTTPCache {
 			return Promise.resolve();
 		}
 		if (this.cacheSweepLast && this.cacheSweepLast.getTime() > Date.now() - this.opts.cache.cleanInterval) {
-			return this._cleaning || Promise.resolve();
+			return Promise.resolve();
 		}
 
 		var now = new Date();
@@ -248,9 +248,6 @@ class HTTPCache {
 						});
 					}
 					return target;
-				}).catch((e) => {
-					console.log('\n-stat error-\n');
-					console.log(e);
 				});
 			}).then(() => {
 				// strict filter files and find empty dirs
@@ -293,17 +290,14 @@ class HTTPCache {
 				// console.log('removeFiles', removeFiles);
 
 				return Promise.map(removeFiles, (target: string) => {
-					return fileIO.removeFile(target)/*.catch((e) => {
-						console.log('\n-removeFile error-\n');
-						console.log(e);
-					})*/;
+					return fileIO.removeFile(target);
 				}).then(() => {
 					return Promise.map(removeDirs, (dir: string) => {
-						return fileIO.rimraf(dir)/*.catch((e) => {
-							console.log('\n-removeDir error-\n');
-							console.log(e);
-						})*/;
+						return fileIO.rimraf(dir);
 					});
+				}).catch((e) => {
+					console.log('\n-removeFile error-\n');
+					console.log(e);
 				});
 			});
 		}).return();

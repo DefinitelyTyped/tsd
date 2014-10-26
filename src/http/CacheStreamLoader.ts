@@ -336,7 +336,7 @@ class CacheStreamLoader {
 					return false;
 				}
 				return true;
-			});
+			}, e => false);
 		});
 	}
 
@@ -350,7 +350,7 @@ class CacheStreamLoader {
 		return Promise.all([
 			fileIO.removeFile(this.object.infoFile),
 			fileIO.removeFile(this.object.bodyFile),
-		]).return();
+		]).catch(e => null).return();
 	}
 
 	private cacheTouch(): Promise<void> {
@@ -360,7 +360,7 @@ class CacheStreamLoader {
 		return Promise.all([
 			fileIO.touchFile(this.object.infoFile),
 			fileIO.touchFile(this.object.bodyFile)
-		]).return();
+		]).catch(e => null).return();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
