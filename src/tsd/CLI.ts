@@ -168,6 +168,7 @@ export function getExpose(): Expose {
 				job.options.maxMatches = ctx.getOpt(Opt.max);
 
 				job.options.saveToConfig = ctx.getOpt(Opt.save);
+				job.options.saveBundle = ctx.getOpt(Opt.save);
 				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
 				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 				job.options.addToBundles = ctx.getOpt(Opt.bundle);
