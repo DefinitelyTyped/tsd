@@ -155,8 +155,8 @@ class API {
 				bundles.push(bundle);
 			});
 		}
-		// TODO re-use config var?
-		if (options.saveToConfig && this.context.config.bundle) {
+
+		if ((options.saveToConfig || options.saveBundle) && this.context.config.bundle) {
 			bundles.push(path.resolve(basePath, this.context.config.bundle));
 		}
 

@@ -17,6 +17,7 @@ class Options {
 	resolveDependencies: boolean = false;
 	overwriteFiles: boolean = false;
 	saveToConfig: boolean = false;
+	saveBundle: boolean = false;
 	addToBundles: string[] = [];
 
 	static fromJSON(json: Object): Options {
