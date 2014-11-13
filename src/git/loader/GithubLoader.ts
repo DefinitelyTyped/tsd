@@ -23,6 +23,7 @@ class GithubLoader {
 
 	cache: HTTPCache;
 	options: JSONPointer;
+	shared: JSONPointer;
 
 	storeDir: string;
 
@@ -31,13 +32,15 @@ class GithubLoader {
 
 	headers = {};
 
-	constructor(urls: GithubURLs, options: JSONPointer, storeDir: string, prefix: string, label: string) {
+	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string, prefix: string, label: string) {
 		assertVar(urls, GithubURLs, 'urls');
 		assertVar(options, JSONPointer, 'options');
+		assertVar(shared, JSONPointer, 'shared');
 		assertVar(storeDir, 'string', 'storeDir');
 
 		this.urls = urls;
 		this.options = options;
+		this.shared = shared;
 		this.storeDir = storeDir;
 		this.label = label;
 	}
@@ -53,10 +56,12 @@ class GithubLoader {
 
 		var opts: HTTPOpts = {
 			cache: cache,
-			concurrent: this.options.getNumber('concurrent', 20),
-			oath: this.options.getString('oath', null)
+			concurrent: this.shared.getNumber('concurrent', 20),
+			oath: this.shared.getString('oath', null),
+			strictSSL: this.shared.getBoolean('strictSSL', true)
 		};
-		opts.proxy = (this.options.getString('proxy')
+
+		opts.proxy = (this.shared.getString('proxy')
 			|| process.env.HTTPS_PROXY
 			|| process.env.https_proxy
 			|| process.env.HTTP_PROXY

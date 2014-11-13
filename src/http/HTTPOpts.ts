@@ -5,6 +5,7 @@ interface HTTPOpts {
 	concurrent?: number;
 	proxy?: string;
 	oath?: string;
+	strictSSL?: boolean;
 }
 
 export = HTTPOpts;

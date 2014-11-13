@@ -35,8 +35,8 @@ class GithubRepo {
 
 		this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
-		this.api = new GithubAPI(this.urls, opts.getChild('git/api'), this.storeDir);
-		this.raw = new GithubRaw(this.urls, opts.getChild('git/raw'), this.storeDir);
+		this.api = new GithubAPI(this.urls, opts.getChild('git/api'), opts, this.storeDir);
+		this.raw = new GithubRaw(this.urls, opts.getChild('git/raw'), opts, this.storeDir);
 	}
 
 	getCacheKey(): string {

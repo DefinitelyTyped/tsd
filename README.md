@@ -455,6 +455,18 @@ Any standard http-proxy as supported by the [request](https://github.com/mikeal/
 }
 ````
 
+- "**strictSSL**" - Toggle strictSSL verification:
+
+Enabled by default, setting this option to `false` disables strict SSL. Passed to [request](https://github.com/mikeal/request) package.
+
+Useful behind (corporate) proxies that act like man-in-the middle on https connections.
+
+````json
+{
+	"strictSSL": false
+}
+````
+
 - "**token**" - Github OAuth token:
 
 The OAuth token can be used to boost the Github API rate-limit from 60 to 5000 (non-cached) requests per hour. The is token needs just ['read-only access to public information'](http://developer.github.com/v3/oauth/#scopes) so no additional OAuth scopes are necessary.
@@ -540,6 +552,10 @@ As of `v0.5.7` there are two ways to configure the location of the proxy server:
 
 1. Use a environment variable. TSD support the conventional fields: pick one of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY` or `http_proxy`.
 1. Use a global `.tsdrc` file and set a `proxy` value (see the tsdrc-section elsewhere in the readme).
+
+### What if my proxy terminates SSL?
+
+As of `v0.6.0` strict SSL verification can be disabled in `.tsdrc` via `strictSSL` variable (see tsdrc-section).
 
 ### Can TSD auto-install definitions for a specific package version?
 

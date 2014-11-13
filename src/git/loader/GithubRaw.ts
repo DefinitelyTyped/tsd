@@ -20,8 +20,8 @@ import GithubRateInfo = require('../model/GithubRateInfo');
  */
 class GithubRaw extends GithubLoader {
 
-	constructor(urls: GithubURLs, options: JSONPointer, storeDir: string) {
-		super(urls, options, storeDir, 'github-raw', 'GithubRaw');
+	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
+		super(urls, options, shared, storeDir, 'github-raw', 'GithubRaw');
 
 		this.formatVersion = '1.0';
 

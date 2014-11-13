@@ -189,6 +189,8 @@ class CacheStreamLoader {
 				req.proxy = this.opts.proxy;
 			}
 
+			req.strictSSL = this.opts.strictSSL;
+
 			Object.keys(this.request.headers).forEach((key) => {
 				req.headers[key] = String(this.request.headers[key]);
 			});
