@@ -288,16 +288,18 @@ class API {
 			return Promise.resolve(file);
 		}).then((list) => {
 			return list.reduce((memo: string[], file: DefVersion) => {
-				var url;
+				var urls;
 				if (file.info && file.info.projects) {
-					url = file.info.projects;
+					urls = file.info.projects;
 				}
 				else if (file.def.head.info && file.def.head.info.projects) {
-					url = file.def.head.info.projects;
+					urls = file.def.head.info.projects;
 				}
-				if (url) {
-					memo.push(url);
-					openInApp(url);
+				if (urls) {
+					urls.forEach((url) => {
+						memo.push(url);
+						openInApp(url);
+					});
 				}
 				return memo;
 			}, []);
