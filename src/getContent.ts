@@ -19,9 +19,9 @@ function getAPI(options): API {
 function getContent(options): Promise<any> {
 	var api = getAPI(options);
 
-	return api.readConfig(true).then(() => {
+	return api.readConfig(false).then(() => {
 		var opts = new tsd.Options();
-		opts.resolveDependencies = true;
+		opts.resolveDependencies = false;
 
 		var query = new tsd.Query();
 		query.addNamePattern('*');
@@ -72,7 +72,7 @@ function getContent(options): Promise<any> {
 			repo: api.context.config.repo,
 			ref: api.context.config.ref,
 			count: content.length,
-			time: Date.now()
+			time: new Date().toISOString()
 		};
 		ret.urls = {
 			def: 'https://github.com/' + ret.repo + '/blob/' + ret.ref + '/{path}'
