@@ -59,9 +59,6 @@ function hashStep(hasher: Updater, obj: any): void {
 			});
 			hasher.update('}' + sep);
 			break;
-		case 'regexp':
-			hasher.update('<Regexp>' + String(obj) + sep);
-			break;
 		case 'date':
 			hasher.update('<Date>' + obj.getTime() + sep);
 			break;
@@ -70,6 +67,10 @@ function hashStep(hasher: Updater, obj: any): void {
 			hasher.update(obj);
 			hasher.update(sep);
 			break;
+		case 'regexp':
+			// hasher.update('<Regexp>' + String(obj) + sep);
+			// we could, but let's not
+			throw (new Error('jsonToIdent: cannot serialise regexp'));
 		case 'function':
 			// we could, but let's not
 			throw (new Error('jsonToIdent: cannot serialise function'));
