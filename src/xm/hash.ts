@@ -36,6 +36,7 @@ function hashStep(hasher: Updater, obj: any): void {
 	switch (type) {
 		case 'number':
 		case 'boolean':
+		case 'null':
 			hasher.update(String(obj) + sep);
 			break;
 		case 'string':
@@ -58,11 +59,8 @@ function hashStep(hasher: Updater, obj: any): void {
 			});
 			hasher.update('}' + sep);
 			break;
-		case 'null':
-			hasher.update('null' + sep);
-			break;
 		case 'regexp':
-			hasher.update('<Regexp>' + obj.getTime() + sep);
+			hasher.update('<Regexp>' + String(obj) + sep);
 			break;
 		case 'date':
 			hasher.update('<Date>' + obj.getTime() + sep);
