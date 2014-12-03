@@ -7,6 +7,7 @@ import bootstrap = require('./bootstrap');
 import API = require('./tsd/API');
 import assertVar = require('./xm/assertVar');
 
+export import Def = require('./tsd/data/Def');
 export import Context = require('./tsd/context/Context');
 export import Options = require('./tsd/Options');
 export import Query = require('./tsd/select/Query');
@@ -28,6 +29,7 @@ export function getAPI(configPath: string, verbose: boolean = false): API {
 [
 	bootstrap,
 	getContent,
+	Def,
 	Options,
 	Query,
 	Context,
