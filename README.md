@@ -693,7 +693,7 @@ Using an OAuth token with additional scope is *neither advised nor supported*, e
 
 ## License
 
-Copyright (c) 2014 by [Bart van der Schoor](https://github.com/Bartvds) @ [DefinitelyTyped](https://github.com/DefinitelyTyped)
+Copyright (c) 2015 by [Bart van der Schoor](https://github.com/Bartvds) @ [DefinitelyTyped](https://github.com/DefinitelyTyped)
 
 Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt). 
 
