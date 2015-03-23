@@ -262,7 +262,7 @@ class API {
 		return Promise.resolve(list.map((file: DefVersion) => {
 			var ref = file.commit.commitSha;
 			// same? 
-			if (file.def.head !== undefined && file.commit.commitSha === file.def.head.commit.commitSha) {
+			if (file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
 				ref = this.core.context.config.ref;
 			}
 			var url = this.core.repo.urls.htmlFile(ref, file.def.path);
