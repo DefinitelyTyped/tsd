@@ -58,7 +58,7 @@ describe('GithubRepo / GithubURLs', () => {
 		it('should return replaced urls', () => {
 			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
 			var api = 'https://api.github.com/repos/foo/bar';
-			var raw = 'https://raw.github.com/foo/bar';
+			var raw = 'https://raw.githubusercontent.com/foo/bar';
 			var base = 'https://github.com/foo/bar';
 			var rawFile = raw + '/2ece23298f06d9fb45772fdb1d38086918c80f44/sub/folder/file.txt';
 			assert.strictEqual(urls.api(), api, 'api');
@@ -71,7 +71,7 @@ describe('GithubRepo / GithubURLs', () => {
 			repoConfig.repoOwner = 'correctOwner';
 			repoConfig.repoProject = 'correctProject';
 			var api = 'https://api.github.com/repos/correctOwner/correctProject';
-			var raw = 'https://raw.github.com/correctOwner/correctProject';
+			var raw = 'https://raw.githubusercontent.com/correctOwner/correctProject';
 			var base = 'https://github.com/correctOwner/correctProject';
 			assert.strictEqual(urls.api(), api, 'api');
 			assert.strictEqual(urls.base(), base, 'base');
