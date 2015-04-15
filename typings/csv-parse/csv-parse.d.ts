@@ -1,8 +1,8 @@
 declare module "csv-parse" {
     import stream = require('stream');
 
-    interface columnsFunc {
-
+    interface columns {
+        (row:string) : string[];
     }
 
     interface CsvParseOptions extends stream.TransformOptions {
@@ -10,7 +10,7 @@ declare module "csv-parse" {
         rowDelimiter?: string;
         quote?: string;
         escape?:string;
-        columns?:string[]|boolean|columnsFunc;
+        columns?:string[]|boolean|columns;
         comment?:string;
         objname?:string;
         relax?:boolean;
@@ -25,3 +25,5 @@ declare module "csv-parse" {
 
     export = parse;
 }
+
+
