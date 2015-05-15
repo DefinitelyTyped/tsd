@@ -7,17 +7,12 @@
 TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
 
 
-:warning: This is the development branch [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) for `v0.6.x`.
-
-:point_right: Current release version `v0.5.x` lives at [master](https://github.com/DefinitelyTyped/tsd/tree/master).
-
-
 ## Install
 
-Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/). This `v0.6.x` prerelease is available on npm tagged as `next`:
+Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/).:
 
 ````bash
-npm install tsd@next -g
+npm install tsd -g
 ````
 
 For previews and history check the [release tags](https://github.com/DefinitelyTyped/tsd/releases).

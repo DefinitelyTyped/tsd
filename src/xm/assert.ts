@@ -16,7 +16,7 @@ function assert(pass: boolean, message: string, actual?: any, expected?: any, sh
 		return;
 	}
 	if (typeOf.isString(message)) {
-		message = message.replace(/\{([\w]+)\}/gi, (match, id) => {
+		message = message.replace(/\{([\w]+)\}/gi, function(match, id) {
 			switch (id) {
 				case 'a':
 				case 'act':

@@ -97,7 +97,7 @@ class JSONPointer {
 	getDate(path: string, alt: Date = null): Date {
 		var value = this.getValue(path);
 		if (typeof value === 'string' || typeof value === 'number') {
-			return new Date(value);
+			return new Date(value.toString());
 		}
 		return alt;
 	}

@@ -92,7 +92,7 @@
     "grunt-regex-replace": "~0.2.5",
     "grunt-shell": "^1.1.1",
     "grunt-todos": "~0.3.0",
-    "grunt-ts": "^1.12.1",
+    "grunt-ts": "4.1.0",
     "grunt-ts-clean": "~0.2.0",
     "grunt-tslint": "git+https://github.com/Bartvds/grunt-tslint#feature/multi",
     "grunt-tv4": "~0.4.0",

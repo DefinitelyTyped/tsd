@@ -55,7 +55,8 @@ export function assertionLike<T>(actual: T[], expected: T[], matcher: IsLikeCB<T
 // get lazy wrapper for re-use
 export function getAssertLike<T>(matcher: IsLikeCB<T>, assertion: AssertCB<T>, preLabel: string): AssertCBA<T> {
 	return function <T>(actual: T[], expected: T[], message?: string) {
-		assertionLike(actual, expected, matcher, assertion, preLabel + ': ' + message);
+		// <any> Ugly hack to get building with latest TS
+		(<any>assertionLike)(actual, expected, matcher, assertion, preLabel + ': ' + message);
 	};
 }
 
