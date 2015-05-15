@@ -191,6 +191,11 @@ class CacheStreamLoader {
 
 			req.strictSSL = this.opts.strictSSL;
 
+			// DEBUG using fiddler
+			// req.proxy = 'http://127.0.0.1:8888';
+			// req.strictSSL = false;
+
+
 			Object.keys(this.request.headers).forEach((key) => {
 				req.headers[key] = String(this.request.headers[key]);
 			});

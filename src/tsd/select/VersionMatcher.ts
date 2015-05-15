@@ -8,7 +8,10 @@ import assert = require('../../xm/assert');
 
 import Def = require('../data/Def');
 
-var intMax = Math.pow(2, 53);
+// https://github.com/npm/node-semver/commit/c80180d8341a8ada0236815c29a2be59864afd70#diff-48b2d487fa986b4cb1862988336d2f2fR24
+// Taken from semver npm package
+var intMax = 900719925474;
+
 var semverMax = 'v' + intMax + '.' + intMax + '.' + intMax;
 var semverMin = 'v' + 0 + '.' + 0 + '.' + 0;
 
