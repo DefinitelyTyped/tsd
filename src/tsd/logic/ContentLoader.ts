@@ -62,7 +62,7 @@ class ContentLoader extends CoreModule {
 		}
 		var ref = file.commit.commitSha;
 		// re-cycle head
-		if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
+		if (tryHead && file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
 			ref = this.core.context.config.ref;
 		}
 		return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
