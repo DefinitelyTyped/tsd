@@ -142,7 +142,7 @@ $ tsd query mocha -sa install
 ````
 
 
-Resolve the reference to `jquery`, overwrite existing files and save to `tsd.json`:
+Resolve the reference to `angular`, overwrite existing files and save to `tsd.json`:
 
 ````bash
 $ tsd install angular --resolve --overwrite --save
