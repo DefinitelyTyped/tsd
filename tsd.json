@@ -1,97 +1,20 @@
 {
-	"version": "v4",
-	"path": "./typings",
-	"repo": "borisyankov/DefinitelyTyped",
-	"ref": "master",
-	"bundle": "./typings/tsd.d.ts",
-	"stats": false,
-	"installed": {
-		"universal-analytics/universal-analytics.d.ts": {
-			"commit": "5e32785f26f69662a6b2b378bd3d54f062821527"
-		},
-		"mocha/mocha.d.ts": {
-			"commit": "eed8736e6445ab77cf91a0f03302f5e74320c9be"
-		},
-		"node/node.d.ts": {
-			"commit": "88f38f5b582007f8a4e71cb9023f8a2daa98fbb7"
-		},
-		"semver/semver.d.ts": {
-			"commit": "b2e96a424672735fcd74fc989d1092386cbe082f"
-		},
-		"bluebird/bluebird.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"lazy.js/lazy.js.d.ts": {
-			"commit": "4f75bef422dbb8564cc52a05d3d37665a638175f"
-		},
-		"detect-indent/detect-indent.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"exit/exit.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"jsesc/jsesc.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"json-pointer/json-pointer.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"minimist/minimist.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"open/open.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"source-map-support/source-map-support.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"mkdirp/mkdirp.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"uri-templates/uri-templates.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"configstore/configstore.d.ts": {
-			"commit": "16c0f2c75a30cace4d673b363bbe7af2fe31cc86"
-		},
-		"joi/joi.d.ts": {
-			"commit": "c63244f8bae7725f100a0b8a9a255305a990f6c6"
-		},
-		"glob/glob.d.ts": {
-			"commit": "7573f56bec703a373ab307eeeb23aa0e0b4ee10f"
-		},
-		"minimatch/minimatch.d.ts": {
-			"commit": "7573f56bec703a373ab307eeeb23aa0e0b4ee10f"
-		},
-		"request/request.d.ts": {
-			"commit": "a9d2023e8eb1afe534b55758f2f1d16fb69ce61f"
-		},
-		"form-data/form-data.d.ts": {
-			"commit": "a9d2023e8eb1afe534b55758f2f1d16fb69ce61f"
-		},
-		"bl/bl.d.ts": {
-			"commit": "0de1592ef9e3144b925287ca0494f621e12b01c6"
-		},
-		"rimraf/rimraf.d.ts": {
-			"commit": "4c09ca98bb22e3fa6964d8d27b9a359e54f9d83c"
-		},
-		"lru-cache/lru-cache.d.ts": {
-			"commit": "ff4d52f8edf4f65fcb15ff129ea8861e93417c87"
-		},
-		"lockfile/lockfile.d.ts": {
-			"commit": "6745ac3279f3650a8ce5e8877cca831272fe0a06"
-		},
-		"deep-freeze/deep-freeze.d.ts": {
-			"commit": "83663818b8176edfe1343e6d7eff688fb1375949"
-		},
-		"ncp/ncp.d.ts": {
-			"commit": "83663818b8176edfe1343e6d7eff688fb1375949"
-		},
-		"type-detect/type-detect.d.ts": {
-			"commit": "47ebd394626861a9d492a7eac1f6aca96df6dfc1"
-		},
-		"chai/chai.d.ts": {
-			"commit": "5a8f9e312f3db37b8efc4dcdd1de204f60e67eb1"
-		}
-	}
+  "dependencies": {
+    "graceful-fs": "file:src/typings/graceful-fs.d.ts",
+    "fs-promise": "file:src/typings/fs-promise.d.ts",
+    "invariant": "file:src/typings/invariant.d.ts",
+    "xtend": "file:src/typings/xtend.d.ts",
+    "sort-keys": "file:src/typings/sort-keys.d.ts",
+    "chai-as-promised": "file:src/typings/chai-as-promised.d.ts"
+  },
+  "ambientDependencies": [
+    "npm:typescript/bin/lib.es6.d.ts",
+    "github:borisyankov/DefinitelyTyped/es6-promise/es6-promise.d.ts",
+    "github:borisyankov/DefinitelyTyped/commander/commander.d.ts",
+    "github:borisyankov/DefinitelyTyped/node/node.d.ts",
+    "github:borisyankov/DefinitelyTyped/proxyquire/proxyquire.d.ts",
+    "github:borisyankov/DefinitelyTyped/mocha/mocha.d.ts",
+    "github:borisyankov/DefinitelyTyped/chai/chai.d.ts",
+    "github:borisyankov/DefinitelyTyped/chalk/chalk.d.ts"
+  ]
 }

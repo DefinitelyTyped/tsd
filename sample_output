@@ -1,0 +1,21 @@
+{ missing: [],
+  dependencies: 
+   { 'graceful-fs': '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/graceful-fs.d.ts',
+     'fs-promise': '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/fs-promise.d.ts',
+     invariant: '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/invariant.d.ts',
+     xtend: '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/xtend.d.ts',
+     'sort-keys': '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/sort-keys.d.ts',
+     'chai-as-promised': '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/src/typings/chai-as-promised.d.ts',
+     popsicle: '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/node_modules/popsicle/popsicle.d.ts' },
+  devDependencies: {},
+  conflicts: {},
+  ambientDependencies: 
+   [ undefined,
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/es6-promise/es6-promise.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/commander/commander.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/node/node.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/proxyquire/proxyquire.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/mocha/mocha.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/chai/chai.d.ts',
+     '/Users/blakeembrey/Projects/DefinitelyTyped/tsd/tsd_typings/.cache/raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/chalk/chalk.d.ts' ],
+  ambientDevDependencies: [] }

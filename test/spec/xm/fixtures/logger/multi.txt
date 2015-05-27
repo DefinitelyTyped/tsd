@@ -1,8 +1,0 @@
-[plain|aa; 1; 2]
-[plain|bb; 1; 2]
-[plain|-> ][succs|ok ][plain|cc; 1; 2]
-[plain|-> ][warng|warning ][plain|dd; 1; 2]
-[plain|-> ][error|error ][plain|ee; 1; 2]
-[plain|-> ][accnt|debug ][plain|ff; 1; 2]
-[plain|-> ][plain|foo ][plain|{ a: [Object] }]
-[plain|-> ][plain|foo ][plain|{ a: { b: 2 } }]

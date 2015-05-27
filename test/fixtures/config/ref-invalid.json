@@ -1,8 +1,0 @@
-{
-	"version": "v4",
-	"path": "typings",
-	"repo": "borisyankov/DefinitelyTyped",
-	"ref": "mas $ ter",
-	"bundle": "typings/tsd.d.ts",
-	"installed": {}
-}

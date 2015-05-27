@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "dist",
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": false,
+    "sourceMap": true
+  },
+  "files": [
+    "src/tsd.ts",
+    "src/bin/tsd.ts",
+    "src/bin/tsd-install.ts",
+    "src/bin/tsd-init.ts",
+    "typings/tsd.d.ts",
+    "src/init.spec.ts",
+    "src/lib/cache-filename.spec.ts",
+    "src/lib/parse.spec.ts",
+    "src/lib/resolve.spec.ts",
+    "src/lib/dependencies.spec.ts",
+    "src/lib/references.spec.ts"
+  ]
+}
