@@ -15,7 +15,7 @@ class GithubURLs extends URLManager {
 	private _base: string = 'https://github.com/{owner}/{project}';
 	private _apiBase: string = 'https://api.github.com';
 	private _api: string = 'https://api.github.com/repos/{owner}/{project}';
-	private _raw: string = 'https://raw.github.com/{owner}/{project}';
+	private _raw: string = 'https://raw.githubusercontent.com/{owner}/{project}';
 	private _repo: GithubRepo;
 
 	constructor(repo: GithubRepo) {
