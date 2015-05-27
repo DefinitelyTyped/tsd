@@ -5,7 +5,3 @@ node_js:
 
 before_install:
   - npm install -g grunt-cli
-
-notifications:
-  email:
-    - bartvanderschoor@gmail.com
