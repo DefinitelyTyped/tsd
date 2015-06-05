@@ -42,7 +42,7 @@ class JSONStabilizer {
 	}
 
 	parseString(jsonString: string): Object {
-		var object = JSON.parse(jsonString);
+		var object = JSON.parse(jsonString.trim());
 		this.style = new CodeStyle();
 		this.sniff(jsonString);
 		this.snapshot(object);
