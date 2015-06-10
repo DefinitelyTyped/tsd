@@ -339,17 +339,17 @@ export function remove(filename: string): Promise<void> {
 }
 
 export function syncDeleteFolderRecursive(path: string) {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
-		syncDeleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+	if (fs.existsSync(path)) {
+		fs.readdirSync(path).forEach(function(file, index) {
+			var curPath = path + '/' + file;
+			if (fs.lstatSync(curPath).isDirectory()) { // recurse
+				syncDeleteFolderRecursive(curPath);
+			} else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
 }
 
 export function chmod(filename: string, mode: string): Promise<void> {

@@ -83,9 +83,9 @@ class Installer extends CoreModule {
 		var removed: string[] = [];
 
 		var fnFoundDefDir = (dir: string): boolean => {
-			for(var i = 0; i < list.length; i++) {
+			for (var i = 0; i < list.length; i++) {
 				var baseName = path.dirname(list[i].path).split('/')[0]; // TODO: improve it!
-				if(baseName === dir) {
+				if (baseName === dir) {
 					return true;
 				}
 			}
