@@ -431,6 +431,24 @@ export function getExpose(): Expose {
 			Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
 		];
 		cmd.execute = (ctx: ExposeContext) => {
+			// TODO: must be refactored. Verify if install command has any arguments,
+			// if not, the command will be performed as a reinstall command
+			// ref: https://github.com/DefinitelyTyped/tsd/issues/122
+			if(ctx.numArgs == 0) {
+				return getAPIJob(ctx).then((job: Job) => {
+					output.line();
+					output.info(true).span('running').space().accent(cmd.name).ln();
+
+					return job.api.reinstall(job.options).then((result: InstallResult) => {
+						print.installResult(result);
+
+						tracker.install('reinstall', result);
+					}).then(() => {
+						return link(job);
+					});
+				}).catch(reportError);
+			}
+
 			return getSelectorJob(ctx).then((job: Job) => {
 				tracker.query(job.query);
 

@@ -261,7 +261,7 @@ class API {
 
 		return Promise.resolve(list.map((file: DefVersion) => {
 			var ref = file.commit.commitSha;
-			// same? 
+			// same?
 			if (file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
 				ref = this.core.context.config.ref;
 			}
