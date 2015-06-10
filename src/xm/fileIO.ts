@@ -195,7 +195,9 @@ export function getDirNameList(target: string): string[] {
 	var list = [];
 	if ( fs.existsSync(target) ) {
 		fs.readdirSync(target).forEach(function(file, index) {
-			list.push(file);
+			if (fs.statSync(path.join(target, file)).isDirectory()) {
+				list.push(file);
+			}
 		});
 	}
 	return list;
