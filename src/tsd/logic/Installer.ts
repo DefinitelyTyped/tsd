@@ -79,6 +79,28 @@ class Installer extends CoreModule {
 		}).return(written);
 	}
 
+	removeUnusedReferences(list: InstalledDef[], typingsPath: string) {
+		var removed = new collection.Hash<DefVersion>();
+
+		var fnFoundDefDir = (dir: string): boolean => {
+			for(var i = 0; i < list.length; i++) {
+				var baseName = path.dirname(list[i].path).split('/')[0]; // TODO: improve it!
+				if(baseName === dir) {
+					return true;
+				}
+			}
+			return false;
+		};
+
+		fileIO.getDirNameList(typingsPath).forEach((dir) => {
+			if (!fnFoundDefDir(dir)) {
+				fileIO.removeDirSync(path.join(typingsPath, dir));
+			}
+		});
+
+		fileIO.removeAllFilesFromDir(typingsPath);
+	}
+
 	/*
 	 lazy load and save a single DefVersion to typings folder
 	 */

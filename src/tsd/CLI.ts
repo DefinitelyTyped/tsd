@@ -436,11 +436,11 @@ export function getExpose(): Expose {
 
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'install';
-		cmd.label = 'install definitions using one or more globbing patterns. With no arguments, the reisntall command will be performed.';
+		cmd.label = 'install definitions using one or more globbing patterns.';
 		cmd.examples = [
 			['tsd install mocha', 'install mocha'],
 			['tsd install angularjs/', 'install full angularjs bundle']
-			['tsd install', 'perform reinstall command']
+			// ['tsd install', 'perform reinstall command']
 		];
 		cmd.variadic = ['...pattern'];
 		cmd.groups = [Group.query];
@@ -453,7 +453,7 @@ export function getExpose(): Expose {
 			// the command will be performed as a reinstall command
 			// ref: https://github.com/DefinitelyTyped/tsd/issues/122
 			//      https://github.com/DefinitelyTyped/tsd/issues/116
-			if(ctx.numArgs == 0) {
+			if (ctx.numArgs === 0) {
 				return executeReinstall(ctx, cmd);
 			}
 

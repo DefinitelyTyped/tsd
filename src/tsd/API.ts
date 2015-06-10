@@ -19,6 +19,7 @@ import InstalledDef = require('./context/InstalledDef');
 
 import Def = require('./data/Def');
 import DefVersion = require('./data/DefVersion');
+import DefCommit = require('./data/DefCommit');
 import defUtil = require('./util/defUtil');
 
 import Query = require('./select/Query');
@@ -181,6 +182,16 @@ class API {
 				return null;
 			}).then(() => {
 				return this.saveBundles(res.written.values(), options);
+			}).then(() => {
+				this.core.installer.removeUnusedReferences(this.context.config.getInstalled(), this.core.context.config.toJSON().path);
+				options.saveBundle = true;
+
+				var defs: DefVersion[] = [];
+				this.context.config.getInstalled().forEach((installed) => {
+					defs.push(new DefVersion(new Def(installed.path), new DefCommit(installed.commitSha)));
+				});
+				
+				return this.saveBundles(defs, options);
 			}).return(res);
 	}
 
