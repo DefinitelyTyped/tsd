@@ -430,3 +430,37 @@ export function listTree(basePath: string, guard?: (basePath: string, stat: fs.S
 		return [];
 	}).then(Promise.all).then(concat);
 }
+
+export function copyFileSync( source, target ) {
+    var targetFile = target;
+    if ( fs.existsSync( target ) ) {
+        if ( fs.lstatSync( target ).isDirectory() ) {
+            targetFile = path.join( target, path.basename( source ) );
+        }
+    }
+    fs.createReadStream( source ).pipe( fs.createWriteStream( targetFile ) );
+}
+
+export function copyFolderRecursiveSync( source, target, inscludeSource? ) {
+    var files = [];
+	var targetFolder = '';
+	if (inscludeSource) {
+		targetFolder = path.resolve('..', target);
+	} else {
+		targetFolder = path.join( target, path.basename( source ) );
+	}
+    if ( !fs.existsSync( targetFolder ) ) {
+        fs.mkdirSync( targetFolder );
+    }
+    if ( fs.lstatSync( source ).isDirectory() ) {
+        files = fs.readdirSync( source );
+        files.forEach( function ( file ) {
+            var curSource = path.join( source, file );
+            if ( fs.lstatSync( curSource ).isDirectory() ) {
+                copyFolderRecursiveSync( curSource, targetFolder );
+            } else {
+                copyFileSync( curSource, targetFolder );
+            }
+        } );
+    }
+}
