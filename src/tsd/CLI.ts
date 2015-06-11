@@ -446,7 +446,7 @@ export function getExpose(): Expose {
 		cmd.groups = [Group.query];
 		cmd.options = [
 			Opt.semver, Opt.date, Opt.commit,
-			Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
+			Opt.overwrite, Opt.save, Opt.bundle
 		];
 		cmd.execute = (ctx: ExposeContext) => {
 			// Verify if install command has any arguments, if not,
@@ -456,6 +456,9 @@ export function getExpose(): Expose {
 			if (ctx.numArgs === 0) {
 				return executeReinstall(ctx, cmd);
 			}
+
+			// install command will have --resolve flag by default
+			ctx.argv[Opt.resolve] = true;
 
 			return getSelectorJob(ctx).then((job: Job) => {
 				tracker.query(job.query);

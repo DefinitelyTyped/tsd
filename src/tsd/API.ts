@@ -185,7 +185,7 @@ class API {
 			}).then(() => {
 				this.core.installer.removeUnusedReferences(
 					this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
-						options.saveBundle = true;
+						options.overwriteFiles = options.saveBundle = true;
 						return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
 					});
 			}).return(res);
