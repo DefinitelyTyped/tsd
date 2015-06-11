@@ -112,6 +112,10 @@ module.exports = function (grunt) {
 				timeout: 3000
 			},
 			integrity: ['test/integrity.js'],
+
+
+			nspec: ['test/nspec/*spec.js'],
+
 			// some extra js tests
 			spec: ['test/spec/*.js']
 		},
@@ -287,6 +291,7 @@ module.exports = function (grunt) {
 		'tslint:testing',
 		'gtx-type:moduleTest',
 		'mochaTest:spec',
+		'mochaTest:nspec',
 		'clean:cruft'
 	]);
 	gtx.alias('default', [

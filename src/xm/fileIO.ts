@@ -183,6 +183,9 @@ export function removeFile(target: string): Promise<void> {
 }
 
 export function removeAllFilesFromDir(target: string) {
+	if (!fs.existsSync(target)) {
+		return;
+	}
 	var files = fs.readdirSync(target);
 	files.forEach(function(file) {
 		if (fs.statSync(path.join(target, file)).isFile()) {

@@ -75,7 +75,8 @@
     "update-notifier": "^0.2.2",
     "uri-templates": "~0.1.5",
     "uuid": "^2.0.1",
-    "verror": "~1.4.0"
+    "verror": "~1.4.0",
+    "wrench": "^1.5.8"
   },
   "devDependencies": {
     "chai": "~1.9.1",
