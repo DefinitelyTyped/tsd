@@ -23,6 +23,7 @@ import InstalledDef = require('../context/InstalledDef');
 
 import DefVersion = require('../data/DefVersion');
 import DefCommit = require('../data/DefCommit');
+import Def = require('../data/Def');
 
 import tsdSchema = require('../schema/config');
 
@@ -132,6 +133,14 @@ class Config implements GithubRepoConfig {
 		return this._installed.values().map((value: InstalledDef) => {
 			return value.path;
 		});
+	}
+
+	getInstalledAsDefVersionList(): DefVersion[] {
+		var defs: DefVersion[] = [];
+		this.getInstalled().forEach((installed) => {
+			defs.push(new DefVersion(new Def(installed.path), new DefCommit(installed.commitSha)));
+		});
+		return defs;
 	}
 
 	toJSON(): any {

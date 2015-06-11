@@ -310,6 +310,23 @@ export function getExpose(): Expose {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	function executeReinstall(ctx: ExposeContext, cmd: ExposeCommand) {
+		return getAPIJob(ctx).then((job: Job) => {
+			output.line();
+			output.info(true).span('running').space().accent(cmd.name).ln();
+
+			return job.api.reinstall(job.options).then((result: InstallResult) => {
+				print.installResult(result);
+
+				tracker.install('reinstall', result);
+			}).then(() => {
+				return link(job);
+			});
+		}).catch(reportError);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'help';
 		cmd.label = 'display usage help';
@@ -419,18 +436,30 @@ export function getExpose(): Expose {
 
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'install';
-		cmd.label = 'install definitions using one or more globbing patterns';
+		cmd.label = 'install definitions using one or more globbing patterns.';
 		cmd.examples = [
 			['tsd install mocha', 'install mocha'],
 			['tsd install angularjs/', 'install full angularjs bundle']
+			// ['tsd install', 'perform reinstall command']
 		];
 		cmd.variadic = ['...pattern'];
 		cmd.groups = [Group.query];
 		cmd.options = [
 			Opt.semver, Opt.date, Opt.commit,
-			Opt.resolve, Opt.overwrite, Opt.save, Opt.bundle
+			Opt.overwrite, Opt.save, Opt.bundle
 		];
 		cmd.execute = (ctx: ExposeContext) => {
+			// Verify if install command has any arguments, if not,
+			// the command will be performed as a reinstall command
+			// ref: https://github.com/DefinitelyTyped/tsd/issues/122
+			//      https://github.com/DefinitelyTyped/tsd/issues/116
+			if (ctx.numArgs === 0) {
+				return executeReinstall(ctx, cmd);
+			}
+
+			// install command will have --resolve flag by default
+			ctx.argv[Opt.resolve] = true;
+
 			return getSelectorJob(ctx).then((job: Job) => {
 				tracker.query(job.query);
 
@@ -525,18 +554,7 @@ export function getExpose(): Expose {
 		cmd.options = [Opt.overwrite, Opt.save];
 		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
-			return getAPIJob(ctx).then((job: Job) => {
-				output.line();
-				output.info(true).span('running').space().accent(cmd.name).ln();
-
-				return job.api.reinstall(job.options).then((result: InstallResult) => {
-					print.installResult(result);
-
-					tracker.install('reinstall', result);
-				}).then(() => {
-					return link(job);
-				});
-			}).catch(reportError);
+			return executeReinstall(ctx, cmd);
 		};
 	});
 

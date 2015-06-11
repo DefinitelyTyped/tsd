@@ -19,6 +19,7 @@ import InstalledDef = require('./context/InstalledDef');
 
 import Def = require('./data/Def');
 import DefVersion = require('./data/DefVersion');
+import DefCommit = require('./data/DefCommit');
 import defUtil = require('./util/defUtil');
 
 import Query = require('./select/Query');
@@ -181,6 +182,12 @@ class API {
 				return null;
 			}).then(() => {
 				return this.saveBundles(res.written.values(), options);
+			}).then(() => {
+				this.core.installer.removeUnusedReferences(
+					this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
+						options.overwriteFiles = options.saveBundle = true;
+						return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
+					});
 			}).return(res);
 	}
 
@@ -261,7 +268,7 @@ class API {
 
 		return Promise.resolve(list.map((file: DefVersion) => {
 			var ref = file.commit.commitSha;
-			// same? 
+			// same?
 			if (file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
 				ref = this.core.context.config.ref;
 			}

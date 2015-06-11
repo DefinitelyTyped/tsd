@@ -182,6 +182,31 @@ export function removeFile(target: string): Promise<void> {
 	});
 }
 
+export function removeAllFilesFromDir(target: string) {
+	var files = fs.readdirSync(target);
+	files.forEach(function(file) {
+		if (fs.statSync(path.join(target, file)).isFile()) {
+			fs.unlinkSync(path.join(target, file));
+		}
+	});
+}
+
+export function getDirNameList(target: string): string[] {
+	var list = [];
+	if ( fs.existsSync(target) ) {
+		fs.readdirSync(target).forEach(function(file, index) {
+			if (fs.statSync(path.join(target, file)).isDirectory()) {
+				list.push(file);
+			}
+		});
+	}
+	return list;
+}
+
+export function removeDirSync(target: string) {
+	syncDeleteFolderRecursive(target);
+}
+
 export function rimraf(target: string): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		rimrafMod(target, (err) => {
@@ -311,6 +336,20 @@ export function remove(filename: string): Promise<void> {
 			}
 		});
 	});
+}
+
+export function syncDeleteFolderRecursive(path: string) {
+	if (fs.existsSync(path)) {
+		fs.readdirSync(path).forEach(function(file, index) {
+			var curPath = path + '/' + file;
+			if (fs.lstatSync(curPath).isDirectory()) { // recurse
+				syncDeleteFolderRecursive(curPath);
+			} else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
 }
 
 export function chmod(filename: string, mode: string): Promise<void> {
