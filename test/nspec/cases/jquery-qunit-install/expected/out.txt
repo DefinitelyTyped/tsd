@@ -6,3 +6,12 @@
 >> written 1 file:
 
     - jquery/jquery.d.ts
+
+
+ - qunit / qunit    
+
+>> running install..
+
+>> written 1 file:
+
+    - qunit/qunit.d.ts
