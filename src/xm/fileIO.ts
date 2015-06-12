@@ -182,6 +182,34 @@ export function removeFile(target: string): Promise<void> {
 	});
 }
 
+export function removeAllFilesFromDir(target: string) {
+	if (!fs.existsSync(target)) {
+		return;
+	}
+	var files = fs.readdirSync(target);
+	files.forEach(function(file) {
+		if (fs.statSync(path.join(target, file)).isFile()) {
+			fs.unlinkSync(path.join(target, file));
+		}
+	});
+}
+
+export function getDirNameList(target: string): string[] {
+	var list = [];
+	if ( fs.existsSync(target) ) {
+		fs.readdirSync(target).forEach(function(file, index) {
+			if (fs.statSync(path.join(target, file)).isDirectory()) {
+				list.push(file);
+			}
+		});
+	}
+	return list;
+}
+
+export function removeDirSync(target: string) {
+	syncDeleteFolderRecursive(target);
+}
+
 export function rimraf(target: string): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		rimrafMod(target, (err) => {
@@ -313,6 +341,20 @@ export function remove(filename: string): Promise<void> {
 	});
 }
 
+export function syncDeleteFolderRecursive(path: string) {
+	if (fs.existsSync(path)) {
+		fs.readdirSync(path).forEach(function(file, index) {
+			var curPath = path + '/' + file;
+			if (fs.lstatSync(curPath).isDirectory()) { // recurse
+				syncDeleteFolderRecursive(curPath);
+			} else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
+}
+
 export function chmod(filename: string, mode: string): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		fs.chmod(filename, mode, (err) => {
@@ -387,4 +429,38 @@ export function listTree(basePath: string, guard?: (basePath: string, stat: fs.S
 	}).catch((reason) => {
 		return [];
 	}).then(Promise.all).then(concat);
+}
+
+export function copyFileSync( source, target ) {
+    var targetFile = target;
+    if ( fs.existsSync( target ) ) {
+        if ( fs.lstatSync( target ).isDirectory() ) {
+            targetFile = path.join( target, path.basename( source ) );
+        }
+    }
+    fs.createReadStream( source ).pipe( fs.createWriteStream( targetFile ) );
+}
+
+export function copyFolderRecursiveSync( source, target, inscludeSource? ) {
+    var files = [];
+	var targetFolder = '';
+	if (inscludeSource) {
+		targetFolder = path.resolve('..', target);
+	} else {
+		targetFolder = path.join( target, path.basename( source ) );
+	}
+    if ( !fs.existsSync( targetFolder ) ) {
+        fs.mkdirSync( targetFolder );
+    }
+    if ( fs.lstatSync( source ).isDirectory() ) {
+        files = fs.readdirSync( source );
+        files.forEach( function ( file ) {
+            var curSource = path.join( source, file );
+            if ( fs.lstatSync( curSource ).isDirectory() ) {
+                copyFolderRecursiveSync( curSource, targetFolder );
+            } else {
+                copyFileSync( curSource, targetFolder );
+            }
+        } );
+    }
 }

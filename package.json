@@ -48,9 +48,11 @@
     "assertion-error": "1.0.0",
     "bl": "^0.9.3",
     "bluebird": "~1.2.4",
+    "colors": "^1.1.0",
     "deep-freeze": "0.0.1",
     "definition-header": "~0.1.0",
     "detect-indent": "^0.2.0",
+    "diff": "^1.4.0",
     "event-stream": "~3.1.5",
     "exit": "~0.1.2",
     "glob": "^4.0.6",
@@ -105,6 +107,7 @@
     "source-map-support": "~0.2.6",
     "time-grunt": "^1.0.0",
     "tslint-path-formatter": "~0.1.1",
-    "typescript": "^1.1.0-1"
+    "typescript": "^1.1.0-1",
+    "dir-compare": "^0.0.2"
   }
 }

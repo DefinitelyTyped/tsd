@@ -1,0 +1,8 @@
+
+ - jquery / jquery    
+
+>> running install..
+
+>> written 1 file:
+
+    - jquery/jquery.d.ts
