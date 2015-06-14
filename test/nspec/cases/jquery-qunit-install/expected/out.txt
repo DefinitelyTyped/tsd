@@ -1,5 +1,8 @@
 
- - jquery / jquery    
+ - jquery / jquery : f7cfda : 2015-04-20 17:59
+      
+   f7cfda | 2015-04-20 17:59 | Robert Dennis @ rdennis   
+    | Add optional jQueryAlias to $(callback) and $().ready(callback).   
 
 >> running install..
 
@@ -8,7 +11,10 @@
     - jquery/jquery.d.ts
 
 
- - qunit / qunit    
+ - qunit / qunit : e0dac0 : 2014-12-15 05:32
+      
+   e0dac0 | 2014-12-15 05:32 | Theodore Brown @ theodorejb   
+    | Initial support for QUnit v1.16   
 
 >> running install..
 
