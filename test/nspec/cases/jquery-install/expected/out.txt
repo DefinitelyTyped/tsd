@@ -1,5 +1,8 @@
 
- - jquery / jquery    
+ - jquery / jquery : f7cfda : 2015-04-20 17:59
+      
+   f7cfda | 2015-04-20 17:59 | Robert Dennis @ rdennis   
+    | Add optional jQueryAlias to $(callback) and $().ready(callback).   
 
 >> running install..
 
