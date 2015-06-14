@@ -72,7 +72,7 @@ class Core {
 		this.repo.api.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 		this.repo.raw.headers['user-agent'] = this.context.packageInfo.getNameVersion();
 
-		var token = this.context.settings.getValue('/token');
+		var token = process.env.TSD_GITHUB_TOKEN || this.context.settings.getValue('/token');
 		if (typeOf.isString(token)) {
 			this.repo.api.headers['authorization'] = 'token ' + token;
 		}

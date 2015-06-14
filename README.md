@@ -472,6 +472,8 @@ The OAuth token can be used to boost the Github API rate-limit from 60 to 5000 (
 }
 ````
 
+You can also set the token using the `TSD_GITHUB_TOKEN` environment variable.
+
 You can create this token on Github.com:
 
 1. Go to https://github.com/settings/tokens/new
