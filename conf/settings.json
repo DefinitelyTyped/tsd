@@ -3,11 +3,12 @@
 	"token" : null,
 	"git": {
 		"raw": {
+			"concurrent": 10,
 			"allowClean": true,
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
 			"cacheCleanInterval": {
-				"days": 2
+				"days": 1
 			},
 			"localMaxAge": {
 				"days": 7
@@ -19,15 +20,16 @@
 				"minutes": 1
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		},
 		"api": {
+			"concurrent": 5,
 			"allowClean": true,
 			"splitDirLevel": 1,
 			"splitDirChunk": 2,
 			"cacheCleanInterval": {
-				"days": 2
+				"days": 1
 			},
 			"localMaxAge": {
 				"days": 7
@@ -36,7 +38,7 @@
 				"minutes": 5
 			},
 			"jobTimeout": {
-				"seconds": 10
+				"seconds": 5
 			}
 		}
 	},

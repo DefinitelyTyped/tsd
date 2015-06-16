@@ -1,76 +1,69 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../../xm/StyledOut.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	export module cli {
+import path = require('path');
+import Promise = require('bluebird');
+import updateNotifier = require('update-notifier');
 
-		var path = require('path');
-		var Q = require('q');
+import StyledOut = require('../../xm/lib/StyledOut');
 
-		var updateNotifier = require('update-notifier');
+import Context = require('../context/Context');
 
-		// keep a global ref
-		var notifier;
+// keep a global ref
+var notifier;
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+export function runNotifier(context: Context, waitForIt: boolean = false): Promise<any> {
+	var opts = context.settings.getChild('update-notifier');
 
-		export function runUpdateNotifier(context:tsd.Context, promise:boolean = false):Q.Promise<any> {
-			var opts = context.settings.getChild('update-notifier');
-
-			return Q.resolve().then(() => {
-				var defer = Q.defer();
-				if (notifier || !opts.getBoolean('enabled', true)) {
-					return Q.resolve(notifier);
-				}
-				// switch if we want to wait for this
-				var callback = (promise ? (err, update) => {
-					if (err) {
-						notifier = null;
-						defer.reject(err);
-					}
-					else {
-						notifier.update = update;
-						defer.resolve(notifier);
-					}
-				} : undefined);
-
-				var settings:any = {
-					packageName: context.packageInfo.name,
-					packageVersion: context.packageInfo.version,
-					updateCheckInterval: opts.getDurationSecs('updateCheckInterval', 24 * 3600) * 1000,
-					updateCheckTimeout: opts.getDurationSecs('updateCheckTimeout', 10) * 1000,
-					registryUrl: opts.getString('registryUrl'),
-					callback: callback
-				};
-
-				notifier = updateNotifier(settings);
-				if (!callback) {
-					defer.resolve(notifier);
-				}
-				return defer.promise;
-			});
+	return new Promise((resolve, reject) => {
+		if (notifier || !opts.getBoolean('enabled', true)) {
+			resolve(notifier);
+			return;
 		}
-
-		export function showUpdateNotifier(output:xm.StyledOut, context?:tsd.Context, promise:boolean = false):Q.Promise<void> {
-			return Q.resolve().then(() => {
-				if (context) {
-					return runUpdateNotifier(context, promise);
-				}
-				return notifier;
-			}).then((notifier) => {
-				if (notifier && notifier.update) {
-					output.ln();
-					output.report(true).span('update available: ');
-					output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
-					output.ln().ln();
-					output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
-					output.ln();
-
+		// switch if we want to wait for this
+		var callback;
+		if (waitForIt) {
+			callback = (err, update) => {
+				if (err) {
 					notifier = null;
+					reject(err);
 				}
-			});
+				else {
+					notifier.update = update;
+					resolve(notifier);
+				}
+			};
+		};
+
+		var settings: any = {
+			packageName: context.packageInfo.name,
+			packageVersion: context.packageInfo.version,
+			updateCheckInterval: opts.getDurationSecs('updateCheckInterval', 24 * 3600) * 1000,
+			updateCheckTimeout: opts.getDurationSecs('updateCheckTimeout', 10) * 1000,
+			registryUrl: opts.getString('registryUrl'),
+			callback: callback
+		};
+
+		notifier = updateNotifier(settings);
+		if (!callback) {
+			resolve(notifier);
 		}
-	}
+	});
+}
+
+export function showNotifier(output: StyledOut): Promise<void> {
+	return Promise.attempt(() => {
+		if (notifier && notifier.update) {
+			if (notifier.update.type === 'major' || notifier.update.type === 'minor') {
+				output.ln();
+				output.report(true).span('update available: ');
+				output.tweakPunc(notifier.update.current).accent(' -> ').tweakPunc(notifier.update.latest);
+				output.ln().ln();
+				output.indent().shell(true).span('npm update ' + notifier.update.name + ' -g');
+				output.ln();
+			}
+			notifier = null;
+		}
+	});
 }

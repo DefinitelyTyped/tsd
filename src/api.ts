@@ -1,16 +1,41 @@
-/// <reference path="bootstrap.ts" />
 /// <reference path="_ref.d.ts" />
-/// <reference path="tsd/_ref.ts" />
-/// <reference path="tsd/API.ts" />
-/// <reference path="tsd/CLI.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	export function getAPI (configPath:string, verbose:boolean = false):tsd.API {
-		xm.assertVar(configPath, 'string', 'configPath');
-		return new tsd.API(new tsd.Context(configPath, verbose));
-	}
+import bootstrap = require('./bootstrap');
+
+import API = require('./tsd/API');
+import assertVar = require('./xm/assertVar');
+
+export import Def = require('./tsd/data/Def');
+export import Context = require('./tsd/context/Context');
+export import Options = require('./tsd/Options');
+export import Query = require('./tsd/select/Query');
+
+export import CommitMatcher = require('./tsd/select/CommitMatcher');
+export import DateMatcher = require('./tsd/select/DateMatcher');
+export import InfoMatcher = require('./tsd/select/InfoMatcher');
+export import VersionMatcher = require('./tsd/select/VersionMatcher');
+
+export import defUtil = require('./tsd/util/defUtil');
+export import getContent = require('./getContent');
+
+export function getAPI(configPath: string, verbose: boolean = false): API {
+	assertVar(configPath, 'string', 'configPath');
+	return new API(new Context(configPath, verbose));
 }
 
-module.exports = tsd;
+// haxx compiler emit bug
+[
+	bootstrap,
+	getContent,
+	Def,
+	Options,
+	Query,
+	Context,
+	CommitMatcher,
+	DateMatcher,
+	InfoMatcher,
+	VersionMatcher,
+	defUtil
+];

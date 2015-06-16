@@ -27,7 +27,7 @@
 			"trace"
 		],
 		"no-construct": true,
-		"no-debugger": true,
+		"x  no-debugger": true,
 		"no-duplicate-key": true,
 		"no-duplicate-variable": true,
 		"no-empty": false,
@@ -35,8 +35,8 @@
 		"no-string-literal": false,
 		"no-trailing-whitespace": true,
 		"no-unreachable": true,
-		"x_________________no-unused-variable": true,
-		"x_________________no-use-before-declare": true,
+		"x__no-unused-variable": true,
+		"x__no-use-before-declare": true,
 		"x__one-line": [true,
 			"check-catch",
 			"check-else"
@@ -73,7 +73,7 @@
 				"variableDeclarator": "nospace"
 			}
 		],
-		"use-strict": [true,
+		"x__use-strict": [true,
 			"check-module",
 			"check-function"
 		],

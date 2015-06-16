@@ -17,4 +17,4 @@ build: off
 test_script:
   - node --version
   - npm --version
-  - ps: grunt test
+  - grunt test

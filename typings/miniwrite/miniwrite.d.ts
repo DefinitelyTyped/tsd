@@ -2,8 +2,8 @@
 // Project: https://github.com/Bartvds/miniwrite/
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
-declare module MiniWrite {
 
+declare module "miniwrite" {
 	interface Line {
 		writeln(line:string):void;
 	}
@@ -76,7 +76,4 @@ declare module MiniWrite {
 	function peek(target:Line, callback:PeekCallback):Peek;
 
 	function grunt(grunt:any, verbose?:boolean, patch?:any):Line;
-}
-declare module "miniwrite" {
-export = MiniWrite;
 }

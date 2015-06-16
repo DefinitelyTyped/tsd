@@ -3,7 +3,7 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-declare module MiniStyle {
+declare module "ministyle" {
 	interface Style {
 		success(str:string):string;
 		accent(str:string):string;
@@ -60,8 +60,4 @@ declare module MiniStyle {
 
 	function colorjs():Style;
 	function grunt():Style;
-
-}
-declare module "ministyle" {
-export = MiniStyle;
 }

@@ -1,91 +1,89 @@
-/*
- * imported from typescript-xm package
- *
- * Bart van der Schoor
- * https://github.com/Bartvds/typescript-xm
- * License: MIT - 2013
- * */
+/// <reference path="./_ref.d.ts" />
 
-/// <reference path="typeOf.ts" />
-/// <reference path="inspect.ts" />
+'use strict';
 
-module xm {
-	'use strict';
+import crypto = require('crypto');
+import typeDetect = require('type-detect');
 
-	var crypto = require('crypto');
+interface Updater {
+	update(value: string): void;
+}
 
-	export function md5(data:any):string {
-		return crypto.createHash('md5').update(data).digest('hex');
-	}
+export function md5(data: any): string {
+	return crypto.createHash('md5').update(data).digest('hex');
+}
 
-	export function sha1(data:any):string {
-		return crypto.createHash('sha1').update(data).digest('hex');
-	}
+export function sha1(data: any): string {
+	return crypto.createHash('sha1').update(data).digest('hex');
+}
 
-	export function sha1Short(data:any, length:number = 8):string {
-		return crypto.createHash('sha1').update(data).digest('hex').substring(0, length);
-	}
+// don't trim additional whitespace
+// var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
+var hashNormExp = /[\r\n]+/g;
+var hashNew = '\n';
 
-	// don't trim additional whitespace
-	// var hashNormExp = /^\s+|(?:\s*?[\r\n]\s*)|\s+$/g;
-	var hashNormExp = /[\r\n]+/g;
-	var hashNew = '\n';
+export function hashNormalines(input: string): string {
+	return sha1(input.replace(hashNormExp, hashNew));
+}
 
-	export function hashNormalines(input:string):string {
-		return sha1(input.replace(hashNormExp, hashNew));
-	}
-
-	// hash any json-like-object's data to a ident-string
-	// - instances with identical fields and values give identical ident-string
-	// - output looks similar to json-string but with auto-sorted property order and other tweaks
-	// - non-reversible
-	// - can be lengthy: re-hash with md5/sha
-	export function jsonToIdent(obj:any):string {
-		var ret = '';
-		var sep = ';';
-		var type = xm.typeOf(obj);
-		if (type === 'string' || type === 'number' || type === 'boolean') {
-			ret += JSON.stringify(obj) + sep;
-		}
-		else if (type === 'regexp' || type === 'function') {
-			// we could, but let's not
-			throw (new Error('jsonToIdent: cannot serialise: ' + type));
-		}
-		else if (type === 'date') {
-			// funky to be unique type
-			ret += '<Date>' + obj.getTime() + sep;
-		}
-		else if (type === 'array') {
-			ret += '[';
-			obj.forEach((value:any) => {
-				ret += jsonToIdent(value);
+// hash any json-like-object
+// - instances with identical fields and values give identical ident-string
+// - auto-sorted property order and other tweaks
+// - non-reversible
+function hashStep(hasher: Updater, obj: any): void {
+	var sep = ';';
+	var type = typeDetect(obj);
+	switch (type) {
+		case 'number':
+		case 'boolean':
+		case 'null':
+			hasher.update(String(obj) + sep);
+			break;
+		case 'string':
+			hasher.update(JSON.stringify(obj) + sep);
+			break;
+		case 'array':
+			hasher.update('[');
+			obj.forEach((value: any) => {
+				hashStep(hasher, value);
 			});
-			ret += ']' + sep;
-		}
-		// object last
-		else if (type === 'object') {
+			hasher.update(']' + sep);
+			break;
+		case 'object':
 			var keys = Object.keys(obj);
 			keys.sort();
-			ret += '{';
-			keys.forEach((key:string) => {
-				ret += JSON.stringify(key) + ':' + jsonToIdent(obj[key]);
+			hasher.update('{');
+			keys.forEach((key: string) => {
+				hasher.update(JSON.stringify(key) + ':');
+				hashStep(hasher, obj[key]);
 			});
-			ret += '}' + sep;
-		}
-		else if (type === 'null') {
-			ret += 'null';
-		}
-		else {
-			throw (new Error('jsonToIdent: cannot serialise value: ' + xm.toValueStrim(obj)));
-		}
-		return ret;
+			hasher.update('}' + sep);
+			break;
+		case 'date':
+			hasher.update('<Date>' + obj.getTime() + sep);
+			break;
+		case 'buffer':
+			hasher.update('<Buffer>');
+			hasher.update(obj);
+			hasher.update(sep);
+			break;
+		case 'regexp':
+			// hasher.update('<Regexp>' + String(obj) + sep);
+			// we could, but let's not
+			throw (new Error('jsonToIdent: cannot serialise regexp'));
+		case 'function':
+			// we could, but let's not
+			throw (new Error('jsonToIdent: cannot serialise function'));
+		default:
+			throw (new Error('jsonToIdent: cannot serialise value: ' + String(obj)));
 	}
+}
 
-	export function jsonToIdentHash(obj:any, length:number = 0):string {
-		var ident = sha1(jsonToIdent(obj));
-		if (length > 0) {
-			ident = ident.substr(0, length);
-		}
-		return ident;
+export function jsonToIdentHash(obj: any, length: number = 0): string {
+	var hash = crypto.createHash('sha1');
+	hashStep(hash, obj);
+	if (length > 0) {
+		return hash.digest('hex').substr(0, Math.min(length, 40));
 	}
+	return hash.digest('hex');
 }

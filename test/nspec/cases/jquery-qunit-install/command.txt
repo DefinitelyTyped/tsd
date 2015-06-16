@@ -1,0 +1,5 @@
+# addin jquery
+install jquery --save -c f7cfda
+
+# addin qunit
+install qunit --save -c e0dac0

@@ -1,7 +1,11 @@
 language: node_js
 node_js:
   - "0.10"
+  - "0.11"
 
-notifications:
-  email:
-    - bartvanderschoor@gmail.com
+before_install:
+  - npm install -g grunt-cli
+
+env:
+  global:
+    secure: "vupOEjWsMVofpYK6fDDlm2p1V1LXD3+lw52esiIbKRQuJTdARMRsdy5fSbkYR4tD4SXI1/QqFTKbIbdTLdUNCsLEHOL8LH+1OY9ELSvDCfn4tKOqd8d/gnG+4RAM86YrpiEDEJT221PkYoDqkBxWYHBny4BgJ6BNq6NxPjJcZ1NGZ4jevWuBjng0ZYq+DpkBoq6EP8RRw/iLSA0cZDQNog+1dQvLm0VsJ2HzfPQ/ilDZFbA/uykq4RW3vBOEu4VqXUv480nvP33Buf6ycv0Rm+90Hed25M1MO44LMxAZ5mrIj28gIgSXR/qYmJUoWaCb0uLeU3gfHrxwaKFDpisUJBo1zmyeHjgxcW9F8gz/S5rQgIgm0/cpH2GVSIGNRNrjMpRZ3QIWBVxthkYzoMx7KqYoDKrLD0TGYSlXYR9hfp6+XBJCDOfsh3nb98jz3OYpEipoTNUuJ5AlfBjPR8IkLyJIPRfJOb8YWsRH3EbS74IaIMfFpvZUwX4xqxFJEd6Ty1yEHYmfbaNcFMG5ecRdsqdyRttThmvOrJj/jJGO7YZhbo0d+LzBATaSgcGK4yInAoORvu7gjnskQQq+fAkMtnkQLxVQRKwZKp4TX7FOPrcCkcJ6dIwJxk7XikoPKyIlJG8NAj5sujwzILXio8XSq1ik9AA6qALbmv6TAZJi3b8="

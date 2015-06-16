@@ -1,32 +1,24 @@
 /// <reference path="_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var Q:typeof Q = require('q');
+import Promise = require('bluebird');
 
-	// optional
-	try {
-		require('source-map-support').install();
+Promise.onPossiblyUnhandledRejection((error) => {
+	console.log('---');
+	console.log(error.message);
+	throw error;
+});
 
-		// have dev-dependencies
-		Q.longStackSupport = true;
-	}
-	catch (e) {
-		// whatever
-	}
+// optional
+try {
+	require('source-map-support').install();
 
-	// kill warning
-	require('bufferstream').fn.warn = false;
-
-	// future is now
-	require('es6-shim');
-
-	// booya
-	if (!global.WeakMap) {
-		global.WeakMap = require('weak-map');
-	}
-
-	// TODO verify process.setMaxListeners() still needs to be this high
-	process.setMaxListeners(20);
+	// have dev-dependencies
+	Promise.longStackTraces();
 }
+catch (e) {
+	// whatever
+}
+
+process.setMaxListeners(20);

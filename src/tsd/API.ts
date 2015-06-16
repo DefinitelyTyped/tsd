@@ -1,345 +1,332 @@
-/// <reference path="_ref.ts" />
-/// <reference path="Core.ts" />
-/// <reference path="context/Context.ts" />
-/// <reference path="select/Query.ts" />
+/// <reference path="./_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var path = require('path');
-	var util = require('util');
-	var Q:typeof Q = require('q');
-	var FS:typeof QioFS = require('q-io/fs');
-	var openInApp = require('open');
+require('../bootstrap');
 
-	export class InstallResult {
+import path = require('path');
+import util = require('util');
+import Promise = require('bluebird');
 
-		options:tsd.Options;
-		written = new Map<string, tsd.DefVersion>();
-		removed = new Map<string, tsd.DefVersion>();
-		skipped = new Map<string, tsd.DefVersion>();
+import openInApp = require('open');
 
-		constructor(options:tsd.Options) {
-			xm.assertVar(options, tsd.Options, 'options');
-			this.options = options;
-		}
-	}
+import assertVar = require('../xm/assertVar');
+import collection = require('../xm/collection');
+import objectUtils = require('../xm/objectUtils');
 
-	export class CompareResult {
+import Context = require('./context/Context');
+import InstalledDef = require('./context/InstalledDef');
 
+import Def = require('./data/Def');
+import DefVersion = require('./data/DefVersion');
+import DefCommit = require('./data/DefCommit');
+import defUtil = require('./util/defUtil');
+
+import Query = require('./select/Query');
+import Selection = require('./select/Selection');
+import VersionMatcher = require('./select/VersionMatcher');
+
+import InstallResult = require('./logic/InstallResult');
+import GitRateInfo = require('../git/model/GithubRateInfo');
+
+import Options = require('./Options');
+import Core = require('./logic/Core');
+
+import PackageLinker = require('./support/PackageLinker');
+import PackageDefinition = require('./support/PackageDefinition');
+import BundleManager = require('./support/BundleManager');
+import BundleChange = require('./support/BundleChange');
+
+/*
+ API: the high-level API used by dependants
+ */
+class API {
+
+	core: Core;
+
+	constructor(public context: Context) {
+		assertVar(context, Context, 'context');
+
+		this.core = new Core(this.context);
 	}
 
 	/*
-	 API: the high-level API used by dependants
+	 create default config file
 	 */
-	export class API {
+	// TODO add some more options
+	initConfig(overwrite: boolean): Promise<string[]> {
+		return this.core.config.initConfig(overwrite).then((configPath) => {
+			configPath = path.relative(process.cwd(), configPath);
 
-		core:tsd.Core;
-		track:xm.EventLog;
-
-		constructor(public context:tsd.Context) {
-			xm.assertVar(context, tsd.Context, 'context');
-
-			this.core = new tsd.Core(this.context);
-			this.track = new xm.EventLog('api', 'API');
-			this.track.unmuteActions([xm.EventLevel.notify]);
-
-			xm.object.lockProps(this, ['core', 'track']);
-
-			this.verbose = this.context.verbose;
-		}
-
-		/*
-		 create default config file
-		 */
-		// TODO add some more options
-		initConfig(overwrite:boolean):Q.Promise<string> {
-			var p = this.core.config.initConfig(overwrite);
-			this.track.promise(p, 'config_init');
-			return p;
-		}
-
-		/*
-		 read the config from Context.path.configFile
-		 */
-		// TODO add some more options
-		readConfig(optional:boolean):Q.Promise<void> {
-			var p = this.core.config.readConfig(optional);
-			this.track.promise(p, 'config_read');
-			return p;
-		}
-
-		/*
-		 save the config to Context.path.configFile
-		 */
-		saveConfig():Q.Promise<string> {
-			var p = this.core.config.saveConfig();
-			this.track.promise(p, 'config_save');
-			return p;
-		}
-
-		/*
-		 list files matching query
-		 */
-		select(query:tsd.Query, options?:tsd.Options):Q.Promise<tsd.Selection> {
-			xm.assertVar(query, tsd.Query, 'query');
-			xm.assertVar(options, tsd.Options, 'options', true);
-			options = options || Options.main;
-
-			var p = this.core.selector.select(query, options);
-			this.track.promise(p, 'select');
-			return p;
-		}
-
-		/*
-		 install all files matching query
-		 */
-		install(selection:tsd.Selection, options?:tsd.Options):Q.Promise<tsd.InstallResult> {
-			xm.assertVar(selection, tsd.Selection, 'selection');
-			xm.assertVar(options, tsd.Options, 'options', true);
-			options = options || Options.main;
-
-			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
-			this.track.promise(d.promise, 'install');
-
-			// TODO keep and report more info about what was written/ignored, split by selected vs dependencies
-
-			var res = new tsd.InstallResult(options);
-			var files:tsd.DefVersion[] = tsd.DefUtil.mergeDependencies(selection.selection);
-
-			this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
-				.progress(d.notify).then((written:Map<string, tsd.DefVersion>) => {
-					if (!written) {
-						throw new Error('expected install paths');
-					}
-					res.written = written;
-				}).then(() => {
-					if (options.saveToConfig) {
-						return this.core.config.saveConfig().progress(d.notify);
-					}
-					return null;
-				}).then(() => {
-					return this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
-				}).then(() => {
-					d.resolve(res);
-				}, d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 helper saves files to bundles
-		 */
-		private saveBundles(files:tsd.DefVersion[], options:tsd.Options):Q.Promise<void> {
-			xm.assertVar(files, 'array', 'files');
-			xm.assertVar(options, tsd.Options, 'options', true);
-			options = options || Options.main;
-
-			var d:Q.Deferred<void> = Q.defer();
-			this.track.promise(d.promise, 'bundle_save');
-
-			var bundles:string[] = [];
-			if (options.addToBundles) {
-				options.addToBundles.forEach((bundle:string) => {
-					bundle = path.join(this.context.config.path, bundle);
-					if (!/\.ts$/.test(bundle)) {
-						bundle += '.d.ts';
-					}
-					bundles.push(bundle);
-				});
+			if (!this.context.config.bundle) {
+				return Promise.resolve([configPath]);
 			}
-			var refs:string[] = [];
-			files.forEach((file:tsd.DefVersion) => {
-				refs.push(file.def.path);
+			var manager = new BundleManager(this.core.context.getTypingsDir());
+			return manager.saveEmptyBundle(this.context.config.bundle).then(() => {
+				return [configPath, path.relative(process.cwd(), this.context.config.bundle)];
+			}, () => {
+				return [configPath];
 			});
+		});
+	}
 
-			Q.all(bundles.map((target:string) => {
-				return this.core.bundle.addToBundle(target, refs, true).progress(d.notify);
-			})).then(() => {
-				// TODO re-use config var?
-				if (options.saveToConfig && this.context.config.bundle) {
-					// no progress?
-					return this.core.bundle.addToBundle(this.context.config.bundle, refs, true);
+	/*
+	 read the config from Context.path.configFile
+	 */
+	// TODO add some more options
+	readConfig(optional: boolean): Promise<void> {
+		return this.core.config.readConfig(optional);
+	}
+
+	/*
+	 save the config to Context.path.configFile
+	 */
+	saveConfig(): Promise<string> {
+		return this.core.config.saveConfig();
+	}
+
+	/*
+	 list files matching query
+	 */
+	select(query: Query, options?: Options): Promise<Selection> {
+		assertVar(query, Query, 'query');
+		assertVar(options, Options, 'options', true);
+		options = options || Options.main;
+
+		return this.core.selector.select(query, options);
+	}
+
+	/*
+	 install all files matching query
+	 */
+	install(selection: Selection, options?: Options): Promise<InstallResult> {
+		assertVar(selection, Selection, 'selection');
+		assertVar(options, Options, 'options', true);
+		options = options || Options.main;
+
+		// TODO keep and report more info about what was written/ignored, split by selected vs dependencies
+
+		var res = new InstallResult(options);
+		var files: DefVersion[] = defUtil.mergeDependencies(selection.selection);
+
+		return this.core.installer.installFileBulk(files, options.saveToConfig, options.overwriteFiles)
+			.then((written: collection.Hash<DefVersion>) => {
+				if (!written) {
+					throw new Error('expected install paths');
 				}
+				res.written = written;
 			}).then(() => {
-				d.resolve();
-			}, d.reject);
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig();
+				}
+				return null;
+			}).then(() => {
+				return this.saveBundles(res.written.values(), options);
+			}).return(res);
+	}
 
-			return d.promise;
+	/*
+	 helper saves files to bundles
+	 */
+	private saveBundles(files: DefVersion[], options: Options): Promise<void> {
+		assertVar(files, 'array', 'files');
+		assertVar(options, Options, 'options', true);
+		options = options || Options.main;
+
+		if (files.length === 0) {
+			return Promise.resolve();
 		}
 
-		/*
-		 re-install from config
-		 */
-		reinstall(options?:tsd.Options):Q.Promise<tsd.InstallResult> {
-			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
-			this.track.promise(d.promise, 'reinstall');
+		var refs: string[] = [];
+		files.forEach((file: DefVersion) => {
+			refs.push(file.def.path);
+		});
+		refs.sort();
 
-			var res = new tsd.InstallResult(options);
+		var basePath = path.dirname(this.context.paths.configFile);
+		var manager = new BundleManager(this.core.context.getTypingsDir());
 
-			this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
-				.progress(d.notify).then((map:Map<string, tsd.DefVersion>) => {
-					res.written = map;
-				}).then(() => {
-					if (options.saveToConfig) {
-						return this.core.config.saveConfig().progress(d.notify);
-					}
-					return null;
-				}).then(() => {
-					return this.saveBundles(xm.valuesOf(res.written), options).progress(d.notify);
-				}).then(() => {
-					d.resolve(res);
-				}, d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 update from config
-		 */
-		update(options?:tsd.Options, version:string = 'latest'):Q.Promise<tsd.InstallResult> {
-			var d:Q.Deferred<tsd.InstallResult> = Q.defer();
-			this.track.promise(d.promise, 'update');
-
-			var query = new tsd.Query();
-			this.context.config.getInstalled().forEach((inst:tsd.InstalledDef) => {
-				query.addNamePattern(tsd.Def.getFrom(inst.path).pathTerm);
+		var bundles: string[] = [];
+		if (options.addToBundles) {
+			options.addToBundles.forEach((bundle: string) => {
+				bundle = path.resolve(basePath, bundle);
+				if (!/\.ts$/.test(bundle)) {
+					bundle += '.d.ts';
+				}
+				bundles.push(bundle);
 			});
-			query.versionMatcher = new tsd.VersionMatcher(version);
+		}
 
-			this.select(query, options).progress(d.notify).then((selection:tsd.Selection) => {
-				return this.install(selection, options).progress(d.notify).then((res:tsd.InstallResult) => {
-					d.resolve(res);
+		if ((options.saveToConfig || options.saveBundle) && this.context.config.bundle) {
+			bundles.push(path.resolve(basePath, this.context.config.bundle));
+		}
+
+		return Promise.map(bundles, (target: string) => {
+			return manager.addToBundle(target, refs, true);
+		}).return();
+	}
+
+	/*
+	 re-install from config
+	 */
+	reinstall(options?: Options): Promise<InstallResult> {
+		var res = new InstallResult(options);
+
+		return this.core.installer.reinstallBulk(this.context.config.getInstalled(), options.overwriteFiles)
+			.then((map: collection.Hash<DefVersion>) => {
+				res.written = map;
+			}).then(() => {
+				if (options.saveToConfig) {
+					return this.core.config.saveConfig();
+				}
+				return null;
+			}).then(() => {
+				return this.saveBundles(res.written.values(), options);
+			}).then(() => {
+				this.core.installer.removeUnusedReferences(
+					this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
+						options.overwriteFiles = options.saveBundle = true;
+						return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
+					});
+			}).return(res);
+	}
+
+	/*
+	 update from config
+	 */
+	update(options?: Options, version: string = 'latest'): Promise<InstallResult> {
+
+		var query = new Query();
+		this.context.config.getInstalled().forEach((inst: InstalledDef) => {
+			query.addNamePattern(new Def(inst.path).pathTerm);
+		});
+		query.versionMatcher = new VersionMatcher(version);
+
+		return this.select(query, options).then((selection: Selection) => {
+			return this.install(selection, options);
+		});
+	}
+
+	link(baseDir: string): Promise<PackageDefinition[]> {
+		assertVar(baseDir, 'string', 'baseDir');
+
+		var linker = new PackageLinker();
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+
+		return linker.scanDefinitions(baseDir).then((packages) => {
+			return Promise.reduce(packages, (memo: PackageDefinition[], packaged) => {
+				return manager.addToBundle(this.context.config.bundle, packaged.definitions, true).then((change) => {
+					if (change.someAdded()) {
+						memo.push(packaged);
+					}
+					return memo;
 				});
-			}).fail(d.reject);
+			}, []);
+		});
+	}
 
-			return d.promise;
+	addToBundle(target: string, refs: string[], save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.addToBundle(target, refs, save);
+	}
+
+	cleanupBundle(target: string, save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.cleanupBundle(target, save);
+	}
+
+	updateBundle(target: string, save: boolean): Promise<BundleChange> {
+		var manager = new BundleManager(this.core.context.getTypingsDir());
+		return manager.updateBundle(target, save);
+	}
+
+	/*
+	 get rate-info
+	 */
+	getRateInfo(): Promise<GitRateInfo> {
+		return this.core.repo.api.getRateInfo();
+	}
+
+	/*
+	 compare repo data with local installed file and check for changes
+	 */
+	// TODO implement compare() command
+	compare(query: Query): Promise<void> {
+		assertVar(query, Query, 'query');
+		return Promise.reject(new Error('not implemented yet'));
+	}
+
+	/*
+	 browse selection in browser
+	 */
+	browse(list: DefVersion[]): Promise<string[]> {
+		assertVar(list, 'array', 'list');
+
+		if (list.length > 2) {
+			return Promise.reject(new Error('to many results to open in browser'));
 		}
 
-		/*
-		 get rate-info
-		 */
-		getRateInfo():Q.Promise<git.GitRateInfo> {
-			var p = this.core.repo.api.getRateInfo();
-			this.track.promise(p, 'rate_info');
-			return p;
-		}
-
-		/*
-		 compare repo data with local installed file and check for changes
-		 */
-		// TODO implement compare() command
-		compare(query:tsd.Query):Q.Promise<CompareResult> {
-			xm.assertVar(query, tsd.Query, 'query');
-			var d:Q.Deferred<CompareResult> = Q.defer();
-			this.track.promise(d.promise, 'compare');
-			d.reject(new Error('not implemented yet'));
-
-			return d.promise;
-		}
-
-		/*
-		 browse selection in browser
-		 */
-		browse(list:tsd.DefVersion[]):Q.Promise<string[]> {
-			xm.assertVar(list, 'array', 'list');
-
-			var d:Q.Deferred<string[]> = Q.defer();
-			this.track.promise(d.promise, 'browse');
-			if (list.length > 2) {
-				d.reject(new Error('to many results to open in browser'));
-				return d.promise;
+		return Promise.resolve(list.map((file: DefVersion) => {
+			var ref = file.commit.commitSha;
+			// same?
+			if (file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
+				ref = this.core.context.config.ref;
 			}
+			var url = this.core.repo.urls.htmlFile(ref, file.def.path);
+			openInApp(url);
+			return url;
+		}));
+	}
 
-			var opened = [];
+	/*
+	 visit selection's project-url in browser
+	 */
+	visit(list: DefVersion[]): Promise<string[]> {
+		assertVar(list, 'array', 'list');
 
-			list.forEach((file:tsd.DefVersion) => {
-				var ref = file.commit.commitSha;
-				// same?
-				if (file.commit.commitSha === file.def.head.commit.commitSha) {
-					ref = this.core.context.config.ref;
-				}
-				var url = this.core.repo.urls.htmlFile(ref, file.def.path);
-				opened.push(url);
-				openInApp(url);
-			});
-			d.resolve(opened);
-
-			return d.promise;
+		if (list.length > 2) {
+			return Promise.reject(new Error('to many results to open in browser'));
 		}
 
-		/*
-		 visit selection's project-url in browser
-		 */
-		visit(list:tsd.DefVersion[]):Q.Promise<string[]> {
-			xm.assertVar(list, 'array', 'list');
-
-			var d:Q.Deferred<string[]> = Q.defer();
-			this.track.promise(d.promise, 'visit');
-			if (list.length > 2) {
-				d.reject(new Error('to many results to open in browser'));
-				return d.promise;
+		return Promise.map(list, (file: DefVersion) => {
+			if (!file.info) {
+				return this.core.parser.parseDefInfo(file);
 			}
-
-			var opened = [];
-
-			Q.all(list.map((file:tsd.DefVersion) => {
-				if (!file.info) {
-					return this.core.parser.parseDefInfo(file).progress(d.notify);
+			return Promise.resolve(file);
+		}).then((list) => {
+			return list.reduce((memo: string[], file: DefVersion) => {
+				var urls;
+				if (file.info && file.info.projects) {
+					urls = file.info.projects;
 				}
-				return Q(file);
-			})).then(() => {
-				list.forEach((file:tsd.DefVersion) => {
-					var url;
-					if (file.info && file.info.projectUrl) {
-						url = file.info.projectUrl;
-					}
-					else if (file.def.head.info && file.def.head.info.projectUrl) {
-						url = file.def.head.info.projectUrl;
-					}
-					if (url) {
-						opened.push(url);
+				else if (file.def.head.info && file.def.head.info.projects) {
+					urls = file.def.head.info.projects;
+				}
+				if (urls) {
+					urls.forEach((url) => {
+						memo.push(url);
 						openInApp(url);
-					}
-				});
-				d.resolve(opened);
-			}).fail(d.reject);
+					});
+				}
+				return memo;
+			}, []);
+		});
+	}
 
-			return d.promise;
+	/*
+	 clear caches and temporary files
+	 */
+	purge(raw: boolean, api: boolean): Promise<void> {
+		// add proper safety checks (let's not accidentally rimraf too much)
+		var queue = [];
+		if (raw) {
+			queue.push(this.core.repo.raw.cache.cleanupCacheAge(0));
 		}
-
-		/*
-		 clear caches and temporary files
-		 */
-		purge(raw:boolean, api:boolean):Q.Promise<void> {
-			// add proper safety checks (let's not accidentally rimraf too much)
-			var d:Q.Deferred<void> = Q.defer();
-			this.track.promise(d.promise, 'purge');
-			var queue = [];
-
-			if (raw) {
-				queue.push(this.core.repo.raw.cache.cleanupCacheAge(0).progress(d.notify));
-			}
-			if (api) {
-				queue.push(this.core.repo.api.cache.cleanupCacheAge(0).progress(d.notify));
-			}
-
-			// run?
-			if (queue.length > 0) {
-				Q.all(queue).done(() => {
-					d.resolve();
-				}, d.reject);
-			}
-			else {
-				d.resolve();
-			}
-
-			return d.promise;
+		if (api) {
+			queue.push(this.core.repo.api.cache.cleanupCacheAge(0));
 		}
-
-		set verbose(verbose:boolean) {
-			this.track.logEnabled = verbose;
-			this.core.verbose = verbose;
-		}
+		return Promise.all(queue).return();
 	}
 }
+
+export = API;

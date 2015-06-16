@@ -1,7 +1,7 @@
 interface ReadOnlyBuffer {
 	toString(encoding?:string, start?:number, end?:number): string;
 	length: number;
-	slice(start?:number, end?:number): NodeBuffer;
+	slice(start?:number, end?:number): Buffer;
 	readUInt8(offset:number, noAsset?:boolean): number;
 	readUInt16LE(offset:number, noAssert?:boolean): number;
 	readUInt16BE(offset:number, noAssert?:boolean): number;
@@ -26,18 +26,4 @@ interface NodeModule {
 	loaded: boolean;
 	parent: any;
 	children: any[];
-}
-
-interface ArrayIterator<T> {
-	next():ArrayIteratorTuple<T>;
-}
-
-interface ArrayIteratorTuple<T> {
-	done:boolean;
-	value:T;
-}
-
-interface Map<K, V> {
-	keys(): ArrayIterator<K>;
-	values():  ArrayIterator<V>;
 }

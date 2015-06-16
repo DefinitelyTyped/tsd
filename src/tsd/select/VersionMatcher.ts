@@ -1,97 +1,101 @@
-/// <reference path="../_ref.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var semver = require('semver');
+import semver = require('semver');
 
-	var intMax = Math.pow(2, 53);
-	var semverMax = 'v' + intMax + '.' + intMax + '.' + intMax;
-	var semverMin = 'v' + 0 + '.' + 0 + '.' + 0;
+import assert = require('../../xm/assert');
 
-	/*
-	 VersionMatcher: test against DefInfo
-	 */
-	export class VersionMatcher {
+import Def = require('../data/Def');
 
-		static latest = 'latest';
-		static all = 'all';
+// https://github.com/npm/node-semver/commit/c80180d8341a8ada0236815c29a2be59864afd70#diff-48b2d487fa986b4cb1862988336d2f2fR24
+// Taken from semver npm package
+var intMax = 900719925474;
 
-		range:string;
+var semverMax = 'v' + intMax + '.' + intMax + '.' + intMax;
+var semverMin = 'v' + 0 + '.' + 0 + '.' + 0;
 
-		constructor(range:string) {
-			if (range === VersionMatcher.latest || range === VersionMatcher.all) {
-				this.range = range;
-			}
-			else if (range) {
-				this.range = semver.validRange(range, true);
-				if (!this.range) {
-					xm.throwAssert('expected {a} to be a valid semver-range', range);
-				}
-			}
-			else {
-				this.range = VersionMatcher.latest;
-			}
+/*
+ VersionMatcher: test against DefInfo
+ */
+class VersionMatcher {
+
+	static latest = 'latest';
+	static all = 'all';
+
+	range: string;
+
+	constructor(range?: string) {
+		if (range === VersionMatcher.latest || range === VersionMatcher.all) {
+			this.range = range;
 		}
-
-		filter(list:tsd.Def[]):tsd.Def[] {
-			// easy
-			if (!this.range || this.range === VersionMatcher.all) {
-				return list.slice(0);
-			}
-			// bake map
-			var map = list.reduce((map:any, def:tsd.Def) => {
-				var id = def.project + '/' + def.name;
-				if (id in map) {
-					map[id].push(def);
-				}
-				else {
-					map[id] = [def];
-				}
-				return map;
-			}, Object.create(null));
-
-			// filter
-			if (this.range === VersionMatcher.latest) {
-				return Object.keys(map).map((key) => {
-					return this.getLatest(map[key]);
-				});
-			}
-
-			// all that satisfy
-			return Object.keys(map).reduce((memo:tsd.Def[], key:string) => {
-				map[key].forEach((def:tsd.Def) => {
-					if (!def.semver) {
-						if (semver.satisfies(semverMax, this.range)) {
-							memo.push(def);
-						}
-					}
-					else if (semver.satisfies(def.semver, this.range)) {
-						memo.push(def);
-					}
-				});
-				return memo;
-			}, []);
+		else if (range) {
+			this.range = semver.validRange(range, true);
+			assert(!!this.range, 'expected {a} to be a valid semver-range', range);
 		}
-
-		private getLatest(list:tsd.Def[]):tsd.Def {
-			var latest:tsd.Def;
-			for (var i = 0, ii = list.length; i < ii; i++) {
-				var def = list[i];
-				if (!def.semver) {
-					// no semver means latest, bail
-					return def;
-				}
-				else if (!latest) {
-					// first latest
-					latest = def;
-				}
-				else if (semver.gt(def.semver, latest.semver)) {
-					xm.log('VersionMatcher.filter', 'gt', def.semver, latest.semver);
-					latest = def;
-				}
-			}
-			return latest;
+		else {
+			this.range = VersionMatcher.latest;
 		}
 	}
+
+	filter(list: Def[]): Def[] {
+		// easy
+		if (!this.range || this.range === VersionMatcher.all) {
+			return list.slice(0);
+		}
+		// bake map
+		var map = list.reduce((map: any, def: Def) => {
+			var id = def.project + '/' + def.name;
+			if (id in map) {
+				map[id].push(def);
+			}
+			else {
+				map[id] = [def];
+			}
+			return map;
+		}, Object.create(null));
+
+		// filter
+		if (this.range === VersionMatcher.latest) {
+			return Object.keys(map).map((key) => {
+				return this.getLatest(map[key]);
+			});
+		}
+
+		// all that satisfy
+		return Object.keys(map).reduce((memo: Def[], key: string) => {
+			map[key].forEach((def: Def) => {
+				if (!def.semver) {
+					if (semver.satisfies(semverMax, this.range)) {
+						memo.push(def);
+					}
+				}
+				else if (semver.satisfies(def.semver, this.range)) {
+					memo.push(def);
+				}
+			});
+			return memo;
+		}, []);
+	}
+
+	private getLatest(list: Def[]): Def {
+		var latest: Def;
+		for (var i = 0, ii = list.length; i < ii; i++) {
+			var def = list[i];
+			if (!def.semver) {
+				// no semver means latest, bail
+				return def;
+			}
+			else if (!latest) {
+				// first latest
+				latest = def;
+			}
+			else if (semver.gt(def.semver, latest.semver)) {
+				latest = def;
+			}
+		}
+		return latest;
+	}
 }
+
+export = VersionMatcher;

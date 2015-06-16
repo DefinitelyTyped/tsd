@@ -1,131 +1,130 @@
-/// <reference path="../_ref.d.ts" />
-/// <reference path="_ref.d.ts" />
-/// <reference path="GithubRepo.ts" />
-/// <reference path="../xm/assertVar.ts" />
-/// <reference path="../xm/object.ts" />
-/// <reference path="../xm/URLManager.ts" />
+/// <reference path="./_ref.d.ts" />
 
-module git {
-	'use strict';
+'use strict';
 
-	/*
-	 GithubURLs: url-templates for common urls
-	 */
-	export class GithubURLs extends xm.URLManager {
+import assertVar = require('../xm/assertVar');
+import objectUtils = require('../xm/objectUtils');
+import URLManager = require('../xm/lib/URLManager');
+import GithubRepo = require('./GithubRepo');
 
-		private _base:string = 'https://github.com/{owner}/{project}';
-		private _apiBase:string = 'https://api.github.com';
-		private _api:string = 'https://api.github.com/repos/{owner}/{project}';
-		private _raw:string = 'https://raw.github.com/{owner}/{project}';
-		private _repo:GithubRepo;
+/*
+ GithubURLs: url-templates for common urls
+ */
+class GithubURLs extends URLManager {
 
-		constructor(repo:GithubRepo) {
-			super();
-			xm.assertVar(repo, GithubRepo, 'repo');
-			this._repo = repo;
-			// externalise later
-			this.addTemplate('base', this._base);
+	private _base: string = 'https://github.com/{owner}/{project}';
+	private _apiBase: string = 'https://api.github.com';
+	private _api: string = 'https://api.github.com/repos/{owner}/{project}';
+	private _raw: string = 'https://raw.githubusercontent.com/{owner}/{project}';
+	private _repo: GithubRepo;
 
-			this.addTemplate('raw', this._raw);
-			this.addTemplate('rawFile', this._raw + '/{+ref}/{+path}');
+	constructor(repo: GithubRepo) {
+		super();
+		assertVar(repo, 'object', 'repo');
 
-			this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
+		this._repo = repo;
+		// externalise later
+		this.addTemplate('base', this._base);
 
-			this.addTemplate('api', this._api);
-			this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
-			this.addTemplate('apiBranch', this._api + '/branches/{branch}');
-			this.addTemplate('apiBranches', this._api + '/branches');
-			this.addTemplate('apiCommit', this._api + '/commits/{commit}');
-			this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
-			this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
-			this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
+		this.addTemplate('raw', this._raw);
+		this.addTemplate('rawFile', this._raw + '/{+ref}/{+path}');
 
-			xm.object.hidePrefixed(this);
-		}
+		this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
 
-		getURL(id:string, vars?: any):string {
-			this.setVars({
-				owner: this._repo.config.repoOwner,
-				project: this._repo.config.repoProject
-			});
-			return super.getURL(id, vars);
-		}
+		this.addTemplate('api', this._api);
+		this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
+		this.addTemplate('apiBranch', this._api + '/branches/{branch}');
+		this.addTemplate('apiBranches', this._api + '/branches');
+		this.addTemplate('apiCommit', this._api + '/commits/{commit}');
+		this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
+		this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
+		this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
+	}
 
-		api():string {
-			return this.getURL('api');
-		}
+	getURL(id: string, vars?: any): string {
+		this.setVars({
+			owner: this._repo.config.repoOwner,
+			project: this._repo.config.repoProject
+		});
+		return super.getURL(id, vars);
+	}
 
-		base():string {
-			return this.getURL('base');
-		}
+	api(): string {
+		return this.getURL('api');
+	}
 
-		raw():string {
-			return this.getURL('raw');
-		}
+	base(): string {
+		return this.getURL('base');
+	}
 
-		rawFile(ref:string, path:string):string {
-			xm.assertVar(ref, 'string', 'ref');
-			xm.assertVar(path, 'string', 'path');
+	raw(): string {
+		return this.getURL('raw');
+	}
 
-			return this.getURL('rawFile', {
-				ref: ref,
-				path: path
-			});
-		}
+	rawFile(ref: string, path: string): string {
+		assertVar(ref, 'string', 'ref');
+		assertVar(path, 'string', 'path');
 
-		htmlFile(ref:string, path:string):string {
-			xm.assertVar(ref, 'string', 'ref');
-			xm.assertVar(path, 'string', 'path');
+		return this.getURL('rawFile', {
+			ref: ref,
+			path: path
+		});
+	}
 
-			return this.getURL('htmlFile', {
-				ref: ref,
-				path: path
-			});
-		}
+	htmlFile(ref: string, path: string): string {
+		assertVar(ref, 'string', 'ref');
+		assertVar(path, 'string', 'path');
 
-		apiBranches():string {
-			return this.getURL('apiBranches');
-		}
+		return this.getURL('htmlFile', {
+			ref: ref,
+			path: path
+		});
+	}
 
-		apiBranch(name:string):string {
-			xm.assertVar(name, 'string', 'name');
-			return this.getURL('apiBranch', {
-				branch: name
-			});
-		}
+	apiBranches(): string {
+		return this.getURL('apiBranches');
+	}
 
-		apiTree(tree:string, recursive?:any):string {
-			xm.assertVar(tree, 'sha1', 'tree');
-			return this.getURL('apiTree', {
-				tree: tree,
-				recursive: (recursive ? 1 : 0)
-			});
-		}
+	apiBranch(name: string): string {
+		assertVar(name, 'string', 'name');
+		return this.getURL('apiBranch', {
+			branch: name
+		});
+	}
 
-		apiPathCommits(path:string):string {
-			xm.assertVar(path, 'string', 'path');
-			return this.getURL('apiPathCommits', {
-				path: path
-			});
-		}
+	apiTree(tree: string, recursive?: any): string {
+		assertVar(tree, 'sha1', 'tree');
+		return this.getURL('apiTree', {
+			tree: tree,
+			recursive: (recursive ? 1 : 0)
+		});
+	}
 
-		apiCommit(commit:string, recursive?:any):string {
-			xm.assertVar(commit, 'sha1', 'commit');
-			return this.getURL('apiCommit', {
-				commit: commit,
-				recursive: recursive
-			});
-		}
+	apiPathCommits(path: string): string {
+		assertVar(path, 'string', 'path');
+		return this.getURL('apiPathCommits', {
+			path: path
+		});
+	}
 
-		apiBlob(sha:string):string {
-			xm.assertVar(sha, 'sha1', 'sha');
-			return this.getURL('apiBlob', {
-				blob: sha
-			});
-		}
+	apiCommit(commit: string, recursive?: any): string {
+		assertVar(commit, 'sha1', 'commit');
+		return this.getURL('apiCommit', {
+			commit: commit,
+			recursive: recursive
+		});
+	}
 
-		rateLimit():string {
-			return this.getURL('rateLimit');
-		}
+	apiBlob(sha: string): string {
+		assertVar(sha, 'sha1', 'sha');
+		return this.getURL('apiBlob', {
+			blob: sha
+		});
+	}
+
+	rateLimit(): string {
+		return this.getURL('rateLimit');
 	}
 }
+
+export = GithubURLs;

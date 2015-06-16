@@ -1,24 +1,25 @@
-module tsd {
-	'use strict';
+/// <reference path="../_ref.d.ts" />
 
-	export var Const = {
-		rc : '.tsdrc',
-		ident : 'tsd',
-		configFile : 'tsd.json',
-		typingsDir : 'typings',
-		cacheDir : 'tsd-cache',
-		bundleFile: 'tsd.d.ts',
+'use strict';
 
-		settings : 'settings.json',
+var Const = {
+	rc: '.tsdrc',
+	ident: 'tsd',
+	configFile: 'tsd.json',
+	typingsDir: 'typings',
+	cacheDir: 'tsd-cache',
+	bundleFile: 'tsd.d.ts',
 
-		configVersion: 'v4',
-		configSchemaFile : 'tsd-v4.json',
-		definitelyRepo: 'borisyankov/DefinitelyTyped',
-		mainBranch: 'master',
-		statsDefault: true,
+	settings: 'settings.json',
 
-		shaShorten: 6
-	 };
-	// brrrrr
-	Object.freeze(Const);
-}
+	configVersion: 'v4',
+	definitelyRepo: 'borisyankov/DefinitelyTyped',
+	mainBranch: 'master',
+	statsDefault: true,
+
+	shaShorten: 6
+};
+// brrrrr
+Object.freeze(Const);
+
+export = Const;

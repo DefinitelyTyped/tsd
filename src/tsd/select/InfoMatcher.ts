@@ -1,15 +1,17 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../data/DefInfo.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
-	/*
-	 InfoMatcher: test against DefInfo
-	 */
-	// TODO implement InfoMatcher
-	export class InfoMatcher {
-		filter(list:tsd.DefVersion[]):tsd.DefVersion[] {
-			return list;
-		}
+'use strict';
+
+import DefVersion = require('../data/DefVersion');
+
+/*
+ InfoMatcher: test against DefInfo
+ */
+// TODO implement InfoMatcher
+class InfoMatcher {
+	filter(list: DefVersion[]): DefVersion[] {
+		return list;
 	}
 }
+
+export = InfoMatcher;

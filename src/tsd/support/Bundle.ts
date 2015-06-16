@@ -1,235 +1,194 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../xm/assertVar.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var path = require('path');
-	var splitExp = /(?:(.*)(\r?\n))|(?:(.+)($))/g;
+import path = require('path');
+import Lazy = require('lazy.js');
 
-	// TODO replace reference node RegExp with a xml parser (tony the pony)
-	var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+import assertVar = require('../../xm/assertVar');
 
-	/*
-	 Bundle - file to bundle <reference/> 's
+var splitExp = /(?:(.*)(\r?\n))|(?:(.+)($))/g;
 
-	 complicated from trying to keep file structure mostly intact after manipulating the file
+// TODO replace reference node RegExp with a xml parser (tony the pony)
+var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
 
-	 with auto-eol detector
-	 */
-	// TODO optimise text content (keep as block)
-	export class Bundle {
+// different fs-call return upper / lower-case drive-letters
+function fixWinDrive(ref: string): string {
+	return ref.replace(/^[a-z]:/, (str) => {
+		return str.toUpperCase();
+	});
+}
 
-		private head:BundleLine;
-		private eol:string = '\n';
+/*
+ Bundle - file to bundle <reference/> 's
 
-		// location of the .d.ts file
-		public target:string;
-		// base folder when adding relative refs
-		public baseDir:string;
+ complicated from trying to keep file structure mostly intact after manipulating the file
 
-		constructor(target:string, baseDir?:string) {
-			xm.assertVar(target, 'string', 'target');
-			this.target = target.replace(/^\.\//, '');
-			this.baseDir = baseDir || path.dirname(this.target);
-		}
+ with auto-eol detector
+ */
+// TODO optimise text content (keep as block)
+class Bundle {
 
-		parse(content:string):void {
-			this.head = null;
-			this.eol = '\n';
+	private lines: BundleLine[] = [];
+	private last: BundleLine = null;
+	private map: {[key: string]: BundleLine} = Object.create(null);
+	private eol: string = '\n';
 
-			var lineMatch:RegExpExecArray;
-			var refMatch:RegExpExecArray;
-			var line:BundleLine;
-			var prev:BundleLine = null;
+	// location of the .d.ts file
+	public target: string;
+	// base folder when adding relative refs
+	public baseDir: string;
 
-			var eolWin = 0;
-			var eolNix = 0;
+	constructor(target: string, baseDir?: string) {
+		assertVar(target, 'string', 'target');
 
-			splitExp.lastIndex = 0;
-			while ((lineMatch = splitExp.exec(content))) {
-				splitExp.lastIndex = lineMatch.index + lineMatch[0].length;
-
-				line = new BundleLine(lineMatch[1]);
-				if (prev) {
-					line.prev = prev;
-					prev.next = line;
-				}
-				prev = line;
-				if (!this.head) {
-					this.head = line;
-				}
-
-				if (/\r\n/.test(lineMatch[2])) {
-					eolWin++;
-				}
-				else {
-					eolNix++;
-				}
-
-				referenceTagExp.lastIndex = 0;
-				refMatch = referenceTagExp.exec(lineMatch[1]);
-				if (refMatch && refMatch.length > 1) {
-					// clean-up path
-					line.ref = path.resolve(this.baseDir, refMatch[1]);
-				}
-			}
-
-			// auto detect
-			this.eol = (eolWin > eolNix ? '\r\n' : '\n');
-		}
-
-		has(ref:string):boolean {
-			ref = path.resolve(this.baseDir, ref);
-
-			var line = this.head;
-			while (line) {
-				if (line.ref === ref) {
-					return true;
-				}
-				line = line.next;
-			}
-			return false;
-		}
-
-		append(ref:string):void {
-			ref = path.resolve(this.baseDir, ref);
-
-			if (!this.has(ref)) {
-				var line = new BundleLine('', ref);
-				if (this.head) {
-					var last = this.last();
-					if (last) {
-						last.addAfter(line);
-					}
-					else {
-						// first ref, add on top
-						this.head.prev = line;
-						line.next = this.head;
-						this.head = line;
-					}
-				}
-				else {
-					this.head = line;
-				}
-			}
-		}
-
-		remove(ref:string):void {
-			ref = path.resolve(this.baseDir, ref);
-
-			var line = this.head;
-			while (line) {
-				if (line.ref === ref) {
-					if (line === this.head) {
-						this.head = line.next;
-					}
-					line.removeSelf();
-					return;
-				}
-				line = line.next;
-			}
-		}
-
-		toArray(all:boolean = false):string[] {
-			var ret:string[] = [];
-			var base = path.dirname(this.target);
-			var line = this.head;
-			while (line) {
-				if (all || line.ref) {
-					ret.push(line.getRef(base));
-				}
-				line = line.next;
-			}
-			return ret;
-		}
-
-		private first(all:boolean = false):BundleLine {
-			var line = this.head;
-			while (line) {
-				if (all || line.ref) {
-					return line;
-				}
-				line = line.next;
-			}
-			return null;
-		}
-
-		private last(all:boolean = false):BundleLine {
-			var ret:BundleLine = null;
-			var line = this.head;
-			while (line) {
-				if (all || line.ref) {
-					ret = line;
-				}
-				line = line.next;
-			}
-			return ret;
-		}
-
-		getContent():string {
-			var content:string[] = [];
-			// make relative paths from target to files
-			var base = path.dirname(this.target);
-			var line = this.head;
-			while (line) {
-				content.push(line.getValue(base), this.eol);
-				line = line.next;
-			}
-			return content.join('');
-		}
+		this.target = fixWinDrive(target.replace(/^\.\//, ''));
+		this.baseDir = fixWinDrive(baseDir || path.dirname(this.target));
 	}
 
-	// do not export, hide implementation
-	class BundleLine {
+	parse(content: string): void {
+		this.eol = '\n';
 
-		next:BundleLine;
-		prev:BundleLine;
-		value:string;
-		ref:string;
+		var lineMatch: RegExpExecArray;
+		var refMatch: RegExpExecArray;
+		var line: BundleLine;
 
-		constructor(value:string, ref?:string) {
-			this.value = value;
-			this.ref = ref;
+		var eolWin = 0;
+		var eolNix = 0;
+
+		splitExp.lastIndex = 0;
+		while ((lineMatch = splitExp.exec(content))) {
+			splitExp.lastIndex = lineMatch.index + lineMatch[0].length;
+
+			line = new BundleLine(lineMatch[1]);
+
+			this.lines.push(line);
+
+			if (/\r\n/.test(lineMatch[2])) {
+				eolWin++;
+			}
+			else {
+				eolNix++;
+			}
+
+			referenceTagExp.lastIndex = 0;
+			refMatch = referenceTagExp.exec(lineMatch[1]);
+
+			if (refMatch && refMatch.length > 1) {
+				// clean-up path
+				line.ref = fixWinDrive(path.resolve(this.baseDir, refMatch[1]));
+
+				this.map[line.ref] = line;
+				this.last = line;
+			}
 		}
 
-		getRef(base?:string):string {
-			var ref = this.ref;
-			if (base) {
-				ref = path.relative(base, ref);
+		// auto detect
+		this.eol = (eolWin > eolNix ? '\r\n' : '\n');
+	}
+
+	has(ref: string): boolean {
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
+		return (ref in this.map);
+	}
+
+	append(ref: string): string {
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
+
+		if (!(ref in this.map)) {
+			var line = new BundleLine('', ref);
+
+			this.map[ref] = line;
+
+			if (this.last) {
+				var i = this.lines.indexOf(this.last);
+				if (i > -1) {
+					this.lines.splice(i + 1, 0, line);
+					this.last = line;
+					return ref;
+				}
 			}
-			if (path.sep === '\\') {
-				// TODO is this correct?
-				ref = ref.replace(/\\/g, '/');
-			}
+
+			this.lines.push(line);
+			this.last = line;
 			return ref;
 		}
+		return null;
+	}
 
-		getValue(base?:string):string {
-			if (this.ref) {
-				return '/// <reference path="' + this.getRef(base) + '" />';
-			}
-			return this.value;
-		}
+	remove(ref: string): string {
+		ref = fixWinDrive(path.resolve(this.baseDir, ref));
 
-		addAfter(add:BundleLine):void {
-			add.prev = this;
-			add.next = this.next;
-			if (this.next) {
-				this.next.prev = add;
-			}
-			this.next = add;
-		}
+		if (ref in this.map) {
+			var line = this.map[ref];
 
-		removeSelf():void {
-			if (this.prev) {
-				this.prev.next = this.next;
+			var i = this.lines.indexOf(line);
+			if (i > -1) {
+				this.lines.splice(i, 1);
 			}
-			if (this.next) {
-				this.next.prev = this.prev;
+
+			delete this.map[ref];
+
+			if (line === this.last) {
+				for (i -= 1; i >= 0; i--) {
+					if (this.lines[i].ref) {
+						this.last = this.lines[i];
+						return ref;
+					}
+				}
 			}
-			this.next = null;
-			this.prev = null;
+			this.last = null;
+			return ref;
 		}
+		return null;
+	}
+
+	toArray(relative: boolean = false, canonical: boolean = false): string[] {
+		var base = (relative ? path.dirname(this.target) : null);
+		return Lazy(this.lines)
+			.filter(line => !!line.ref)
+			.map(line => line.getRef(base, canonical))
+			.toArray();
+	}
+
+	stringify(): string {
+		// make relative paths from target to files
+		var base = path.dirname(this.target);
+		return this.lines.map((line) => {
+			return line.getValue(base) + this.eol;
+		}).join('');
 	}
 }
+
+// do not export, hide implementation
+class BundleLine {
+
+	value: string;
+	ref: string;
+
+	constructor(value: string, ref?: string) {
+		this.value = value;
+		this.ref = ref;
+	}
+
+	getRef(base?: string, canonical?: boolean): string {
+		var ref = this.ref;
+		if (base) {
+			ref = path.relative(base, ref);
+		}
+		if (canonical && path.sep === '\\') {
+			// TODO is this correct?
+			ref = ref.replace(/\\/g, '/');
+		}
+		return ref;
+	}
+
+	getValue(base?: string): string {
+		if (this.ref) {
+			return '/// <reference path="' + this.getRef(base, true) + '" />';
+		}
+		return this.value;
+	}
+}
+
+export = Bundle;

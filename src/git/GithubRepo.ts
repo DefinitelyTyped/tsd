@@ -1,65 +1,56 @@
-/// <reference path="../xm/assertVar.ts" />
-/// <reference path="../xm/json-pointer.ts" />
-/// <reference path="GithubURLs.ts" />
-/// <reference path="GithubRepoConfig.ts" />
-/// <reference path="loader/GithubAPI.ts" />
-/// <reference path="loader/GithubRaw.ts" />
+/// <reference path="./_ref.d.ts" />
 
-module git {
-	'use strict';
+'use strict';
 
-	var path = require('path');
+import path = require('path');
 
-	/*
-	 GithubRepo: basic github repo info
-	 */
-	export class GithubRepo {
+import assertVar = require('../xm/assertVar');
+import objectUtils = require('../xm/objectUtils');
+import JSONPointer = require('../xm/lib/JSONPointer');
 
-		config:git.GithubRepoConfig;
-		storeDir:string;
+import GithubRepoConfig = require('./GithubRepoConfig');
+import GithubURLs = require('./GithubURLs');
+import GithubAPI = require('./loader/GithubAPI');
+import GithubRaw = require('./loader/GithubRaw');
 
-		urls:git.GithubURLs;
-		api:git.GithubAPI;
-		raw:git.GithubRaw;
+/*
+ GithubRepo: basic github repo info
+ */
+class GithubRepo {
 
-		constructor(config:git.GithubRepoConfig, storeDir:string, opts:xm.JSONPointer) {
-			xm.assertVar(config, 'object', 'config');
-			xm.assertVar(storeDir, 'string', 'storeDir');
-			xm.assertVar(opts, xm.JSONPointer, 'opts');
+	config: GithubRepoConfig;
+	storeDir: string;
 
-			this.config = config;
-			this.urls = new git.GithubURLs(this);
+	urls: GithubURLs;
+	api: GithubAPI;
+	raw: GithubRaw;
 
-			this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
+	constructor(config: GithubRepoConfig, storeDir: string, opts: JSONPointer) {
+		assertVar(config, 'object', 'config');
+		assertVar(storeDir, 'string', 'storeDir');
+		assertVar(opts, JSONPointer, 'opts');
 
-			this.api = new git.GithubAPI(this, opts.getChild('git/api'), this.storeDir);
-			this.raw = new git.GithubRaw(this, opts.getChild('git/raw'), this.storeDir);
+		this.config = config;
+		this.urls = new GithubURLs(this);
 
-			var proxy = (
-				opts.getString('proxy')
-				|| process.env.HTTPS_PROXY
-				|| process.env.https_proxy
-				|| process.env.HTTP_PROXY
-				|| process.env.http_proxy
-			);
+		this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
 
-			this.api.cache.proxy = proxy;
-			this.raw.cache.proxy = proxy;
+		this.api = new GithubAPI(this.urls, opts.getChild('git/api'), opts, this.storeDir);
+		this.raw = new GithubRaw(this.urls, opts.getChild('git/raw'), opts, this.storeDir);
+	}
 
-			xm.object.lockProps(this, Object.keys(this));
-		}
+	getCacheKey(): string {
+		return this.config.repoOwner + '-' + this.config.repoProject;
+	}
 
-		getCacheKey():string {
-			return this.config.repoOwner + '-' + this.config.repoProject;
-		}
+	toString(): string {
+		return this.config.repoOwner + '/' + this.config.repoProject;
+	}
 
-		toString():string {
-			return this.config.repoOwner + '/' + this.config.repoProject;
-		}
-
-		set verbose(verbose:boolean) {
-			this.api.verbose = verbose;
-			this.raw.verbose = verbose;
-		}
+	set verbose(verbose: boolean) {
+		this.api.verbose = verbose;
+		this.raw.verbose = verbose;
 	}
 }
+
+export  = GithubRepo;

@@ -1,129 +1,137 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="DefVersion.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var semver = require('semver');
+import semver = require('semver');
+import VError = require('verror');
 
-	/*
-	 Def: single definition in repo (identified by its path)
-	 */
-	export class Def {
+import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
 
-		static nameExp = /^([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
-		static nameExpEnd = /([\w\.-]*)\/([\w\.-]*)\.d\.ts$/;
+import DefVersion = require('./DefVersion');
 
-		static versionEnd = /(?:-v?)(\d+(?:\.\d+)*)((?:-[a-z]+)?)$/i;
-		static twoNums = /^\d+\.\d+$/;
+var defExp = /^[a-z](?:[\._-]?[a-z0-9])*(?:\/[a-z](?:[\._-]?[a-z0-9])*)+\.d\.ts$/i;
 
-		// unique identifier: 'project/name-v0.1.3-alpha.d.ts'
-		path:string;
+var versionEnd = /(?:-v?)(\d+(?:\.\d+)*)(-[a-z](?:[_-]?[a-z0-9])*(?:\.\d+)*)?$/i;
+var twoNums = /^\d+\.\d+$/;
 
-		// split
-		project:string;
-		name:string;
-		// used?
-		semver:string;
+var lockProps = [
+	'path',
+	'project',
+	'name',
+	'semver',
+	'label',
+	'isLegacy',
+	'isMain',
+];
 
-		// version from the DefIndex commit +tree (may be not our edit)
-		head:tsd.DefVersion;
+var legacyFolders = [
+	'legacy',
+	'releases'
+];
 
-		// versions from commits that changed this file
-		history:tsd.DefVersion[] = [];
+/*
+ Def: single definition in repo (identified by its path)
+ */
+class Def {
 
-		constructor(path:string) {
-			xm.assertVar(path, 'string', 'path');
-			this.path = path;
+	// unique identifier: 'project/name-v0.1.3-alpha.d.ts'
+	path: string = null;
+
+	// split
+	project: string = null;
+	name: string = null;
+	semver: string = null;
+
+	// normalised display name
+	label: string = null;
+
+	isLegacy: boolean = false;
+	isMain: boolean = true;
+
+	// version from the DefIndex commit +tree (may be not our edit)
+	head: DefVersion = null;
+
+	// versions from commits that changed this file
+	history: DefVersion[] = [];
+
+	releases: Def[] = [];
+
+	constructor(path: string) {
+		assertVar(path, 'string', 'path');
+
+		if (!defExp.test(path)) {
+			throw new VError('cannot part path %s to Def', path);
 		}
 
-		toString():string {
-			return this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
+		this.path = path;
+
+		var parts = this.path.replace(/\.d\.ts$/, '').split(/\//g);
+
+		this.project = parts[0];
+		this.name = parts.slice(1).join(':');
+
+		// aa/bb.dts vs aa/bb/cc.d.ts
+		this.isMain = (parts.length === 2);
+		this.isLegacy = false;
+
+		if (parts.length > 2 && legacyFolders.indexOf(parts[1]) > -1) {
+			this.isLegacy = true;
+			this.name = parts.slice(2).join(':');
+			this.isMain = (parts.length === 3);
 		}
 
-		// TODO add test
-		get pathTerm():string {
-			return this.path.replace(/\.d\.ts$/, '');
-		}
+		versionEnd.lastIndex = 0;
+		var semMatch = versionEnd.exec(this.name);
+		if (semMatch) {
+			var sem = semMatch[1];
 
-		// TODO add test
-		static getPathExp(trim:boolean):RegExp {
-			var useExp:RegExp = (trim ? Def.nameExpEnd : Def.nameExp);
-			useExp.lastIndex = 0;
-			return useExp;
-		}
-
-		// TODO add test
-		static getFileFrom(path:string):string {
-			var useExp:RegExp = Def.getPathExp(true);
-			var match = useExp.exec(path);
-			if (!match) {
-				return null;
+			// try to fix semver version
+			if (twoNums.test(sem)) {
+				sem += '.0';
 			}
-			return match[1] + '/' + match[2] + '.d.ts';
-		}
-
-		static isDefPath(path:string, trim:boolean = false):boolean {
-			if (Def.getPathExp(trim).test(path)) {
-				Def.versionEnd.lastIndex = 0;
-				var semMatch = Def.versionEnd.exec(path);
-				if (!semMatch) {
-					return true;
-				}
-				var sem = semMatch[1];
-				if (Def.twoNums.test(sem)) {
-					sem += '.0';
-				}
-				if (semMatch.length > 2) {
-					sem += semMatch[2];
-				}
-				return semver.valid(sem, true);
-			}
-			return false;
-		}
-
-		static getFrom(path:string, trim:boolean = false):tsd.Def {
-			var useExp:RegExp = Def.getPathExp(trim);
-
-			var match:RegExpExecArray = useExp.exec(path);
-			if (!match) {
-				return null;
-			}
-			if (match.length < 1) {
-				return null;
-			}
-			if (match[1].length < 1 || match[2].length < 1) {
-				return null;
-			}
-			var file = new tsd.Def(path);
-			file.project = match[1];
-			file.name = match[2];
-
-			Def.versionEnd.lastIndex = 0;
-			var semMatch = Def.versionEnd.exec(file.name);
-			if (semMatch) {
-				var sem = semMatch[1];
-				// append missing patch version
-				if (Def.twoNums.test(sem)) {
-					sem += '.0';
-				}
-				if (semMatch.length > 2) {
-					sem += semMatch[2];
-				}
-
-				var valid = semver.valid(sem, true);
-				if (valid) {
-					file.semver = valid;
-					file.name = file.name.substr(0, semMatch.index);
-				}
-				else {
-					// xm.log.warn('invalid semver', sem);
-				}
+			if (semMatch.length > 2 && typeof semMatch[2] !== 'undefined') {
+				sem += semMatch[2];
 			}
 
-			xm.object.lockProps(file, ['path', 'project', 'name', 'semver']);
-
-			return file;
+			var valid = semver.valid(sem, true);
+			if (valid) {
+				this.semver = valid;
+				this.isLegacy = true;
+				this.name = this.name.substr(0, semMatch.index);
+			}
+			else {
+				// console.log('invalid semver ' + def.name);
+			}
 		}
+
+		this.label = this.project + '/' + this.name + (this.semver ? '-v' + this.semver : '');
+
+		objectUtils.lockProps(this, lockProps);
+	}
+
+	toString(): string {
+		return this.path;
+	}
+
+	get pathTerm(): string {
+		return this.path.replace(/\.d\.ts$/, '');
+	}
+
+	get nameTerm(): string {
+		return this.name + (this.semver ? '-v' + this.semver : '');
+	}
+
+	static isDefPath(path: string): boolean {
+		return defExp.test(path);
+	}
+
+	static getFrom(path: string): Def {
+		if (!defExp.test(path)) {
+			return null;
+		}
+		return new Def(path);
 	}
 }
+
+export = Def;

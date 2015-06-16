@@ -3,9 +3,9 @@
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-///<reference path="../chai/chai-assert.d.ts" />
+///<reference path="../chai/chai.d.ts" />
 
-declare module Chai {
+declare module chai {
 	export interface Assert {
 		basename(path:string, name:string, msg?:string):void;
 		notBasename(path:string, name:string, msg?:string):void;
@@ -32,9 +32,9 @@ declare module Chai {
 		notIsEmptyDirectory(path:string, msg?:string):void;
 
 		fileContent(path:string, data:string, msg?:string):void;
-		fileContent(path:string, data:NodeBuffer, msg?:string):void;
+		fileContent(path:string, data:Buffer, msg?:string):void;
 		notFileContent(path:string, data:string, msg?:string):void;
-		notFileContent(path:string, data:NodeBuffer, msg?:string):void;
+		notFileContent(path:string, data:Buffer, msg?:string):void;
 
 		jsonFile(path:string, msg?:string):void;
 		notJsonFile(path:string, msg?:string):void;

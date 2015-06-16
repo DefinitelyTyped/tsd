@@ -1,0 +1,7 @@
+{
+    "name": "foo-single",
+    "version": "0.0.1",
+    "typescript": {
+        "definition": "bar.d.ts"
+    }
+}

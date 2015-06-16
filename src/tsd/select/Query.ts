@@ -1,53 +1,56 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="NameMatcher.ts" />
-/// <reference path="InfoMatcher.ts" />
-/// <reference path="DateMatcher.ts" />
-/// <reference path="VersionMatcher.ts" />
-/// <reference path="CommitMatcher.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	/*
-	 Query: bundles the various selector options
-	 */
-	export class Query {
+import assertVar = require('../../xm/assertVar');
 
-		patterns:NameMatcher[] = [];
+import NameMatcher = require('./NameMatcher');
+import VersionMatcher = require('./VersionMatcher');
+import DateMatcher = require('./DateMatcher');
+import InfoMatcher = require('./InfoMatcher');
+import CommitMatcher = require('./CommitMatcher');
 
-		versionMatcher:VersionMatcher;
-		dateMatcher:DateMatcher;
-		infoMatcher:InfoMatcher;
-		commitMatcher:CommitMatcher;
+/*
+ Query: bundles the various selector options
+ */
+class Query {
 
-		parseInfo:boolean = false;
-		loadHistory:boolean = false;
+	patterns: NameMatcher[] = [];
 
-		constructor(pattern?:string) {
-			xm.assertVar(pattern, 'string', 'pattern', true);
-			if (pattern) {
-				this.patterns.push(new tsd.NameMatcher(pattern));
-			}
-		}
+	versionMatcher: VersionMatcher;
+	dateMatcher: DateMatcher;
+	infoMatcher: InfoMatcher;
+	commitMatcher: CommitMatcher;
 
-		addNamePattern(pattern:string):void {
-			xm.assertVar(pattern, 'string', 'pattern');
-			this.patterns.push(new tsd.NameMatcher(pattern));
-		}
+	parseInfo: boolean = false;
+	loadHistory: boolean = false;
 
-		get requiresSource():boolean {
-			return !!(this.infoMatcher || this.parseInfo);
-		}
-
-		get requiresHistory():boolean {
-			return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
-		}
-
-		toString():string {
-			return this.patterns.reduce((memo:string[], matcher:NameMatcher) => {
-				memo.push(matcher.pattern);
-				return memo;
-			}, []).join(', ');
+	constructor(pattern?: string) {
+		assertVar(pattern, 'string', 'pattern', true);
+		if (pattern) {
+			this.patterns.push(new NameMatcher(pattern));
 		}
 	}
+
+	addNamePattern(pattern: string): void {
+		assertVar(pattern, 'string', 'pattern');
+		this.patterns.push(new NameMatcher(pattern));
+	}
+
+	setVersionRange(range: string): void {
+		assertVar(range, 'string', 'range');
+		this.versionMatcher = new VersionMatcher(range);
+	}
+
+	get requiresHistory(): boolean {
+		return !!(this.dateMatcher || this.commitMatcher || this.loadHistory);
+	}
+
+	toString(): string {
+		return this.patterns.map((matcher: NameMatcher) => {
+			return matcher.pattern;
+		}).join(', ');
+	}
 }
+
+export = Query;

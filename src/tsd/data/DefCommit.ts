@@ -1,80 +1,82 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../../git/model/GithubJSON.ts" />
-/// <reference path="../../git/model/GithubUser.ts" />
-/// <reference path="../../git/model/GitCommitMessage.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var pointer = require('json-pointer');
+import pointer = require('json-pointer');
 
-	/*
-	 DefCommit: meta-data for a single github commit
-	 */
-	export class DefCommit {
+import assert = require('../../xm/assert');
+import assertVar = require('../../xm/assertVar');
+import objectUtils = require('../../xm/objectUtils');
 
-		// NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
+import GithubUser = require('../../git/model/GithubUser');
+import GitCommitUser = require('../../git/model/GitCommitUser');
+import GitCommitMessage = require('../../git/model/GitCommitMessage');
 
-		commitSha:string;
-		hasMeta:boolean = false;
+import defUtil = require('../util/defUtil');
 
-		message:git.GitCommitMessage = new git.GitCommitMessage();
+/*
+ DefCommit: meta-data for a single github commit
+ */
+class DefCommit {
 
-		hubAuthor:git.GithubUser;
-		hubCommitter:git.GithubUser;
+	// NOTE for now lets not keep full git-trees per commit (DefinitelyTyped has too many commits) instead keep history per file
 
-		gitAuthor:git.GitUserCommit;
-		gitCommitter:git.GitUserCommit;
+	commitSha: string;
+	hasMeta: boolean = false;
 
-		// moar fields?
+	message: GitCommitMessage = new GitCommitMessage();
 
-		constructor(commitSha:string) {
-			xm.assertVar(commitSha, 'sha1', 'commitSha');
+	hubAuthor: GithubUser;
+	hubCommitter: GithubUser;
 
-			this.commitSha = commitSha;
+	gitAuthor: GitCommitUser;
+	gitCommitter: GitCommitUser;
 
-			xm.object.hidePrefixed(this);
-			xm.object.lockProps(this, ['commitSha']);
+	// moar fields?
+
+	constructor(commitSha: string) {
+		assertVar(commitSha, 'sha1', 'commitSha');
+
+		this.commitSha = commitSha;
+		objectUtils.lockProps(this, ['commitSha']);
+	}
+
+	parseJSON(commit: any): void {
+		assertVar(commit, 'object', 'commit');
+		assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
+
+		this.hubAuthor = GithubUser.fromJSON(commit.author);
+		this.hubCommitter = GithubUser.fromJSON(commit.committer);
+
+		this.gitAuthor = GitCommitUser.fromJSON(commit.commit.author);
+		this.gitCommitter = GitCommitUser.fromJSON(commit.commit.committer);
+
+		this.message.parse(commit.commit.message);
+		this.hasMeta = true;
+	}
+
+	hasMetaData(): boolean {
+		return this.hasMeta;
+	}
+
+	toString(): string {
+		return this.commitSha;
+	}
+
+	get changeDate(): Date {
+		if (this.gitAuthor) {
+			return this.gitAuthor.date;
 		}
-
-		parseJSON(commit:any):void {
-			xm.assertVar(commit, 'object', 'commit');
-			xm.assert((commit.sha === this.commitSha), 'not my tree: {act}, {exp}', this.commitSha, commit.sha);
-
-			// TODO add a bit of checking? error? beh?
-			this.hubAuthor = git.GithubUser.fromJSON(commit.author);
-			this.hubCommitter = git.GithubUser.fromJSON(commit.committer);
-
-			this.gitAuthor = git.GitUserCommit.fromJSON(commit.commit.author);
-			this.gitCommitter = git.GitUserCommit.fromJSON(commit.commit.committer);
-
-			this.message.parse(commit.commit.message);
-			this.hasMeta = true;
-
-			xm.object.lockProps(this, ['commitSha', 'hasMeta']);
+		if (this.gitCommitter) {
+			return this.gitCommitter.date;
 		}
+		return null;
+	}
 
-		hasMetaData():boolean {
-			return this.hasMeta;
-		}
-
-		toString():string {
-			return this.commitSha;
-		}
-
-		get changeDate():Date {
-			if (this.gitAuthor) {
-				return this.gitAuthor.date;
-			}
-			if (this.gitCommitter) {
-				return this.gitCommitter.date;
-			}
-			return null;
-		}
-
-		// human friendly
-		get commitShort():string {
-			return this.commitSha ? tsd.shaShort(this.commitSha) : '<no sha>';
-		}
+	// human friendly
+	get commitShort(): string {
+		return this.commitSha ? defUtil.shaShort(this.commitSha) : '<no sha>';
 	}
 }
+
+export = DefCommit;

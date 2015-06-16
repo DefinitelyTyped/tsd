@@ -1,222 +1,223 @@
-/*
- * imported from typescript-xm package
- *
- * Bart van der Schoor
- * https://github.com/Bartvds/typescript-xm
- * License: MIT - 2013
- * */
+/// <reference path="./_ref.d.ts" />
 
- module xm {
-	'use strict';
+'use strict';
 
-	 var natives = {
-		'[object Arguments]': 'arguments',
-		'[object Array]': 'array',
-		'[object Date]': 'date',
-		'[object Function]': 'function',
-		'[object Number]': 'number',
-		'[object RegExp]': 'regexp',
-		'[object String]': 'string'
-	};
+import typeDetect = require('type-detect');
 
-	export function typeOf(obj:any):string {
-		var str = Object.prototype.toString.call(obj);
-		if (natives[str]) {
-			return natives[str];
-		}
-		if (obj === null) {
-			return 'null';
-		}
-		if (obj === undefined) {
-			return 'undefined';
-		}
-		if (obj === Object(obj)) {
-			return 'object';
-		}
-		return typeof obj;
+var toString = Object.prototype.toString;
+
+export function get(value: any): string {
+	return typeDetect(value);
+}
+
+export var jsonTypes: string[] = [
+	'array',
+	'object',
+	'boolean',
+	'number',
+	'string',
+	'null'
+];
+
+export var primitiveTypes: string[] = [
+	'boolean',
+	'number',
+	'string'
+];
+
+export var valueTypes: string[] = [
+	'boolean',
+	'number',
+	'string',
+	'null'
+];
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+export function hasOwnProp(value: any, prop: string): boolean {
+	return hasOwnProperty.call(value, prop);
+}
+
+export function isType(value: any, type: string): boolean {
+	if (hasOwnProp(typeMap, type)) {
+		return typeMap[type].call(null, value);
 	}
+	return false;
+}
 
-	var jsonTypes:string[] = [
-		'array',
-		'object',
-		'boolean',
-		'number',
-		'string',
-		'null'
-	];
+export function isArguments(value: any): boolean {
+	return typeDetect(value) === 'arguments';
+}
 
-	var primitiveTypes:string[] = [
-		'boolean',
-		'number',
-		'string'
-	];
+export function isArray(value: any): boolean {
+	return typeDetect(value) === 'array';
+}
 
-	var valueTypes:string[] = [
-		'boolean',
-		'number',
-		'string',
-		'null'
-	];
+export function isDate(value: any): boolean {
+	return typeDetect(value) === 'date';
+}
 
-	var objectNameExp = /(^\[object )|(\]$)/gi;
+export function isFunction(value: any): boolean {
+	return typeDetect(value) === 'function';
+}
 
-	export function toProtoString(obj:any):string {
-		return Object.prototype.toString.call(obj).replace(objectNameExp, '');
-	}
+export function isNumber(value: any): boolean {
+	return typeDetect(value) === 'number';
+}
 
-	var typeMap:any = {
-		arguments: isArguments,
-		array: isArray,
-		date: isDate,
-		function: isFunction,
-		number: isNumber,
-		regexp: isRegExp,
-		string: isString,
-		null: isNull,
-		undefined: isUndefined,
-		object: isObject,
-		boolean: isBoolean,
-		ok: isOk,
-		valid: isValid,
-		jsonValue: isJSONValue
-	};
+export function isRegExp(value: any): boolean {
+	return typeDetect(value) === 'regexp';
+}
 
-	export function hasOwnProp(obj:any, prop:string):boolean {
-		return Object.prototype.hasOwnProperty.call(obj, prop);
-	}
+export function isString(value: any): boolean {
+	return typeDetect(value) === 'string';
+}
 
-	export function isType(obj:any, type:string):boolean {
-		if (hasOwnProp(typeMap, type)) {
-			return typeMap[type].call(null, obj);
-		}
+export function isNull(value: any): boolean {
+	return typeDetect(value) === 'null';
+}
+
+export function isUndefined(value: any): boolean {
+	return typeDetect(value) === 'undefined';
+}
+
+export function isObject(value: any): boolean {
+	return typeDetect(value) === 'object';
+}
+
+export function isBoolean(value: any): boolean {
+	return typeDetect(value) === 'boolean';
+}
+// error?
+
+// - - - - meta types
+
+// TODO add more array-likes?? DOM???
+export function isArrayLike(value: any): boolean {
+	return (typeDetect(value) === 'array' || typeDetect(value) === 'arguments');
+}
+
+export function isOk(value: any): boolean {
+	return !!value;
+}
+
+export function isFlagOn(value: any): boolean {
+	if (!isValid(value)) {
 		return false;
 	}
-
-	export function isArguments(obj:any):boolean {
-		return (typeOf(obj) === 'arguments');
+	value = String(value).trim().toLowerCase();
+	if (value === '' || value === '0') {
+		return false;
 	}
-
-	export function isArray(obj:any):boolean {
-		return (typeOf(obj) === 'array');
-	}
-
-	export function isDate(obj:any):boolean {
-		return (typeOf(obj) === 'date');
-	}
-
-	export function isFunction(obj:any):boolean {
-		return (typeOf(obj) === 'function');
-	}
-
-	export function isNumber(obj:any):boolean {
-		return (typeOf(obj) === 'number');
-	}
-
-	export function isRegExp(obj:any):boolean {
-		return (typeOf(obj) === 'regexp');
-	}
-
-	export function isString(obj:any):boolean {
-		return (typeOf(obj) === 'string');
-	}
-
-	export function isNull(obj:any):boolean {
-		return (typeOf(obj) === 'null');
-	}
-
-	export function isUndefined(obj:any):boolean {
-		return (typeOf(obj) === 'undefined');
-	}
-
-	export function isObject(obj:any):boolean {
-		return (typeOf(obj) === 'object');
-	}
-
-	export function isBoolean(obj:any):boolean {
-		return (typeOf(obj) === 'boolean');
-	}
-	// error?
-
-	// - - - - meta types
-
-	// TODO add more array-likes?? DOM???
-	export function isArrayLike(obj:any):boolean {
-		return (typeOf(obj) === 'array' || typeOf(obj) === 'arguments');
-	}
-
-	export function isOk(obj:any):boolean {
-		return !!obj;
-	}
-
-	export function isFlagOn(obj:any):boolean {
-		if (!xm.isValid(obj)) {
+	switch (value) {
+		case 'false':
+		case 'null':
+		case 'nan':
+		case 'undefined':
+		// language
+		case 'no':
+		case 'off':
+		case 'disabled':
 			return false;
+	}
+	return true;
+}
+
+export function isValid(value: any): boolean {
+	var type = typeDetect(value);
+	return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(value)));
+}
+
+export function isNaN(value: any): boolean {
+	return value !== value;
+}
+
+export function isJSONValue(value: any): boolean {
+	return jsonTypes.indexOf(typeDetect(value)) > -1;
+}
+
+export function isPrimitive(value: any): boolean {
+	return primitiveTypes.indexOf(typeDetect(value)) > -1;
+}
+
+export function isValueType(value: any): boolean {
+	return valueTypes.indexOf(typeDetect(value)) > -1;
+}
+
+// - - - -
+
+export function isSha(value: any): boolean {
+	if (typeof value !== 'string') {
+		return false;
+	}
+	return /^[0-9a-f]{40}$/.test(value);
+}
+
+export function isShaShort(value: any): boolean {
+	if (typeof value !== 'string') {
+		return false;
+	}
+	return /^[0-9a-f]{6,40}$/.test(value);
+}
+
+export function isMd5(value: any): boolean {
+	if (typeof value !== 'string') {
+		return false;
+	}
+	return /^[0-9a-f]{32}$/.test(value);
+}
+
+export var typeMap: any = {
+	arguments: isArguments,
+	array: isArray,
+	date: isDate,
+	function: isFunction,
+	number: isNumber,
+	regexp: isRegExp,
+	string: isString,
+	null: isNull,
+	undefined: isUndefined,
+	object: isObject,
+	boolean: isBoolean,
+	ok: isOk,
+	valid: isValid,
+	sha1: isSha,
+	md5: isMd5,
+	jsonValue: isJSONValue
+};
+
+// - - - -
+
+// clone/extend the map
+export function getTypeOfMap(add?: any): Object {
+	var name: string;
+	var value = Object.create(null);
+	for (name in typeMap) {
+		if (hasOwnProp(typeMap, name)) {
+			if (!isFunction(typeMap[name])) {
+				throw new Error('bad typeOf function ' + name);
+			}
+			value[name] = typeMap[name];
 		}
-		obj = ('' + obj).toLowerCase();
-		if (obj === '' || obj === '0') {
-			return false;
-		}
-		switch (obj) {
-			case 'false':
-			case 'null':
-			case 'nan':
-			case 'undefined':
-			// language
-			case 'no':
-			case 'off':
-			case 'disabled':
-				return false;
-		}
-		return true;
 	}
-
-	export function isValid(obj:any):boolean {
-		var type = typeOf(obj);
-		return !(type === 'undefined' || type === 'null' || (type === 'number' && isNaN(obj)));
-	}
-
-	export function isJSONValue(obj:any):boolean {
-		return jsonTypes.indexOf(typeOf(obj)) > -1;
-	}
-
-	export function isPrimitive(obj:any):boolean {
-		return primitiveTypes.indexOf(typeOf(obj)) > -1;
-	}
-
-	export function isValueType(obj:any):boolean {
-		return valueTypes.indexOf(typeOf(obj)) > -1;
-	}
-
-	// - - - -
-
-	// clone/extend the map
-	export function getTypeOfMap(add?:any) {
-		var name:string;
-		var obj = {};
-		for (name in typeMap) {
-			if (hasOwnProp(typeMap, name)) {
-				obj[name] = typeMap[name];
+	if (add) {
+		for (name in add) {
+			if (hasOwnProp(add, name) && isFunction(add[name])) {
+				value[name] = add[name];
 			}
 		}
-		if (add) {
-			for (name in add) {
-				if (hasOwnProp(add, name) && isFunction(add[name])) {
-					obj[name] = add[name];
-				}
-			}
+	}
+	return value;
+}
+
+// get a wrapper to check in the cloned/extended map
+export function getTypeOfWrap(add?: any): (value: any, type: string) => boolean {
+	var typeMap = getTypeOfMap(add);
+
+	return function isTypeWrap(value: any, type: string): boolean {
+		if (hasOwnProp(typeMap, type)) {
+			return typeMap[type].call(null, value);
 		}
-		return obj;
-	}
-
-	// get a wrapper to check in the cloned/extended map
-	export function getTypeOfWrap(add?:any):(obj:any, type:string) => boolean {
-		var typeMap = getTypeOfMap(add);
-
-		return function isTypeWrap(obj:any, type:string):boolean {
-			if (hasOwnProp(typeMap, type)) {
-				return typeMap[type].call(null, obj);
-			}
-			return false;
-		};
-	}
+		return false;
+	};
 }

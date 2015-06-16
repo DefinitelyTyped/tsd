@@ -1,11 +1,11 @@
-// Type definitions for chai-fs v0.0.0 assert style
+// Type definitions for chai-as-promised v0.0.0 assert style
 // Project: http://chaijs.com/
 // Definitions by: Bart van der Schoor <https://github.com/Bartvds>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-///<reference path="../chai/chai-assert.d.ts" />
+///<reference path="../chai/chai.d.ts" />
 
-declare module Chai {
+declare module chai {
 	export interface Assert {
 		isFulfilled(promise:any, msg?:string):any;
 

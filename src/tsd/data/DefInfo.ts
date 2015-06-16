@@ -1,64 +1,59 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="Def.ts" />
-/// <reference path="../../xm/data/AuthorInfo.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	/*
-	 DefInfo: parsed info from single definition source
-	 */
-	export class DefInfo {
-		name:string;
-		version:string;
-		description:string;
-		projectUrl:string;
+import header = require('definition-header');
 
-		authors:xm.AuthorInfo[];
-		// reposName:string;
-		reposUrl:string;
+import AuthorInfo = require('../support/AuthorInfo');
 
-		references:string[] = [];
+/*
+ DefInfo: parsed info from single definition source
+ */
+class DefInfo {
+	name: string;
+	version: string;
+	projects: string[];
 
-		constructor() {
-			this.resetAll();
+	authors: AuthorInfo[];
+
+	externals: string[] = [];
+	partial: boolean;
+
+	constructor() {
+		this.resetAll();
+	}
+
+	resetFields() {
+		this.name = '';
+		this.version = '';
+		this.projects = [];
+
+		this.authors = [];
+	}
+
+	resetAll() {
+		this.resetFields();
+	}
+
+	toString(): string {
+		return this.name;
+	}
+
+	// harsh
+	isValid(): boolean {
+		// || !this.description
+		if (!this.name) {
+			return false;
 		}
-
-		resetFields() {
-			this.name = '';
-			this.version = '';
-			this.description = '';
-			this.projectUrl = '';
-
-			this.authors = [];
-			// this.reposName = '';
-			this.reposUrl = '';
+		/*if (this.authors.length === 0) {
+			return false;
 		}
-
-		resetAll() {
-			this.resetFields();
-
-			this.references = [];
-		}
-
-		toString():string {
-			return this.name;
-		}
-
-		// harsh
-		isValid():boolean {
-			// || !this.description
-			if (!this.name) {
-				return false;
-			}
-			/*if (this.authors.length === 0) {
-				return false;
-			}
-			//!this.reposName ||
-			if (!this.reposUrl) {
-				return false;
-			}*/
-			return true;
-		}
+		//!this.reposName ||
+		if (!this.reposUrl) {
+			return false;
+		}*/
+		return true;
 	}
 }
+
+export = DefInfo;

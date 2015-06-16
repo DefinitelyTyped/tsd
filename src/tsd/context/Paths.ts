@@ -1,40 +1,39 @@
-/// <reference path='../../xm/Logger.ts' />
-/// <reference path='../../xm/Logger.ts' />
-/// <reference path='../../_ref.d.ts' />
-/// <reference path='Const.ts' />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var path = require('path');
+import path = require('path');
 
-	// sourced paths from npm and its dependencies (osenv/osenv.js, npmconf/config-defs.js)
-	export class Paths {
+import Const = require('./Const');
 
-		configFile:string;
-		cacheDir:string;
-		startCwd:string;
+// sourced paths from npm and its dependencies (osenv/osenv.js, npmconf/config-defs.js)
+class Paths {
 
-		constructor() {
-			this.startCwd = path.resolve(process.cwd());
-			this.configFile = path.resolve(this.startCwd, tsd.Const.configFile);
-			this.cacheDir = path.resolve(this.startCwd, tsd.Const.cacheDir);
-		}
+	configFile: string;
+	cacheDir: string;
+	startCwd: string;
 
-		static getCacheDirName():string {
-			return (process.platform === 'win32' ? Const.cacheDir : '.' + Const.cacheDir);
-		}
+	constructor() {
+		this.startCwd = path.resolve(process.cwd());
+		this.configFile = path.resolve(this.startCwd, Const.configFile);
+		this.cacheDir = path.resolve(this.startCwd, Const.cacheDir);
+	}
 
-		static getUserHome():string {
-			return (process.env.HOME || process.env.USERPROFILE);
-		}
+	static getCacheDirName(): string {
+		return (process.platform === 'win32' ? Const.cacheDir : '.' + Const.cacheDir);
+	}
 
-		static getUserRoot():string {
-			return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
-		}
+	static getUserHome(): string {
+		return (process.env.HOME || process.env.USERPROFILE);
+	}
 
-		static getUserCacheDir():string {
-			return path.resolve(Paths.getUserRoot(), Paths.getCacheDirName());
-		}
+	static getUserRoot(): string {
+		return (process.platform === 'win32' ? process.env.APPDATA : Paths.getUserHome());
+	}
+
+	static getUserCacheDir(): string {
+		return path.resolve(Paths.getUserRoot(), Paths.getCacheDirName());
 	}
 }
+
+export = Paths;

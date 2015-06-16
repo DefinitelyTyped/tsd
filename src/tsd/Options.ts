@@ -1,38 +1,39 @@
-/// <reference path="../xm/assertVar.ts" />
-/// <reference path="../xm/typeOf.ts" />
+/// <reference path="./_ref.d.ts" />
 
-module tsd {
-	'use strict';
-	/*
-	 Options: bundles options
-	 */
-	export class Options {
+'use strict';
 
-		minMatches:number = 0;
-		maxMatches:number = 0;
-		limitApi:number = 5;
+import typeOf = require('../xm/typeOf');
+import assertVar = require('../xm/assertVar');
 
-		resolveDependencies:boolean = false;
-		overwriteFiles:boolean = false;
-		saveToConfig:boolean = false;
-		addToBundles:string[] = [];
+/*
+ Options: bundles options
+ */
+class Options {
 
-		// TODO implement timeout (limitless powerr!)
-		timeout:number = 10000;
+	minMatches: number = 0;
+	maxMatches: number = 0;
+	limitApi: number = 5;
 
-		static fromJSON(json:Object):tsd.Options {
-			var opts = new Options();
-			if (json) {
-				Object.keys(opts).forEach((key:string) => {
-					if (key in json) {
-						xm.assertVar(json[key], xm.typeOf(opts[key]), 'json[' + key + ']');
-						opts[key] = json[key];
-					}
-				});
-			}
-			return opts;
+	resolveDependencies: boolean = false;
+	overwriteFiles: boolean = false;
+	saveToConfig: boolean = false;
+	saveBundle: boolean = false;
+	addToBundles: string[] = [];
+
+	static fromJSON(json: Object): Options {
+		var opts = new Options();
+		if (json) {
+			Object.keys(opts).forEach((key: string) => {
+				if (key in json) {
+					assertVar(json[key], typeOf.get(opts[key]), 'json[' + key + ']');
+					opts[key] = json[key];
+				}
+			});
 		}
-
-		static main = Object.freeze(new Options());
+		return opts;
 	}
+
+	static main = Object.freeze(new Options());
 }
+
+export = Options;

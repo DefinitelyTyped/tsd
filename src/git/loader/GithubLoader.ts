@@ -1,78 +1,93 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../xm/object.ts" />
-/// <reference path="../../xm/Logger.ts" />
-/// <reference path="../../xm/file.ts" />
-/// <reference path="../../xm/http/HTTPCache.ts" />
-/// <reference path="../GithubRepo.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module git {
-	'use strict';
+'use strict';
 
-	var path = require('path');
+import path = require('path');
 
-	/*
-	 GithubRaw: get files from raw.github.com and cache on disk
-	 */
-	export class GithubLoader {
+import assertVar = require('../../xm/assertVar');
+import HTTPCache = require('../../http/HTTPCache');
+import HTTPOpts = require('../../http/HTTPOpts');
+import CacheOpts = require('../../http/CacheOpts');
 
-		repo:git.GithubRepo;
-		track:xm.EventLog;
+import JSONPointer = require('../../xm/lib/JSONPointer');
 
-		cache:xm.http.HTTPCache;
-		options:xm.JSONPointer;
+import GithubURLs = require('../GithubURLs');
+import GithubRateInfo = require('../model/GithubRateInfo');
 
-		storeDir:string;
+/*
+ GithubLoader: base class
+ */
+class GithubLoader {
 
-		label:string = 'github-loader';
-		formatVersion:string = '0.0.0';
+	urls: GithubURLs;
 
-		headers = {};
+	cache: HTTPCache;
+	options: JSONPointer;
+	shared: JSONPointer;
 
-		constructor(repo:git.GithubRepo, options:xm.JSONPointer, storeDir:string, prefix:string, label:string) {
-			xm.assertVar(repo, git.GithubRepo, 'repo');
-			xm.assertVar(options, xm.JSONPointer, 'options');
-			xm.assertVar(storeDir, 'string', 'storeDir');
+	storeDir: string;
 
-			this.repo = repo;
-			this.options = options;
-			this.storeDir = storeDir;
-			this.label = label;
-			this.track = new xm.EventLog(prefix, label);
-		}
+	label: string = 'github-loader';
+	formatVersion: string = '0.0.0';
 
-		_initGithubLoader(lock?:string[]):void {
-			var opts = new xm.http.CacheOpts();
-			opts.allowClean = this.options.getBoolean('allowClean', opts.allowClean);
-			opts.cacheCleanInterval = this.options.getDurationSecs('cacheCleanInterval', opts.cacheCleanInterval / 1000) * 1000;
-			opts.splitDirLevel = this.options.getNumber('splitDirLevel', opts.splitDirLevel);
-			opts.splitDirChunk = this.options.getNumber('splitDirChunk', opts.splitDirChunk);
-			opts.jobTimeout = this.options.getDurationSecs('jobTimeout', opts.jobTimeout / 1000) * 1000;
+	headers = {};
 
-			this.cache = new xm.http.HTTPCache(path.join(this.storeDir, this.getCacheKey()), opts);
+	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string, prefix: string, label: string) {
+		assertVar(urls, GithubURLs, 'urls');
+		assertVar(options, JSONPointer, 'options');
+		assertVar(shared, JSONPointer, 'shared');
+		assertVar(storeDir, 'string', 'storeDir');
 
-			xm.object.lockProps(this, ['repo', 'cache', 'options', 'storeDir', 'track', 'label', 'formatVersion']);
-			if (lock) {
-				xm.object.lockProps(this, lock);
-			}
-			// required to have some header
-			this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
-		}
+		this.urls = urls;
+		this.options = options;
+		this.shared = shared;
+		this.storeDir = storeDir;
+		this.label = label;
+	}
 
-		getCacheKey():string {
-			// override
-			return 'loader';
-		}
+	_initGithubLoader(): void {
+		var cache = new CacheOpts();
+		cache.allowClean = this.options.getBoolean('allowClean', cache.allowClean);
+		cache.cleanInterval = this.options.getDurationSecs('cacheCleanInterval', cache.cleanInterval / 1000) * 1000;
+		cache.splitDirLevel = this.options.getNumber('splitDirLevel', cache.splitDirLevel);
+		cache.splitDirChunk = this.options.getNumber('splitDirChunk', cache.splitDirChunk);
+		cache.jobTimeout = this.options.getDurationSecs('jobTimeout', cache.jobTimeout / 1000) * 1000;
+		cache.storeDir = path.join(this.storeDir, this.getCacheKey());
 
-		copyHeadersTo(target:any, source?:any) {
-			source = (source || this.headers);
-			Object.keys(source).forEach((name) => {
-				target[name] = source[name];
-			});
-		}
+		var opts: HTTPOpts = {
+			cache: cache,
+			concurrent: this.shared.getNumber('concurrent', 20),
+			oath: this.shared.getString('oath', null),
+			strictSSL: this.shared.getBoolean('strictSSL', true)
+		};
 
-		set verbose(verbose:boolean) {
-			this.track.logEnabled = verbose;
-			this.cache.verbose = verbose;
-		}
+		opts.proxy = (this.shared.getString('proxy')
+			|| process.env.HTTPS_PROXY
+			|| process.env.https_proxy
+			|| process.env.HTTP_PROXY
+			|| process.env.http_proxy
+			);
+
+		this.cache = new HTTPCache(opts);
+		// required to have some header
+		this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+	}
+
+	getCacheKey(): string {
+		// override
+		return 'loader';
+	}
+
+	copyHeadersTo(target: any, source?: any) {
+		source = (source || this.headers);
+		Object.keys(source).forEach((name) => {
+			target[name] = source[name];
+		});
+	}
+
+	set verbose(verbose: boolean) {
+
 	}
 }
+
+export = GithubLoader;

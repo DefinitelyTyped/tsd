@@ -4,12 +4,23 @@
 /node_modules
 /build/*.map
 
+/build
 /cache
+/scratch
 /tsd-cache
 /test/tmp
+/test/spec/*/tmp
+/test/spec/*/build
+/test/nspec/cases/*/result
 
+/docs
+/.tscache
 /tscommand*
 /*.tgz
+/*.ts
+/*.txt
+/src/*/*/.baseDir.ts
+/src/*/.baseDir.ts
 
 tmp/
 dump/

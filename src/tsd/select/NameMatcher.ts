@@ -1,167 +1,87 @@
-/// <reference path="../_ref.ts" />
-/// <reference path="../../xm/RegExpGlue.ts" />
-/// <reference path="../data/Def.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	// beh
-	var wordParts = /[\w_\.-]/;
-	var wordGreedy = /[\w_\.-]+/;
-	var wordLazy = /[\w_\.-]*?/;
-	var wordGlob:RegExp = /(\**)([\w_\.-]*?)(\**)/;
+import VError = require('verror');
+import minimatch = require('minimatch');
+import assertVar = require('../../xm/assertVar');
 
-	// simple pattern: *project*/*name*
-	var patternSplit:RegExp = xm.RegExpGlue.get('^', wordGlob, '/', wordGlob, '$').join();
-	var patternSingle:RegExp = xm.RegExpGlue.get('^', wordGlob, '$').join();
+import Def = require('../data/Def');
 
-	function escapeRegExpChars(str:string):string {
-		// http://stackoverflow.com/a/1144788/1026362
-		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+/*
+ NameMatcher: match name pattern (globs etc)
+ */
+class NameMatcher {
+
+	pattern: string;
+
+	constructor(pattern: string) {
+		assertVar(pattern, 'string', 'pattern');
+		this.pattern = pattern;
 	}
-	/*
-	 NameMatcher: match name pattern (globs etc)
-	 */
-	// TODO use minimatch or replace RegExpGlue with XRegExp
-	// TODO add negation
-	export class NameMatcher {
 
-		pattern:string;
-		private projectExp:RegExp;
-		private nameExp:RegExp;
+	filter(list: Def[]): Def[] {
+		return list.filter(this.getFilterFunc());
+	}
 
-		constructor(pattern:string) {
-			xm.assertVar(pattern, 'string', 'pattern');
-			this.pattern = pattern;
+	toString(): string {
+		return this.pattern;
+	}
+
+	private getFilterFunc(): (file: Def) => boolean {
+		if (!this.pattern) {
+			throw (new VError('NameMatcher undefined pattern'));
 		}
 
-		filter(list:tsd.Def[], current:tsd.Def[]):tsd.Def[] {
-			return list.filter(this.getFilterFunc(current));
+		var parts = this.pattern.split(/\//g);
+
+		var projectPattern: (target: string) => boolean;
+		var namePattern: (target: string) => boolean;
+
+		var miniopts = {
+			nocase: true
+		};
+
+		if (parts.length === 1) {
+			// just look at the names
+			if (parts[0].length > 0 && parts[0] !== '*') {
+				namePattern = minimatch.filter(parts[0], miniopts);
+			}
 		}
-
-		toString():string {
-			return this.pattern;
-		}
-
-		// crude compilator
-		private compile():void {
-			if (!this.pattern) {
-				throw (new Error('NameMatcher undefined pattern'));
+		else {
+			// get a project/file filter
+			if (parts[0].length > 0 && parts[0] !== '*') {
+				projectPattern = minimatch.filter(parts[0], miniopts);
 			}
-			this.projectExp = null;
-			this.nameExp = null;
-
-			if (this.pattern.indexOf('/') > -1) {
-				// get a project/file filter
-				this.compileSplit();
-			}
-			else {
-				// just look at the names
-				this.compileSingle();
-			}
-
-			// xm.log(this.projectExp);
-			// xm.log(this.nameExp);
-		}
-
-		private compileSingle():void {
-			patternSingle.lastIndex = 0;
-			var match = patternSingle.exec(this.pattern);
-
-			if (match.length < 4) {
-				throw (new Error('NameMatcher bad match: "' + match + '"'));
-			}
-			var glue:xm.RegExpGlue;
-
-			var gotMatch = false;
-			glue = xm.RegExpGlue.get('^');
-			if (match[1].length > 0) {
-				glue.append(wordLazy);
-				gotMatch = true;
-			}
-			if (match[2].length > 0) {
-				glue.append(escapeRegExpChars(match[2]));
-				gotMatch = true;
-			}
-			if (match[3].length > 0) {
-				glue.append(wordLazy);
-				gotMatch = true;
-			}
-			if (gotMatch) {
-				glue.append('$');
-				this.nameExp = glue.join('i');
+			if (parts[1].length > 0 && parts[1] !== '*') {
+				namePattern = minimatch.filter(parts.slice(1).join(':'), miniopts);
 			}
 		}
 
-		private compileSplit():void {
-			patternSplit.lastIndex = 0;
-			var match = patternSplit.exec(this.pattern);
-
-			if (match.length < 7) {
-				throw (new Error('NameMatcher bad match: "' + match + '"'));
-			}
-			var glue:xm.RegExpGlue;
-
-
-			var gotProject = false;
-			glue = xm.RegExpGlue.get('^');
-			if (match[1].length > 0) {
-				glue.append(wordLazy);
-			}
-			if (match[2].length > 0) {
-				glue.append(escapeRegExpChars(match[2]));
-				gotProject = true;
-			}
-			if (match[3].length > 0) {
-				glue.append(wordLazy);
-			}
-			if (gotProject) {
-				glue.append('$');
-				this.projectExp = glue.join('i');
-			}
-
-			var gotFile = false;
-			glue = xm.RegExpGlue.get('^');
-			if (match[4].length > 0) {
-				glue.append(wordLazy);
-			}
-			if (match[5].length > 0) {
-				glue.append(escapeRegExpChars(match[5]));
-				gotFile = true;
-			}
-			if (match[6].length > 0) {
-				glue.append(wordLazy);
-			}
-			if (gotFile) {
-				glue.append('$');
-				this.nameExp = glue.join('i');
-			}
-		}
-
-		private getFilterFunc(current:tsd.Def[]):(file:tsd.Def) => boolean {
-			this.compile();
-
-			// get an efficient filter function
-			if (this.nameExp) {
-				if (this.projectExp) {
-					return (file:tsd.Def) => {
-						return this.projectExp.test(file.project) && this.nameExp.test(file.name);
-					};
-				}
-				else {
-					return (file:tsd.Def) => {
-						return this.nameExp.test(file.name);
-					};
-				}
-			}
-			else if (this.projectExp) {
-				return (file:tsd.Def) => {
-					return this.projectExp.test(file.name);
+		// get an efficient filter function
+		if (namePattern) {
+			if (projectPattern) {
+				return (file: Def) => {
+					return projectPattern(file.project) && namePattern(file.name);
 				};
 			}
 			else {
-				throw (new Error('NameMatcher cannot compile pattern: ' + JSON.stringify(<any>this.pattern) + ''));
+				return (file: Def) => {
+					return namePattern(file.name);
+				};
 			}
+		}
+		else if (projectPattern) {
+			return (file: Def) => {
+				return projectPattern(file.project);
+			};
+		}
+		else {
+			return (file: Def) => {
+				return true;
+			};
 		}
 	}
 }
+
+export = NameMatcher;

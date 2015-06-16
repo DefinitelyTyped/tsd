@@ -1,147 +1,121 @@
-/// <reference path="../../_ref.d.ts" />
-/// <reference path="../../tsd/data/DefIndex.ts" />
-/// <reference path="SubCore.ts" />
+/// <reference path="../_ref.d.ts" />
 
-module tsd {
-	'use strict';
+'use strict';
 
-	var Q = require('q');
-	var fs = require('fs');
-	var path = require('path');
-	var FS:typeof QioFS = require('q-io/fs');
-	var pointer = require('json-pointer');
+import fs = require('fs');
+import path = require('path');
+import pointer = require('json-pointer');
+import Promise = require('bluebird');
+import LRU = require('lru-cache');
+import VError = require('verror');
 
-	export class ContentLoader extends tsd.SubCore {
+import assert = require('../../xm/assert');
 
-		constructor(core:tsd.Core) {
-			super(core, 'content', 'ContentLoader');
-		}
+import Def = require('../data/Def');
+import DefBlob = require('../data/DefBlob');
+import DefVersion = require('../data/DefVersion');
+import DefCommit = require('../data/DefCommit');
+import DefIndex = require('../data/DefIndex');
+import defUtil = require('../util/defUtil');
+import gitUtil = require('../../git/gitUtil');
 
-		/*
-		 lazy load a single DefCommit meta data
-		 promise: DefCommit with meta data fields (authors, message etc)
-		 */
-		loadCommitMetaData(commit:tsd.DefCommit):Q.Promise<DefCommit> {
-			var d:Q.Deferred<DefCommit> = Q.defer();
-			this.track.promise(d.promise, 'commit_meta_load', commit.commitSha);
+import Options = require('../Options');
+import Core = require('./Core');
+import CoreModule = require('./CoreModule');
 
-			if (commit.hasMetaData()) {
-				d.resolve(commit);
-				return;
+class ContentLoader extends CoreModule {
+
+	private cache: LRU.Cache<Buffer>;
+
+	constructor(core: Core) {
+		super(core, 'ContentLoader');
+
+		this.cache = LRU<Buffer>({
+			stale: true,
+			max: 10 * 1024 * 1024,
+			maxAge: 1000 * 60,
+			length: (buffer) => {
+				return buffer.length;
 			}
-			this.core.repo.api.getCommit(commit.commitSha).progress(d.notify).then((json:any) => {
-				commit.parseJSON(json);
-				d.resolve(commit);
-			}).fail(d.reject);
+		});
+	}
 
-			return d.promise;
+	/*
+	 lazy load a single DefCommit meta data
+	 */
+	loadCommitMetaData(commit: DefCommit): Promise<DefCommit> {
+		if (commit.hasMetaData()) {
+			return Promise.resolve(commit);
 		}
+		return this.core.repo.api.getCommit(commit.commitSha).then((json: any) => {
+			commit.parseJSON(json);
+			return commit;
+		});
+	}
 
-		/*
-		 lazy load a single DefVersion file content
-		 promise: DefVersion; with raw .blob loaded
-		 */
-		// TODO this should not keep the content in memory
-		loadContent(file:tsd.DefVersion, tryHead:boolean = false):Q.Promise<DefVersion> {
-			if (file.hasContent()) {
-				this.track.skip('content_load', file.key);
-				return Q(file);
-			}
-
-			var d:Q.Deferred<DefVersion> = Q.defer();
-			this.track.promise(d.promise, 'content_load', file.key);
-
-			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
-				var ref = file.commit.commitSha;
-				// re-cycle head
-				if (tryHead && file.commit.commitSha === file.def.head.commit.commitSha) {
-					ref = this.core.context.config.ref;
+	/*
+	 lazy load a single DefVersion file content
+	 */
+	loadContent(file: DefVersion, tryHead: boolean = true): Promise<DefBlob> {
+		if (file.blobSha && this.cache.has(file.blobSha)) {
+			return Promise.resolve(new DefBlob(file, this.cache.get(file.blobSha)));
+		}
+		var ref = file.commit.commitSha;
+		// re-cycle head
+		if (tryHead && file.def.head && file.commit.commitSha === file.def.head.commit.commitSha) {
+			ref = this.core.context.config.ref;
+		}
+		return this.core.repo.raw.getBinary(ref, file.def.path).then((content: Buffer) => {
+			var sha: string = gitUtil.blobShaHex(content);
+			if (file.blobSha) {
+				if (sha !== file.blobSha) {
+					throw new VError('bad blob sha1 for %s, expected %s, got %s', file.def.path, file.blobSha, sha);
 				}
-				return this.core.repo.raw.getBinary(ref, file.def.path).progress(d.notify).then((content:NodeBuffer) => {
-					if (file.blob) {
-						// race
-						if (!file.blob.hasContent()) {
-							try {
-								file.blob.setContent(content);
-							}
-							catch (err) {
-								xm.log.warn(err);
-								xm.log.debug('path', file.def.path);
-								xm.log.debug('commitSha', file.commit.commitSha);
-								xm.log.error('failed to set content');
-								// throw new Error('failed to set content');
-								throw err;
-							}
-						}
-					}
-					else {
-						file.setContent(index.procureBlobFor(content));
-					}
-					d.resolve(file);
-				});
-			}).fail(d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 bulk version of loadContent
-		 promise: array: bulk results of single calls
-		 */
-		loadContentBulk(list:tsd.DefVersion[]):Q.Promise<DefVersion[]> {
-			var d:Q.Deferred<DefVersion[]> = Q.defer();
-			this.track.promise(d.promise, 'content_load_bulk');
-
-			Q.all(list.map((file:DefVersion) => {
-					return this.loadContent(file).progress(d.notify);
-
-				})).then((list:tsd.DefVersion[]) => {
-					d.resolve(list);
-				}, d.reject);
-
-			return d.promise;
-		}
-
-		/*
-		 lazy load commit history meta data
-		 promise: Def with .history filled with DefVersion
-		 */
-		loadHistory(def:tsd.Def):Q.Promise<Def> {
-			var d:Q.Deferred<Def> = Q.defer();
-			this.track.promise(d.promise, 'history_load', def.path);
-
-			if (def.history.length > 0) {
-				return Q(def);
 			}
-			this.core.index.getIndex().progress(d.notify).then((index:tsd.DefIndex) => {
-				return this.core.repo.api.getPathCommits(def.path).progress(d.notify).then((content:any[]) => {
-					// this.log.inspect(content, null, 2);
-					// TODO add pagination support (see github api docs)
-					index.setHistory(def, content);
-					d.resolve(def);
-				});
-			}).fail(d.reject);
+			else {
+				file.setBlob(sha);
+			}
+			this.cache.set(sha, content);
 
-			return d.promise;
+			return new DefBlob(file, content);
+		});
+	}
+
+	/*
+	 bulk version of loadContent
+	 */
+	loadContentBulk(list: DefVersion[]): Promise<DefBlob[]> {
+		return Promise.map(list, (file: DefVersion) => {
+			return this.loadContent(file);
+		});
+	}
+
+	/*
+	 lazy load commit history meta data
+	 */
+	loadHistory(def: Def): Promise<Def> {
+		if (def.history.length > 0) {
+			return Promise.resolve(def);
 		}
+		return Promise.all([
+			this.core.index.getIndex(),
+			this.core.repo.api.getPathCommits(def.path)
+		]).spread((index: DefIndex, content: any[]) => {
+			// this.console.dir(content, null, 2);
+			// TODO add pagination support (see github api docs)
+			index.setHistory(def, content);
+		}).return(def);
+	}
 
-		/*
-		 bulk version of loadHistory()
-		 promise: array: bulk results of single calls
-		 */
-		loadHistoryBulk(list:tsd.Def[]):Q.Promise<DefVersion[]> {
-			var d:Q.Deferred<DefVersion[]> = Q.defer();
-			this.track.promise(d.promise, 'history_load_bulk');
-
-			list = tsd.DefUtil.uniqueDefs(list);
-
-			Q.all(list.map((file:Def) => {
-					return this.loadHistory(file).progress(d.notify);
-				})).then((list:DefVersion[]) => {
-					d.resolve(list);
-				}, d.reject);
-
-			return d.promise;
-		}
+	/*
+	 bulk version of loadHistory()
+	 */
+	loadHistoryBulk(list: Def[]): Promise<Def[]> {
+		list = defUtil.uniqueDefs(list);
+		return Promise.map(list, (file: Def) => {
+			return this.loadHistory(file);
+		});
 	}
 }
+
+export = ContentLoader;

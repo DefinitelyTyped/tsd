@@ -13,26 +13,30 @@
 /tsd-cache
 /util
 /lib
+/scratch
+/tools
 
 /tsd-config.json
 /tsd.json
 /tslint.json
 /Vagrantfile
 /Gruntfile.js
+/.travis.yml
+/appveyor.yml
+/.jshintrc
+/.vagrant
+/.editorconfig
+/.tscache
+/.grunt
 
 .npmignore
 .gitignore
 .gitmodules
-
-.travis.yml
-.jshintrc
-.vagrant
-.editorconfig
+.gitattributes
 
 /tscommand*
 
 tmp/
 
 /*.tgz
-/*.txt
 /*.ts
