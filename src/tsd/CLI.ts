@@ -439,8 +439,8 @@ export function getExpose(): Expose {
 		cmd.label = 'install definitions using one or more globbing patterns.';
 		cmd.examples = [
 			['tsd install mocha', 'install mocha'],
-			['tsd install angularjs/', 'install full angularjs bundle']
-			// ['tsd install', 'perform reinstall command']
+			['tsd install angularjs/', 'install full angularjs bundle'],
+			['tsd install', 'perform reinstall command']
 		];
 		cmd.variadic = ['...pattern'];
 		cmd.groups = [Group.query];
