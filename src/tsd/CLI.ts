@@ -665,7 +665,7 @@ try {
 	if (fs.existsSync(path.resolve(process.cwd(), 'tsd-debug.log'))) {
 		fs.unlinkSync(path.resolve(process.cwd(), 'tsd-debug.log'));
 	}
-} catch(e) { /*...*/ }
+} catch (e) { /*...*/ }
 
 /*
  runARGV: run raw cli arguments, like process.argv

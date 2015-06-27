@@ -13,7 +13,7 @@ function logError(tag: string, message: string, print: boolean = true): string {
 }
 
 function normalizeError(e): any {
-    if (typeof e == 'string' || e instanceof String) {
+    if (typeof e === 'string' || e instanceof String) {
         e = {message: e};
     }
 
@@ -30,7 +30,7 @@ export function handler(e: any) {
 
     e = normalizeError(e);
 
-    if (e.code == 'EGITIHAPI') {
+    if (e.code === 'EGITIHAPI') {
         logError('GitHub API: ', [
                 'GitHub rate limit reached.',
                 '    To increase the limit use GitHub authentication.',
@@ -49,7 +49,7 @@ export function handler(e: any) {
     logFile += logError('Error: ', e.message);
     logFile += logError('CODE : ', e.code);
 
-    switch(e.code) {
+    switch (e.code) {
         case 'ECONNREFUSED':
             logFile += logError(null, e);
             logFile += logError(
@@ -64,7 +64,7 @@ export function handler(e: any) {
 
         case 'EACCES':
         case 'EPERM':
-            logFile += logError(null, e)
+            logFile += logError(null, e);
             logFile += logError(null, '\nPlease try running this command again as root/Administrator.');
             break;
 
@@ -81,10 +81,10 @@ export function handler(e: any) {
                     'and is related to network connectivity.',
                     'In most cases you are behind a proxy or have bad network settings.',
                     '\nIf you are behind a proxy, please make sure that the',
-                    "'proxy' config is set properly.  See: https://github.com/DefinitelyTyped/tsd#tsdrc"
+                    '\'proxy\' config is set properly.  See: https://github.com/DefinitelyTyped/tsd#tsdrc'
                 ].join('\n')
             );
-            break
+            break;
 
         case 'ENOSPC':
             logFile += logError(
@@ -105,7 +105,7 @@ export function handler(e: any) {
                     'This is most likely not a problem with tsd itself',
                     'and is related to the file system being read-only.',
                     '\nOften virtualized file systems, or other file systems',
-                    "that don't support symlinks, give this error."
+                    'that don\'t support symlinks, give this error.'
                 ].join('\n')
             );
             break;
@@ -117,7 +117,7 @@ export function handler(e: any) {
                     e.message,
                     'This is most likely not a problem with tsd itself',
                     'and is related to tsd not being able to find a file.',
-                    e.file ? "\nCheck if the file '" + e.file + "' is present." : ''
+                    e.file ? '\nCheck if the file \'' + e.file + '\' is present.' : ''
                 ].join('\n')
             );
             break;
@@ -132,7 +132,7 @@ export function handler(e: any) {
                     ''
                 ].join('\n')
             );
-            break
+            break;
     }
 
     if (e.stack) {
@@ -144,22 +144,22 @@ export function handler(e: any) {
         var configFlagIndex = -1;
 
         process.argv.forEach((arg, index) => {
-            if (arg == '--config' || arg == '-c') {
+            if (arg === '--config' || arg === '-c') {
                 foundConfigFlag = true;
                 configFlagIndex = index;
             }
         });
 
-        var tsdJson = require(path.resolve(path.join(process.cwd(), foundConfigFlag ? process.argv[configFlagIndex + 1] : 'tsd.json')));
-        logFile += logError('tsd.json: ', JSON.stringify(tsdJson) + '\n', false);
-    } catch(err) {
+        var tsdjson = require(path.resolve(path.join(process.cwd(), foundConfigFlag ? process.argv[configFlagIndex + 1] : 'tsd.json')));
+        logFile += logError('tsd.json: ', JSON.stringify(tsdjson) + '\n', false);
+    } catch (err) {
         logFile += logError(null, 'tsd.json could not be retrieved\n');
     }
 
     try {
-        var tsdJson = require(path.resolve(path.join(process.cwd(), '.tsdrc')));
-        logFile += logError('.tsdrc : ', JSON.stringify(tsdJson) + '\n', false);
-    } catch(err) {
+        var tsdrc = require(path.resolve(path.join(process.cwd(), '.tsdrc')));
+        logFile += logError('.tsdrc : ', JSON.stringify(tsdrc) + '\n', false);
+    } catch (err) {
         logFile += logError(null, '.tsdrc could not be retrieved\n');
     }
 
