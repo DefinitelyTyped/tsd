@@ -92,6 +92,9 @@
 		},
 		"chai/chai.d.ts": {
 			"commit": "5a8f9e312f3db37b8efc4dcdd1de204f60e67eb1"
+		},
+		"chalk/chalk.d.ts": {
+			"commit": "e1182d56ccb192379eade6055d9ba3fb6a0bacc4"
 		}
 	}
 }

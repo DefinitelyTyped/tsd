@@ -2,7 +2,10 @@
 
 'use strict';
 
+import errHandler = require('./util/error-handler');
+
 import path = require('path');
+import fs = require('fs');
 
 import Promise = require('bluebird');
 import VError = require('verror');
@@ -219,13 +222,12 @@ export function getExpose(): Expose {
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	var expose = new Expose(output);
 
 	function reportError(err: any, head: boolean = true): void {
 		tracker.error(err);
-		print.reportError(err, head);
-	}
+		errHandler.handler(err);
+	};
 
 	function link(job: Job): Promise<PackageDefinition[]> {
 		return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
@@ -657,6 +659,13 @@ export function getExpose(): Expose {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// trying to remove tsd-debug.log if exists
+try {
+	if (fs.existsSync(path.resolve(process.cwd(), 'tsd-debug.log'))) {
+		fs.unlinkSync(path.resolve(process.cwd(), 'tsd-debug.log'));
+	}
+} catch(e) { /*...*/ }
 
 /*
  runARGV: run raw cli arguments, like process.argv

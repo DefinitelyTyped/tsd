@@ -161,6 +161,7 @@
         "./tsd/support/PackageLinker.ts",
         "./tsd/util/DateComp.ts",
         "./tsd/util/defUtil.ts",
+        "./tsd/util/error-handler.ts",
         "./xm/_ref.d.ts",
         "./xm/assert.ts",
         "./xm/assertVar.ts",

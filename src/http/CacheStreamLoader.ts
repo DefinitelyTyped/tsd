@@ -232,8 +232,13 @@ class CacheStreamLoader {
 
 				// check status
 				if (res.statusCode < 200 || res.statusCode >= 400) {
+					var errMsg = 'unexpected status code: ' + res.statusCode + ' on: ' + this.request.url;
+					if (res.statusCode === 403) {
+						errMsg = 'EGITIHAPI, ' + errMsg;
+					}
+
 					// TODO add custom errors
-					reject(new Error('unexpected status code: ' + res.statusCode + ' on: ' + this.request.url));
+					reject(new Error(errMsg));
 					return;
 				}
 				if (res.statusCode === 304) {
