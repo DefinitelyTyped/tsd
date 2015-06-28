@@ -1,6 +1,6 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.svg)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.svg)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.svg)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.svg)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
+[![Build Status](https://travis-ci.org/DefinitelyTyped/tsd.svg?branch=master)](https://travis-ci.org/DefinitelyTyped/tsd) [![Build status](https://ci.appveyor.com/api/projects/status/v4w7p3qvcuxhte33/branch/master?svg=true)](https://ci.appveyor.com/project/Diullei/tsd/branch/master) [![NPM version](https://badge.fury.io/js/tsd.svg)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.svg)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.svg)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
 > TypeScript Definition manager for DefinitelyTyped
 
