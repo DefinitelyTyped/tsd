@@ -28,3 +28,5 @@ dump/
 _tmp.*
 
 npm-debug.log
+
+tsd-debug.log

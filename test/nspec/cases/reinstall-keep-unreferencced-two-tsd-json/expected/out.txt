@@ -1,0 +1,13 @@
+
+-> running reinstall
+
+>> written 1 file:
+
+    - qunit/qunit.d.ts
+
+
+-> running reinstall
+
+>> written 1 file:
+
+    - jquery/jquery.d.ts

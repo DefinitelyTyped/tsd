@@ -183,11 +183,17 @@ class API {
 			}).then(() => {
 				return this.saveBundles(res.written.values(), options);
 			}).then(() => {
-				this.core.installer.removeUnusedReferences(
-					this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
-						options.overwriteFiles = options.saveBundle = true;
-						return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
-					});
+				if (!options.keepUnreferencedDefs) {
+					this.core.installer.removeUnusedReferences(
+						this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
+							options.overwriteFiles = options.saveBundle = true;
+							return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
+						});
+				} else {
+					options.overwriteFiles = options.saveBundle = true;
+					return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
+				}
+				return null;
 			}).return(res);
 	}
 

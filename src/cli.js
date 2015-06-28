@@ -2,5 +2,13 @@
 
 // note: it is critical this file has unix line-endings
 
-require('./bootstrap');
-require('./tsd/CLI').runARGV(process.argv);
+var errHandler = require('./tsd/util/error-handler');
+
+process.on('uncaughtException', function(err) {
+	errHandler.handler(err);
+});
+
+setTimeout(function() {
+    require('./bootstrap');
+    require('./tsd/CLI').runARGV(process.argv);
+}, 500);

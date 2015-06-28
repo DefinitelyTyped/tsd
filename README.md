@@ -1,10 +1,10 @@
 # TSD
 
-[![Build Status](https://secure.travis-ci.org/DefinitelyTyped/tsd.svg)](http://travis-ci.org/DefinitelyTyped/tsd) [![NPM version](https://badge.fury.io/js/tsd.svg)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.svg)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.svg)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
+[![Build Status](https://travis-ci.org/DefinitelyTyped/tsd.svg?branch=master)](https://travis-ci.org/DefinitelyTyped/tsd) [![Build status](https://ci.appveyor.com/api/projects/status/v4w7p3qvcuxhte33/branch/master?svg=true)](https://ci.appveyor.com/project/Diullei/tsd/branch/master) [![NPM version](https://badge.fury.io/js/tsd.svg)](http://badge.fury.io/js/tsd) [![Dependency Status](https://david-dm.org/DefinitelyTyped/tsd.svg)](https://david-dm.org/DefinitelyTyped/tsd) [![devDependency Status](https://david-dm.org/DefinitelyTyped/tsd/dev-status.svg)](https://david-dm.org/DefinitelyTyped/tsd#info=devDependencies)
 
 > TypeScript Definition manager for DefinitelyTyped
 
-TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository. 
+TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository.
 
 
 ## Install
@@ -30,6 +30,9 @@ $ tsd query angularjs/
 $ tsd query jquery.*
 # glob on mac/linux
 $ tsd query "jquery.*"
+
+#install all definitions from tsd.json
+$ tsd install
 ````
 
 ### Commands
@@ -161,6 +164,14 @@ Install `mocha`, `chai` and `sinon` definitions all at once, with resolve refere
 $ tsd install mocha chai sinon -ros
 ````
 
+Install all definitions from `tsd.json`:
+
+````bash
+$ tsd install
+````
+
+> NOTE: `tsd install` will work like `tsd reinstall --save --overwrite`
+
 #### Reinstall definitions
 
 Reset the definitions to the commits listed in `tsd.json`:
@@ -232,7 +243,7 @@ $ tsd rebundle
 ````
 
 
-#### Rate-limit 
+#### Rate-limit
 
 Print current Github rate-limit info
 
@@ -282,7 +293,7 @@ other/plugin.d.ts
 Notice the pattern, and ignore the `.d.ts` extension:
 
 ````html
-<project>/<module><semver>.d.ts	
+<project>/<module><semver>.d.ts
 ````
 
 Select definitions using only the module name:
@@ -366,7 +377,7 @@ $ tsd query d3 -d "<2012-01-01"
 
 ### Commit filter
 
-Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), for convenience a shortened sha1 hash is supported. 
+Use the `--commit` / `-c` option to supply sha1-hash of a commit (find a commit hash using `--history`), for convenience a shortened sha1 hash is supported.
 
 ````bash
 $ tsd query youtube --history
@@ -404,7 +415,7 @@ An example configuration the 'node.js' definition installed would look like this
 	"installed": {
 		"node/node.d.ts": {
 			"commit": "6834f97fb33561a3ad40695084da2b660efaee29"
-		}        
+		}
     }
 }
 ````
@@ -429,7 +440,7 @@ The `tsd.d.ts` file refers every definition that is installed with `--save` for 
 
 ````
 /// <reference path="../typings/tsd.d.ts" />
-```` 
+````
 
 By default it is created in the typings folder but the name and location are configurable in `tsd.json`. When adding new references TSD will check the existing references and respects re-ordering (ordering is important for inter-dependent definitions).
 
@@ -478,7 +489,7 @@ You can create this token on Github.com:
 
 1. Go to https://github.com/settings/tokens/new
 3. *Deselect* all scopes to create a token with just basic authentication.
-	1. (verify you *really* deselected all scopes) 
+	1. (verify you *really* deselected all scopes)
 	5. (wonder why these presets were set??)
 2. Enter a identifying name, something like "`TSD Turbo 5000`"
 5. Create the token.
@@ -487,13 +498,13 @@ You can create this token on Github.com:
 
 Change or revoke the token at any time on https://github.com/settings/applications
 
-Note: keep in mind the `.tsdrc` file is *not* secured. Don't use a token with additional scope unless you know what you are doing. 
+Note: keep in mind the `.tsdrc` file is *not* secured. Don't use a token with additional scope unless you know what you are doing.
 
 The bare 'no scope' token is *relatively* harmless as it gives 'read-only access to public information', same as any non-authenticated access. But it does *identify* any requests done with it as being *yours*, so it is still *your* responsibility to keep the token private.
 
 ## Usage as module
- 
-TSD can be used as a JavaScript npm dependency: 
+
+TSD can be used as a JavaScript npm dependency:
 
 ````js
 var tsd = require('tsd');
@@ -513,9 +524,9 @@ TSD uses Promise/A+ by [bluebird](https://github.com/petkaantonov/bluebird). :po
 
 API export is somewhat experimental; take care to lock versions and test on upgrade. If you plan to use TSD as module in a tool or project then feel free to [leave a message](https://github.com/DefinitelyTyped/tsd/issues) and coordinate stuff.
 
-### API docs 
+### API docs
 
-Not yet. 
+Not yet.
 
 ## Notes
 
@@ -564,7 +575,7 @@ It works well but is not used much in the current DefinitelyTyped repository. Th
 
 ### What is the location of the cache folders?
 
-The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour. 
+The cache is stored in the users home directory (like `$ npm`). Use `$ tsd settings` to view the current paths. Use the `--cacheDir` to override the cache directory, or `--cacheMode` to modify caching behaviour.
 
 ### I have a suggestion or contribution
 
@@ -572,11 +583,11 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 ## History
 
-### v0.6.x ( > 2014-10) 
+### v0.6.x ( > 2014-10)
 
 * Long delayed release of major overhaul: migrated code to external module style and reworked many features, subsystems and dependencies. Development in [dev/next](https://github.com/DefinitelyTyped/tsd/tree/dev/next) branch.
 
-* Interesting changes 
+* Interesting changes
 	* added `install` command to CLI
 	* improved module-name pattern matching
 	* refreshed CLI interface, formatting, help
@@ -584,7 +595,7 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 	* switched many modules, added `definition-header`
 	* replaced ugly node-gyp sub-dependency
 
-### v0.5.x ( > 2013-08) 
+### v0.5.x ( > 2013-08)
 
 * Current release versions. See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
 
@@ -670,9 +681,9 @@ Contributions are very welcome; please discuss larger changes in a [ticket](http
 
 The TSD CLI tool collects definition usage information, like the queries made to the repo and the definitions that get installed. The information collected amounts to about same level of detail as services like npm or github would collect (maybe even less as we don't track a user id).
 
-The API does not track anything. 
+The API does not track anything.
 
-To store this TSD uses [Google Analytics](http://www.google.com/analytics/) in the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website. 
+To store this TSD uses [Google Analytics](http://www.google.com/analytics/) in the excellent [universal-analytics](https://npmjs.org/package/universal-analytics) package. We might at some point publish some anonymised aggregate stats to the DefinitelyTyped website.
 
 Changes to the policy should be announced in release notes, and ideally ask confirmation on the first CLI use.
 
@@ -681,9 +692,9 @@ Keep in mind we're just devs like you and are working on this in our spare time;
 
 ## Security
 
-Please close read the relevant sections of the readme, especially on OAuth 'scope'. 
+Please close read the relevant sections of the readme, especially on OAuth 'scope'.
 
-The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe. 
+The optional [Github OAuth token](http://developer.github.com/v3/oauth/) is only used to authenticate with the Github API. The token is not stored anywhere but the local machine. It is your responsibility to keep your token safe.
 
 Using an OAuth token with additional scope is *neither advised nor supported*, even though it could make TSD work with private repositories. But it might also leak repo or content names to analytics or leave a bare http cache in your temp dir. If this bothers you please review the license and/or leave a message.
 
@@ -692,12 +703,12 @@ Using an OAuth token with additional scope is *neither advised nor supported*, e
 
 Copyright (c) 2014 by [Bart van der Schoor](https://github.com/Bartvds) @ [DefinitelyTyped](https://github.com/DefinitelyTyped)
 
-Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt). 
+Licensed under the [Apache License, Version 2.0](https://raw.github.com/DefinitelyTyped/tsd/master/LICENSE.txt).
 
 * note: there is some imported MIT licensed code by myself, [Bart van der Schoor](https://github.com/Bartvds)
 
 Copyright (c) 2012 by [Diullei Gomes](https://github.com/Diullei).
 
-Licensed under the MIT License. 
+Licensed under the MIT License.
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/DefinitelyTyped/tsd/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

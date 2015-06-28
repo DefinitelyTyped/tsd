@@ -2,7 +2,10 @@
 
 'use strict';
 
+import errHandler = require('./util/error-handler');
+
 import path = require('path');
+import fs = require('fs');
 
 import Promise = require('bluebird');
 import VError = require('verror');
@@ -172,6 +175,7 @@ export function getExpose(): Expose {
 				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
 				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 				job.options.addToBundles = ctx.getOpt(Opt.bundle);
+				job.options.keepUnreferencedDefs = ctx.getOpt(Opt.keepUnreferenced);
 
 				if (ctx.hasOpt(Opt.cacheMode)) {
 					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
@@ -218,13 +222,12 @@ export function getExpose(): Expose {
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	var expose = new Expose(output);
 
 	function reportError(err: any, head: boolean = true): void {
 		tracker.error(err);
-		print.reportError(err, head);
-	}
+		errHandler.handler(err);
+	};
 
 	function link(job: Job): Promise<PackageDefinition[]> {
 		return job.api.link(job.api.context.paths.startCwd).then((packages: PackageDefinition[]) => {
@@ -314,7 +317,6 @@ export function getExpose(): Expose {
 		return getAPIJob(ctx).then((job: Job) => {
 			output.line();
 			output.info(true).span('running').space().accent(cmd.name).ln();
-
 			return job.api.reinstall(job.options).then((result: InstallResult) => {
 				print.installResult(result);
 
@@ -439,8 +441,8 @@ export function getExpose(): Expose {
 		cmd.label = 'install definitions using one or more globbing patterns.';
 		cmd.examples = [
 			['tsd install mocha', 'install mocha'],
-			['tsd install angularjs/', 'install full angularjs bundle']
-			// ['tsd install', 'perform reinstall command']
+			['tsd install angularjs/', 'install full angularjs bundle'],
+			['tsd install', 'perform reinstall command']
 		];
 		cmd.variadic = ['...pattern'];
 		cmd.groups = [Group.query];
@@ -551,7 +553,7 @@ export function getExpose(): Expose {
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'reinstall';
 		cmd.label = 're-install definitions from config';
-		cmd.options = [Opt.overwrite, Opt.save];
+		cmd.options = [Opt.overwrite, Opt.save, Opt.keepUnreferenced];
 		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return executeReinstall(ctx, cmd);
@@ -657,6 +659,13 @@ export function getExpose(): Expose {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// trying to remove tsd-debug.log if exists
+try {
+	if (fs.existsSync(path.resolve(process.cwd(), 'tsd-debug.log'))) {
+		fs.unlinkSync(path.resolve(process.cwd(), 'tsd-debug.log'));
+	}
+} catch (e) { /*...*/ }
 
 /*
  runARGV: run raw cli arguments, like process.argv

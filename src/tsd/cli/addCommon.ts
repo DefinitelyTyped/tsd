@@ -234,6 +234,14 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 		opt.placeholder = 'name';
 		opt.enum = [Action.install, Action.browse, Action.visit]; // , Action.compare, Action.update, Action.open];
 	});
+
+	expose.defineOption((opt: ExposeOption) => {
+		opt.name = Opt.keepUnreferenced;
+		opt.short = 'k';
+		opt.description = 'keep unreferenced typings when using reinstal command';
+		opt.type = 'flag';
+		opt.default = false;
+	});
 }
 
 export = addCommon;

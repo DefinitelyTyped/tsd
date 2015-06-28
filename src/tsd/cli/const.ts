@@ -26,6 +26,7 @@ export module Opt {
 	export var info = 'info';
 	export var history = 'history';
 	export var services = 'services';
+	export var keepUnreferenced = 'keep-unreferenced';
 }
 objectUtils.lockPrimitives(Opt);
 
