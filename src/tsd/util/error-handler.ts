@@ -157,8 +157,8 @@ export function handler(e: any) {
     }
 
     try {
-        var tsdrc = require(path.resolve(path.join(process.cwd(), '.tsdrc')));
-        logFile += logError('.tsdrc : ', JSON.stringify(tsdrc) + '\n', false);
+        var tsdrc = fs.readFileSync(path.resolve(path.join(process.cwd(), '.tsdrc'))).toString();
+        logFile += logError('.tsdrc : ', tsdrc + '\n', false);
     } catch (err) {
         logFile += logError(null, '.tsdrc could not be retrieved\n');
     }
