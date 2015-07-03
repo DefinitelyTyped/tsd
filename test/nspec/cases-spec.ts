@@ -136,6 +136,7 @@ class TestCase {
 				tsd.executeCommand(commands[index], (out) => {
 					finalOut += (index > 0 ? '\n' : '') + out;
 					index++;
+
 					fnExec();
 				});
 			} else {

@@ -1,0 +1,2 @@
+query jquery --action install -c f7cfda
+query jquery --action install --save -c f7cfda
