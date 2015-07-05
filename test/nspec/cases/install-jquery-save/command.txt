@@ -1,0 +1,2 @@
+install jquery -c f7cfda
+install jquery --save -c f7cfda

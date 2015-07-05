@@ -465,6 +465,10 @@ export function getExpose(): Expose {
 			return getSelectorJob(ctx).then((job: Job) => {
 				tracker.query(job.query);
 
+				if (job.options.saveToConfig) {
+					job.options.overwriteFiles = true;
+				}
+
 				return job.api.select(job.query, job.options).then((selection: Selection) => {
 
 					if (selection.selection.length === 0) {
@@ -510,6 +514,10 @@ export function getExpose(): Expose {
 		cmd.execute = (ctx: ExposeContext) => {
 			return getSelectorJob(ctx).then((job: Job) => {
 				tracker.query(job.query);
+
+				if (job.options.saveToConfig) {
+					job.options.overwriteFiles = true;
+				}
 
 				return job.api.select(job.query, job.options).then((selection: Selection) => {
 
