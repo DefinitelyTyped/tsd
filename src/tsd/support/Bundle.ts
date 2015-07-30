@@ -10,7 +10,7 @@ import assertVar = require('../../xm/assertVar');
 var splitExp = /(?:(.*)(\r?\n))|(?:(.+)($))/g;
 
 // TODO replace reference node RegExp with a xml parser (tony the pony)
-var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/_-]*)["']?[ \t]*\/>/g;
+var referenceTagExp = /\/\/\/[ \t]+<reference[ \t]*path=["']?([\w\.\/@_-]*)["']?[ \t]*\/>/g;
 
 // different fs-call return upper / lower-case drive-letters
 function fixWinDrive(ref: string): string {
