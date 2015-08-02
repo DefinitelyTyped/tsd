@@ -16,11 +16,13 @@ class PackageType {
 
 	name: string;
 	folderName: string;
+	packageGlob: string;
 	infoJson: string;
 
-	constructor(name: string, folderName: string, infoJson: string) {
+	constructor(name: string, folderName: string, packageGlob: string, infoJson: string) {
 		this.name = name;
 		this.folderName = folderName;
+		this.packageGlob = packageGlob;
 		this.infoJson = infoJson;
 	}
 }
@@ -40,8 +42,8 @@ class PackageLinker {
 	private managers: PackageType[] = [];
 
 	constructor() {
-		this.managers.push(new PackageType('node', 'node_modules', 'package.json'));
-		this.managers.push(new PackageType('bower', 'bower_components', 'bower.json'));
+		this.managers.push(new PackageType('node', 'node_modules', '{*/,@*/*/}', 'package.json'));
+		this.managers.push(new PackageType('bower', 'bower_components', '*/', 'bower.json'));
 	}
 
 	scanDefinitions(baseDir: string): Promise<PackageDefinition[]> {
@@ -54,12 +56,12 @@ class PackageLinker {
 
 	private scanFolder(memo: PackageDefinition[], type: PackageType, baseDir: string): Promise<void> {
 		var scanDir = path.resolve(baseDir, type.folderName);
-		var pattern = '*/' + type.infoJson;
+		var pattern = type.packageGlob + type.infoJson;
 
 		return FS.glob(pattern, {
 			cwd: scanDir
 		}).map((infoPath: string) => {
-			var packageName = path.basename(path.dirname(infoPath));
+			var packageName = path.dirname(infoPath);
 			infoPath = path.join(scanDir, infoPath);
 
 			return FS.readJSON(infoPath).then((info) => {
