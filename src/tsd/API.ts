@@ -183,7 +183,7 @@ class API {
 			}).then(() => {
 				return this.saveBundles(res.written.values(), options);
 			}).then(() => {
-				if (!options.keepUnreferencedDefs) {
+				if (options.reinstallClean) {
 					this.core.installer.removeUnusedReferences(
 						this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
 							options.overwriteFiles = options.saveBundle = true;

@@ -1,0 +1,2 @@
+reinstall
+--config tsd-2.json reinstall

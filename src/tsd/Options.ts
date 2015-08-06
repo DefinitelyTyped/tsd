@@ -18,7 +18,7 @@ class Options {
 	overwriteFiles: boolean = false;
 	saveToConfig: boolean = false;
 	saveBundle: boolean = false;
-	keepUnreferencedDefs: boolean = false;
+	reinstallClean: boolean = false;
 	addToBundles: string[] = [];
 
 	static fromJSON(json: Object): Options {
