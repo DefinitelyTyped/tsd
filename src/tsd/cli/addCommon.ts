@@ -236,9 +236,9 @@ function addCommon(expose: Expose, print: CLIPrinter, style: StyleMap): void {
 	});
 
 	expose.defineOption((opt: ExposeOption) => {
-		opt.name = Opt.keepUnreferenced;
+		opt.name = Opt.reinstallClean;
 		opt.short = 'k';
-		opt.description = 'keep unreferenced typings when using reinstal command';
+		opt.description = 'reinstall from tsd.json and remove all unreferenced files';
 		opt.type = 'flag';
 		opt.default = false;
 	});

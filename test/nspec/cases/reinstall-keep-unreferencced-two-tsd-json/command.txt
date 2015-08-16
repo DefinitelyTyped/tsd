@@ -1,2 +1,0 @@
-reinstall --keep-unreferenced
---config tsd-2.json reinstall --keep-unreferenced

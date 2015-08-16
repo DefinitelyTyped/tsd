@@ -175,7 +175,7 @@ export function getExpose(): Expose {
 				job.options.overwriteFiles = ctx.getOpt(Opt.overwrite);
 				job.options.resolveDependencies = ctx.getOpt(Opt.resolve);
 				job.options.addToBundles = ctx.getOpt(Opt.bundle);
-				job.options.keepUnreferencedDefs = ctx.getOpt(Opt.keepUnreferenced);
+				job.options.reinstallClean = ctx.getOpt(Opt.reinstallClean);
 
 				if (ctx.hasOpt(Opt.cacheMode)) {
 					job.api.core.useCacheMode(ctx.getOpt(Opt.cacheMode));
@@ -561,7 +561,7 @@ export function getExpose(): Expose {
 	expose.defineCommand((cmd: ExposeCommand) => {
 		cmd.name = 'reinstall';
 		cmd.label = 're-install definitions from config';
-		cmd.options = [Opt.overwrite, Opt.save, Opt.keepUnreferenced];
+		cmd.options = [Opt.overwrite, Opt.save, Opt.reinstallClean];
 		cmd.groups = [Group.manage];
 		cmd.execute = (ctx: ExposeContext) => {
 			return executeReinstall(ctx, cmd);
