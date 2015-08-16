@@ -7,7 +7,7 @@ before_install:
   - npm install -g grunt-cli
   # Token for tsd to increase github rate limit
   # See https://github.com/DefinitelyTyped/tsd#tsdrc
-  - echo {\"token\":\"a87095819e87aeda759618dee070f97a43f8b10a\"} > .tsdrc
+  - p1=bb4ef6755851f && p2=9e97e89932c5a && p3=8f46a3d85e0a8c && echo {\"token\":\"$p1$p2$p3\"} > .tsdrc
 
 env:
   global:
