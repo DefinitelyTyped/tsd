@@ -32,7 +32,7 @@ class GithubLoader {
 
 	headers = {};
 
-	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string, prefix: string, label: string) {
+	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string, label: string) {
 		assertVar(urls, GithubURLs, 'urls');
 		assertVar(options, JSONPointer, 'options');
 		assertVar(shared, JSONPointer, 'shared');
