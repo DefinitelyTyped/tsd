@@ -28,7 +28,7 @@ class GithubAPI extends GithubLoader {
 	private apiVersion: string = '3.0.0';
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
-		super(urls, options, shared, storeDir, 'github-api', 'GithubAPI');
+		super(urls, options, shared, storeDir, 'GithubAPI');
 
 		this.formatVersion = '1.0';
 
