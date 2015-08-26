@@ -321,8 +321,6 @@ export function getExpose(): Expose {
 				print.installResult(result);
 
 				tracker.install('reinstall', result);
-			}).then(() => {
-				return link(job);
 			});
 		}).catch(reportError);
 	}
