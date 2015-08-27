@@ -1,0 +1,15 @@
+
+-> running install
+
+>> written 10 files:
+
+    - atom/atom.d.ts
+    - emissary/emissary.d.ts
+    - jquery/jquery.d.ts
+    - mixto/mixto.d.ts
+    - node/node.d.ts
+    - pathwatcher/pathwatcher.d.ts
+    - q/Q.d.ts
+    - space-pen/space-pen.d.ts
+    - status-bar/status-bar.d.ts
+    - text-buffer/text-buffer.d.ts
