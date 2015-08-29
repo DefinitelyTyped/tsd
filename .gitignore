@@ -12,6 +12,7 @@
 /test/spec/*/tmp
 /test/spec/*/build
 /test/nspec/cases/*/result
+/test/nspec/cases/*/diff
 
 /docs
 /.tscache

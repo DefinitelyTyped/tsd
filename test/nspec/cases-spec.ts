@@ -12,9 +12,38 @@ var utils = require('util');
 var dircompare = require('dir-compare');
 var jsdiff = require('diff');
 
-// ****************************************************************
-//  TODO: the io manipulation should be migrated to fileIO module
-// ****************************************************************
+// **********************************************************************
+//  TODO: the io manipulation should be migrated/merged to fileIO module
+// **********************************************************************
+
+function copyFileSync( source, target ) {
+    var targetFile = target;
+    if ( fs.existsSync( target ) ) {
+        if ( fs.lstatSync( target ).isDirectory() ) {
+            targetFile = path.join( target, path.basename( source ) );
+        }
+    }
+    fs.writeFileSync(targetFile, io.readFileSync(source).replace(/\r?\n|\r/g, '\n'));
+}
+
+function copyFolderRecursiveSync( source, target ) {
+    var files = [];
+    var targetFolder = path.join( target, path.basename( source ) );
+    if ( !fs.existsSync( targetFolder ) ) {
+        fs.mkdirSync( targetFolder );
+    }
+    if ( fs.lstatSync( source ).isDirectory() ) {
+        files = fs.readdirSync( source );
+        files.forEach( function ( file ) {
+            var curSource = path.join( source, file );
+            if ( fs.lstatSync( curSource ).isDirectory() ) {
+                copyFolderRecursiveSync( curSource, targetFolder );
+            } else {
+                copyFileSync( curSource, targetFolder );
+            }
+        } );
+    }
+}
 
 function pad(pad, str, padLeft) {
 	if (typeof str === 'undefined') {
@@ -104,9 +133,19 @@ class TestCase {
 		var resultDir = path.join(this.dirname, 'result');
 		var expectedDir = path.join(this.dirname, 'expected');
 
+		var diffDir = path.join(this.dirname, 'diff');
+		var diffResultDir = path.join(this.dirname, 'diff', 'result');
+		var diffExpectedDir = path.join(this.dirname, 'diff', 'expected');
+
 		if (fs.existsSync(resultDir)) {
 			io.removeDirSync(resultDir);
 		}
+
+		if (fs.existsSync(diffDir)) {
+			io.removeDirSync(diffDir);
+		}
+
+		fs.mkdirSync(diffDir);
 
 		io.mkdirCheckSync(resultDir);
 
@@ -141,7 +180,11 @@ class TestCase {
 				});
 			} else {
 				io.writeFileSync(path.join(resultDir, 'out.txt'), finalOut);
-				assertDiff(expectedDir, resultDir);
+
+				copyFolderRecursiveSync(expectedDir, diffDir);
+				copyFolderRecursiveSync(resultDir, diffDir);
+
+				assertDiff(diffExpectedDir, diffResultDir);
 				done();
 			}
 		};

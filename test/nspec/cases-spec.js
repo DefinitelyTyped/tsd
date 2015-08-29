@@ -8,6 +8,34 @@ require('colors');
 var utils = require('util');
 var dircompare = require('dir-compare');
 var jsdiff = require('diff');
+function copyFileSync(source, target) {
+    var targetFile = target;
+    if (fs.existsSync(target)) {
+        if (fs.lstatSync(target).isDirectory()) {
+            targetFile = path.join(target, path.basename(source));
+        }
+    }
+    fs.writeFileSync(targetFile, io.readFileSync(source).replace(/\r?\n|\r/g, '\n'));
+}
+function copyFolderRecursiveSync(source, target) {
+    var files = [];
+    var targetFolder = path.join(target, path.basename(source));
+    if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder);
+    }
+    if (fs.lstatSync(source).isDirectory()) {
+        files = fs.readdirSync(source);
+        files.forEach(function (file) {
+            var curSource = path.join(source, file);
+            if (fs.lstatSync(curSource).isDirectory()) {
+                copyFolderRecursiveSync(curSource, targetFolder);
+            }
+            else {
+                copyFileSync(curSource, targetFolder);
+            }
+        });
+    }
+}
 function pad(pad, str, padLeft) {
     if (typeof str === 'undefined') {
         return pad;
@@ -81,9 +109,16 @@ var TestCase = (function () {
     TestCase.prototype.execute = function (done) {
         var resultDir = path.join(this.dirname, 'result');
         var expectedDir = path.join(this.dirname, 'expected');
+        var diffDir = path.join(this.dirname, 'diff');
+        var diffResultDir = path.join(this.dirname, 'diff', 'result');
+        var diffExpectedDir = path.join(this.dirname, 'diff', 'expected');
         if (fs.existsSync(resultDir)) {
             io.removeDirSync(resultDir);
         }
+        if (fs.existsSync(diffDir)) {
+            io.removeDirSync(diffDir);
+        }
+        fs.mkdirSync(diffDir);
         io.mkdirCheckSync(resultDir);
         if (fs.existsSync(path.join(this.dirname, 'setup'))) {
             io.copyFolderRecursiveSync(path.join(this.dirname, 'setup'), resultDir, true);
@@ -110,7 +145,9 @@ var TestCase = (function () {
             }
             else {
                 io.writeFileSync(path.join(resultDir, 'out.txt'), finalOut);
-                assertDiff(expectedDir, resultDir);
+                copyFolderRecursiveSync(expectedDir, diffDir);
+                copyFolderRecursiveSync(resultDir, diffDir);
+                assertDiff(diffExpectedDir, diffResultDir);
                 done();
             }
         };
