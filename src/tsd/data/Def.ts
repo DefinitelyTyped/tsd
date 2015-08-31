@@ -10,7 +10,7 @@ import objectUtils = require('../../xm/objectUtils');
 
 import DefVersion = require('./DefVersion');
 
-var defExp = /^[a-z](?:[\._-]?[a-z0-9])*(?:\/[a-z](?:[\._-]?[a-z0-9])*)+\.d\.ts$/i;
+var defExp = /^[a-z_](?:[\._-]?[a-z0-9_])*(?:\/[a-z_](?:[\._-]?[a-z0-9_])*)+\.d\.ts$/i;
 
 var versionEnd = /(?:-v?)(\d+(?:\.\d+)*)(-[a-z](?:[_-]?[a-z0-9])*(?:\.\d+)*)?$/i;
 var twoNums = /^\d+\.\d+$/;

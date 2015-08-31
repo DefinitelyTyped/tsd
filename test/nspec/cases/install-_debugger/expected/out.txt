@@ -1,0 +1,13 @@
+
+ - _debugger / _debugger : 5937bd : 2015-07-22 00:07
+   -> node   > node                 
+      
+   5937bd | 2015-07-22 00:07 | basarat @ basarat   
+    | feat(node) _debugger API   
+
+>> running install..
+
+>> written 2 files:
+
+    - _debugger/_debugger.d.ts
+    - node/node.d.ts
