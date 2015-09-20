@@ -184,8 +184,9 @@ class API {
 				return this.saveBundles(res.written.values(), options);
 			}).then(() => {
 				if (options.reinstallClean) {
+					var typingsPath = path.join(path.dirname(this.core.context.paths.configFile), this.core.context.config.toJSON().path);
 					this.core.installer.removeUnusedReferences(
-						this.context.config.getInstalled(), this.core.context.config.toJSON().path).then((removedList: string[]) => {
+						this.context.config.getInstalled(), typingsPath).then((removedList: string[]) => {
 							options.overwriteFiles = options.saveBundle = true;
 							return this.saveBundles(this.context.config.getInstalledAsDefVersionList(), options);
 						});
