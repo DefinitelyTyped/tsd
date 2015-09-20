@@ -26,6 +26,7 @@ class BundleManager {
 	addToBundle(target: string, refs: string[], save: boolean): Promise<BundleChange> {
 		return this.readBundle(target, true).then((bundle: Bundle) => {
 			var change = new BundleChange(bundle);
+
 			refs.forEach((ref) => {
 				change.add(bundle.append(ref));
 			});
@@ -89,7 +90,7 @@ class BundleManager {
 		target = path.resolve(target);
 
 		return this.cleanupBundle(target, false).then((change) => {
-			return fileIO.glob('*/*.d.ts', {
+			return fileIO.glob('*/*.d.ts', <any>{
 				cwd: change.bundle.baseDir
 			}).then((paths) => {
 				paths.forEach((def) => {
