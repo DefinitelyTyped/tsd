@@ -32,7 +32,7 @@ $ tsd query jquery.*
 $ tsd query "jquery.*"
 
 #install all definitions from tsd.json
-$ tsd install
+$ tsd reinstall
 ````
 
 ### Commands
