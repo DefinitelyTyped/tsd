@@ -108,7 +108,7 @@
     "source-map-support": "~0.2.6",
     "time-grunt": "^1.0.0",
     "tslint-path-formatter": "~0.1.1",
-    "typescript": "^1.1.0-1",
+    "typescript": "1.5.3",
     "dir-compare": "^0.0.2"
   }
 }
