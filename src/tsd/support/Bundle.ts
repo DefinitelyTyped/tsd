@@ -145,7 +145,7 @@ class Bundle {
 
 	toArray(relative: boolean = false, canonical: boolean = false): string[] {
 		var base = (relative ? path.dirname(this.target) : null);
-		return Lazy(this.lines)
+		return (<any>Lazy(this.lines))
 			.filter(line => !!line.ref)
 			.map(line => line.getRef(base, canonical))
 			.toArray();

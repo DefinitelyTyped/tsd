@@ -220,9 +220,12 @@ class API {
 		var linker = new PackageLinker();
 		var manager = new BundleManager(this.core.context.getTypingsDir());
 
+		var bundlePath = path.join(path.dirname(this.core.context.paths.configFile), this.core.context.config.toJSON().bundle);
+
 		return linker.scanDefinitions(baseDir).then((packages) => {
 			return Promise.reduce(packages, (memo: PackageDefinition[], packaged) => {
-				return manager.addToBundle(this.context.config.bundle, packaged.definitions, true).then((change) => {
+
+				return manager.addToBundle(bundlePath, packaged.definitions, true).then((change) => {
 					if (change.someAdded()) {
 						memo.push(packaged);
 					}

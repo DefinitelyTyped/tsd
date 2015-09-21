@@ -19,10 +19,10 @@
 		"a/bb-tests.ts": false
 	},
 	"debatable": {
-		"_a/a.d.ts": false,
-		"a_/a.d.ts": false,
-		"a/_a.d.ts": false,
-		"a/a_.d.ts": false
+		"_a/a.d.ts": true,
+		"a_/a.d.ts": true,
+		"a/_a.d.ts": true,
+		"a/a_.d.ts": true
 	},
 	"space": {
 		" a/a.d.ts": false,

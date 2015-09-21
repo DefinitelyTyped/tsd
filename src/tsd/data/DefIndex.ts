@@ -89,9 +89,9 @@ class DefIndex {
 
 		var releases: Def[] = [];
 
-		Lazy(<Object>tree.tree).each((elem: GithubJSONTreeElem) => {
+		(<any>Lazy(<Object>tree.tree)).each((elem: GithubJSONTreeElem) => {
 			var char = elem.path.charAt(0);
-			if (elem.type === 'blob' && char !== '.' && char !== '_' && Def.isDefPath(elem.path)) {
+			if (elem.type === 'blob' && char !== '.' && Def.isDefPath(elem.path)) {
 				def = this.procureDef(elem.path);
 				if (!def) {
 					return;
@@ -135,7 +135,7 @@ class DefIndex {
 		def.history = [];
 
 		// TODO harden data validation
-		Lazy(commitJsonArray).each((json) => {
+		(<any>Lazy(commitJsonArray)).each((json) => {
 			if (!json || !json.sha) {
 				console.dir(json, 'weird: json no sha', 1);
 			}
