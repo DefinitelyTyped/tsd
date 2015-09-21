@@ -25,14 +25,18 @@ import GithubRateInfo = require('../model/GithubRateInfo');
 class GithubAPI extends GithubLoader {
 
 	// github's version
-	private apiVersion: string = '3.0.0';
+	private static API_VERSION: string = '3.0.0';
+	private static FORMAT_VERSION: string = '1.0';
+	private static CACHE_KEY: string = 'git-api-v' + GithubAPI.API_VERSION + '-fmt' + GithubAPI.FORMAT_VERSION;
+
+	static NAME: string = 'GithubAPI';
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
-		super(urls, options, shared, storeDir, 'GithubAPI');
+		super(urls, options, shared, storeDir, GithubAPI.NAME);
 
-		this.formatVersion = '1.0';
+		this.formatVersion = GithubAPI.FORMAT_VERSION;
 
-		this._initGithubLoader();
+		this._initGithubLoader(GithubAPI.CACHE_KEY);
 	}
 
 	getBranches(): Promise<any> {
@@ -121,10 +125,6 @@ class GithubAPI extends GithubLoader {
 				}
 			});
 		});
-	}
-
-	getCacheKey(): string {
-		return 'git-api-v' + this.apiVersion + '-fmt' + this.formatVersion;
 	}
 }
 
