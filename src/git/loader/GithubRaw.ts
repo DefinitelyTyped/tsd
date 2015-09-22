@@ -23,9 +23,10 @@ class GithubRaw extends GithubLoader {
 	private static FORMAT_VERSION: string = '1.0';
 	private static CACHE_KEY = 'git-raw-fmt' + GithubRaw.FORMAT_VERSION;
 
+	static NAME: string = 'GithubRaw';
+
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
-		super(urls, options, shared, storeDir, 'GithubRaw');
-		this._initGithubLoader(GithubRaw.CACHE_KEY, GithubRaw.FORMAT_VERSION);
+		super(urls, options, shared, storeDir, GithubRaw.CACHE_KEY, GithubRaw.NAME, GithubRaw.FORMAT_VERSION);
 	}
 
 	getText(ref: string, filePath: string): Promise<string> {
