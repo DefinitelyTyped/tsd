@@ -19,13 +19,16 @@ import GithubRateInfo = require('../model/GithubRateInfo');
  GithubRaw: get files from raw.github.com and cache on disk
  */
 class GithubRaw extends GithubLoader {
+	private static API_VERSION: string = '3.0.0';
+	private static FORMAT_VERSION: string = '1.0';
+	private static CACHE_KEY = 'git-raw-fmt' + GithubRaw.FORMAT_VERSION;
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
 		super(urls, options, shared, storeDir, 'GithubRaw');
 
-		this.formatVersion = '1.0';
+		this.formatVersion = GithubRaw.FORMAT_VERSION;
 
-		this._initGithubLoader();
+		this._initGithubLoader(GithubRaw.CACHE_KEY);
 	}
 
 	getText(ref: string, filePath: string): Promise<string> {
@@ -67,10 +70,6 @@ class GithubRaw extends GithubLoader {
 		return this.cache.getObject(request).then((object: CacheObject) => {
 			return object.body;
 		});
-	}
-
-	getCacheKey(): string {
-		return 'git-raw-fmt' + this.formatVersion;
 	}
 }
 

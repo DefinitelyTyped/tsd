@@ -33,14 +33,11 @@ class GithubRepo {
 		this.config = config;
 		this.urls = new GithubURLs(this);
 
-		this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), this.getCacheKey());
+		var cacheKey = this.config.repoOwner + '-' + this.config.repoProject;
+		this.storeDir = path.join(storeDir.replace(/[\\\/]+$/, ''), cacheKey);
 
 		this.api = new GithubAPI(this.urls, opts.getChild('git/api'), opts, this.storeDir);
 		this.raw = new GithubRaw(this.urls, opts.getChild('git/raw'), opts, this.storeDir);
-	}
-
-	getCacheKey(): string {
-		return this.config.repoOwner + '-' + this.config.repoProject;
 	}
 
 	toString(): string {
