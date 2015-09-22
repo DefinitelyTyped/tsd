@@ -45,7 +45,7 @@ class GithubLoader {
 		this.label = label;
 	}
 
-	_initGithubLoader(cacheKey: string): void {
+	_initGithubLoader(cacheKey: string, formatVersion: string): void {
 		var cache = new CacheOpts();
 		cache.allowClean = this.options.getBoolean('allowClean', cache.allowClean);
 		cache.cleanInterval = this.options.getDurationSecs('cacheCleanInterval', cache.cleanInterval / 1000) * 1000;
@@ -70,7 +70,7 @@ class GithubLoader {
 
 		this.cache = new HTTPCache(opts);
 		// required to have some header
-		this.headers['user-agent'] = this.label + '-v' + this.formatVersion;
+		this.headers['user-agent'] = this.label + '-v' + formatVersion;
 	}
 
 	copyHeadersTo(target: any, source?: any) {
