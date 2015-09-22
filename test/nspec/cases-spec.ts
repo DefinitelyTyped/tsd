@@ -195,6 +195,11 @@ class TestCase {
 
 describe('tsd test cases', function () {
 	io.getDirNameList(path.join(__dirname, 'cases')).forEach((dir) => {
+        if (dir.indexOf('_disabled.') === 0) {
+            console.log('        skipped (disabled): ' + dir.substr(10));
+            return;
+        }
+
 		it(dir, function (done) {
 			this.timeout(60000);
 			var testCase = TestCase.create(path.join(__dirname, 'cases', dir));
