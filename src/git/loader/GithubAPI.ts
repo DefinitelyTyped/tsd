@@ -33,10 +33,7 @@ class GithubAPI extends GithubLoader {
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
 		super(urls, options, shared, storeDir, GithubAPI.NAME);
-
-		this.formatVersion = GithubAPI.FORMAT_VERSION;
-
-		this._initGithubLoader(GithubAPI.CACHE_KEY);
+		this._initGithubLoader(GithubAPI.CACHE_KEY, GithubAPI.FORMAT_VERSION);
 	}
 
 	getBranches(): Promise<any> {

@@ -25,10 +25,7 @@ class GithubRaw extends GithubLoader {
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
 		super(urls, options, shared, storeDir, 'GithubRaw');
-
-		this.formatVersion = GithubRaw.FORMAT_VERSION;
-
-		this._initGithubLoader(GithubRaw.CACHE_KEY);
+		this._initGithubLoader(GithubRaw.CACHE_KEY, GithubRaw.FORMAT_VERSION);
 	}
 
 	getText(ref: string, filePath: string): Promise<string> {
