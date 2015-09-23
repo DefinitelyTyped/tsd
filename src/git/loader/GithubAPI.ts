@@ -23,8 +23,6 @@ import GithubRateInfo = require('../model/GithubRateInfo');
 
 // TODO add OAuth support (here or in HTTPCache)
 class GithubAPI extends GithubLoader {
-
-	// github's version
 	private static API_VERSION: string = '3.0.0';
 	private static FORMAT_VERSION: string = '1.0';
 	private static CACHE_KEY: string = 'git-api-v' + GithubAPI.API_VERSION + '-fmt' + GithubAPI.FORMAT_VERSION;
@@ -32,8 +30,7 @@ class GithubAPI extends GithubLoader {
 	static NAME: string = 'GithubAPI';
 
 	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string) {
-		super(urls, options, shared, storeDir, GithubAPI.NAME);
-		this._initGithubLoader(GithubAPI.CACHE_KEY, GithubAPI.FORMAT_VERSION);
+		super(urls, options, shared, storeDir, GithubAPI.CACHE_KEY, GithubAPI.NAME, GithubAPI.FORMAT_VERSION);
 	}
 
 	getBranches(): Promise<any> {

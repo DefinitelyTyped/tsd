@@ -20,48 +20,46 @@ import GithubRateInfo = require('../model/GithubRateInfo');
 class GithubLoader {
 
 	urls: GithubURLs;
-
-	cache: HTTPCache;
 	options: JSONPointer;
-	shared: JSONPointer;
+	cache: HTTPCache;
+	headers: {[index: string]: string} = {};
 
-	storeDir: string;
+	constructor(
+		urls: GithubURLs,
+		options: JSONPointer,
+		shared: JSONPointer,
+		storeDir: string,
+		cacheKey: string,
+		label: string,
+		formatVersion: string) {
 
-	label: string = 'github-loader';
-	formatVersion: string = '0.0.0';
-
-	headers = {};
-
-	constructor(urls: GithubURLs, options: JSONPointer, shared: JSONPointer, storeDir: string, label: string) {
 		assertVar(urls, GithubURLs, 'urls');
 		assertVar(options, JSONPointer, 'options');
 		assertVar(shared, JSONPointer, 'shared');
 		assertVar(storeDir, 'string', 'storeDir');
+		assertVar(cacheKey, 'string', 'cacheKey');
+		assertVar(label, 'string', 'label');
+		assertVar(formatVersion, 'string', 'formatVersion');
 
 		this.urls = urls;
 		this.options = options;
-		this.shared = shared;
-		this.storeDir = storeDir;
-		this.label = label;
-	}
 
-	_initGithubLoader(cacheKey: string, formatVersion: string): void {
 		var cache = new CacheOpts();
 		cache.allowClean = this.options.getBoolean('allowClean', cache.allowClean);
 		cache.cleanInterval = this.options.getDurationSecs('cacheCleanInterval', cache.cleanInterval / 1000) * 1000;
 		cache.splitDirLevel = this.options.getNumber('splitDirLevel', cache.splitDirLevel);
 		cache.splitDirChunk = this.options.getNumber('splitDirChunk', cache.splitDirChunk);
 		cache.jobTimeout = this.options.getDurationSecs('jobTimeout', cache.jobTimeout / 1000) * 1000;
-		cache.storeDir = path.join(this.storeDir, cacheKey);
+		cache.storeDir = path.join(storeDir, cacheKey);
 
 		var opts: HTTPOpts = {
 			cache: cache,
-			concurrent: this.shared.getNumber('concurrent', 20),
-			oath: this.shared.getString('oath', null),
-			strictSSL: this.shared.getBoolean('strictSSL', true)
+			concurrent: shared.getNumber('concurrent', 20),
+			oath: shared.getString('oath', null),
+			strictSSL: shared.getBoolean('strictSSL', true)
 		};
 
-		opts.proxy = (this.shared.getString('proxy')
+		opts.proxy = (shared.getString('proxy')
 			|| process.env.HTTPS_PROXY
 			|| process.env.https_proxy
 			|| process.env.HTTP_PROXY
@@ -70,7 +68,7 @@ class GithubLoader {
 
 		this.cache = new HTTPCache(opts);
 		// required to have some header
-		this.headers['user-agent'] = this.label + '-v' + formatVersion;
+		this.headers['user-agent'] = label + '-v' + formatVersion;
 	}
 
 	copyHeadersTo(target: any, source?: any) {
@@ -81,7 +79,6 @@ class GithubLoader {
 	}
 
 	set verbose(verbose: boolean) {
-
 	}
 }
 
