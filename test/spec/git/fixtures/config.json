@@ -2,6 +2,7 @@
 	"repo": {
 		"repoOwner": "borisyankov",
 		"repoProject": "DefinitelyTyped",
+		"githubHost": "github.com",
 		"ref": "master"
 	},
 	"data": {

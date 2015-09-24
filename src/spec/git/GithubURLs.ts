@@ -36,11 +36,11 @@ describe('GithubRepo / GithubURLs', () => {
 		});
 		it('should throw on bad params', () => {
 			assert.throws(() => {
-				repo = new GithubRepo({repoOwner: null, repoProject: null}, null, null);
+				repo = new GithubRepo({repoOwner: null, repoProject: null, githubHost: null}, null, null);
 			});
 		});
 		it('should be constructor', () => {
-			repo = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts);
+			repo = new GithubRepo({repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.com'}, 'baz', gitTest.opts);
 			urls = repo.urls;
 			assert.ok(urls, 'instance');
 		});
@@ -56,7 +56,7 @@ describe('GithubRepo / GithubURLs', () => {
 			});
 		});
 		it('should return replaced urls', () => {
-			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
+			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.com'}, 'baz', gitTest.opts).urls;
 			var api = 'https://api.github.com/repos/foo/bar';
 			var raw = 'https://raw.githubusercontent.com/foo/bar';
 			var base = 'https://github.com/foo/bar';
@@ -66,7 +66,7 @@ describe('GithubRepo / GithubURLs', () => {
 			assert.strictEqual(urls.rawFile('2ece23298f06d9fb45772fdb1d38086918c80f44', 'sub/folder/file.txt'), rawFile, 'rawFile');
 		});
 		it('should return correctly replaced urls if repoConfig is modified after repo creation', () => {
-			var repoConfig = {repoOwner: 'foo', repoProject: 'bar'};
+			var repoConfig = {repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.com'};
 			urls = new GithubRepo(repoConfig, 'baz', gitTest.opts).urls;
 			repoConfig.repoOwner = 'correctOwner';
 			repoConfig.repoProject = 'correctProject';
@@ -77,9 +77,19 @@ describe('GithubRepo / GithubURLs', () => {
 			assert.strictEqual(urls.base(), base, 'base');
 		});
 		it('should return no trailing slash', () => {
-			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar'}, 'baz', gitTest.opts).urls;
+			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.com'}, 'baz', gitTest.opts).urls;
 			assert.notMatch(urls.apiBranches(), /\/$/, 'apiBranches');
 			assert.notMatch(urls.apiBranch('abc'), /\/$/, 'apiBranch');
+		});
+		it('should handle enterprise github urls', () => {
+			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.mycompany.com'}, 'baz', gitTest.opts).urls;
+			var api = 'https://github.mycompany.com/api/v3/repos/foo/bar';
+			var raw = 'https://github.mycompany.com/foo/bar/raw';
+			var base = 'https://github.mycompany.com/foo/bar';
+			var rawFile = raw + '/2ece23298f06d9fb45772fdb1d38086918c80f44/sub/folder/file.txt';
+			assert.strictEqual(urls.api(), api, 'api');
+			assert.strictEqual(urls.base(), base, 'base');
+			assert.strictEqual(urls.rawFile('2ece23298f06d9fb45772fdb1d38086918c80f44', 'sub/folder/file.txt'), rawFile, 'rawFile');
 		});
 	});
 });

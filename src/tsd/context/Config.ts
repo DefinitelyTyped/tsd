@@ -149,7 +149,11 @@ class Config implements GithubRepoConfig {
 		var json = this.otherFields;
 		json.version = this.version;
 		json.repo = this.repo;
-		json.githubHost = this.githubHost;
+		if (this.githubHost !== Const.githubHost) {
+			// only write to config if the host is not github.com
+			json.githubHost = this.githubHost;
+		}
+
 		json.ref = this.ref;
 		json.path = this.path;
 
@@ -195,6 +199,10 @@ class Config implements GithubRepoConfig {
 		this.version = json.version;
 		this.repo = json.repo;
 		this.githubHost = json.githubHost;
+		if (!this.githubHost) {
+			// when migrating from file that do not have this parameter make sure upgrade won't fail
+			this.githubHost = Const.githubHost;
+		}
 		this.ref = json.ref;
 		this.bundle = json.bundle;
 		this.stats = (typeOf.isBoolean(json.stats) ? json.stats : Const.statsDefault);
