@@ -41,6 +41,7 @@ class Config implements GithubRepoConfig {
 	path: string;
 	version: string;
 	repo: string;
+	githubHost: string;
 	ref: string;
 	stats: boolean;
 	bundle: string;
@@ -61,6 +62,7 @@ class Config implements GithubRepoConfig {
 		this.path = Const.typingsDir;
 		this.version = Const.configVersion;
 		this.repo = Const.definitelyRepo;
+		this.githubHost = Const.githubHost;
 		this.ref = Const.mainBranch;
 		this.stats = Const.statsDefault;
 		this.otherFields = {};
@@ -147,6 +149,7 @@ class Config implements GithubRepoConfig {
 		var json = this.otherFields;
 		json.version = this.version;
 		json.repo = this.repo;
+		json.githubHost = this.githubHost;
 		json.ref = this.ref;
 		json.path = this.path;
 
@@ -191,6 +194,7 @@ class Config implements GithubRepoConfig {
 		this.path = json.path;
 		this.version = json.version;
 		this.repo = json.repo;
+		this.githubHost = json.githubHost;
 		this.ref = json.ref;
 		this.bundle = json.bundle;
 		this.stats = (typeOf.isBoolean(json.stats) ? json.stats : Const.statsDefault);
@@ -205,9 +209,9 @@ class Config implements GithubRepoConfig {
 			});
 		}
 
-		var reservedFields = ['path', 'version', 'repo', 'ref', 'bundle', 'stats', 'installed'];
-		var otherFieldKeys = Object.keys(json).filter(function(key) { return reservedFields.indexOf(key) === -1; } );
-		this.otherFields = otherFieldKeys.reduce(function(fields, key) {
+		var reservedFields = ['path', 'version', 'repo', 'githubHost', 'ref', 'bundle', 'stats', 'installed'];
+		var otherFieldKeys = Object.keys(json).filter(function (key) { return reservedFields.indexOf(key) === -1; });
+		this.otherFields = otherFieldKeys.reduce(function (fields, key) {
 			fields[key] = json[key];
 			return fields;
 		}, {});
