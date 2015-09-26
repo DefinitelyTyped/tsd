@@ -14,6 +14,7 @@ var Const = {
 
 	configVersion: 'v4',
 	definitelyRepo: 'borisyankov/DefinitelyTyped',
+	githubHost: 'github.com',
 	mainBranch: 'master',
 	statsDefault: true,
 

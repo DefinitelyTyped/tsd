@@ -71,11 +71,12 @@ function getContent(options): Promise<any> {
 		var ret: any = {
 			repo: api.context.config.repo,
 			ref: api.context.config.ref,
+			githubHost: api.context.config.githubHost,
 			count: content.length,
 			time: new Date().toISOString()
 		};
 		ret.urls = {
-			def: 'https://github.com/' + ret.repo + '/blob/' + ret.ref + '/{path}'
+			def: 'https://' + ret.githubHost + '/' + ret.repo + '/blob/' + ret.ref + '/{path}'
 		};
 		ret.content = content;
 		return ret;

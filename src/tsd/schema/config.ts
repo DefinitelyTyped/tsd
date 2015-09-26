@@ -21,6 +21,11 @@ var schema = Joi.object({
 		.default(Const.definitelyRepo)
 		.required()
 		.description('github repository "owner/name"'),
+	githubHost: Joi
+		.string()
+		.default(Const.githubHost)
+		.optional()
+		.description('github url, used to specify github enteprise url'),
 	ref: Joi
 		.string().regex(/^[\w\.-]+(?:\/[\w\.-]+)*$/)
 		.default(Const.mainBranch)

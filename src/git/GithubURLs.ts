@@ -16,6 +16,11 @@ class GithubURLs extends URLManager {
 	private _apiBase: string = 'https://api.github.com';
 	private _api: string = 'https://api.github.com/repos/{owner}/{project}';
 	private _raw: string = 'https://raw.githubusercontent.com/{owner}/{project}';
+
+	private _enterpriseBase: string = 'https://{githubHost}/{owner}/{project}';
+	private _enterpriseApiBase: string = 'https://{githubHost}/api/v3';
+	private _enterpriseApi: string = 'https://{githubHost}/api/v3/repos/{owner}/{project}';
+	private _enterpriseRaw: string = 'https://{githubHost}/{owner}/{project}/raw';
 	private _repo: GithubRepo;
 
 	constructor(repo: GithubRepo) {
@@ -23,26 +28,38 @@ class GithubURLs extends URLManager {
 		assertVar(repo, 'object', 'repo');
 
 		this._repo = repo;
+		var base: string = this._base;
+		var raw: string = this._raw;
+		var api: string = this._api;
+		var apiBase: string = this._apiBase;
+		if (this._repo.config.githubHost !== 'github.com') {
+			// We are working with an enterprise github
+			base = this._enterpriseBase;
+			raw = this._enterpriseRaw;
+			api = this._enterpriseApi;
+			apiBase = this._enterpriseApiBase;
+		}
 		// externalise later
-		this.addTemplate('base', this._base);
+		this.addTemplate('base', base);
 
-		this.addTemplate('raw', this._raw);
-		this.addTemplate('rawFile', this._raw + '/{+ref}/{+path}');
+		this.addTemplate('raw', raw);
+		this.addTemplate('rawFile', raw + '/{+ref}/{+path}');
 
-		this.addTemplate('htmlFile', this._base + '/blob/{ref}/{+path}');
+		this.addTemplate('htmlFile', base + '/blob/{ref}/{+path}');
 
-		this.addTemplate('api', this._api);
-		this.addTemplate('apiTree', this._api + '/git/trees/{tree}?recursive={recursive}');
-		this.addTemplate('apiBranch', this._api + '/branches/{branch}');
-		this.addTemplate('apiBranches', this._api + '/branches');
-		this.addTemplate('apiCommit', this._api + '/commits/{commit}');
-		this.addTemplate('apiPathCommits', this._api + '/commits?path={path}');
-		this.addTemplate('apiBlob', this._api + '/git/blobs/{blob}');
-		this.addTemplate('rateLimit', this._apiBase + '/rate_limit');
+		this.addTemplate('api', api);
+		this.addTemplate('apiTree', api + '/git/trees/{tree}?recursive={recursive}');
+		this.addTemplate('apiBranch', api + '/branches/{branch}');
+		this.addTemplate('apiBranches', api + '/branches');
+		this.addTemplate('apiCommit', api + '/commits/{commit}');
+		this.addTemplate('apiPathCommits', api + '/commits?path={path}');
+		this.addTemplate('apiBlob', api + '/git/blobs/{blob}');
+		this.addTemplate('rateLimit', apiBase + '/rate_limit');
 	}
 
 	getURL(id: string, vars?: any): string {
 		this.setVars({
+			githubHost: this._repo.config.githubHost,
 			owner: this._repo.config.repoOwner,
 			project: this._repo.config.repoProject
 		});
