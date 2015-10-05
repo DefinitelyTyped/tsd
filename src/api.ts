@@ -4,7 +4,7 @@
 
 import bootstrap = require('./bootstrap');
 
-import API = require('./tsd/API');
+export import API = require('./tsd/API');
 import assertVar = require('./xm/assertVar');
 
 export import Def = require('./tsd/data/Def');

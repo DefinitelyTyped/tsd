@@ -37,6 +37,7 @@
     "node": ">= 0.10.0"
   },
   "main": "./build/api.js",
+  "typings": "./build/api.d.ts",
   "bin": {
     "tsd": "./build/cli.js"
   },
