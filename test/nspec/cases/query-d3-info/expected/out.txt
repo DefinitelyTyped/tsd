@@ -1,0 +1,13 @@
+
+ - d3 / d3    
+   >> d3JS                 : d3js.org
+    @ Alex Ford            : github.com/gustavderdrache
+    @ Boris Yankov         : github.com/borisyankov
+    < d3 (external module) 
+
+
+ - d3 / d3    
+   >> d3JS                 : d3js.org
+    @ Alex Ford            : github.com/gustavderdrache
+    @ Boris Yankov         : github.com/borisyankov
+    < d3 (external module) 
