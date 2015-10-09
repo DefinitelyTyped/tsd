@@ -4,8 +4,8 @@
 
 import bootstrap = require('./bootstrap');
 
-export import API = require('./tsd/API');
 import assertVar = require('./xm/assertVar');
+export import API = require('./tsd/API');
 
 export import Def = require('./tsd/data/Def');
 export import Context = require('./tsd/context/Context');
