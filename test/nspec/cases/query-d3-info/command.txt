@@ -1,0 +1,2 @@
+query d3 --info
+query --info d3

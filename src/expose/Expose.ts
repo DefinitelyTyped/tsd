@@ -119,7 +119,10 @@ class Expose {
 				opts.default[option.name] = option.default;
 			}
 			// we parse our own types
-			if (option.type !== 'number') {
+			if (option.type === 'flag') {
+				opts.boolean.push(option.name);
+			}
+			else if (option.type !== 'number') {
 				opts.string.push(option.name);
 			}
 		});
@@ -217,7 +220,7 @@ class Expose {
 		// command options (option that takes priority, like --version etc)
 		for (i = 0, ii = options.length; i < ii; i++) {
 			opt = options[i];
-			if (opt.command && ctx.hasOpt(opt.name, true)) {
+			if (opt.command && ctx.hasOpt(opt.name, true) && ctx.getOpt(opt.name)) {
 				return this.executeCommand(opt.command, ctx);
 			}
 		}
