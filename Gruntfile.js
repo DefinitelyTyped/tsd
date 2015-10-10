@@ -101,7 +101,8 @@ module.exports = function (grunt) {
 				options: {
 					root: function() {
 						return require('package.json-schema').get();
-					}
+					},
+					banUnknown: false
 				},
 				src: ['package.json']
 			}
