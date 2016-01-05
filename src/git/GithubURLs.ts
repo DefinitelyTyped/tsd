@@ -17,10 +17,10 @@ class GithubURLs extends URLManager {
 	private _api: string = 'https://api.github.com/repos/{owner}/{project}';
 	private _raw: string = 'https://raw.githubusercontent.com/{owner}/{project}';
 
-	private _enterpriseBase: string = 'https://{githubHost}/{owner}/{project}';
-	private _enterpriseApiBase: string = 'https://{githubHost}/api/v3';
-	private _enterpriseApi: string = 'https://{githubHost}/api/v3/repos/{owner}/{project}';
-	private _enterpriseRaw: string = 'https://{githubHost}/{owner}/{project}/raw';
+	private _enterpriseBase: string = '{+githubHost}/{owner}/{project}';
+	private _enterpriseApiBase: string = '{+githubHost}/api/v3';
+	private _enterpriseApi: string = '{+githubHost}/api/v3/repos/{owner}/{project}';
+	private _enterpriseRaw: string = '{+githubHost}/{owner}/{project}/raw';
 	private _repo: GithubRepo;
 
 	constructor(repo: GithubRepo) {
@@ -32,7 +32,7 @@ class GithubURLs extends URLManager {
 		var raw: string = this._raw;
 		var api: string = this._api;
 		var apiBase: string = this._apiBase;
-		if (this._repo.config.githubHost !== 'github.com') {
+		if (this._repo.config.githubHost !== 'https://github.com') {
 			// We are working with an enterprise github
 			base = this._enterpriseBase;
 			raw = this._enterpriseRaw;
