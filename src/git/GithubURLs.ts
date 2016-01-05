@@ -15,12 +15,10 @@ class GithubURLs extends URLManager {
 	private _base: string = 'https://github.com/{owner}/{project}';
 	private _apiBase: string = 'https://api.github.com';
 	private _api: string = 'https://api.github.com/repos/{owner}/{project}';
-	private _raw: string = 'https://raw.githubusercontent.com/{owner}/{project}';
 
 	private _enterpriseBase: string = 'https://{githubHost}/{owner}/{project}';
 	private _enterpriseApiBase: string = 'https://{githubHost}/api/v3';
 	private _enterpriseApi: string = 'https://{githubHost}/api/v3/repos/{owner}/{project}';
-	private _enterpriseRaw: string = 'https://{githubHost}/{owner}/{project}/raw';
 	private _repo: GithubRepo;
 
 	constructor(repo: GithubRepo) {
@@ -29,21 +27,16 @@ class GithubURLs extends URLManager {
 
 		this._repo = repo;
 		var base: string = this._base;
-		var raw: string = this._raw;
 		var api: string = this._api;
 		var apiBase: string = this._apiBase;
 		if (this._repo.config.githubHost !== 'github.com') {
 			// We are working with an enterprise github
 			base = this._enterpriseBase;
-			raw = this._enterpriseRaw;
 			api = this._enterpriseApi;
 			apiBase = this._enterpriseApiBase;
 		}
 		// externalise later
 		this.addTemplate('base', base);
-
-		this.addTemplate('raw', raw);
-		this.addTemplate('rawFile', raw + '/{+ref}/{+path}');
 
 		this.addTemplate('htmlFile', base + '/blob/{ref}/{+path}');
 
@@ -54,6 +47,7 @@ class GithubURLs extends URLManager {
 		this.addTemplate('apiCommit', api + '/commits/{commit}');
 		this.addTemplate('apiPathCommits', api + '/commits?path={path}');
 		this.addTemplate('apiBlob', api + '/git/blobs/{blob}');
+		this.addTemplate('apiContents', api + '/contents/{+path}?ref={ref}');
 		this.addTemplate('rateLimit', apiBase + '/rate_limit');
 	}
 
@@ -74,15 +68,11 @@ class GithubURLs extends URLManager {
 		return this.getURL('base');
 	}
 
-	raw(): string {
-		return this.getURL('raw');
-	}
-
 	rawFile(ref: string, path: string): string {
 		assertVar(ref, 'string', 'ref');
 		assertVar(path, 'string', 'path');
 
-		return this.getURL('rawFile', {
+		return this.getURL('apiContents', {
 			ref: ref,
 			path: path
 		});
