@@ -6,6 +6,7 @@
 
 TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository.
 
+**DEPRECATED: TSD is deprecated, please use [Typings](http://github.com/typings/typings) and see [this issue](https://github.com/DefinitelyTyped/tsd/issues/269) for more information.**
 
 ## Install
 
