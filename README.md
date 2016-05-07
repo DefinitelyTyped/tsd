@@ -476,7 +476,7 @@ Useful behind (corporate) proxies that act like man-in-the middle on https conne
 
 - "**token**" - Github OAuth token:
 
-The OAuth token can be used to boost the Github API rate-limit from 60 to 5000 (non-cached) requests per hour. The is token needs just ['read-only access to public information'](http://developer.github.com/v3/oauth/#scopes) so no additional OAuth scopes are necessary.
+The OAuth token can be used to boost the Github API rate-limit from 60 to 5000 (non-cached) requests per hour. This token just needs ['read-only access to public information'](http://developer.github.com/v3/oauth/#scopes) so no additional OAuth scopes are necessary.
 
 ````json
 {
