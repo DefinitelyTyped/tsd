@@ -4,7 +4,7 @@
 
 > TypeScript Definition manager for DefinitelyTyped
 
-TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped) repository.
+TSD is a package manager to search and install [TypeScript](http://www.typescriptlang.org/) definition files directly from the community driven [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) repository.
 
 **DEPRECATED: TSD is deprecated, please use [Typings](http://github.com/typings/typings) and see [this issue](https://github.com/DefinitelyTyped/tsd/issues/269) for more information.**
 
@@ -268,7 +268,7 @@ There are various ways to select files from the repository index.
 
 ### Module name
 
-TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/borisyankov/DefinitelyTyped). The results can then be modified using various filters:
+TSD uses a (globbing) path + filename selector to query the [DefinitelyTyped index](https://github.com/DefinitelyTyped/DefinitelyTyped). The results can then be modified using various filters:
 
 Note how the definition filename takes priority:
 
@@ -409,7 +409,7 @@ An example configuration the 'node.js' definition installed would look like this
 ````json
 {
 	"version": "v4",
-	"repo": "borisyankov/DefinitelyTyped",
+	"repo": "DefinitelyTyped/DefinitelyTyped",
 	"ref": "master",
 	"path": "typings",
 	"bundle": "typings/tsd.d.ts",
@@ -427,7 +427,7 @@ Supported fields:
 | field | required | default | description  |
 |---|---|---|---|
 | `version` | yes | `v4` | Tracks config version for future changes (don't change this).
-| `repo` | yes | `borisyankov/DefinitelyTyped` |  Github user and repo name of the typings repository. Change this if you want to use TSD from a DefinitelyTyped fork.
+| `repo` | yes | `DefinitelyTyped/DefinitelyTyped` |  Github user and repo name of the typings repository. Change this if you want to use TSD from a DefinitelyTyped fork.
 | `ref` | yes | `master` | Branch name or other git reference of the repository. Change this to use legacy branches.
 | `path` | yes | `typings` | Path to the typings directory, the definitions will be installed in the appropriate sub-folders. Change this to have typings in your main code directory, but this is not recommended as the mixed styles used in the definitions it will confuse your inspections and lint-tools.
 | `bundle` | no | `typings/tsd.d.ts` | Path to a `.d.ts` bundle file (see below). Change this if you want the bundle to be closer to the actual source files. TSD will create the appropriate relative paths.
@@ -532,7 +532,7 @@ Not yet.
 ## Notes
 
 *	It is recommended you check-in the definitions you install into your VCS.
-*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped)
+*	Don't forget to move your fixes back to [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)
 
 #### Github rate-limit
 
@@ -580,7 +580,7 @@ The cache is stored in the users home directory (like `$ npm`). Use `$ tsd setti
 
 ### I have a suggestion or contribution
 
-Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/borisyankov/DefinitelyTyped/issues).
+Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Questions and contributions for the definition files go [here](https://github.com/DefinitelyTyped/DefinitelyTyped/issues).
 
 ## History
 
@@ -600,7 +600,7 @@ Feel free to leave a [ticket](https://github.com/DefinitelyTyped/tsd/issues). Qu
 
 * Current release versions. See the [release tags](https://github.com/DefinitelyTyped/tsd/releases) fore more details.
 
-* Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+* Full rewrite by @[Bartvds](https://github.com/Bartvds): drops the separated TSD data registry in favour of using the [Github API](http://developer.github.com/) to pull definitions directly from [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped).
 
 ### v0.3.x
 
@@ -675,7 +675,7 @@ Master branch is the release version, new development happens currently in [dev/
 
 Contributions are very welcome; please discuss larger changes in a [ticket](https://github.com/DefinitelyTyped/tsd/issues) first. Fixes and simple enhancements are always much appreciated. Please make sure you work in the right branch.
 
-**Note:** Contributions on the definition files go directly to [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped).
+**Note:** Contributions on the definition files go directly to [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped).
 
 
 ## Privacy

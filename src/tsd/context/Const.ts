@@ -13,7 +13,7 @@ var Const = {
 	settings: 'settings.json',
 
 	configVersion: 'v4',
-	definitelyRepo: 'borisyankov/DefinitelyTyped',
+	definitelyRepo: 'DefinitelyTyped/DefinitelyTyped',
 	githubHost: 'github.com',
 	mainBranch: 'master',
 	statsDefault: true,

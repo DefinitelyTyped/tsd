@@ -1,7 +1,7 @@
 {
   "version": "v4",
   "path": "typings",
-  "repo": "borisyankov/DefinitelyTyped",
+  "repo": "DefinitelyTyped/DefinitelyTyped",
   "ref": "master",
   "installed": {
     "async/async.d.ts": {

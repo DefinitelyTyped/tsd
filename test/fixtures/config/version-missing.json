@@ -1,6 +1,6 @@
 {
 	"path": "typings",
-	"repo": "borisyankov/DefinitelyTyped",
+	"repo": "DefinitelyTyped/DefinitelyTyped",
 	"ref": "master",
 	"bundle": "typings/tsd.d.ts",
 	"installed": {}
