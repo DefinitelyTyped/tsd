@@ -76,7 +76,7 @@ function getContent(options): Promise<any> {
 			time: new Date().toISOString()
 		};
 		ret.urls = {
-			def: 'https://' + ret.githubHost + '/' + ret.repo + '/blob/' + ret.ref + '/{path}'
+			def: ret.githubHost + '/' + ret.repo + '/blob/' + ret.ref + '/{path}'
 		};
 		ret.content = content;
 		return ret;
