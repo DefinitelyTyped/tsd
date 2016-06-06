@@ -8,6 +8,8 @@ TSD is a package manager to search and install [TypeScript](http://www.typescrip
 
 **DEPRECATED: TSD is deprecated, please use [Typings](http://github.com/typings/typings) and see [this issue](https://github.com/DefinitelyTyped/tsd/issues/269) for more information.**
 
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 ## Install
 
 Install global using [node](http://nodejs.org/) using [npm](https://npmjs.org/).:
