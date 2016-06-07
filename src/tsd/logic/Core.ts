@@ -75,6 +75,7 @@ class Core {
 		var token = process.env.TSD_GITHUB_TOKEN || this.context.settings.getValue('/token');
 		if (typeOf.isString(token)) {
 			this.repo.api.headers['authorization'] = 'token ' + token;
+			this.repo.raw.headers['authorization'] = 'token ' + token;
 		}
 		else {
 			delete this.repo.api.headers['authorization'];

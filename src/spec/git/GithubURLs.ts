@@ -58,9 +58,8 @@ describe('GithubRepo / GithubURLs', () => {
 		it('should return replaced urls', () => {
 			urls = new GithubRepo({repoOwner: 'foo', repoProject: 'bar', githubHost: 'github.com'}, 'baz', gitTest.opts).urls;
 			var api = 'https://api.github.com/repos/foo/bar';
-			var raw = 'https://raw.githubusercontent.com/foo/bar';
 			var base = 'https://github.com/foo/bar';
-			var rawFile = raw + '/2ece23298f06d9fb45772fdb1d38086918c80f44/sub/folder/file.txt';
+			var rawFile = api + '/contents/sub/folder/file.txt?ref=2ece23298f06d9fb45772fdb1d38086918c80f44';
 			assert.strictEqual(urls.api(), api, 'api');
 			assert.strictEqual(urls.base(), base, 'base');
 			assert.strictEqual(urls.rawFile('2ece23298f06d9fb45772fdb1d38086918c80f44', 'sub/folder/file.txt'), rawFile, 'rawFile');
@@ -71,7 +70,6 @@ describe('GithubRepo / GithubURLs', () => {
 			repoConfig.repoOwner = 'correctOwner';
 			repoConfig.repoProject = 'correctProject';
 			var api = 'https://api.github.com/repos/correctOwner/correctProject';
-			var raw = 'https://raw.githubusercontent.com/correctOwner/correctProject';
 			var base = 'https://github.com/correctOwner/correctProject';
 			assert.strictEqual(urls.api(), api, 'api');
 			assert.strictEqual(urls.base(), base, 'base');
@@ -86,7 +84,7 @@ describe('GithubRepo / GithubURLs', () => {
 			var api = 'https://github.mycompany.com/api/v3/repos/foo/bar';
 			var raw = 'https://github.mycompany.com/foo/bar/raw';
 			var base = 'https://github.mycompany.com/foo/bar';
-			var rawFile = raw + '/2ece23298f06d9fb45772fdb1d38086918c80f44/sub/folder/file.txt';
+			var rawFile = api + '/contents/sub/folder/file.txt?ref=2ece23298f06d9fb45772fdb1d38086918c80f44';
 			assert.strictEqual(urls.api(), api, 'api');
 			assert.strictEqual(urls.base(), base, 'base');
 			assert.strictEqual(urls.rawFile('2ece23298f06d9fb45772fdb1d38086918c80f44', 'sub/folder/file.txt'), rawFile, 'rawFile');

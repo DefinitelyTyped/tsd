@@ -52,8 +52,9 @@ class GithubRaw extends GithubLoader {
 
 		var url = this.urls.rawFile(ref, filePath);
 
-		var headers = {};
-		var request = new CacheRequest(url, headers);
+		var request = new CacheRequest(url);
+		this.copyHeadersTo(request.headers);
+		request.headers['accept'] = 'application/vnd.github.v3.raw';
 
 		if (typeOf.isSha(ref)) {
 			request.localMaxAge = this.options.getDurationSecs('localMaxAge') * 1000;
