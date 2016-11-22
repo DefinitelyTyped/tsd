@@ -119,7 +119,7 @@ class Installer extends CoreModule {
 			}
 			// write
 			return this.core.content.loadContent(file).then((blob) => {
-				return fileIO.write(targetPath, blob.content);
+				return fileIO.write(targetPath, "/* tslint:disable */\n" + blob.content);
 			}).return(targetPath);
 		});
 	}
