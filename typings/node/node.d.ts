@@ -302,7 +302,7 @@ declare module "http" {
         writeHead(statusCode: number, reasonPhrase?: string, headers?: any): void;
         writeHead(statusCode: number, headers?: any): void;
         statusCode: number;
-        setHeader(name: string, value: string): void;
+        setHeader(name: string, value: any /* string | string[] */): void;
         sendDate: boolean;
         getHeader(name: string): string;
         removeHeader(name: string): void;
